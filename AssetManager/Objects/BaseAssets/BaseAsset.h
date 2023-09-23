@@ -1,0 +1,37 @@
+#pragma once 
+#include <GraphicsEngine/Rendering/Vertex.h>
+
+class Material;
+
+
+class AssetBase
+{
+public:
+	AssetBase(const std::filesystem::path& aFilePath);
+	virtual void Init();
+	virtual ~AssetBase() {};
+	bool isLoadedComplete;
+	const std::filesystem::path AssetPath;
+};
+
+struct Bone
+{
+	CU::Matrix4x4<float> BindPoseInverse;
+	int ParentIdx = -1;
+	std::string Name;
+	std::vector<unsigned> Children;
+};
+struct Frame
+{
+	std::unordered_map<std::string,CU::Matrix4x4<float>> myTransforms;
+};
+
+struct Element
+{
+	ComPtr<ID3D11Buffer> VertexBuffer;
+	ComPtr<ID3D11Buffer> IndexBuffer;
+	UINT NumVertices = 0;
+	UINT NumIndices = 0;
+	UINT PrimitiveTopology = 0;
+	UINT Stride = 0; 
+};

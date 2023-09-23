@@ -1,0 +1,120 @@
+#include "AssetManager.pch.h"
+#include "MeshAsset.h"
+
+std::vector<std::string> GetTextureNames(TGA::FBX::Material& material)
+{
+	std::vector<std::string> textureNames;
+
+	if(material.Diffuse.Name != "")
+	{
+		textureNames.push_back(((std::filesystem::path)material.Diffuse.Name).replace_extension(".dds").string());
+	}
+	if(material.NormalMap.Name != "")
+	{
+		textureNames.push_back(((std::filesystem::path)material.NormalMap.Name).replace_extension(".dds").string());
+	}
+	if(material.Bump.Name != "")
+	{
+		textureNames.push_back(((std::filesystem::path)material.Bump.Name).replace_extension(".dds").string());
+	}
+
+	if(material.Specular.Name != "")
+	{
+		textureNames.push_back(((std::filesystem::path)material.Specular.Name).replace_extension(".dds").string());
+	}
+	return textureNames;
+}
+
+Mesh::Mesh(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)
+{
+	
+}
+
+void Mesh::Init()
+{
+	TGA::FBX::Importer::InitImporter();
+	TGA::FBX::Mesh inMesh;
+
+	if(!std::filesystem::exists(AssetPath))
+	{
+		assert(false && "Mesh file does not exist");
+	}
+	try
+	{
+		if(TGA::FBX::Importer::LoadMeshW(AssetPath,inMesh))
+		{
+			std::vector<Vertex> mdlVertices;
+			std::vector<unsigned int> mdlIndicies;
+
+			//for(auto& mat : inMesh.Materials)
+			//{
+			//	for(auto& i : GetTextureNames(mat))
+			//	{
+			//		myMaterial->AddTexture("Textures/" + i );
+			//	}
+			//}
+
+
+			for(auto& element : inMesh.Elements)
+			{
+				for(auto& vert : element.Vertices)
+				{
+					CU::Vector3<float> position = {vert.Position[0],vert.Position[1] ,vert.Position[2]};
+					CU::Vector4<float> color = {((float)(std::rand() % 1000)) * 0.001f,((float)(std::rand() % 1000)) * 0.001f,((float)(std::rand() % 1000)) * 0.001f,1.0f};
+					CU::Vector4<unsigned int> boneId = {vert.BoneIDs[0],vert.BoneIDs[1],vert.BoneIDs[2],vert.BoneIDs[3]};
+					CU::Vector4<float> boneWeight = {vert.BoneWeights[0],vert.BoneWeights[1],vert.BoneWeights[2],vert.BoneWeights[3]};
+					CU::Vector2<float> UVCoord = {vert.UVs[0][0],vert.UVs[0][1]};
+					CU::Vector3<float> normal = {vert.Normal[0],vert.Normal[1],vert.Normal[2]};
+					CU::Vector3<float> tangent = {vert.Tangent[0],vert.Tangent[1],vert.Tangent[2]};
+
+					mdlVertices.push_back(
+						{
+							position,
+							color,
+							UVCoord,
+							normal,
+							tangent,
+							boneId,
+							boneWeight
+						});
+				}
+				mdlIndicies = element.Indices;
+
+				VertexData.insert(VertexData.end(),mdlVertices.begin(),mdlVertices.end());
+				IndexData.insert(IndexData.end(),mdlIndicies.begin(),mdlIndicies.end());
+
+				ComPtr<ID3D11Buffer> vertexBuffer;
+				if(!RHI::CreateVertexBuffer<Vertex>(vertexBuffer,mdlVertices))
+				{
+					std::cout << "Failed to create vertex buffer" << std::endl;
+					return;
+				}
+				ComPtr<ID3D11Buffer> indexBuffer;
+				if(!RHI::CreateIndexBuffer(indexBuffer,mdlIndicies))
+				{
+					std::cout << "Failed to create vertex buffer" << std::endl;
+					return;
+				}
+				Element toAdd = {
+					vertexBuffer,
+					indexBuffer,
+					AsUINT(mdlVertices.size()),
+					AsUINT(mdlIndicies.size()),
+					D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
+					sizeof(Vertex)
+				};
+
+				Elements.push_back(toAdd);
+				mdlVertices.clear();
+				mdlIndicies.clear();
+			}
+		}
+		MaxBox = CU::Vector3<float>(inMesh.BoxBounds.Max[0],inMesh.BoxBounds.Max[1],inMesh.BoxBounds.Max[2]);
+		MinBox = CU::Vector3<float>(inMesh.BoxBounds.Min[0],inMesh.BoxBounds.Min[1],inMesh.BoxBounds.Min[2]);
+	}
+	catch(const std::exception& e)
+	{
+		std::cout << "Error: SkeletonLoader failed to load: " << AssetPath << "\n" << e.what() << "\n";
+	}
+	isLoadedComplete = true;
+}
