@@ -236,6 +236,7 @@
     <None Include="Shaders\ConstantBuffers\DefaultVertexToPixel.hlsli" />
     <None Include="Shaders\ConstantBuffers\FrameBuffer.hlsli" />
     <None Include="Shaders\ConstantBuffers\IBLBRDF.hlsli" />
+    <None Include="Shaders\ConstantBuffers\LightBuffer.hlsli" />
     <None Include="Shaders\ConstantBuffers\MaterialBuffer.hlsli" />
     <None Include="Shaders\ConstantBuffers\ObjectBuffer.hlsli" />
   </ItemGroup>

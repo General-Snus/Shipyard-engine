@@ -154,6 +154,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Objects\Components\ComponentDerivatives\CameraComponent.h" />
+    <ClInclude Include="Objects\Components\ComponentDerivatives\LightComponent.h" />
+    <ClInclude Include="Objects\BaseAssets\LightDataBase.h" />
     <ClInclude Include="Objects\BaseAssets\MaterialAsset.h" />
     <ClInclude Include="Objects\BaseAssets\Animations.h" />
     <ClInclude Include="Objects\BaseAssets\BaseAsset.h" />
@@ -168,12 +171,14 @@
     <ClInclude Include="Objects\Components\Component.h" />
     <ClInclude Include="Objects\GameObjects\GameObject.h" />
     <ClInclude Include="Objects\Components\ComponentDerivatives\MeshRenderer.h" />
-    <ClInclude Include="Objects\CameraTestClass.h" />
     <ClInclude Include="Objects\Components\ComponentDerivatives\Transform.h" />
     <ClInclude Include="Objects\BaseAssets\TextureAsset.h" />
     <ClInclude Include="Objects\Components\ComponentDerivatives\Skybox.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Objects\Components\ComponentDerivatives\CameraComponent.cpp" />
+    <ClCompile Include="Objects\Components\ComponentDerivatives\LightComponent.cpp" />
+    <ClCompile Include="Objects\BaseAssets\LightDataBase.cpp" />
     <ClCompile Include="Objects\BaseAssets\MaterialAsset.cpp" />
     <ClCompile Include="Objects\BaseAssets\Animations.cpp" />
     <ClCompile Include="Objects\BaseAssets\BaseAsset.cpp" />
@@ -192,7 +197,6 @@
     <ClCompile Include="Objects\Components\Component.cpp" />
     <ClCompile Include="Objects\GameObjects\GameObject.cpp" />
     <ClCompile Include="Objects\Components\ComponentDerivatives\MeshRenderer.cpp" />
-    <ClCompile Include="Objects\CameraTestClass.cpp" />
     <ClCompile Include="Objects\Components\ComponentDerivatives\Transform.cpp" />
     <ClCompile Include="Objects\BaseAssets\TextureAsset.cpp" />
     <ClCompile Include="Objects\Components\ComponentDerivatives\Skybox.cpp" />

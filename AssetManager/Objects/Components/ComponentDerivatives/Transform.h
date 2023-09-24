@@ -36,9 +36,7 @@ public:
 	 
 	void SetScale(float scale);
 	void SetScale(Vector2f scale);
-	void SetScale(Vector3f scale);
-
-
+	void SetScale(Vector3f scale); 
 
 	~Transform() = default;
 private:

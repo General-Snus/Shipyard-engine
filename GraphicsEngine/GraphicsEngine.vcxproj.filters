@@ -131,6 +131,7 @@
     <None Include="Shaders\ConstantBuffers\DefaultVertexOutput.hlsli" />
     <None Include="Shaders\ConstantBuffers\MaterialBuffer.hlsli" />
     <None Include="Shaders\ConstantBuffers\IBLBRDF.hlsli" />
+    <None Include="Shaders\ConstantBuffers\LightBuffer.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\ConstantBuffers\Default_VS.hlsl" />
