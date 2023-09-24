@@ -2,6 +2,7 @@
 #include <DefaultVertexOutput.hlsli>
 #include <FrameBuffer.hlsli>
 #include <MaterialBuffer.hlsli>
+#include <LightBuffer.hlsli>
 #include <IBLBRDF.hlsli>
 #include "../Registers.h"
 
@@ -58,6 +59,25 @@ float3 CalculateSpecularIBL(float3 specularColor, float3 normal, float3 cameraDi
     return cubeMap * (specularColor * brdfLUT.x + brdfLUT.y);;
 }
 
+float3 CalculateDiffuseLight(float3 diffuseColor)
+{
+    return (diffuseColor / PI);
+
+}
+float3 CalculateSpecularLight(float3 specularColor, float3 normal, float3 cameraDirection, float3 lightDirection, float3 halfAngle, float roughness)
+{
+    const float3 G = GeometricAttenuation_Smith_IBL(normal, cameraDirection, lightDirection, roughness);
+     
+    const float3 D = pow(roughness, 4) / (PI * pow((pow(dot(normal, halfAngle), 2) * (pow(roughness, 4) - 1) + 1), 2));
+    
+    const float fresnel = ((-5.55373 * saturate(dot(cameraDirection, halfAngle)) - 6.981316) * saturate(dot(cameraDirection, halfAngle)));
+    const float3 F = specularColor + (1 - specularColor) * pow(2, fresnel);
+    const float3 B = 4 * saturate(dot(normal, lightDirection)) * saturate(dot(normal, cameraDirection));
+    
+    const float3 directLightSpecular = (D * F * G) / B;
+    
+    return directLightSpecular;
+}
 
 
 float3 CalculateIndirectLight(
@@ -93,20 +113,38 @@ float roughness
     const float NdotL = saturate(dot(normal, lightDirection));
     const float K = pow(roughness + 1, 2) / 8;
      
-    const float3 G = GeometricAttenuation_Smith_IBL(normal, cameraDirection, lightDirection, roughness);
 
-    
-    const float3 D = pow(roughness, 4) / (PI * pow((pow(dot(normal, halfAngle), 2) * (pow(roughness, 4) - 1) + 1), 2));
-    
-    const float fresnel = ((-5.55373 * saturate(dot(cameraDirection, halfAngle)) - 6.981316) * saturate(dot(cameraDirection, halfAngle)));
-    const float3 F = specularColor + (1 - specularColor) * pow(2, fresnel);
-    const float3 B = 4 * saturate(dot(normal, lightDirection)) * saturate(dot(normal, cameraDirection));
-    
-    const float3 directLightSpecular = (D * F * G) / B;
-    float3 directLightDiffuse = (diffuseColor / PI);
+    float3 directLightSpecular = CalculateSpecularLight(specularColor, normal, cameraDirection, lightDirection, halfAngle, roughness);
+    float3 directLightDiffuse = CalculateDiffuseLight(diffuseColor);
     directLightDiffuse *= (1.0f - directLightSpecular);
     
     return saturate(directLightDiffuse + directLightSpecular) * lightColor * NdotL;
+}
+
+float3 CalculateSpotLight()
+{
+    return 0;
+}
+
+float3 CalculatePointLight(float3 diffuseColor, float3 specularColor,float3 worldPosition, float3 normal, float3 halfAngle, float3 cameraDirection, PointLight pointLightData, float roughness, float shine)
+{
+    float3 lightDirection = (pointLightData.Position - worldPosition);
+    const float distance = length(lightDirection);
+    lightDirection = normalize(lightDirection);
+    
+    const float constantAtt = 1.0f;
+    const float linearAtt = 4.6 * pow(distance, -1);
+    const float quadraticAtt = 8.9 * pow(distance, -0.5);
+    
+    const float3 Attenuation = 1 / (constantAtt + distance * (linearAtt + quadraticAtt * distance));
+    
+    float3 directLightSpecular = CalculateSpecularLight(specularColor, normal, cameraDirection, lightDirection, halfAngle, roughness);
+    float3 directLightDiffuse = CalculateDiffuseLight(diffuseColor);
+    directLightDiffuse *= (1.0f - directLightSpecular);
+    
+    const float NdotL = dot(lightDirection, normal);
+    
+    return saturate(directLightDiffuse + directLightSpecular) * NdotL * Attenuation * pointLightData.Color * pointLightData.Intensity;
 }
 
 DefaultPixelOutput main(DefaultVertexToPixel input)
@@ -152,10 +190,35 @@ DefaultPixelOutput main(DefaultVertexToPixel input)
     const float3 specularColor = lerp((float3) 0.04f, textureColor.rgb, metallic);
     
     const float3 halfAngle = normalize(cameraDirection + lightDirection);
-     
-    const float3 radiance =
-    CalculateDirectionLight(diffuseColor, specularColor, pixelNormal.xyz, halfAngle, cameraDirection, lightDirection, lightColor, roughness) +
-    CalculateIndirectLight(diffuseColor, specularColor, pixelNormal.xyz, cameraDirection, enviromentCube, roughness, occlusion);
+    
+    float3 totalPointLightContribution = 0;
+    
+    [unroll]
+    for (uint p = 0; p < 8; p++)
+    {
+        [flatten]
+        if (myPointLight[p].Intensity > 0)
+        {
+            totalPointLightContribution += CalculatePointLight(
+            diffuseColor,
+            specularColor,
+            input.WorldPosition.xyz,
+            pixelNormal,
+            halfAngle,
+            cameraDirection,
+            myPointLight[p],
+            roughness,
+            DefaultMaterial.Shine            
+            );
+        }
+    }
+    
+    
+    const float3 radiance = totalPointLightContribution;
+    //CalculateDirectionLight(diffuseColor, specularColor, pixelNormal.xyz, halfAngle, cameraDirection, lightDirection, lightColor, roughness) +
+    //CalculateIndirectLight(diffuseColor, specularColor, pixelNormal.xyz, cameraDirection, enviromentCube, roughness, occlusion)
+    
+    ;
     
     result.Color.rgb = radiance * textureColor.rgb;
   

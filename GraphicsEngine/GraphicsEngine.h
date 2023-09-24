@@ -22,6 +22,7 @@ class GraphicsEngine
 private:
 	FrameBuffer myFrameBuffer;
 	ObjectBuffer myObjectBuffer;
+	LightBuffer myLightBuffer;
 	std::vector<std::unique_ptr<GraphicCommand>> myCommandList;
 
 	SIZE myWindowSize{0,0};	

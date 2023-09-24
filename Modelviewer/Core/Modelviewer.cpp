@@ -22,6 +22,8 @@
 #include <AssetManager/Objects/Components/ComponentDerivatives/Transform.h>
 #include <AssetManager/Objects/Components/ComponentDerivatives/Animator.h>
 #include <AssetManager/Objects/Components/ComponentDerivatives/Skybox.h>
+#include <AssetManager/Objects/Components/ComponentDerivatives/CameraComponent.h>
+#include <AssetManager/Objects/Components/ComponentDerivatives/LightComponent.h>
 #include <AssetManager/Objects/Components/ComponentDerivatives/DEBUGCOMPONENTS/BackgroundColor.h>
 #include <AssetManager/AssetManager.h>
 #include <functional>
@@ -150,17 +152,22 @@ void ModelViewer::HideSplashScreen() const
 void ModelViewer::LoadScene()
 {
 	JsonToSaveData();
-	myCamera = std::make_shared<MainCamera>();
+	//myCamera = std::make_shared<MainCamera>();
 
 	GameObjectManager& gom = GameObjectManager::GetInstance();
+
+	GameObject camera = gom.CreateGameObject();
+	camera.AddComponent<cCamera>();
+	gom.SetLastGOAsCamera();
 
 	GameObject worldRoot = gom.CreateGameObject();
 	gom.SetLastGOAsWorld();
 	worldRoot.AddComponent<Skybox>();
+
 	{
 		myMesh = gom.CreateGameObject();
 		myMesh.AddComponent<cSkeletalMeshRenderer>(L"Models/SK_C_TGA_Bro.fbx");
-		myMesh.GetComponent<cSkeletalMeshRenderer>().SetMaterialPath(L"Materials/TGABroMaterial.json"); 
+		myMesh.GetComponent<cSkeletalMeshRenderer>().SetMaterialPath(L"Materials/TGABroMaterial.json");
 
 		CU::Matrix4x4<float> aPosition;
 		aPosition = aPosition * CU::Matrix4x4<float>::CreateRotationAroundY(-PI);
@@ -177,31 +184,34 @@ void ModelViewer::LoadScene()
 
 	{
 
-	GameObject test2 = gom.CreateGameObject();
-	test2.AddComponent<cMeshRenderer>("Models/Buddha.fbx");
-	test2.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BuddhaMaterial.json");
-	CU::Matrix4x4<float> aPosition;
-	aPosition = aPosition * CU::Matrix4x4<float>::CreateRotationAroundY(-PI);
-	test2.AddComponent<Transform>(aPosition);
-	test2.GetComponent<Transform>().GetTransform()(4,3) = 1000;;
-	test2.GetComponent<Transform>().GetTransform()(4,2) = -100;;
+		GameObject test2 = gom.CreateGameObject();
+		test2.AddComponent<cMeshRenderer>("Models/Buddha.fbx");
+		test2.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BuddhaMaterial.json");
+		CU::Matrix4x4<float> aPosition;
+		aPosition = aPosition * CU::Matrix4x4<float>::CreateRotationAroundY(-PI);
+		test2.AddComponent<Transform>(aPosition);
+		test2.GetComponent<Transform>().GetTransform()(4,3) = 1000;;
+		test2.GetComponent<Transform>().GetTransform()(4,2) = -100;;
 	}
 
-	
 
-	GameObject Chest = gom.CreateGameObject();
-	CU::Matrix4x4<float> ChestPosition;
-	ChestPosition = ChestPosition * CU::Matrix4x4<float>::CreateRotationAroundY(-PI);
-	Chest.AddComponent<Transform>(ChestPosition);
-	Chest.AddComponent<cMeshRenderer>("Models/Chest.fbx");
-	Chest.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/ChestMaterial.json");
-	Chest.GetComponent<Transform>().GetTransform()(4,1) = 300;
+	{
+		GameObject Chest = gom.CreateGameObject();
+		CU::Matrix4x4<float> ChestPosition;
+		ChestPosition = ChestPosition * CU::Matrix4x4<float>::CreateRotationAroundY(-PI);
+		Chest.AddComponent<Transform>(ChestPosition);
+		Chest.AddComponent<cMeshRenderer>("Models/Chest.fbx");
+		Chest.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/ChestMaterial.json");
+		Chest.GetComponent<Transform>().GetTransform()(4,1) = 300;
+	}
 
-	GameObject Box = gom.CreateGameObject();
-	Box.AddComponent<cMeshRenderer>("Models/Cube.fbx");
-	Box.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/CubeMaterial.json");
-	Box.AddComponent<Transform>();
-	Box.GetComponent<Transform>().GetTransform()(4,1) = 700;
+	{
+		GameObject Box = gom.CreateGameObject();
+		Box.AddComponent<cMeshRenderer>("Models/Cube.fbx");
+		Box.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/CubeMaterial.json");
+		Box.AddComponent<Transform>();
+		Box.GetComponent<Transform>().GetTransform()(4,1) = 700;
+	}
 
 	for(int i = 1; i < 5; i++)
 	{
@@ -219,27 +229,34 @@ void ModelViewer::LoadScene()
 		gO.GetComponent<cAnimator>().SetPlayingAnimation(i - 1);
 	}
 
+	{
+		GameObject pointLight = gom.CreateGameObject();
+		PointLight pLight;
+		pLight.Position = CU::Vector3<float>(0,0,0);
+		pLight.Color = CU::Vector3<float>(1,1,1);
+		pLight.Intensity = 100;
+		pLight.Range = 1000;
+
+		pointLight.AddComponent<cLight>(eLightType::Point);
+
+	}
+
+
 	if(gom.GetAllComponents<BackgroundColor>().size() == 0)
 	{
 		GameObject newG = gom.CreateGameObject();
 		newG.AddComponent<BackgroundColor>(CU::Vector4<float>(1.0f,1.0f,1.0f,1.0f));
 	}
 
-	/*
+
 	{
 		GameObject test3 = gom.CreateGameObject();
-		test3.AddComponent<cMeshRenderer>("Models/ShowRoomTGP.fbx");
-		test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BuddhaMaterial.json");;
+		test3.AddComponent<cMeshRenderer>("Models/SteelFloor.fbx");
+		test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");;
 		test3.AddComponent<Transform>();
-		test3.GetComponent<Transform>().Rotate({90,0,0});
-		test3.GetComponent<Transform>().SetScale(150);
-
-		test3.GetComponent<Transform>().GetTransform()(4,1) = -100;;
-		test3.GetComponent<Transform>().GetTransform()(4,2) = -100;;
-		test3.GetComponent<Transform>().GetTransform()(4,3) = 500;;
+		test3.GetComponent<Transform>().GetTransform()(4,2) = -125;;
 
 	}
-	*/
 }
 
 void ModelViewer::Update()
@@ -262,37 +279,43 @@ void ModelViewer::Update()
 
 void ModelViewer::UpdateScene()
 {
-	myCamera->Update(CommonUtilities::Timer::GetInstance().GetDeltaTime());
-	myCamera->UpdatePositionVectors();
-	GameObjectManager::GetInstance().Update(); 
+	//myCamera->Update(CommonUtilities::Timer::GetInstance().GetDeltaTime());
+	//myCamera->UpdatePositionVectors();
+	GameObjectManager::GetInstance().Update();
 
 	if(GetAsyncKeyState('1'))
 	{
 		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(0);
 	}
 	if(GetAsyncKeyState('2'))
-	{ 
+	{
 		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(1);
 	}
 	if(GetAsyncKeyState('3'))
 	{
-		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(2); 
+		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(2);
 	}
 	if(GetAsyncKeyState('4'))
-	{ 
+	{
 		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(3);
 	}
+
+	//LIGHTS
+	GraphicsEngine::Get().AddCommand<GfxCmd_SetLightBuffer>();
+
+
+
 
 	for(auto& data : mySaveData)
 	{
 		if(data.identifier == "CameraPos")
 		{
-			float* a[3] = {&myCamera->GetTransform()(4,1),&myCamera->GetTransform()(4,2),&myCamera->GetTransform()(4,3)};
-			ImGui::InputFloat3("CameraPos",*a);
-			SaveToMemory(eSaveToJsonArgument::InputFloat3,"CameraPos",*a);
+			//float* a[3] = {&myCamera->GetTransform()(4,1),&myCamera->GetTransform()(4,2),&myCamera->GetTransform()(4,3)};
+			//ImGui::InputFloat3("CameraPos",*a);
+			//SaveToMemory(eSaveToJsonArgument::InputFloat3,"CameraPos",*a);
 		}
 	}
-	GraphicsEngine::Get().AddCommand<GfxCmd_SetFrameBuffer>(Matrix::GetFastInverse(myCamera->myTransform),myCamera->myClipMatrix,myCamera->GetPosition());
+
 }
 
 

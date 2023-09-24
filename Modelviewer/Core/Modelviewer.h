@@ -5,8 +5,7 @@
 #include "GraphicsEngine/GraphicsEngine.h"
 #include "Logging/Logging.h" 
 #include <TGAFbx.h>
-#include <TgaFbxStructs.h> 
-#include <Objects/CameraTestClass.h>
+#include <TgaFbxStructs.h>  
 #include <Modelviewer/Windows/SplashWindow.h>
 
 template<typename T>
@@ -80,8 +79,7 @@ public:
 
 	bool Initialize(HINSTANCE aHInstance,SIZE aWindowSize,WNDPROC aWindowProcess,LPCWSTR aWindowTitle);
 	int Run();
-private:
-	std::shared_ptr<MainCamera> myCamera;
+private: 
 	GameObject myMesh;
 	Matrix myModelMatrix;
 	std::vector<SaveData<float>> mySaveData;

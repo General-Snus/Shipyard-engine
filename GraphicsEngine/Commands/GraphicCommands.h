@@ -2,6 +2,7 @@
 #include <ThirdParty/CU/CommonUtills/Matrix4x4.hpp>
 #include <GraphicsEngine/Rendering/Buffers/FrameBuffer.h>
 #include <GraphicsEngine/Rendering/Buffers/ObjectBuffer.h> 
+#include <GraphicsEngine/Rendering/Buffers/LightBuffer.h> 
 #include <AssetManager/Objects/Components/ComponentDerivatives/MeshRenderer.h>
 
 typedef CU::Matrix4x4<float>  Matrix;
@@ -11,9 +12,30 @@ class GraphicCommand
 protected:
 	FrameBuffer& GetFrameBuffer();
 	ObjectBuffer& GetObjectBuffer();
+	LightBuffer& GetLightBuffer();
 public:
 	virtual ~GraphicCommand() = default;
 	virtual void Execute() = 0;
+};
+
+class GfxCmd_SetFrameBuffer : public GraphicCommand
+{
+private:
+	Matrix myViewMatrix;
+	Matrix myProjectionMatrix;
+	Vector3f myPosition;
+	float myDeltaTime;
+public:
+	GfxCmd_SetFrameBuffer( const Matrix& ProjectionMatrix,const Transform& ref);
+	void Execute() override;
+};
+
+class GfxCmd_SetLightBuffer : public GraphicCommand
+{
+
+public:
+	GfxCmd_SetLightBuffer();
+	void Execute() override;
 };
 
 class GfxCmd_RenderMesh : public GraphicCommand
@@ -30,17 +52,6 @@ public:
 	void Execute() override;
 };
 
-class GfxCmd_SetFrameBuffer : public GraphicCommand
-{
-private:
-	Matrix myViewMatrix;
-	Matrix myProjectionMatrix;
-	Vector3f myPosition;
-	float myDeltaTime;
-public:
-	GfxCmd_SetFrameBuffer(const Matrix& ViewMatrix,const Matrix& ProjectionMatrix, Vector3f CameraWorldPosition);
-	void Execute() override;
-};
 
 
 class GfxCmd_RenderSkeletalMesh : public GfxCmd_RenderMesh

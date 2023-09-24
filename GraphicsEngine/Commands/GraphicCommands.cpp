@@ -1,6 +1,7 @@
 #include "GraphicsEngine.pch.h"
 #include "GraphicsEngine.h"
 #include "GraphicCommands.h" 
+#include <AssetManager/Objects/Components/ComponentDerivatives/LightComponent.h>
 #include "Timer.h"
 #include <assert.h>
 
@@ -12,6 +13,11 @@ FrameBuffer& GraphicCommand::GetFrameBuffer()
 ObjectBuffer& GraphicCommand::GetObjectBuffer()
 {
 	return GraphicsEngine::Get().myObjectBuffer;
+}
+
+LightBuffer& GraphicCommand::GetLightBuffer()
+{
+	return GraphicsEngine::Get().myLightBuffer;
 }
 
 GfxCmd_RenderMesh::GfxCmd_RenderMesh(const RenderData& aData,const Matrix& aTransform)
@@ -26,7 +32,37 @@ GfxCmd_RenderMesh::GfxCmd_RenderMesh(const RenderData& aData,const Matrix& aTran
 		myMaterials.push_back(aMaterial);
 	}
 }
+GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
+{
+	int pointLightCount = 0;
+	int spotLightCount = 0;
 
+	LightBuffer& buff = GetLightBuffer();
+	for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
+	{
+		switch(i.GetType())
+		{
+		case eLightType::Directional:
+			memcpy(&buff.Data.myDirectionalLight,i.GetData(),sizeof(DirectionalLight));
+			break;
+		case eLightType::Point:  
+			memcpy(&buff.Data.myPointLight[pointLightCount],i.GetData(),sizeof(PointLight));
+			pointLightCount++;
+			break;
+		case eLightType::Spot:
+			memcpy(&buff.Data.mySpotLight[spotLightCount],i.GetData(),sizeof(SpotLight)); 
+			spotLightCount++;
+			break;
+
+		default:
+			break;
+		}
+	} 
+}
+void GfxCmd_SetLightBuffer::Execute()
+{
+	RHI::UpdateConstantBufferData(GetLightBuffer());
+}
 void GfxCmd_RenderMesh::Execute()
 {
 	ObjectBuffer& objectBuffer = GetObjectBuffer();
@@ -54,12 +90,12 @@ void GfxCmd_RenderMesh::Execute()
 	}
 }
 
-GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& aViewMatrix,const Matrix& aProjectionMatrix,Vector3f CameraWorldPosition)
+GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,const Transform& ref)
 {
-	myViewMatrix = aViewMatrix;
-	myProjectionMatrix = aProjectionMatrix;
+	myViewMatrix = Matrix::GetFastInverse(ref.GetTransform());
+	myProjectionMatrix = ProjectionMatrix;
 	myDeltaTime = static_cast<float>(CommonUtilities::Timer::GetInstance().GetTotalTime());
-	myPosition = CameraWorldPosition;
+	myPosition = ref.GetPosition();
 }
 
 void GfxCmd_SetFrameBuffer::Execute()

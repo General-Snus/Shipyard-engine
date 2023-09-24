@@ -138,6 +138,9 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 		myFrameBuffer.Initialize();
 		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,0,myFrameBuffer);
 
+		myLightBuffer.Initialize();
+		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,3,myLightBuffer);
+
 #ifdef _DEBUG
 	}
 	catch(const std::exception& e)

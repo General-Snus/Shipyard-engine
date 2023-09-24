@@ -2,14 +2,13 @@
 #include <ThirdParty/CU/CommonUtills/Matrix4x4.hpp> 
 #include <ThirdParty/CU/CommonUtills/Vectors.hpp>
 #include "Rendering/Buffers/ConstantBuffer.h" 
+#include <AssetManager/Objects/BaseAssets/LightDataBase.h>
 
-struct LightBufferData
+struct LightBufferData 
 {
-    CommonUtilities::Vector4<float> lightDirection;
-    CommonUtilities::Vector4<float> lightPosition;
-    CommonUtilities::Vector4<float> lightDiffuseColor;
-    CommonUtilities::Vector4<float> lightSpecularColor;
-
+   DirectionalLight myDirectionalLight;
+   PointLight myPointLight[8];
+   SpotLight mySpotLight[8]; 
 };
 
-typedef ConstantBuffer<LightBufferData> ObjectBuffer;
+typedef ConstantBuffer<LightBufferData> LightBuffer;
