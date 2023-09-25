@@ -47,11 +47,12 @@ void cLight::SetType(const eLightType aType)
 		myLightData = std::make_shared<LightDataBase>();
 		break;
 	}
-}
-LightDataBase* cLight::GetData()
+} 
+std::shared_ptr<LightDataBase> cLight::GetData()
 {
-	return  myLightData.get();
+	return  ( myLightData);
 }
+ 
 void cLight::Update()
 {
 }

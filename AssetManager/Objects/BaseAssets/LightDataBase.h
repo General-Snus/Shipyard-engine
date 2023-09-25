@@ -11,21 +11,27 @@ class LightDataBase
 {
 public:
 	LightDataBase();
-	~LightDataBase() ;  
-	Vector3f Color;
-	float Intensity;
-	eLightType LightType;
+	~LightDataBase();
+	Vector3f Color;			//12
+	float Intensity;		//4
+	eLightType LightType;	//4
+private:
+	Vector3f padding;			//12
 };
 
 class SpotLight : public LightDataBase
 {
 public:
 	SpotLight();
-	Vector3f Position;
-	Vector3f Direction;
-	float Range;
-	float InnerConeAngle;
-	float OuterConeAngle;
+	Vector3f Position;	//12
+	float Range;		//4
+
+	Vector3f Direction; //12
+	float InnerConeAngle; // 4
+
+	float OuterConeAngle; //4 
+private:
+	Vector3f padding;			//12
 };
 
 class PointLight : public LightDataBase
@@ -40,5 +46,7 @@ class DirectionalLight : public LightDataBase
 {
 public:
 	DirectionalLight();
-	Vector3f Direction; 
+	Vector3f Direction;
+private:
+	float padding;
 };

@@ -132,14 +132,15 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 
 		AssetManager::GetInstance().ForceLoadAsset<Mesh>("default.fbx",defaultMesh);
 
+		myLightBuffer.Initialize();
+		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,3,myLightBuffer);
+
 		myObjectBuffer.Initialize();
 		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,1,myObjectBuffer);
 
 		myFrameBuffer.Initialize();
 		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,0,myFrameBuffer);
 
-		myLightBuffer.Initialize();
-		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,3,myLightBuffer);
 
 #ifdef _DEBUG
 	}

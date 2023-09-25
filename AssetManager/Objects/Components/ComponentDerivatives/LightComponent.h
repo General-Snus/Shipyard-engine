@@ -14,8 +14,8 @@ public:
 	
 	eLightType GetType() const;
 	void SetType(const eLightType aType);
-
-	LightDataBase* GetData();
+	 
+	std::shared_ptr<LightDataBase> GetData();
 
 	void Update() override;
 	void Render() override;
