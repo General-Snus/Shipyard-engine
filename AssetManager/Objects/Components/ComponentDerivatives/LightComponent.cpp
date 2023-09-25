@@ -3,59 +3,74 @@
 
 cLight::cLight(const unsigned int anOwnerId) : Component(anOwnerId)
 {
-	myLightData = std::make_shared<LightDataBase>();
+	myLightType = eLightType::uninitialized;
 }
 cLight::cLight(const unsigned int anOwnerId,const eLightType type) : Component(anOwnerId)
 {
-	switch(type)
+	myLightType = type;
+
+	switch(myLightType)
 	{
 	case eLightType::Directional:
-		myLightData = std::make_shared<DirectionalLight>();
+		myDirectionLightData = std::make_shared<DirectionalLight>();
 		break;
-
 	case eLightType::Point:
-		myLightData = std::make_shared<PointLight>();
+		myPointLightData = std::make_shared<PointLight>();
 		break;
-
 	case eLightType::Spot:
-		myLightData = std::make_shared<SpotLight>();
+		mySpotLightData = std::make_shared<SpotLight>();
 		break;
-
+	case eLightType::uninitialized:
+		break;
 	default:
-		myLightData = std::make_shared<LightDataBase>();
 		break;
 	}
 }
 eLightType cLight::GetType() const
 {
-	return  myLightData->LightType;
+	return myLightType;
 }
 void cLight::SetType(const eLightType aType)
 {
-	switch(aType)
-	{
-	case eLightType::Directional:
-		myLightData = std::make_shared<DirectionalLight>();
-		break;
-	case eLightType::Point:
-		myLightData = std::make_shared<PointLight>();
-		break;
-	case eLightType::Spot:
-		myLightData = std::make_shared<SpotLight>();
-		break;
-	default:
-		myLightData = std::make_shared<LightDataBase>();
-		break;
-	}
-} 
-std::shared_ptr<LightDataBase> cLight::GetData()
-{
-	return  ( myLightData);
+	myLightType = aType;
 }
- 
+
+
+
 void cLight::Update()
 {
+
+	if(boundToTransform)
+	{
+		Transform* transform = this->TryGetComponent<Transform>(); 
+		if(transform == nullptr)
+		{
+			std::cout << "Light component has no transform component" << std::endl;
+			return;
+		} 
+		switch(myLightType)
+		{
+		case eLightType::Directional:
+			myDirectionLightData->Direction = transform->GetForward();
+			break;
+		case eLightType::Point:
+			myPointLightData->Position = transform->GetPosition();
+			break;
+		case eLightType::Spot:
+			mySpotLightData->Position = transform->GetPosition();
+			mySpotLightData->Direction = transform->GetForward();
+			break;
+		case eLightType::uninitialized:
+			break;
+		default:
+			break;
+		}
+	}
 }
 void cLight::Render()
-{ 
+{
+}
+void cLight::BindDirectionToTransform(bool active)
+{
+	boundToTransform = active;
 }

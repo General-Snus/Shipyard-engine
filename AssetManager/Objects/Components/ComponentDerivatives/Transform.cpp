@@ -60,11 +60,14 @@ void Transform::Move(Vector3f translation)
 
 void Transform::SetPosition(Vector2f position)
 {
-	position;
+	myTransform(4,1) = position.x;
+	myTransform(4,2) = position.y; 
 }
 void Transform::SetPosition(Vector3f position)
 {
-	position;
+	myTransform(4,1) = position.x;
+	myTransform(4,2) = position.y;
+	myTransform(4,3) = position.z;
 }
 Vector3f Transform::GetPosition() const
 {  

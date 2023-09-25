@@ -8,8 +8,8 @@ class AssetBase
 {
 public:
 	AssetBase(const std::filesystem::path& aFilePath);
-	virtual void Init();
-	virtual ~AssetBase() {};
+	virtual ~AssetBase() = default;
+	virtual void Init() = 0; 
 	bool isLoadedComplete;
 	const std::filesystem::path AssetPath;
 };

@@ -128,7 +128,8 @@ T* ComponentManager<T>::TryGetComponent(const unsigned int aGameObjectID)
 	{
 		return &myComponents[myGameObjectIDtoVectorIndex[aGameObjectID]];
 	}
-	std::cout << "ComponentManager: Tried to get a component but the game object did not exist.ID : " + aGameObjectID << " \n";
+	
+	std::cout << "ComponentManager: Tried to get a component but the game object did not exist.ID : " << aGameObjectID << " \n";
 	//assert(false && "ComponentManager: Tried to get a component but the game object did not exist. ID: " + aGameObjectID);
 	//ERROR_PRINT("ComponentManager: Tried to get a component but the game object did not exist. ID: " + aGameObjectID);
 	return nullptr;

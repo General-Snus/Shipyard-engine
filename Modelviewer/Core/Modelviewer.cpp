@@ -156,13 +156,33 @@ void ModelViewer::LoadScene()
 
 	GameObjectManager& gom = GameObjectManager::GetInstance();
 
-	GameObject camera = gom.CreateGameObject();
-	camera.AddComponent<cCamera>();
-	gom.SetLastGOAsCamera();
+	{
+		GameObject camera = gom.CreateGameObject();
+		camera.AddComponent<cCamera>();
+		gom.SetLastGOAsCamera();
+		camera.AddComponent<cLight>(eLightType::Spot);
+		std::weak_ptr<SpotLight> pLight = camera.GetComponent<cLight>().GetData<SpotLight>();
+		pLight.lock()->Position = CU::Vector3<float>(0,0,0);
+		pLight.lock()->Color = CU::Vector3<float>(1,1,1);
+		pLight.lock()->Intensity = 10;
+		pLight.lock()->Range = 100;
+		pLight.lock()->Direction = {0,0,0};
+		pLight.lock()->InnerConeAngle = 25 * DEG_TO_RAD;
+		pLight.lock()->OuterConeAngle = 85 * DEG_TO_RAD;
+		camera.GetComponent<cLight>().BindDirectionToTransform(true);
+	}
 
-	GameObject worldRoot = gom.CreateGameObject();
-	gom.SetLastGOAsWorld();
-	worldRoot.AddComponent<Skybox>();
+	{
+		GameObject worldRoot = gom.CreateGameObject();
+		gom.SetLastGOAsWorld();
+		worldRoot.AddComponent<Skybox>();
+		worldRoot.AddComponent<cLight>(eLightType::Directional);
+		std::weak_ptr<DirectionalLight> pLight = worldRoot.GetComponent<cLight>().GetData<DirectionalLight>();
+		pLight.lock()->Color = CU::Vector3<float>(1,1,1);
+		pLight.lock()->Intensity = 00.0f;
+		pLight.lock()->Direction = {1,-1,0};
+	}
+
 
 	{
 		myMesh = gom.CreateGameObject();
@@ -229,26 +249,21 @@ void ModelViewer::LoadScene()
 		gO.GetComponent<cAnimator>().SetPlayingAnimation(i - 1);
 	}
 
+	for(size_t i = 0; i < 8; i++)
 	{
+		int x = rand() % 10000 - 5000;
+		int z = rand() % 10000 - 5000;
+
 		GameObject pointLight = gom.CreateGameObject();
-		
+		pointLight.AddComponent<Transform>();
+		pointLight.GetComponent<Transform>().SetPosition({(float)x,100,(float)z});
 
-		pointLight.AddComponent<cLight>(eLightType::Spot);
-		pointLight.AddComponent<Transform>(camera.GetComponent<Transform>());
-		pointLight.GetComponent<Transform>( ).SetPosition({-100,100,-100});
-
-
-		std::weak_ptr<SpotLight> pLight;
-		pLight = std::static_pointer_cast<SpotLight>(pointLight.GetComponent<cLight>().GetData());
-
-		pLight.lock()->Position = CU::Vector3<float>(-100,100,-100);
-		pLight.lock()->Color = CU::Vector3<float>(1,1,1);
-		pLight.lock()->Intensity = 100000;
-		pLight.lock()->Range = 1000000;
-		pLight.lock()->Direction = {1,-1,0};
-		pLight.lock()->InnerConeAngle = 25 * DEG_TO_RAD;
-		pLight.lock()->OuterConeAngle = 85 * DEG_TO_RAD;
-
+		pointLight.AddComponent<cLight>(eLightType::Point);
+		std::weak_ptr<PointLight> ptr = pointLight.GetComponent<cLight>().GetData<PointLight>();
+		ptr.lock()->Color = {(float)(rand() % 1000)/1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000};
+		ptr.lock()->Range = 10000.0f;
+		ptr.lock()->Intensity = 100000.0f;
+		pointLight.GetComponent<cLight>().BindDirectionToTransform(true);
 	}
 
 
@@ -256,14 +271,14 @@ void ModelViewer::LoadScene()
 	{
 		GameObject newG = gom.CreateGameObject();
 		newG.AddComponent<BackgroundColor>(CU::Vector4<float>(1.0f,1.0f,1.0f,1.0f));
-	} 
+	}
 
 	{
 		GameObject test3 = gom.CreateGameObject();
 		test3.AddComponent<cMeshRenderer>("Models/SteelFloor.fbx");
 		//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");;
 		test3.AddComponent<Transform>();
-		test3.GetComponent<Transform>().GetTransform()(4,2) = -125; 
+		test3.GetComponent<Transform>().GetTransform()(4,2) = -125;
 	}
 }
 
@@ -309,7 +324,7 @@ void ModelViewer::UpdateScene()
 	}
 
 	//LIGHTS	
-	GraphicsEngine::Get().AddCommand<GfxCmd_SetLightBuffer>(); 
+	GraphicsEngine::Get().AddCommand<GfxCmd_SetLightBuffer>();
 
 	for(auto& data : mySaveData)
 	{

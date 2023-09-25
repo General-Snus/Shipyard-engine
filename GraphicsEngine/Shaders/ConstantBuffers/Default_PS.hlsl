@@ -102,30 +102,28 @@ float occulusion
 float3 CalculateDirectionLight(
 float3 diffuseColor,
 float3 specularColor,
-float3 normal,
-float3 halfAngle,
+float3 normal, 
 float3 cameraDirection,
-float3 lightDirection,
-float3 lightColor,
 float roughness
 )
 {
-    const float NdotL = saturate(dot(normal, lightDirection));
+    const float3 halfAngle = normalize(cameraDirection + myDirectionalLight.Direction);
+    const float NdotL = saturate(dot(normal, myDirectionalLight.Direction));
     const float K = pow(roughness + 1, 2) / 8;
-     
 
-    float3 directLightSpecular = CalculateSpecularLight(specularColor, normal, cameraDirection, lightDirection, halfAngle, roughness);
+    float3 directLightSpecular = CalculateSpecularLight(specularColor, normal, cameraDirection, myDirectionalLight.Direction, halfAngle, roughness);
     float3 directLightDiffuse = CalculateDiffuseLight(diffuseColor);
     directLightDiffuse *= (1.0f - directLightSpecular);
     
-    return saturate(directLightDiffuse + directLightSpecular) * lightColor * NdotL;
+    return saturate(directLightDiffuse + directLightSpecular) * myDirectionalLight.Color * myDirectionalLight.Intensity * NdotL;
 }
 
-float3 CalculateSpotLight(float3 diffuseColor, float3 specularColor, float3 worldPosition, float3 normal, float3 halfAngle, float3 cameraDirection, SpotLight spotLightData, float roughness, float shine)
+float3 CalculateSpotLight(float3 diffuseColor, float3 specularColor, float3 worldPosition, float3 normal,  float3 cameraDirection, SpotLight spotLightData, float roughness, float shine)
 {
     float3 lightDirection = (spotLightData.Position - worldPosition);
     const float dist = distance(spotLightData.Position, worldPosition);
     lightDirection = normalize(lightDirection); 
+    const float3 halfAngle = normalize(cameraDirection + lightDirection);
     spotLightData.Direction = normalize(spotLightData.Direction);
     
     //const float conalAtt = pow(max(dot(-lightDirection, normalize(spotLightData.Direction)), 0.1), 2);
@@ -134,9 +132,7 @@ float3 CalculateSpotLight(float3 diffuseColor, float3 specularColor, float3 worl
     
     const float conalAtt = pow(saturate(denom / numer), 2);
     
-    const float3 Attenuation = conalAtt * (1 - saturate(pow(dist * (1.0f / max(spotLightData.Range, 0.00001f)), 2)));
-    
-    
+    const float3 Attenuation = conalAtt * (1 - saturate(pow(dist * (1.0f / max(spotLightData.Range, 0.00001f)), 2))); 
     
     float3 directLightSpecular = CalculateSpecularLight(specularColor, normal, cameraDirection, lightDirection, halfAngle, roughness);
     float3 directLightDiffuse = CalculateDiffuseLight(diffuseColor);
@@ -147,11 +143,13 @@ float3 CalculateSpotLight(float3 diffuseColor, float3 specularColor, float3 worl
     return saturate(directLightDiffuse + directLightSpecular) * NdotL * Attenuation * spotLightData.Color * spotLightData.Intensity;
 }
 
-float3 CalculatePointLight(float3 diffuseColor, float3 specularColor,float3 worldPosition, float3 normal, float3 halfAngle, float3 cameraDirection, PointLight pointLightData, float roughness, float shine)
+float3 CalculatePointLight(float3 diffuseColor, float3 specularColor,float3 worldPosition, float3 normal, float3 cameraDirection, PointLight pointLightData, float roughness, float shine)
 {
     float3 lightDirection = (pointLightData.Position - worldPosition);
     const float distance = length(lightDirection);
+    
     lightDirection = normalize(lightDirection);
+    const float3 halfAngle = normalize(cameraDirection + lightDirection);
     
     const float constantAtt = 1.0f;
     const float linearAtt = 4.6 * pow(distance, -1);
@@ -195,22 +193,10 @@ DefaultPixelOutput main(DefaultVertexToPixel input)
     pixelNormal.xy = ((2.0f * pixelNormal.xy) - 1.0f);
     pixelNormal.z = sqrt(1 - (pow(pixelNormal.x, 2.0f) + pow(pixelNormal.y, 2.0f)));
     pixelNormal = normalize(mul(pixelNormal, TBN));
-    pixelNormal *= DefaultMaterial.NormalStrength;
-    
-    //Enviroment
+    pixelNormal *= DefaultMaterial.NormalStrength; 
    
-    
-    
-    
-    float3 lightDirection = normalize(float3(1, 1, 1));
-    float ambienceStrength = .1f;
-    float3 lightColor = float3(1.0f, 1.0f, 1.0f) * 10;
-    float3 materialSpecular = float3(1.0f, 1.0f, 1.0f);
-    
     const float3 diffuseColor = lerp((float3) 0.0f, textureColor.rgb, 1 - metallic);
-    const float3 specularColor = lerp((float3) 0.04f, textureColor.rgb, metallic);
-    
-    const float3 halfAngle = normalize(cameraDirection + lightDirection);
+    const float3 specularColor = lerp((float3) 0.04f, textureColor.rgb, metallic); 
     
     float3 totalPointLightContribution = 0;
     float3 totalSpotLightContribution = 0;
@@ -225,8 +211,7 @@ DefaultPixelOutput main(DefaultVertexToPixel input)
             diffuseColor,
             specularColor,
             input.WorldPosition.xyz,
-            pixelNormal,
-            halfAngle,
+            pixelNormal, 
             cameraDirection,
             myPointLight[p],
             roughness,
@@ -245,8 +230,7 @@ DefaultPixelOutput main(DefaultVertexToPixel input)
             diffuseColor,
             specularColor,
             input.WorldPosition.xyz,
-            pixelNormal,
-            halfAngle,
+            pixelNormal, 
             cameraDirection,
             mySpotLight[s],
             roughness,
@@ -255,12 +239,9 @@ DefaultPixelOutput main(DefaultVertexToPixel input)
         }
     }
     
-    
-    const float3 radiance = totalSpotLightContribution;
-    //CalculateDirectionLight(diffuseColor, specularColor, pixelNormal.xyz, halfAngle, cameraDirection, lightDirection, lightColor, roughness) +
-    //CalculateIndirectLight(diffuseColor, specularColor, pixelNormal.xyz, cameraDirection, enviromentCube, roughness, occlusion)
-    
-    ;
+   
+    const float3 radiance = totalSpotLightContribution + totalPointLightContribution +
+    CalculateDirectionLight(diffuseColor, specularColor, pixelNormal.xyz , cameraDirection, roughness);
     
     result.Color.rgb = radiance * textureColor.rgb;
   

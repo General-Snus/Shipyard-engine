@@ -35,11 +35,7 @@ GfxCmd_RenderMesh::GfxCmd_RenderMesh(const RenderData& aData,const Matrix& aTran
 GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 {
 	int pointLightCount = 0;
-	int spotLightCount = 0;
-	std::cout << sizeof(LightDataBase) << " " << sizeof(DirectionalLight) - sizeof(LightDataBase) << " " << sizeof(PointLight) - sizeof(LightDataBase) << " " << sizeof(SpotLight) - sizeof(LightDataBase) << std::endl;
-
-
-
+	int spotLightCount = 0; 
 	LightBuffer& buff = GetLightBuffer();
 	for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
 	{
@@ -51,10 +47,9 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 			case eLightType::Directional:
 			{
 				//memcpy(&buff.Data.myDirectionalLight,i.GetData ().get(),sizeof(DirectionalLight));
-				DirectionalLight* light = static_cast<DirectionalLight*>(i.GetData().get());
+				DirectionalLight* light = i.GetData<DirectionalLight>().get();
 				buff.Data.myDirectionalLight.Color = light->Color;
-				buff.Data.myDirectionalLight.Intensity = light->Intensity;
-				buff.Data.myDirectionalLight.LightType = light->LightType;
+				buff.Data.myDirectionalLight.Intensity = light->Intensity; 
 				buff.Data.myDirectionalLight.Direction = light->Direction;
 				break;
 			}
@@ -62,10 +57,9 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 			case eLightType::Point:
 			{
 				//memcpy(&buff.Data.myPointLight[pointLightCount],i.GetData ().get(),sizeof(PointLight));
-				PointLight* light = static_cast<PointLight*>(i.GetData().get());
+				PointLight* light = i.GetData<PointLight>().get();
 				buff.Data.myPointLight[pointLightCount].Color = light->Color;
-				buff.Data.myPointLight[pointLightCount].Intensity = light->Intensity;
-				buff.Data.myPointLight[pointLightCount].LightType = light->LightType;
+				buff.Data.myPointLight[pointLightCount].Intensity = light->Intensity; 
 				buff.Data.myPointLight[pointLightCount].Range = light->Range;
 				buff.Data.myPointLight[pointLightCount].Position = transform->GetPosition();
 				pointLightCount++;
@@ -74,10 +68,9 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 			case eLightType::Spot:
 			{
 				//memcpy(&buff.Data.mySpotLight[spotLightCount],i.GetData().get(),sizeof(SpotLight)); 
-				SpotLight* light = static_cast<SpotLight*>(i.GetData().get());
+				SpotLight* light = i.GetData<SpotLight>().get();
 				buff.Data.mySpotLight[spotLightCount].Color = light->Color;
-				buff.Data.mySpotLight[spotLightCount].Intensity = light->Intensity;
-				buff.Data.mySpotLight[spotLightCount].LightType = light->LightType;
+				buff.Data.mySpotLight[spotLightCount].Intensity = light->Intensity; 
 				buff.Data.mySpotLight[spotLightCount].Range = light->Range;
 				buff.Data.mySpotLight[spotLightCount].InnerConeAngle = light->InnerConeAngle;
 				buff.Data.mySpotLight[spotLightCount].OuterConeAngle = light->OuterConeAngle;
@@ -98,10 +91,9 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 		case eLightType::Directional:
 		{
 			//memcpy(&buff.Data.myDirectionalLight,i.GetData().get(),sizeof(DirectionalLight));
-			DirectionalLight* light = static_cast<DirectionalLight*>(i.GetData().get());
+			DirectionalLight* light = i.GetData<DirectionalLight>().get();
 			buff.Data.myDirectionalLight.Color = light->Color;
-			buff.Data.myDirectionalLight.Intensity = light->Intensity;
-			buff.Data.myDirectionalLight.LightType = light->LightType;
+			buff.Data.myDirectionalLight.Intensity = light->Intensity; 
 			buff.Data.myDirectionalLight.Direction = light->Direction;
 			break;
 		}
@@ -109,10 +101,9 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 		case eLightType::Point:
 		{
 			//memcpy(&buff.Data.myPointLight[pointLightCount],i.GetData().get(),sizeof(PointLight));
-			PointLight* light = static_cast<PointLight*>(i.GetData().get());
+			PointLight* light = i.GetData<PointLight>().get();
 			buff.Data.myPointLight[pointLightCount].Color = light->Color;
-			buff.Data.myPointLight[pointLightCount].Intensity = light->Intensity;
-			buff.Data.myPointLight[pointLightCount].LightType = light->LightType;
+			buff.Data.myPointLight[pointLightCount].Intensity = light->Intensity; 
 			buff.Data.myPointLight[pointLightCount].Range = light->Range;
 			buff.Data.myPointLight[pointLightCount].Position = light->Position;
 			pointLightCount++;
@@ -121,10 +112,9 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 		case eLightType::Spot:
 		{
 			//memcpy(&buff.Data.mySpotLight[spotLightCount],i.GetData().get(),sizeof(SpotLight));
-			SpotLight* light = static_cast<SpotLight*>(i.GetData().get());
+			SpotLight* light = i.GetData<SpotLight>().get();
 			buff.Data.mySpotLight[spotLightCount].Color = light->Color;
-			buff.Data.mySpotLight[spotLightCount].Intensity = light->Intensity;
-			buff.Data.mySpotLight[spotLightCount].LightType = light->LightType;
+			buff.Data.mySpotLight[spotLightCount].Intensity = light->Intensity; 
 			buff.Data.mySpotLight[spotLightCount].Range = light->Range;
 			buff.Data.mySpotLight[spotLightCount].InnerConeAngle = light->InnerConeAngle;
 			buff.Data.mySpotLight[spotLightCount].OuterConeAngle = light->OuterConeAngle;

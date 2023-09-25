@@ -125,7 +125,8 @@ T* GameObjectManager::TryGetComponent(const unsigned int aGameObjectID)
 	{
 		return static_cast<ComponentManager<T>*>(myComponentManagers[&typeid(T)])->TryGetComponent(aGameObjectID);
 	}
-	std::cout << "GameObjectManager: Tried to get a component which was not present on GameObjectID: " << aGameObjectID << std::endl;
+	auto name = &typeid(T);
+	std::cout << "GameObjectManager: Tried to get " << name << " which was not present on GameObjectID : " << aGameObjectID << std::endl;
 	//assert(false && "GameObjectManager::TryGetComponent(...) component manager doesn't exist.");
 	//ERROR_PRINT("GameObjectManager: Tried to get a component which was not present on GameObjectID: " + aGameObjectID);
 	return nullptr;
