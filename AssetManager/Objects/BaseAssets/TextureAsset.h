@@ -6,6 +6,7 @@ enum class eTextureType
 	ColorMap = 0,
 	NormalMap = 1,
 	MaterialMap = 2,
+	EffectMap = 3,
 	CubeMap = 100
 };
 

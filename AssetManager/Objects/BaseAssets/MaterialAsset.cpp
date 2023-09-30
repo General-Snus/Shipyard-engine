@@ -10,10 +10,11 @@ Material::Material(const std::filesystem::path& aFilePath) : AssetBase(aFilePath
 
 void Material::Init()
 {
-	textures.resize(3);
+	textures.resize(4);
 	textures[(int)eTextureType::ColorMap] = GraphicsEngine::Get().GetDefaultTexture(eTextureType::ColorMap);
 	textures[(int)eTextureType::NormalMap] = GraphicsEngine::Get().GetDefaultTexture(eTextureType::NormalMap);
 	textures[(int)eTextureType::MaterialMap] = GraphicsEngine::Get().GetDefaultTexture(eTextureType::MaterialMap);
+	textures[(int)eTextureType::EffectMap] = GraphicsEngine::Get().GetDefaultTexture(eTextureType::EffectMap);
 
 	if(GraphicsEngine::Get().GetDefaultMaterial() != nullptr)
 	{

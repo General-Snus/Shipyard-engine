@@ -51,6 +51,7 @@ private:
 	std::shared_ptr<TextureHolder> defaultTexture;
 	std::shared_ptr<TextureHolder> defaultNormalTexture;
 	std::shared_ptr<TextureHolder> defaultMatTexture;
+	std::shared_ptr<TextureHolder> defaultEffectTexture;
 	std::shared_ptr<TextureHolder> defaultCubeMap;
 
 	std::shared_ptr<Mesh> defaultMesh; 
@@ -121,6 +122,9 @@ public:
 
 		case eTextureType::MaterialMap:
 			return defaultMatTexture;
+
+		case eTextureType::EffectMap:
+			return defaultEffectTexture;
 
 		case eTextureType::CubeMap:
 			return defaultCubeMap;

@@ -154,6 +154,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Objects\Components\ComponentDerivatives\DEBUGCOMPONENTS\RenderMode.h" />
+    <ClInclude Include="Objects\Components\ComponentDerivatives\DEBUGCOMPONENTS\FrameStatistics.h" />
     <ClInclude Include="Objects\Components\ComponentDerivatives\CameraComponent.h" />
     <ClInclude Include="Objects\Components\ComponentDerivatives\LightComponent.h" />
     <ClInclude Include="Objects\BaseAssets\LightDataBase.h" />
@@ -176,6 +178,8 @@
     <ClInclude Include="Objects\Components\ComponentDerivatives\Skybox.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Objects\Components\ComponentDerivatives\DEBUGCOMPONENTS\RenderMode.cpp" />
+    <ClCompile Include="Objects\Components\ComponentDerivatives\DEBUGCOMPONENTS\FrameStatistics.cpp" />
     <ClCompile Include="Objects\Components\ComponentDerivatives\CameraComponent.cpp" />
     <ClCompile Include="Objects\Components\ComponentDerivatives\LightComponent.cpp" />
     <ClCompile Include="Objects\BaseAssets\LightDataBase.cpp" />

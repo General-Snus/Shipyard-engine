@@ -14,7 +14,7 @@ FrameBuffer& GraphicCommand::GetFrameBuffer()
 ObjectBuffer& GraphicCommand::GetObjectBuffer()
 {
 	return GraphicsEngine::Get().myObjectBuffer;
-} 
+}
 
 LineBuffer& GraphicCommand::GetLineBuffer()
 {
@@ -38,11 +38,42 @@ GfxCmd_RenderMesh::GfxCmd_RenderMesh(const RenderData& aData,const Matrix& aTran
 		myMaterials.push_back(aMaterial);
 	}
 }
+
+void GfxCmd_RenderMesh::Execute()
+{
+	ObjectBuffer& objectBuffer = GetObjectBuffer();
+	objectBuffer.Data.myTransform = myTransform;
+	objectBuffer.Data.MaxExtents = MaxExtents;
+	objectBuffer.Data.MinExtents = MinExtents;
+	objectBuffer.Data.hasBone = false;
+
+	RHI::UpdateConstantBufferData(objectBuffer);
+
+
+	for(auto& aElement : myElementsData)
+	{
+		if(myMaterials.size() > 0)
+		{
+			myMaterials[0].lock()->Update(); 
+		}
+		RHI::ConfigureInputAssembler(
+			aElement.PrimitiveTopology,
+			aElement.VertexBuffer,
+			aElement.IndexBuffer,
+			aElement.Stride,
+			Vertex::InputLayout);
+		RHI::DrawIndexed(aElement.NumIndices);
+	}
+}
+
 GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 {
 	int pointLightCount = 0;
 	int spotLightCount = 0;
 	LightBuffer& buff = GetLightBuffer();
+
+
+
 	for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
 	{
 		Transform* transform = i.TryGetComponent<Transform>();
@@ -64,10 +95,11 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 			{
 				//memcpy(&buff.Data.myPointLight[pointLightCount],i.GetData ().get(),sizeof(PointLight));
 				PointLight* light = i.GetData<PointLight>().get();
-				buff.Data.myPointLight[pointLightCount % PointLightCount].Color = light->Color;
-				buff.Data.myPointLight[pointLightCount % PointLightCount].Power = light->Power;
-				buff.Data.myPointLight[pointLightCount % PointLightCount].Range = light->Range;
-				buff.Data.myPointLight[pointLightCount % PointLightCount].Position = transform->GetPosition();
+				const int bufferID = pointLightCount % PointLightCount;
+				buff.Data.myPointLight[bufferID].Color = light->Color;
+				buff.Data.myPointLight[bufferID].Power = light->Power;
+				buff.Data.myPointLight[bufferID].Range = light->Range;
+				buff.Data.myPointLight[bufferID].Position = transform->GetPosition();
 				pointLightCount++;
 				break;
 			}
@@ -75,13 +107,14 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 			{
 				//memcpy(&buff.Data.mySpotLight[spotLightCount],i.GetData().get(),sizeof(SpotLight)); 
 				SpotLight* light = i.GetData<SpotLight>().get();
-				buff.Data.mySpotLight[spotLightCount % SpotLightCount].Color = light->Color;
-				buff.Data.mySpotLight[spotLightCount % SpotLightCount].Power = light->Power;
-				buff.Data.mySpotLight[spotLightCount % SpotLightCount].Range = light->Range;
-				buff.Data.mySpotLight[spotLightCount % SpotLightCount].InnerConeAngle = light->InnerConeAngle;
-				buff.Data.mySpotLight[spotLightCount % SpotLightCount].OuterConeAngle = light->OuterConeAngle;
-				buff.Data.mySpotLight[spotLightCount % SpotLightCount].Direction = light->Direction;
-				buff.Data.mySpotLight[spotLightCount % SpotLightCount].Position = transform->GetPosition();
+				const int bufferID = spotLightCount % SpotLightCount;
+				buff.Data.mySpotLight[bufferID].Color = light->Color;
+				buff.Data.mySpotLight[bufferID].Power = light->Power;
+				buff.Data.mySpotLight[bufferID].Range = light->Range;
+				buff.Data.mySpotLight[bufferID].InnerConeAngle = light->InnerConeAngle;
+				buff.Data.mySpotLight[bufferID].OuterConeAngle = light->OuterConeAngle;
+				buff.Data.mySpotLight[bufferID].Direction = light->Direction;
+				buff.Data.mySpotLight[bufferID].Position = transform->GetPosition();
 				spotLightCount++;
 				break;
 			}
@@ -135,44 +168,19 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 		}
 	}
 }
+
 void GfxCmd_SetLightBuffer::Execute()
 {
 	RHI::UpdateConstantBufferData(GetLightBuffer());
 }
-void GfxCmd_RenderMesh::Execute()
-{
-	ObjectBuffer& objectBuffer = GetObjectBuffer();
-	objectBuffer.Data.myTransform = myTransform;
-	objectBuffer.Data.MaxExtents = MaxExtents;
-	objectBuffer.Data.MinExtents = MinExtents;
-	objectBuffer.Data.hasBone = false;
 
-	RHI::UpdateConstantBufferData(objectBuffer);
-
-
-	for(auto& aElement : myElementsData)
-	{
-		if(myMaterials.size() > 0)
-		{
-			myMaterials[0].lock()->Update();
-
-		}
-		RHI::ConfigureInputAssembler(
-			aElement.PrimitiveTopology,
-			aElement.VertexBuffer,
-			aElement.IndexBuffer,
-			aElement.Stride,
-			Vertex::InputLayout);
-		RHI::DrawIndexed(aElement.NumIndices);
-	}
-}
-
-GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,const Transform& ref)
+GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,const Transform& ref,int aRenderMode)
 {
 	myViewMatrix = Matrix::GetFastInverse(ref.GetTransform());
 	myProjectionMatrix = ProjectionMatrix;
 	myDeltaTime = static_cast<float>(CommonUtilities::Timer::GetInstance().GetTotalTime());
 	myPosition = ref.GetPosition();
+	RenderMode = aRenderMode;
 }
 
 void GfxCmd_SetFrameBuffer::Execute()
@@ -181,6 +189,7 @@ void GfxCmd_SetFrameBuffer::Execute()
 	buffert.Data.ProjectionMatrix = myProjectionMatrix;
 	buffert.Data.ViewMatrix = myViewMatrix;
 	buffert.Data.Time = myDeltaTime;
+	buffert.Data.FB_RenderMode = RenderMode;
 
 	buffert.Data.FB_CameraPosition[0] = myPosition.x;
 	buffert.Data.FB_CameraPosition[1] = myPosition.y;
@@ -236,7 +245,7 @@ void GfxCmd_RenderSkybox::Execute()
 
 GfxCmd_DrawDebugPrimitive::GfxCmd_DrawDebugPrimitive(Debug::DebugPrimitive primitive,Matrix Transform) : myPrimitive(primitive),myTransform(Transform)
 {
-	
+
 }
 
 void GfxCmd_DrawDebugPrimitive::Execute()

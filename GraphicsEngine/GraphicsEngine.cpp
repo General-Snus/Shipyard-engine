@@ -10,6 +10,7 @@
 #include <Shaders/Include/Default_C.h>
 #include <Shaders/Include/Default_N.h>
 #include <Shaders/Include/Default_M.h>
+#include <Shaders/Include/Default_FX.h>
 
 #include <Shaders/Include/LineDrawer_PS.h>
 #include <Shaders/Include/LineDrawer_VS.h>
@@ -180,6 +181,14 @@ void GraphicsEngine::SetupDefaultVariables()
 		L"Default material texture",
 		BuiltIn_Default_M_ByteCode,
 		sizeof(BuiltIn_Default_M_ByteCode)
+	);
+
+	defaultEffectTexture = std::make_shared<TextureHolder>("",eTextureType::EffectMap);
+	RHI::LoadTextureFromMemory(
+		defaultEffectTexture->GetRawTexture().get(),
+		L"Default effect texture",
+		BuiltIn_Default_FX_ByteCode,
+		sizeof(BuiltIn_Default_FX_ByteCode)
 	);
 
 	defaultVS = std::make_shared<Shader>();

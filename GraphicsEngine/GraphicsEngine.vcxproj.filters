@@ -96,6 +96,9 @@
     <ClInclude Include="Rendering\Buffers\LineBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Shaders\Include\Default_FX.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsEngine.pch.cpp">

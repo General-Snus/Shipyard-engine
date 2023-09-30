@@ -3,12 +3,13 @@
 #include <ThirdParty/CU/CommonUtills/Vectors.hpp>
 #include "Rendering/Buffers/ConstantBuffer.h" 
 #include <AssetManager/Objects/BaseAssets/LightDataBase.h>
+#include "../../Shaders/Registers.h"
 
 struct LightBufferData 
 {
-   DirectionalLight myDirectionalLight;
-   PointLight myPointLight[8];
-   SpotLight mySpotLight[8]; 
+   DirectionalLight myDirectionalLight= DirectionalLight();
+   PointLight myPointLight[PointLightCount] = {PointLight()};
+   SpotLight mySpotLight[SpotLightCount] = {SpotLight()};;
 };
 
 typedef ConstantBuffer<LightBufferData> LightBuffer;

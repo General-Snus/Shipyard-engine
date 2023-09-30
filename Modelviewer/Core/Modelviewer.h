@@ -7,6 +7,7 @@
 #include <TGAFbx.h>
 #include <TgaFbxStructs.h>  
 #include <Modelviewer/Windows/SplashWindow.h>
+#include <ThirdParty/CU/CommonUtills/AABB3D.hpp>
 
 template<typename T>
 struct SaveData
@@ -37,10 +38,7 @@ class ModelViewer
 	ModelViewer() = default;
 
 	void ShowSplashScreen();
-	void HideSplashScreen() const;
-	size_t LoadAllAssets();
-
-	static bool LoadModel(const std::wstring someFilePath,TGA::FBX::Mesh& aModel,bool bRegeneralteNormals = false,bool bMergeDuplicateVertices = false);
+	void HideSplashScreen() const;´
 
 
 	void LoadScene();
@@ -60,7 +58,7 @@ class ModelViewer
 	bool SaveToMemory(SaveData<float>& arg);
 
 public:
-
+	void ExpandWorldBounds(AABB3D);
 	// Singleton Getter.
 	static ModelViewer& Get()
 	{

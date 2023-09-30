@@ -36,6 +36,10 @@ void TextureHolder::Init()
 		{
 			this->textureType = eTextureType::MaterialMap;
 		}
+		if(typeOfTexture == "_FX" || typeOfTexture == "_fx" || typeOfTexture == "_Fx")
+		{
+			this->textureType = eTextureType::EffectMap;
+		}
 	}
 	if(!RHI::LoadTexture(RawTexture.get(),AssetPath.wstring()))
 	{

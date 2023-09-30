@@ -24,6 +24,8 @@
 #include <AssetManager/Objects/Components/ComponentDerivatives/CameraComponent.h>
 #include <AssetManager/Objects/Components/ComponentDerivatives/LightComponent.h>
 #include <AssetManager/Objects/Components/ComponentDerivatives/DEBUGCOMPONENTS/BackgroundColor.h>
+#include <AssetManager/Objects/Components/ComponentDerivatives/DEBUGCOMPONENTS/FrameStatistics.h>
+#include <AssetManager/Objects/Components/ComponentDerivatives/DEBUGCOMPONENTS/RenderMode.h>
 #include <AssetManager/AssetManager.h>
 #include <ThirdParty/CU/Math.hpp>
 #include <functional>
@@ -176,11 +178,16 @@ void ModelViewer::LoadScene()
 	{
 		GameObject worldRoot = gom.CreateGameObject();
 		gom.SetLastGOAsWorld();
+
+		worldRoot.AddComponent<FrameStatistics>();
+		worldRoot.AddComponent<RenderMode>();
+
 		worldRoot.AddComponent<Skybox>();
+
 		worldRoot.AddComponent<cLight>(eLightType::Directional);
 		std::weak_ptr<DirectionalLight> pLight = worldRoot.GetComponent<cLight>().GetData<DirectionalLight>();
 		pLight.lock()->Color = CU::Vector3<float>(1,1,1);
-		pLight.lock()->Power = 1.0f;
+		pLight.lock()->Power = 0.0f;
 		pLight.lock()->Direction = { 1,-1,0};
 	}
 
@@ -197,7 +204,7 @@ void ModelViewer::LoadScene()
 		myMesh.GetComponent<cAnimator>().AddAnimation(L"Animations/Locomotion/A_C_TGA_Bro_Run.fbx");
 		myMesh.GetComponent<cAnimator>().AddAnimation(L"Animations/Idle/A_C_TGA_Bro_Idle_Brething.fbx");
 		myMesh.GetComponent<cAnimator>().AddAnimation(L"Animations/Idle/A_C_TGA_Bro_Idle_Wave.fbx");
-	}
+	} 
 	GameObject test = gom.CreateGameObject();
 	test.AddComponent<cMeshRenderer>();
 	test.AddComponent<Transform>();
@@ -249,7 +256,7 @@ void ModelViewer::LoadScene()
 		gO.GetComponent<cAnimator>().SetPlayingAnimation(i - 1);
 	}
 
-	for(int i = 1; i < 6; i++)
+	for(int i = 1; i < 10; i++)
 	{
 		GameObject spotLight = gom.CreateGameObject();
 		spotLight.AddComponent<cLight>(eLightType::Spot);
@@ -267,7 +274,7 @@ void ModelViewer::LoadScene()
 
 	}
 
-	for(size_t i = 0; i < 8; i++)
+	for(size_t i = 0; i < 20; i++)
 	{ 
 		int x = rand() % 10000 - 5000;
 		int z = rand() % 10000 - 5000;
@@ -280,7 +287,7 @@ void ModelViewer::LoadScene()
 		std::weak_ptr<PointLight> ptr = pointLight.GetComponent<cLight>().GetData<PointLight>();
 		ptr.lock()->Color = { (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000 };
 		ptr.lock()->Range = 10000.0f;
-		ptr.lock()->Power = 60.0f * Kilo;
+		ptr.lock()->Power = 600.0f * Kilo;
 		pointLight.GetComponent<cLight>().BindDirectionToTransform(true); 
 	}
 
@@ -305,8 +312,7 @@ void ModelViewer::Update()
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
-	ImGui::ShowDemoWindow(); // Show demo window! :)
-
+	ImGui::ShowDemoWindow(); // Show demo window! :) 
 	CommonUtilities::Timer::GetInstance().Update();
 	UpdateScene();
 	GraphicsEngine::Get().BeginFrame();
@@ -345,8 +351,7 @@ void ModelViewer::UpdateScene()
 	//} 
 	myMesh.GetComponent<Transform>().Rotate({0,delta * 100,0},false);
 	//LIGHTS	
-	GraphicsEngine::Get().AddCommand<GfxCmd_SetLightBuffer>();
-
+	GraphicsEngine::Get().AddCommand<GfxCmd_SetLightBuffer>(); 
 	for(auto& data : mySaveData)
 	{
 		if(data.identifier == "CameraPos")

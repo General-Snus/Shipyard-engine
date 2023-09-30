@@ -29,8 +29,9 @@ private:
 	Matrix myProjectionMatrix;
 	Vector3f myPosition;
 	float myDeltaTime;
+	 int RenderMode;
 public:
-	GfxCmd_SetFrameBuffer( const Matrix& ProjectionMatrix,const Transform& ref);
+	GfxCmd_SetFrameBuffer( const Matrix& ProjectionMatrix,const Transform& ref,int aRenderMode);
 	void Execute() override;
 };
 

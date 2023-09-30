@@ -12,6 +12,7 @@ SamplerState BRDFSampler : register(HLSL_REG_BRDFSampler);
 Texture2D colorMap : register(HLSL_REG_colorMap);
 Texture2D normalMap : register(HLSL_REG_normalMap);
 Texture2D materialMap : register(HLSL_REG_materialMap);
+Texture2D effectMap : register(HLSL_REG_effectMap);
 TextureCube enviromentCube : register(HLSL_REG_enviromentCube);
 Texture2D BRDF_LUT_Texture : register(HLSL_REG_BRDF_LUT_Texture);
 
@@ -94,7 +95,7 @@ float occulusion
     const float3 diffuse = CalculateDiffuseIBL(normal, enviromentCube);
     const float3 specular = CalculateSpecularIBL(specularColor, normal, cameraDirection, roughness, enviromentCube);
     
-    const float3 kA = (diffuseColor * diffuse + specular) * occulusion*.3f;
+    const float3 kA = (diffuseColor * diffuse + specular) * occulusion * .3f;
     
     return kA;
 }
@@ -120,7 +121,7 @@ float roughness
     return saturate(directLightDiffuse + directLightSpecular) * myDirectionalLight.Color * myDirectionalLight.Power * NdotL;
 }
 
-float spotFallof(float spectatorAngle, float umbralAngle,float penumbralAngle)
+float spotFallof(float spectatorAngle, float umbralAngle, float penumbralAngle)
 {
      [flatten]
     if (spectatorAngle > penumbralAngle)
@@ -147,10 +148,10 @@ float3 CalculateSpotLight(float3 diffuseColor, float3 specularColor, float3 worl
     const float spectatorAngle = dot(spotlightDirection, -RayFromSpot);
     const float umbralAngle = cos(clamp(spotLightData.OuterConeAngle / 2, 0.001f, PI));
     const float penumbralAngle = cos(clamp(spotLightData.InnerConeAngle / 2, 0.001f, PI - umbralAngle));
-    const float conalAtt = spotFallof(spectatorAngle, umbralAngle, penumbralAngle);  
+    const float conalAtt = spotFallof(spectatorAngle, umbralAngle, penumbralAngle);
     
     //const float3 Attenuation = 1 - saturate(pow(dist * pow(max(spotLightData.Range, 0.000001f), -1), 2));
-    const float3 Attenuation = conalAtt / pow(max(dist,spotLightData.Range), 2); //REFACTOR: PHYSICS i hate this
+    const float3 Attenuation = conalAtt / pow(max(dist, spotLightData.Range), 2); //REFACTOR: PHYSICS i hate this
       
     float3 directLightSpecular = CalculateSpecularLight(specularColor, normal, cameraDirection, RayFromSpot, halfAngle, roughness);
     float3 directLightDiffuse = CalculateDiffuseLight(diffuseColor);
@@ -201,7 +202,8 @@ DefaultPixelOutput main(DefaultVertexToPixel input)
     
     const float4 textureColor = colorMap.Sample(defaultSampler, uv) * DefaultMaterial.albedoColor;
     const float4 materialComponent = materialMap.Sample(defaultSampler, uv);
-    float3 pixelNormal = normalMap.Sample(defaultSampler, uv).xyz;
+    const float3 textureNormal = normalMap.Sample(defaultSampler, uv).xyz;
+    const float emmision = effectMap.Sample(defaultSampler, uv).r;
     
     const float occlusion = materialComponent.r;
     const float roughness = materialComponent.g;
@@ -209,7 +211,8 @@ DefaultPixelOutput main(DefaultVertexToPixel input)
     
     
     //Normals
-    pixelNormal.xy = ((2.0f * pixelNormal.xy) - 1.0f);
+    float3 pixelNormal;
+    pixelNormal.xy = ((2.0f * textureNormal.xy) - 1.0f);
     pixelNormal.z = sqrt(1 - (pow(pixelNormal.x, 2.0f) + pow(pixelNormal.y, 2.0f)));
     pixelNormal = normalize(mul(pixelNormal, TBN));
     pixelNormal *= DefaultMaterial.NormalStrength;
@@ -221,7 +224,7 @@ DefaultPixelOutput main(DefaultVertexToPixel input)
     float3 totalSpotLightContribution = 0;
     
     [unroll]
-    for (uint p = 0; p < 8; p++)
+    for (uint p = 0; p < PointLightCount; p++)
     {
         [flatten]
         if (myPointLight[p].Power > 0)
@@ -240,7 +243,7 @@ DefaultPixelOutput main(DefaultVertexToPixel input)
     }
     
     [unroll]
-    for (uint s = 0; s < 8; s++)
+    for (uint s = 0; s < SpotLightCount - 1; s++)
     {
         [flatten]
         if (mySpotLight[s].Power > 0)
@@ -263,11 +266,114 @@ DefaultPixelOutput main(DefaultVertexToPixel input)
     CalculateDirectionLight(diffuseColor, specularColor, pixelNormal.xyz, cameraDirection, roughness)
     + CalculateIndirectLight(diffuseColor, specularColor, pixelNormal.xyz, cameraDirection, enviromentCube, roughness, occlusion);
     
-    result.Color.rgb = radiance * textureColor.rgb;
+    result.Color.rgb = (radiance + emmision) * textureColor.rgb;
   
     
     result.Color.rgb = saturate(LinearToGamma(result.Color.rgb));
     result.Color.a = 1.0f;
+    
+    
+    
+#if _DEBUG
+    switch(FB_RenderMode)
+    {
+    default:
+    case 0:
+    {
+    break;
+    }
+    
+    case 1:
+    {
+    result.Color.rgb = input.WorldPosition.xyz;
+    result.Color.a = 1.0f;
+    break;
+    }
+    
+     case 2:
+    {
+    result.Color.rgb = input.VxColor;
+    result.Color.a = 1.0f;
+    break;
+    }
+    
+    case 3:
+    {
+    result.Color.rgb = input.Normal;
+    result.Color.a = 1.0f;
+    break;
+    }
+    
+    case 4:
+    {
+    result.Color.rgb = input.Tangent;
+    result.Color.a = 1.0f;
+    break;
+    } 
+    
+    case 5:
+    {
+    result.Color.rgb = input.BiNormal;
+    result.Color.a = 1.0f;
+    break;
+    } 
+    
+    case 6:
+    {
+    result.Color.rgb = textureColor.rgb;
+    result.Color.a = 1.0f;
+    break;
+    } 
+    
+     case 7:
+    {
+    result.Color.rgb = textureNormal.rgb;
+    result.Color.a = 1.0f;
+    break;
+    } 
+    
+    
+     case 8:
+    {
+    result.Color.rgb = pixelNormal.rgb;
+    result.Color.a = 1.0f;
+    break;
+    } 
+    
+     case 9:
+    {
+    result.Color.rgb = occlusion;
+    result.Color.a = 1.0f;
+    break;
+    } 
+     case 10:
+    {
+    result.Color.rgb = roughness;
+    result.Color.a = 1.0f;
+    break;
+    } 
+     case 11:
+    {
+    result.Color.rgb = metallic;
+    result.Color.a = 1.0f;
+    break;
+    } 
+     case 12:
+    {
+    result.Color.rgb = emmision;
+    result.Color.a = 1.0f;
+    break;
+    } 
+     case 13:
+    {
+    result.Color.rgb = emmision;
+    result.Color.a = 1.0f;
+    break;
+    } 
+    
+} 
+#endif
+    
     
     return result;
 }
