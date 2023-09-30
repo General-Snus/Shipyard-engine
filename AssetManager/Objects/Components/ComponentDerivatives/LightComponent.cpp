@@ -42,7 +42,8 @@ void cLight::Update()
 
 	if(boundToTransform)
 	{
-		Transform* transform = this->TryGetComponent<Transform>(); 
+		Transform* transform = this->TryGetComponent<Transform>();
+
 		if(transform == nullptr)
 		{
 			std::cout << "Light component has no transform component" << std::endl;

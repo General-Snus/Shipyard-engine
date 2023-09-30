@@ -31,17 +31,17 @@ DefaultVertexToPixel main(DefaultVertexInput input)
         
         const float3x3 skinNormalRotation = (float3x3) transpose(skinMatrix);
         result.Normal = mul(input.Normal, skinNormalRotation);
-        result.BiNormal = mul(result.BiNormal, skinNormalRotation);
-        result.Tangent = mul(result.Tangent, skinNormalRotation);
+        result.BiNormal = mul(result.BiNormal, (float3x3) skinMatrix);
+        result.Tangent = mul(result.Tangent, (float3x3) skinMatrix);
     }
     
     const float3x3 worldNormalRotation = (float3x3) OB_Transform;
-    result.Normal = mul(result.Normal, worldNormalRotation);
+    result.Normal = mul(result.Normal, transpose(worldNormalRotation));
     result.BiNormal = mul(result.BiNormal, worldNormalRotation);
     result.Tangent = mul(result.Tangent, worldNormalRotation);
     
     
-     //Local to world     
+     //Local to world    
     result.Position = mul(OB_Transform, result.Position);
     result.WorldPosition = result.Position;
     result.Position = mul(FB_InvView, result.Position);

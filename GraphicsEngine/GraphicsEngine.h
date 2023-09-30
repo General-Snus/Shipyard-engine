@@ -8,6 +8,7 @@
 #include "Commands/GraphicCommands.h"
 #include "Rendering/Buffers/FrameBuffer.h"
 #include "Rendering/Buffers/ObjectBuffer.h"
+#include "Rendering/Buffers/LineBuffer.h"
 #include "Rendering/Buffers/ConstantBuffer.h"  
 
 #include <memory>
@@ -22,6 +23,7 @@ class GraphicsEngine
 private:
 	FrameBuffer myFrameBuffer;
 	ObjectBuffer myObjectBuffer;
+	LineBuffer myLineBuffer;
 	LightBuffer myLightBuffer;
 	std::vector<std::unique_ptr<GraphicCommand>> myCommandList;
 
@@ -30,13 +32,20 @@ private:
 	CU::Vector4<float> myBackgroundColor;
 
 	std::shared_ptr<Texture> myBackBuffer;
-	std::shared_ptr<Texture> myDepthBuffer;
-	// TODO: TEMP: These will live elsewhere later on.Now live in forward render
+	std::shared_ptr<Texture> myDepthBuffer; 
+
 	ComPtr<ID3D11VertexShader> myVertexShader;
 	ComPtr<ID3D11PixelShader> myPixelShader;
 
 	std::shared_ptr<Shader> defaultVS;
 	std::shared_ptr<Shader> defaultPS;
+	
+	//Debug
+	ComPtr<ID3D11Buffer> myLineVertexBuffer;
+	ComPtr<ID3D11Buffer> myLineIndexBuffer;
+	std::shared_ptr<Shader> debugLinePS;
+	std::shared_ptr<Shader> debugLineVS;
+
 	 
 	std::shared_ptr<Texture> BRDLookUpTable;
 	std::shared_ptr<TextureHolder> defaultTexture;
@@ -44,8 +53,7 @@ private:
 	std::shared_ptr<TextureHolder> defaultMatTexture;
 	std::shared_ptr<TextureHolder> defaultCubeMap;
 
-	std::shared_ptr<Mesh> defaultMesh;
-
+	std::shared_ptr<Mesh> defaultMesh; 
 	std::shared_ptr<Material> defaultMaterial;
 
 	ComPtr<ID3D11SamplerState> myDefaultSampleState;
@@ -63,6 +71,8 @@ public:
 	 * @param enableDeviceDebug If DirectX should write debug output in the Output.
 	 */
 	bool Initialize(HWND windowHandle,bool enableDeviceDebug);
+
+	void SetupDefaultVariables();
 
 	void SetupBRDF();
 
@@ -92,6 +102,11 @@ public:
 
 	FORCEINLINE std::shared_ptr<Shader> GetDefaultVSShader() const { return defaultVS; }
 	FORCEINLINE std::shared_ptr<Shader> GetDefaultPSShader() const { return defaultPS; }
+
+	FORCEINLINE std::shared_ptr<Shader> GetDebugLineVS() const { return debugLineVS; }
+	FORCEINLINE std::shared_ptr<Shader> GetDebugLinePS() const { return debugLinePS; }
+
+
 	FORCEINLINE std::shared_ptr<TextureHolder> GetDefaultTexture() const { return defaultTexture; }
 	FORCEINLINE std::shared_ptr<Material> GetDefaultMaterial() const { return defaultMaterial; }
 	FORCEINLINE std::shared_ptr<TextureHolder> GetDefaultTexture(eTextureType type) const

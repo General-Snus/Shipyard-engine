@@ -25,6 +25,7 @@
 #include <AssetManager/Objects/Components/ComponentDerivatives/LightComponent.h>
 #include <AssetManager/Objects/Components/ComponentDerivatives/DEBUGCOMPONENTS/BackgroundColor.h>
 #include <AssetManager/AssetManager.h>
+#include <ThirdParty/CU/Math.hpp>
 #include <functional>
 #include <fstream>
 #include <streambuf>
@@ -38,7 +39,7 @@
 #include <ThirdParty/CU/Math.hpp> 
 #include "Timer.h"
 
-
+#define _DEBUGDRAW
 using json = nlohmann::json;
 
 bool ModelViewer::Initialize(HINSTANCE aHInstance,SIZE aWindowSize,WNDPROC aWindowProcess,LPCWSTR aWindowTitle)
@@ -160,16 +161,16 @@ void ModelViewer::LoadScene()
 		GameObject camera = gom.CreateGameObject();
 		camera.AddComponent<cCamera>();
 		gom.SetLastGOAsCamera();
-		camera.AddComponent<cLight>(eLightType::Spot);
-		std::weak_ptr<SpotLight> pLight = camera.GetComponent<cLight>().GetData<SpotLight>();
-		pLight.lock()->Position = CU::Vector3<float>(0,0,0);
-		pLight.lock()->Color = CU::Vector3<float>(1,1,1);
-		pLight.lock()->Intensity = 10;
-		pLight.lock()->Range = 100;
-		pLight.lock()->Direction = {0,0,0};
-		pLight.lock()->InnerConeAngle = 25 * DEG_TO_RAD;
-		pLight.lock()->OuterConeAngle = 85 * DEG_TO_RAD;
-		camera.GetComponent<cLight>().BindDirectionToTransform(true);
+		//camera.AddComponent<cLight>(eLightType::Spot);
+		//std::weak_ptr<SpotLight> pLight = camera.GetComponent<cLight>().GetData<SpotLight>();
+		//pLight.lock()->Position = CU::Vector3<float>(0,0,0);
+		//pLight.lock()->Color = CU::Vector3<float>(1,1,1);
+		//pLight.lock()->Intensity = 10;
+		//pLight.lock()->Range = 1000;
+		//pLight.lock()->Direction = {0,-1,0};
+		//pLight.lock()->InnerConeAngle = 10 * DEG_TO_RAD;
+		//pLight.lock()->OuterConeAngle = 45 * DEG_TO_RAD;
+		//camera.GetComponent<cLight>().BindDirectionToTransform(true);
 	}
 
 	{
@@ -179,8 +180,8 @@ void ModelViewer::LoadScene()
 		worldRoot.AddComponent<cLight>(eLightType::Directional);
 		std::weak_ptr<DirectionalLight> pLight = worldRoot.GetComponent<cLight>().GetData<DirectionalLight>();
 		pLight.lock()->Color = CU::Vector3<float>(1,1,1);
-		pLight.lock()->Intensity = 00.0f;
-		pLight.lock()->Direction = {1,-1,0};
+		pLight.lock()->Power = 1.0f;
+		pLight.lock()->Direction = { 1,-1,0};
 	}
 
 
@@ -238,10 +239,9 @@ void ModelViewer::LoadScene()
 		GameObject gO = gom.CreateGameObject();
 		gO.AddComponent<cSkeletalMeshRenderer>(L"Models/SK_C_TGA_Bro.fbx");
 		gO.GetComponent<cSkeletalMeshRenderer>().SetMaterialPath(L"Materials/TGABroMaterial.json");
-		CU::Matrix4x4<float> aPosition;
-		aPosition(4,1) = (float)i * 100;
-		aPosition = aPosition * CU::Matrix4x4<float>::CreateRotationAroundY(-PI);
-		gO.AddComponent<Transform>(aPosition);
+		gO.AddComponent<Transform>();
+		gO.GetComponent<Transform>().SetPosition({-i * 300.0f,0});
+		gO.GetComponent<Transform>().Rotate({0,180.0f,0},true);
 		gO.AddComponent<cAnimator>(L"Animations/Locomotion/A_C_TGA_Bro_Walk.fbx");
 		gO.GetComponent<cAnimator>().AddAnimation(L"Animations/Locomotion/A_C_TGA_Bro_Run.fbx");
 		gO.GetComponent<cAnimator>().AddAnimation(L"Animations/Idle/A_C_TGA_Bro_Idle_Brething.fbx");
@@ -249,21 +249,39 @@ void ModelViewer::LoadScene()
 		gO.GetComponent<cAnimator>().SetPlayingAnimation(i - 1);
 	}
 
-	for(size_t i = 0; i < 8; i++)
+	for(int i = 1; i < 6; i++)
 	{
+		GameObject spotLight = gom.CreateGameObject();
+		spotLight.AddComponent<cLight>(eLightType::Spot);
+		std::weak_ptr<SpotLight> ptr = spotLight.GetComponent<cLight>().GetData<SpotLight>();
+		spotLight.AddComponent<Transform>();
+		spotLight.GetComponent<Transform>().SetPosition({ -i * 300.0f + 300.f,300,0});
+		spotLight.GetComponent<Transform>().Rotate({90,0,0},true);
+		ptr.lock()->Color = {(float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000};
+		//ptr.lock()->Color = {1,1,1};
+		ptr.lock()->Range = 300.0f;;
+		ptr.lock()->Power = i * 60.0f * Kilo;
+		ptr.lock()->OuterConeAngle = i * 20.0f * DEG_TO_RAD;
+		ptr.lock()->InnerConeAngle = 1.0f * DEG_TO_RAD;
+		spotLight.GetComponent<cLight>().BindDirectionToTransform(true);
+
+	}
+
+	for(size_t i = 0; i < 8; i++)
+	{ 
 		int x = rand() % 10000 - 5000;
 		int z = rand() % 10000 - 5000;
 
 		GameObject pointLight = gom.CreateGameObject();
 		pointLight.AddComponent<Transform>();
-		pointLight.GetComponent<Transform>().SetPosition({(float)x,100,(float)z});
+		pointLight.GetComponent<Transform>().SetPosition({ (float)x,100,(float)z });
 
 		pointLight.AddComponent<cLight>(eLightType::Point);
 		std::weak_ptr<PointLight> ptr = pointLight.GetComponent<cLight>().GetData<PointLight>();
-		ptr.lock()->Color = {(float)(rand() % 1000)/1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000};
+		ptr.lock()->Color = { (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000 };
 		ptr.lock()->Range = 10000.0f;
-		ptr.lock()->Intensity = 100000.0f;
-		pointLight.GetComponent<cLight>().BindDirectionToTransform(true);
+		ptr.lock()->Power = 60.0f * Kilo;
+		pointLight.GetComponent<cLight>().BindDirectionToTransform(true); 
 	}
 
 
@@ -276,7 +294,7 @@ void ModelViewer::LoadScene()
 	{
 		GameObject test3 = gom.CreateGameObject();
 		test3.AddComponent<cMeshRenderer>("Models/SteelFloor.fbx");
-		//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");;
+		test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");;
 		test3.AddComponent<Transform>();
 		test3.GetComponent<Transform>().GetTransform()(4,2) = -125;
 	}
@@ -302,8 +320,7 @@ void ModelViewer::Update()
 
 void ModelViewer::UpdateScene()
 {
-	//myCamera->Update(CommonUtilities::Timer::GetInstance().GetDeltaTime());
-	//myCamera->UpdatePositionVectors();
+	float delta = CU::Timer::GetInstance().GetDeltaTime();
 	GameObjectManager::GetInstance().Update();
 
 	if(GetAsyncKeyState('1'))
@@ -322,7 +339,11 @@ void ModelViewer::UpdateScene()
 	{
 		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(3);
 	}
-
+	//for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
+	//{
+	//	i.GetComponent<Transform>().Rotate({0,delta * 100,0},false);
+	//} 
+	myMesh.GetComponent<Transform>().Rotate({0,delta * 100,0},false);
 	//LIGHTS	
 	GraphicsEngine::Get().AddCommand<GfxCmd_SetLightBuffer>();
 

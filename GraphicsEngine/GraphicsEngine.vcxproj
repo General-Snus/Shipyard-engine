@@ -181,8 +181,10 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DebugDrawer\DebugDrawer.h" />
     <ClInclude Include="InterOp\ShaderInfo.h" />
     <ClInclude Include="Rendering\Buffers\LightBuffer.h" />
+    <ClInclude Include="Rendering\Buffers\LineBuffer.h" />
     <ClInclude Include="Shaders\Include\brdfLUT_PS.h" />
     <ClInclude Include="Shaders\Include\brdfLUT_VS.h" />
     <ClInclude Include="Shaders\Include\Default_C.h" />
@@ -206,6 +208,7 @@
     <ClInclude Include="Shaders\Registers.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DebugDrawer\DebugDrawer.cpp" />
     <ClCompile Include="Rendering\ForwardRenderer.cpp" />
     <ClCompile Include="Commands\GraphicCommands.cpp" />
     <ClCompile Include="GraphicsEngine.cpp" />
@@ -237,17 +240,18 @@
     <None Include="Shaders\ConstantBuffers\FrameBuffer.hlsli" />
     <None Include="Shaders\ConstantBuffers\IBLBRDF.hlsli" />
     <None Include="Shaders\ConstantBuffers\LightBuffer.hlsli" />
+    <None Include="Shaders\ConstantBuffers\LineDrawer\LineDrawerStructs.hlsli" />
     <None Include="Shaders\ConstantBuffers\MaterialBuffer.hlsli" />
     <None Include="Shaders\ConstantBuffers\ObjectBuffer.hlsli" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\ConstantBuffers\brdfLUT_PS.hlsl">
+    <FxCompile Include="Shaders\ConstantBuffers\LUT\brdfLUT_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="Shaders\ConstantBuffers\brdfLUT_VS.hlsl">
+    <FxCompile Include="Shaders\ConstantBuffers\LUT\brdfLUT_VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
@@ -260,6 +264,14 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Shaders\ConstantBuffers\Default_VS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\ConstantBuffers\LineDrawer\LineDrawer_PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\ConstantBuffers\LineDrawer\LineDrawer_VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>

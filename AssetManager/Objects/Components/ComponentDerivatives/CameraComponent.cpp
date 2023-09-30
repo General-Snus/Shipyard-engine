@@ -5,7 +5,7 @@ cCamera::cCamera(const unsigned int anOwnerId) : Component(anOwnerId)
 {
 
 	GetGameObject().AddComponent<Transform>();
-
+	GetGameObject().GetComponent<Transform>().SetGizmo(false);
 
 	const float fow = 3.14f * (85.0f / 180.0f);
 	const float fowmdf = 1.0f / (tanf(fow / 2.0f));
@@ -54,12 +54,12 @@ void cCamera::Update()
 	}
 	if(GetAsyncKeyState('E'))
 	{
-		myTransform.Rotate({0,rotationSpeed * aTimeDelta});
+		myTransform.Rotate({0,rotationSpeed * aTimeDelta},true);
 	}
 
 	if(GetAsyncKeyState('Q'))
 	{
-		myTransform.Rotate({0,-rotationSpeed * aTimeDelta});
+		myTransform.Rotate({0,-rotationSpeed * aTimeDelta},true);
 	}
 
 	if(GetAsyncKeyState(VK_SPACE))

@@ -1,6 +1,7 @@
 #pragma once
  
-#include <AssetManager/AssetManager.h>
+#include <AssetManager/AssetManager.pch.h>
+#include <GraphicsEngine/DebugDrawer/DebugDrawer.h>
 typedef CU::Vector3<float> Vector3f;
 typedef CU::Matrix4x4<float> Matrix;
 
@@ -17,6 +18,7 @@ public:
 	const Matrix& GetTransform() const;
 
 
+
 	// TODO
 	//SET A UNIVERSAL METER
 	Vector3f GetForward();
@@ -30,8 +32,8 @@ public:
 	void SetPosition(Vector3f position);
 	Vector3f GetPosition() const;   
 	 
-	void Rotate(Vector2f angularRotation);
-	void Rotate(Vector3f angularRotation);
+	void Rotate(Vector2f angularRotation,bool worldSpace);
+	void Rotate(Vector3f angularRotation,bool worldSpace);
 	void ApplyTransformation(Matrix transformationMatrix);
 	 
 	void SetScale(float scale);
@@ -39,9 +41,14 @@ public:
 	void SetScale(Vector3f scale); 
 
 	~Transform() = default;
+	void SetGizmo(bool enabled);
+	void InitPrimitive();
 private:
 	bool isDirty;
+	bool isDebugGizmoEnabled;
 	CU::Matrix4x4<float> myTransform;
+	CU::Matrix4x4<float> myWorldSpaceTransform;
+	Debug::DebugPrimitive primitive;
 	
 	/*  
 

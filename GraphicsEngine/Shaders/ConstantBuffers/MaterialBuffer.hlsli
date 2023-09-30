@@ -1,3 +1,5 @@
+#include "../Registers.h"
+
 struct DefaultMaterialData
 {
     float4 albedoColor;
@@ -7,7 +9,7 @@ struct DefaultMaterialData
     float Roughness;
 };
 
-cbuffer DefaultMaterialBuffer : register(b2)
+cbuffer DefaultMaterialBuffer : register(HLSL_REG_DefaultMaterialBuffer)
 {
     DefaultMaterialData DefaultMaterial;
 };

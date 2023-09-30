@@ -1,4 +1,6 @@
-cbuffer FrameBuffer : register(b0)
+#include "../Registers.h"
+
+cbuffer FrameBuffer : register(HLSL_REG_FrameBuffer)
 {
     float4x4 FB_InvView;
     float4x4 FB_Proj; 

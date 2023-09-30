@@ -4,6 +4,7 @@
 #include <AssetManager/Objects/Components/ComponentDerivatives/LightComponent.h>
 #include "Timer.h"
 #include <assert.h>
+#include <GraphicsEngine/Shaders/Registers.h>
 
 FrameBuffer& GraphicCommand::GetFrameBuffer()
 {
@@ -13,6 +14,11 @@ FrameBuffer& GraphicCommand::GetFrameBuffer()
 ObjectBuffer& GraphicCommand::GetObjectBuffer()
 {
 	return GraphicsEngine::Get().myObjectBuffer;
+} 
+
+LineBuffer& GraphicCommand::GetLineBuffer()
+{
+	return GraphicsEngine::Get().myLineBuffer;
 }
 
 LightBuffer& GraphicCommand::GetLightBuffer()
@@ -35,7 +41,7 @@ GfxCmd_RenderMesh::GfxCmd_RenderMesh(const RenderData& aData,const Matrix& aTran
 GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 {
 	int pointLightCount = 0;
-	int spotLightCount = 0; 
+	int spotLightCount = 0;
 	LightBuffer& buff = GetLightBuffer();
 	for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
 	{
@@ -49,7 +55,7 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 				//memcpy(&buff.Data.myDirectionalLight,i.GetData ().get(),sizeof(DirectionalLight));
 				DirectionalLight* light = i.GetData<DirectionalLight>().get();
 				buff.Data.myDirectionalLight.Color = light->Color;
-				buff.Data.myDirectionalLight.Intensity = light->Intensity; 
+				buff.Data.myDirectionalLight.Power = light->Power;
 				buff.Data.myDirectionalLight.Direction = light->Direction;
 				break;
 			}
@@ -58,10 +64,10 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 			{
 				//memcpy(&buff.Data.myPointLight[pointLightCount],i.GetData ().get(),sizeof(PointLight));
 				PointLight* light = i.GetData<PointLight>().get();
-				buff.Data.myPointLight[pointLightCount].Color = light->Color;
-				buff.Data.myPointLight[pointLightCount].Intensity = light->Intensity; 
-				buff.Data.myPointLight[pointLightCount].Range = light->Range;
-				buff.Data.myPointLight[pointLightCount].Position = transform->GetPosition();
+				buff.Data.myPointLight[pointLightCount % PointLightCount].Color = light->Color;
+				buff.Data.myPointLight[pointLightCount % PointLightCount].Power = light->Power;
+				buff.Data.myPointLight[pointLightCount % PointLightCount].Range = light->Range;
+				buff.Data.myPointLight[pointLightCount % PointLightCount].Position = transform->GetPosition();
 				pointLightCount++;
 				break;
 			}
@@ -69,13 +75,13 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 			{
 				//memcpy(&buff.Data.mySpotLight[spotLightCount],i.GetData().get(),sizeof(SpotLight)); 
 				SpotLight* light = i.GetData<SpotLight>().get();
-				buff.Data.mySpotLight[spotLightCount].Color = light->Color;
-				buff.Data.mySpotLight[spotLightCount].Intensity = light->Intensity; 
-				buff.Data.mySpotLight[spotLightCount].Range = light->Range;
-				buff.Data.mySpotLight[spotLightCount].InnerConeAngle = light->InnerConeAngle;
-				buff.Data.mySpotLight[spotLightCount].OuterConeAngle = light->OuterConeAngle;
-				buff.Data.mySpotLight[spotLightCount].Direction = light->Direction;
-				buff.Data.mySpotLight[spotLightCount].Position = transform->GetPosition();
+				buff.Data.mySpotLight[spotLightCount % SpotLightCount].Color = light->Color;
+				buff.Data.mySpotLight[spotLightCount % SpotLightCount].Power = light->Power;
+				buff.Data.mySpotLight[spotLightCount % SpotLightCount].Range = light->Range;
+				buff.Data.mySpotLight[spotLightCount % SpotLightCount].InnerConeAngle = light->InnerConeAngle;
+				buff.Data.mySpotLight[spotLightCount % SpotLightCount].OuterConeAngle = light->OuterConeAngle;
+				buff.Data.mySpotLight[spotLightCount % SpotLightCount].Direction = light->Direction;
+				buff.Data.mySpotLight[spotLightCount % SpotLightCount].Position = transform->GetPosition();
 				spotLightCount++;
 				break;
 			}
@@ -93,7 +99,7 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 			//memcpy(&buff.Data.myDirectionalLight,i.GetData().get(),sizeof(DirectionalLight));
 			DirectionalLight* light = i.GetData<DirectionalLight>().get();
 			buff.Data.myDirectionalLight.Color = light->Color;
-			buff.Data.myDirectionalLight.Intensity = light->Intensity; 
+			buff.Data.myDirectionalLight.Power = light->Power;
 			buff.Data.myDirectionalLight.Direction = light->Direction;
 			break;
 		}
@@ -102,10 +108,10 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 		{
 			//memcpy(&buff.Data.myPointLight[pointLightCount],i.GetData().get(),sizeof(PointLight));
 			PointLight* light = i.GetData<PointLight>().get();
-			buff.Data.myPointLight[pointLightCount].Color = light->Color;
-			buff.Data.myPointLight[pointLightCount].Intensity = light->Intensity; 
-			buff.Data.myPointLight[pointLightCount].Range = light->Range;
-			buff.Data.myPointLight[pointLightCount].Position = light->Position;
+			buff.Data.myPointLight[pointLightCount % PointLightCount].Color = light->Color;
+			buff.Data.myPointLight[pointLightCount % PointLightCount].Power = light->Power;
+			buff.Data.myPointLight[pointLightCount % PointLightCount].Range = light->Range;
+			buff.Data.myPointLight[pointLightCount % PointLightCount].Position = light->Position;
 			pointLightCount++;
 			break;
 		}
@@ -113,13 +119,13 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 		{
 			//memcpy(&buff.Data.mySpotLight[spotLightCount],i.GetData().get(),sizeof(SpotLight));
 			SpotLight* light = i.GetData<SpotLight>().get();
-			buff.Data.mySpotLight[spotLightCount].Color = light->Color;
-			buff.Data.mySpotLight[spotLightCount].Intensity = light->Intensity; 
-			buff.Data.mySpotLight[spotLightCount].Range = light->Range;
-			buff.Data.mySpotLight[spotLightCount].InnerConeAngle = light->InnerConeAngle;
-			buff.Data.mySpotLight[spotLightCount].OuterConeAngle = light->OuterConeAngle;
-			buff.Data.mySpotLight[spotLightCount].Direction = light->Direction;
-			buff.Data.mySpotLight[spotLightCount].Position = light->Position;
+			buff.Data.mySpotLight[spotLightCount % SpotLightCount].Color = light->Color;
+			buff.Data.mySpotLight[spotLightCount % SpotLightCount].Power = light->Power;
+			buff.Data.mySpotLight[spotLightCount % SpotLightCount].Range = light->Range;
+			buff.Data.mySpotLight[spotLightCount % SpotLightCount].InnerConeAngle = light->InnerConeAngle;
+			buff.Data.mySpotLight[spotLightCount % SpotLightCount].OuterConeAngle = light->OuterConeAngle;
+			buff.Data.mySpotLight[spotLightCount % SpotLightCount].Direction = light->Direction;
+			buff.Data.mySpotLight[spotLightCount % SpotLightCount].Position = light->Position;
 			spotLightCount++;
 			break;
 		}
@@ -151,7 +157,8 @@ void GfxCmd_RenderMesh::Execute()
 			myMaterials[0].lock()->Update();
 
 		}
-		RHI::ConfigureInputAssembler(aElement.PrimitiveTopology,
+		RHI::ConfigureInputAssembler(
+			aElement.PrimitiveTopology,
 			aElement.VertexBuffer,
 			aElement.IndexBuffer,
 			aElement.Stride,
@@ -225,4 +232,27 @@ GfxCmd_RenderSkybox::GfxCmd_RenderSkybox(std::shared_ptr<Texture> texture) : myS
 void GfxCmd_RenderSkybox::Execute()
 {
 	//RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER, 100	,mySkyboxTexture.get());
+}
+
+GfxCmd_DrawDebugPrimitive::GfxCmd_DrawDebugPrimitive(Debug::DebugPrimitive primitive,Matrix Transform) : myPrimitive(primitive),myTransform(Transform)
+{
+	
+}
+
+void GfxCmd_DrawDebugPrimitive::Execute()
+{
+	LineBuffer& lineBuffer = GetLineBuffer();
+	lineBuffer.Data.myTransform = myTransform;
+	RHI::UpdateConstantBufferData(lineBuffer);
+
+	RHI::ConfigureInputAssembler(
+		D3D11_PRIMITIVE_TOPOLOGY_LINELIST,
+		myPrimitive.VertexBuffer,
+		myPrimitive.IndexBuffer,
+		sizeof(Debug::DebugVertex),
+		Debug::DebugVertex::InputLayout);
+
+	RHI::SetVertexShader(GraphicsEngine::Get().GetDebugLineVS().get());
+	RHI::SetPixelShader(GraphicsEngine::Get().GetDebugLinePS().get());
+	RHI::DrawIndexed(static_cast<UINT>(myPrimitive.NumIndices));
 }

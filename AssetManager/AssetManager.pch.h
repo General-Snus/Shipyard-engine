@@ -32,6 +32,7 @@
 #include <GraphicsEngine/Rendering/Vertex.h>
 #include <GraphicsEngine/GraphicsEngine.h>  
 #include <GraphicsEngine/Commands/GraphicCommands.h>
+#include <GraphicsEngine/DebugDrawer/DebugDrawer.h>
 #include "AssetManager.h"
 
 #endif //ASSETMANAGER_PCH_H 

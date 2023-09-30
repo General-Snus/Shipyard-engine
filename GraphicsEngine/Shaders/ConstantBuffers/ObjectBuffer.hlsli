@@ -1,4 +1,6 @@
-cbuffer ObjectBuffer : register(b1)
+#include "../Registers.h"
+
+cbuffer ObjectBuffer : register(HLSL_REG_ObjectBuffer)
 {
     float4x4 OB_Transform; // 64 bytes
     float3 OB_MinExtents; // 12 bytes

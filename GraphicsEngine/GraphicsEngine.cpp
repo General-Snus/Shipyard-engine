@@ -11,6 +11,9 @@
 #include <Shaders/Include/Default_N.h>
 #include <Shaders/Include/Default_M.h>
 
+#include <Shaders/Include/LineDrawer_PS.h>
+#include <Shaders/Include/LineDrawer_VS.h>
+
 #include <Shaders/Include/brdfLUT_PS.h>
 #include <Shaders/Include/brdfLUT_VS.h>
 #include <Shaders/Registers.h>
@@ -21,6 +24,8 @@
 #include "Objects/Model.h"
 #include "Commands/GraphicCommands.h"
 #include <AssetManager/Objects/BaseAssets/TextureAsset.h>
+
+#include "Shaders/Registers.h"
 
 
 bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
@@ -47,100 +52,55 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 		}
 
 
-		D3D11_SAMPLER_DESC samplerDesc = {};
-		samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-		samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-		samplerDesc.MipLODBias = 0.f;
-		samplerDesc.MaxAnisotropy = 1;
-		samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-		samplerDesc.BorderColor[0] = 1.f;
-		samplerDesc.BorderColor[1] = 1.f;
-		samplerDesc.BorderColor[2] = 1.f;
-		samplerDesc.BorderColor[3] = 1.f;
-		samplerDesc.MinLOD = -D3D11_FLOAT32_MAX;
-		samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
-		if(!RHI::CreateSamplerState(myDefaultSampleState,samplerDesc))
-		{
-			GELogger.Log("Sampler state created");
-			assert(false);
-		}
-
-		RHI::SetSamplerState(myDefaultSampleState,0);
-		// TEMP: Load the default shader programs.
-		// This will be done elsewhere later on :).
-		RHI::CreateVertexShaderAndInputLayout(
-			myVertexShader,
-			Vertex::InputLayout,
-			Vertex::InputLayoutDefinition,
-			BuiltIn_Default_VS_ByteCode,
-			sizeof(BuiltIn_Default_VS_ByteCode)
-		);
-		RHI::CreatePixelShader(
-			myPixelShader,
-			BuiltIn_Default_PS_ByteCode,
-			sizeof(BuiltIn_Default_PS_ByteCode)
-		);
-		RHI::CreateInputLayout(
-			Vertex::InputLayout,
-			Vertex::InputLayoutDefinition,
-			BuiltIn_Default_VS_ByteCode,
-			sizeof(BuiltIn_Default_VS_ByteCode)
-		);
-
-		defaultTexture = std::make_shared<TextureHolder>("",eTextureType::ColorMap);
-		RHI::LoadTextureFromMemory(
-			defaultTexture->GetRawTexture().get(),
-			L"Default Color texture",
-			BuiltIn_Default_C_ByteCode,
-			sizeof(BuiltIn_Default_C_ByteCode)
-		);
-
-		defaultNormalTexture = std::make_shared<TextureHolder>("",eTextureType::NormalMap);
-		RHI::LoadTextureFromMemory(
-			defaultNormalTexture->GetRawTexture().get(),
-			L"Default Normal texture",
-			BuiltIn_Default_N_ByteCode,
-			sizeof(BuiltIn_Default_N_ByteCode)
-		);
-
-		defaultMatTexture = std::make_shared<TextureHolder>("",eTextureType::MaterialMap);
-		RHI::LoadTextureFromMemory(
-			defaultMatTexture->GetRawTexture().get(),
-			L"Default material texture",
-			BuiltIn_Default_M_ByteCode, 
-			sizeof(BuiltIn_Default_M_ByteCode)
-		);
-
-		defaultVS = std::make_shared<Shader>();
-		defaultPS = std::make_shared<Shader>();
-
-		defaultVS->SetShader(myVertexShader);
-		defaultVS->myName = L"Default Vertex Shader";
-		defaultPS->SetShader(myPixelShader);
-		defaultPS->myName = L"Default Pixel Shader";
-
-		AssetManager::GetInstance().ForceLoadAsset<Material>("Materials/Default.json",defaultMaterial);
-		defaultMaterial->SetShader(defaultVS,defaultPS);
-
-		AssetManager::GetInstance().ForceLoadAsset<TextureHolder>("Textures/skansen_cubemap.dds",defaultCubeMap);
-		defaultCubeMap->SetTextureType(eTextureType::CubeMap);
-		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER, REG_enviromentCube, defaultCubeMap->GetRawTexture().get());
+		SetupDefaultVariables();
 		SetupBRDF(); 
 
-		AssetManager::GetInstance().ForceLoadAsset<Mesh>("default.fbx",defaultMesh);
+
+		debugLineVS = std::make_shared<Shader>();
+		RHI::LoadShaderFromMemory(
+			debugLineVS.get(),
+			L"LineVertexShader",
+			BuiltIn_LineDrawer_VS_ByteCode,
+			sizeof(BuiltIn_LineDrawer_VS_ByteCode)
+		);
+
+		debugLinePS = std::make_shared<Shader>();
+		RHI::LoadShaderFromMemory(
+			debugLinePS.get(),
+			L"LinePixelShader",
+			BuiltIn_LineDrawer_PS_ByteCode,
+			sizeof(BuiltIn_LineDrawer_PS_ByteCode)
+		);
+
+		//Create DebugVertex input layout
+		RHI::CreateInputLayout(
+			Debug::DebugVertex::InputLayout,
+			Debug::DebugVertex::InputLayoutDescription,
+			BuiltIn_LineDrawer_VS_ByteCode,
+			sizeof(BuiltIn_LineDrawer_VS_ByteCode)
+		);
+		 
+		if(!(
+			RHI::CreateDynamicVertexBuffer(myLineVertexBuffer,65536,sizeof(Debug::DebugVertex)) &&
+			RHI::CreateDynamicIndexBuffer(myLineIndexBuffer,65536)
+			))
+		{
+			GELogger.Err("Failed to initialize the myLineVertexBuffer!");
+			return false;
+		}
+
 
 		myLightBuffer.Initialize();
-		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,3,myLightBuffer);
+		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_LightBuffer,myLightBuffer);
 
 		myObjectBuffer.Initialize();
-		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,1,myObjectBuffer);
+		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_ObjectBuffer,myObjectBuffer);
 
 		myFrameBuffer.Initialize();
-		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,0,myFrameBuffer);
+		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_FrameBuffer,myFrameBuffer);
 
+		myLineBuffer.Initialize();
+		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_LineBuffer,myLineBuffer);
 
 #ifdef _DEBUG
 	}
@@ -151,6 +111,93 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 	}
 #endif 
 	return true;
+}
+
+void GraphicsEngine::SetupDefaultVariables()
+{
+	D3D11_SAMPLER_DESC samplerDesc = {};
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	samplerDesc.BorderColor[0] = 1.f;
+	samplerDesc.BorderColor[1] = 1.f;
+	samplerDesc.BorderColor[2] = 1.f;
+	samplerDesc.BorderColor[3] = 1.f;
+	samplerDesc.MinLOD = -D3D11_FLOAT32_MAX;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	if(!RHI::CreateSamplerState(myDefaultSampleState,samplerDesc))
+	{
+		GELogger.Log("Sampler state created");
+		assert(false);
+	}
+
+	RHI::SetSamplerState(myDefaultSampleState,0);
+	// TEMP: Load the default shader programs.
+	// This will be done elsewhere later on :).
+	RHI::CreateVertexShaderAndInputLayout(
+		myVertexShader,
+		Vertex::InputLayout,
+		Vertex::InputLayoutDefinition,
+		BuiltIn_Default_VS_ByteCode,
+		sizeof(BuiltIn_Default_VS_ByteCode)
+	);
+	RHI::CreatePixelShader(
+		myPixelShader,
+		BuiltIn_Default_PS_ByteCode,
+		sizeof(BuiltIn_Default_PS_ByteCode)
+	);
+	RHI::CreateInputLayout(
+		Vertex::InputLayout,
+		Vertex::InputLayoutDefinition,
+		BuiltIn_Default_VS_ByteCode,
+		sizeof(BuiltIn_Default_VS_ByteCode)
+	);
+
+	defaultTexture = std::make_shared<TextureHolder>("",eTextureType::ColorMap);
+	RHI::LoadTextureFromMemory(
+		defaultTexture->GetRawTexture().get(),
+		L"Default Color texture",
+		BuiltIn_Default_C_ByteCode,
+		sizeof(BuiltIn_Default_C_ByteCode)
+	);
+
+	defaultNormalTexture = std::make_shared<TextureHolder>("",eTextureType::NormalMap);
+	RHI::LoadTextureFromMemory(
+		defaultNormalTexture->GetRawTexture().get(),
+		L"Default Normal texture",
+		BuiltIn_Default_N_ByteCode,
+		sizeof(BuiltIn_Default_N_ByteCode)
+	);
+
+	defaultMatTexture = std::make_shared<TextureHolder>("",eTextureType::MaterialMap);
+	RHI::LoadTextureFromMemory(
+		defaultMatTexture->GetRawTexture().get(),
+		L"Default material texture",
+		BuiltIn_Default_M_ByteCode,
+		sizeof(BuiltIn_Default_M_ByteCode)
+	);
+
+	defaultVS = std::make_shared<Shader>();
+	defaultPS = std::make_shared<Shader>();
+
+	defaultVS->SetShader(myVertexShader);
+	defaultVS->myName = L"Default Vertex Shader";
+	defaultPS->SetShader(myPixelShader);
+	defaultPS->myName = L"Default Pixel Shader";
+
+	AssetManager::GetInstance().ForceLoadAsset<Material>("Materials/Default.json",defaultMaterial);
+	defaultMaterial->SetShader(defaultVS,defaultPS);
+
+	AssetManager::GetInstance().ForceLoadAsset<TextureHolder>("Textures/skansen_cubemap.dds",defaultCubeMap);
+	defaultCubeMap->SetTextureType(eTextureType::CubeMap);
+	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_enviromentCube,defaultCubeMap->GetRawTexture().get());
+
+	AssetManager::GetInstance().ForceLoadAsset<Mesh>("default.fbx",defaultMesh);
 }
 
 void GraphicsEngine::SetupBRDF()

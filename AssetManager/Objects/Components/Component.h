@@ -12,7 +12,7 @@ class Component
 {
 public:
 	Component() = default;
-	Component(const unsigned int anOwnerID) : myOwnerID(anOwnerID),myIsActive(true) {}
+	Component(const unsigned int anOwnerID) : myOwnerID(anOwnerID),myIsActive(true),myComponentType(eComponentType::base) {}
 	Component(const unsigned int anOwnerID,eComponentType aComponentType) : myOwnerID(anOwnerID),myIsActive(true),myComponentType(aComponentType) {}
 	virtual ~Component() = default;
 

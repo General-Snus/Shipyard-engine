@@ -1,7 +1,9 @@
+#include "../Registers.h"
+
 struct  DirectionalLight
 {
     float3 Color;   //12
-    float Intensity;//4
+    float Power; //4
     
     float3 Direction; //12
     float Pad;        //4
@@ -10,7 +12,7 @@ struct  DirectionalLight
 struct PointLight
 {
     float3 Color; //12
-    float Intensity;//4
+    float Power;//4
     
     float3 Position; //12
     float Range;    //4
@@ -19,7 +21,7 @@ struct PointLight
 struct SpotLight
 {
     float3 Color;   //12
-    float Intensity;//4
+    float Power; //4
     
     float3 Position; //12
     float Range;    //4
@@ -31,7 +33,7 @@ struct SpotLight
     float3 Pad; //12
 };
 
-cbuffer LightBuffer : register(b3)
+cbuffer LightBuffer : register(HLSL_REG_LightBuffer)
 {
     DirectionalLight myDirectionalLight;    //32
     PointLight myPointLight[8];             //32 * 8

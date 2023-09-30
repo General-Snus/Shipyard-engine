@@ -1,8 +1,11 @@
 #pragma once
 #include <ThirdParty/CU/CommonUtills/Matrix4x4.hpp>
+
 #include <GraphicsEngine/Rendering/Buffers/FrameBuffer.h>
 #include <GraphicsEngine/Rendering/Buffers/ObjectBuffer.h> 
 #include <GraphicsEngine/Rendering/Buffers/LightBuffer.h> 
+#include <GraphicsEngine/Rendering/Buffers/LineBuffer.h> 
+
 #include <AssetManager/Objects/Components/ComponentDerivatives/MeshRenderer.h>
 
 typedef CU::Matrix4x4<float>  Matrix;
@@ -12,6 +15,7 @@ class GraphicCommand
 protected:
 	FrameBuffer& GetFrameBuffer();
 	ObjectBuffer& GetObjectBuffer();
+	LineBuffer& GetLineBuffer();
 	LightBuffer& GetLightBuffer();
 public:
 	virtual ~GraphicCommand() = default;
@@ -31,10 +35,20 @@ public:
 };
 
 class GfxCmd_SetLightBuffer : public GraphicCommand
-{
-
+{ 
 public:
 	GfxCmd_SetLightBuffer();
+	void Execute() override;
+};
+
+
+class GfxCmd_DrawDebugPrimitive : public GraphicCommand
+{ 
+private:
+	Debug::DebugPrimitive myPrimitive; 
+	Matrix myTransform;
+public:
+	GfxCmd_DrawDebugPrimitive(Debug::DebugPrimitive primitive,Matrix Transform);
 	void Execute() override;
 };
 

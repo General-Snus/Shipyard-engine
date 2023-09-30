@@ -90,6 +90,12 @@
     <ClInclude Include="Shaders\Registers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DebugDrawer\DebugDrawer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Buffers\LineBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsEngine.pch.cpp">
@@ -122,6 +128,9 @@
     <ClCompile Include="Commands\GraphicCommands.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DebugDrawer\DebugDrawer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\ConstantBuffers\FrameBuffer.hlsli" />
@@ -132,11 +141,14 @@
     <None Include="Shaders\ConstantBuffers\MaterialBuffer.hlsli" />
     <None Include="Shaders\ConstantBuffers\IBLBRDF.hlsli" />
     <None Include="Shaders\ConstantBuffers\LightBuffer.hlsli" />
+    <None Include="Shaders\ConstantBuffers\LineDrawer\LineDrawerStructs.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\ConstantBuffers\Default_VS.hlsl" />
     <FxCompile Include="Shaders\ConstantBuffers\Default_PS.hlsl" />
-    <FxCompile Include="Shaders\ConstantBuffers\brdfLUT_VS.hlsl" />
-    <FxCompile Include="Shaders\ConstantBuffers\brdfLUT_PS.hlsl" />
+    <FxCompile Include="Shaders\ConstantBuffers\LUT\brdfLUT_VS.hlsl" />
+    <FxCompile Include="Shaders\ConstantBuffers\LUT\brdfLUT_PS.hlsl" />
+    <FxCompile Include="Shaders\ConstantBuffers\LineDrawer\LineDrawer_PS.hlsl" />
+    <FxCompile Include="Shaders\ConstantBuffers\LineDrawer\LineDrawer_VS.hlsl" />
   </ItemGroup>
 </Project>
