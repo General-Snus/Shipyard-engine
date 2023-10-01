@@ -14,7 +14,13 @@ struct G_BufferData
 	std::shared_ptr<Texture> normalTexture;
 	std::shared_ptr<Texture> materialTexture; 
 	std::shared_ptr<Texture> effectTexture;
+
+	std::shared_ptr<Texture> vertexNormalsTexture;
+
+	std::shared_ptr<Texture> positionTexture;
+
 	std::shared_ptr<Texture> depthTexture;
+
 	std::shared_ptr<Texture> defaultCubeMap;
 
 	//Custom shader 

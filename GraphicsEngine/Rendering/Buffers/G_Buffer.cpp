@@ -12,6 +12,9 @@
 
 void G_BufferData::Init()
 {
+	const int width = RHI::GetDeviceSize().Width;
+	const int height = RHI::GetDeviceSize().Height;
+
 	RHI::CreateVertexShaderAndInputLayout(
 		myVertexShader,
 		Vertex::InputLayout,
@@ -32,36 +35,88 @@ void G_BufferData::Init()
 	);
 
 	albedoTexture = std::make_shared<Texture>();
-	RHI::LoadTextureFromMemory(
+	RHI::CreateTexture(
 		albedoTexture.get(),
-		L"Default Color texture",
-		BuiltIn_Default_C_ByteCode,
-		sizeof(BuiltIn_Default_C_ByteCode)
+		L"Default color texture",
+		width,
+		height,
+		DXGI_FORMAT_R8G8B8A8_UNORM,
+		D3D11_USAGE_DEFAULT,
+		0,
+		0
 	);
 
 	normalTexture = std::make_shared<Texture>();
-	RHI::LoadTextureFromMemory(
+	RHI::CreateTexture(
 		normalTexture.get(),
-		L"Default Normal texture",
-		BuiltIn_Default_N_ByteCode,
-		sizeof(BuiltIn_Default_N_ByteCode)
+		L"Default normal texture",
+		width,
+		height,
+		DXGI_FORMAT_R16G16B16A16_SNORM,
+		D3D11_USAGE_DEFAULT,
+		0,
+		0
+	);
+
+	vertexNormalsTexture = std::make_shared<Texture>();
+	RHI::CreateTexture(
+		vertexNormalsTexture.get(),
+		L"Default vertex normal texture",
+		width,
+		height,
+		DXGI_FORMAT_R16G16B16A16_SNORM,
+		D3D11_USAGE_DEFAULT,
+		0,
+		0
 	);
 
 	materialTexture = std::make_shared<Texture>();
-	RHI::LoadTextureFromMemory(
+	RHI::CreateTexture(
 		materialTexture.get(),
 		L"Default material texture",
-		BuiltIn_Default_M_ByteCode,
-		sizeof(BuiltIn_Default_M_ByteCode)
+		width,
+		height,
+		DXGI_FORMAT_R8G8B8A8_UNORM,
+		D3D11_USAGE_DEFAULT,
+		0,
+		0
 	);
 
 	effectTexture = std::make_shared<Texture>();
-	RHI::LoadTextureFromMemory(
+	RHI::CreateTexture(
 		effectTexture.get(),
 		L"Default effect texture",
-		BuiltIn_Default_FX_ByteCode,
-		sizeof(BuiltIn_Default_FX_ByteCode)
-	); 
+		width,
+		height,
+		DXGI_FORMAT_R8G8B8A8_UNORM,
+		D3D11_USAGE_DEFAULT,
+		0,
+		0
+	);
+
+	positionTexture = std::make_shared<Texture>();
+	RHI::CreateTexture(
+		positionTexture.get(),
+		L"Default position texture",
+		width,
+		height,
+		DXGI_FORMAT_R32G32B32A32_FLOAT,
+		D3D11_USAGE_DEFAULT,
+		0,
+		0
+	);
+
+	depthTexture = std::make_shared<Texture>();
+	RHI::CreateTexture(
+		depthTexture.get(),
+		L"Default depth texture",
+		width,
+		height,
+		DXGI_FORMAT_R32G32B32A32_FLOAT,
+		D3D11_USAGE_DEFAULT,
+		0,
+		0
+	);
 
 	ID3D11Texture2D* depthStencilTexture = nullptr;
 

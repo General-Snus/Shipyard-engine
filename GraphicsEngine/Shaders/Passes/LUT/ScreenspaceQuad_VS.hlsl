@@ -1,4 +1,4 @@
-#include <../DefaultVertexToPixel.hlsli>
+#include "../../Headers/DefaultVertexToPixel.hlsli"
 
 BRDF_VS_to_PS main(unsigned int aVertexIndex : SV_VertexID)
 {

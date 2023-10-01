@@ -150,13 +150,13 @@
     <None Include="Shaders\Headers\MaterialBuffer.hlsli" />
     <None Include="Shaders\Headers\IBLBRDF.hlsli" />
     <None Include="Shaders\Headers\LightBuffer.hlsli" />
-    <None Include="Shaders\Headers\LineDrawerStructs.hlsli" />
+    <None Include="Shaders\Passes\LineDrawer\LineDrawerStructs.hlsli" />
     <None Include="Shaders\Passes\GBuffer\GBufferOutput.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\ConstantBuffers\Default_VS.hlsl" />
     <FxCompile Include="Shaders\ConstantBuffers\Default_PS.hlsl" />
-    <FxCompile Include="Shaders\Passes\LUT\brdfLUT_VS.hlsl" />
+    <FxCompile Include="Shaders\Passes\LUT\ScreenspaceQuad_VS.hlsl" />
     <FxCompile Include="Shaders\Passes\LUT\brdfLUT_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\LineDrawer\LineDrawer_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\LineDrawer\LineDrawer_VS.hlsl" />
