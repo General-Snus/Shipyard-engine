@@ -2,8 +2,6 @@
  
 #include <AssetManager/AssetManager.pch.h>
 #include <GraphicsEngine/DebugDrawer/DebugDrawer.h>
-typedef CU::Vector3<float> Vector3f;
-typedef CU::Matrix4x4<float> Matrix;
 
 class Transform : public Component
 {

@@ -99,6 +99,9 @@
     <ClInclude Include="Shaders\Include\Default_FX.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Rendering\Buffers\G_Buffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsEngine.pch.cpp">
@@ -134,24 +137,30 @@
     <ClCompile Include="DebugDrawer\DebugDrawer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Rendering\Buffers\G_Buffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\ConstantBuffers\FrameBuffer.hlsli" />
-    <None Include="Shaders\ConstantBuffers\ObjectBuffer.hlsli" />
-    <None Include="Shaders\ConstantBuffers\DefaultShaderStructs.hlsli" />
-    <None Include="Shaders\ConstantBuffers\DefaultVertexToPixel.hlsli" />
-    <None Include="Shaders\ConstantBuffers\DefaultVertexOutput.hlsli" />
-    <None Include="Shaders\ConstantBuffers\MaterialBuffer.hlsli" />
-    <None Include="Shaders\ConstantBuffers\IBLBRDF.hlsli" />
-    <None Include="Shaders\ConstantBuffers\LightBuffer.hlsli" />
-    <None Include="Shaders\ConstantBuffers\LineDrawer\LineDrawerStructs.hlsli" />
+    <None Include="Shaders\Headers\FrameBuffer.hlsli" />
+    <None Include="Shaders\Headers\ObjectBuffer.hlsli" />
+    <None Include="Shaders\Headers\DefaultShaderStructs.hlsli" />
+    <None Include="Shaders\Headers\DefaultVertexToPixel.hlsli" />
+    <None Include="Shaders\Headers\DefaultVertexOutput.hlsli" />
+    <None Include="Shaders\Headers\MaterialBuffer.hlsli" />
+    <None Include="Shaders\Headers\IBLBRDF.hlsli" />
+    <None Include="Shaders\Headers\LightBuffer.hlsli" />
+    <None Include="Shaders\Headers\LineDrawerStructs.hlsli" />
+    <None Include="Shaders\Passes\GBuffer\GBufferOutput.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\ConstantBuffers\Default_VS.hlsl" />
     <FxCompile Include="Shaders\ConstantBuffers\Default_PS.hlsl" />
-    <FxCompile Include="Shaders\ConstantBuffers\LUT\brdfLUT_VS.hlsl" />
-    <FxCompile Include="Shaders\ConstantBuffers\LUT\brdfLUT_PS.hlsl" />
-    <FxCompile Include="Shaders\ConstantBuffers\LineDrawer\LineDrawer_PS.hlsl" />
-    <FxCompile Include="Shaders\ConstantBuffers\LineDrawer\LineDrawer_VS.hlsl" />
+    <FxCompile Include="Shaders\Passes\LUT\brdfLUT_VS.hlsl" />
+    <FxCompile Include="Shaders\Passes\LUT\brdfLUT_PS.hlsl" />
+    <FxCompile Include="Shaders\Passes\LineDrawer\LineDrawer_PS.hlsl" />
+    <FxCompile Include="Shaders\Passes\LineDrawer\LineDrawer_VS.hlsl" />
+    <FxCompile Include="Shaders\Passes\EnvironmentLight_PS.hlsl" />
+    <FxCompile Include="Shaders\Passes\GBuffer\GBufferPS.hlsl" />
   </ItemGroup>
 </Project>

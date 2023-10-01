@@ -38,7 +38,7 @@
 #include <ImGUI/imgui_impl_dx11.h>
 
 #include <ThirdParty/nlohmann/json.hpp> 
-#include <ThirdParty/CU/Math.hpp> 
+#include <ThirdParty/CU/Math.hpp>  
 #include "Timer.h"
 
 #define _DEBUGDRAW
@@ -188,7 +188,7 @@ void ModelViewer::LoadScene()
 		std::weak_ptr<DirectionalLight> pLight = worldRoot.GetComponent<cLight>().GetData<DirectionalLight>();
 		pLight.lock()->Color = CU::Vector3<float>(1,1,1);
 		pLight.lock()->Power = 0.0f;
-		pLight.lock()->Direction = { 1,-1,0};
+		pLight.lock()->CalculateDirectionLight({1,-1,0});
 	}
 
 
@@ -350,8 +350,7 @@ void ModelViewer::UpdateScene()
 	//	i.GetComponent<Transform>().Rotate({0,delta * 100,0},false);
 	//} 
 	myMesh.GetComponent<Transform>().Rotate({0,delta * 100,0},false);
-	//LIGHTS	
-	GraphicsEngine::Get().AddCommand<GfxCmd_SetLightBuffer>(); 
+
 	for(auto& data : mySaveData)
 	{
 		if(data.identifier == "CameraPos")
@@ -360,8 +359,7 @@ void ModelViewer::UpdateScene()
 			//ImGui::InputFloat3("CameraPos",*a);
 			//SaveToMemory(eSaveToJsonArgument::InputFloat3,"CameraPos",*a);
 		}
-	}
-
+	} 
 }
 
 
@@ -494,6 +492,20 @@ bool ModelViewer::SaveToMemory(SaveData<float>& arg)
 	}
 	mySaveData.push_back(arg);
 	return true;
+}
+
+void ModelViewer::ExpandWorldBounds(CU::Sphere<float> sphere)
+{
+	if(myWorldBounds.ExpandSphere(sphere))
+	{
+		std::cout << "world bounds was expanded" << "\n";
+	} //REFACTOR if updated real time the world expansion will cause the light/shadow to lagg behind, use this to update camera position, 
+	//REFACTOR not called on object moving outside worldbound causing same error as above
+}
+
+const CU::Sphere<float>& ModelViewer::GetWorldBounds() const 
+{
+	return myWorldBounds;
 }
 
 

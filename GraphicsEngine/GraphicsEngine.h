@@ -9,6 +9,7 @@
 #include "Rendering/Buffers/FrameBuffer.h"
 #include "Rendering/Buffers/ObjectBuffer.h"
 #include "Rendering/Buffers/LineBuffer.h"
+#include "Rendering/Buffers/G_Buffer.h"
 #include "Rendering/Buffers/ConstantBuffer.h"  
 
 #include <memory>
@@ -25,7 +26,9 @@ private:
 	ObjectBuffer myObjectBuffer;
 	LineBuffer myLineBuffer;
 	LightBuffer myLightBuffer;
-	std::vector<std::unique_ptr<GraphicCommand>> myCommandList;
+	G_Buffer myG_Buffer;
+
+	std::vector<std::unique_ptr<GraphicCommand>> deferredCommandList;
 
 	SIZE myWindowSize{0,0};	
 	HWND myWindowHandle{};
@@ -138,5 +141,5 @@ public:
 template<typename T,typename...Types>
 FORCEINLINE void GraphicsEngine::AddCommand(Types... args)
 {
-	myCommandList.push_back(std::make_unique<T>(args...));
+	deferredCommandList.push_back(std::make_unique<T>(args...));
 }

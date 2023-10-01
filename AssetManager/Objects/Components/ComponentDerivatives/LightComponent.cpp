@@ -13,6 +13,7 @@ cLight::cLight(const unsigned int anOwnerId,const eLightType type) : Component(a
 	{
 	case eLightType::Directional:
 		myDirectionLightData = std::make_shared<DirectionalLight>();
+		myDirectionLightData->CalculateDirectionLight({0.0f,-1.0f,0.0f});
 		break;
 	case eLightType::Point:
 		myPointLightData = std::make_shared<PointLight>();
@@ -51,8 +52,8 @@ void cLight::Update()
 		} 
 		switch(myLightType)
 		{
-		case eLightType::Directional:
-			myDirectionLightData->Direction = transform->GetForward();
+		case eLightType::Directional: 
+			myDirectionLightData->CalculateDirectionLight(transform->GetForward());  
 			break;
 		case eLightType::Point:
 			myPointLightData->Position = transform->GetPosition();

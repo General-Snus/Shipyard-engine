@@ -1,6 +1,6 @@
 #include "AssetManager.pch.h"
-#include "MeshAsset.h"
-
+#include "MeshAsset.h" 
+#include <Modelviewer/Core/Modelviewer.h>
 std::vector<std::string> GetTextureNames(TGA::FBX::Material& material)
 {
 	std::vector<std::string> textureNames;
@@ -43,6 +43,33 @@ void Mesh::Init()
 	{
 		if(TGA::FBX::Importer::LoadMeshW(AssetPath,inMesh))
 		{
+
+			Vector3f greatestExtent = { 
+				std::abs(inMesh.BoxSphereBounds.Center[0] - inMesh.BoxSphereBounds.BoxExtents[0]), 
+				std::abs(inMesh.BoxSphereBounds.Center[1] - inMesh.BoxSphereBounds.BoxExtents[1]),
+				std::abs(inMesh.BoxSphereBounds.Center[2] - inMesh.BoxSphereBounds.BoxExtents[2])
+			};
+
+			float radius = 0;
+			for(int i = 0; i < 3; ++i)
+			{
+				if(radius < greatestExtent[i])
+				{
+					radius = greatestExtent[i];
+				}
+			} 
+
+			boxSphereBounds = CU::Sphere<float>(
+				{
+					inMesh.BoxSphereBounds.Center[0],
+					inMesh.BoxSphereBounds.Center[1],
+					inMesh.BoxSphereBounds.Center[2]
+				},
+				radius
+			); 
+
+			ModelViewer::Get().ExpandWorldBounds(boxSphereBounds); 
+
 			std::vector<Vertex> mdlVertices;
 			std::vector<unsigned int> mdlIndicies;
 

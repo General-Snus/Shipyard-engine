@@ -288,12 +288,15 @@ void GraphicsEngine::BeginFrame()
 void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 {
 	aDeltaTime; aTotalTime;
+
 	RHI::SetRenderTarget(myBackBuffer.get(),myDepthBuffer.get());
 
-	for(const auto& command : myCommandList)
+	//LIGHTS	
+	GraphicsEngine::Get().AddCommand<GfxCmd_SetLightBuffer>();
+
+	for(const auto& command : deferredCommandList)
 	{
-		command->Execute();
-		//command->~GraphicCommand();
+		command->Execute(); 
 	}
 }
 
@@ -301,6 +304,6 @@ void GraphicsEngine::EndFrame()
 {
 	// We finish our frame here and present it on screen.
 	RHI::Present(0);
-	myCommandList.clear();
+	deferredCommandList.clear();
 }
 

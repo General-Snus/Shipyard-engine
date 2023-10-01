@@ -4,16 +4,17 @@
 #include "Vectors.hpp" 
 
 namespace CommonUtilities
-{ 
+{
 	template <class T>
 	class Matrix4x4
 	{
-	public: 
+	public:
 		// Creates the identity matrix.
 		Matrix4x4<T>();
 		// Copy Constructor.
-		Matrix4x4<T>(const  Matrix4x4<T>& aMatrix); 
-			// () operator for accessing element (row, column) for read/write or read,respectively.
+		Matrix4x4<T>(const  Matrix4x4<T>& aMatrix);
+		Matrix4x4<T>(const  Vector4<Vector4<T>> aVector);
+		// () operator for accessing element (row, column) for read/write or read,respectively.
 		T& operator()(const int aRow,const int aColumn);
 		const T& operator()(const int aRow,const int aColumn) const;
 
@@ -28,10 +29,12 @@ namespace CommonUtilities
 		static Matrix4x4<T> Transpose(const Matrix4x4<T>& aMatrixToTranspose);
 		static Matrix4x4<T> GetFastInverse(const Matrix4x4<T>& aTransform);
 
-		void SetFromRaw(const T arr[16]); 
+		static Matrix4x4<T> LookAt(Vector3<T> position,Vector3<T> target,Vector3<T> upVector);
+		static Matrix4x4<T> CreateOrthographicProjection(float aLeftPlane,float aRightPlane,float aBottomPlane,float aTopPlane,float aNearPlane,float aFarPlane);
+		void SetFromRaw(const T arr[16]);
 	private:
 		T arr[4][4];
-	};  
+	};
 	template<class T>
 	void Matrix4x4<T>::SetFromRaw(const T input[16])
 	{
@@ -41,7 +44,18 @@ namespace CommonUtilities
 		}
 	}
 
-	
+	template<class T>
+	inline Matrix4x4<T>::Matrix4x4(const Vector4<Vector4<T>> aVector)
+	{
+		for(int i = 0; i < 3; i++)
+		{
+			for(int j = 0; j < 3; j++)
+			{
+				arr[i][j] = aVector[i][j];
+			}
+		}
+	}
+
 	template<class T>
 	Matrix4x4<T> Matrix4x4<T>::CreateRotationMatrix(const Vector3<T>& aAnglesInRadians)
 	{
@@ -275,16 +289,66 @@ namespace CommonUtilities
 	inline Matrix4x4<T> Matrix4x4<T>::GetFastInverse(const Matrix4x4<T>& aTransform)
 	{
 		Matrix4x4<T> Rotation = aTransform;
-		Matrix4x4<T> Transform;		 
+		Matrix4x4<T> Transform;
 		for(short i = 1; i <= 3; i++)
-		{ 
+		{
 			Rotation(4,i) = 0;
 			Transform(4,i) = -aTransform(4,i);
 		}
 		Rotation = Rotation.Transpose(Rotation);
 
-		return Transform*Rotation;
+		return Transform * Rotation;
+	}
+
+	template<class T>
+	inline Matrix4x4<T> Matrix4x4<T>::LookAt(Vector3<T> position,Vector3<T> target,Vector3<T> upVector)
+	{
+		Vector3<T> zaxis = (target - position).GetNormalized();
+		Vector3<T> xaxis = (zaxis.Cross(upVector)).GetNormalized();
+		Vector3<T> yaxis = xaxis.Cross(zaxis);
+
+		zaxis = -zaxis;
+
+		Matrix4x4<T> viewMatrix = {Vector4<Vector4<T>>(
+		  Vector4<T>(xaxis.x, xaxis.y, xaxis.z, -(xaxis).Dot(position)),
+		  Vector4<T>(yaxis.x, yaxis.y, yaxis.z, -(yaxis).Dot(position)),
+		  Vector4<T>(zaxis.x, zaxis.y, zaxis.z, -(zaxis).Dot(position)),
+		  Vector4<T>(0, 0, 0, 1)
+		)};
+
+		return viewMatrix;
+	}
+
+	template<typename T>
+	inline Matrix4x4<T> Matrix4x4<T>::CreateOrthographicProjection(float aLeftPlane,float aRightPlane,float aBottomPlane,float aTopPlane,
+		float aNearPlane,float aFarPlane)
+	{
+		const float reciprocalWidth = 1.0f / (aRightPlane - aLeftPlane);
+		const float reciprocalHeight = 1.0f / (aTopPlane - aBottomPlane);
+		const float fRange = 1.0f / (aFarPlane - aNearPlane);
+
+		Matrix4x4<T> result;
+		result(0 + 1,0 + 1) = reciprocalWidth + reciprocalWidth;
+		result(0 + 1,1 + 1) = 0.0f;
+		result(0 + 1,2 + 1) = 0.0f;
+		result(0 + 1,3 + 1) = 0.0f;
+
+		result(1 + 1,0 + 1) = 0.0f;
+		result(1 + 1,1 + 1) = reciprocalHeight + reciprocalHeight;
+		result(1 + 1,2 + 1) = 0.0f;
+		result(1 + 1,3 + 1) = 0.0f;
+
+		result(2 + 1,0 + 1) = 0.0f;
+		result(2 + 1,1 + 1) = 0.0f;
+		result(2 + 1,2 + 1) = fRange;
+		result(2 + 1,3 + 1) = 0.0f;
+
+		result(3 + 1,0 + 1) = -(aLeftPlane + aRightPlane) * reciprocalWidth;
+		result(3 + 1,1 + 1) = -(aTopPlane + aBottomPlane) * reciprocalHeight;
+		result(3 + 1,2 + 1) = -fRange * aNearPlane;
+		result(3 + 1,3 + 1) = 1.0f;
 
 
+		return result;
 	}
 }

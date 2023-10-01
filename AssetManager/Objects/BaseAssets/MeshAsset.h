@@ -14,5 +14,6 @@ public:
 
 	CU::Vector3<float> MaxBox;
 	CU::Vector3<float> MinBox;
+	CU::Sphere<float> boxSphereBounds;
 };
 

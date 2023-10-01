@@ -4,17 +4,6 @@
 #include <MaterialBuffer.hlsli>
 #include <LightBuffer.hlsli>
 #include <IBLBRDF.hlsli>
-#include "../Registers.h" 
-
-
-SamplerState defaultSampler : register(HLSL_REG_DefaultSampler);
-SamplerState BRDFSampler : register(HLSL_REG_BRDFSampler);
-Texture2D colorMap : register(HLSL_REG_colorMap);
-Texture2D normalMap : register(HLSL_REG_normalMap);
-Texture2D materialMap : register(HLSL_REG_materialMap);
-Texture2D effectMap : register(HLSL_REG_effectMap);
-TextureCube enviromentCube : register(HLSL_REG_enviromentCube);
-Texture2D BRDF_LUT_Texture : register(HLSL_REG_BRDF_LUT_Texture);
 
 float Sine(float aValue)
 {

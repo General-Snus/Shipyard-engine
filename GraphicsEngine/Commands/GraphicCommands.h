@@ -5,6 +5,7 @@
 #include <GraphicsEngine/Rendering/Buffers/ObjectBuffer.h> 
 #include <GraphicsEngine/Rendering/Buffers/LightBuffer.h> 
 #include <GraphicsEngine/Rendering/Buffers/LineBuffer.h> 
+#include <GraphicsEngine/Rendering/Buffers/G_buffer.h> 
 
 #include <AssetManager/Objects/Components/ComponentDerivatives/MeshRenderer.h>
 
@@ -17,6 +18,7 @@ protected:
 	ObjectBuffer& GetObjectBuffer();
 	LineBuffer& GetLineBuffer();
 	LightBuffer& GetLightBuffer();
+	G_Buffer& GetGBuffer();
 public:
 	virtual ~GraphicCommand() = default;
 	virtual void Execute() = 0;

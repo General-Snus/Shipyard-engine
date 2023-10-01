@@ -4,18 +4,18 @@
 #include "Animator.h"
 
 #include <GraphicsEngine/Commands/GraphicCommands.h>
-
 cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId) : Component(anOwnerId)
 {
 	myRenderData.myMaterials.resize(1);
 	AssetManager::GetInstance().LoadAsset<Mesh>("default.fbx",myRenderData.myMesh); 
+	
 	myRenderData.myMaterials[0] = GraphicsEngine::Get().GetDefaultMaterial();
 }
 
 inline cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath) : Component(anOwnerId)
 {
 	myRenderData.myMaterials.resize(1);
-	AssetManager::GetInstance().LoadAsset<Mesh>(aFilePath,myRenderData.myMesh);
+	AssetManager::GetInstance().LoadAsset<Mesh>(aFilePath,myRenderData.myMesh); 
 	myRenderData.myMaterials[0] = GraphicsEngine::Get().GetDefaultMaterial();
 }
 

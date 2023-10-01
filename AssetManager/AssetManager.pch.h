@@ -6,7 +6,8 @@
 
 #ifndef ASSETMANAGER_PCH_H
 #define ASSETMANAGER_PCH_H
-#define CU   CommonUtilities 
+
+#define CU   CommonUtilities  
 // add headers that you want to pre-compile here
 #include <iostream> 
 #include <filesystem> 
@@ -34,5 +35,8 @@
 #include <GraphicsEngine/Commands/GraphicCommands.h>
 #include <GraphicsEngine/DebugDrawer/DebugDrawer.h>
 #include "AssetManager.h"
+
+typedef CU::Vector3<float> Vector3f;
+typedef CU::Matrix4x4<float> Matrix;
 
 #endif //ASSETMANAGER_PCH_H 

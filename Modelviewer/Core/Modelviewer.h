@@ -6,8 +6,8 @@
 #include "Logging/Logging.h" 
 #include <TGAFbx.h>
 #include <TgaFbxStructs.h>  
-#include <Modelviewer/Windows/SplashWindow.h>
-#include <ThirdParty/CU/CommonUtills/AABB3D.hpp>
+#include <Modelviewer/Windows/SplashWindow.h> 
+#include <ThirdParty/CU/CommonUtills/Sphere.hpp>
 
 template<typename T>
 struct SaveData
@@ -38,8 +38,7 @@ class ModelViewer
 	ModelViewer() = default;
 
 	void ShowSplashScreen();
-	void HideSplashScreen() const;´
-
+	void HideSplashScreen() const; 
 
 	void LoadScene();
 
@@ -58,7 +57,8 @@ class ModelViewer
 	bool SaveToMemory(SaveData<float>& arg);
 
 public:
-	void ExpandWorldBounds(AABB3D);
+	void ExpandWorldBounds(CU::Sphere<float> sphere);
+	const CU::Sphere<float>& GetWorldBounds() const; 
 	// Singleton Getter.
 	static ModelViewer& Get()
 	{
@@ -78,6 +78,7 @@ public:
 	bool Initialize(HINSTANCE aHInstance,SIZE aWindowSize,WNDPROC aWindowProcess,LPCWSTR aWindowTitle);
 	int Run();
 private: 
+	CU::Sphere<float> myWorldBounds;
 	GameObject myMesh;
 	Matrix myModelMatrix;
 	std::vector<SaveData<float>> mySaveData;

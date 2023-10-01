@@ -16,6 +16,11 @@ ObjectBuffer& GraphicCommand::GetObjectBuffer()
 	return GraphicsEngine::Get().myObjectBuffer;
 }
 
+G_Buffer& GraphicCommand::GetGBuffer()
+{
+	return GraphicsEngine::Get().myG_Buffer;
+}
+
 LineBuffer& GraphicCommand::GetLineBuffer()
 {
 	return GraphicsEngine::Get().myLineBuffer;
@@ -46,9 +51,9 @@ void GfxCmd_RenderMesh::Execute()
 	objectBuffer.Data.MaxExtents = MaxExtents;
 	objectBuffer.Data.MinExtents = MinExtents;
 	objectBuffer.Data.hasBone = false;
-
+	
 	RHI::UpdateConstantBufferData(objectBuffer);
-
+	G_Buffer gBuffer = GetGBuffer(); 
 
 	for(auto& aElement : myElementsData)
 	{
@@ -87,7 +92,8 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 				DirectionalLight* light = i.GetData<DirectionalLight>().get();
 				buff.Data.myDirectionalLight.Color = light->Color;
 				buff.Data.myDirectionalLight.Power = light->Power;
-				buff.Data.myDirectionalLight.Direction = light->Direction;
+				buff.Data.myDirectionalLight.lightView = light->lightView;
+				buff.Data.myDirectionalLight.projection = light->projection;
 				break;
 			}
 
@@ -133,7 +139,9 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 			DirectionalLight* light = i.GetData<DirectionalLight>().get();
 			buff.Data.myDirectionalLight.Color = light->Color;
 			buff.Data.myDirectionalLight.Power = light->Power;
-			buff.Data.myDirectionalLight.Direction = light->Direction;
+			buff.Data.myDirectionalLight.lightView = light->lightView;
+			buff.Data.myDirectionalLight.projection = light->projection;
+			//buff.Data.myDirectionalLight.Direction = light->Direction;
 			break;
 		}
 
