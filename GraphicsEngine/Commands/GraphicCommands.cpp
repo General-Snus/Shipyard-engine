@@ -4,8 +4,7 @@
 #include <AssetManager/Objects/Components/ComponentDerivatives/LightComponent.h>
 #include "Timer.h"
 #include <assert.h>
-#include <GraphicsEngine/Shaders/Registers.h>
-
+#include <GraphicsEngine/Shaders/Registers.h> 
 FrameBuffer& GraphicCommand::GetFrameBuffer()
 {
 	return GraphicsEngine::Get().myFrameBuffer;
@@ -53,7 +52,9 @@ void GfxCmd_RenderMesh::Execute()
 	objectBuffer.Data.hasBone = false;
 	
 	RHI::UpdateConstantBufferData(objectBuffer);
+
 	G_Buffer gBuffer = GetGBuffer(); 
+	gBuffer.Data.UseGBufferShader(); 
 
 	for(auto& aElement : myElementsData)
 	{
@@ -71,16 +72,20 @@ void GfxCmd_RenderMesh::Execute()
 	}
 }
 
-GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
+GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer(eLightType runWithThisType)
 {
 	int pointLightCount = 0;
 	int spotLightCount = 0;
 	LightBuffer& buff = GetLightBuffer();
 
 
-
 	for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
 	{
+		if(i.GetType() != runWithThisType)
+		{
+			continue;
+		}
+
 		Transform* transform = i.TryGetComponent<Transform>();
 		if(transform != nullptr)
 		{
@@ -141,7 +146,7 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 			buff.Data.myDirectionalLight.Power = light->Power;
 			buff.Data.myDirectionalLight.lightView = light->lightView;
 			buff.Data.myDirectionalLight.projection = light->projection;
-			//buff.Data.myDirectionalLight.Direction = light->Direction;
+			buff.Data.myDirectionalLight.Direction = light->Direction;
 			break;
 		}
 
@@ -180,6 +185,38 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 void GfxCmd_SetLightBuffer::Execute()
 {
 	RHI::UpdateConstantBufferData(GetLightBuffer());
+
+	G_Buffer& gBuffer = GetGBuffer();
+
+	switch(runWithThisType)
+	{
+	case eLightType::Directional:
+		gBuffer.Data.UseEnviromentShader();
+		break;
+	case eLightType::Point:
+		gBuffer.Data.UsePointlightShader();
+		break;
+	case eLightType::Spot:
+		gBuffer.Data.UseSpotlightShader();
+		break;
+	case eLightType::uninitialized:
+		gBuffer.Data.UseEnviromentShader();
+		break;
+	default:
+		gBuffer.Data.UseEnviromentShader();
+		break;
+	}
+	
+
+	RHI::ConfigureInputAssembler(
+		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
+		nullptr,
+		nullptr,
+		0,
+		nullptr
+	);
+
+	RHI::Draw(4);
 }
 
 GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,const Transform& ref,int aRenderMode)
@@ -228,7 +265,9 @@ void GfxCmd_RenderSkeletalMesh::Execute()
 		objectBuffer.Data.myBoneTransforms[i] = myBoneTransforms[i];
 	}
 
-	RHI::UpdateConstantBufferData(objectBuffer);
+	RHI::UpdateConstantBufferData(objectBuffer); 
+	G_Buffer gBuffer = GetGBuffer();
+	gBuffer.Data.UseGBufferShader();
 
 	for(auto& aElement : myElementsData)
 	{

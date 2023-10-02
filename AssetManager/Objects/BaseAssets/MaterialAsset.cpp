@@ -2,6 +2,7 @@
 #include "MaterialAsset.h"
 #include <ThirdParty/nlohmann/json.hpp>
 #include <fstream>
+#include <GraphicsEngine/Shaders/Registers.h>
 
 Material::Material(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)
 {
@@ -110,18 +111,18 @@ void Material::Update()
 		//If default material is not loaded with forced or if it erronous we will end with a overflow here, guess it guarantees defaults works atleast 
 	}
 
-	ComPtr<ID3D11VertexShader> convertedVS;
-	vertexShader.lock()->GetShader().As(&convertedVS);
-	RHI::SetVertexShader(convertedVS); 
+	//ComPtr<ID3D11VertexShader> convertedVS;
+	//vertexShader.lock()->GetShader().As(&convertedVS);
+	//RHI::SetVertexShader(convertedVS); 
 
-	ComPtr<ID3D11PixelShader> convertedPS;
-	pixelShader.lock()->GetShader().As(&convertedPS);
-	RHI::SetPixelShader(convertedPS);
+	//ComPtr<ID3D11PixelShader> convertedPS;
+	//pixelShader.lock()->GetShader().As(&convertedPS);
+	//RHI::SetPixelShader(convertedPS);
 
 	RHI::UpdateConstantBufferData(materialData);
-	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,2,materialData);
+	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_DefaultMaterialBuffer,materialData);
 
-	SetAsResources();
+	 SetAsResources();
 }
 
 void Material::SetShader(std::shared_ptr<Shader> aVertexShader,std::shared_ptr<Shader> aPixelShader)

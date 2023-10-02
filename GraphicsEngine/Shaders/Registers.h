@@ -33,6 +33,15 @@
 #define HLSL_REG_effectMap t3 
 #define REG_effectMap 3  
 
+#define HLSL_REG_VertexNormal t4 
+#define REG_VertexNormal 4  
+
+#define HLSL_REG_WorldPosition t5 
+#define REG_WorldPosition 5  
+
+#define HLSL_REG_DepthMap t6 
+#define REG_DepthMap 6   
+ 
 #define HLSL_REG_enviromentCube t100 
 #define REG_enviromentCube 100 
 

@@ -25,6 +25,7 @@
 #include "Objects/Model.h"
 #include "Commands/GraphicCommands.h"
 #include <AssetManager/Objects/BaseAssets/TextureAsset.h>
+#include <AssetManager/Objects/Components/ComponentDerivatives/LightComponent.h>
 
 #include "Shaders/Registers.h"
 
@@ -102,6 +103,9 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 
 		myLineBuffer.Initialize();
 		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_LineBuffer,myLineBuffer);
+		 
+		myG_Buffer.Data.Init();
+		myG_Buffer.Initialize();
 
 #ifdef _DEBUG
 	}
@@ -280,7 +284,8 @@ void GraphicsEngine::SetLoggingWindow(HANDLE aHandle)
 
 void GraphicsEngine::BeginFrame()
 {
-	// Here we should initialize our frame and clean up from the last one.
+	// Here we should initialize our frame and clean up from the last one.  
+	myG_Buffer.Data.ClearTargets();
 	RHI::ClearRenderTarget(myBackBuffer.get(),myBackgroundColor);
 	RHI::ClearDepthStencil(myDepthBuffer.get());
 }
@@ -290,14 +295,19 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	aDeltaTime; aTotalTime;
 
 	RHI::SetRenderTarget(myBackBuffer.get(),myDepthBuffer.get());
-
-	//LIGHTS	
-	GraphicsEngine::Get().AddCommand<GfxCmd_SetLightBuffer>();
-
+	myG_Buffer.Data.SetWriteTargetToBuffer(); //Let all write to textures
+	 
 	for(const auto& command : deferredCommandList)
 	{
 		command->Execute(); 
 	}
+	RHI::SetRenderTarget(myBackBuffer.get(),nullptr);
+
+	//LIGHTS	
+	GfxCmd_SetLightBuffer(eLightType::Directional).Execute();
+	GfxCmd_SetLightBuffer(eLightType::Point).Execute();
+	GfxCmd_SetLightBuffer(eLightType::Spot).Execute();
+//	GraphicsEngine::Get().AddCommand<GfxCmd_SetLightBuffer>();//Do lighting based on gbuffer
 }
 
 void GraphicsEngine::EndFrame()

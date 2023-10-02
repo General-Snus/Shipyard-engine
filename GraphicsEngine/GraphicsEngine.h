@@ -107,6 +107,9 @@ public:
 	FORCEINLINE std::shared_ptr<Shader> GetDefaultVSShader() const { return defaultVS; }
 	FORCEINLINE std::shared_ptr<Shader> GetDefaultPSShader() const { return defaultPS; }
 
+	Texture* DepthBuffer()const { return myDepthBuffer.get(); };
+	Texture* BackBuffer()const { return myBackBuffer.get(); };
+
 	FORCEINLINE std::shared_ptr<Shader> GetDebugLineVS() const { return debugLineVS; }
 	FORCEINLINE std::shared_ptr<Shader> GetDebugLinePS() const { return debugLinePS; }
 

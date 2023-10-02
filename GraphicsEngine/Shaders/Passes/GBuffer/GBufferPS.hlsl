@@ -1,16 +1,45 @@
-#include "GBufferOutput.hlsli"
+ 
 #include "../../Headers/DefaultVertexToPixel.hlsli"
+#include "../../Headers/DefaultVertexOutput.hlsli"
 #include "../../Headers/MaterialBuffer.hlsli"
 #include "../../Headers/FrameBuffer.hlsli"
+#include "../../Headers/LightBuffer.hlsli"
+#include "../../Headers/IBLBRDF.hlsli"
+
+#include "../../Registers.h" 
+
+
+SamplerState defaultSampler : register(HLSL_REG_DefaultSampler);
+SamplerState BRDFSampler : register(HLSL_REG_BRDFSampler);
+
+Texture2D colorMap : register(HLSL_REG_colorMap);
+Texture2D normalMap : register(HLSL_REG_normalMap);
+Texture2D materialMap : register(HLSL_REG_materialMap);
+Texture2D effectMap : register(HLSL_REG_effectMap);
+Texture2D vertexNormalMap : register(HLSL_REG_VertexNormal);
+Texture2D worldPositionMap : register(HLSL_REG_WorldPosition);
+Texture2D DepthMap : register(HLSL_REG_DepthMap);
+
+TextureCube enviromentCube : register(HLSL_REG_enviromentCube);
+Texture2D BRDF_LUT_Texture : register(HLSL_REG_BRDF_LUT_Texture);
+
+struct GBufferOutput
+{
+    float4 Albedo : SV_TARGET0;
+    float4 Normal : SV_TARGET1;
+    float4 Material : SV_TARGET2;
+    float4 Effect : SV_TARGET3; 
+    float4 VertexNormal : SV_TARGET4; 
+    float4 WorldPosition : SV_TARGET5; 
+    float4 Depth : SV_TARGET6;
+};
 
 
 
-
-
-GBufferOutput main(DefaultVertexToPixel input) : SV_TARGET
+GBufferOutput main(DefaultVertexToPixel input)
 {
     GBufferOutput result;
-
+    
     const float3x3 TBN = float3x3(
     normalize(input.Tangent),
     normalize(input.BiNormal),
@@ -40,13 +69,14 @@ GBufferOutput main(DefaultVertexToPixel input) : SV_TARGET
      
     result.Albedo = textureColor;
     
-    result.Normal = pixelNormal;
+    result.Normal.xyz = pixelNormal;
+    result.Normal.w = 1;
     
     result.Material = materialComponent; 
     
     result.Effect = effect;
     
-    result.VertexNormal = input.Normal;
+    result.VertexNormal.xyz = input.Normal;
     result.VertexNormal.w = 1;
     
     result.WorldPosition = input.WorldPosition;

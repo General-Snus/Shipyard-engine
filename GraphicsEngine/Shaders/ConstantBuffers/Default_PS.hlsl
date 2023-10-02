@@ -1,9 +1,9 @@
-//#include <../Headers/DefaultVertexToPixel.hlsli>
-//#include <../Headers/DefaultVertexOutput.hlsli>
-//#include <../Headers/FrameBuffer.hlsli>
-//#include <../Headers/MaterialBuffer.hlsli>
-//#include <../Headers/LightBuffer.hlsli>
-//#include <../Headers/IBLBRDF.hlsli>
+#include <../Headers/DefaultVertexToPixel.hlsli>
+#include <../Headers/DefaultVertexOutput.hlsli>
+#include <../Headers/FrameBuffer.hlsli>
+#include <../Headers/MaterialBuffer.hlsli>
+#include <../Headers/LightBuffer.hlsli>
+#include <../Headers/IBLBRDF.hlsli>
 
 //float Sine(float aValue)
 //{
@@ -366,3 +366,7 @@
     
 //    return result;
 //}
+float4 main(DefaultVertexToPixel input) : SV_Target
+{
+    return float4(0,0,0,0);
+}

@@ -2,7 +2,7 @@
 #include <ThirdParty/CU/CommonUtills/Matrix4x4.hpp> 
 #include <ThirdParty/CU/CommonUtills/Vectors.hpp>
 #include "Rendering/Buffers/ConstantBuffer.h" 
-#include <AssetManager/Objects/BaseAssets/LightDataBase.h>
+#include <AssetManager/Objects/BaseAssets/LightDataBase.h> 
 #include "../../Shaders/Registers.h"
 
 struct LightBufferData 

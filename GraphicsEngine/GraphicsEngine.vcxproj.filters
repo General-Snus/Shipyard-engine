@@ -102,6 +102,27 @@
     <ClInclude Include="Rendering\Buffers\G_Buffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Shaders\Include\EnvironmentLight_PS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Include\GBufferPS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Include\LineDrawer_PS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Include\LineDrawer_VS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Include\ScreenspaceQuad_VS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Include\PointLight_PS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Include\SpotLight_PS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsEngine.pch.cpp">
@@ -151,16 +172,16 @@
     <None Include="Shaders\Headers\IBLBRDF.hlsli" />
     <None Include="Shaders\Headers\LightBuffer.hlsli" />
     <None Include="Shaders\Passes\LineDrawer\LineDrawerStructs.hlsli" />
-    <None Include="Shaders\Passes\GBuffer\GBufferOutput.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\ConstantBuffers\Default_VS.hlsl" />
-    <FxCompile Include="Shaders\ConstantBuffers\Default_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\LUT\ScreenspaceQuad_VS.hlsl" />
     <FxCompile Include="Shaders\Passes\LUT\brdfLUT_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\LineDrawer\LineDrawer_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\LineDrawer\LineDrawer_VS.hlsl" />
     <FxCompile Include="Shaders\Passes\EnvironmentLight_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\GBuffer\GBufferPS.hlsl" />
+    <FxCompile Include="Shaders\Passes\PointLight_PS.hlsl" />
+    <FxCompile Include="Shaders\Passes\SpotLight_PS.hlsl" />
   </ItemGroup>
 </Project>

@@ -10,24 +10,26 @@ struct G_BufferData
 	void Init();
 
 	Vector4f position;
+
+
 	std::shared_ptr<Texture> albedoTexture;
 	std::shared_ptr<Texture> normalTexture;
 	std::shared_ptr<Texture> materialTexture; 
 	std::shared_ptr<Texture> effectTexture;
-
 	std::shared_ptr<Texture> vertexNormalsTexture;
-
 	std::shared_ptr<Texture> positionTexture;
-
 	std::shared_ptr<Texture> depthTexture;
-
 	std::shared_ptr<Texture> defaultCubeMap;
+
+	std::vector<Texture*> vectorOfTextures;
 
 	//Custom shader 
 	ComPtr<ID3D11VertexShader> myVertexShader;
-	ComPtr<ID3D11PixelShader> myPixelShader;
-	std::shared_ptr<Shader> defaultVS;
-	std::shared_ptr<Shader> defaultPS;
+	ComPtr<ID3D11VertexShader> myScreenSpaceShader;
+	ComPtr<ID3D11PixelShader> myPixelShader; 
+	ComPtr<ID3D11PixelShader> myEnviromentPixelShader; 
+	ComPtr<ID3D11PixelShader> myPointPixelShader; 
+	ComPtr<ID3D11PixelShader> mySpotShader; 
 
 	int mask = 0;
 	/* Can i send Gbuffer as a light?
@@ -38,8 +40,13 @@ struct G_BufferData
 	
 	
 	*/
+	void SetWriteTargetToBuffer();
+	void UseGBufferShader(); 
+	void UseEnviromentShader(); 
+	void UsePointlightShader(); 
+	void UseSpotlightShader();
+	void ClearTargets();
 
-	void SetMaterialBuffer(std::vector<std::shared_ptr<TextureHolder>> textures);
 };
 
 typedef ConstantBuffer<G_BufferData> G_Buffer;

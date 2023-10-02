@@ -4,6 +4,7 @@
 #include <GraphicsEngine/Rendering/Buffers/FrameBuffer.h>
 #include <GraphicsEngine/Rendering/Buffers/ObjectBuffer.h> 
 #include <GraphicsEngine/Rendering/Buffers/LightBuffer.h> 
+#include <AssetManager/Objects/Components/ComponentDerivatives/LightComponent.h> 
 #include <GraphicsEngine/Rendering/Buffers/LineBuffer.h> 
 #include <GraphicsEngine/Rendering/Buffers/G_buffer.h> 
 
@@ -39,8 +40,9 @@ public:
 
 class GfxCmd_SetLightBuffer : public GraphicCommand
 { 
+	eLightType runWithThisType;
 public:
-	GfxCmd_SetLightBuffer();
+	GfxCmd_SetLightBuffer(eLightType runWithThisType);
 	void Execute() override;
 };
 
