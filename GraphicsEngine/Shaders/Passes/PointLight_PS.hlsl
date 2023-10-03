@@ -104,28 +104,24 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     const float3 specularColor = lerp((float3) 0.04f, albedo.rgb, metallic);
     
     float3 totalPointLightContribution = 0;
-    
-    [unroll]
-    for (uint p = 0; p < PointLightCount; p++)
-    {
+     
         [flatten]
-        if (myPointLight[p].Power > 0)
-        {
-            totalPointLightContribution += CalculatePointLight(
+    if (myPointLight.Power > 0)
+    {
+        totalPointLightContribution += CalculatePointLight(
             diffuseColor,
             specularColor,
             worldPosition.xyz,
             Normal.xyz,
             cameraDirection,
-            myPointLight[p],
+            myPointLight,
             roughness,
             DefaultMaterial.Shine            
             );
-        }
     }
    
     const float3 radiance = totalPointLightContribution;
-    result.Color.rgb = (radiance + Effect.r) * albedo.rgb;
+    result.Color.rgb = (radiance ) * albedo.rgb;
     
     //result.Color.rgb = saturate(LinearToGamma(result.Color.rgb));
     result.Color.a = 1.0f;

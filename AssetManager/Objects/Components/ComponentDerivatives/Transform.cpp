@@ -23,7 +23,7 @@ void Transform::Render()
 #ifndef _DEBUGDRAW 
 	if(primitive.NumVertices != 0 && primitive.NumIndices != 0)
 	{
-		GraphicsEngine::Get().AddCommand<GfxCmd_DrawDebugPrimitive>(primitive,myTransform);
+		GraphicsEngine::Get().OverlayCommands<GfxCmd_DrawDebugPrimitive>(primitive,myTransform);
 	}
 #endif // _DEBUGDRAW 
 }

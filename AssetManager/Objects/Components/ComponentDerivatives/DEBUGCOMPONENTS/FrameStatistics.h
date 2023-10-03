@@ -10,6 +10,7 @@ public:
 	void Update() override; 
 	void OnExit() override;
 	void OnStart() override;
+	
 	~FrameStatistics() { OnExit();};
 
 private:

@@ -122,30 +122,24 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     const float3 specularColor = lerp((float3) 0.04f, albedo.rgb, metallic);
      
     float3 totalSpotLightContribution = 0;
-     
-    [unroll]
-    for (uint s = 0; s < SpotLightCount - 1; s++)
-    {
         [flatten]
-        if (mySpotLight[s].Power > 0)
-        {
-            totalSpotLightContribution += CalculateSpotLight(
+    if (mySpotLight.Power > 0)
+    {
+        totalSpotLightContribution += CalculateSpotLight(
             diffuseColor,
             specularColor,
             worldPosition.xyz,
             Normal.xyz,
             cameraDirection,
-            mySpotLight[s],
+            mySpotLight,
             roughness,
             DefaultMaterial.Shine            
             );
-        }
     }
-    
    
     const float3 radiance = totalSpotLightContribution;
     
-    result.Color.rgb = (radiance + Effect.r) * albedo.rgb;
+    result.Color.rgb = (radiance ) * albedo.rgb;
   
     
    // result.Color.rgb = saturate(LinearToGamma(result.Color.rgb));

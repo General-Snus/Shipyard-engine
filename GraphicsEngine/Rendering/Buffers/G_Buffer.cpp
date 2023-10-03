@@ -173,6 +173,7 @@ void G_BufferData::UseGBufferShader()
 }
 void G_BufferData::UseEnviromentShader()
 {
+	
 	RHI::SetVertexShader(myScreenSpaceShader);
 	RHI::SetPixelShader(myEnviromentPixelShader);
 
@@ -184,6 +185,7 @@ void G_BufferData::UseEnviromentShader()
 
 void G_BufferData::UsePointlightShader()
 {
+	RHI::SetBlendState(GraphicsEngine::Get().GetAdditiveBlendState());
 	RHI::SetVertexShader(myScreenSpaceShader);
 	RHI::SetPixelShader(myPointPixelShader);
 
@@ -195,6 +197,7 @@ void G_BufferData::UsePointlightShader()
 
 void G_BufferData::UseSpotlightShader()
 {
+	RHI::SetBlendState(GraphicsEngine::Get().GetAdditiveBlendState());
 	RHI::SetVertexShader(myScreenSpaceShader);
 	RHI::SetPixelShader(mySpotShader);
 

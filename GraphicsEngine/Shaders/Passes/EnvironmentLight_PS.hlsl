@@ -73,7 +73,7 @@ float occulusion
     const float3 diffuse = CalculateDiffuseIBL(normal, enviromentCube);
     const float3 specular = CalculateSpecularIBL(specularColor, normal, cameraDirection, roughness, enviromentCube);
     
-    const float3 kA = (diffuseColor * diffuse + specular) * occulusion * .3f;
+    const float3 kA = (diffuseColor * diffuse + specular) * occulusion;
     
     return kA;
 }

@@ -57,38 +57,36 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 		SetupDefaultVariables();
 		SetupBRDF(); 
 
+		bool retFlag;
+		bool retVal = SetupDebugDrawline(retFlag);
+		if (retFlag) return retVal;
 
-		debugLineVS = std::make_shared<Shader>();
-		RHI::LoadShaderFromMemory(
-			debugLineVS.get(),
-			L"LineVertexShader",
-			BuiltIn_LineDrawer_VS_ByteCode,
-			sizeof(BuiltIn_LineDrawer_VS_ByteCode)
-		);
 
-		debugLinePS = std::make_shared<Shader>();
-		RHI::LoadShaderFromMemory(
-			debugLinePS.get(),
-			L"LinePixelShader",
-			BuiltIn_LineDrawer_PS_ByteCode,
-			sizeof(BuiltIn_LineDrawer_PS_ByteCode)
-		);
+		D3D11_BLEND_DESC blendDesc = {};
+		D3D11_RENDER_TARGET_BLEND_DESC& rtBlendDesc = blendDesc.RenderTarget[0];
+		rtBlendDesc.BlendEnable = TRUE;
+		rtBlendDesc.SrcBlend = D3D11_BLEND_ONE;
+		rtBlendDesc.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+		rtBlendDesc.BlendOp = D3D11_BLEND_OP_ADD;
+		rtBlendDesc.SrcBlendAlpha = D3D11_BLEND_ONE;
+		rtBlendDesc.DestBlendAlpha = D3D11_BLEND_ONE;
+		rtBlendDesc.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+		rtBlendDesc.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
-		//Create DebugVertex input layout
-		RHI::CreateInputLayout(
-			Debug::DebugVertex::InputLayout,
-			Debug::DebugVertex::InputLayoutDescription,
-			BuiltIn_LineDrawer_VS_ByteCode,
-			sizeof(BuiltIn_LineDrawer_VS_ByteCode)
-		);
+		if(!RHI::CreateBlendState(AlphaBlendState, blendDesc))
+		{assert(false);}
 		 
-		if(!(
-			RHI::CreateDynamicVertexBuffer(myLineVertexBuffer,65536,sizeof(Debug::DebugVertex)) &&
-			RHI::CreateDynamicIndexBuffer(myLineIndexBuffer,65536)
-			))
+		rtBlendDesc.SrcBlend = D3D11_BLEND_SRC_ALPHA;
+		rtBlendDesc.DestBlend = D3D11_BLEND_ONE; 
+		rtBlendDesc.SrcBlendAlpha = D3D11_BLEND_ZERO;
+		rtBlendDesc.DestBlendAlpha = D3D11_BLEND_ONE;
+		rtBlendDesc.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+		rtBlendDesc.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+
+		if (!RHI::CreateBlendState(AdditiveBlendState, blendDesc))
 		{
-			GELogger.Err("Failed to initialize the myLineVertexBuffer!");
-			return false;
+			assert(false);
 		}
 
 
@@ -116,6 +114,45 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 	}
 #endif 
 	return true;
+}
+
+bool GraphicsEngine::SetupDebugDrawline(bool& retFlag)
+{
+	retFlag = true;
+	debugLineVS = std::make_shared<Shader>();
+	RHI::LoadShaderFromMemory(
+		debugLineVS.get(),
+		L"LineVertexShader",
+		BuiltIn_LineDrawer_VS_ByteCode,
+		sizeof(BuiltIn_LineDrawer_VS_ByteCode)
+	);
+
+	debugLinePS = std::make_shared<Shader>();
+	RHI::LoadShaderFromMemory(
+		debugLinePS.get(),
+		L"LinePixelShader",
+		BuiltIn_LineDrawer_PS_ByteCode,
+		sizeof(BuiltIn_LineDrawer_PS_ByteCode)
+	);
+
+	//Create DebugVertex input layout
+	RHI::CreateInputLayout(
+		Debug::DebugVertex::InputLayout,
+		Debug::DebugVertex::InputLayoutDescription,
+		BuiltIn_LineDrawer_VS_ByteCode,
+		sizeof(BuiltIn_LineDrawer_VS_ByteCode)
+	);
+
+	if (!(
+		RHI::CreateDynamicVertexBuffer(myLineVertexBuffer, 65536, sizeof(Debug::DebugVertex)) &&
+		RHI::CreateDynamicIndexBuffer(myLineIndexBuffer, 65536)
+		))
+	{
+		GELogger.Err("Failed to initialize the myLineVertexBuffer!");
+		return false;
+	}
+	retFlag = false;
+	return {};
 }
 
 void GraphicsEngine::SetupDefaultVariables()
@@ -297,16 +334,21 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	RHI::SetRenderTarget(myBackBuffer.get(),myDepthBuffer.get());
 	myG_Buffer.Data.SetWriteTargetToBuffer(); //Let all write to textures
 	 
-	for(const auto& command : deferredCommandList)
+	for(const auto& command : DeferredCommandList)
 	{
 		command->Execute(); 
 	}
 	RHI::SetRenderTarget(myBackBuffer.get(),nullptr);
 
-	//LIGHTS	
-	GfxCmd_SetLightBuffer(eLightType::Directional).Execute();
-	GfxCmd_SetLightBuffer(eLightType::Point).Execute();
-	GfxCmd_SetLightBuffer(eLightType::Spot).Execute();
+	//LIGHTS 
+	GfxCmd_SetLightBuffer().Execute(); 
+	RHI::SetBlendState(AlphaBlendState);
+
+	for (const auto& command : this->OverlayCommandList)
+	{
+		command->Execute();
+	}
+
 //	GraphicsEngine::Get().AddCommand<GfxCmd_SetLightBuffer>();//Do lighting based on gbuffer
 }
 
@@ -314,6 +356,7 @@ void GraphicsEngine::EndFrame()
 {
 	// We finish our frame here and present it on screen.
 	RHI::Present(0);
-	deferredCommandList.clear();
+	this->OverlayCommandList.clear();
+	this->DeferredCommandList.clear();
 }
 

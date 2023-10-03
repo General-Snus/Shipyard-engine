@@ -19,7 +19,7 @@ using namespace Microsoft::WRL;
 
 class GraphicsEngine
 {
-	friend class GraphicCommand; 
+	friend class GraphicCommand;
 
 private:
 	FrameBuffer myFrameBuffer;
@@ -28,9 +28,10 @@ private:
 	LightBuffer myLightBuffer;
 	G_Buffer myG_Buffer;
 
-	std::vector<std::unique_ptr<GraphicCommand>> deferredCommandList;
+	std::vector<std::unique_ptr<GraphicCommand>> DeferredCommandList;
+	std::vector<std::unique_ptr<GraphicCommand>> OverlayCommandList;
 
-	SIZE myWindowSize{0,0};	
+	SIZE myWindowSize{ 0,0 };
 	HWND myWindowHandle{};
 	CU::Vector4<float> myBackgroundColor;
 
@@ -42,14 +43,14 @@ private:
 
 	std::shared_ptr<Shader> defaultVS;
 	std::shared_ptr<Shader> defaultPS;
-	
+
 	//Debug
 	ComPtr<ID3D11Buffer> myLineVertexBuffer;
 	ComPtr<ID3D11Buffer> myLineIndexBuffer;
 	std::shared_ptr<Shader> debugLinePS;
 	std::shared_ptr<Shader> debugLineVS;
 
-	 
+
 	std::shared_ptr<Texture> BRDLookUpTable;
 	std::shared_ptr<TextureHolder> defaultTexture;
 	std::shared_ptr<TextureHolder> defaultNormalTexture;
@@ -57,11 +58,14 @@ private:
 	std::shared_ptr<TextureHolder> defaultEffectTexture;
 	std::shared_ptr<TextureHolder> defaultCubeMap;
 
-	std::shared_ptr<Mesh> defaultMesh; 
+	std::shared_ptr<Mesh> defaultMesh;
 	std::shared_ptr<Material> defaultMaterial;
 
 	ComPtr<ID3D11SamplerState> myDefaultSampleState;
 	ComPtr<ID3D11SamplerState> myBRDFSampleState;
+
+	ComPtr<ID3D11BlendState> AlphaBlendState;
+	ComPtr<ID3D11BlendState> AdditiveBlendState;
 	// We're a container singleton, no instancing this outside the class.
 	GraphicsEngine() = default;
 
@@ -74,7 +78,9 @@ public:
 	 * @param windowHandle The window that will contain this Graphics Engine.
 	 * @param enableDeviceDebug If DirectX should write debug output in the Output.
 	 */
-	bool Initialize(HWND windowHandle,bool enableDeviceDebug);
+	bool Initialize(HWND windowHandle, bool enableDeviceDebug);
+
+	bool SetupDebugDrawline(bool& retFlag);
 
 	void SetupDefaultVariables();
 
@@ -95,11 +101,15 @@ public:
 	/**
 	 * Renders the current scene to the BackBuffer.
 	 */
-	void RenderFrame(float aDeltaTime,double aTotalTime);
+	void RenderFrame(float aDeltaTime, double aTotalTime);
 	CU::Vector4<float>& GetBackgroundColor() { return myBackgroundColor; }
 
-	template<typename T,typename...Types>
+	template<typename T, typename...Types>
 	void AddCommand(Types... args);
+
+	template<typename T, typename...Types>
+	void OverlayCommands(Types... args);
+
 
 	[[nodiscard]] HWND FORCEINLINE GetWindowHandle() const { return myWindowHandle; }
 	[[nodiscard]] SIZE FORCEINLINE GetWindowSize() const { return myWindowSize; }
@@ -113,12 +123,14 @@ public:
 	FORCEINLINE std::shared_ptr<Shader> GetDebugLineVS() const { return debugLineVS; }
 	FORCEINLINE std::shared_ptr<Shader> GetDebugLinePS() const { return debugLinePS; }
 
+	FORCEINLINE ComPtr<ID3D11BlendState> GetAlphaBlendState() const { return AlphaBlendState; }
+	FORCEINLINE ComPtr<ID3D11BlendState> GetAdditiveBlendState() const { return AdditiveBlendState; }
 
 	FORCEINLINE std::shared_ptr<TextureHolder> GetDefaultTexture() const { return defaultTexture; }
 	FORCEINLINE std::shared_ptr<Material> GetDefaultMaterial() const { return defaultMaterial; }
 	FORCEINLINE std::shared_ptr<TextureHolder> GetDefaultTexture(eTextureType type) const
 	{
-		switch(type)
+		switch (type)
 		{
 		case eTextureType::ColorMap:
 			return defaultTexture;
@@ -141,8 +153,14 @@ public:
 	}
 };
 
-template<typename T,typename...Types>
+template<typename T, typename...Types>
 FORCEINLINE void GraphicsEngine::AddCommand(Types... args)
 {
-	deferredCommandList.push_back(std::make_unique<T>(args...));
+	this->DeferredCommandList.push_back(std::make_unique<T>(args...));
 }
+template<typename T, typename...Types>
+FORCEINLINE void GraphicsEngine::OverlayCommands(Types... args)
+{
+	this->OverlayCommandList.push_back(std::make_unique<T>(args...));
+}
+

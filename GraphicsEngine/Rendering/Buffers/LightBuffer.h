@@ -8,8 +8,8 @@
 struct LightBufferData 
 {
    DirectionalLight myDirectionalLight= DirectionalLight();
-   PointLight myPointLight[PointLightCount] = {PointLight()};
-   SpotLight mySpotLight[SpotLightCount] = {SpotLight()};;
+   PointLight myPointLight  = {PointLight()};
+   SpotLight mySpotLight = {SpotLight()};;
 };
 
 typedef ConstantBuffer<LightBufferData> LightBuffer;

@@ -183,5 +183,7 @@
     <FxCompile Include="Shaders\Passes\GBuffer\GBufferPS.hlsl" />
     <FxCompile Include="Shaders\Passes\PointLight_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\SpotLight_PS.hlsl" />
+    <FxCompile Include="Shaders\Passes\DebugLayer.hlsl" />
+    <FxCompile Include="Shaders\Passes\LineDrawer.hlsl" />
   </ItemGroup>
 </Project>
