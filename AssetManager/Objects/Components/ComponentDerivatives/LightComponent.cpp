@@ -39,8 +39,7 @@ void cLight::SetType(const eLightType aType)
 
 
 void cLight::Update()
-{
-
+{ 
 	if(boundToTransform)
 	{
 		Transform* transform = this->TryGetComponent<Transform>();
@@ -68,10 +67,7 @@ void cLight::Update()
 			break;
 		}
 	}
-}
-void cLight::Render()
-{
-}
+} 
 void cLight::BindDirectionToTransform(bool active)
 {
 	boundToTransform = active;

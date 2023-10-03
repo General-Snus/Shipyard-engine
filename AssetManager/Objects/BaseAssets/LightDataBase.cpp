@@ -11,7 +11,7 @@ void DirectionalLight::CalculateDirectionLight(Vector3f direction)
 	const float radius = ModelViewer::Get().GetWorldBounds().GetRadius();
 	Vector3f lightPosition = radius * 2.0f * -direction;
 	const Vector3f worldCenter = ModelViewer::Get().GetWorldBounds().GetCenter();
-	direction = (lightPosition - worldCenter).GetNormalized();
+	this->Direction = (worldCenter- lightPosition).GetNormalized(); 
 	this->lightView = CU::Matrix4x4<float>::LookAt(lightPosition,ModelViewer::Get().GetWorldBounds().GetCenter(),{0,1,0}); // REFACTOR, Magic value up
 
 	const float leftPlane = lightPosition.x - radius;

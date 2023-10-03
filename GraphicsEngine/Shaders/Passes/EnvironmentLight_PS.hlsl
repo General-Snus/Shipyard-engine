@@ -122,9 +122,8 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     const float3 radiance =
     CalculateDirectionLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, Material.g)
     + CalculateIndirectLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, enviromentCube, Material.g, Material.r); 
-    result.Color.rgb = (radiance + Effect.r) * albedo.rgb;
-    
-    //result.Color.rgb = saturate(LinearToGamma(result.Color.rgb));
+    result.Color.rgb = (radiance + Effect.r) * albedo.rgb; 
+    result.Color.rgb = saturate(LinearToGamma(result.Color.rgb));
     result.Color.a = 1.0f;
     return result;
 }

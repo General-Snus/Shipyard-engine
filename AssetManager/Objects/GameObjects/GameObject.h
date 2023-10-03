@@ -28,8 +28,7 @@ public:
 	template <class T>
 	T& GetComponent();
 
-	bool GetActive();
-
+	bool GetActive(); 
 	void SetActive(const bool aState);
 
 	inline const unsigned int GetID() const { return myID; }
@@ -42,8 +41,7 @@ private:
 	GameObject(const unsigned int anID,GameObjectManager* aManager) : myID(anID),myManager(aManager) {}
 	unsigned int myID = UINT_MAX;
 	GameObjectManager* myManager = nullptr;
-};
-
+}; 
 
 template<class T>
 inline void GameObject::AddComponent()

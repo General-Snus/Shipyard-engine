@@ -46,8 +46,7 @@ public:
 	GameObject GetCamera(); 
 	GameObject GetGameObject(unsigned int anID);
 
-	void CollidedWith(const unsigned int aFirstID,const unsigned int aTargetID);
-
+	void CollidedWith(const unsigned int aFirstID,const unsigned int aTargetID); 
 	void SetActive(const unsigned int aGameObjectID,const bool aState);
 
 	void SetLastGOAsPlayer();
@@ -75,8 +74,6 @@ private:
 	unsigned int myPlayer;
 	unsigned int myCamera;
 };
-
-
 
 template<class T>
 void GameObjectManager::AddComponent(const unsigned int aGameObjectID)
@@ -165,4 +162,3 @@ void GameObjectManager::AddManager()
 	myComponentManagers[&typeid(T)] = new ComponentManager<T>();
 	SortUpdateOrder();
 }
-

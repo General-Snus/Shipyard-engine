@@ -187,8 +187,8 @@ void ModelViewer::LoadScene()
 		worldRoot.AddComponent<cLight>(eLightType::Directional);
 		std::weak_ptr<DirectionalLight> pLight = worldRoot.GetComponent<cLight>().GetData<DirectionalLight>();
 		pLight.lock()->Color = CU::Vector3<float>(1,1,1);
-		pLight.lock()->Power = 10.0f;
-		pLight.lock()->CalculateDirectionLight({1,-1,0});
+		pLight.lock()->Power = 5.0f;
+		pLight.lock()->CalculateDirectionLight({0,-1,0});
 	}
 
 
@@ -262,12 +262,12 @@ void ModelViewer::LoadScene()
 		spotLight.AddComponent<cLight>(eLightType::Spot);
 		std::weak_ptr<SpotLight> ptr = spotLight.GetComponent<cLight>().GetData<SpotLight>();
 		spotLight.AddComponent<Transform>();
-		spotLight.GetComponent<Transform>().SetPosition({ -i * 300.0f + 300.f,300,0});
+		spotLight.GetComponent<Transform>().SetPosition({ -i * 300.0f + 600.f,300,0});
 		spotLight.GetComponent<Transform>().Rotate({90,0,0},true);
 		ptr.lock()->Color = {(float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000};
 		//ptr.lock()->Color = {1,1,1};
 		ptr.lock()->Range = 300.0f;;
-		ptr.lock()->Power = i * 60.0f * Kilo;
+		ptr.lock()->Power = i * 600.0f * Kilo;
 		ptr.lock()->OuterConeAngle = i * 20.0f * DEG_TO_RAD;
 		ptr.lock()->InnerConeAngle = 1.0f * DEG_TO_RAD;
 		spotLight.GetComponent<cLight>().BindDirectionToTransform(true);

@@ -1,5 +1,4 @@
-#pragma once
-
+#pragma once 
 #include <AssetManager/AssetManager.pch.h>
 #include <AssetManager/AssetManager.h>
 #include "../../BaseAssets/LightDataBase.h"
@@ -26,8 +25,7 @@ public:
 	template<class T>
 	std::shared_ptr<T> GetData();
 
-	void Update() override;
-	void Render() override;
+	void Update() override; 
 
 	~cLight() = default;
 private:

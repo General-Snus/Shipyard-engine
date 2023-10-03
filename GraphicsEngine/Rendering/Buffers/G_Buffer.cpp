@@ -7,9 +7,8 @@
 #include <Shaders/Include/ScreenspaceQuad_VS.h>
 #include <Shaders/Include/EnvironmentLight_PS.h>
 #include <Shaders/Include/PointLight_PS.h>
-#include <Shaders/Include/SpotLight_PS.h>
-
-#include<GraphicsEngine/GraphicsEngine.h>
+#include <Shaders/Include/SpotLight_PS.h> 
+#include<GraphicsEngine/GraphicsEngine.h> 
 #include <d3d11.h>
 
 void G_BufferData::Init()
@@ -172,8 +171,7 @@ void G_BufferData::UseGBufferShader()
 	RHI::SetPixelShader(myPixelShader);
 }
 void G_BufferData::UseEnviromentShader()
-{
-	
+{ 
 	RHI::SetVertexShader(myScreenSpaceShader);
 	RHI::SetPixelShader(myEnviromentPixelShader);
 

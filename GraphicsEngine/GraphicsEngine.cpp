@@ -323,8 +323,8 @@ void GraphicsEngine::BeginFrame()
 {
 	// Here we should initialize our frame and clean up from the last one.  
 	myG_Buffer.Data.ClearTargets();
-	RHI::ClearRenderTarget(myBackBuffer.get(),myBackgroundColor);
 	RHI::ClearDepthStencil(myDepthBuffer.get());
+	RHI::ClearRenderTarget(myBackBuffer.get(),myBackgroundColor);
 }
 
 void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)

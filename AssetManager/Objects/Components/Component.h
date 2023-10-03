@@ -17,7 +17,7 @@ public:
 	virtual ~Component() = default;
 
 	virtual void Update() {}
-	virtual void Render() {}
+	virtual void Render() {} 
 
 	template <class T>
 	const bool HasComponent() const;

@@ -117,6 +117,7 @@ void GfxCmd_SetLightBuffer::Execute()
 		LightBuffer& buff = GetLightBuffer();
 		buff.Data.myDirectionalLight.Color = light->Color;
 		buff.Data.myDirectionalLight.Power = light->Power;
+		buff.Data.myDirectionalLight.Direction = light->Direction;
 		buff.Data.myDirectionalLight.lightView = light->lightView;
 		buff.Data.myDirectionalLight.projection = light->projection;
 
