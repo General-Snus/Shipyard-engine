@@ -63,6 +63,7 @@ private:
 	std::shared_ptr<Material> defaultMaterial;
 
 	ComPtr<ID3D11SamplerState> myDefaultSampleState;
+	ComPtr<ID3D11SamplerState> myShadowSampleState;
 	ComPtr<ID3D11SamplerState> myBRDFSampleState;
 
 	ComPtr<ID3D11BlendState> AlphaBlendState;

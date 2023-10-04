@@ -162,6 +162,12 @@ void G_BufferData::Init()
 
 void G_BufferData::SetWriteTargetToBuffer()
 {
+
+	for(int i = 0; i < vectorOfTextures.size(); i++)
+	{
+		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,i,nullptr);
+	}
+
 	RHI::SetRenderTargets(vectorOfTextures,GraphicsEngine::Get().DepthBuffer());
 }
 
@@ -207,8 +213,11 @@ void G_BufferData::UseSpotlightShader()
 
 void G_BufferData::ClearTargets()
 {
+
 	for(int i = 0; i < vectorOfTextures.size(); i++)
 	{
+		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,i,nullptr);
+
 		RHI::ClearRenderTarget(vectorOfTextures[i]);
 	}
 }

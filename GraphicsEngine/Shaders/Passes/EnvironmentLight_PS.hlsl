@@ -1,6 +1,9 @@
  
 #include "GBuffer/GBufferPS.hlsl"
 
+SamplerComparisonState shadowCmpSampler : register(HLSL_REG_shadowCmpSampler);
+Texture2D shadowMap : register(HLSL_REG_dirLightShadowMap);
+
 float3 PositionInBound(float3 aMin, float3 aMax, float3 aPosition)
 {
     const float3 boundSize = aMax - aMin;
@@ -84,7 +87,8 @@ float3 diffuseColor,
 float3 specularColor,
 float3 normal,
 float3 cameraDirection,
-float roughness
+float roughness,
+float4 worldPosition
 )
 {
     const float3 directionToLight = -myDirectionalLight.Direction;
@@ -96,7 +100,17 @@ float roughness
     float3 directLightDiffuse = CalculateDiffuseLight(diffuseColor);
     directLightDiffuse *= (1.0f - directLightSpecular);
     
-    return saturate(directLightDiffuse + directLightSpecular) * myDirectionalLight.Color * myDirectionalLight.Power * NdotL;
+    float4 lightSpacePos = (myDirectionalLight.lightView, worldPosition);
+    lightSpacePos = mul(myDirectionalLight.projection, lightSpacePos);
+    float3 lightSpaceUV = lightSpacePos.xyz / lightSpacePos.w;
+    float D = lightSpaceUV.z-0.03;
+    lightSpaceUV.xy = lightSpaceUV.xy * 0.5f + 0.5f;
+    lightSpaceUV.y = 1 - lightSpaceUV.y;
+    float shadow = shadowMap.SampleCmpLevelZero(shadowCmpSampler, lightSpaceUV.xy, D).r; 
+    
+    
+    
+    return   saturate(directLightDiffuse + directLightSpecular) * myDirectionalLight.Color * myDirectionalLight.Power * NdotL;
 }
 
 
@@ -118,9 +132,10 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     const float3 cameraDirection = normalize(FB_CameraPosition.xyz - worldPosition.xyz);
     const float3 diffuseColor = lerp((float3) 0.0f, albedo.rgb, 1 - metallic);
     const float3 specularColor = lerp((float3) 0.04f, albedo.rgb, metallic);
+     
     
     const float3 radiance =
-    CalculateDirectionLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, Material.g)
+    CalculateDirectionLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, Material.g, worldPosition)
     + CalculateIndirectLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, enviromentCube, Material.g, Material.r); 
     result.Color.rgb = (radiance + Effect.r) * albedo.rgb; 
     result.Color.rgb = saturate(LinearToGamma(result.Color.rgb));

@@ -14,7 +14,8 @@ namespace CommonUtilities
 		//Creates a null-vector
 		Vector4<T>();
 		//Creates a vector (aX, aY, aZ)
-		Vector4<T>(const T& aX,const T& aY,const T& aZ,const T& aW);
+		Vector4<T>(const T& aX,const T& aY,const T& aZ,const T& aW); 
+		Vector4<T>(const Vector3<T>& aVector, const T& aW);
 
 		//Copy constructor (compiler generated)
 		Vector4<T>(const Vector4<T>& aVector) = default;
@@ -214,6 +215,14 @@ namespace CommonUtilities
 		w = aW;
 	}
 
+	template<class T>
+	inline Vector4<T>::Vector4(const Vector3<T>& aVector,const T& aW)
+	{
+		x = aVector.x;
+		y = aVector.y;
+		z = aVector.z;
+		w = aW;
+	}
 	template<class T>
 	template<class U>
 	inline Vector4<T>::operator U() const

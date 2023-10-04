@@ -187,8 +187,8 @@ void ModelViewer::LoadScene()
 		worldRoot.AddComponent<cLight>(eLightType::Directional);
 		std::weak_ptr<DirectionalLight> pLight = worldRoot.GetComponent<cLight>().GetData<DirectionalLight>();
 		pLight.lock()->Color = CU::Vector3<float>(1,1,1);
-		pLight.lock()->Power = 5.0f;
-		pLight.lock()->CalculateDirectionLight({0,-1,0});
+		pLight.lock()->Power = 10.0f;
+		pLight.lock()->CalculateDirectionLight({1,-1,1});
 	}
 
 

@@ -56,11 +56,11 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 
 
 		SetupDefaultVariables();
-		SetupBRDF(); 
+		SetupBRDF();
 
 		bool retFlag;
 		bool retVal = SetupDebugDrawline(retFlag);
-		if (retFlag) return retVal;
+		if(retFlag) return retVal;
 
 
 		D3D11_BLEND_DESC blendDesc = {};
@@ -74,18 +74,20 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 		rtBlendDesc.BlendOpAlpha = D3D11_BLEND_OP_ADD;
 		rtBlendDesc.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
-		if(!RHI::CreateBlendState(AlphaBlendState, blendDesc))
-		{assert(false);}
-		 
+		if(!RHI::CreateBlendState(AlphaBlendState,blendDesc))
+		{
+			assert(false);
+		}
+
 		rtBlendDesc.SrcBlend = D3D11_BLEND_SRC_ALPHA;
-		rtBlendDesc.DestBlend = D3D11_BLEND_ONE; 
+		rtBlendDesc.DestBlend = D3D11_BLEND_ONE;
 		rtBlendDesc.SrcBlendAlpha = D3D11_BLEND_ZERO;
 		rtBlendDesc.DestBlendAlpha = D3D11_BLEND_ONE;
 		rtBlendDesc.BlendOpAlpha = D3D11_BLEND_OP_ADD;
 		rtBlendDesc.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
 
-		if (!RHI::CreateBlendState(AdditiveBlendState, blendDesc))
+		if(!RHI::CreateBlendState(AdditiveBlendState,blendDesc))
 		{
 			assert(false);
 		}
@@ -102,7 +104,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 
 		myLineBuffer.Initialize();
 		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_LineBuffer,myLineBuffer);
-		 
+
 		myG_Buffer.Data.Init();
 		myG_Buffer.Initialize();
 
@@ -144,9 +146,9 @@ bool GraphicsEngine::SetupDebugDrawline(bool& retFlag)
 		sizeof(BuiltIn_LineDrawer_VS_ByteCode)
 	);
 
-	if (!(
-		RHI::CreateDynamicVertexBuffer(myLineVertexBuffer, 65536, sizeof(Debug::DebugVertex)) &&
-		RHI::CreateDynamicIndexBuffer(myLineIndexBuffer, 65536)
+	if(!(
+		RHI::CreateDynamicVertexBuffer(myLineVertexBuffer,65536,sizeof(Debug::DebugVertex)) &&
+		RHI::CreateDynamicIndexBuffer(myLineIndexBuffer,65536)
 		))
 	{
 		GELogger.Err("Failed to initialize the myLineVertexBuffer!");
@@ -178,8 +180,32 @@ void GraphicsEngine::SetupDefaultVariables()
 		GELogger.Log("Sampler state created");
 		assert(false);
 	}
+	RHI::SetSamplerState(myDefaultSampleState,REG_DefaultSampler);
 
-	RHI::SetSamplerState(myDefaultSampleState,0);
+	D3D11_SAMPLER_DESC shadowSamplerDesc = {};
+	shadowSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+	shadowSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	shadowSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	shadowSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	shadowSamplerDesc.BorderColor[0] = 0.f;
+	shadowSamplerDesc.BorderColor[1] = 0.f;
+	shadowSamplerDesc.BorderColor[2] = 0.f;
+	shadowSamplerDesc.BorderColor[3] = 0.f;
+	shadowSamplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+	shadowSamplerDesc.MipLODBias = 0.0f;
+	shadowSamplerDesc.MaxAnisotropy = static_cast<UINT>(1.0f);
+	shadowSamplerDesc.MinLOD = -FLT_MAX;
+	shadowSamplerDesc.MaxLOD = FLT_MAX;
+
+	if(!RHI::CreateSamplerState(myShadowSampleState,shadowSamplerDesc))
+	{
+		GELogger.Log("Sampler state created");
+		assert(false);
+	} 
+	RHI::SetSamplerState(myShadowSampleState,REG_shadowCmpSampler);
+
+
+
 	// TEMP: Load the default shader programs.
 	// This will be done elsewhere later on :).
 	RHI::CreateVertexShaderAndInputLayout(
@@ -252,8 +278,7 @@ void GraphicsEngine::SetupDefaultVariables()
 }
 
 void GraphicsEngine::SetupBRDF()
-{ 
-	
+{
 	//Light
 	BRDLookUpTable = std::make_shared<Texture>();
 	RHI::CreateTexture(BRDLookUpTable.get(),L"brdfLUT",512,512,
@@ -288,7 +313,7 @@ void GraphicsEngine::SetupBRDF()
 
 	RHI::SetRenderTarget(nullptr,nullptr);
 	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_BRDF_LUT_Texture,BRDLookUpTable.get());
-	
+
 
 	D3D11_SAMPLER_DESC lutsamplerDesc = {};
 	lutsamplerDesc.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
@@ -305,13 +330,13 @@ void GraphicsEngine::SetupBRDF()
 	lutsamplerDesc.MinLOD = 0;
 	lutsamplerDesc.MaxLOD = 0;
 
-	if (!RHI::CreateSamplerState(myBRDFSampleState, lutsamplerDesc))
+	if(!RHI::CreateSamplerState(myBRDFSampleState,lutsamplerDesc))
 	{
 		GELogger.Log("Sampler state created");
 		assert(false);
 	}
 
-	RHI::SetSamplerState(myBRDFSampleState, REG_BRDFSampler);
+	RHI::SetSamplerState(myBRDFSampleState,REG_BRDFSampler);
 
 }
 
@@ -339,42 +364,48 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 		if(i.GetType() == eLightType::Directional)
 		{
 			shadowMap = i.GetShadowMap();
-			dirLight = i.GetData<DirectionalLight>().get();
+			dirLight = i.GetData<DirectionalLight>().get(); 			 
+			myLightBuffer.Data.myDirectionalLight.Color = dirLight->Color;
+			myLightBuffer.Data.myDirectionalLight.Power = dirLight->Power;
+			myLightBuffer.Data.myDirectionalLight.Direction = dirLight->Direction;
+			myLightBuffer.Data.myDirectionalLight.lightView = dirLight->lightView;
+			myLightBuffer.Data.myDirectionalLight.projection = dirLight->projection;
 
-			ImGui::Begin("shadowmap");
-			ImGui::Image((void*)shadowMap->GetSRV(),ImVec2(256,256));
-			ImGui::End();
-
-			GfxCmd_SetFrameBuffer(dirLight->projection,dirLight->lightView,0).Execute();
+			RHI::UpdateConstantBufferData(myLightBuffer);
+			RHI::ClearDepthStencil(shadowMap.get());
+			RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,nullptr);
 			RHI::SetRenderTarget(nullptr,shadowMap.get());
-			RHI::Context->PSSetShader(nullptr,nullptr,0);
+			GfxCmd_SetFrameBuffer(dirLight->projection,dirLight->lightView,0).Execute(); 
 			for(const auto& command : ShadowCommandList)
 			{
 				command->Execute();
-			} 
-		} 
+			}
+		}
 	}
-	
+	ImGui::Begin("shadowmap");
+	ImGui::Image((void*)shadowMap->GetSRV(),ImVec2(1024,1024));
+	ImGui::End();
 
 
-	RHI::SetRenderTarget(myBackBuffer.get(),myDepthBuffer.get());
+	//RHI::SetRenderTarget(myBackBuffer.get(),myDepthBuffer.get());
 	myG_Buffer.Data.SetWriteTargetToBuffer(); //Let all write to textures
-	 
+	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,shadowMap.get()); 
+
 	for(const auto& command : DeferredCommandList)
 	{
-		command->Execute(); 
+		command->Execute();
 	}
 	RHI::SetRenderTarget(myBackBuffer.get(),nullptr);
 
 	//LIGHTS 
-	GfxCmd_SetLightBuffer().Execute(); 
+	GfxCmd_SetLightBuffer().Execute();
 	RHI::SetBlendState(AlphaBlendState);
-	for (const auto& command : this->OverlayCommandList)
+	for(const auto& command : this->OverlayCommandList)
 	{
 		command->Execute();
 	}
 
-//	GraphicsEngine::Get().AddCommand<GfxCmd_SetLightBuffer>();//Do lighting based on gbuffer
+	//	GraphicsEngine::Get().AddCommand<GfxCmd_SetLightBuffer>();//Do lighting based on gbuffer
 }
 
 void GraphicsEngine::EndFrame()
@@ -383,5 +414,6 @@ void GraphicsEngine::EndFrame()
 	RHI::Present(0);
 	this->OverlayCommandList.clear();
 	this->DeferredCommandList.clear();
+	this->ShadowCommandList.clear();
 }
 

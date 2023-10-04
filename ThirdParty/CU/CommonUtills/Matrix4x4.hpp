@@ -47,9 +47,9 @@ namespace CommonUtilities
 	template<class T>
 	inline Matrix4x4<T>::Matrix4x4(const Vector4<Vector4<T>> aVector)
 	{
-		for(int i = 0; i < 3; i++)
+		for(int i = 0; i < 4; i++)
 		{
-			for(int j = 0; j < 3; j++)
+			for(int j = 0; j < 4; j++)
 			{
 				arr[i][j] = aVector[i][j];
 			}
@@ -287,7 +287,7 @@ namespace CommonUtilities
 	}
 	template<class T>
 	inline Matrix4x4<T> Matrix4x4<T>::GetFastInverse(const Matrix4x4<T>& aTransform)
-	{
+	{ 
 		Matrix4x4<T> Rotation = aTransform;
 		Matrix4x4<T> Transform;
 		for(short i = 1; i <= 3; i++)
@@ -297,32 +297,30 @@ namespace CommonUtilities
 		}
 		Rotation = Rotation.Transpose(Rotation);
 
-		return Transform * Rotation;
+		return Transform * Rotation;  //Version 1 no scaling
 	}
 
 	template<class T>
 	inline Matrix4x4<T> Matrix4x4<T>::LookAt(Vector3<T> position,Vector3<T> target,Vector3<T> upVector)
 	{
-		Vector3<T> zaxis = (target - position).GetNormalized();
-		Vector3<T> xaxis = (zaxis.Cross(upVector));
-		Vector3<T> yaxis = xaxis.Cross(zaxis);
+		Vector3<T> zaxis = (position - target);
+		zaxis.Normalize();
+		Vector3<T> xaxis = (upVector.Cross(zaxis));
+		Vector3<T> yaxis = zaxis.Cross(xaxis);
 
-		zaxis = -zaxis;
+		xaxis.Normalize();
+		yaxis.Normalize();
 
-		Matrix4x4<T> viewMatrix = {Vector4<Vector4<T>>(
-		  Vector4<T>(xaxis.x, xaxis.y, xaxis.z,0 ),
-		  Vector4<T>(yaxis.x, yaxis.y, yaxis.z,0 ),
-		  Vector4<T>(zaxis.x, zaxis.y, zaxis.z,0 ),
-		  Vector4<T>(-(xaxis).Dot(position), -(yaxis).Dot(position), -(zaxis).Dot(position), 1)
-		)};
 
-		Matrix4x4<T> viewMatrix = SetFromRaw(
+
+		Vector3<T> transform = {-(xaxis.Dot(position)), -(yaxis.Dot(position)), -(zaxis.Dot(position))};
+		Matrix4x4<T> viewMatrix(
 			{
-		  Vector4<T>(xaxis.x, xaxis.y, xaxis.z,0),
-		  Vector4<T>(yaxis.x, yaxis.y, yaxis.z,0),
-		  Vector4<T>(zaxis.x, zaxis.y, zaxis.z,0),
-		  Vector4<T>(-(xaxis).Dot(position), -(yaxis).Dot(position), -(zaxis).Dot(position), 1)
-		)};
+				{xaxis.x, xaxis.y, xaxis.z,0},
+				{yaxis.x, yaxis.y, yaxis.z,0},
+				{zaxis.x, zaxis.y, zaxis.z,0},
+				{transform.x,transform.y,transform.z, 1}
+			});
 
 		return viewMatrix;
 	}
@@ -336,25 +334,25 @@ namespace CommonUtilities
 		const float fRange = 1.0f / (aFarPlane - aNearPlane);
 
 		Matrix4x4<T> result;
-		result(0 + 1,0 + 1) = reciprocalWidth + reciprocalWidth;
-		result(0 + 1,1 + 1) = 0.0f;
-		result(0 + 1,2 + 1) = 0.0f;
-		result(0 + 1,3 + 1) = 0.0f;
+		result(1,1) = reciprocalWidth + reciprocalWidth;
+		result(1,2) = 0.0f;
+		result(1,3) = 0.0f;
+		result(1,4) = 0.0f;
 
-		result(1 + 1,0 + 1) = 0.0f;
-		result(1 + 1,1 + 1) = reciprocalHeight + reciprocalHeight;
-		result(1 + 1,2 + 1) = 0.0f;
-		result(1 + 1,3 + 1) = 0.0f;
+		result(2,1) = 0.0f;
+		result(2,2) = reciprocalHeight + reciprocalHeight;
+		result(2,3) = 0.0f;
+		result(2,4) = 0.0f;
 
-		result(2 + 1,0 + 1) = 0.0f;
-		result(2 + 1,1 + 1) = 0.0f;
-		result(2 + 1,2 + 1) = fRange;
-		result(2 + 1,3 + 1) = 0.0f;
+		result(3,1) = 0.0f;
+		result(3,2) = 0.0f;
+		result(3,3) = fRange;
+		result(3,4) = 0.0f;
 
-		result(3 + 1,0 + 1) = -(aLeftPlane + aRightPlane) * reciprocalWidth;
-		result(3 + 1,1 + 1) = -(aTopPlane + aBottomPlane) * reciprocalHeight;
-		result(3 + 1,2 + 1) = -fRange * aNearPlane;
-		result(3 + 1,3 + 1) = 1.0f;
+		result(4,1) = -(aLeftPlane + aRightPlane) * reciprocalWidth;
+		result(4,2) = -(aTopPlane + aBottomPlane) * reciprocalHeight;
+		result(4,3) = -fRange * aNearPlane;
+		result(4,4) = 1.0f;
 
 
 		return result;

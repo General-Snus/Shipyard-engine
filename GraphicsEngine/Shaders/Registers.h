@@ -3,6 +3,9 @@
 #define HLSL_REG_DefaultSampler s0 
 #define REG_DefaultSampler 0 
 
+#define HLSL_REG_shadowCmpSampler s14 
+#define REG_shadowCmpSampler 14 
+
 #define HLSL_REG_BRDFSampler s15 
 #define REG_BRDFSampler 15 
 
@@ -45,12 +48,8 @@
 #define HLSL_REG_enviromentCube t100 
 #define REG_enviromentCube 100 
 
+#define HLSL_REG_dirLightShadowMap t110 
+#define REG_dirLightShadowMap 110 
+
 #define HLSL_REG_BRDF_LUT_Texture t127
-#define REG_BRDF_LUT_Texture 127
-
-
-#define SpotLightCount 100
-#define PointLightCount 100
-
-
- 
+#define REG_BRDF_LUT_Texture 127  

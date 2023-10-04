@@ -144,7 +144,7 @@ GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix, con
 }
 GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,const Matrix& ref,int aRenderMode)
 {
-	myViewMatrix = Matrix::GetFastInverse(ref);
+	myViewMatrix = ref;
 	myProjectionMatrix = ProjectionMatrix;
 	myDeltaTime = static_cast<float>(CommonUtilities::Timer::GetInstance().GetTotalTime());
 	myPosition = {ref(4,1),ref(4,2),ref(4,3)};
@@ -163,6 +163,7 @@ void GfxCmd_SetFrameBuffer::Execute()
 	buffert.Data.FB_CameraPosition[2] = myPosition.z;
 
 	RHI::UpdateConstantBufferData(buffert);
+	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_GEOMETERY_SHADER | PIPELINE_STAGE_PIXEL_SHADER,0,buffert);
 }
  
 GfxCmd_RenderMesh::GfxCmd_RenderMesh(const RenderData& aData, const Matrix& aTransform)
@@ -218,10 +219,12 @@ void GfxCmd_RenderMeshShadow::Execute()
 	objectBuffer.Data.MinExtents = MinExtents;
 	objectBuffer.Data.hasBone = false;
 
-	RHI::UpdateConstantBufferData(objectBuffer); 
+	RHI::UpdateConstantBufferData(objectBuffer);
+	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER,REG_ObjectBuffer,objectBuffer);
+	RHI::Context->PSSetShader(nullptr,nullptr,0);
 
 	for(auto& aElement : myElementsData)
-	{ 
+	{
 		RHI::ConfigureInputAssembler(
 			aElement.PrimitiveTopology,
 			aElement.VertexBuffer,
@@ -277,8 +280,7 @@ GfxCmd_RenderSkybox::GfxCmd_RenderSkybox(std::shared_ptr<Texture> texture) : myS
 void GfxCmd_RenderSkybox::Execute()
 {
 	//RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER, 100	,mySkyboxTexture.get());
-}
-
+} 
 
 GfxCmd_DrawDebugPrimitive::GfxCmd_DrawDebugPrimitive(Debug::DebugPrimitive primitive, Matrix Transform) : myPrimitive(primitive), myTransform(Transform)
 {
@@ -323,11 +325,14 @@ void GfxCmd_RenderSkeletalMeshShadow::Execute()
 		objectBuffer.Data.myBoneTransforms[i] = myBoneTransforms[i];
 	}
 
-	RHI::UpdateConstantBufferData(objectBuffer); 
+	RHI::UpdateConstantBufferData(objectBuffer);
+	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER,REG_ObjectBuffer,objectBuffer);
+	RHI::Context->PSSetShader(nullptr,nullptr,0); 
 
 	for(auto& aElement : myElementsData)
-	{ 
-		RHI::ConfigureInputAssembler(aElement.PrimitiveTopology,
+	{   
+		RHI::ConfigureInputAssembler(
+			aElement.PrimitiveTopology,
 			aElement.VertexBuffer,
 			aElement.IndexBuffer,
 			aElement.Stride,
