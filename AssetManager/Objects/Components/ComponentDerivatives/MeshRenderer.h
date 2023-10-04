@@ -35,7 +35,7 @@ protected:
 	RenderData myRenderData;
 };
 
-class cSkeletalMeshRenderer : public cMeshRenderer
+class cSkeletalMeshRenderer : public cMeshRenderer	
 {
 public:
 	cSkeletalMeshRenderer() = delete;

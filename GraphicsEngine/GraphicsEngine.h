@@ -28,6 +28,7 @@ private:
 	LightBuffer myLightBuffer;
 	G_Buffer myG_Buffer;
 
+	std::vector<std::unique_ptr<GraphicCommand>> ShadowCommandList;
 	std::vector<std::unique_ptr<GraphicCommand>> DeferredCommandList;
 	std::vector<std::unique_ptr<GraphicCommand>> OverlayCommandList;
 
@@ -104,8 +105,11 @@ public:
 	void RenderFrame(float aDeltaTime, double aTotalTime);
 	CU::Vector4<float>& GetBackgroundColor() { return myBackgroundColor; }
 
+	template<typename T,typename ...Types>
+	void ShadowCommands(Types ...args);
+
 	template<typename T, typename...Types>
-	void AddCommand(Types... args);
+	void DeferredCommand(Types... args);
 
 	template<typename T, typename...Types>
 	void OverlayCommands(Types... args);
@@ -152,9 +156,13 @@ public:
 		}
 	}
 };
-
+template<typename T,typename...Types>
+FORCEINLINE void GraphicsEngine::ShadowCommands(Types... args)
+{
+	this->ShadowCommandList.push_back(std::make_unique<T>(args...));
+}
 template<typename T, typename...Types>
-FORCEINLINE void GraphicsEngine::AddCommand(Types... args)
+FORCEINLINE void GraphicsEngine::DeferredCommand(Types... args)
 {
 	this->DeferredCommandList.push_back(std::make_unique<T>(args...));
 }

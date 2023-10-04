@@ -24,7 +24,7 @@ public:
 
 	template<class T>
 	std::shared_ptr<T> GetData();
-
+	std::shared_ptr<Texture> GetShadowMap() const;
 	void Update() override; 
 
 	~cLight() = default;
@@ -33,12 +33,15 @@ private:
 	std::shared_ptr<DirectionalLight> myDirectionLightData;
 	std::shared_ptr<SpotLight> mySpotLightData;
 	std::shared_ptr<PointLight> myPointLightData;
+	std::shared_ptr<Texture> shadowMap;
 	bool boundToTransform = false;
+	bool castShadows = true;
 };
 
 template<>
 inline std::shared_ptr<DirectionalLight> cLight::GetData<DirectionalLight>()
 {
+	myDirectionLightData->CalculateDirectionLight(myDirectionLightData->Direction);
 	return myDirectionLightData;
 }
 

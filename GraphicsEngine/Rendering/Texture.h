@@ -50,4 +50,5 @@ public:
 	FORCEINLINE UINT GetUsageFlags() const { return myUsageFlags; }
 	FORCEINLINE UINT GetAccessFlags() const { return myAccessFlags; }
 	FORCEINLINE bool IsValid() const { return myTexture != nullptr; }
+	FORCEINLINE ID3D11ShaderResourceView* GetSRV() const { return mySRV.Get(); }
 };

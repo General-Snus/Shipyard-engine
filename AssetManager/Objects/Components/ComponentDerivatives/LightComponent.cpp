@@ -3,11 +3,36 @@
 
 cLight::cLight(const unsigned int anOwnerId) : Component(anOwnerId)
 {
-	myLightType = eLightType::uninitialized;
+	myLightType = eLightType::uninitialized; 
+	shadowMap = std::make_shared<Texture>();
+	if(castShadows)
+	{
+		RHI::CreateTexture(shadowMap.get(),L"directionalLight",
+			1024,
+			1024,
+			DXGI_FORMAT_R32_TYPELESS,
+			D3D11_USAGE_DEFAULT,
+			D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE
+		);
+		RHI::ClearDepthStencil(shadowMap.get());
+	}
 }
 cLight::cLight(const unsigned int anOwnerId,const eLightType type) : Component(anOwnerId)
 {
 	myLightType = type;
+	shadowMap = std::make_shared<Texture>();
+	if(castShadows)
+	{
+		RHI::CreateTexture(shadowMap.get(),L"directionalLight",
+			1024,
+			1024,
+			DXGI_FORMAT_R32_TYPELESS,
+			D3D11_USAGE_DEFAULT,
+			D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE
+		);
+		RHI::ClearDepthStencil(shadowMap.get());
+	}
+
 
 	switch(myLightType)
 	{
@@ -36,7 +61,10 @@ void cLight::SetType(const eLightType aType)
 	myLightType = aType;
 }
 
-
+std::shared_ptr<Texture> cLight::GetShadowMap() const
+{
+	return shadowMap;
+}
 
 void cLight::Update()
 { 

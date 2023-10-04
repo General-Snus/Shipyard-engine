@@ -75,7 +75,7 @@ void cCamera::Update()
 
 void cCamera::Render()
 {
-	GraphicsEngine::Get().AddCommand<GfxCmd_SetFrameBuffer>(myClipMatrix,this->GetGameObject().GetComponent<Transform>(),(int)ModelViewer::GetApplicationState().filter);
+	GraphicsEngine::Get().DeferredCommand<GfxCmd_SetFrameBuffer>(myClipMatrix,this->GetGameObject().GetComponent<Transform>(),(int)ModelViewer::GetApplicationState().filter);
 }
 
 CU::Vector4<float> cCamera::WoldSpaceToPostProjectionSpace(CommonUtilities::Vector3<float> aEntity)

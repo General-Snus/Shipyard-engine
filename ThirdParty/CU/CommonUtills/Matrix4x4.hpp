@@ -304,16 +304,24 @@ namespace CommonUtilities
 	inline Matrix4x4<T> Matrix4x4<T>::LookAt(Vector3<T> position,Vector3<T> target,Vector3<T> upVector)
 	{
 		Vector3<T> zaxis = (target - position).GetNormalized();
-		Vector3<T> xaxis = (zaxis.Cross(upVector)).GetNormalized();
+		Vector3<T> xaxis = (zaxis.Cross(upVector));
 		Vector3<T> yaxis = xaxis.Cross(zaxis);
 
 		zaxis = -zaxis;
 
 		Matrix4x4<T> viewMatrix = {Vector4<Vector4<T>>(
-		  Vector4<T>(xaxis.x, xaxis.y, xaxis.z, -(xaxis).Dot(position)),
-		  Vector4<T>(yaxis.x, yaxis.y, yaxis.z, -(yaxis).Dot(position)),
-		  Vector4<T>(zaxis.x, zaxis.y, zaxis.z, -(zaxis).Dot(position)),
-		  Vector4<T>(0, 0, 0, 1)
+		  Vector4<T>(xaxis.x, xaxis.y, xaxis.z,0 ),
+		  Vector4<T>(yaxis.x, yaxis.y, yaxis.z,0 ),
+		  Vector4<T>(zaxis.x, zaxis.y, zaxis.z,0 ),
+		  Vector4<T>(-(xaxis).Dot(position), -(yaxis).Dot(position), -(zaxis).Dot(position), 1)
+		)};
+
+		Matrix4x4<T> viewMatrix = SetFromRaw(
+			{
+		  Vector4<T>(xaxis.x, xaxis.y, xaxis.z,0),
+		  Vector4<T>(yaxis.x, yaxis.y, yaxis.z,0),
+		  Vector4<T>(zaxis.x, zaxis.y, zaxis.z,0),
+		  Vector4<T>(-(xaxis).Dot(position), -(yaxis).Dot(position), -(zaxis).Dot(position), 1)
 		)};
 
 		return viewMatrix;

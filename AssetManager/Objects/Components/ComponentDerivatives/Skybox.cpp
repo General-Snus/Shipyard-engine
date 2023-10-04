@@ -22,5 +22,5 @@ void Skybox::Render()
 	{
 		return;
 	}
-	GraphicsEngine::Get().AddCommand<GfxCmd_RenderSkybox>(myCubeMap->GetRawTexture());
+	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderSkybox>(myCubeMap->GetRawTexture());
 }

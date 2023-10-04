@@ -7,15 +7,15 @@
 cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId) : Component(anOwnerId)
 {
 	myRenderData.myMaterials.resize(1);
-	AssetManager::GetInstance().LoadAsset<Mesh>("default.fbx",myRenderData.myMesh); 
-	
+	AssetManager::GetInstance().LoadAsset<Mesh>("default.fbx",myRenderData.myMesh);
+
 	myRenderData.myMaterials[0] = GraphicsEngine::Get().GetDefaultMaterial();
 }
 
 inline cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath) : Component(anOwnerId)
 {
 	myRenderData.myMaterials.resize(1);
-	AssetManager::GetInstance().LoadAsset<Mesh>(aFilePath,myRenderData.myMesh); 
+	AssetManager::GetInstance().LoadAsset<Mesh>(aFilePath,myRenderData.myMesh);
 	myRenderData.myMaterials[0] = GraphicsEngine::Get().GetDefaultMaterial();
 }
 
@@ -34,10 +34,12 @@ void cMeshRenderer::Render()
 	Transform* myTransform = this->TryGetComponent<Transform>();
 	if(myTransform != nullptr)
 	{
-		GraphicsEngine::Get().AddCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform());
+		GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform());
+		GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform());
 		return;
 	}
-	GraphicsEngine::Get().AddCommand<GfxCmd_RenderMesh>(myRenderData,CU::Matrix4x4<float>());
+	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,CU::Matrix4x4<float>());
+	GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,CU::Matrix4x4<float>());
 }
 
 cSkeletalMeshRenderer::cSkeletalMeshRenderer(const unsigned int anOwnerId) : cMeshRenderer(anOwnerId)
@@ -67,8 +69,10 @@ void cSkeletalMeshRenderer::Render()
 			myAnimation->RenderAnimation(myRenderData,myTransform->GetTransform());
 			return;
 		}
-		GraphicsEngine::Get().AddCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform());
+		GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform());
+		GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform());
 		return;
 	}
-	GraphicsEngine::Get().AddCommand<GfxCmd_RenderMesh>(myRenderData,CU::Matrix4x4<float>());
+	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,CU::Matrix4x4<float>());
+	GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,CU::Matrix4x4<float>());
 }

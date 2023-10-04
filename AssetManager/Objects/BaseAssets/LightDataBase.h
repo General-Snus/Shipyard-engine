@@ -37,4 +37,5 @@ struct DirectionalLight
 
 	Matrix lightView;
 	Matrix projection;
+
 };

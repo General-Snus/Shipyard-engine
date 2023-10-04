@@ -35,6 +35,7 @@ private:
 	 int RenderMode;
 public:
 	GfxCmd_SetFrameBuffer( const Matrix& ProjectionMatrix,const Transform& ref,int aRenderMode);
+	GfxCmd_SetFrameBuffer( const Matrix& ProjectionMatrix,const Matrix& ref,int aRenderMode);
 	void Execute() override;
 };
 
@@ -48,8 +49,7 @@ class GfxCmd_SetLightBuffer : public GraphicCommand
 public:
 	GfxCmd_SetLightBuffer( );
 	void Execute() override;
-};
-
+}; 
 
 class GfxCmd_DrawDebugPrimitive : public GraphicCommand
 { 
@@ -75,14 +75,25 @@ public:
 	void Execute() override;
 };
 
-
-
+class GfxCmd_RenderMeshShadow : public GfxCmd_RenderMesh
+{  
+public:
+	GfxCmd_RenderMeshShadow(const RenderData& aMesh, const Matrix& aTransform);
+	void Execute() override;
+};
 class GfxCmd_RenderSkeletalMesh : public GfxCmd_RenderMesh
 {
-private:
+protected:
 	Matrix myBoneTransforms[128];
 public:
 	GfxCmd_RenderSkeletalMesh(const RenderData& aMesh,const Matrix& aTransform,const Matrix* aBoneTransformList,unsigned int aNumBones);
+	void Execute() override;
+};
+
+class GfxCmd_RenderSkeletalMeshShadow : public GfxCmd_RenderSkeletalMesh
+{
+public:
+	GfxCmd_RenderSkeletalMeshShadow(const RenderData& aMesh,const Matrix& aTransform,const Matrix* aBoneTransformList,unsigned int aNumBones);
 	void Execute() override;
 };
 

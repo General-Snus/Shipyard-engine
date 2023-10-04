@@ -5,71 +5,26 @@
 #include "Timer.h"
 #include <assert.h>
 #include <GraphicsEngine/Shaders/Registers.h> 
+
 FrameBuffer& GraphicCommand::GetFrameBuffer()
 {
 	return GraphicsEngine::Get().myFrameBuffer;
 }
-
 ObjectBuffer& GraphicCommand::GetObjectBuffer()
 {
 	return GraphicsEngine::Get().myObjectBuffer;
 }
-
 G_Buffer& GraphicCommand::GetGBuffer()
 {
 	return GraphicsEngine::Get().myG_Buffer;
 }
-
 LineBuffer& GraphicCommand::GetLineBuffer()
 {
 	return GraphicsEngine::Get().myLineBuffer;
 }
-
 LightBuffer& GraphicCommand::GetLightBuffer()
 {
 	return GraphicsEngine::Get().myLightBuffer;
-}
-
-GfxCmd_RenderMesh::GfxCmd_RenderMesh(const RenderData& aData, const Matrix& aTransform)
-{
-	myElementsData = aData.myMesh->Elements;
-	myTransform = aTransform;
-	MaxExtents = aData.myMesh->MaxBox;
-	MinExtents = aData.myMesh->MinBox;
-
-	for (auto& aMaterial : aData.myMaterials)
-	{
-		myMaterials.push_back(aMaterial);
-	}
-}
-
-void GfxCmd_RenderMesh::Execute()
-{
-	ObjectBuffer& objectBuffer = GetObjectBuffer();
-	objectBuffer.Data.myTransform = myTransform;
-	objectBuffer.Data.MaxExtents = MaxExtents;
-	objectBuffer.Data.MinExtents = MinExtents;
-	objectBuffer.Data.hasBone = false;
-
-	RHI::UpdateConstantBufferData(objectBuffer);
-
-	G_Buffer gBuffer = GetGBuffer();
-	gBuffer.Data.UseGBufferShader();
-
-	for (auto& aElement : myElementsData)
-	{
-		if (myMaterials.size() > 0)
-		{
-			myMaterials[0].lock()->Update();
-		}
-		RHI::ConfigureInputAssembler(
-			aElement.PrimitiveTopology,
-			aElement.VertexBuffer,
-			aElement.IndexBuffer,
-			aElement.Stride,
-			Vertex::InputLayout);
-		RHI::DrawIndexed(aElement.NumIndices);
-	}
 }
 
 GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
@@ -106,7 +61,6 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 		}
 	}
 }
-
 void GfxCmd_SetLightBuffer::Execute()
 {
 	G_Buffer& gBuffer = GetGBuffer();
@@ -179,7 +133,7 @@ void GfxCmd_SetLightBuffer::Execute()
 		RHI::Draw(4);
 	}
 }
-
+ 
 GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix, const Transform& ref, int aRenderMode)
 {
 	myViewMatrix = Matrix::GetFastInverse(ref.GetTransform());
@@ -188,7 +142,14 @@ GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix, con
 	myPosition = ref.GetPosition();
 	RenderMode = aRenderMode;
 }
-
+GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,const Matrix& ref,int aRenderMode)
+{
+	myViewMatrix = Matrix::GetFastInverse(ref);
+	myProjectionMatrix = ProjectionMatrix;
+	myDeltaTime = static_cast<float>(CommonUtilities::Timer::GetInstance().GetTotalTime());
+	myPosition = {ref(4,1),ref(4,2),ref(4,3)};
+	RenderMode = aRenderMode;
+}
 void GfxCmd_SetFrameBuffer::Execute()
 {
 	FrameBuffer& buffert = GetFrameBuffer();
@@ -203,6 +164,74 @@ void GfxCmd_SetFrameBuffer::Execute()
 
 	RHI::UpdateConstantBufferData(buffert);
 }
+ 
+GfxCmd_RenderMesh::GfxCmd_RenderMesh(const RenderData& aData, const Matrix& aTransform)
+{
+	myElementsData = aData.myMesh->Elements;
+	myTransform = aTransform;
+	MaxExtents = aData.myMesh->MaxBox;
+	MinExtents = aData.myMesh->MinBox;
+
+	for (auto& aMaterial : aData.myMaterials)
+	{
+		myMaterials.push_back(aMaterial);
+	}
+}
+void GfxCmd_RenderMesh::Execute()
+{
+	ObjectBuffer& objectBuffer = GetObjectBuffer();
+	objectBuffer.Data.myTransform = myTransform;
+	objectBuffer.Data.MaxExtents = MaxExtents;
+	objectBuffer.Data.MinExtents = MinExtents;
+	objectBuffer.Data.hasBone = false;
+
+	RHI::UpdateConstantBufferData(objectBuffer);
+
+	G_Buffer gBuffer = GetGBuffer();
+	gBuffer.Data.UseGBufferShader();
+
+	for (auto& aElement : myElementsData)
+	{
+		if (myMaterials.size() > 0)
+		{
+			myMaterials[0].lock()->Update();
+		}
+		RHI::ConfigureInputAssembler(
+			aElement.PrimitiveTopology,
+			aElement.VertexBuffer,
+			aElement.IndexBuffer,
+			aElement.Stride,
+			Vertex::InputLayout);
+		RHI::DrawIndexed(aElement.NumIndices);
+	}
+}
+
+GfxCmd_RenderMeshShadow::GfxCmd_RenderMeshShadow(const RenderData& aMesh,const Matrix& aTransform) : GfxCmd_RenderMesh(aMesh,aTransform)
+{ 
+} 
+
+void GfxCmd_RenderMeshShadow::Execute()
+{
+	ObjectBuffer& objectBuffer = GetObjectBuffer();
+	objectBuffer.Data.myTransform = myTransform;
+	objectBuffer.Data.MaxExtents = MaxExtents;
+	objectBuffer.Data.MinExtents = MinExtents;
+	objectBuffer.Data.hasBone = false;
+
+	RHI::UpdateConstantBufferData(objectBuffer); 
+
+	for(auto& aElement : myElementsData)
+	{ 
+		RHI::ConfigureInputAssembler(
+			aElement.PrimitiveTopology,
+			aElement.VertexBuffer,
+			aElement.IndexBuffer,
+			aElement.Stride,
+			Vertex::InputLayout);
+		RHI::DrawIndexed(aElement.NumIndices);
+	}
+}
+
 
 GfxCmd_RenderSkeletalMesh::GfxCmd_RenderSkeletalMesh(const RenderData& aData,
 	const Matrix& aTransform, const Matrix* aBoneTransformList, unsigned int aNumBones) : GfxCmd_RenderMesh(aData, aTransform)
@@ -213,7 +242,6 @@ GfxCmd_RenderSkeletalMesh::GfxCmd_RenderSkeletalMesh(const RenderData& aData,
 		myBoneTransforms[i] = aBoneTransformList[i];
 	}
 }
-
 void GfxCmd_RenderSkeletalMesh::Execute()
 {
 	ObjectBuffer& objectBuffer = GetObjectBuffer();
@@ -240,22 +268,22 @@ void GfxCmd_RenderSkeletalMesh::Execute()
 			Vertex::InputLayout);
 		RHI::DrawIndexed(aElement.NumIndices);
 	}
-}
+} 
+
 
 GfxCmd_RenderSkybox::GfxCmd_RenderSkybox(std::shared_ptr<Texture> texture) : mySkyboxTexture(texture)
 {
 }
-
 void GfxCmd_RenderSkybox::Execute()
 {
 	//RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER, 100	,mySkyboxTexture.get());
 }
 
+
 GfxCmd_DrawDebugPrimitive::GfxCmd_DrawDebugPrimitive(Debug::DebugPrimitive primitive, Matrix Transform) : myPrimitive(primitive), myTransform(Transform)
 {
 
 }
-
 void GfxCmd_DrawDebugPrimitive::Execute()
 {
 	LineBuffer& lineBuffer = GetLineBuffer();
@@ -272,4 +300,38 @@ void GfxCmd_DrawDebugPrimitive::Execute()
 	RHI::SetVertexShader(GraphicsEngine::Get().GetDebugLineVS().get());
 	RHI::SetPixelShader(GraphicsEngine::Get().GetDebugLinePS().get());
 	RHI::DrawIndexed(static_cast<UINT>(myPrimitive.NumIndices));
+}
+ 
+GfxCmd_RenderSkeletalMeshShadow::GfxCmd_RenderSkeletalMeshShadow(
+	const RenderData& aMesh,
+	const Matrix& aTransform,
+	const Matrix* aBoneTransformList,
+	unsigned int aNumBones) : 
+	GfxCmd_RenderSkeletalMesh(aMesh,aTransform,aBoneTransformList,aNumBones)
+{
+}
+
+void GfxCmd_RenderSkeletalMeshShadow::Execute()
+{
+	ObjectBuffer& objectBuffer = GetObjectBuffer();
+	objectBuffer.Data.myTransform = myTransform;
+	objectBuffer.Data.MaxExtents = MaxExtents;
+	objectBuffer.Data.MinExtents = MinExtents;
+	objectBuffer.Data.hasBone = true;
+	for(int i = 0; i < 128; i++)
+	{
+		objectBuffer.Data.myBoneTransforms[i] = myBoneTransforms[i];
+	}
+
+	RHI::UpdateConstantBufferData(objectBuffer); 
+
+	for(auto& aElement : myElementsData)
+	{ 
+		RHI::ConfigureInputAssembler(aElement.PrimitiveTopology,
+			aElement.VertexBuffer,
+			aElement.IndexBuffer,
+			aElement.Stride,
+			Vertex::InputLayout);
+		RHI::DrawIndexed(aElement.NumIndices);
+	}
 }

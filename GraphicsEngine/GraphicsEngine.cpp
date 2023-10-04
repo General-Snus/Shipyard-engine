@@ -28,6 +28,7 @@
 #include <AssetManager/Objects/Components/ComponentDerivatives/LightComponent.h>
 
 #include "Shaders/Registers.h"
+#include <ImGui/imgui.h>
 
 
 bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
@@ -330,6 +331,31 @@ void GraphicsEngine::BeginFrame()
 void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 {
 	aDeltaTime; aTotalTime;
+	DirectionalLight* dirLight;
+	std::shared_ptr<Texture> shadowMap;
+	Matrix lightMatrix;
+	for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
+	{
+		if(i.GetType() == eLightType::Directional)
+		{
+			shadowMap = i.GetShadowMap();
+			dirLight = i.GetData<DirectionalLight>().get();
+
+			ImGui::Begin("shadowmap");
+			ImGui::Image((void*)shadowMap->GetSRV(),ImVec2(256,256));
+			ImGui::End();
+
+			GfxCmd_SetFrameBuffer(dirLight->projection,dirLight->lightView,0).Execute();
+			RHI::SetRenderTarget(nullptr,shadowMap.get());
+			RHI::Context->PSSetShader(nullptr,nullptr,0);
+			for(const auto& command : ShadowCommandList)
+			{
+				command->Execute();
+			} 
+		} 
+	}
+	
+
 
 	RHI::SetRenderTarget(myBackBuffer.get(),myDepthBuffer.get());
 	myG_Buffer.Data.SetWriteTargetToBuffer(); //Let all write to textures
@@ -343,7 +369,6 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	//LIGHTS 
 	GfxCmd_SetLightBuffer().Execute(); 
 	RHI::SetBlendState(AlphaBlendState);
-
 	for (const auto& command : this->OverlayCommandList)
 	{
 		command->Execute();
