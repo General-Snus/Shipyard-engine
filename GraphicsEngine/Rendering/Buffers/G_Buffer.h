@@ -25,8 +25,8 @@ struct G_BufferData
 
 	//Custom shader 
 	ComPtr<ID3D11VertexShader> myVertexShader;
-	ComPtr<ID3D11VertexShader> myScreenSpaceShader;
 	ComPtr<ID3D11PixelShader> myPixelShader; 
+	ComPtr<ID3D11VertexShader> myScreenSpaceShader;
 	ComPtr<ID3D11PixelShader> myEnviromentPixelShader; 
 	ComPtr<ID3D11PixelShader> myPointPixelShader; 
 	ComPtr<ID3D11PixelShader> mySpotShader; 

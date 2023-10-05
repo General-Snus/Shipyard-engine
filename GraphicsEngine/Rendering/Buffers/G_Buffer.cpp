@@ -161,8 +161,7 @@ void G_BufferData::Init()
 }
 
 void G_BufferData::SetWriteTargetToBuffer()
-{
-
+{ 
 	for(int i = 0; i < vectorOfTextures.size(); i++)
 	{
 		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,i,nullptr);

@@ -29,7 +29,7 @@ namespace CommonUtilities
 		static Matrix4x4<T> Transpose(const Matrix4x4<T>& aMatrixToTranspose);
 		static Matrix4x4<T> GetFastInverse(const Matrix4x4<T>& aTransform);
 
-		static Matrix4x4<T> LookAt(Vector3<T> position,Vector3<T> target,Vector3<T> upVector);
+		static const Matrix4x4<T> LookAt(const Vector3<T>& aFrom,const Vector3<T>& aTarget,const Vector3<T>& anUp);
 		static Matrix4x4<T> CreateOrthographicProjection(float aLeftPlane,float aRightPlane,float aBottomPlane,float aTopPlane,float aNearPlane,float aFarPlane);
 		void SetFromRaw(const T arr[16]);
 	private:
@@ -301,28 +301,31 @@ namespace CommonUtilities
 	}
 
 	template<class T>
-	inline Matrix4x4<T> Matrix4x4<T>::LookAt(Vector3<T> position,Vector3<T> target,Vector3<T> upVector)
+	inline const Matrix4x4<T> Matrix4x4<T>::LookAt(const Vector3<T>& aFrom,const Vector3<T>& aTarget,const Vector3<T>& anUp)
 	{
-		Vector3<T> zaxis = (position - target);
-		zaxis.Normalize();
-		Vector3<T> xaxis = (upVector.Cross(zaxis));
-		Vector3<T> yaxis = zaxis.Cross(xaxis);
+		Matrix4x4<T> result; 
 
-		xaxis.Normalize();
-		yaxis.Normalize();
+		Vector3<T> forward = (aTarget - aFrom).GetNormalized();
+		Vector3<T> right = anUp.Cross(forward).GetNormalized();
+		Vector3<T> up = forward.Cross(right);
 
+		result(1,1) = right.x;
+		result(1,2) = right.y;
+		result(1,3) = right.z;
 
+		result(2,1) = up.x;
+		result(2,2) = up.y;
+		result(2,3) = up.z;
 
-		Vector3<T> transform = {-(xaxis.Dot(position)), -(yaxis.Dot(position)), -(zaxis.Dot(position))};
-		Matrix4x4<T> viewMatrix(
-			{
-				{xaxis.x, xaxis.y, xaxis.z,0},
-				{yaxis.x, yaxis.y, yaxis.z,0},
-				{zaxis.x, zaxis.y, zaxis.z,0},
-				{transform.x,transform.y,transform.z, 1}
-			});
+		result(3,1) = forward.x;
+		result(3,2) = forward.y;
+		result(3,3) = forward.z;
 
-		return viewMatrix;
+		result(4,1) = aFrom.x;
+		result(4,2) = aFrom.y;
+		result(4,3) = aFrom.z;
+
+		return result;
 	}
 
 	template<typename T>

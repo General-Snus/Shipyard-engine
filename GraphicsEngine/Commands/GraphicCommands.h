@@ -40,8 +40,7 @@ public:
 };
 
 class GfxCmd_SetLightBuffer : public GraphicCommand
-{ 
-	eLightType runWithThisType;
+{
 	std::vector<DirectionalLight*> dirLight;
 	std::vector<PointLight*> pointLight;
 	std::vector<SpotLight*> spotLight;

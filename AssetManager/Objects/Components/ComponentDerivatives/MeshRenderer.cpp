@@ -8,7 +8,7 @@ cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId) : Component(anOwnerId
 {
 	myRenderData.myMaterials.resize(1);
 	AssetManager::GetInstance().LoadAsset<Mesh>("default.fbx",myRenderData.myMesh);
-
+		
 	myRenderData.myMaterials[0] = GraphicsEngine::Get().GetDefaultMaterial();
 }
 

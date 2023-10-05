@@ -28,6 +28,7 @@ public:
 	void Update() override; 
 
 	~cLight() = default;
+	static void CalculateDirectionLight(Vector3f direction,DirectionalLight& ref);
 private:
 	eLightType myLightType;
 	std::shared_ptr<DirectionalLight> myDirectionLightData;
@@ -35,13 +36,13 @@ private:
 	std::shared_ptr<PointLight> myPointLightData;
 	std::shared_ptr<Texture> shadowMap;
 	bool boundToTransform = false;
-	bool castShadows = true;
+	bool castShadows = true; 
 };
 
 template<>
 inline std::shared_ptr<DirectionalLight> cLight::GetData<DirectionalLight>()
 {
-	myDirectionLightData->CalculateDirectionLight(myDirectionLightData->Direction);
+	 CalculateDirectionLight(myDirectionLightData->Direction,*myDirectionLightData);
 	return myDirectionLightData;
 }
 

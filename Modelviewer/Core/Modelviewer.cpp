@@ -187,8 +187,8 @@ void ModelViewer::LoadScene()
 		worldRoot.AddComponent<cLight>(eLightType::Directional);
 		std::weak_ptr<DirectionalLight> pLight = worldRoot.GetComponent<cLight>().GetData<DirectionalLight>();
 		pLight.lock()->Color = CU::Vector3<float>(1,1,1);
-		pLight.lock()->Power = 10.0f;
-		pLight.lock()->CalculateDirectionLight({1,-1,1});
+		pLight.lock()->Power = 10.0f; 
+		cLight::CalculateDirectionLight({1,-1,1},*pLight.lock());
 	}
 
 
@@ -220,6 +220,7 @@ void ModelViewer::LoadScene()
 		test2.AddComponent<Transform>(aPosition);
 		test2.GetComponent<Transform>().GetTransform()(4,3) = 1000;;
 		test2.GetComponent<Transform>().GetTransform()(4,2) = -100;;
+		test2.GetComponent<Transform>().SetScale(5);
 	}
 
 
@@ -287,7 +288,7 @@ void ModelViewer::LoadScene()
 		std::weak_ptr<PointLight> ptr = pointLight.GetComponent<cLight>().GetData<PointLight>();
 		ptr.lock()->Color = { (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000 };
 		ptr.lock()->Range = 10000.0f;
-		ptr.lock()->Power = 600.0f * Kilo;
+		ptr.lock()->Power = 1.0f * Kilo;
 		pointLight.GetComponent<cLight>().BindDirectionToTransform(true); 
 	}
 
@@ -299,11 +300,11 @@ void ModelViewer::LoadScene()
 	}
 
 	{
-		GameObject test3 = gom.CreateGameObject();
-		test3.AddComponent<cMeshRenderer>("Models/SteelFloor.fbx");
-		test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");;
-		test3.AddComponent<Transform>();
-		test3.GetComponent<Transform>().GetTransform()(4,2) = -125;
+		 GameObject test3 = gom.CreateGameObject();
+		 test3.AddComponent<cMeshRenderer>("Models/SteelFloor.fbx");
+		 test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");;
+		 test3.AddComponent<Transform>();
+		 test3.GetComponent<Transform>().GetTransform()(4,2) = -125;
 	}
 }
 

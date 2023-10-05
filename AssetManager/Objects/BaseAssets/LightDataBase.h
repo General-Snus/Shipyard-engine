@@ -19,16 +19,15 @@ struct SpotLight
 
 struct PointLight
 {
-	Vector3f Color;
-	float Power;
+	Vector3f Color = {1,1,1};
+	float Power = 0;
 
-	Vector3f Position;
-	float Range;
+	Vector3f Position = {0,0,0};
+	float Range = 0;
 };
 
 struct DirectionalLight 
 { 
-	void CalculateDirectionLight(Vector3f direction);
 	Vector3f Color;
 	float Power; // watt
 
@@ -36,6 +35,5 @@ struct DirectionalLight
 	float padding;
 
 	Matrix lightView;
-	Matrix projection;
-
-};
+	Matrix projection; 
+}; 

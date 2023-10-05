@@ -183,7 +183,7 @@ void GraphicsEngine::SetupDefaultVariables()
 	RHI::SetSamplerState(myDefaultSampleState,REG_DefaultSampler);
 
 	D3D11_SAMPLER_DESC shadowSamplerDesc = {};
-	shadowSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+	shadowSamplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
 	shadowSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
 	shadowSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
 	shadowSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
@@ -192,10 +192,10 @@ void GraphicsEngine::SetupDefaultVariables()
 	shadowSamplerDesc.BorderColor[2] = 0.f;
 	shadowSamplerDesc.BorderColor[3] = 0.f;
 	shadowSamplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
-	shadowSamplerDesc.MipLODBias = 0.0f;
-	shadowSamplerDesc.MaxAnisotropy = static_cast<UINT>(1.0f);
-	shadowSamplerDesc.MinLOD = -FLT_MAX;
-	shadowSamplerDesc.MaxLOD = FLT_MAX;
+	shadowSamplerDesc.MinLOD = -D3D11_FLOAT32_MAX;
+	shadowSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	shadowSamplerDesc.MipLODBias = 0.f;
+	shadowSamplerDesc.MaxAnisotropy = 1;
 
 	if(!RHI::CreateSamplerState(myShadowSampleState,shadowSamplerDesc))
 	{
@@ -355,6 +355,7 @@ void GraphicsEngine::BeginFrame()
 
 void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 {
+	RHI::SetVertexShader(myVertexShader);
 	aDeltaTime; aTotalTime;
 	DirectionalLight* dirLight;
 	std::shared_ptr<Texture> shadowMap;
@@ -362,32 +363,31 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
 	{
 		if(i.GetType() == eLightType::Directional)
-		{
+		{	
 			shadowMap = i.GetShadowMap();
 			dirLight = i.GetData<DirectionalLight>().get(); 			 
 			myLightBuffer.Data.myDirectionalLight.Color = dirLight->Color;
 			myLightBuffer.Data.myDirectionalLight.Power = dirLight->Power;
 			myLightBuffer.Data.myDirectionalLight.Direction = dirLight->Direction;
 			myLightBuffer.Data.myDirectionalLight.lightView = dirLight->lightView;
-			myLightBuffer.Data.myDirectionalLight.projection = dirLight->projection;
-
+			myLightBuffer.Data.myDirectionalLight.projection = dirLight->projection; 
 			RHI::UpdateConstantBufferData(myLightBuffer);
-			RHI::ClearDepthStencil(shadowMap.get());
+
+			RHI::ClearDepthStencil(shadowMap.get()); 
 			RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,nullptr);
 			RHI::SetRenderTarget(nullptr,shadowMap.get());
-			GfxCmd_SetFrameBuffer(dirLight->projection,dirLight->lightView,0).Execute(); 
+			GfxCmd_SetFrameBuffer(dirLight->projection,dirLight->lightView,0).Execute();
+
 			for(const auto& command : ShadowCommandList)
 			{
 				command->Execute();
 			}
 		}
 	}
-	ImGui::Begin("shadowmap");
-	ImGui::Image((void*)shadowMap->GetSRV(),ImVec2(1024,1024));
-	ImGui::End();
+	
 
 
-	//RHI::SetRenderTarget(myBackBuffer.get(),myDepthBuffer.get());
+	RHI::SetRenderTarget(myBackBuffer.get(),myDepthBuffer.get());
 	myG_Buffer.Data.SetWriteTargetToBuffer(); //Let all write to textures
 	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,shadowMap.get()); 
 
@@ -397,6 +397,9 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	}
 	RHI::SetRenderTarget(myBackBuffer.get(),nullptr);
 
+	ImGui::Begin("shadowmap");
+	ImGui::Image((void*)shadowMap->GetSRV(),ImVec2(1000,1000));
+	ImGui::End();
 	//LIGHTS 
 	GfxCmd_SetLightBuffer().Execute();
 	RHI::SetBlendState(AlphaBlendState);

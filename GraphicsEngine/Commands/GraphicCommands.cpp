@@ -68,7 +68,7 @@ void GfxCmd_SetLightBuffer::Execute()
 	gBuffer.Data.UseEnviromentShader();
 	for (auto& light : dirLight)
 	{
-		LightBuffer& buff = GetLightBuffer();
+		LightBuffer& buff = GetLightBuffer(); 
 		buff.Data.myDirectionalLight.Color = light->Color;
 		buff.Data.myDirectionalLight.Power = light->Power;
 		buff.Data.myDirectionalLight.Direction = light->Direction;
@@ -88,50 +88,50 @@ void GfxCmd_SetLightBuffer::Execute()
 
 
 
-	gBuffer.Data.UsePointlightShader();
-	for (auto& light : pointLight)
-	{
-		LightBuffer& buff = GetLightBuffer();
-		buff.Data.myDirectionalLight.Color = light->Color;
-		buff.Data.myDirectionalLight.Power = light->Power;
-		buff.Data.myPointLight.Color = light->Color;
-		buff.Data.myPointLight.Power = light->Power;
-		buff.Data.myPointLight.Range = light->Range;
-		buff.Data.myPointLight.Position = light->Position;
-
-		RHI::UpdateConstantBufferData(buff);
-		RHI::ConfigureInputAssembler(
-			D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
-			nullptr,
-			nullptr,
-			0,
-			nullptr
-		);
-		RHI::Draw(4);
-	}
-
-	gBuffer.Data.UseSpotlightShader();
-	for (auto& light : spotLight)
-	{
-		LightBuffer& buff = GetLightBuffer();
-		buff.Data.mySpotLight.Color = light->Color;
-		buff.Data.mySpotLight.Power = light->Power;
-		buff.Data.mySpotLight.Range = light->Range;
-		buff.Data.mySpotLight.InnerConeAngle = light->InnerConeAngle;
-		buff.Data.mySpotLight.OuterConeAngle = light->OuterConeAngle;
-		buff.Data.mySpotLight.Direction = light->Direction;
-		buff.Data.mySpotLight.Position = light->Position;
-
-		RHI::UpdateConstantBufferData(buff);
-		RHI::ConfigureInputAssembler(
-			D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
-			nullptr,
-			nullptr,
-			0,
-			nullptr
-		);
-		RHI::Draw(4);
-	}
+	//gBuffer.Data.UsePointlightShader();
+	//for (auto& light : pointLight)
+	//{
+	//	LightBuffer& buff = GetLightBuffer();
+	//	buff.Data.myDirectionalLight.Color = light->Color;
+	//	buff.Data.myDirectionalLight.Power = light->Power;
+	//	buff.Data.myPointLight.Color = light->Color;
+	//	buff.Data.myPointLight.Power = light->Power;
+	//	buff.Data.myPointLight.Range = light->Range;
+	//	buff.Data.myPointLight.Position = light->Position;
+	//
+	//	RHI::UpdateConstantBufferData(buff);
+	//	RHI::ConfigureInputAssembler(
+	//		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
+	//		nullptr,
+	//		nullptr,
+	//		0,
+	//		nullptr
+	//	);
+	//	RHI::Draw(4);
+	//}
+	//
+	//gBuffer.Data.UseSpotlightShader();
+	//for (auto& light : spotLight)
+	//{
+	//	LightBuffer& buff = GetLightBuffer();
+	//	buff.Data.mySpotLight.Color = light->Color;
+	//	buff.Data.mySpotLight.Power = light->Power;
+	//	buff.Data.mySpotLight.Range = light->Range;
+	//	buff.Data.mySpotLight.InnerConeAngle = light->InnerConeAngle;
+	//	buff.Data.mySpotLight.OuterConeAngle = light->OuterConeAngle;
+	//	buff.Data.mySpotLight.Direction = light->Direction;
+	//	buff.Data.mySpotLight.Position = light->Position;
+	//
+	//	RHI::UpdateConstantBufferData(buff);
+	//	RHI::ConfigureInputAssembler(
+	//		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
+	//		nullptr,
+	//		nullptr,
+	//		0,
+	//		nullptr
+	//	);
+	//	RHI::Draw(4);
+	//}
 }
  
 GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix, const Transform& ref, int aRenderMode)
@@ -163,7 +163,7 @@ void GfxCmd_SetFrameBuffer::Execute()
 	buffert.Data.FB_CameraPosition[2] = myPosition.z;
 
 	RHI::UpdateConstantBufferData(buffert);
-	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_GEOMETERY_SHADER | PIPELINE_STAGE_PIXEL_SHADER,0,buffert);
+	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_GEOMETERY_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_FrameBuffer,buffert);
 }
  
 GfxCmd_RenderMesh::GfxCmd_RenderMesh(const RenderData& aData, const Matrix& aTransform)
@@ -219,8 +219,7 @@ void GfxCmd_RenderMeshShadow::Execute()
 	objectBuffer.Data.MinExtents = MinExtents;
 	objectBuffer.Data.hasBone = false;
 
-	RHI::UpdateConstantBufferData(objectBuffer);
-	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER,REG_ObjectBuffer,objectBuffer);
+	RHI::UpdateConstantBufferData(objectBuffer); 
 	RHI::Context->PSSetShader(nullptr,nullptr,0);
 
 	for(auto& aElement : myElementsData)

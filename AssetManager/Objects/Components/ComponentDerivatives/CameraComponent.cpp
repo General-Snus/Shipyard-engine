@@ -31,7 +31,7 @@ void cCamera::Update()
 
 	float aTimeDelta = CU::Timer::GetInstance().GetDeltaTime();
 	//UpdatePositionVectors();
-	const float mdf = 150;
+	const float mdf = 1000;
 	const float rotationSpeed = 100;
 	if(GetAsyncKeyState('W'))
 	{
