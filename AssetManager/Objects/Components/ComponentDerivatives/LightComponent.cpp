@@ -108,10 +108,9 @@ void cLight::CalculateDirectionLight(Vector3f direction, DirectionalLight& ref)
 	const float radius = ModelViewer::Get().GetWorldBounds().GetRadius();
 	Vector3f lightPosition = radius * 2.0f * -direction.GetNormalized();
 	const Vector3f worldCenter = ModelViewer::Get().GetWorldBounds().GetCenter();
-	ref.Direction = (worldCenter - lightPosition).GetNormalized();
+	ref.Direction =  Vector4f((worldCenter - lightPosition).GetNormalized(),1);
 	ref.lightView = CU::Matrix4x4<float>::LookAt(lightPosition,worldCenter,{0,1,0}); // REFACTOR, Magic value up
-	const Vector4f cameraCenter = Vector4f(worldCenter,0.0f) * ref.lightView;
-	ref.lightView = Matrix::GetFastInverse(ref.lightView);
+	const Vector4f cameraCenter = Vector4f(worldCenter,0.0f) * ref.lightView; 
 
 	const float leftPlane = cameraCenter.x - radius * 1;
 	const float rightPlane = cameraCenter.x + radius * 1;

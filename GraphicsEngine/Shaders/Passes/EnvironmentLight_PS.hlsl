@@ -103,9 +103,8 @@ float4 worldPosition
     float4 lightSpacePos = (myDirectionalLight.lightView, worldPosition);
     lightSpacePos = mul(myDirectionalLight.projection, lightSpacePos);
     float3 lightSpaceUV = lightSpacePos.xyz / lightSpacePos.w;
-    float D = lightSpaceUV.z    ;
+    float D = lightSpaceUV.z -0.03  ;
     lightSpaceUV.xy = lightSpaceUV.xy * 0.5f + 0.5f; 
-    lightSpaceUV.y = 1 - lightSpaceUV.y;
     float shadow = shadowMap.SampleCmpLevelZero(shadowCmpSampler, lightSpaceUV.xy, D).r;  
     
     return shadow*saturate(directLightDiffuse + directLightSpecular) * myDirectionalLight.Color * myDirectionalLight.Power * NdotL;

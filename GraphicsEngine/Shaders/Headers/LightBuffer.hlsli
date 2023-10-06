@@ -5,8 +5,7 @@ struct  DirectionalLight
     float3 Color;   //12
     float Power; //4
     
-    float3 Direction; //12
-    float Pad;        //4
+    float4 Direction;  
     
     float4x4 lightView;
     float4x4 projection;

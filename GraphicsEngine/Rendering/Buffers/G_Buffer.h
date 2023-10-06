@@ -4,7 +4,7 @@
 #include "Rendering/Buffers/ConstantBuffer.h" 
 #include <AssetManager/Objects/BaseAssets/MaterialAsset.h>
 
-struct G_BufferData
+struct G_Buffer
 {
 	// Set default values from graphicsEngine
 	void Init();
@@ -48,5 +48,4 @@ struct G_BufferData
 	void ClearTargets();
 
 };
-
-typedef ConstantBuffer<G_BufferData> G_Buffer;
+ 

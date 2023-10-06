@@ -14,7 +14,7 @@ ObjectBuffer& GraphicCommand::GetObjectBuffer()
 {
 	return GraphicsEngine::Get().myObjectBuffer;
 }
-G_Buffer& GraphicCommand::GetGBuffer()
+G_Buffer& GraphicCommand::GetGBuffer()	
 {
 	return GraphicsEngine::Get().myG_Buffer;
 }
@@ -65,7 +65,7 @@ void GfxCmd_SetLightBuffer::Execute()
 {
 	G_Buffer& gBuffer = GetGBuffer();
 
-	gBuffer.Data.UseEnviromentShader();
+	gBuffer.UseEnviromentShader();
 	for (auto& light : dirLight)
 	{
 		LightBuffer& buff = GetLightBuffer(); 
@@ -73,8 +73,7 @@ void GfxCmd_SetLightBuffer::Execute()
 		buff.Data.myDirectionalLight.Power = light->Power;
 		buff.Data.myDirectionalLight.Direction = light->Direction;
 		buff.Data.myDirectionalLight.lightView = light->lightView;
-		buff.Data.myDirectionalLight.projection = light->projection;
-
+		buff.Data.myDirectionalLight.projection = light->projection; 
 		RHI::UpdateConstantBufferData(buff);
 		RHI::ConfigureInputAssembler(
 			D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
@@ -144,7 +143,7 @@ GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix, con
 }
 GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,const Matrix& ref,int aRenderMode)
 {
-	myViewMatrix = ref;
+	myViewMatrix = Matrix::GetFastInverse(ref); 
 	myProjectionMatrix = ProjectionMatrix;
 	myDeltaTime = static_cast<float>(CommonUtilities::Timer::GetInstance().GetTotalTime());
 	myPosition = {ref(4,1),ref(4,2),ref(4,3)};
@@ -189,7 +188,7 @@ void GfxCmd_RenderMesh::Execute()
 	RHI::UpdateConstantBufferData(objectBuffer);
 
 	G_Buffer gBuffer = GetGBuffer();
-	gBuffer.Data.UseGBufferShader();
+	gBuffer.UseGBufferShader();
 
 	for (auto& aElement : myElementsData)
 	{
@@ -219,7 +218,8 @@ void GfxCmd_RenderMeshShadow::Execute()
 	objectBuffer.Data.MinExtents = MinExtents;
 	objectBuffer.Data.hasBone = false;
 
-	RHI::UpdateConstantBufferData(objectBuffer); 
+	RHI::UpdateConstantBufferData(objectBuffer);  
+	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER,1,objectBuffer);
 	RHI::Context->PSSetShader(nullptr,nullptr,0);
 
 	for(auto& aElement : myElementsData)
@@ -258,7 +258,7 @@ void GfxCmd_RenderSkeletalMesh::Execute()
 
 	RHI::UpdateConstantBufferData(objectBuffer);
 	G_Buffer gBuffer = GetGBuffer();
-	gBuffer.Data.UseGBufferShader();
+	gBuffer.UseGBufferShader();
 
 	for (auto& aElement : myElementsData)
 	{
@@ -325,7 +325,7 @@ void GfxCmd_RenderSkeletalMeshShadow::Execute()
 	}
 
 	RHI::UpdateConstantBufferData(objectBuffer);
-	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER,REG_ObjectBuffer,objectBuffer);
+	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER,1,objectBuffer);
 	RHI::Context->PSSetShader(nullptr,nullptr,0); 
 
 	for(auto& aElement : myElementsData)

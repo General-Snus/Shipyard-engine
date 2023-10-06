@@ -31,8 +31,7 @@ struct DirectionalLight
 	Vector3f Color;
 	float Power; // watt
 
-	Vector3f Direction = {0,0,1}; //12
-	float padding;
+	Vector4f Direction = {0,0,1,1}; 
 
 	Matrix lightView;
 	Matrix projection; 

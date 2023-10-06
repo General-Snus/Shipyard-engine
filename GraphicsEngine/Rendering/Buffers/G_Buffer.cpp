@@ -11,7 +11,7 @@
 #include<GraphicsEngine/GraphicsEngine.h> 
 #include <d3d11.h>
 
-void G_BufferData::Init()
+void G_Buffer::Init()
 {
 	const int width = RHI::GetDeviceSize().Width;
 	const int height = RHI::GetDeviceSize().Height;
@@ -160,7 +160,7 @@ void G_BufferData::Init()
 
 }
 
-void G_BufferData::SetWriteTargetToBuffer()
+void G_Buffer::SetWriteTargetToBuffer()
 { 
 	for(int i = 0; i < vectorOfTextures.size(); i++)
 	{
@@ -170,12 +170,12 @@ void G_BufferData::SetWriteTargetToBuffer()
 	RHI::SetRenderTargets(vectorOfTextures,GraphicsEngine::Get().DepthBuffer());
 }
 
-void G_BufferData::UseGBufferShader()
+void G_Buffer::UseGBufferShader()
 {
 	RHI::SetVertexShader(myVertexShader);
 	RHI::SetPixelShader(myPixelShader);
 }
-void G_BufferData::UseEnviromentShader()
+void G_Buffer::UseEnviromentShader()
 { 
 	RHI::SetVertexShader(myScreenSpaceShader);
 	RHI::SetPixelShader(myEnviromentPixelShader);
@@ -186,7 +186,7 @@ void G_BufferData::UseEnviromentShader()
 	} 
 }
 
-void G_BufferData::UsePointlightShader()
+void G_Buffer::UsePointlightShader()
 {
 	RHI::SetBlendState(GraphicsEngine::Get().GetAdditiveBlendState());
 	RHI::SetVertexShader(myScreenSpaceShader);
@@ -198,7 +198,7 @@ void G_BufferData::UsePointlightShader()
 	}
 }
 
-void G_BufferData::UseSpotlightShader()
+void G_Buffer::UseSpotlightShader()
 {
 	RHI::SetBlendState(GraphicsEngine::Get().GetAdditiveBlendState());
 	RHI::SetVertexShader(myScreenSpaceShader);
@@ -210,7 +210,7 @@ void G_BufferData::UseSpotlightShader()
 	}
 }
 
-void G_BufferData::ClearTargets()
+void G_Buffer::ClearTargets()
 {
 
 	for(int i = 0; i < vectorOfTextures.size(); i++)

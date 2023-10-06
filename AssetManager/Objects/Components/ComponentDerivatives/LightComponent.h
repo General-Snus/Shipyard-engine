@@ -42,7 +42,8 @@ private:
 template<>
 inline std::shared_ptr<DirectionalLight> cLight::GetData<DirectionalLight>()
 {
-	 CalculateDirectionLight(myDirectionLightData->Direction,*myDirectionLightData);
+	const Vector3f dir =  {myDirectionLightData->Direction.x,myDirectionLightData->Direction.y,myDirectionLightData->Direction.z};
+	CalculateDirectionLight(dir,*myDirectionLightData);
 	return myDirectionLightData;
 }
 
