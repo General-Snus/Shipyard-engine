@@ -45,7 +45,7 @@
 #define HLSL_REG_DepthMap t6 
 #define REG_DepthMap 6   
  
-#define HLSL_REG_enviromentCube t100 
+#define HLSL_REG_enviromentCube t100
 #define REG_enviromentCube 100 
 
 #define HLSL_REG_dirLightShadowMap t110 

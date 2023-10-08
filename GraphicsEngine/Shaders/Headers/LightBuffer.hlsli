@@ -39,6 +39,6 @@ struct SpotLight
 cbuffer LightBuffer : register(HLSL_REG_LightBuffer)
 {
     DirectionalLight myDirectionalLight;    //32
-    PointLight myPointLight ;             //32 * 8
-    SpotLight mySpotLight ;               //64*8
+    PointLight myPointLight ;             //32
+    SpotLight mySpotLight ;               //64
 }

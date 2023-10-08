@@ -40,8 +40,6 @@ void G_Buffer::Init()
 		sizeof(BuiltIn_EnvironmentLight_PS_ByteCode)
 	);
 
-	
-
 	RHI::CreatePixelShader(
 		mySpotShader,
 		BuiltIn_SpotLight_PS_ByteCode,
@@ -151,9 +149,6 @@ void G_Buffer::Init()
 	vectorOfTextures.push_back(effectTexture.get());
 	vectorOfTextures.push_back(positionTexture.get());
 	vectorOfTextures.push_back(depthTexture.get());
-
-
-
 
 	//ID3D11Texture2D* depthStencilTexture = nullptr;
 	//

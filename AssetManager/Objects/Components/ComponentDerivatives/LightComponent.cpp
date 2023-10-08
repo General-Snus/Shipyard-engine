@@ -111,13 +111,13 @@ void cLight::CalculateDirectionLight(Vector3f direction, DirectionalLight& ref)
 	ref.Direction =  Vector4f((worldCenter - lightPosition).GetNormalized(),1);
 	ref.lightView = CU::Matrix4x4<float>::LookAt(lightPosition,worldCenter,{0,1,0}); // REFACTOR, Magic value up
 	const Vector4f cameraCenter = Vector4f(worldCenter,0.0f) * ref.lightView; 
-
+	ref.lightView = Matrix::GetFastInverse(ref.lightView);
 	const float leftPlane = cameraCenter.x - radius * 1;
 	const float rightPlane = cameraCenter.x + radius * 1;
 	const float bottomPlane = cameraCenter.y - radius * 1;
 	const float topPlane = cameraCenter.y + radius * 1;
 	const float nearPlane = 0.1f;
-	const float farPlane = radius * 10;
+	const float farPlane = radius * 4;
 	ref.projection = Matrix::CreateOrthographicProjection(
 		leftPlane,
 		rightPlane,

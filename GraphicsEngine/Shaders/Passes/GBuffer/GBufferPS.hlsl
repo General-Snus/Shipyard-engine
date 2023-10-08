@@ -2,8 +2,7 @@
 #include "../../Headers/DefaultVertexToPixel.hlsli"
 #include "../../Headers/DefaultVertexOutput.hlsli"
 #include "../../Headers/MaterialBuffer.hlsli"
-#include "../../Headers/FrameBuffer.hlsli"
-#include "../../Headers/LightBuffer.hlsli"
+#include "../../Headers/FrameBuffer.hlsli" 
 #include "../../Headers/IBLBRDF.hlsli"
 
 #include "../../Registers.h" 
@@ -23,6 +22,9 @@ Texture2D DepthMap : register(HLSL_REG_DepthMap);
 TextureCube enviromentCube : register(HLSL_REG_enviromentCube);
 Texture2D BRDF_LUT_Texture : register(HLSL_REG_BRDF_LUT_Texture);
 
+SamplerComparisonState shadowCmpSampler : register(HLSL_REG_shadowCmpSampler);
+Texture2D shadowMap : register(HLSL_REG_dirLightShadowMap);
+
 struct GBufferOutput
 {
     float4 Albedo : SV_TARGET0;
@@ -39,7 +41,6 @@ struct GBufferOutput
 GBufferOutput main(DefaultVertexToPixel input)
 {
     GBufferOutput result;
-    
     const float3x3 TBN = float3x3(
     normalize(input.Tangent),
     normalize(input.BiNormal),
@@ -48,7 +49,7 @@ GBufferOutput main(DefaultVertexToPixel input)
     
     const float3 cameraDirection = normalize(FB_CameraPosition.xyz - input.WorldPosition.xyz);
    // result.Color.rgb = (input.Normal.rgb + 1) / 2.0f;
-    const float2 uv = input.UV * DefaultMaterial.UVTiling;
+    const float2 uv = input.UV ;
     
     const float4 textureColor = colorMap.Sample(defaultSampler, uv) * DefaultMaterial.albedoColor;
     const float4 materialComponent = materialMap.Sample(defaultSampler, uv);
@@ -80,6 +81,6 @@ GBufferOutput main(DefaultVertexToPixel input)
     result.VertexNormal.w = 1;
     
     result.WorldPosition = input.WorldPosition;
-    
+    result.Depth = 1;
     return result;
 }

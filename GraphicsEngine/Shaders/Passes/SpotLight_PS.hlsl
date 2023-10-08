@@ -1,4 +1,5 @@
 #include "GBuffer/GBufferPS.hlsl"
+#include "../Headers/LightBuffer.hlsli"
 
 float3 PositionInBound(float3 aMin, float3 aMax, float3 aPosition)
 {

@@ -148,6 +148,7 @@
       <VariableName>BuiltIn_%(Filename)_ByteCode</VariableName>
       <HeaderFileOutput>$(ProjectDir)\Shaders\Include\%(Filename).h</HeaderFileOutput>
       <PreprocessorDefinitions>_HLSL;_DEBUG</PreprocessorDefinitions>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

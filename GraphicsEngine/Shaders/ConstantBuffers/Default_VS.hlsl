@@ -51,7 +51,7 @@ DefaultVertexToPixel main(DefaultVertexInput input)
     vertexColorBasedOnPositionInBox.xy = input.UV.xy;
     vertexColorBasedOnPositionInBox.z = 1;
     vertexColorBasedOnPositionInBox.w = 1;
-    result.VxColor = vertexColorBasedOnPositionInBox;
+    result.VxColor = vertexColorBasedOnPositionInBox; 
     return result;
 }
   

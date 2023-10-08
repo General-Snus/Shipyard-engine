@@ -1,10 +1,8 @@
  
 #include "GBuffer/GBufferPS.hlsl"
 
-SamplerComparisonState shadowCmpSampler : register(HLSL_REG_shadowCmpSampler);
-Texture2D shadowMap : register(HLSL_REG_dirLightShadowMap);
 
-DefaultPixelOutput main(BRDF_VS_to_PS input) : SV_TARGET
+DefaultPixelOutput main(BRDF_VS_to_PS input)
 {
     
     DefaultPixelOutput result;
@@ -15,7 +13,7 @@ DefaultPixelOutput main(BRDF_VS_to_PS input) : SV_TARGET
     const float4 Normal = normalMap.Sample(defaultSampler, uv);
     const float4 Effect = effectMap.Sample(defaultSampler, uv);
     const float4 vertexNormal = vertexNormalMap.Sample(defaultSampler, uv);
-    const float4 worldPosition = float4(worldPositionMap.Sample(defaultSampler, uv).xyz, 1);
+    const float4 worldPosition = float4(normalize(worldPositionMap.Sample(defaultSampler, uv).xyz),1);
     const float metallic = Material.b;
     const float roughness = Material.g;
     const float occlusion = Material.r;
@@ -27,6 +25,8 @@ DefaultPixelOutput main(BRDF_VS_to_PS input) : SV_TARGET
     default:
     case 0:
     {
+     result.Color.rgb = 1;
+    result.Color.a = 0.0f;
     break;
     }
     
@@ -39,21 +39,21 @@ DefaultPixelOutput main(BRDF_VS_to_PS input) : SV_TARGET
     
      case 2:
     {
-    result.Color.rgb = vertexNormal;
+    result.Color.rgb = vertexNormal.rgb;
     result.Color.a = 1.0f;
     break;
     }
     
     case 3:
     {
-    result.Color.rgb = albedo;
+    result.Color.rgb = albedo.rgb;
     result.Color.a = 1.0f;
     break;
     }
     
     case 4:
     {
-    result.Color.rgb = Normal;
+    result.Color.rgb = Normal.rgb;
     result.Color.a = 1.0f;
     break;
     } 

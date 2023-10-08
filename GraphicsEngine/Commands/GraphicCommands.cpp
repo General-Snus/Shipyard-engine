@@ -75,7 +75,7 @@ void GfxCmd_SetLightBuffer::Execute()
 		buff.Data.myDirectionalLight.Direction = light->Direction;
 		buff.Data.myDirectionalLight.lightView = light->lightView;
 		buff.Data.myDirectionalLight.projection = light->projection; 
-
+		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_LightBuffer,buff);
 		RHI::UpdateConstantBufferData(buff);
 		RHI::ConfigureInputAssembler(
 			D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
@@ -165,9 +165,11 @@ GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix, con
 	myPosition = ref.GetPosition();
 	RenderMode = aRenderMode;
 }
+
+//Remember to invert the matrix
 GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,const Matrix& ref,int aRenderMode)
 {
-	myViewMatrix = Matrix::GetFastInverse(ref); 
+	myViewMatrix = ref; 
 	myProjectionMatrix = ProjectionMatrix;
 	myDeltaTime = static_cast<float>(CommonUtilities::Timer::GetInstance().GetTotalTime());
 	myPosition = {ref(4,1),ref(4,2),ref(4,3)};
@@ -242,8 +244,8 @@ void GfxCmd_RenderMeshShadow::Execute()
 	objectBuffer.Data.MinExtents = MinExtents;
 	objectBuffer.Data.hasBone = false;
 
-	RHI::UpdateConstantBufferData(objectBuffer);  
 	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER,1,objectBuffer);
+	RHI::UpdateConstantBufferData(objectBuffer);  
 	RHI::Context->PSSetShader(nullptr,nullptr,0);
 
 	for(auto& aElement : myElementsData)
@@ -348,8 +350,8 @@ void GfxCmd_RenderSkeletalMeshShadow::Execute()
 		objectBuffer.Data.myBoneTransforms[i] = myBoneTransforms[i];
 	}
 
-	RHI::UpdateConstantBufferData(objectBuffer);
 	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER,REG_ObjectBuffer,objectBuffer);
+	RHI::UpdateConstantBufferData(objectBuffer);
 	RHI::Context->PSSetShader(nullptr,nullptr,0); 
 
 	for(auto& aElement : myElementsData)

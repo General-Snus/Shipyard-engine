@@ -1,8 +1,6 @@
  
 #include "GBuffer/GBufferPS.hlsl"
-
-SamplerComparisonState shadowCmpSampler : register(HLSL_REG_shadowCmpSampler);
-Texture2D shadowMap : register(HLSL_REG_dirLightShadowMap);
+#include "../Headers/LightBuffer.hlsli" 
 
 float3 PositionInBound(float3 aMin, float3 aMax, float3 aPosition)
 {
@@ -100,14 +98,21 @@ float4 worldPosition
     float3 directLightDiffuse = CalculateDiffuseLight(diffuseColor);
     directLightDiffuse *= (1.0f - directLightSpecular);
     
-    float4 lightSpacePos = mul(myDirectionalLight.lightView, worldPosition);
-    lightSpacePos = mul(myDirectionalLight.projection, lightSpacePos);
-    float3 lightSpaceUV = lightSpacePos.xyz / lightSpacePos.w;
-    float Depth = lightSpaceUV.z;
-    lightSpaceUV.xy = lightSpaceUV.xy * 0.5f + 0.5f;
-    float shadow = shadowMap.SampleCmpLevelZero(shadowCmpSampler, lightSpaceUV.xy, Depth).r;
+    const float4x4 lightView = myDirectionalLight.lightView;
+    const float4x4 lightProj = myDirectionalLight.projection;
     
-    return shadow*saturate(directLightDiffuse + directLightSpecular) * myDirectionalLight.Color * myDirectionalLight.Power * NdotL;
+    float4 lightSpacePos = mul(lightView, worldPosition);
+    lightSpacePos = mul(lightProj, lightSpacePos);
+    
+    float3 lightSpaceUV = 0;
+    lightSpaceUV.x = ((lightSpacePos.x / lightSpacePos.w) * .5 + 0.5);
+    lightSpaceUV.y = 1- ((lightSpacePos.y / lightSpacePos.w) * .5 + 0.5f);
+    
+    float Depth = lightSpacePos.z / lightSpacePos.w;
+    float shadow = shadowMap.Sample(defaultSampler, lightSpaceUV.xy).r;
+    //return float3(pow(shadow, 2), 0, 0);
+
+    return pow(shadow+.5f, 4) * saturate(directLightDiffuse + directLightSpecular) * myDirectionalLight.Color * myDirectionalLight.Power * NdotL;
 }
 
 
@@ -127,14 +132,15 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     const float occlusion = Material.r;
     
     const float3 cameraDirection = normalize(FB_CameraPosition.xyz - worldPosition.xyz);
-    const float3 diffuseColor = lerp((float3) 0.0f, albedo.rgb, 1 - metallic);
-    const float3 specularColor = lerp((float3) 0.04f, albedo.rgb, metallic);
+    const float3 diffuseColor = lerp((float3)0.0f, albedo.rgb, 1 - metallic);
+    const float3 specularColor = lerp((float3)0.04f, albedo.rgb, metallic);
      
     
     const float3 radiance =
-    CalculateDirectionLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, Material.g, worldPosition); 
-    result.Color.rgb = (radiance + Effect.r) * albedo.rgb; 
+    CalculateDirectionLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, Material.g, worldPosition);
+    result.Color.rgb = (radiance + Effect.r) * albedo.rgb;
     result.Color.rgb = saturate(LinearToGamma(result.Color.rgb));
+   //result.Color.rgb = radiance;
     result.Color.a = 1.0f;
     return result;
 }
