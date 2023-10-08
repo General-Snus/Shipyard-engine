@@ -8,6 +8,7 @@
 #include <Shaders/Include/EnvironmentLight_PS.h>
 #include <Shaders/Include/PointLight_PS.h>
 #include <Shaders/Include/SpotLight_PS.h> 
+#include <Shaders/Include/DebugLayer_PS.h> 
 #include<GraphicsEngine/GraphicsEngine.h> 
 #include <d3d11.h>
 
@@ -39,6 +40,8 @@ void G_Buffer::Init()
 		sizeof(BuiltIn_EnvironmentLight_PS_ByteCode)
 	);
 
+	
+
 	RHI::CreatePixelShader(
 		mySpotShader,
 		BuiltIn_SpotLight_PS_ByteCode,
@@ -49,6 +52,12 @@ void G_Buffer::Init()
 		myPointPixelShader,
 		BuiltIn_PointLight_PS_ByteCode,
 		sizeof(BuiltIn_PointLight_PS_ByteCode)
+	);
+
+	RHI::CreatePixelShader(
+		myDebugPixelShader,
+		BuiltIn_DebugLayer_PS_ByteCode,
+		sizeof(BuiltIn_DebugLayer_PS_ByteCode)
 	);
 
 	albedoTexture = std::make_shared<Texture>();
@@ -184,6 +193,18 @@ void G_Buffer::UseEnviromentShader()
 	{
 		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,i,vectorOfTextures[i]);
 	} 
+}
+
+
+void G_Buffer::UseDebugShader()
+{
+	RHI::SetVertexShader(myScreenSpaceShader);
+	RHI::SetPixelShader(myDebugPixelShader);
+
+	for(int i = 0; i < vectorOfTextures.size(); i++)
+	{
+		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,i,vectorOfTextures[i]);
+	}
 }
 
 void G_Buffer::UsePointlightShader()

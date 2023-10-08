@@ -363,37 +363,53 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	{
 		if(i.GetType() == eLightType::Directional)
 		{	
+			RHI::SetVertexShader(myVertexShader); 
 			shadowMap = i.GetShadowMap();
 			dirLight = i.GetData<DirectionalLight>().get(); 
+			myLightBuffer.Data.myDirectionalLight.Color = dirLight->Color;
+			myLightBuffer.Data.myDirectionalLight.Power = dirLight->Power;
+			myLightBuffer.Data.myDirectionalLight.Direction = dirLight->Direction;
+			myLightBuffer.Data.myDirectionalLight.lightView = dirLight->lightView;
+			myLightBuffer.Data.myDirectionalLight.projection = dirLight->projection;
+			RHI::UpdateConstantBufferData(myLightBuffer);
 
-			RHI::SetVertexShader(myVertexShader); 
 			RHI::ClearDepthStencil(shadowMap.get()); 
 			RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,nullptr);
 			RHI::SetRenderTarget(nullptr,shadowMap.get());
 			GfxCmd_SetFrameBuffer(dirLight->projection,dirLight->lightView,0).Execute(); 
+
 			for(const auto& command : ShadowCommandList)
 			{ 
 				command->Execute();
 			}
+			RHI::SetRenderTarget(nullptr,nullptr);
 			
 		}
 	}
 
 
 
-	ImGui::Begin("shadowmap");
-	ImGui::Image((void*)shadowMap->GetSRV(),ImVec2(1000,1000));
-	ImGui::End();
-
-	myG_Buffer.SetWriteTargetToBuffer(); //Let all write to textures
+	
+	 
 	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,shadowMap.get()); 
+	myG_Buffer.SetWriteTargetToBuffer(); //Let all write to textures
 	for(const auto& command : DeferredCommandList)
 	{
 		command->Execute();
 	} 
+	RHI::SetRenderTarget(myBackBuffer.get(),nullptr);
+
+	ImGui::Begin("shadowmap");
+	ImGui::Image((void*)shadowMap->GetSRV(),ImVec2(1000,1000));
+	ImGui::End();
+
 	//LIGHTS 
-	RHI::SetBlendState(AdditiveBlendState);
-	GfxCmd_SetLightBuffer().Execute();  
+	GfxCmd_SetLightBuffer().Execute(); 
+
+	GfxCmd_DebugLayer().Execute();
+
+	myG_Buffer.ClearTargets();
+	RHI::SetBlendState(AlphaBlendState);
 
 	for(const auto& command : this->OverlayCommandList)
 	{

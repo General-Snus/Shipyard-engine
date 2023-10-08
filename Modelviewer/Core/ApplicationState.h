@@ -4,11 +4,8 @@
 enum class DebugFilter
 {
 	NoFilter = 0,
-	WorldPosition,
-	VertexColor,
-	VertetexWorldNormal,
-	VertexWorldTangent,
-	VertexWorldBiNormal,
+	WorldPosition, 
+	VertetexWorldNormal, 
 	AlbedoMap,
 	NormalMap,
 	WorldPixelNormal,
@@ -42,11 +39,8 @@ struct ApplicationState
 
 static inline std::string layerNames[(int)DebugFilter::count] = {
 	"NoFilter ",
-	"WorldPosition",
-	"VertexColor",
-	"VertetexWorldNormal",
-	"VertexWorldTangent",
-	"VertexWorldBiNormal",
+	"WorldPosition", 
+	"VertetexWorldNormal", 
 	"AlbedoMap",
 	"NormalMap",
 	"WorldPixelNormal",

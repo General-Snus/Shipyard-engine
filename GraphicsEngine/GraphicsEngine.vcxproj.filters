@@ -123,6 +123,9 @@
     <ClInclude Include="Shaders\Include\SpotLight_PS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Shaders\Include\DebugLayer_PS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsEngine.pch.cpp">
@@ -183,7 +186,7 @@
     <FxCompile Include="Shaders\Passes\GBuffer\GBufferPS.hlsl" />
     <FxCompile Include="Shaders\Passes\PointLight_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\SpotLight_PS.hlsl" />
-    <FxCompile Include="Shaders\Passes\DebugLayer.hlsl" />
+    <FxCompile Include="Shaders\Passes\DebugLayer_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\LineDrawer.hlsl" />
   </ItemGroup>
 </Project>

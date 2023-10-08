@@ -28,6 +28,7 @@ struct G_Buffer
 	ComPtr<ID3D11PixelShader> myPixelShader; 
 	ComPtr<ID3D11VertexShader> myScreenSpaceShader;
 	ComPtr<ID3D11PixelShader> myEnviromentPixelShader; 
+	ComPtr<ID3D11PixelShader> myDebugPixelShader; 
 	ComPtr<ID3D11PixelShader> myPointPixelShader; 
 	ComPtr<ID3D11PixelShader> mySpotShader; 
 
@@ -43,7 +44,8 @@ struct G_Buffer
 	void SetWriteTargetToBuffer();
 	void UseGBufferShader(); 
 	void UseEnviromentShader(); 
-	void UsePointlightShader(); 
+	void UseDebugShader();
+	void UsePointlightShader();
 	void UseSpotlightShader();
 	void ClearTargets();
 

@@ -91,7 +91,7 @@ float roughness,
 float4 worldPosition
 )
 {
-    const float3 directionToLight = -myDirectionalLight.Direction;
+    const float3 directionToLight = -myDirectionalLight.Direction.xyz;
     const float3 halfAngle = normalize(cameraDirection + directionToLight);
     const float NdotL = saturate(dot(normal, directionToLight));
     const float K = pow(roughness + 1, 2) / 8;
@@ -100,12 +100,12 @@ float4 worldPosition
     float3 directLightDiffuse = CalculateDiffuseLight(diffuseColor);
     directLightDiffuse *= (1.0f - directLightSpecular);
     
-    float4 lightSpacePos = (myDirectionalLight.lightView, worldPosition);
+    float4 lightSpacePos = mul(myDirectionalLight.lightView, worldPosition);
     lightSpacePos = mul(myDirectionalLight.projection, lightSpacePos);
     float3 lightSpaceUV = lightSpacePos.xyz / lightSpacePos.w;
-    float D = lightSpaceUV.z -0.03  ;
-    lightSpaceUV.xy = lightSpaceUV.xy * 0.5f + 0.5f; 
-    float shadow = shadowMap.SampleCmpLevelZero(shadowCmpSampler, lightSpaceUV.xy, D).r;  
+    float Depth = lightSpaceUV.z;
+    lightSpaceUV.xy = lightSpaceUV.xy * 0.5f + 0.5f;
+    float shadow = shadowMap.SampleCmpLevelZero(shadowCmpSampler, lightSpaceUV.xy, Depth).r;
     
     return shadow*saturate(directLightDiffuse + directLightSpecular) * myDirectionalLight.Color * myDirectionalLight.Power * NdotL;
 }
@@ -121,7 +121,7 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     const float4 Material = materialMap.Sample(defaultSampler, uv);
     const float4 Normal = normalMap.Sample(defaultSampler, uv);
     const float4 Effect = effectMap.Sample(defaultSampler, uv);
-    const float4 worldPosition = worldPositionMap.Sample(defaultSampler, uv);
+    const float4 worldPosition = float4(worldPositionMap.Sample(defaultSampler, uv).xyz, 1);
     const float metallic = Material.b;
     const float roughness = Material.g;
     const float occlusion = Material.r;

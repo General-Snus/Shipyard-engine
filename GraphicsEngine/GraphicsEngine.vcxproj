@@ -188,6 +188,7 @@
     <ClInclude Include="Rendering\Buffers\LineBuffer.h" />
     <ClInclude Include="Shaders\Include\brdfLUT_PS.h" />
     <ClInclude Include="Shaders\Include\brdfLUT_VS.h" />
+    <ClInclude Include="Shaders\Include\DebugLayer_PS.h" />
     <ClInclude Include="Shaders\Include\Default_C.h" />
     <ClInclude Include="Shaders\Include\Default_FX.h" />
     <ClInclude Include="Shaders\Include\Default_M.h" />
@@ -255,7 +256,7 @@
     <None Include="Shaders\Headers\ObjectBuffer.hlsli" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\Passes\DebugLayer.hlsl">
+    <FxCompile Include="Shaders\Passes\DebugLayer_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
@@ -296,6 +297,7 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</TreatWarningAsError>
     </FxCompile>
     <FxCompile Include="Shaders\Passes\GBuffer\GBufferPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

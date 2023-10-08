@@ -50,6 +50,13 @@ public:
 	void Execute() override;
 }; 
 
+class GfxCmd_DebugLayer : public GraphicCommand
+{
+public:
+	GfxCmd_DebugLayer();
+	void Execute() override;
+};
+
 class GfxCmd_DrawDebugPrimitive : public GraphicCommand
 { 
 private:
