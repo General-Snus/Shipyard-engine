@@ -101,13 +101,13 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     const float occlusion = Material.r;
     
     const float3 cameraDirection = normalize(FB_CameraPosition.xyz - worldPosition.xyz);
-    const float3 diffuseColor = lerp((float3) 0.0f, albedo.rgb, 1 - metallic);
-    const float3 specularColor = lerp((float3) 0.04f, albedo.rgb, metallic);
+    const float3 diffuseColor = lerp((float3)0.0f, albedo.rgb, 1 - metallic);
+    const float3 specularColor = lerp((float3)0.04f, albedo.rgb, metallic);
     
     float3 totalPointLightContribution = 0;
      
         [flatten]
-    if (myPointLight.Power > 0)
+    if(myPointLight.Power > 0)
     {
         totalPointLightContribution += CalculatePointLight(
             diffuseColor,
@@ -122,9 +122,7 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     }
    
     const float3 radiance = totalPointLightContribution;
-    result.Color.rgb = (radiance ) * albedo.rgb;
-    
-    //result.Color.rgb = saturate(LinearToGamma(result.Color.rgb));
+    result.Color.rgb = radiance * albedo.rgb;     
     result.Color.a = 1.0f;
     
     return result;

@@ -42,6 +42,7 @@
 #include "Timer.h"
 
 #define _DEBUGDRAW
+//#define Flashlight
 using json = nlohmann::json;
 
 bool ModelViewer::Initialize(HINSTANCE aHInstance,SIZE aWindowSize,WNDPROC aWindowProcess,LPCWSTR aWindowTitle)
@@ -163,16 +164,19 @@ void ModelViewer::LoadScene()
 		GameObject camera = gom.CreateGameObject();
 		camera.AddComponent<cCamera>();
 		gom.SetLastGOAsCamera();
-		//camera.AddComponent<cLight>(eLightType::Spot);
-		//std::weak_ptr<SpotLight> pLight = camera.GetComponent<cLight>().GetData<SpotLight>();
-		//pLight.lock()->Position = CU::Vector3<float>(0,0,0);
-		//pLight.lock()->Color = CU::Vector3<float>(1,1,1);
-		//pLight.lock()->Intensity = 10;
-		//pLight.lock()->Range = 1000;
-		//pLight.lock()->Direction = {0,-1,0};
-		//pLight.lock()->InnerConeAngle = 10 * DEG_TO_RAD;
-		//pLight.lock()->OuterConeAngle = 45 * DEG_TO_RAD;
-		//camera.GetComponent<cLight>().BindDirectionToTransform(true);
+
+#ifdef  Flashlight
+		camera.AddComponent<cLight>(eLightType::Spot);
+		std::weak_ptr<SpotLight> pLight = camera.GetComponent<cLight>().GetData<SpotLight>();
+		pLight.lock()->Position = CU::Vector3<float>(0,0,0);
+		pLight.lock()->Color = CU::Vector3<float>(1,1,1);
+		pLight.lock()->Power = 1000.0f * Mega;
+		pLight.lock()->Range = 1000;
+		pLight.lock()->Direction = {0,-1,0};
+		pLight.lock()->InnerConeAngle = 10 * DEG_TO_RAD;
+		pLight.lock()->OuterConeAngle = 45 * DEG_TO_RAD;
+		camera.GetComponent<cLight>().BindDirectionToTransform(true);
+#endif //  Flashlight
 	}
 
 	{
@@ -187,8 +191,8 @@ void ModelViewer::LoadScene()
 		worldRoot.AddComponent<cLight>(eLightType::Directional);
 		std::weak_ptr<DirectionalLight> pLight = worldRoot.GetComponent<cLight>().GetData<DirectionalLight>();
 		pLight.lock()->Color = CU::Vector3<float>(1,1,1);
-		pLight.lock()->Power = 10.0f; 
-		cLight::CalculateDirectionLight({0,-1,1},*pLight.lock());
+		pLight.lock()->Power = 1.0f; 
+		//cLight::CalculateDirectionLight({0,-1,1},*pLight.lock());
 	}
 
 
@@ -288,7 +292,7 @@ void ModelViewer::LoadScene()
 		std::weak_ptr<PointLight> ptr = pointLight.GetComponent<cLight>().GetData<PointLight>();
 		ptr.lock()->Color = { (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000 };
 		ptr.lock()->Range = 10000.0f;
-		ptr.lock()->Power = 1.0f * Kilo;
+		ptr.lock()->Power = 500.0f * Kilo;
 		pointLight.GetComponent<cLight>().BindDirectionToTransform(true); 
 	}
 

@@ -107,12 +107,11 @@ float4 worldPosition
     float3 lightSpaceUV = 0;
     lightSpaceUV.x = ((lightSpacePos.x / lightSpacePos.w) * .5 + 0.5);
     lightSpaceUV.y = 1- ((lightSpacePos.y / lightSpacePos.w) * .5 + 0.5f);
-    
-    float Depth = lightSpacePos.z / lightSpacePos.w;
-    float shadow = shadowMap.Sample(defaultSampler, lightSpaceUV.xy).r;
-    //return float3(pow(shadow, 2), 0, 0);
+    const float bias = 0.0005;
+    float Depth = (lightSpacePos.z / lightSpacePos.w) - bias  ;
+    float shadow = shadowMap.SampleCmpLevelZero(shadowCmpSampler, lightSpaceUV.xy,Depth).r; 
 
-    return pow(shadow+.5f, 4) * saturate(directLightDiffuse + directLightSpecular) * myDirectionalLight.Color * myDirectionalLight.Power * NdotL;
+    return shadow * saturate(directLightDiffuse + directLightSpecular) * myDirectionalLight.Color * myDirectionalLight.Power * NdotL;
 }
 
 
@@ -137,10 +136,11 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
      
     
     const float3 radiance =
-    CalculateDirectionLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, Material.g, worldPosition);
+    CalculateDirectionLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, Material.g, worldPosition)
+    + CalculateIndirectLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, enviromentCube, Material.g, Material.r);
+    
     result.Color.rgb = (radiance + Effect.r) * albedo.rgb;
-    result.Color.rgb = saturate(LinearToGamma(result.Color.rgb));
-   //result.Color.rgb = radiance;
+    result.Color.rgb = saturate(LinearToGamma(result.Color.rgb)); 
     result.Color.a = 1.0f;
     return result;
 }

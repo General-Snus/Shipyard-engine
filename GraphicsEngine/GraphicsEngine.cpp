@@ -352,34 +352,31 @@ void GraphicsEngine::BeginFrame()
 
 void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 { 
-	aDeltaTime; aTotalTime;
-	DirectionalLight* dirLight;
-	std::shared_ptr<Texture> shadowMap;
-	Matrix lightMatrix;
+	aDeltaTime; aTotalTime;  
+
+	std::shared_ptr<Texture> shadowMap; 
 	for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
 	{
-		if(i.GetType() == eLightType::Directional)
-		{	
-			RHI::SetVertexShader(myVertexShader); 
-			shadowMap = i.GetShadowMap();
-			dirLight = i.GetData<DirectionalLight>().get(); 
-			myLightBuffer.Data.myDirectionalLight.Color = dirLight->Color;
-			myLightBuffer.Data.myDirectionalLight.Power = dirLight->Power;
-			myLightBuffer.Data.myDirectionalLight.Direction = dirLight->Direction; 
-			myLightBuffer.Data.myDirectionalLight.projection = dirLight->projection;
-			RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_LightBuffer,myLightBuffer);
-			RHI::UpdateConstantBufferData(myLightBuffer);
+		if(i.GetIsShadowCaster() && i.GetIsDirty())
+		{
+			if(i.GetType() == eLightType::Directional)
+			{	
+				RHI::SetVertexShader(myVertexShader); 
+				shadowMap = i.GetShadowMap(); 
+				myLightBuffer.Data.myDirectionalLight = *i.GetData<DirectionalLight>().get();
+				RHI::UpdateConstantBufferData(myLightBuffer);
 
-			RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,nullptr); // cant be bound to resources when rendering to it
-			RHI::ClearDepthStencil(shadowMap.get()); 
-			RHI::SetRenderTarget(nullptr,shadowMap.get());
-			GfxCmd_SetFrameBuffer(dirLight->projection,dirLight->lightView,0).Execute();
+				RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,nullptr); // cant be bound to resources when rendering to it
+				RHI::ClearDepthStencil(shadowMap.get()); 
+				RHI::SetRenderTarget(nullptr,shadowMap.get());
+				GfxCmd_SetFrameBuffer(myLightBuffer.Data.myDirectionalLight.projection,myLightBuffer.Data.myDirectionalLight.lightView,0).Execute();
 
-			for(const auto& command : ShadowCommandList)
-			{ 
-				command->Execute();
+				for(const auto& command : ShadowCommandList)
+				{ 
+					command->Execute();
+				}
+				RHI::SetRenderTarget(nullptr,nullptr); 
 			}
-			RHI::SetRenderTarget(nullptr,nullptr); 
 		}
 	}
 

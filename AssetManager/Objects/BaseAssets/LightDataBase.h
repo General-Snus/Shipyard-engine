@@ -15,6 +15,9 @@ struct SpotLight
 
 	float OuterConeAngle = 0; //4  
 	Vector3f padding = {0,0,0};	//12
+
+	Matrix lightView;
+	Matrix projection;
 };
 
 struct PointLight
@@ -24,6 +27,9 @@ struct PointLight
 
 	Vector3f Position = {0,0,0};
 	float Range = 0;
+
+	Matrix lightView;
+	Matrix projection;
 };
 
 struct DirectionalLight 
