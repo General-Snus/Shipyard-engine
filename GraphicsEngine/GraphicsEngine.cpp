@@ -362,7 +362,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 			if(i.GetType() == eLightType::Directional)
 			{	
 				RHI::SetVertexShader(myVertexShader); 
-				shadowMap = i.GetShadowMap(); 
+				shadowMap = i.GetShadowMap(0); 
 				myLightBuffer.Data.myDirectionalLight = *i.GetData<DirectionalLight>().get();
 				RHI::UpdateConstantBufferData(myLightBuffer);
 
@@ -416,5 +416,4 @@ void GraphicsEngine::EndFrame()
 	this->OverlayCommandList.clear();
 	this->DeferredCommandList.clear();
 	this->ShadowCommandList.clear();
-}
-
+} 

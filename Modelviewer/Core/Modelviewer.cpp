@@ -189,9 +189,12 @@ void ModelViewer::LoadScene()
 		worldRoot.AddComponent<Skybox>();
 
 		worldRoot.AddComponent<cLight>(eLightType::Directional);
-		std::weak_ptr<DirectionalLight> pLight = worldRoot.GetComponent<cLight>().GetData<DirectionalLight>();
-		pLight.lock()->Color = CU::Vector3<float>(1,1,1);
-		pLight.lock()->Power = 1.0f; 
+
+		cLight& pLight = worldRoot.GetComponent<cLight>();
+		pLight.SetColor(CU::Vector3<float>(1,1,1));
+		pLight.SetPower(1.0f);
+		pLight.SetDirection({0,-1,1});
+
 		//cLight::CalculateDirectionLight({0,-1,1},*pLight.lock());
 	}
 
@@ -208,7 +211,7 @@ void ModelViewer::LoadScene()
 		myMesh.GetComponent<cAnimator>().AddAnimation(L"Animations/Locomotion/A_C_TGA_Bro_Run.fbx");
 		myMesh.GetComponent<cAnimator>().AddAnimation(L"Animations/Idle/A_C_TGA_Bro_Idle_Brething.fbx");
 		myMesh.GetComponent<cAnimator>().AddAnimation(L"Animations/Idle/A_C_TGA_Bro_Idle_Wave.fbx");
-	} 
+	}
 	GameObject test = gom.CreateGameObject();
 	test.AddComponent<cMeshRenderer>();
 	test.AddComponent<Transform>();
@@ -267,7 +270,7 @@ void ModelViewer::LoadScene()
 		spotLight.AddComponent<cLight>(eLightType::Spot);
 		std::weak_ptr<SpotLight> ptr = spotLight.GetComponent<cLight>().GetData<SpotLight>();
 		spotLight.AddComponent<Transform>();
-		spotLight.GetComponent<Transform>().SetPosition({ -i * 300.0f + 600.f,300,0});
+		spotLight.GetComponent<Transform>().SetPosition({-i * 300.0f + 600.f,300,0});
 		spotLight.GetComponent<Transform>().Rotate({90,0,0},true);
 		ptr.lock()->Color = {(float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000};
 		//ptr.lock()->Color = {1,1,1};
@@ -280,20 +283,20 @@ void ModelViewer::LoadScene()
 	}
 
 	for(size_t i = 0; i < 20; i++)
-	{ 
+	{
 		int x = rand() % 10000 - 5000;
 		int z = rand() % 10000 - 5000;
 
 		GameObject pointLight = gom.CreateGameObject();
 		pointLight.AddComponent<Transform>();
-		pointLight.GetComponent<Transform>().SetPosition({ (float)x,100,(float)z });
+		pointLight.GetComponent<Transform>().SetPosition({(float)x,100,(float)z});
 
 		pointLight.AddComponent<cLight>(eLightType::Point);
 		std::weak_ptr<PointLight> ptr = pointLight.GetComponent<cLight>().GetData<PointLight>();
-		ptr.lock()->Color = { (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000 };
+		ptr.lock()->Color = {(float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000};
 		ptr.lock()->Range = 10000.0f;
 		ptr.lock()->Power = 500.0f * Kilo;
-		pointLight.GetComponent<cLight>().BindDirectionToTransform(true); 
+		pointLight.GetComponent<cLight>().BindDirectionToTransform(true);
 	}
 
 
@@ -304,11 +307,11 @@ void ModelViewer::LoadScene()
 	}
 
 	{
-		 GameObject test3 = gom.CreateGameObject();
-		 test3.AddComponent<cMeshRenderer>("Models/SteelFloor.fbx");
-		 test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");;
-		 test3.AddComponent<Transform>();
-		 test3.GetComponent<Transform>().GetTransform()(4,2) = -125;
+		GameObject test3 = gom.CreateGameObject();
+		test3.AddComponent<cMeshRenderer>("Models/SteelFloor.fbx");
+		test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");;
+		test3.AddComponent<Transform>();
+		test3.GetComponent<Transform>().GetTransform()(4,2) = -125;
 	}
 }
 
@@ -364,7 +367,7 @@ void ModelViewer::UpdateScene()
 			//ImGui::InputFloat3("CameraPos",*a);
 			//SaveToMemory(eSaveToJsonArgument::InputFloat3,"CameraPos",*a);
 		}
-	} 
+	}
 }
 
 
@@ -508,7 +511,7 @@ void ModelViewer::ExpandWorldBounds(CU::Sphere<float> sphere)
 	//REFACTOR not called on object moving outside worldbound causing same error as above
 }
 
-const CU::Sphere<float>& ModelViewer::GetWorldBounds() const 
+const CU::Sphere<float>& ModelViewer::GetWorldBounds() const
 {
 	return myWorldBounds;
 }

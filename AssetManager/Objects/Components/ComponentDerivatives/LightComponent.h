@@ -50,7 +50,7 @@ public:
 	void SetOuterAngle(float angle);
 	float GetOuterAngle( ); 
 
-	std::shared_ptr<Texture> GetShadowMap() const;
+	std::shared_ptr<Texture> GetShadowMap(int number) const;
 	void BindDirectionToTransform(bool active);
 
 	template<class T>
@@ -68,7 +68,7 @@ private:
 	std::shared_ptr<DirectionalLight> myDirectionLightData;
 	std::shared_ptr<SpotLight> mySpotLightData;
 	std::shared_ptr<PointLight> myPointLightData;
-	std::shared_ptr<Texture> shadowMap;
+	std::shared_ptr<Texture> shadowMap[6];
 
 	eLightType myLightType;
 	bool boundToTransform = false;

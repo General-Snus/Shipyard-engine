@@ -2,16 +2,17 @@
 #include "LightComponent.h"
 #include <Modelviewer/Core/Modelviewer.h>
 
-cLight::cLight(const unsigned int anOwnerId) : Component(anOwnerId)
+cLight::cLight(const unsigned int anOwnerId) : Component(anOwnerId) , isDirty(true)
 {
 	myLightType = eLightType::uninitialized;
-	shadowMap = std::make_shared<Texture>();
+	shadowMap[0] = std::make_shared<Texture>();
 	SetIsShadowCaster(true);
 }
+
 cLight::cLight(const unsigned int anOwnerId,const eLightType type) : Component(anOwnerId)
 {
 	myLightType = type;
-	shadowMap = std::make_shared<Texture>();
+	shadowMap[0] = std::make_shared<Texture>();
 	SetIsShadowCaster(true);
 
 	switch(myLightType)
@@ -21,9 +22,21 @@ cLight::cLight(const unsigned int anOwnerId,const eLightType type) : Component(a
 		break;
 	case eLightType::Point:
 		myPointLightData = std::make_shared<PointLight>();
+
+		for(int i = 0; i < 6; i++)
+		{
+			shadowMap[i] = std::make_shared<Texture>();
+		}
+
 		break;
 	case eLightType::Spot:
 		mySpotLightData = std::make_shared<SpotLight>();
+
+		for(int i = 0; i < 6; i++)
+		{
+			shadowMap[i] = std::make_shared<Texture>();
+		}
+
 		break;
 	case eLightType::uninitialized:
 		break;
@@ -40,6 +53,9 @@ void cLight::SetType(const eLightType aType)
 {
 	myLightType = aType;
 }
+void cLight::GetType(const eLightType aType)
+{
+}
 void cLight::SetIsShadowCaster(bool active)
 {
 	isShadowCaster = active;
@@ -49,37 +65,49 @@ void cLight::SetIsShadowCaster(bool active)
 		isDirty = true;
 		std::wstring name = L"unNamedMap";
 		CU::Vector2<int> resolution = {512,512};
+		int mapsToCreate = 0;
 		switch(myLightType)
 		{
 		case eLightType::Directional:
 			name = L"directionalLight";
 			resolution = {2048,2048};
+			mapsToCreate = 1;
 			break;
 		case eLightType::Point:
 			name = L"pointLight";
 			resolution = {512,512};
+			mapsToCreate = 6;
 			break;
 		case eLightType::Spot:
 			name = L"spotLight";
 			resolution = {512,512};
+			mapsToCreate = 6;
 			break;
 		case eLightType::uninitialized:
 			break;
 		default:
 			break;
-		} 
-
-		if(!RHI::CreateTexture(shadowMap.get(),name,
-			resolution.x,
-			resolution.y,
-			DXGI_FORMAT_R32_TYPELESS,
-			D3D11_USAGE_DEFAULT,
-			D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE
-		))
-		{
-			std::cout << "Error in texture creation shadowmap" << std::endl;
 		}
-		RHI::ClearDepthStencil(shadowMap.get());
+
+		for(int i = 0; i < mapsToCreate; i++)
+		{
+			std::wstring tempName = name
+				+ std::to_wstring(i) + L"_"
+				+ std::to_wstring(resolution.x) + L"|"
+				+ std::to_wstring(resolution.y);
+
+			if(!RHI::CreateTexture(shadowMap[i].get(),tempName,
+				resolution.x,
+				resolution.y,
+				DXGI_FORMAT_R32_TYPELESS,
+				D3D11_USAGE_DEFAULT,
+				D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE
+			))
+			{
+				std::cout << "Error in texture creation shadowmap" << std::endl;
+			}
+			RHI::ClearDepthStencil(shadowMap[i].get());
+		}
 	}
 }
 
@@ -87,7 +115,7 @@ bool cLight::GetIsShadowCaster()
 {
 	return false;
 }
- 
+
 
 bool cLight::GetIsDirty() const
 {
@@ -113,6 +141,11 @@ void cLight::SetPower(float power)
 		break;
 	}
 }
+float cLight::GetPower(float power)
+{
+	return 0.0f;
+}
+
 void cLight::SetColor(Vector3f color)
 {
 	switch(myLightType)
@@ -136,6 +169,7 @@ Vector3f cLight::GetColor()
 {
 	return Vector3f();
 }
+
 void cLight::SetPosition(Vector3f position)
 {
 	switch(myLightType)
@@ -158,13 +192,14 @@ Vector3f cLight::GetPosition()
 {
 	return Vector3f();
 }
+
 void cLight::SetDirection(Vector3f direction)
 {
+	isDirty = true;
 	switch(myLightType)
 	{
 	case eLightType::Directional:
 		myDirectionLightData->Direction = Vector4f(direction,1);
-		RedrawDirectionMap(direction,*myDirectionLightData);
 		break;
 	case eLightType::Point:
 		break;
@@ -181,6 +216,7 @@ Vector3f cLight::GetDirection()
 {
 	return Vector3f();
 }
+
 void cLight::SetRange(float range)
 {
 	switch(myLightType)
@@ -203,6 +239,7 @@ float cLight::GetRange()
 {
 	return 0.0f;
 }
+
 void cLight::SetInnerAngle(float angle)
 {
 	switch(myLightType)
@@ -224,6 +261,7 @@ float cLight::GetInnerAngle()
 {
 	return 0.0f;
 }
+
 void cLight::SetOuterAngle(float angle)
 {
 	switch(myLightType)
@@ -241,15 +279,14 @@ void cLight::SetOuterAngle(float angle)
 		break;
 	}
 }
-
 float cLight::GetOuterAngle()
 {
 	return 0.0f;
 }
 
-std::shared_ptr<Texture> cLight::GetShadowMap() const
+std::shared_ptr<Texture> cLight::GetShadowMap(int number) const
 {
-	return shadowMap;
+	return shadowMap[number];
 }
 
 void cLight::Update()
@@ -293,15 +330,15 @@ void cLight::ConformToTransform()
 }
 
 void cLight::RedrawShadowMap()
-{ 
+{
 	switch(myLightType)
 	{
 	case eLightType::Directional:
-		RedrawDirectionMap(myDirectionLightData->Direction,*myDirectionLightData);
+		RedrawDirectionMap();
 		break;
-	case eLightType::Point: 
+	case eLightType::Point:
 		break;
-	case eLightType::Spot: 
+	case eLightType::Spot:
 		break;
 	case eLightType::uninitialized:
 		break;
@@ -309,10 +346,11 @@ void cLight::RedrawShadowMap()
 		break;
 	}
 }
+
 void cLight::RedrawDirectionMap()
 {
 	const float radius = ModelViewer::Get().GetWorldBounds().GetRadius();
-	Vector3f lightPosition = radius * 2.0f * -myDirectionLightData->Direction.GetNormalized();
+	Vector3f lightPosition = radius * 2.0f * -static_cast<Vector3f>(myDirectionLightData->Direction.GetNormalized());
 	const Vector3f worldCenter = ModelViewer::Get().GetWorldBounds().GetCenter();
 
 	myDirectionLightData->Direction = Vector4f((worldCenter - lightPosition).GetNormalized(),1);
