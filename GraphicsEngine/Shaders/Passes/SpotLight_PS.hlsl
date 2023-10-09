@@ -65,11 +65,11 @@ float3 CalculateSpecularLight(float3 specularColor, float3 normal, float3 camera
 float spotFallof(float spectatorAngle, float umbralAngle, float penumbralAngle)
 {
      [flatten]
-    if (spectatorAngle > penumbralAngle)
+    if(spectatorAngle > penumbralAngle)
         return 1;
     
      [flatten]
-    if (spectatorAngle < umbralAngle)
+    if(spectatorAngle < umbralAngle)
         return 0;
     
     const float denom = spectatorAngle - umbralAngle;
@@ -80,7 +80,7 @@ float spotFallof(float spectatorAngle, float umbralAngle, float penumbralAngle)
 float LinearizeDepth(float depth)
 {
     
-   float near_plane = .1f;
+    float near_plane = .1f;
     float far_plane = mySpotLight.Range;
     
     float z = depth * 2.0 - 1.0; // Back to NDC 
@@ -120,31 +120,30 @@ float3 CalculateSpotLight(float3 diffuseColor, float3 specularColor, float4 worl
     
     float3 lightSpaceUV = 0;
     lightSpaceUV.x = ((lightSpacePos.x / lightSpacePos.w) * .5 + 0.5);
-    lightSpaceUV.y =  ((lightSpacePos.y / lightSpacePos.w) * .5 + 0.5f);
+    lightSpaceUV.y = 1-((lightSpacePos.y / lightSpacePos.w) * .5 + 0.5f);
     const float bias = 0.0005;
     float Depth = (lightSpacePos.z / lightSpacePos.w) - bias;
-    float shadow = shadowMap.SampleCmpLevelZero(shadowCmpSampler, lightSpaceUV.xy, Depth).r; 
+    float shadow = shadowMap.SampleCmpLevelZero(shadowCmpSampler, lightSpaceUV.xy, Depth).r;
      
     //Enable if quality is too low
-    //uint2 dim = 0;
-    //uint numMips = 0;
-    //shadowMap.GetDimensions(0, dim.x, dim.y, numMips);
-    //float2 texelSize = 1.0 / dim;
-    
-    //float sum = 0;
-    //float x, y;
-    //for(y = -1.5; y <= 1.5; y += 1.0)
-    //{
-    //    for(x = -1.5; x <= 1.5; x += 1.0)
-    //    {
-    //        float2 newUV;
-    //        newUV.x = lightSpaceUV.x + x * texelSize.x;
-    //        newUV.y = lightSpaceUV.y + y * texelSize.y;
-            
-    //        sum += shadowMap.SampleCmpLevelZero(shadowCmpSampler, newUV, Depth).r;
-    //    }
-    //}
-    //shadow = sum / 16.0;
+     uint2 dim = 0;
+     uint numMips = 0;
+     shadowMap.GetDimensions(0, dim.x, dim.y, numMips);
+     float2 texelSize = 1.0 / dim;
+     
+     float sum = 0;
+     float x, y;
+     for(y = -1.5; y <= 1.5; y += 1.0)
+     {
+         for(x = -1.5; x <= 1.5; x += 1.0)
+         {
+             float2 newUV;
+             newUV.x = lightSpaceUV.x + x * texelSize.x;
+             newUV.y = lightSpaceUV.y + y * texelSize.y; 
+             sum += shadowMap.SampleCmpLevelZero(shadowCmpSampler, newUV, Depth).r;
+         }
+     }
+     shadow = sum / 16.0;
     
     
     return shadow * saturate(directLightDiffuse + directLightSpecular) * NdotL * Attenuation * radiantIntensity * normalize(mySpotLight.Color);
@@ -171,21 +170,21 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
      
     float3 totalSpotLightContribution = 0;
         [flatten]
-    if (mySpotLight.Power > 0)
+    if(mySpotLight.Power > 0)
     {
         totalSpotLightContribution += CalculateSpotLight(
             diffuseColor,
             specularColor,
             worldPosition,
             Normal.xyz,
-            cameraDirection, 
+            cameraDirection,
             roughness,
             DefaultMaterial.Shine            
             );
     }
    
     const float3 radiance = totalSpotLightContribution;
-    result.Color.rgb = radiance * albedo.rgb; 
+    result.Color.rgb = radiance * albedo.rgb;
     result.Color.a = 1.0f;
     
     return result;

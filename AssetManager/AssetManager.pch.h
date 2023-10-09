@@ -35,7 +35,7 @@
 #include <GraphicsEngine/Commands/GraphicCommands.h>
 #include <GraphicsEngine/DebugDrawer/DebugDrawer.h>
 #include "AssetManager.h"
-
+#include <ThirdParty/CU/Math.hpp>
 typedef CU::Vector3<float> Vector3f;
 typedef CU::Matrix4x4<float> Matrix;
 

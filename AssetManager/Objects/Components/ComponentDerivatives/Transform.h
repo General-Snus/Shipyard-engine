@@ -38,6 +38,8 @@ public:
 	void SetScale(Vector2f scale);
 	void SetScale(Vector3f scale); 
 
+	bool GetIsDirty() const;
+
 	~Transform() = default;
 	void SetGizmo(bool enabled);
 	void InitPrimitive();

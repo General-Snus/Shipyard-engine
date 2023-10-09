@@ -120,6 +120,11 @@ void Transform::SetScale(Vector3f scale)
 	ApplyTransformation(Matrix::CreateScaleMatrix(scale));
 }
 
+bool Transform::GetIsDirty() const
+{
+	return isDirty;
+}
+
 void Transform::SetGizmo(bool enabled)
 {
 	isDebugGizmoEnabled = enabled;

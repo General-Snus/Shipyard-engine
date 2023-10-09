@@ -362,8 +362,8 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 		{
 			if(i.GetType() == eLightType::Directional)
 			{
-				//if(!i.GetIsRendered())
-				{ 
+				if(!i.GetIsRendered())
+				{
 					myLightBuffer.Data.myDirectionalLight = *i.GetData<DirectionalLight>().get();
 					RHI::UpdateConstantBufferData(myLightBuffer);
 
@@ -380,12 +380,12 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 
 					RHI::SetRenderTarget(nullptr,nullptr);
 					i.SetIsRendered(true);
-				} 
-			} 
+				}
+			}
 
 			if(i.GetType() == eLightType::Spot)
 			{
-				//if(!i.GetIsRendered())
+				if(!i.GetIsRendered())
 				{
 					myLightBuffer.Data.mySpotLight = *i.GetData<SpotLight>().get();
 					RHI::UpdateConstantBufferData(myLightBuffer);
@@ -399,13 +399,38 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 					for(const auto& command : ShadowCommandList)
 					{
 						command->Execute();
-					} 
+					}
 
 					RHI::SetRenderTarget(nullptr,nullptr);
 					i.SetIsRendered(true);
-				} 
+				}
 			}
-		} 
+
+			if(i.GetType() == eLightType::Point)
+			{
+				if(!i.GetIsRendered())
+				{
+					myLightBuffer.Data.myPointLight = *i.GetData<PointLight>().get();
+					RHI::UpdateConstantBufferData(myLightBuffer);
+					for(int j = 0; j < 6; j++)
+					{
+						shadowMap = i.GetShadowMap(j);
+						RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,nullptr); // cant be bound to resources when rendering to it
+						RHI::ClearDepthStencil(shadowMap.get());
+						RHI::SetRenderTarget(nullptr,shadowMap.get());
+						GfxCmd_SetFrameBuffer(myLightBuffer.Data.myPointLight.projection, i.GetLightViewMatrix(j),0).Execute();
+
+						for(const auto& command : ShadowCommandList)
+						{
+							command->Execute();
+						}
+
+						RHI::SetRenderTarget(nullptr,nullptr);
+						i.SetIsRendered(true);
+					}
+				}
+			}
+		}
 	}
 
 	myG_Buffer.SetWriteTargetToBuffer(); //Let all write to textures

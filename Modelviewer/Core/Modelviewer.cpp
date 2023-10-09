@@ -42,7 +42,7 @@
 #include "Timer.h"
 
 #define _DEBUGDRAW
-//#define Flashlight
+ #define Flashlight
 using json = nlohmann::json;
 
 bool ModelViewer::Initialize(HINSTANCE aHInstance,SIZE aWindowSize,WNDPROC aWindowProcess,LPCWSTR aWindowTitle)
@@ -164,19 +164,6 @@ void ModelViewer::LoadScene()
 		GameObject camera = gom.CreateGameObject();
 		camera.AddComponent<cCamera>();
 		gom.SetLastGOAsCamera();
-
-#ifdef  Flashlight
-		camera.AddComponent<cLight>(eLightType::Spot);
-		std::weak_ptr<SpotLight> pLight = camera.GetComponent<cLight>().GetData<SpotLight>();
-		pLight.lock()->Position = CU::Vector3<float>(0,0,0);
-		pLight.lock()->Color = CU::Vector3<float>(1,1,1);
-		pLight.lock()->Power = 1000.0f * Mega;
-		pLight.lock()->Range = 1000;
-		pLight.lock()->Direction = {0,-1,0};
-		pLight.lock()->InnerConeAngle = 10 * DEG_TO_RAD;
-		pLight.lock()->OuterConeAngle = 45 * DEG_TO_RAD;
-		camera.GetComponent<cLight>().BindDirectionToTransform(true);
-#endif //  Flashlight
 	}
 
 	{
@@ -268,7 +255,7 @@ void ModelViewer::LoadScene()
 		spotLight.AddComponent<cLight>(eLightType::Spot);
 		std::weak_ptr<SpotLight> ptr = spotLight.GetComponent<cLight>().GetData<SpotLight>();
 		spotLight.AddComponent<Transform>();
-		spotLight.GetComponent<Transform>().SetPosition({-i * 300.0f + 300 ,300,0});
+		spotLight.GetComponent<Transform>().SetPosition({-i * 300.0f + 300 ,500,0});
 		spotLight.GetComponent<Transform>().Rotate({90,0,0},true);
 		ptr.lock()->Color = {(float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000};
 		//ptr.lock()->Color = {1,1,1};
@@ -284,11 +271,11 @@ void ModelViewer::LoadScene()
 	{
 		int x = rand() % 10000 - 5000;
 		int z = rand() % 10000 - 5000;
-
+		
 		GameObject pointLight = gom.CreateGameObject();
 		pointLight.AddComponent<Transform>();
 		pointLight.GetComponent<Transform>().SetPosition({(float)x,100,(float)z});
-
+		
 		pointLight.AddComponent<cLight>(eLightType::Point);
 		std::weak_ptr<PointLight> ptr = pointLight.GetComponent<cLight>().GetData<PointLight>();
 		ptr.lock()->Color = {(float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000};
@@ -296,6 +283,17 @@ void ModelViewer::LoadScene()
 		ptr.lock()->Power = 500.0f * Kilo;
 		pointLight.GetComponent<cLight>().BindDirectionToTransform(true);
 	}
+
+	GameObject pointLight = gom.CreateGameObject();
+	pointLight.AddComponent<Transform>();
+	pointLight.GetComponent<Transform>().SetPosition({0,300,1000});
+
+	pointLight.AddComponent<cLight>(eLightType::Point);
+	cLight& ptr = pointLight.GetComponent<cLight>();
+	ptr.SetColor({1,1,1});
+	ptr.SetRange(1000.0f);
+	ptr.SetPower(5000.0f * Kilo);
+	ptr.BindDirectionToTransform(true);
 
 
 	if(gom.GetAllComponents<BackgroundColor>().size() == 0)

@@ -1,4 +1,12 @@
- // Purpose: Registers for the shaders.
+//General Graphics settings
+ 
+
+
+
+
+
+
+// Purpose: Registers for the shaders.
 
 #define HLSL_REG_DefaultSampler s0 
 #define REG_DefaultSampler 0 

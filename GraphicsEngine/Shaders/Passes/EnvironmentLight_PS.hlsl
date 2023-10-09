@@ -106,7 +106,8 @@ float4 worldPosition
     float3 lightSpaceUV = 0;
     lightSpaceUV.x = ((lightSpacePos.x / lightSpacePos.w) * .5 + 0.5);
     lightSpaceUV.y = 1- ((lightSpacePos.y / lightSpacePos.w) * .5 + 0.5f);
-    const float bias = 0.0005;
+     
+    const float bias = max(0.05 * (1.0 - NdotL), 0.005);
     float Depth = (lightSpacePos.z / lightSpacePos.w) - bias  ;
     float shadow = shadowMap.SampleCmpLevelZero(shadowCmpSampler, lightSpaceUV.xy,Depth).r; 
     
@@ -160,7 +161,7 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     + CalculateIndirectLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, enviromentCube, Material.g, Material.r);
     
     result.Color.rgb = (radiance + Effect.r) * albedo.rgb;
-    result.Color.rgb = saturate(LinearToGamma(result.Color.rgb)); 
+    result.Color.rgb = saturate(LinearToGamma(result.Color.rgb));  
     result.Color.a = 1.0f;
     return result;
 }

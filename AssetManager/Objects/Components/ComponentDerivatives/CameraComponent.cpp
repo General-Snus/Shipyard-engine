@@ -19,6 +19,17 @@ cCamera::cCamera(const unsigned int anOwnerId) : Component(anOwnerId)
 	myClipMatrix(3,3) = farfield / (farfield - nearField);
 	myClipMatrix(4,3) = nearField * farfield / (farfield - nearField);
 	myClipMatrix(3,4) = 1;
+
+	GetGameObject().AddComponent<cLight>(eLightType::Spot);
+	std::weak_ptr<SpotLight> pLight = GetComponent<cLight>().GetData<SpotLight>();
+	pLight.lock()->Position = CU::Vector3<float>(0,0,0);
+	pLight.lock()->Color = CU::Vector3<float>(1,1,1);
+	pLight.lock()->Power = 500.0f * Mega;
+	pLight.lock()->Range = 1000;
+	pLight.lock()->Direction = {0,-1,0};
+	pLight.lock()->InnerConeAngle = 10 * DEG_TO_RAD;
+	pLight.lock()->OuterConeAngle = 45 * DEG_TO_RAD;
+	GetComponent<cLight>().BindDirectionToTransform(true);
 }
 
 cCamera::~cCamera()
@@ -55,6 +66,10 @@ void cCamera::Update()
 	if(GetAsyncKeyState('E'))
 	{
 		myTransform.Rotate({0,rotationSpeed * aTimeDelta},true);
+	}
+	if(GetAsyncKeyState('F'))
+	{
+		GetComponent<cLight>().BindDirectionToTransform(!GetComponent<cLight>().GetIsBound());
 	}
 
 	if(GetAsyncKeyState('Q'))

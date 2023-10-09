@@ -15,17 +15,11 @@ const float Milli = 0.001f;
 const float Centi = 0.01f;
 const float Deci = 0.1f;
 const float Kilo = 1000.0f;
-const float Mega = 1000000.0f; 
+const float Mega = 1000000.0f;
 
- 
-
-
-
-
-
-
-
-
+const Vector3f GlobalRight = Vector3f(1.0,0.0,0.0);
+const Vector3f GlobalUp = Vector3f(0.0,1.0,0.0);
+const Vector3f GlobalFwd = Vector3f(0.0,0.0,1.0);
 
 
 

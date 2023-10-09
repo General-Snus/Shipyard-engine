@@ -36,8 +36,6 @@ struct GBufferOutput
     float4 Depth : SV_TARGET6;
 };
 
-
-
 GBufferOutput main(DefaultVertexToPixel input)
 {
     GBufferOutput result;

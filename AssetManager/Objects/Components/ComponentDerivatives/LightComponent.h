@@ -13,6 +13,9 @@ enum class eLightType
 
 class cLight : public Component
 {
+	friend class GraphicsEngine;
+	friend class GraphicCommand;
+	friend class GfxCmd_SetLightBuffer;
 public:
 	cLight() = delete; // Create a generic cube
 	cLight(const unsigned int anOwnerId); // Create a generic cube 
@@ -53,6 +56,7 @@ public:
 
 	std::shared_ptr<Texture> GetShadowMap(int number) const;
 	void BindDirectionToTransform(bool active);
+	bool GetIsBound();
 
 	template<class T>
 	std::shared_ptr<T> GetData();
@@ -65,6 +69,8 @@ private:
 	void RedrawDirectionMap();
 	void RedrawPointMap();
 	void RedrawSpotMap();
+
+	Matrix GetLightViewMatrix(int number);
 
 	std::shared_ptr<DirectionalLight> myDirectionLightData;
 	std::shared_ptr<SpotLight> mySpotLightData;

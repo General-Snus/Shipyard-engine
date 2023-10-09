@@ -62,9 +62,9 @@ float3 CalculateSpecularLight(float3 specularColor, float3 normal, float3 camera
     return directLightSpecular;
 }
 
-float3 CalculatePointLight(float3 diffuseColor, float3 specularColor, float3 worldPosition, float3 normal, float3 cameraDirection, PointLight pointLightData, float roughness, float shine)
+float3 CalculatePointLight(float3 diffuseColor, float3 specularColor, float4 worldPosition, float3 normal, float3 cameraDirection, PointLight pointLightData, float roughness, float shine)
 {
-    float3 lightDirection = (pointLightData.Position - worldPosition);
+    float3 lightDirection = (pointLightData.Position - worldPosition.xyz);
     const float distance = length(lightDirection);
     
     lightDirection = normalize(lightDirection);
@@ -82,7 +82,42 @@ float3 CalculatePointLight(float3 diffuseColor, float3 specularColor, float3 wor
     
     const float NdotL = dot(lightDirection, normal);
     
-    return saturate(directLightDiffuse + directLightSpecular) * NdotL * Attenuation * pointLightData.Color * pointLightData.Power;
+    const float4x4 lightView = myPointLight.lightView;
+    const float4x4 lightProj = myPointLight.projection;
+    
+    float4 lightSpacePos = mul(lightView, worldPosition);
+    lightSpacePos = mul(lightProj, lightSpacePos);
+    
+    float3 lightSpaceUV = 0;
+    lightSpaceUV.x = ((lightSpacePos.x / lightSpacePos.w) * .5 + 0.5);
+    lightSpaceUV.y = 1 - ((lightSpacePos.y / lightSpacePos.w) * .5 + 0.5f);
+    const float bias = 0.0005;
+    float Depth = (lightSpacePos.z / lightSpacePos.w) - bias;
+    float shadow = shadowMap.SampleCmpLevelZero(shadowCmpSampler, lightSpaceUV.xy, Depth).r;
+     
+    //Enable if quality is too low
+   //uint2 dim = 0;
+   //uint numMips = 0;
+   //shadowMap.GetDimensions(0, dim.x, dim.y, numMips);
+   //float2 texelSize = 1.0 / dim;
+   // 
+   //float sum = 0;
+   //float x, y;
+   //for(y = -1.5; y <= 1.5; y += 1.0)
+   //{
+   //    for(x = -1.5; x <= 1.5; x += 1.0)
+   //    {
+   //        float2 newUV;
+   //        newUV.x = lightSpaceUV.x + x * texelSize.x;
+   //        newUV.y = lightSpaceUV.y + y * texelSize.y;
+   //        sum += shadowMap.SampleCmpLevelZero(shadowCmpSampler, newUV, Depth).r;
+   //    }
+   //}
+   //shadow = sum / 16.0;
+    
+    
+    //return shadow * Attenuation;  
+   return shadow * saturate(directLightDiffuse + directLightSpecular) * NdotL * Attenuation * pointLightData.Color * pointLightData.Power;
 }
 
 DefaultPixelOutput main(BRDF_VS_to_PS input)
@@ -112,7 +147,7 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
         totalPointLightContribution += CalculatePointLight(
             diffuseColor,
             specularColor,
-            worldPosition.xyz,
+            worldPosition,
             Normal.xyz,
             cameraDirection,
             myPointLight,
