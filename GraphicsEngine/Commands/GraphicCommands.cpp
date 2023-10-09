@@ -5,6 +5,7 @@
 #include <AssetManager/Objects/Components/ComponentDerivatives/LightComponent.h>
 #include "Timer.h"
 #include <assert.h>
+#include <ImGui/imgui.h>
 #include <GraphicsEngine/Shaders/Registers.h> 
 
 FrameBuffer& GraphicCommand::GetFrameBuffer()
@@ -15,7 +16,7 @@ ObjectBuffer& GraphicCommand::GetObjectBuffer()
 {
 	return GraphicsEngine::Get().myObjectBuffer;
 }
-G_Buffer& GraphicCommand::GetGBuffer()	
+G_Buffer& GraphicCommand::GetGBuffer()
 {
 	return GraphicsEngine::Get().myG_Buffer;
 }
@@ -30,30 +31,45 @@ LightBuffer& GraphicCommand::GetLightBuffer()
 
 GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 {
-	for (auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
+	for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
 	{
-		switch (i.GetType())
+		switch(i.GetType())
 		{
 		case eLightType::Directional:
-		{
-			//memcpy(&buff.Data.myDirectionalLight,i.GetData ().get(),sizeof(DirectionalLight));
-			DirectionalLight* light = i.GetData<DirectionalLight>().get();
-			dirLight.push_back(light);
+		{ 
+			std::pair< DirectionalLight*,Texture*> pair;
+			pair.first = i.GetData<DirectionalLight>().get();
+			if(i.GetIsShadowCaster())
+			{
+				pair.second = i.GetShadowMap(0).get();
+			}
+
+			dirLight.push_back(pair);
 			break;
 		}
 
 		case eLightType::Point:
-		{
-			//memcpy(&buff.Data.myPointLight[pointLightCount],i.GetData ().get(),sizeof(PointLight));
-			PointLight* light = i.GetData<PointLight>().get();
-			pointLight.push_back(light);
+		{ 
+			std::pair< PointLight*,Texture*> pair;
+			pair.first = i.GetData<PointLight>().get();
+
+			if(i.GetIsShadowCaster())
+			{
+				pair.second = i.GetShadowMap(0).get();
+			}
+			pointLight.push_back(pair);
 			break;
 		}
 		case eLightType::Spot:
-		{
-			//memcpy(&buff.Data.mySpotLight[spotLightCount],i.GetData().get(),sizeof(SpotLight)); 
-			SpotLight* light = i.GetData<SpotLight>().get();
-			spotLight.push_back(light);
+		{ 
+			std::pair< SpotLight*,Texture*> pair;
+			pair.first = i.GetData<SpotLight>().get();
+
+			if(i.GetIsShadowCaster())
+			{
+				pair.second = i.GetShadowMap(0).get();
+			}
+			spotLight.push_back(pair);
 			break;
 		}
 
@@ -67,37 +83,12 @@ void GfxCmd_SetLightBuffer::Execute()
 	G_Buffer& gBuffer = GetGBuffer();
 
 	gBuffer.UseEnviromentShader();
-	for (auto& light : dirLight)
-	{
-		LightBuffer& buff = GetLightBuffer(); 
-		buff.Data.myDirectionalLight.Color = light->Color;
-		buff.Data.myDirectionalLight.Power = light->Power;
-		buff.Data.myDirectionalLight.Direction = light->Direction;
-		buff.Data.myDirectionalLight.lightView = light->lightView;
-		buff.Data.myDirectionalLight.projection = light->projection; 
-
-		RHI::UpdateConstantBufferData(buff);
-		RHI::ConfigureInputAssembler(
-			D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
-			nullptr,
-			nullptr,
-			0,
-			nullptr
-		);
-		RHI::Draw(4);
-	} 
-
-	gBuffer.UsePointlightShader();
-	for (auto& light : pointLight)
+	for(auto& light : dirLight)
 	{
 		LightBuffer& buff = GetLightBuffer();
-		buff.Data.myDirectionalLight.Color = light->Color;
-		buff.Data.myDirectionalLight.Power = light->Power;
-		buff.Data.myPointLight.Color = light->Color;
-		buff.Data.myPointLight.Power = light->Power;
-		buff.Data.myPointLight.Range = light->Range;
-		buff.Data.myPointLight.Position = light->Position;
-	
+		buff.Data.myDirectionalLight = *light.first;
+		RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,light.second);
+
 		RHI::UpdateConstantBufferData(buff);
 		RHI::ConfigureInputAssembler(
 			D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
@@ -108,19 +99,32 @@ void GfxCmd_SetLightBuffer::Execute()
 		);
 		RHI::Draw(4);
 	}
-	
-	gBuffer.UseSpotlightShader();
-	for (auto& light : spotLight)
+
+	gBuffer.UsePointlightShader();
+	for(auto& light : pointLight)
 	{
 		LightBuffer& buff = GetLightBuffer();
-		buff.Data.mySpotLight.Color = light->Color;
-		buff.Data.mySpotLight.Power = light->Power;
-		buff.Data.mySpotLight.Range = light->Range;
-		buff.Data.mySpotLight.InnerConeAngle = light->InnerConeAngle;
-		buff.Data.mySpotLight.OuterConeAngle = light->OuterConeAngle;
-		buff.Data.mySpotLight.Direction = light->Direction;
-		buff.Data.mySpotLight.Position = light->Position;
-	
+		buff.Data.myPointLight = *light.first;
+		RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,light.second);
+
+		RHI::UpdateConstantBufferData(buff);
+		RHI::ConfigureInputAssembler(
+			D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
+			nullptr,
+			nullptr,
+			0,
+			nullptr
+		);
+		RHI::Draw(4);
+	}
+
+	gBuffer.UseSpotlightShader();
+	for(auto& light : spotLight)
+	{
+		LightBuffer& buff = GetLightBuffer();
+		buff.Data.mySpotLight = *light.first;
+		RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,light.second); 
+
 		RHI::UpdateConstantBufferData(buff);
 		RHI::ConfigureInputAssembler(
 			D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
@@ -135,7 +139,7 @@ void GfxCmd_SetLightBuffer::Execute()
 
 GfxCmd_DebugLayer::GfxCmd_DebugLayer()
 {
-	
+
 }
 
 void GfxCmd_DebugLayer::Execute()
@@ -153,9 +157,9 @@ void GfxCmd_DebugLayer::Execute()
 		);
 		RHI::Draw(4);
 	}
-} 
- 
-GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix, const Transform& ref, int aRenderMode)
+}
+
+GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,const Transform& ref,int aRenderMode)
 {
 	myViewMatrix = Matrix::GetFastInverse(ref.GetTransform());
 	myProjectionMatrix = ProjectionMatrix;
@@ -167,7 +171,7 @@ GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix, con
 //Remember to invert the matrix
 GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,const Matrix& ref,int aRenderMode)
 {
-	myViewMatrix = ref; 
+	myViewMatrix = ref;
 	myProjectionMatrix = ProjectionMatrix;
 	myDeltaTime = static_cast<float>(CommonUtilities::Timer::GetInstance().GetTotalTime());
 	myPosition = {ref(4,1),ref(4,2),ref(4,3)};
@@ -187,15 +191,15 @@ void GfxCmd_SetFrameBuffer::Execute()
 
 	RHI::UpdateConstantBufferData(buffert);
 }
- 
-GfxCmd_RenderMesh::GfxCmd_RenderMesh(const RenderData& aData, const Matrix& aTransform)
+
+GfxCmd_RenderMesh::GfxCmd_RenderMesh(const RenderData& aData,const Matrix& aTransform)
 {
 	myElementsData = aData.myMesh->Elements;
 	myTransform = aTransform;
 	MaxExtents = aData.myMesh->MaxBox;
 	MinExtents = aData.myMesh->MinBox;
 
-	for (auto& aMaterial : aData.myMaterials)
+	for(auto& aMaterial : aData.myMaterials)
 	{
 		myMaterials.push_back(aMaterial);
 	}
@@ -213,9 +217,9 @@ void GfxCmd_RenderMesh::Execute()
 	G_Buffer gBuffer = GetGBuffer();
 	gBuffer.UseGBufferShader();
 
-	for (auto& aElement : myElementsData)
+	for(auto& aElement : myElementsData)
 	{
-		if (myMaterials.size() > 0)
+		if(myMaterials.size() > 0)
 		{
 			myMaterials[0].lock()->Update();
 		}
@@ -230,8 +234,8 @@ void GfxCmd_RenderMesh::Execute()
 }
 
 GfxCmd_RenderMeshShadow::GfxCmd_RenderMeshShadow(const RenderData& aMesh,const Matrix& aTransform) : GfxCmd_RenderMesh(aMesh,aTransform)
-{ 
-} 
+{
+}
 
 void GfxCmd_RenderMeshShadow::Execute()
 {
@@ -240,8 +244,8 @@ void GfxCmd_RenderMeshShadow::Execute()
 	objectBuffer.Data.MaxExtents = MaxExtents;
 	objectBuffer.Data.MinExtents = MinExtents;
 	objectBuffer.Data.hasBone = false;
-	 
-	RHI::UpdateConstantBufferData(objectBuffer);  
+
+	RHI::UpdateConstantBufferData(objectBuffer);
 	RHI::Context->PSSetShader(nullptr,nullptr,0);
 
 	for(auto& aElement : myElementsData)
@@ -258,10 +262,10 @@ void GfxCmd_RenderMeshShadow::Execute()
 
 
 GfxCmd_RenderSkeletalMesh::GfxCmd_RenderSkeletalMesh(const RenderData& aData,
-	const Matrix& aTransform, const Matrix* aBoneTransformList, unsigned int aNumBones) : GfxCmd_RenderMesh(aData, aTransform)
+	const Matrix& aTransform,const Matrix* aBoneTransformList,unsigned int aNumBones) : GfxCmd_RenderMesh(aData,aTransform)
 {
 	assert(aNumBones < 128);
-	for (size_t i = 0; i < 128; i++)
+	for(size_t i = 0; i < 128; i++)
 	{
 		myBoneTransforms[i] = aBoneTransformList[i];
 	}
@@ -273,7 +277,7 @@ void GfxCmd_RenderSkeletalMesh::Execute()
 	objectBuffer.Data.MaxExtents = MaxExtents;
 	objectBuffer.Data.MinExtents = MinExtents;
 	objectBuffer.Data.hasBone = true;
-	for (int i = 0; i < 128; i++)
+	for(int i = 0; i < 128; i++)
 	{
 		objectBuffer.Data.myBoneTransforms[i] = myBoneTransforms[i];
 	}
@@ -282,7 +286,7 @@ void GfxCmd_RenderSkeletalMesh::Execute()
 	G_Buffer gBuffer = GetGBuffer();
 	gBuffer.UseGBufferShader();
 
-	for (auto& aElement : myElementsData)
+	for(auto& aElement : myElementsData)
 	{
 		myMaterials[0].lock()->Update();
 		RHI::ConfigureInputAssembler(aElement.PrimitiveTopology,
@@ -292,7 +296,7 @@ void GfxCmd_RenderSkeletalMesh::Execute()
 			Vertex::InputLayout);
 		RHI::DrawIndexed(aElement.NumIndices);
 	}
-} 
+}
 
 
 GfxCmd_RenderSkybox::GfxCmd_RenderSkybox(std::shared_ptr<Texture> texture) : mySkyboxTexture(texture)
@@ -301,9 +305,9 @@ GfxCmd_RenderSkybox::GfxCmd_RenderSkybox(std::shared_ptr<Texture> texture) : myS
 void GfxCmd_RenderSkybox::Execute()
 {
 	//RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER, 100	,mySkyboxTexture.get());
-} 
+}
 
-GfxCmd_DrawDebugPrimitive::GfxCmd_DrawDebugPrimitive(Debug::DebugPrimitive primitive, Matrix Transform) : myPrimitive(primitive), myTransform(Transform)
+GfxCmd_DrawDebugPrimitive::GfxCmd_DrawDebugPrimitive(Debug::DebugPrimitive primitive,Matrix Transform) : myPrimitive(primitive),myTransform(Transform)
 {
 
 }
@@ -324,13 +328,13 @@ void GfxCmd_DrawDebugPrimitive::Execute()
 	RHI::SetPixelShader(GraphicsEngine::Get().GetDebugLinePS().get());
 	RHI::DrawIndexed(static_cast<UINT>(myPrimitive.NumIndices));
 }
- 
+
 GfxCmd_RenderSkeletalMeshShadow::GfxCmd_RenderSkeletalMeshShadow(
 	const RenderData& aMesh,
 	const Matrix& aTransform,
 	const Matrix* aBoneTransformList,
-	unsigned int aNumBones) : 
- 	GfxCmd_RenderSkeletalMesh(aMesh,aTransform,aBoneTransformList,aNumBones)
+	unsigned int aNumBones) :
+	GfxCmd_RenderSkeletalMesh(aMesh,aTransform,aBoneTransformList,aNumBones)
 {
 }
 
@@ -345,12 +349,12 @@ void GfxCmd_RenderSkeletalMeshShadow::Execute()
 	{
 		objectBuffer.Data.myBoneTransforms[i] = myBoneTransforms[i];
 	}
-	 
+
 	RHI::UpdateConstantBufferData(objectBuffer);
-	RHI::Context->PSSetShader(nullptr,nullptr,0); 
+	RHI::Context->PSSetShader(nullptr,nullptr,0);
 
 	for(auto& aElement : myElementsData)
-	{   
+	{
 		RHI::ConfigureInputAssembler(
 			aElement.PrimitiveTopology,
 			aElement.VertexBuffer,

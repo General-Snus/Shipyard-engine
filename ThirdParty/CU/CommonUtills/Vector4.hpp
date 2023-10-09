@@ -159,7 +159,7 @@ namespace CommonUtilities
 	template<class T>
 	inline T Vector4<T>::LengthSqr() const
 	{
-		return static_cast<T>(x * x + y * y + z * z + w * w);
+ 		return static_cast<T>(x * x + y * y + z * z + w * w);
 	}
 
 	template<class T>

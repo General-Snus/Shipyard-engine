@@ -8,8 +8,7 @@ struct  DirectionalLight
     float4 Direction;  
     
     float4x4 lightView;
-    float4x4 projection;
-    
+    float4x4 projection;    
 }; 
 
 struct PointLight
@@ -19,6 +18,9 @@ struct PointLight
     
     float3 Position; //12
     float Range;    //4
+    
+    float4x4 lightView;
+    float4x4 projection;
 };
 
 struct SpotLight
@@ -34,6 +36,9 @@ struct SpotLight
     
     float OuterConeAngle; //4
     float3 Pad; //12
+    
+    float4x4 lightView;
+    float4x4 projection;
 };
 
 cbuffer LightBuffer : register(HLSL_REG_LightBuffer)

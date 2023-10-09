@@ -95,7 +95,7 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     const float4 Material = materialMap.Sample(defaultSampler, uv);
     const float4 Normal = normalMap.Sample(defaultSampler, uv);
     const float4 Effect = effectMap.Sample(defaultSampler, uv);
-    const float4 worldPosition = worldPositionMap.Sample(defaultSampler, uv);
+    const float4 worldPosition = float4(worldPositionMap.Sample(defaultSampler, uv).xyz, 1);
     const float metallic = Material.b;
     const float roughness = Material.g;
     const float occlusion = Material.r;

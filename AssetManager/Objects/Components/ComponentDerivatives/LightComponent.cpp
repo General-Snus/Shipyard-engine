@@ -1,6 +1,7 @@
 #include "AssetManager.pch.h"
 #include "LightComponent.h"
 #include <Modelviewer/Core/Modelviewer.h>
+#include <ThirdParty/CU/Math.hpp>
 
 cLight::cLight(const unsigned int anOwnerId) : Component(anOwnerId) , isDirty(true)
 {
@@ -13,7 +14,6 @@ cLight::cLight(const unsigned int anOwnerId,const eLightType type) : Component(a
 {
 	myLightType = type;
 	shadowMap[0] = std::make_shared<Texture>();
-	SetIsShadowCaster(true);
 
 	switch(myLightType)
 	{
@@ -22,39 +22,38 @@ cLight::cLight(const unsigned int anOwnerId,const eLightType type) : Component(a
 		break;
 	case eLightType::Point:
 		myPointLightData = std::make_shared<PointLight>();
-
 		for(int i = 0; i < 6; i++)
 		{
 			shadowMap[i] = std::make_shared<Texture>();
 		}
-
 		break;
 	case eLightType::Spot:
 		mySpotLightData = std::make_shared<SpotLight>();
-
 		for(int i = 0; i < 6; i++)
 		{
 			shadowMap[i] = std::make_shared<Texture>();
 		}
-
 		break;
 	case eLightType::uninitialized:
 		break;
 	default:
 		break;
 	}
+	SetIsShadowCaster(true);
 }
+
 eLightType cLight::GetType() const
 {
 	return myLightType;
 }
-
 void cLight::SetType(const eLightType aType)
 {
 	myLightType = aType;
 }
-void cLight::GetType(const eLightType aType)
+
+bool cLight::GetIsShadowCaster()
 {
+	return isShadowCaster;
 }
 void cLight::SetIsShadowCaster(bool active)
 {
@@ -70,7 +69,7 @@ void cLight::SetIsShadowCaster(bool active)
 		{
 		case eLightType::Directional:
 			name = L"directionalLight";
-			resolution = {2048,2048};
+			resolution = {4096,4096};
 			mapsToCreate = 1;
 			break;
 		case eLightType::Point:
@@ -80,7 +79,7 @@ void cLight::SetIsShadowCaster(bool active)
 			break;
 		case eLightType::Spot:
 			name = L"spotLight";
-			resolution = {512,512};
+			resolution = {1024,1024};
 			mapsToCreate = 6;
 			break;
 		case eLightType::uninitialized:
@@ -91,6 +90,7 @@ void cLight::SetIsShadowCaster(bool active)
 
 		for(int i = 0; i < mapsToCreate; i++)
 		{
+			shadowMap[i] = std::make_shared<Texture>();
 			std::wstring tempName = name
 				+ std::to_wstring(i) + L"_"
 				+ std::to_wstring(resolution.x) + L"|"
@@ -107,19 +107,27 @@ void cLight::SetIsShadowCaster(bool active)
 				std::cout << "Error in texture creation shadowmap" << std::endl;
 			}
 			RHI::ClearDepthStencil(shadowMap[i].get());
+
 		}
 	}
 }
 
-bool cLight::GetIsShadowCaster()
+bool cLight::GetIsRendered() const
 {
-	return false;
+	return isRendered;
 }
-
+void cLight::SetIsRendered(bool aRendered)
+{
+	 isRendered = aRendered;
+}
 
 bool cLight::GetIsDirty() const
 {
-	return false;
+	return isDirty;
+}
+void cLight::SetIsDirty(bool dirty)
+{
+	isDirty = dirty;
 }
 
 void cLight::SetPower(float power)
@@ -141,9 +149,25 @@ void cLight::SetPower(float power)
 		break;
 	}
 }
-float cLight::GetPower(float power)
+float cLight::GetPower()
 {
-	return 0.0f;
+	switch(myLightType)
+	{
+	case eLightType::Directional:
+		return myDirectionLightData->Power;
+		break;
+	case eLightType::Point:
+		return myPointLightData->Power;
+		break;
+	case eLightType::Spot:
+		return mySpotLightData->Power;
+		break;
+	case eLightType::uninitialized:
+		break;
+	default:
+		break;
+	}
+	return 0;
 }
 
 void cLight::SetColor(Vector3f color)
@@ -167,6 +191,22 @@ void cLight::SetColor(Vector3f color)
 }
 Vector3f cLight::GetColor()
 {
+	switch(myLightType)
+	{
+	case eLightType::Directional:
+		return myDirectionLightData->Color;
+		break;
+	case eLightType::Point:
+		return myPointLightData->Color;
+		break;
+	case eLightType::Spot:
+		return mySpotLightData->Color;
+		break;
+	case eLightType::uninitialized:
+		break;
+	default:
+		break;
+	}
 	return Vector3f();
 }
 
@@ -190,6 +230,22 @@ void cLight::SetPosition(Vector3f position)
 }
 Vector3f cLight::GetPosition()
 {
+	switch(myLightType)
+	{
+	case eLightType::Directional:
+		return Vector3f();
+		break;
+	case eLightType::Point:
+		return myPointLightData->Position;
+		break;
+	case eLightType::Spot:
+		return mySpotLightData->Position;
+		break;
+	case eLightType::uninitialized:
+		break;
+	default:
+		break;
+	}
 	return Vector3f();
 }
 
@@ -214,6 +270,26 @@ void cLight::SetDirection(Vector3f direction)
 }
 Vector3f cLight::GetDirection()
 {
+	switch(myLightType)
+	{
+	case eLightType::Directional:
+		return Vector3f(
+			myDirectionLightData->Direction.x,
+			myDirectionLightData->Direction.y,
+			myDirectionLightData->Direction.z
+		);
+		break;
+	case eLightType::Point:
+		return Vector3f();
+		break;
+	case eLightType::Spot:
+		return mySpotLightData->Direction;
+		break;
+	case eLightType::uninitialized:
+		break;
+	default:
+		break;
+	}
 	return Vector3f();
 }
 
@@ -237,7 +313,23 @@ void cLight::SetRange(float range)
 }
 float cLight::GetRange()
 {
-	return 0.0f;
+	switch(myLightType)
+	{
+	case eLightType::Directional:
+		return 0;
+		break;
+	case eLightType::Point:
+		return myPointLightData->Range;
+		break;
+	case eLightType::Spot:
+		return mySpotLightData->Range;
+		break;
+	case eLightType::uninitialized:
+		break;
+	default:
+		break;
+	}
+	return 0;
 }
 
 void cLight::SetInnerAngle(float angle)
@@ -278,6 +370,7 @@ void cLight::SetOuterAngle(float angle)
 	default:
 		break;
 	}
+	isDirty = true;
 }
 float cLight::GetOuterAngle()
 {
@@ -297,7 +390,23 @@ void cLight::Update()
 	}
 	if(isDirty)
 	{
-
+		switch(myLightType)
+		{
+		case eLightType::Directional:
+			RedrawDirectionMap();
+			break;
+		case eLightType::Point:
+			RedrawPointMap();
+			break;
+		case eLightType::Spot:
+			RedrawSpotMap();
+			break;
+		case eLightType::uninitialized:
+			break;
+		default:
+			break;
+		}
+		isDirty = false;
 	}
 
 }
@@ -350,7 +459,7 @@ void cLight::RedrawShadowMap()
 void cLight::RedrawDirectionMap()
 {
 	const float radius = ModelViewer::Get().GetWorldBounds().GetRadius();
-	Vector3f lightPosition = radius * 2.0f * -static_cast<Vector3f>(myDirectionLightData->Direction.GetNormalized());
+	Vector3f lightPosition = radius * 2.0f * -Vector3f(myDirectionLightData->Direction.GetNormalized().x,myDirectionLightData->Direction.GetNormalized().y,myDirectionLightData->Direction.GetNormalized().z);
 	const Vector3f worldCenter = ModelViewer::Get().GetWorldBounds().GetCenter();
 
 	myDirectionLightData->Direction = Vector4f((worldCenter - lightPosition).GetNormalized(),1);
@@ -380,7 +489,25 @@ void cLight::RedrawPointMap()
 }
 
 void cLight::RedrawSpotMap()
-{
+{ 
+	Vector3f lightPosition = mySpotLightData->Position;  
+	mySpotLightData->lightView = CU::Matrix4x4<float>::LookAt(lightPosition,lightPosition + mySpotLightData->Direction.GetNormalized(),{0,1,0}); // REFACTOR, Magic value up
+
+	const float fow = mySpotLightData->OuterConeAngle;
+	const float fowmdf = 1.0f / (tanf(fow / 2.0f));
+	const float farfield = mySpotLightData->Range*2;
+	const float nearField = 1.0f;
+	const float prc = farfield / (farfield - nearField);
+	Matrix clipMatrix;
+	clipMatrix(1,1) = fowmdf;
+	clipMatrix(2,2) = fowmdf; 
+	clipMatrix(3,3) = prc;
+	clipMatrix(3,4) = 1/ prc;
+	clipMatrix(4,3) = nearField * -prc;
+	clipMatrix(4,4) = 0;
+
+	mySpotLightData->projection =  clipMatrix;
+	mySpotLightData->lightView = Matrix::GetFastInverse(mySpotLightData->lightView);
 }
 
 void cLight::BindDirectionToTransform(bool active)

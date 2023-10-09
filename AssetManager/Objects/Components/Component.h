@@ -16,6 +16,7 @@ public:
 	Component(const unsigned int anOwnerID,eComponentType aComponentType) : myOwnerID(anOwnerID),myIsActive(true),myComponentType(aComponentType) {}
 	virtual ~Component() = default;
 
+	virtual void Init() {} 
 	virtual void Update() {}
 	virtual void Render() {} 
 

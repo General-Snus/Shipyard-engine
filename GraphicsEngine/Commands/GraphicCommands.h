@@ -40,11 +40,10 @@ public:
 };
 
 class GfxCmd_SetLightBuffer : public GraphicCommand
-{
-	std::vector<DirectionalLight*> dirLight;
-	std::vector<PointLight*> pointLight;
-	std::vector<SpotLight*> spotLight;
-
+{ 
+	std::vector<std::pair< DirectionalLight*,Texture*>> dirLight;
+	std::vector<std::pair< PointLight*,Texture*>> pointLight;
+	std::vector<std::pair< SpotLight*,Texture*>> spotLight; 
 public:
 	GfxCmd_SetLightBuffer( );
 	void Execute() override;

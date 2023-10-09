@@ -77,8 +77,7 @@ float occulusion
     const float3 kA = (diffuseColor * diffuse + specular) * occulusion;
     
     return kA;
-}
-
+}  
 
 float3 CalculateDirectionLight(
 float3 diffuseColor,
@@ -110,8 +109,30 @@ float4 worldPosition
     const float bias = 0.0005;
     float Depth = (lightSpacePos.z / lightSpacePos.w) - bias  ;
     float shadow = shadowMap.SampleCmpLevelZero(shadowCmpSampler, lightSpaceUV.xy,Depth).r; 
-
-    return shadow * saturate(directLightDiffuse + directLightSpecular) * myDirectionalLight.Color * myDirectionalLight.Power * NdotL;
+    
+    
+    uint2 dim = 0;
+    uint numMips = 0;
+    shadowMap.GetDimensions(0, dim.x, dim.y, numMips);
+    float2 texelSize = 1.0 / dim;
+    
+    float sum = 0;
+    float x, y;
+    for(y = -1.5; y <= 1.5; y += 1.0)
+    {
+        for(x = -1.5; x <= 1.5; x += 1.0)
+        {
+            float2 newUV;
+            newUV.x = lightSpaceUV.x + x*texelSize.x;
+            newUV.y = lightSpaceUV.y + y * texelSize.y;
+            
+            sum += shadowMap.SampleCmpLevelZero(shadowCmpSampler, newUV, Depth).r;
+        }
+    }
+    shadow = sum / 16.0;
+    
+    const float ShadowStrength = 2;
+    return ShadowStrength * shadow * saturate(directLightDiffuse + directLightSpecular) * myDirectionalLight.Color * myDirectionalLight.Power * NdotL;
 }
 
 
@@ -133,7 +154,6 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     const float3 cameraDirection = normalize(FB_CameraPosition.xyz - worldPosition.xyz);
     const float3 diffuseColor = lerp((float3)0.0f, albedo.rgb, 1 - metallic);
     const float3 specularColor = lerp((float3)0.04f, albedo.rgb, metallic);
-     
     
     const float3 radiance =
     CalculateDirectionLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, Material.g, worldPosition)

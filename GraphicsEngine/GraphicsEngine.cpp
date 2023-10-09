@@ -200,7 +200,7 @@ void GraphicsEngine::SetupDefaultVariables()
 	{
 		GELogger.Log("Sampler state created");
 		assert(false);
-	} 
+	}
 	RHI::SetSamplerState(myShadowSampleState,REG_shadowCmpSampler);
 
 	// TEMP: Load the default shader programs.
@@ -345,68 +345,88 @@ void GraphicsEngine::SetLoggingWindow(HANDLE aHandle)
 void GraphicsEngine::BeginFrame()
 {
 	// Here we should initialize our frame and clean up from the last one.  
-	RHI::ClearRenderTarget(myBackBuffer.get(),myBackgroundColor); 
+	RHI::ClearRenderTarget(myBackBuffer.get(),myBackgroundColor);
 	RHI::ClearDepthStencil(myDepthBuffer.get());
 	myG_Buffer.ClearTargets();
 }
 
 void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
-{ 
-	aDeltaTime; aTotalTime;  
+{
+	aDeltaTime; aTotalTime;
 
-	std::shared_ptr<Texture> shadowMap; 
+	RHI::SetVertexShader(myVertexShader);
+	std::shared_ptr<Texture> shadowMap;
 	for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
 	{
-		if(i.GetIsShadowCaster() && i.GetIsDirty())
+		if(i.GetIsShadowCaster() && !i.GetIsDirty())
 		{
 			if(i.GetType() == eLightType::Directional)
-			{	
-				RHI::SetVertexShader(myVertexShader); 
-				shadowMap = i.GetShadowMap(0); 
-				myLightBuffer.Data.myDirectionalLight = *i.GetData<DirectionalLight>().get();
-				RHI::UpdateConstantBufferData(myLightBuffer);
-
-				RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,nullptr); // cant be bound to resources when rendering to it
-				RHI::ClearDepthStencil(shadowMap.get()); 
-				RHI::SetRenderTarget(nullptr,shadowMap.get());
-				GfxCmd_SetFrameBuffer(myLightBuffer.Data.myDirectionalLight.projection,myLightBuffer.Data.myDirectionalLight.lightView,0).Execute();
-
-				for(const auto& command : ShadowCommandList)
+			{
+				//if(!i.GetIsRendered())
 				{ 
-					command->Execute();
-				}
-				RHI::SetRenderTarget(nullptr,nullptr); 
+					myLightBuffer.Data.myDirectionalLight = *i.GetData<DirectionalLight>().get();
+					RHI::UpdateConstantBufferData(myLightBuffer);
+
+					shadowMap = i.GetShadowMap(0);
+					RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,nullptr); // cant be bound to resources when rendering to it
+					RHI::ClearDepthStencil(shadowMap.get());
+					RHI::SetRenderTarget(nullptr,shadowMap.get());
+					GfxCmd_SetFrameBuffer(myLightBuffer.Data.myDirectionalLight.projection,myLightBuffer.Data.myDirectionalLight.lightView,0).Execute();
+
+					for(const auto& command : ShadowCommandList)
+					{
+						command->Execute();
+					}
+
+					RHI::SetRenderTarget(nullptr,nullptr);
+					i.SetIsRendered(true);
+				} 
+			} 
+
+			if(i.GetType() == eLightType::Spot)
+			{
+				//if(!i.GetIsRendered())
+				{
+					myLightBuffer.Data.mySpotLight = *i.GetData<SpotLight>().get();
+					RHI::UpdateConstantBufferData(myLightBuffer);
+
+					shadowMap = i.GetShadowMap(0);
+					RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,nullptr); // cant be bound to resources when rendering to it
+					RHI::ClearDepthStencil(shadowMap.get());
+					RHI::SetRenderTarget(nullptr,shadowMap.get());
+					GfxCmd_SetFrameBuffer(myLightBuffer.Data.mySpotLight.projection,myLightBuffer.Data.mySpotLight.lightView,0).Execute();
+
+					for(const auto& command : ShadowCommandList)
+					{
+						command->Execute();
+					} 
+
+					RHI::SetRenderTarget(nullptr,nullptr);
+					i.SetIsRendered(true);
+				} 
 			}
-		}
+		} 
 	}
 
-	ImGui::Begin("shadowmap");
-	ImGui::Image((void*)shadowMap->GetSRV(),ImVec2(1000,1000));
-	ImGui::End();
-
-
-	
-	 
 	myG_Buffer.SetWriteTargetToBuffer(); //Let all write to textures
 	for(const auto& command : DeferredCommandList)
 	{
 		command->Execute();
-	} 
+	}
 	RHI::SetRenderTarget(myBackBuffer.get(),nullptr);
 
 
-	//LIGHTS 
-	RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,shadowMap.get());
-	GfxCmd_SetLightBuffer().Execute(); 
+	//LIGHTS  
+	GfxCmd_SetLightBuffer().Execute();
 
-	GfxCmd_DebugLayer().Execute(); 
+	GfxCmd_DebugLayer().Execute();
 	RHI::SetBlendState(AlphaBlendState);
 
 	for(const auto& command : this->OverlayCommandList)
 	{
 		command->Execute();
 	}
-	RHI::SetBlendState(nullptr); 
+	RHI::SetBlendState(nullptr);
 }
 
 void GraphicsEngine::EndFrame()
@@ -416,4 +436,4 @@ void GraphicsEngine::EndFrame()
 	this->OverlayCommandList.clear();
 	this->DeferredCommandList.clear();
 	this->ShadowCommandList.clear();
-} 
+}

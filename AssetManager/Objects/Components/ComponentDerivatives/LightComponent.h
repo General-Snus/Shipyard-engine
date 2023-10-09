@@ -17,20 +17,21 @@ public:
 	cLight() = delete; // Create a generic cube
 	cLight(const unsigned int anOwnerId); // Create a generic cube 
 	cLight(const unsigned int anOwnerId,const eLightType type);
-
+	 
 	eLightType GetType() const;
-
-
-	void SetType(const eLightType aType);
-	void GetType(const eLightType aType);
+	void SetType(const eLightType aType); 
 
 	void SetIsShadowCaster(bool active);
 	bool GetIsShadowCaster();
 
+	bool GetIsRendered() const;
+	void SetIsRendered(bool isRendered);
+
 	bool GetIsDirty() const;
+	void SetIsDirty(bool dirty);
 
 	void SetPower(float power);
-	float GetPower(float power);
+	float GetPower(); 
 
 	void SetColor(Vector3f color);
 	Vector3f GetColor();
@@ -74,6 +75,7 @@ private:
 	bool boundToTransform = false;
 	bool isShadowCaster = true; 
 	bool isDirty = true; 
+	bool isRendered = false; 
 };
 
 template<>

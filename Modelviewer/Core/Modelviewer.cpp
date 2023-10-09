@@ -193,9 +193,7 @@ void ModelViewer::LoadScene()
 		cLight& pLight = worldRoot.GetComponent<cLight>();
 		pLight.SetColor(CU::Vector3<float>(1,1,1));
 		pLight.SetPower(1.0f);
-		pLight.SetDirection({0,-1,1});
-
-		//cLight::CalculateDirectionLight({0,-1,1},*pLight.lock());
+		pLight.SetDirection({0,-1,1}); 
 	}
 
 
@@ -270,11 +268,11 @@ void ModelViewer::LoadScene()
 		spotLight.AddComponent<cLight>(eLightType::Spot);
 		std::weak_ptr<SpotLight> ptr = spotLight.GetComponent<cLight>().GetData<SpotLight>();
 		spotLight.AddComponent<Transform>();
-		spotLight.GetComponent<Transform>().SetPosition({-i * 300.0f + 600.f,300,0});
+		spotLight.GetComponent<Transform>().SetPosition({-i * 300.0f + 300 ,300,0});
 		spotLight.GetComponent<Transform>().Rotate({90,0,0},true);
 		ptr.lock()->Color = {(float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000};
 		//ptr.lock()->Color = {1,1,1};
-		ptr.lock()->Range = 300.0f;;
+		ptr.lock()->Range = 1000.0f;;
 		ptr.lock()->Power = i * 600.0f * Kilo;
 		ptr.lock()->OuterConeAngle = i * 20.0f * DEG_TO_RAD;
 		ptr.lock()->InnerConeAngle = 1.0f * DEG_TO_RAD;
@@ -507,31 +505,17 @@ void ModelViewer::ExpandWorldBounds(CU::Sphere<float> sphere)
 	if(myWorldBounds.ExpandSphere(sphere))
 	{
 		std::cout << "world bounds was expanded" << "\n";
+		for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
+		{
+			i.SetIsDirty(true);
+			i.SetIsRendered(false);
+		}
+
+
 	} //REFACTOR if updated real time the world expansion will cause the light/shadow to lagg behind, use this to update camera position, 
 	//REFACTOR not called on object moving outside worldbound causing same error as above
-}
-
+} 
 const CU::Sphere<float>& ModelViewer::GetWorldBounds() const
 {
 	return myWorldBounds;
-}
-
-
-
-static std::string WStringToString(const std::wstring& someString)
-{
-	const int sLength = static_cast<int>(someString.length());
-	const int len = WideCharToMultiByte(CP_ACP,0,someString.c_str(),sLength,0,0,0,0);
-	std::string result(len,L'\0');
-	WideCharToMultiByte(CP_ACP,0,someString.c_str(),sLength,&result[0],len,0,0);
-	return result;
-}
-
-static std::wstring StringToWString(const std::string& someString)
-{
-	const int sLength = static_cast<int>(someString.length());
-	const int len = MultiByteToWideChar(CP_ACP,0,someString.c_str(),sLength,0,0);
-	std::wstring result(len,L'\0');
-	MultiByteToWideChar(CP_ACP,0,someString.c_str(),sLength,&result[0],len);
-	return result;
-}
+}  
