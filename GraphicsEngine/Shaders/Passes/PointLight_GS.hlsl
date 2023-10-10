@@ -1,18 +1,71 @@
+#include "GBuffer/GBufferPS.hlsl" 
+
 struct GSOutput
 {
-	float4 pos : SV_POSITION;
+    float4 posCS : SV_POSITION;
+    uint slice : SV_RenderTargetArrayIndex;
 };
 
-[maxvertexcount(3)]
-void main(
-	triangle float4 input[3] : SV_POSITION, 
-	inout TriangleStream< GSOutput > output
-)
+[maxvertexcount(18)]
+void main(triangle DefaultVertexToPixel input[3], inout TriangleStream<GSOutput> output)
 {
-	for (uint i = 0; i < 3; i++)
-	{
-		GSOutput element;
-		element.pos = input[i];
-		output.Append(element);
-	}
+    const float4x4 viewMatrixInverse[6] =
+    {
+        //Right
+        float4x4(
+            float4(0, 0, -1, 0),
+            float4(0, 1, 0, 0),
+            float4(1, 0, 0, 0),
+            float4(0, 0, 0, 1)),
+        
+        //left
+        float4x4(
+            float4(0, 0, 1, 0),
+            float4(0, 1, 0, 0),
+            float4(-1, 0, 0, 0),
+            float4(0, 0, 0, 1)),
+        
+        //up
+        float4x4(
+            float4(1, 0, 0, 0),
+            float4(0, 0, -1, 0),
+            float4(0, 1, 0, 0),
+            float4(0, 0, 0, 1)),
+        
+        //down
+        float4x4(
+            float4(1, 0, 0, 0),
+            float4(0, 0, 1, 0),
+            float4(0, -1, 0, 0),
+            float4(0, 0, 0, 1)),
+        
+        //Forward
+        float4x4(
+            float4(1, 0, 0, 0),
+            float4(0, 1, 0, 0),
+            float4(0, 0, 1, 0),
+            float4(0, 0, 0, 1)),
+                
+        //back
+        float4x4(
+            float4(-1, 0, 0, 0),
+            float4(0, 1, 0, 0),
+            float4(0, 0, -1, 0),
+            float4(0, 0, 0, 1)),
+    };
+    
+    [unroll]
+    for (uint count = 0; count < 6; count++)
+    {
+        [unroll]
+        for (uint i = 0; i < 3; i++)
+        {
+            GSOutput element;
+            element.posCS = mul(FB_Proj, mul(viewMatrixInverse[count], mul(FB_InvView,  input[i].WorldPosition)));
+            element.slice = count;
+            output.Append(element);
+        }
+        
+        output.RestartStrip();
+    }
 }

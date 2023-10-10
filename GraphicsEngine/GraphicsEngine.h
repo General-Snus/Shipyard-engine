@@ -19,7 +19,7 @@ using namespace Microsoft::WRL;
 
 class GraphicsEngine
 {
-	friend class GraphicCommand;
+	friend class GraphicCommandBase;
 
 private:
 	FrameBuffer myFrameBuffer;
@@ -28,9 +28,12 @@ private:
 	LightBuffer myLightBuffer;
 	G_Buffer myG_Buffer;
 
-	std::vector<std::unique_ptr<GraphicCommand>> ShadowCommandList;
-	std::vector<std::unique_ptr<GraphicCommand>> DeferredCommandList;
-	std::vector<std::unique_ptr<GraphicCommand>> OverlayCommandList;
+	GraphicsCommandList ShadowCommandList;
+	GraphicsCommandList DeferredCommandList;
+	GraphicsCommandList OverlayCommandList;
+	//std::vector<std::unique_ptr<GraphicCommandBase>> ShadowCommandList;
+	//std::vector<std::unique_ptr<GraphicCommandBase>> DeferredCommandList;
+	//std::vector<std::unique_ptr<GraphicCommandBase>> OverlayCommandList;
 
 	SIZE myWindowSize{ 0,0 };
 	HWND myWindowHandle{};
@@ -157,19 +160,18 @@ public:
 		}
 	}
 };
-template<typename T,typename...Types>
-FORCEINLINE void GraphicsEngine::ShadowCommands(Types... args)
+template<typename CommandClass, typename ...Args>
+FORCEINLINE void GraphicsEngine::ShadowCommands(Args ... arguments)
 {
-	this->ShadowCommandList.push_back(std::make_unique<T>(args...));
+	this->ShadowCommandList.AddCommand<CommandClass>(arguments...);
 }
-template<typename T, typename...Types>
-FORCEINLINE void GraphicsEngine::DeferredCommand(Types... args)
+template<typename CommandClass, typename ...Args>
+FORCEINLINE void GraphicsEngine::DeferredCommand(Args ... arguments)
 {
-	this->DeferredCommandList.push_back(std::make_unique<T>(args...));
+	this->DeferredCommandList.AddCommand<CommandClass>(arguments...);
 }
-template<typename T, typename...Types>
-FORCEINLINE void GraphicsEngine::OverlayCommands(Types... args)
+template<typename CommandClass, typename ...Args>
+FORCEINLINE void GraphicsEngine::OverlayCommands(Args ... arguments)
 {
-	this->OverlayCommandList.push_back(std::make_unique<T>(args...));
-}
-
+	this->OverlayCommandList.AddCommand<CommandClass>(arguments...);
+} 

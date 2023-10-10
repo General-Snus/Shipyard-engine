@@ -14,7 +14,7 @@ enum class eLightType
 class cLight : public Component
 {
 	friend class GraphicsEngine;
-	friend class GraphicCommand;
+	friend class GraphicCommandBase;
 	friend class GfxCmd_SetLightBuffer;
 public:
 	cLight() = delete; // Create a generic cube

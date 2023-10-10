@@ -42,8 +42,7 @@ void Mesh::Init()
 	try
 	{
 		if(TGA::FBX::Importer::LoadMeshW(AssetPath,inMesh))
-		{
-
+		{ 
 			Vector3f greatestExtent = { 
 				std::abs(inMesh.BoxSphereBounds.Center[0] - inMesh.BoxSphereBounds.BoxExtents[0]), 
 				std::abs(inMesh.BoxSphereBounds.Center[1] - inMesh.BoxSphereBounds.BoxExtents[1]),
