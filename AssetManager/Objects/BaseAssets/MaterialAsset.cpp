@@ -134,7 +134,7 @@ void Material::SetShader(std::shared_ptr<Shader> aVertexShader,std::shared_ptr<S
 
 void Material::SetAsResources()
 {
-	for(auto& i : textures)
+	for(const auto& i : textures)
 	{
 		if(!i)
 		{

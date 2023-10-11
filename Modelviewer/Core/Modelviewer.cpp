@@ -163,11 +163,15 @@ void ModelViewer::LoadScene()
 		worldRoot.AddComponent<Skybox>();
 
 		worldRoot.AddComponent<cLight>(eLightType::Directional);
-
 		cLight& pLight = worldRoot.GetComponent<cLight>();
 		pLight.SetColor(CU::Vector3<float>(1,1,1));
 		pLight.SetPower(1.0f);
 		pLight.SetDirection({0,-1,1}); 
+
+		if (gom.GetAllComponents<BackgroundColor>().empty())
+		{ 
+			worldRoot.AddComponent<BackgroundColor>(CU::Vector4<float>(1.0f, 1.0f, 1.0f, 1.0f));
+		}
 	}
 
 
@@ -283,11 +287,7 @@ void ModelViewer::LoadScene()
 	ptr.BindDirectionToTransform(true);
 
 
-	if(gom.GetAllComponents<BackgroundColor>().size() == 0)
-	{
-		GameObject newG = gom.CreateGameObject();
-		newG.AddComponent<BackgroundColor>(CU::Vector4<float>(1.0f,1.0f,1.0f,1.0f));
-	}
+	
 
 	{
 		GameObject test3 = gom.CreateGameObject();

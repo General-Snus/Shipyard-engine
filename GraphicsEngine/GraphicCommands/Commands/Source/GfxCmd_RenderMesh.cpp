@@ -2,9 +2,8 @@
 #include "../Headers/GfxCmd_RenderMesh.h" 
 #include <GraphicsEngine/Rendering/Buffers/ObjectBuffer.h>
 
-GfxCmd_RenderMesh::GfxCmd_RenderMesh(const RenderData& aData,const Matrix& aTransform)
-{
-	myElementsData = aData.myMesh->Elements;
+GfxCmd_RenderMesh::GfxCmd_RenderMesh(const RenderData& aData,const Matrix& aTransform) : myMesh(aData.myMesh)
+{ 
 	myTransform = aTransform;
 	MaxExtents = aData.myMesh->MaxBox;
 	MinExtents = aData.myMesh->MinBox;
@@ -27,7 +26,7 @@ void GfxCmd_RenderMesh::ExecuteAndDestroy()
 	G_Buffer gBuffer = GetGBuffer();
 	gBuffer.UseGBufferShader();
 
-	for(auto& aElement : myElementsData)
+	for(const auto& aElement : myMesh->Elements)
 	{
 		if(myMaterials.size() > 0)
 		{

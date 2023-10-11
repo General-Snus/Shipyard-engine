@@ -18,6 +18,7 @@ void GfxCmd_RenderSkeletalMesh::ExecuteAndDestroy()
 	objectBuffer.Data.MaxExtents = MaxExtents;
 	objectBuffer.Data.MinExtents = MinExtents;
 	objectBuffer.Data.hasBone = true;
+
 	for(int i = 0; i < 128; i++)
 	{
 		objectBuffer.Data.myBoneTransforms[i] = myBoneTransforms[i];
@@ -27,9 +28,12 @@ void GfxCmd_RenderSkeletalMesh::ExecuteAndDestroy()
 	G_Buffer gBuffer = GetGBuffer();
 	gBuffer.UseGBufferShader();
 
-	for(auto& aElement : myElementsData)
+	for(const auto& aElement : myMesh->Elements)
 	{
-		myMaterials[0].lock()->Update();
+		if (!myMaterials.empty())
+		{
+			myMaterials[0].lock()->Update();
+		} 
 		RHI::ConfigureInputAssembler(aElement.PrimitiveTopology,
 			aElement.VertexBuffer,
 			aElement.IndexBuffer,

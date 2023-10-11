@@ -20,15 +20,15 @@ public:
 
 	void SetNewMesh(const std::filesystem::path& aFilePath);
 	void SetMaterialPath(const std::filesystem::path& aFilePath);
-	~cMeshRenderer() = default;
+	~cMeshRenderer() override = default;
 
 	FORCEINLINE const std::vector<Element>& GetElements() const
 	{
 		return myRenderData.myMesh->Elements;
 	}
-	FORCEINLINE const std::shared_ptr<Mesh> GetRawMesh() const
+	FORCEINLINE std::shared_ptr<Mesh> GetRawMesh() const
 	{
-		return (myRenderData.myMesh);
+		return myRenderData.myMesh;
 	}
 
 protected:

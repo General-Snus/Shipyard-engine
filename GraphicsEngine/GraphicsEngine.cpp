@@ -440,13 +440,6 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 
 	DeferredCommandList.Execute();
 
-	//RHI::SetRenderTarget(myBackBuffer.get(), nullptr);
-
-
-	//LIGHTS  
-	//GfxCmd_SetLightBuffer().ExecuteAndDestroy();
-	//
-	//GfxCmd_DebugLayer().ExecuteAndDestroy();
 	RHI::SetBlendState(AlphaBlendState);
 	OverlayCommandList.Execute();
 	RHI::SetBlendState(nullptr);

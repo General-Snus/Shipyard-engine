@@ -77,9 +77,8 @@ private:
 	// We're a container singleton, no instancing this outside the class.
 	GraphicsEngine() = default;
 
-public:
-
-	static GraphicsEngine& Get() { inline static GraphicsEngine myInstance; return myInstance; }
+public: 
+	inline static GraphicsEngine& Get() {  static  GraphicsEngine myInstance; return myInstance; }
 
 	/**
 	 * Initializes the Graphics Engine with the specified settings.

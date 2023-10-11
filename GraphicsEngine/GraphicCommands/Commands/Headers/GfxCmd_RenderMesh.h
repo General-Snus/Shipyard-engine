@@ -5,16 +5,16 @@
 class GfxCmd_RenderMesh : public GraphicCommandBase
 {
 protected:
-	std::vector<Element> myElementsData;
+	std::shared_ptr<Mesh> myMesh;
 	std::vector<std::weak_ptr<Material>> myMaterials;
 	Matrix myTransform;
 	CU::Vector3<float> MinExtents; // 12 bytes 
 	CU::Vector3<float> MaxExtents; // 12 bytes  
 
 public:
-	GfxCmd_RenderMesh(const RenderData& aData,const Matrix& aTransform); 
+	GfxCmd_RenderMesh(const RenderData& aData,const Matrix& aTransform);
 	void Destroy() override
-	{
+	{ 
 	};
 	void ExecuteAndDestroy() override;
 };

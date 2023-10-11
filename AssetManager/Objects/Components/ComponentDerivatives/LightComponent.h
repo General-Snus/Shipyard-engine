@@ -68,8 +68,7 @@ private:
 	void RedrawShadowMap();
 	void RedrawDirectionMap();
 	void RedrawPointMap();
-	void RedrawSpotMap();
-
+	void RedrawSpotMap(); 
 	Matrix GetLightViewMatrix(int number);
 
 	std::shared_ptr<DirectionalLight> myDirectionLightData;
