@@ -1,7 +1,4 @@
-#include <../Headers/DefaultVertexToPixel.hlsli>
-#include <../Headers/DefaultShaderStructs.hlsli>
-#include <../Headers/FrameBuffer.hlsli>
-#include <../Headers/ObjectBuffer.hlsli>
+#include "../Headers/ShaderStructs.hlsli" 
 
 float3 PositionInBound(float3 aMin, float3 aMax, float3 aPosition)
 {

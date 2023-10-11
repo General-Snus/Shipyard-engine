@@ -1,5 +1,5 @@
 #include "LineDrawerStructs.hlsli"
-#include "../../Headers/FrameBuffer.hlsli"
+#include "../../Headers/ShaderStructs.hlsli"
 
 LineVertexToPixel main(LineVertexInput input)
 {

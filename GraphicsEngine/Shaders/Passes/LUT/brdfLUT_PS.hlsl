@@ -1,6 +1,5 @@
-#include <../../Headers/DefaultVertexToPixel.hlsli>
-#include <../../Headers/DefaultVertexOutput.hlsli>
-#include <../../Headers/IBLBRDF.hlsli>
+#include "../../Headers/ShaderStructs.hlsli"
+#include "../../Headers/PBRFunctions.hlsli"
 
 float2 main(BRDF_VS_to_PS input) : SV_Target
 { 

@@ -1,5 +1,4 @@
- 
-#include "GBuffer/GBufferPS.hlsl"
+ #include "../Headers/ShaderStructs.hlsli"
 
 
 DefaultPixelOutput main(BRDF_VS_to_PS input)

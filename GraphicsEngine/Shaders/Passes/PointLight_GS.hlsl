@@ -1,4 +1,5 @@
-#include "GBuffer/GBufferPS.hlsl" 
+
+#include "../Headers/ShaderStructs.hlsli"   
 
 struct GSOutput
 {

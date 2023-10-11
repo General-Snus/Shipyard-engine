@@ -26,10 +26,10 @@ constexpr float ByteToBit = 8.f;
 
 
 constexpr float Byte = 1.f;
-constexpr float kByte = 1024.f;
-constexpr float megByte = 1048576.f;
-constexpr float gigByte = 1073741824.f;
-constexpr float terByte = 1099511627776.f; 
+constexpr float KiloByte = 1024.f;
+constexpr float MegaByte = 1048576.f;
+constexpr float GigaByte = 1073741824.f;
+constexpr float TeraByte = 1099511627776.f; 
 
 //Bytes
 

@@ -229,14 +229,12 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\Headers\FrameBuffer.hlsli" />
     <None Include="Shaders\Headers\ObjectBuffer.hlsli" />
-    <None Include="Shaders\Headers\DefaultShaderStructs.hlsli" />
-    <None Include="Shaders\Headers\DefaultVertexToPixel.hlsli" />
-    <None Include="Shaders\Headers\DefaultVertexOutput.hlsli" />
+    <None Include="Shaders\Headers\ShaderStructs.hlsli" />
+    <None Include="Shaders\Headers\PBRFunctions.hlsli" />
+    <None Include="Shaders\Headers\Common.hlsli" />
     <None Include="Shaders\Headers\MaterialBuffer.hlsli" />
-    <None Include="Shaders\Headers\IBLBRDF.hlsli" />
-    <None Include="Shaders\Headers\LightBuffer.hlsli" />
+    <None Include="Shaders\Headers\LightsData.hlsli" />
     <None Include="Shaders\Passes\LineDrawer\LineDrawerStructs.hlsli" />
   </ItemGroup>
   <ItemGroup>

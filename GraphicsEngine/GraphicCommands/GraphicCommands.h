@@ -33,7 +33,7 @@ class GraphicsCommandList
 public:
 	GraphicsCommandList();
 	~GraphicsCommandList();
-	void Initialize(size_t aSize = 5*megByte); //5mb default
+	void Initialize(size_t aSize = 1*MegaByte); //5mb default
 
 	template<typename CommandClass, typename ...Args>
 	void AddCommand(Args ... arguments)
