@@ -245,10 +245,12 @@
     <FxCompile Include="Shaders\Passes\LineDrawer\LineDrawer_VS.hlsl" />
     <FxCompile Include="Shaders\Passes\EnvironmentLight_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\GBuffer\GBufferPS.hlsl" />
-    <FxCompile Include="Shaders\Passes\PointLight_PS.hlsl" />
+    <FxCompile Include="Shaders\Passes\PointLight\PointLight_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\SpotLight_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\DebugLayer_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\LineDrawer.hlsl" />
-    <FxCompile Include="Shaders\Passes\PointLight_GS.hlsl" />
+    <FxCompile Include="Shaders\Passes\PointLight\PointLight_GS.hlsl" />
+    <FxCompile Include="Shaders\Passes\PointLight\PointLightShadow_PS.hlsl" />
+    <FxCompile Include="Shaders\Passes\PointLight\PointLightShadow_VS.hlsl" />
   </ItemGroup>
 </Project>

@@ -3,6 +3,16 @@
 #include "MaterialBuffer.hlsli"
 #include "ObjectBuffer.hlsli"
 
+
+struct VertexOutput
+{
+    float4 Position : SV_POSITION; // carry till geo 
+};
+struct GSOutput
+{
+    float4 posCS : SV_POSITION; 
+};
+
 struct GBufferOutput
 {
     float4 Albedo : SV_TARGET0;

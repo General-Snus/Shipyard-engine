@@ -1,14 +1,9 @@
+#include "../../Headers/ShaderStructs.hlsli"
 
-#include "../Headers/ShaderStructs.hlsli"   
 
-struct GSOutput
-{
-    float4 posCS : SV_POSITION;
-    uint slice : SV_RenderTargetArrayIndex;
-};
 
 [maxvertexcount(18)]
-void main(triangle DefaultVertexToPixel input[3], inout TriangleStream<GSOutput> output)
+void main(triangle VertexOutput input[3], inout TriangleStream<GSOutput> output)
 {
     const float4x4 viewMatrixInverse[6] =
     {
@@ -62,8 +57,7 @@ void main(triangle DefaultVertexToPixel input[3], inout TriangleStream<GSOutput>
         for (uint i = 0; i < 3; i++)
         {
             GSOutput element;
-            element.posCS = mul(FB_Proj, mul(viewMatrixInverse[count], mul(FB_InvView,  input[i].WorldPosition)));
-            element.slice = count;
+            element.posCS = mul(FB_Proj, mul(viewMatrixInverse[count], mul(FB_InvView,  input[i].Position)));
             output.Append(element);
         }
         
