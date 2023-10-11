@@ -12,6 +12,7 @@
 #include "Rendering/Buffers/ConstantBuffer.h" 
 
 #include "InterOp/RHI.h"
+#include "Rendering/ShadowRenderer/ShadowRenderer.h"
 
 #include <AssetManager/Objects/BaseAssets/TextureAsset.h>
 #include <AssetManager/Objects/BaseAssets/MeshAsset.h>
@@ -19,11 +20,12 @@
 #include <ThirdParty/CU/CommonUtills/Matrix4x4.hpp> 
 
 
-using namespace Microsoft::WRL; 
+using namespace Microsoft::WRL;
 
 class GraphicsEngine
 {
-	friend class GraphicCommandBase; 
+	friend class GraphicCommandBase;
+	friend class ShadowRenderer;
 private:
 	FrameBuffer myFrameBuffer;
 	ObjectBuffer myObjectBuffer;
@@ -31,19 +33,15 @@ private:
 	LightBuffer myLightBuffer;
 	G_Buffer myG_Buffer;
 
-	GraphicsCommandList ShadowCommandList;
 	GraphicsCommandList DeferredCommandList;
 	GraphicsCommandList OverlayCommandList;
-	//std::vector<std::unique_ptr<GraphicCommandBase>> ShadowCommandList;
-	//std::vector<std::unique_ptr<GraphicCommandBase>> DeferredCommandList;
-	//std::vector<std::unique_ptr<GraphicCommandBase>> OverlayCommandList;
 
-	SIZE myWindowSize{ 0,0 };
+	SIZE myWindowSize{0,0};
 	HWND myWindowHandle{};
 	CU::Vector4<float> myBackgroundColor;
 
 	std::shared_ptr<Texture> myBackBuffer;
-	std::shared_ptr<Texture> myDepthBuffer; 
+	std::shared_ptr<Texture> myDepthBuffer;
 
 	ComPtr<ID3D11VertexShader> myVertexShader;
 	ComPtr<ID3D11PixelShader> myPixelShader;
@@ -56,7 +54,6 @@ private:
 	ComPtr<ID3D11Buffer> myLineIndexBuffer;
 	std::shared_ptr<Shader> debugLinePS;
 	std::shared_ptr<Shader> debugLineVS;
-
 
 	std::shared_ptr<Texture> BRDLookUpTable;
 	std::shared_ptr<TextureHolder> defaultTexture;
@@ -74,18 +71,24 @@ private:
 
 	ComPtr<ID3D11BlendState> AlphaBlendState;
 	ComPtr<ID3D11BlendState> AdditiveBlendState;
+
+	ShadowRenderer myShadowRenderer;
 	// We're a container singleton, no instancing this outside the class.
 	GraphicsEngine() = default;
 
-public: 
-	inline static GraphicsEngine& Get() {  static  GraphicsEngine myInstance; return myInstance; }
+public:
+	inline static GraphicsEngine& Get() 
+	{ 
+		 static GraphicsEngine myInstance;
+		return myInstance; 
+	}
 
 	/**
 	 * Initializes the Graphics Engine with the specified settings.
 	 * @param windowHandle The window that will contain this Graphics Engine.
 	 * @param enableDeviceDebug If DirectX should write debug output in the Output.
 	 */
-	bool Initialize(HWND windowHandle, bool enableDeviceDebug);
+	bool Initialize(HWND windowHandle,bool enableDeviceDebug);
 
 	bool SetupDebugDrawline(bool& retFlag);
 
@@ -108,13 +111,13 @@ public:
 	/**
 	 * Renders the current scene to the BackBuffer.
 	 */
-	void RenderFrame(float aDeltaTime, double aTotalTime);
+	void RenderFrame(float aDeltaTime,double aTotalTime);
 	CU::Vector4<float>& GetBackgroundColor() { return myBackgroundColor; }
 
 	template<typename CommandClass,typename ...Args>
 	FORCEINLINE void ShadowCommands(Args... args)
 	{
-		ShadowCommandList.AddCommand<CommandClass>(args...);
+		myShadowRenderer.ShadowCommandList.AddCommand<CommandClass>(args...);
 	}
 
 	template<typename CommandClass,typename ...Args>
@@ -149,7 +152,7 @@ public:
 	FORCEINLINE std::shared_ptr<Material> GetDefaultMaterial() const { return defaultMaterial; }
 	FORCEINLINE std::shared_ptr<TextureHolder> GetDefaultTexture(eTextureType type) const
 	{
-		switch (type)
+		switch(type)
 		{
 		case eTextureType::ColorMap:
 			return defaultTexture;
@@ -171,18 +174,3 @@ public:
 		}
 	}
 };
-//template<typename CommandClass, typename ...Args>
-//FORCEINLINE void GraphicsEngine::ShadowCommands(Args ... arguments)
-//{
-//	this->ShadowCommandList.AddCommand<CommandClass>(arguments ...);
-//}
-//template<typename CommandClass, typename ...Args>
-//FORCEINLINE void GraphicsEngine::DeferredCommand(Args ... arguments)
-//{
-//	this->DeferredCommandList.AddCommand<CommandClass>(arguments ...);
-//}
-//template<typename CommandClass, typename ...Args>
-//FORCEINLINE void GraphicsEngine::OverlayCommands(Args ... arguments)
-//{
-//	this->OverlayCommandList.AddCommand<CommandClass>(arguments ...);
-//} 

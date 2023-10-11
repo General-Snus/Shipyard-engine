@@ -40,7 +40,6 @@ bool GraphicsEngine::Initialize(HWND windowHandle, bool enableDeviceDebug)
 {
 	GELogger = Logger::Create("GraphicsEngine");
 
-	ShadowCommandList.Initialize();
 	DeferredCommandList.Initialize();
 	OverlayCommandList.Initialize();
 
@@ -115,7 +114,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle, bool enableDeviceDebug)
 		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER, REG_LineBuffer, myLineBuffer);
 
 		myG_Buffer.Init();
-
+		myShadowRenderer.Init();
 #ifdef _DEBUG
 	}
 	catch (const std::exception& e)
@@ -363,75 +362,8 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 {
 	aDeltaTime; aTotalTime; 
 	RHI::SetVertexShader(myVertexShader);
-	std::shared_ptr<Texture> shadowMap;
-	for (auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
-	{
-		if (i.GetIsShadowCaster() && !i.GetIsDirty())
-		{
-			if (i.GetType() == eLightType::Directional)
-			{
-				if (!i.GetIsRendered())
-				{
-					myLightBuffer.Data.myDirectionalLight = *i.GetData<DirectionalLight>().get();
-					RHI::UpdateConstantBufferData(myLightBuffer);
 
-					shadowMap = i.GetShadowMap(0);
-					RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER, REG_dirLightShadowMap, nullptr); // cant be bound to resources when rendering to it
-					RHI::ClearDepthStencil(shadowMap.get());
-					RHI::SetRenderTarget(nullptr, shadowMap.get());
-					GfxCmd_SetFrameBuffer(myLightBuffer.Data.myDirectionalLight.projection, myLightBuffer.Data.myDirectionalLight.lightView, 0).ExecuteAndDestroy();
-					ShadowCommandList.StartOver();
-					ShadowCommandList.Execute();
-
-					RHI::SetRenderTarget(nullptr, nullptr);
-					i.SetIsRendered(true);
-				}
-			}
-
-			if (i.GetType() == eLightType::Spot)
-			{
-				if (!i.GetIsRendered())
-				{
-					myLightBuffer.Data.mySpotLight = *i.GetData<SpotLight>().get();
-					RHI::UpdateConstantBufferData(myLightBuffer);
-
-					shadowMap = i.GetShadowMap(0);
-					RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER, REG_dirLightShadowMap, nullptr); // cant be bound to resources when rendering to it
-					RHI::ClearDepthStencil(shadowMap.get());
-					RHI::SetRenderTarget(nullptr, shadowMap.get());
-					GfxCmd_SetFrameBuffer(myLightBuffer.Data.mySpotLight.projection, myLightBuffer.Data.mySpotLight.lightView, 0).ExecuteAndDestroy();
-
-					ShadowCommandList.StartOver();
-					ShadowCommandList.Execute();
-
-					RHI::SetRenderTarget(nullptr, nullptr);
-					i.SetIsRendered(true);
-				}
-			}
-
-			if (i.GetType() == eLightType::Point)
-			{
-				if (!i.GetIsRendered())
-				{
-					myLightBuffer.Data.myPointLight = *i.GetData<PointLight>().get();
-					RHI::UpdateConstantBufferData(myLightBuffer);
-					{
-						shadowMap = i.GetShadowMap(0);
-						RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER, REG_dirLightShadowMap, nullptr); // cant be bound to resources when rendering to it
-						RHI::ClearDepthStencil(shadowMap.get());
-						RHI::SetRenderTarget(nullptr, shadowMap.get());
-						GfxCmd_SetFrameBuffer(myLightBuffer.Data.myPointLight.projection,myLightBuffer.Data.myPointLight.lightView, 0).ExecuteAndDestroy();
-
-						ShadowCommandList.StartOver();
-						ShadowCommandList.Execute();
-
-						RHI::SetRenderTarget(nullptr, nullptr);
-						i.SetIsRendered(true);
-					}
-				}
-			}
-		}
-	}
+	myShadowRenderer.Execute();	
 
 	myG_Buffer.SetWriteTargetToBuffer(); //Let all write to textures
 	DeferredCommandList.AddCommand<GfxCmd_SetRenderTarget>(myBackBuffer.get(),nullptr);
@@ -449,7 +381,7 @@ void GraphicsEngine::EndFrame()
 {
 	// We finish our frame here and present it on screen.
 	RHI::Present(0);
-	ShadowCommandList.Reset();
+	myShadowRenderer.ResetShadowList();
 	DeferredCommandList.Reset();
 	OverlayCommandList.Reset();
 }

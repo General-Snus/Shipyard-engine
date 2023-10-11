@@ -221,13 +221,17 @@
     <ClInclude Include="Rendering\Vertex.h" />
     <ClInclude Include="Shaders\Include\EnvironmentLight_PS.h" />
     <ClInclude Include="Shaders\Include\GBufferPS.h" />
+    <ClInclude Include="Shaders\Include\LineDrawer.h" />
     <ClInclude Include="Shaders\Include\LineDrawer_PS.h" />
     <ClInclude Include="Shaders\Include\LineDrawer_VS.h" />
-    <ClInclude Include="Shaders\Include\PointLight_GS.h" />
+    <ClInclude Include="Shaders\Include\PointLightShadow_GS.h" />
+    <ClInclude Include="Shaders\Include\PointLightShadow_PS.h" />
+    <ClInclude Include="Shaders\Include\PointLightShadow_VS.h" />
     <ClInclude Include="Shaders\Include\PointLight_PS.h" />
     <ClInclude Include="Shaders\Include\ScreenspaceQuad_VS.h" />
     <ClInclude Include="Shaders\Include\SpotLight_PS.h" />
     <ClInclude Include="Shaders\Registers.h" />
+    <ClInclude Include="Rendering\ShadowRenderer\ShadowRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DebugDrawer\DebugDrawer.cpp" />
@@ -260,6 +264,7 @@
     <ClCompile Include="Rendering\Buffers\ConstantBuffer.cpp" />
     <ClCompile Include="Rendering\Texture.cpp" />
     <ClCompile Include="Rendering\Vertex.cpp" />
+    <ClCompile Include="Rendering\ShadowRenderer\ShadowRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Logging\Logging.vcxproj">
@@ -335,7 +340,7 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
-    <FxCompile Include="Shaders\Passes\PointLight\PointLight_GS.hlsl">
+    <FxCompile Include="Shaders\Passes\PointLight\PointLightShadow_GS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Geometry</ShaderType>

@@ -6,8 +6,7 @@
 #include <Shaders/Include/GBufferPS.h>
 #include <Shaders/Include/ScreenspaceQuad_VS.h>
 #include <Shaders/Include/EnvironmentLight_PS.h>
-#include <Shaders/Include/PointLight_PS.h>
-#include <Shaders/Include/PointLight_GS.h>
+#include <Shaders/Include/PointLight_PS.h> 
 #include <Shaders/Include/SpotLight_PS.h> 
 #include <Shaders/Include/DebugLayer_PS.h> 
 #include<GraphicsEngine/GraphicsEngine.h> 
@@ -51,13 +50,7 @@ void G_Buffer::Init()
 		myPointPixelShader,
 		BuiltIn_PointLight_PS_ByteCode,
 		sizeof(BuiltIn_PointLight_PS_ByteCode)
-	);
-
-	RHI::CreateGeometryShader(
-		myPointGeometryShader,
-		BuiltIn_PointLight_GS_ByteCode,
-		sizeof(BuiltIn_PointLight_GS_ByteCode)
-	);
+	); 
 
 	RHI::CreatePixelShader(
 		myDebugPixelShader,
@@ -213,8 +206,7 @@ void G_Buffer::UseDebugShader()
 void G_Buffer::UsePointlightShader()
 {
 	RHI::SetBlendState(GraphicsEngine::Get().GetAdditiveBlendState());
-	RHI::SetVertexShader(myScreenSpaceShader);
-	 RHI::SetGeometryShader(myPointGeometryShader);
+	RHI::SetVertexShader(myScreenSpaceShader); 
 	RHI::SetPixelShader(myPointPixelShader);
 
 	for(int i = 0; i < vectorOfTextures.size(); i++)

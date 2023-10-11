@@ -1,6 +1,6 @@
-#include "../Headers/ShaderStructs.hlsli"
-#include "../Headers/PBRFunctions.hlsli"
-#include "../Registers.h" 
+#include "../../Headers/ShaderStructs.hlsli"
+#include "../../Headers/PBRFunctions.hlsli"
+#include "../../Registers.h" 
  
 
 float3 CalculatePointLight(float3 diffuseColor, float3 specularColor, float4 worldPosition, float3 normal, float3 cameraDirection, PointLight pointLightData, float roughness, float shine)

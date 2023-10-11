@@ -30,8 +30,7 @@ struct G_Buffer
 	ComPtr<ID3D11VertexShader> myScreenSpaceShader;
 	ComPtr<ID3D11PixelShader> myEnviromentPixelShader; 
 	ComPtr<ID3D11PixelShader> myDebugPixelShader; 
-	ComPtr<ID3D11PixelShader> myPointPixelShader; 
-	ComPtr<ID3D11GeometryShader> myPointGeometryShader; 
+	ComPtr<ID3D11PixelShader> myPointPixelShader;  
 	ComPtr<ID3D11PixelShader> mySpotShader; 
 
 	int mask = 0;

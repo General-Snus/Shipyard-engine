@@ -126,9 +126,6 @@
     <ClInclude Include="Shaders\Include\DebugLayer_PS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Shaders\Include\PointLight_GS.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_DebugLayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -157,6 +154,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetRenderTarget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\ShadowRenderer\ShadowRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Include\PointLightShadow_PS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Include\PointLightShadow_VS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Include\LineDrawer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Include\PointLightShadow_GS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -227,6 +239,9 @@
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetLightBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Rendering\ShadowRenderer\ShadowRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Headers\ObjectBuffer.hlsli" />
@@ -249,7 +264,7 @@
     <FxCompile Include="Shaders\Passes\SpotLight_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\DebugLayer_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\LineDrawer.hlsl" />
-    <FxCompile Include="Shaders\Passes\PointLight\PointLight_GS.hlsl" />
+    <FxCompile Include="Shaders\Passes\PointLight\PointLightShadow_GS.hlsl" />
     <FxCompile Include="Shaders\Passes\PointLight\PointLightShadow_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\PointLight\PointLightShadow_VS.hlsl" />
   </ItemGroup>
