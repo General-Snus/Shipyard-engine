@@ -30,18 +30,7 @@
 #include "GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_SetRenderTarget.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_DebugLayer.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_SetLightBuffer.h"
-
-
-
-
-
-
-
-
-
-
-
+#include "GraphicCommands/Commands/Headers/GfxCmd_SetLightBuffer.h" 
 
 #include "Shaders/Registers.h"
 #include <ImGui/imgui.h>
@@ -73,8 +62,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle, bool enableDeviceDebug)
 		{
 			GELogger.Err("Failed to initialize the RHI!");
 			return false;
-		}
-
+		} 
 
 		SetupDefaultVariables();
 		SetupBRDF();
@@ -373,8 +361,7 @@ void GraphicsEngine::BeginFrame()
 
 void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 {
-	aDeltaTime; aTotalTime;
-
+	aDeltaTime; aTotalTime; 
 	RHI::SetVertexShader(myVertexShader);
 	std::shared_ptr<Texture> shadowMap;
 	for (auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())

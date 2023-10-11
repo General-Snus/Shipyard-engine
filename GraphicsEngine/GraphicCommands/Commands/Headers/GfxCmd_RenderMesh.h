@@ -12,9 +12,9 @@ protected:
 	CU::Vector3<float> MaxExtents; // 12 bytes  
 
 public:
-	GfxCmd_RenderMesh(const RenderData& aData,const Matrix& aTransform);
+	GfxCmd_RenderMesh(const RenderData& aData,const Matrix& aTransform); 
 	void Destroy() override
-	{ 
+	{
 	};
 	void ExecuteAndDestroy() override;
 };

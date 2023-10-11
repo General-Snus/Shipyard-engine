@@ -79,7 +79,7 @@ private:
 
 public:
 
-	static GraphicsEngine& Get() { static GraphicsEngine myInstance; return myInstance; }
+	static GraphicsEngine& Get() { inline static GraphicsEngine myInstance; return myInstance; }
 
 	/**
 	 * Initializes the Graphics Engine with the specified settings.
