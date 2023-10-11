@@ -1,33 +1,18 @@
 
 // Exclude things we don't need from the Windows headers
-#define WIN32_LEAN_AND_MEAN 
+#include <AssetManager/AssetManager.pch.h>
+#include <GraphicsEngine/GraphicsEngine.pch.h>
+
 #include "Modelviewer.h"
 
-#include "GraphicsEngine/GraphicsEngine.h"
+#define WIN32_LEAN_AND_MEAN 
 #include "Windows.h"
 
 #include <string>
 #include <stringapiset.h>
-
 #include <filesystem>
-
-#include "GraphicsEngine/InterOp/Helpers.h"
-#include "Windows/SplashWindow.h" 
-
-#include <AssetManager/GameObjectManager.h>
-#include <AssetManager/Objects/GameObjects/GameObject.h>
-#include <AssetManager/Objects/Components/ComponentManager.h>
-#include <AssetManager/Objects/Components/ComponentDerivatives/MeshRenderer.h>
-#include <AssetManager/Objects/Components/ComponentDerivatives/Transform.h>
-#include <AssetManager/Objects/Components/ComponentDerivatives/Animator.h>
-#include <AssetManager/Objects/Components/ComponentDerivatives/Skybox.h>
-#include <AssetManager/Objects/Components/ComponentDerivatives/CameraComponent.h>
-#include <AssetManager/Objects/Components/ComponentDerivatives/LightComponent.h>
-#include <AssetManager/Objects/Components/ComponentDerivatives/DEBUGCOMPONENTS/BackgroundColor.h>
-#include <AssetManager/Objects/Components/ComponentDerivatives/DEBUGCOMPONENTS/FrameStatistics.h>
-#include <AssetManager/Objects/Components/ComponentDerivatives/DEBUGCOMPONENTS/RenderMode.h>
-#include <AssetManager/AssetManager.h>
-#include <ThirdParty/CU/Math.hpp>
+#include "Windows/SplashWindow.h"  
+ 
 #include <functional>
 #include <fstream>
 #include <streambuf>
@@ -37,9 +22,11 @@
 #include <ImGUI/imgui_impl_win32.h>
 #include <ImGUI/imgui_impl_dx11.h>
 
+#include <ThirdParty/CU/Math.hpp>
 #include <ThirdParty/nlohmann/json.hpp> 
 #include <ThirdParty/CU/Math.hpp>  
 #include "Timer.h"
+#include "GraphicsEngine/InterOp/Helpers.h"
 
 #define _DEBUGDRAW
  #define Flashlight

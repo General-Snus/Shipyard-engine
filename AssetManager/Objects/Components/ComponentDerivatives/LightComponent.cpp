@@ -1,4 +1,5 @@
 #include "AssetManager.pch.h"
+#include <GraphicsEngine/GraphicsEngine.pch.h>
 #include "LightComponent.h"
 #include <Modelviewer/Core/Modelviewer.h>
 #include <ThirdParty/CU/Math.hpp>

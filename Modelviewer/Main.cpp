@@ -23,7 +23,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     FILE* consoleOut;
     AllocConsole();
     freopen_s(&consoleOut, "CONOUT$", "w", stdout);
-    freopen_s(&consoleOut, "CONOUT$", "w",stderr);
+  //  freopen_s(&consoleOut, "CONOUT$", "w",stderr);
     setvbuf(consoleOut, nullptr, _IONBF, 1024);
 
 	HWND consoleWindow = GetConsoleWindow();

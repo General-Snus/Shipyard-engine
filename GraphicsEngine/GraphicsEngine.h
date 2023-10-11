@@ -1,26 +1,29 @@
 #pragma once
-#include "GraphicsEngine.pch.h"
-#include <memory>
-#include "InterOp/RHI.h"
+#include <memory> 
 #include <wrl.h>
-#include <ThirdParty/CU/CommonUtills/Matrix4x4.hpp>
 
-#include "Commands/GraphicCommands.h"
+#include <GraphicsEngine/GraphicCommands/GraphicCommands.h>
+#include <GraphicsEngine/Shaders/Registers.h>
+
 #include "Rendering/Buffers/FrameBuffer.h"
 #include "Rendering/Buffers/ObjectBuffer.h"
 #include "Rendering/Buffers/LineBuffer.h"
 #include "Rendering/Buffers/G_Buffer.h"
-#include "Rendering/Buffers/ConstantBuffer.h"  
+#include "Rendering/Buffers/ConstantBuffer.h" 
 
-#include <memory>
+#include "InterOp/RHI.h"
 
-using namespace Microsoft::WRL;
+#include <AssetManager/Objects/BaseAssets/TextureAsset.h>
+#include <AssetManager/Objects/BaseAssets/MeshAsset.h>
 
+#include <ThirdParty/CU/CommonUtills/Matrix4x4.hpp> 
+
+
+using namespace Microsoft::WRL; 
 
 class GraphicsEngine
 {
-	friend class GraphicCommandBase;
-
+	friend class GraphicCommandBase; 
 private:
 	FrameBuffer myFrameBuffer;
 	ObjectBuffer myObjectBuffer;
@@ -109,14 +112,23 @@ public:
 	void RenderFrame(float aDeltaTime, double aTotalTime);
 	CU::Vector4<float>& GetBackgroundColor() { return myBackgroundColor; }
 
-	template<typename T,typename ...Types>
-	void ShadowCommands(Types ...args);
+	template<typename CommandClass,typename ...Args>
+	FORCEINLINE void ShadowCommands(Args... args)
+	{
+		ShadowCommandList.AddCommand<CommandClass>(args...);
+	}
 
-	template<typename T, typename...Types>
-	void DeferredCommand(Types... args);
+	template<typename CommandClass,typename ...Args>
+	FORCEINLINE void DeferredCommand(Args... args)
+	{
+		DeferredCommandList.AddCommand<CommandClass>(args ...);
+	}
 
-	template<typename T, typename...Types>
-	void OverlayCommands(Types... args);
+	template<typename CommandClass,typename ...Args>
+	FORCEINLINE void OverlayCommands(Args... args)
+	{
+		OverlayCommandList.AddCommand<CommandClass>(args ...);
+	}
 
 
 	[[nodiscard]] HWND FORCEINLINE GetWindowHandle() const { return myWindowHandle; }
@@ -160,18 +172,18 @@ public:
 		}
 	}
 };
-template<typename CommandClass, typename ...Args>
-FORCEINLINE void GraphicsEngine::ShadowCommands(Args ... arguments)
-{
-	this->ShadowCommandList.AddCommand<CommandClass>(arguments...);
-}
-template<typename CommandClass, typename ...Args>
-FORCEINLINE void GraphicsEngine::DeferredCommand(Args ... arguments)
-{
-	this->DeferredCommandList.AddCommand<CommandClass>(arguments...);
-}
-template<typename CommandClass, typename ...Args>
-FORCEINLINE void GraphicsEngine::OverlayCommands(Args ... arguments)
-{
-	this->OverlayCommandList.AddCommand<CommandClass>(arguments...);
-} 
+//template<typename CommandClass, typename ...Args>
+//FORCEINLINE void GraphicsEngine::ShadowCommands(Args ... arguments)
+//{
+//	this->ShadowCommandList.AddCommand<CommandClass>(arguments ...);
+//}
+//template<typename CommandClass, typename ...Args>
+//FORCEINLINE void GraphicsEngine::DeferredCommand(Args ... arguments)
+//{
+//	this->DeferredCommandList.AddCommand<CommandClass>(arguments ...);
+//}
+//template<typename CommandClass, typename ...Args>
+//FORCEINLINE void GraphicsEngine::OverlayCommands(Args ... arguments)
+//{
+//	this->OverlayCommandList.AddCommand<CommandClass>(arguments ...);
+//} 

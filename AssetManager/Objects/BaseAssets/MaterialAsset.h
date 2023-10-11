@@ -3,6 +3,7 @@
 #include <GraphicsEngine/Objects/Shader.h>
 #include <GraphicsEngine/Rendering/Buffers/ConstantBuffer.h>
 #include <Thirdparty/nlohmann/json.hpp>
+
 class TextureHolder;
 
 struct MaterialData
@@ -12,8 +13,11 @@ struct MaterialData
 	float NormalStrength = 1.0f;
 	float Shine = 100.f;
 };
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(MaterialData,albedoColor.x,albedoColor.y,albedoColor.z,albedoColor.w,
-		UVTiling.x,UVTiling.y,NormalStrength,Shine);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(MaterialData,
+	albedoColor.x,albedoColor.y,albedoColor.z,albedoColor.w,
+	UVTiling.x,UVTiling.y,NormalStrength,Shine
+);
+
 class Material : public AssetBase
 {
 public:

@@ -17,7 +17,27 @@
 #include "InterOp/Helpers.h"
 #include "InterOp/RHI.h"
 #include "Logging/Logging.h"
-  
+#include "GraphicsEngine.h"
+
+
+#include <GraphicsEngine/Rendering/Buffers/FrameBuffer.h>
+#include <GraphicsEngine/Rendering/Buffers/ObjectBuffer.h>
+#include <GraphicsEngine/Rendering/Buffers/LightBuffer.h>
+#include <GraphicsEngine/Rendering/Buffers/LineBuffer.h>
+#include <GraphicsEngine/Rendering/Buffers/G_buffer.h>
+
+#include <GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_DebugLayer.h>
+#include <GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_DrawDebugPrimitive.h>
+#include <GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_RenderMesh.h>
+#include <GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_RenderMeshShadow.h>
+#include <GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_RenderSkeletalMesh.h>
+#include <GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_RenderSkeletalMeshShadow.h>
+#include <GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_RenderSkybox.h>
+#include <GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h>
+#include <GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_SetLightBuffer.h>
+#include <GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_SetRenderTarget.h>
+
+
 
 static inline Logger GELogger;
 #endif //GRAPHICSENGINE_PCH

@@ -1,4 +1,5 @@
 #include "AssetManager.pch.h"
+#include <GraphicsEngine/GraphicsEngine.pch.h>
 #include "MaterialAsset.h"
 #include <ThirdParty/nlohmann/json.hpp>
 #include <fstream>

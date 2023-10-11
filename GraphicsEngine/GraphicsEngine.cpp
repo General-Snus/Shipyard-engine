@@ -23,9 +23,25 @@
 
 #include "Rendering/Vertex.h"
 #include "Objects/Model.h"
-#include "Commands/GraphicCommands.h"
+#include "GraphicCommands/GraphicCommands.h"
 #include <AssetManager/Objects/BaseAssets/TextureAsset.h>
 #include <AssetManager/Objects/Components/ComponentDerivatives/LightComponent.h>
+
+#include "GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h"
+#include "GraphicCommands/Commands/Headers/GfxCmd_SetRenderTarget.h"
+#include "GraphicCommands/Commands/Headers/GfxCmd_DebugLayer.h"
+#include "GraphicCommands/Commands/Headers/GfxCmd_SetLightBuffer.h"
+
+
+
+
+
+
+
+
+
+
+
 
 #include "Shaders/Registers.h"
 #include <ImGui/imgui.h>
@@ -377,7 +393,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 					RHI::ClearDepthStencil(shadowMap.get());
 					RHI::SetRenderTarget(nullptr, shadowMap.get());
 					GfxCmd_SetFrameBuffer(myLightBuffer.Data.myDirectionalLight.projection, myLightBuffer.Data.myDirectionalLight.lightView, 0).ExecuteAndDestroy();
-
+					ShadowCommandList.StartOver();
 					ShadowCommandList.Execute();
 
 					RHI::SetRenderTarget(nullptr, nullptr);
@@ -398,6 +414,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 					RHI::SetRenderTarget(nullptr, shadowMap.get());
 					GfxCmd_SetFrameBuffer(myLightBuffer.Data.mySpotLight.projection, myLightBuffer.Data.mySpotLight.lightView, 0).ExecuteAndDestroy();
 
+					ShadowCommandList.StartOver();
 					ShadowCommandList.Execute();
 
 					RHI::SetRenderTarget(nullptr, nullptr);
@@ -411,14 +428,14 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 				{
 					myLightBuffer.Data.myPointLight = *i.GetData<PointLight>().get();
 					RHI::UpdateConstantBufferData(myLightBuffer);
-					for (int j = 0; j < 6; j++)
 					{
-						shadowMap = i.GetShadowMap(j);
+						shadowMap = i.GetShadowMap(0);
 						RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER, REG_dirLightShadowMap, nullptr); // cant be bound to resources when rendering to it
 						RHI::ClearDepthStencil(shadowMap.get());
 						RHI::SetRenderTarget(nullptr, shadowMap.get());
-						GfxCmd_SetFrameBuffer(myLightBuffer.Data.myPointLight.projection, i.GetLightViewMatrix(j), 0).ExecuteAndDestroy();
+						GfxCmd_SetFrameBuffer(myLightBuffer.Data.myPointLight.projection,myLightBuffer.Data.myPointLight.lightView, 0).ExecuteAndDestroy();
 
+						ShadowCommandList.StartOver();
 						ShadowCommandList.Execute();
 
 						RHI::SetRenderTarget(nullptr, nullptr);
@@ -430,15 +447,19 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 	}
 
 	myG_Buffer.SetWriteTargetToBuffer(); //Let all write to textures
+	DeferredCommandList.AddCommand<GfxCmd_SetRenderTarget>(myBackBuffer.get(),nullptr);
+	DeferredCommandList.AddCommand<GfxCmd_SetLightBuffer>();
+	DeferredCommandList.AddCommand<GfxCmd_DebugLayer>();
+
 	DeferredCommandList.Execute();
 
-	RHI::SetRenderTarget(myBackBuffer.get(), nullptr);
+	//RHI::SetRenderTarget(myBackBuffer.get(), nullptr);
 
 
 	//LIGHTS  
-	GfxCmd_SetLightBuffer().ExecuteAndDestroy();
-
-	GfxCmd_DebugLayer().ExecuteAndDestroy();
+	//GfxCmd_SetLightBuffer().ExecuteAndDestroy();
+	//
+	//GfxCmd_DebugLayer().ExecuteAndDestroy();
 	RHI::SetBlendState(AlphaBlendState);
 	OverlayCommandList.Execute();
 	RHI::SetBlendState(nullptr);

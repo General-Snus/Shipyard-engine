@@ -179,6 +179,7 @@ void G_Buffer::SetWriteTargetToBuffer()
 	}
 
 	RHI::SetRenderTargets(vectorOfTextures,GraphicsEngine::Get().DepthBuffer());
+
 }
 
 void G_Buffer::UseGBufferShader()
@@ -213,7 +214,7 @@ void G_Buffer::UsePointlightShader()
 {
 	RHI::SetBlendState(GraphicsEngine::Get().GetAdditiveBlendState());
 	RHI::SetVertexShader(myScreenSpaceShader);
-	RHI::SetGeometryShader(myPointGeometryShader);
+	//RHI::SetGeometryShader(myPointGeometryShader);
 	RHI::SetPixelShader(myPointPixelShader);
 
 	for(int i = 0; i < vectorOfTextures.size(); i++)

@@ -1,6 +1,10 @@
 #include "AssetManager.pch.h"
+#include <GraphicsEngine/GraphicsEngine.pch.h>
 #include "CameraComponent.h"
 #include <Modelviewer/Core/Modelviewer.h>
+#include <GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h>
+
+
 cCamera::cCamera(const unsigned int anOwnerId) : Component(anOwnerId)
 {
 

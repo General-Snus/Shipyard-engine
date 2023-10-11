@@ -18,6 +18,8 @@ enum class eAnimationState
 
 
 class GfxCmd_RenderSkeletalMesh;
+struct RenderData;
+
 class cAnimator : public Component
 {
 public:
@@ -28,7 +30,7 @@ public:
 
 	void Update() override;
 
-	void RenderAnimation(const  RenderData& aMesh,const CU::Matrix4x4<float> aTransform);
+	void RenderAnimation(const RenderData& aMesh,const CU::Matrix4x4<float> aTransform);
 	void AddAnimation(Animation aAnimation);
 	void AddAnimation(const std::filesystem::path& aFilePath);
 	eAnimationState GetState() const;

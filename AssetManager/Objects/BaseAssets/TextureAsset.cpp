@@ -1,4 +1,5 @@
 #include "AssetManager.pch.h"
+#include <GraphicsEngine/GraphicsEngine.pch.h>
 #include "TextureAsset.h"
 
 TextureHolder::TextureHolder(const std::filesystem::path& aFilePath,eTextureType atextureType) : AssetBase(aFilePath)

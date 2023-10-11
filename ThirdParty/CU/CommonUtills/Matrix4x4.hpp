@@ -1,8 +1,7 @@
 #define dim4x4 4
 #pragma once
-
+#define CU CommonUtilities
 #include "Vectors.hpp" 
-
 namespace CommonUtilities
 {
 	template <class T>
@@ -361,3 +360,6 @@ namespace CommonUtilities
 		return result;
 	}
 }
+
+typedef CU::Vector3<float> Vector3f;
+typedef CU::Matrix4x4<float> Matrix;

@@ -1,5 +1,6 @@
 #pragma once
 #include "BaseAsset.h"
+#include <GraphicsEngine/Rendering/Texture.h>
 
 enum class eTextureType
 {

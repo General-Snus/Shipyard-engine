@@ -1,5 +1,4 @@
-#pragma once
-
+#pragma once 
 
 class cCamera : public Component
 {

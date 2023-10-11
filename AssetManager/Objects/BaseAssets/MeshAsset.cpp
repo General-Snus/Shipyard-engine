@@ -1,4 +1,6 @@
 #include "AssetManager.pch.h"
+#include <GraphicsEngine/GraphicsEngine.pch.h>
+
 #include "MeshAsset.h" 
 #include <Modelviewer/Core/Modelviewer.h>
 std::vector<std::string> GetTextureNames(TGA::FBX::Material& material)

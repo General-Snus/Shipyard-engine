@@ -1,4 +1,7 @@
 #pragma once
+#include <algorithm>
+#include <cmath>
+#include <ThirdParty/CU/CommonUtills/Vectors.hpp>
 
 constexpr float PI = 3.14159f;
 constexpr float PI2 = PI * 2.0f;

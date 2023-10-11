@@ -2,7 +2,7 @@
 #include <wrl.h>
 using namespace Microsoft::WRL;
 #include <ThirdParty/Cu/CommonUtills/Vectors.hpp>
-#include "../GraphicsEngine.pch.h"
+#include <d3d11.h>
 // We'll be writing this a lot so easier
 // to just typedef it here.
 typedef std::vector<D3D11_INPUT_ELEMENT_DESC> InputElementList;

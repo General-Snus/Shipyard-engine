@@ -1,7 +1,8 @@
 #include "AssetManager.pch.h"
+#include <GraphicsEngine/GraphicsEngine.pch.h>
 #include "Animator.h"
 #include "Transform.h" 
-#include <GraphicsEngine/Commands/GraphicCommands.h>
+#include <GraphicsEngine/GraphicCommands/GraphicCommands.h>
 
 cAnimator::cAnimator(const unsigned int anOwnerId) : Component(anOwnerId),myCurrentAnimation(0),myAnimationTimer(0)
 {

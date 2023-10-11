@@ -183,6 +183,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DebugDrawer\DebugDrawer.h" />
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_DebugLayer.h" />
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_DrawDebugPrimitive.h" />
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderMesh.h" />
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderMeshShadow.h" />
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderSkeletalMesh.h" />
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderSkeletalMeshShadow.h" />
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderSkybox.h" />
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetFrameBuffer.h" />
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetLightBuffer.h" />
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetRenderTarget.h" />
     <ClInclude Include="InterOp\ShaderInfo.h" />
     <ClInclude Include="Rendering\Buffers\G_Buffer.h" />
     <ClInclude Include="Rendering\Buffers\LightBuffer.h" />
@@ -200,7 +210,7 @@
     <ClInclude Include="Rendering\ForwardRenderer.h" />
     <ClInclude Include="Rendering\Buffers\ObjectBuffer.h" />
     <ClInclude Include="Rendering\Buffers\FrameBuffer.h" />
-    <ClInclude Include="Commands\GraphicCommands.h" />
+    <ClInclude Include="GraphicCommands\GraphicCommands.h" />
     <ClInclude Include="GraphicsEngine.h" />
     <ClInclude Include="GraphicsEngine.pch.h" />
     <ClInclude Include="InterOp\DDSTextureLoader11.h" />
@@ -221,9 +231,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DebugDrawer\DebugDrawer.cpp" />
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_DebugLayer.cpp" />
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_DrawDebugPrimitive.cpp" />
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderMesh.cpp" />
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderMeshShadow.cpp" />
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderSkeletalMesh.cpp" />
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderSkeletalMeshShadow.cpp" />
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderSkybox.cpp" />
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetFrameBuffer.cpp" />
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetLightBuffer.cpp" />
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetRenderTarget.cpp" />
     <ClCompile Include="Rendering\Buffers\G_Buffer.cpp" />
     <ClCompile Include="Rendering\ForwardRenderer.cpp" />
-    <ClCompile Include="Commands\GraphicCommands.cpp" />
+    <ClCompile Include="GraphicCommands\GraphicCommands.cpp" />
     <ClCompile Include="GraphicsEngine.cpp" />
     <ClCompile Include="GraphicsEngine.pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

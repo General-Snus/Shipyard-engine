@@ -1,8 +1,9 @@
-#pragma once
-
-#include <ThirdParty/CU/CommonUtills/Matrix4x4.hpp>
-#include "Rendering/Buffers/ConstantBuffer.h" 
-#include <AssetManager/Objects/BaseAssets/MaterialAsset.h>
+#pragma once 
+#include <GraphicsEngine/Rendering/Buffers/ConstantBuffer.h>
+#include <ThirdParty/CU/CommonUtills/Matrix4x4.hpp> 
+#include <GraphicsEngine/Rendering/Texture.h>
+#include <vector>
+#include <d3d11.h>
 
 struct G_Buffer
 {
@@ -38,9 +39,7 @@ struct G_Buffer
 	std::shared_ptr<Texture> albedoTexture;
 	std::shared_ptr<Texture> normalTexture;
 	std::shared_ptr<Texture> materialTexture;
-	std::shared_ptr<Texture> effectTexture;
-	
-	
+	std::shared_ptr<Texture> effectTexture; 
 	*/
 	void SetWriteTargetToBuffer();
 	void UseGBufferShader(); 

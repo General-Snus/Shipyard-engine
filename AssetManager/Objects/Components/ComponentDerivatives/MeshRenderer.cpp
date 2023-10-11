@@ -1,9 +1,10 @@
 #include "AssetManager.pch.h"
+#include <GraphicsEngine/GraphicsEngine.pch.h>
 #include "MeshRenderer.h"
 #include "Transform.h"
-#include "Animator.h"
+#include "Animator.h" 
+#include <GraphicsEngine/GraphicCommands/GraphicCommands.h>
 
-#include <GraphicsEngine/Commands/GraphicCommands.h>
 cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId) : Component(anOwnerId)
 {
 	myRenderData.myMaterials.resize(1);

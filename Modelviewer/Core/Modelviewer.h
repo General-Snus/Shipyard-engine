@@ -1,13 +1,13 @@
 #pragma once
 #include <memory>
-
 #include "ApplicationState.h"
-#include "GraphicsEngine/GraphicsEngine.h"
 #include "Logging/Logging.h" 
 #include <TGAFbx.h>
 #include <TgaFbxStructs.h>  
 #include <Modelviewer/Windows/SplashWindow.h> 
 #include <ThirdParty/CU/CommonUtills/Sphere.hpp>
+#include <ThirdParty/CU/CommonUtills/Matrix4x4.hpp>
+#include <AssetManager/Objects/GameObjects/GameObject.h>
 
 template<typename T>
 struct SaveData
@@ -58,7 +58,8 @@ class ModelViewer
 
 public:
 	void ExpandWorldBounds(CU::Sphere<float> sphere);
-	const CU::Sphere<float>& GetWorldBounds() const; 
+	const CU::Sphere<float>& GetWorldBounds() const;
+
 	// Singleton Getter.
 	static ModelViewer& Get()
 	{
