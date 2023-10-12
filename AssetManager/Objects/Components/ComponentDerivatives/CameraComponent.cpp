@@ -17,20 +17,20 @@ cCamera::cCamera(const unsigned int anOwnerId) : Component(anOwnerId)
 	const float farfield = 1500;
 	const float nearField = .001f;
 
-	myClipMatrix(1,1) = fowmdf;
-	myClipMatrix(2,2) = APRatio * fowmdf;
-	myClipMatrix(3,3) = APRatio * fowmdf;
-	myClipMatrix(3,3) = farfield / (farfield - nearField);
-	myClipMatrix(4,3) = nearField * farfield / (farfield - nearField);
-	myClipMatrix(3,4) = 1;
+	myClipMatrix(1, 1) = fowmdf;
+	myClipMatrix(2, 2) = APRatio * fowmdf;
+	myClipMatrix(3, 3) = APRatio * fowmdf;
+	myClipMatrix(3, 3) = farfield / (farfield - nearField);
+	myClipMatrix(4, 3) = nearField * farfield / (farfield - nearField);
+	myClipMatrix(3, 4) = 1;
 
 	GetGameObject().AddComponent<cLight>(eLightType::Spot);
 	std::weak_ptr<SpotLight> pLight = GetComponent<cLight>().GetData<SpotLight>();
-	pLight.lock()->Position = CU::Vector3<float>(0,0,0);
-	pLight.lock()->Color = CU::Vector3<float>(1,1,1);
+	pLight.lock()->Position = CU::Vector3<float>(0, 0, 0);
+	pLight.lock()->Color = CU::Vector3<float>(1, 1, 1);
 	pLight.lock()->Power = 500.0f * Mega;
 	pLight.lock()->Range = 1000;
-	pLight.lock()->Direction = {0,-1,0};
+	pLight.lock()->Direction = { 0,-1,0 };
 	pLight.lock()->InnerConeAngle = 10 * DEG_TO_RAD;
 	pLight.lock()->OuterConeAngle = 45 * DEG_TO_RAD;
 	GetComponent<cLight>().BindDirectionToTransform(true);
@@ -48,45 +48,45 @@ void cCamera::Update()
 	//UpdatePositionVectors();
 	const float mdf = 1000;
 	const float rotationSpeed = 100;
-	if(GetAsyncKeyState('W'))
+	if (GetAsyncKeyState('W'))
 	{
 		myTransform.Move(myTransform.GetForward() * aTimeDelta * mdf);
 	}
 
-	if(GetAsyncKeyState('S'))
+	if (GetAsyncKeyState('S'))
 	{
 		myTransform.Move(-myTransform.GetForward() * aTimeDelta * mdf);
 	}
 
-	if(GetAsyncKeyState('D'))
+	if (GetAsyncKeyState('D'))
 	{
 		myTransform.Move(myTransform.GetRight() * aTimeDelta * mdf);
 	}
 
-	if(GetAsyncKeyState('A'))
+	if (GetAsyncKeyState('A'))
 	{
 		myTransform.Move(-myTransform.GetRight() * aTimeDelta * mdf);
 	}
-	if(GetAsyncKeyState('E'))
+	if (GetAsyncKeyState('E'))
 	{
-		myTransform.Rotate({0,rotationSpeed * aTimeDelta},true);
+		myTransform.Rotate({ 0,rotationSpeed * aTimeDelta }, true);
 	}
-	if(GetAsyncKeyState('F'))
+	if (GetAsyncKeyState('F'))
 	{
 		GetComponent<cLight>().BindDirectionToTransform(!GetComponent<cLight>().GetIsBound());
 	}
 
-	if(GetAsyncKeyState('Q'))
+	if (GetAsyncKeyState('Q'))
 	{
-		myTransform.Rotate({0,-rotationSpeed * aTimeDelta},true);
+		myTransform.Rotate({ 0,-rotationSpeed * aTimeDelta }, true);
 	}
 
-	if(GetAsyncKeyState(VK_SPACE))
+	if (GetAsyncKeyState(VK_SPACE))
 	{
 		myTransform.Move(myTransform.GetUp() * aTimeDelta * mdf);
 	}
 
-	if(GetAsyncKeyState(VK_LSHIFT))
+	if (GetAsyncKeyState(VK_LSHIFT))
 	{
 		myTransform.Move(-myTransform.GetUp() * aTimeDelta * mdf);
 	}
@@ -94,7 +94,34 @@ void cCamera::Update()
 
 void cCamera::Render()
 {
-	GraphicsEngine::Get().DeferredCommand<GfxCmd_SetFrameBuffer>(myClipMatrix,this->GetGameObject().GetComponent<Transform>(),(int)ModelViewer::GetApplicationState().filter);
+	GraphicsEngine::Get().DeferredCommand<GfxCmd_SetFrameBuffer>(myClipMatrix, this->GetGameObject().GetComponent<Transform>(), (int)ModelViewer::GetApplicationState().filter);
+}
+
+Vector3f cCamera::GetPointerDirection(const CU::Vector2<int> position)
+{
+	Vector4f viewPosition;
+	RHI::DeviceSize size = RHI::GetDeviceSize();
+
+	viewPosition.x = ((2.0f * position.x / size.Width) - 1);
+	viewPosition /= myClipMatrix(1, 1);
+
+	viewPosition.y = ((-2.0f * position.y / size.Height) - 1);
+	viewPosition /= myClipMatrix(2, 2);
+
+	viewPosition.z = 1;
+	viewPosition.w = 0;
+
+	Transform& myTransform = this->GetGameObject().GetComponent<Transform>();
+	return viewPosition * Matrix::GetFastInverse(myTransform.GetTransform());
+
+
+}
+Vector3f cCamera::GetPointerDirectionNDC(const Vector2f position)
+{
+	return Vector3f();
+
+
+
 }
 
 CU::Vector4<float> cCamera::WoldSpaceToPostProjectionSpace(CommonUtilities::Vector3<float> aEntity)
@@ -102,7 +129,7 @@ CU::Vector4<float> cCamera::WoldSpaceToPostProjectionSpace(CommonUtilities::Vect
 	Transform& myTransform = this->GetGameObject().GetComponent<Transform>();
 
 	//Get actuall world space coordinate
-	CommonUtilities::Vector4<float> outPosition = {aEntity.x,aEntity.y,aEntity.z,1};
+	CommonUtilities::Vector4<float> outPosition = { aEntity.x,aEntity.y,aEntity.z,1 };
 
 	//Punkt -> CameraSpace
 	outPosition = outPosition * Matrix::GetFastInverse(myTransform.GetTransform());
