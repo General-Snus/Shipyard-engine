@@ -10,6 +10,10 @@ public:
 	void Update() override;
 	void Render() override;
 
+	Vector3f GetPointerDirection(const CU::Vector2<int> position);
+
+	Vector3f GetPointerDirectionNDC(const Vector2f position) const;
+
 	CU::Vector4<float> WoldSpaceToPostProjectionSpace(CommonUtilities::Vector3<float> aEntity); 
 
 private: 

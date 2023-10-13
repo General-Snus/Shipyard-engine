@@ -28,7 +28,7 @@ void ShadowRenderer::Execute()
 {
 	LightBuffer& buffer = GraphicsEngine::Get().myLightBuffer;
 	RHI::SetVertexShader(myVertexShader);
-	RHI::SetGeometryShader(myGeoShader);
+	
 	RHI::SetPixelShader(myPixelShader);
 
 
@@ -50,7 +50,7 @@ void ShadowRenderer::Execute()
 					GfxCmd_SetFrameBuffer(buffer.Data.myDirectionalLight.projection,buffer.Data.myDirectionalLight.lightView,0).ExecuteAndDestroy();
 					ShadowCommandList.StartOver();
 					ShadowCommandList.Execute();
-
+ 
 					RHI::SetRenderTarget(nullptr,nullptr);
 					i.SetIsRendered(true);
 				}
@@ -79,6 +79,7 @@ void ShadowRenderer::Execute()
 
 			if(i.GetType() == eLightType::Point)
 			{
+				RHI::SetGeometryShader(myGeoShader);
 				if(!i.GetIsRendered())
 				{
 					buffer.Data.myPointLight = *i.GetData<PointLight>().get();
@@ -97,6 +98,7 @@ void ShadowRenderer::Execute()
 						i.SetIsRendered(true);
 					}
 				}
+				RHI::SetGeometryShader(nullptr);
 			}
 		}
 	}

@@ -111,14 +111,15 @@ Vector3f cCamera::GetPointerDirection(const CU::Vector2<int> position)
 	viewPosition.z = 1;
 	viewPosition.w = 0;
 
-	Transform& myTransform = this->GetGameObject().GetComponent<Transform>();
-	return viewPosition * Matrix::GetFastInverse(myTransform.GetTransform());
-
+	const Matrix myTransform = GetGameObject().GetComponent<Transform>().GetTransform();
+	const Vector4f out = viewPosition * Matrix::GetFastInverse(myTransform);
+	return Vector3f(out.x, out.y, out.z);
 
 }
-Vector3f cCamera::GetPointerDirectionNDC(const Vector2f position)
+Vector3f cCamera::GetPointerDirectionNDC(const Vector2f position) const
 {
-	return Vector3f();
+	position;
+	throw std::exception("Not implemented");
 
 
 
