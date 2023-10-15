@@ -77,10 +77,10 @@ private:
 	GraphicsEngine() = default;
 
 public:
-	inline static GraphicsEngine& Get() 
-	{ 
-		 static GraphicsEngine myInstance;
-		return myInstance; 
+	inline static GraphicsEngine& Get()
+	{
+		static GraphicsEngine myInstance;
+		return myInstance;
 	}
 
 	/**

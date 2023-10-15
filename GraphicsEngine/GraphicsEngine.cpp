@@ -363,15 +363,18 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 	aDeltaTime; aTotalTime; 
 	RHI::SetVertexShader(myVertexShader);
 
-	myShadowRenderer.Execute();	
+	 myShadowRenderer.Execute();	
 
 	myG_Buffer.SetWriteTargetToBuffer(); //Let all write to textures
 	DeferredCommandList.AddCommand<GfxCmd_SetRenderTarget>(myBackBuffer.get(),nullptr);
 	DeferredCommandList.AddCommand<GfxCmd_SetLightBuffer>();
-	DeferredCommandList.AddCommand<GfxCmd_DebugLayer>();
 
-	DeferredCommandList.Execute();
+	DeferredCommandList.Execute(); 
 
+
+
+	RHI::SetBlendState(nullptr);
+	GfxCmd_DebugLayer().ExecuteAndDestroy();
 	RHI::SetBlendState(AlphaBlendState);
 	OverlayCommandList.Execute();
 	RHI::SetBlendState(nullptr);

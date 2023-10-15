@@ -25,14 +25,14 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 		{
 			if(i.GetIsShadowCaster())
 			{
-				//for(int j = 0; j < 6; j++)//REFACTOR
-				//{
-					std::pair< PointLight*,Texture*> pair;
-					pair.first =  i.GetData<PointLight>().get();
-					//pair.first->lightView = i.GetLightViewMatrix(j);
-					pair.second = i.GetShadowMap(0).get();
+				for(int j = 0; j < 6; j++)//REFACTOR
+				{
+					std::pair< PointLight,Texture*> pair;
+					pair.first = *i.GetData<PointLight>().get();
+					pair.first.lightView = i.GetLightViewMatrix(j);
+					pair.second = i.GetShadowMap(j).get();
 					pointLight.push_back(pair);
-				//}
+				}
 			}
 			break;
 		}
@@ -81,7 +81,7 @@ void GfxCmd_SetLightBuffer::ExecuteAndDestroy()
 	for(auto& light : pointLight)
 	{
 		LightBuffer& buff = GetLightBuffer();
-		buff.Data.myPointLight = *light.first;
+		buff.Data.myPointLight = light.first;
 		RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,light.second);
 
 		RHI::UpdateConstantBufferData(buff);
@@ -94,14 +94,16 @@ void GfxCmd_SetLightBuffer::ExecuteAndDestroy()
 		);
 		RHI::Draw(4);
 	}
-	 RHI::SetGeometryShader(nullptr);
 
 	gBuffer.UseSpotlightShader();
 	for(auto& light : spotLight)
 	{
 		LightBuffer& buff = GetLightBuffer();
 		buff.Data.mySpotLight = *light.first;
-		RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,light.second);
+		if(light.second)
+		{
+			RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,light.second);
+		}
 
 		RHI::UpdateConstantBufferData(buff);
 		RHI::ConfigureInputAssembler(

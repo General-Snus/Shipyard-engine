@@ -193,8 +193,7 @@ void ModelViewer::LoadScene()
 	test.AddComponent<Transform>();
 	test.GetComponent<Transform>().GetTransform()(4,1) = 100;;
 
-	{
-
+	{ 
 		GameObject test2 = gom.CreateGameObject();
 		test2.AddComponent<cMeshRenderer>("Models/Buddha.fbx");
 		test2.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BuddhaMaterial.json");
@@ -258,7 +257,7 @@ void ModelViewer::LoadScene()
 
 	}
 
-	for(size_t i = 0; i < 20; i++)
+	for(size_t i = 0; i < 2; i++)
 	{
 		int x = rand() % 10000 - 5000;
 		int z = rand() % 10000 - 5000;
@@ -271,7 +270,7 @@ void ModelViewer::LoadScene()
 		std::weak_ptr<PointLight> ptr = pointLight.GetComponent<cLight>().GetData<PointLight>();
 		ptr.lock()->Color = {(float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000};
 		ptr.lock()->Range = 10000.0f;
-		ptr.lock()->Power = 500.0f * Kilo;
+		ptr.lock()->Power = 50.0f * Kilo;
 		pointLight.GetComponent<cLight>().BindDirectionToTransform(true);
 	}
 

@@ -10,7 +10,7 @@ GfxCmd_DebugLayer::GfxCmd_DebugLayer()
 void GfxCmd_DebugLayer::ExecuteAndDestroy()
 {
 	if(ModelViewer::GetApplicationState().filter != DebugFilter::NoFilter)
-	{
+	{ 
 		G_Buffer& gBuffer = GetGBuffer();
 		gBuffer.UseDebugShader();
 		RHI::ConfigureInputAssembler(

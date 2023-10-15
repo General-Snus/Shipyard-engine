@@ -1,6 +1,6 @@
-#include "../../Headers/ShaderStructs.hlsli"
-#include "../../Headers/PBRFunctions.hlsli"
-#include "../../Registers.h" 
+#include "../../../Headers/ShaderStructs.hlsli"
+#include "../../../Headers/PBRFunctions.hlsli"
+#include "../../../Registers.h" 
  
 
 float3 CalculatePointLight(float3 diffuseColor, float3 specularColor, float4 worldPosition, float3 normal, float3 cameraDirection, PointLight pointLightData, float roughness, float shine)
@@ -37,24 +37,24 @@ float3 CalculatePointLight(float3 diffuseColor, float3 specularColor, float4 wor
     float shadow = shadowMap.SampleCmpLevelZero(shadowCmpSampler, lightSpaceUV.xy, Depth).r;
      
     //Enable if quality is too low
-   //uint2 dim = 0;
-   //uint numMips = 0;
-   //shadowMap.GetDimensions(0, dim.x, dim.y, numMips);
-   //float2 texelSize = 1.0 / dim;
-   // 
-   //float sum = 0;
-   //float x, y;
-   //for(y = -1.5; y <= 1.5; y += 1.0)
-   //{
-   //    for(x = -1.5; x <= 1.5; x += 1.0)
-   //    {
-   //        float2 newUV;
-   //        newUV.x = lightSpaceUV.x + x * texelSize.x;
-   //        newUV.y = lightSpaceUV.y + y * texelSize.y;
-   //        sum += shadowMap.SampleCmpLevelZero(shadowCmpSampler, newUV, Depth).r;
-   //    }
-   //}
-   //shadow = sum / 16.0;
+   uint2 dim = 0;
+   uint numMips = 0;
+   shadowMap.GetDimensions(0, dim.x, dim.y, numMips);
+   float2 texelSize = 1.0 / dim;
+    
+   float sum = 0;
+   float x, y;
+   for(y = -1.5; y <= 1.5; y += 1.0)
+   {
+       for(x = -1.5; x <= 1.5; x += 1.0)
+       {
+           float2 newUV;
+           newUV.x = lightSpaceUV.x + x * texelSize.x;
+           newUV.y = lightSpaceUV.y + y * texelSize.y;
+           sum += shadowMap.SampleCmpLevelZero(shadowCmpSampler, newUV, Depth).r;
+       }
+   }
+   shadow = sum / 16.0;
     
     
     //return shadow * Attenuation;  

@@ -29,11 +29,7 @@ cLight::cLight(const unsigned int anOwnerId,const eLightType type) : Component(a
 		}
 		break;
 	case eLightType::Spot:
-		mySpotLightData = std::make_shared<SpotLight>();
-		for(int i = 0; i < 6; i++)
-		{
-			shadowMap[i] = std::make_shared<Texture>();
-		}
+		mySpotLightData = std::make_shared<SpotLight>(); 
 		break;
 	case eLightType::uninitialized:
 		break;
@@ -91,15 +87,14 @@ void cLight::SetIsShadowCaster(bool active)
 
 		for(int i = 0; i < mapsToCreate; i++)
 		{
-			shadowMap[i] = std::make_shared<Texture>();
-			std::wstring tempName = name
-				+ std::to_wstring(i) + L"_"
-				+ std::to_wstring(resolution.x) + L"|"
-				+ std::to_wstring(resolution.y);
+			shadowMap[i] = std::make_shared<Texture>(); 
 
 			if(!RHI::CreateTexture(
 				shadowMap[i].get(),
-				tempName,
+				name
+				+ std::to_wstring(i) + L"_"
+				+ std::to_wstring(resolution.x) + L"|"
+				+ std::to_wstring(resolution.y),
 				resolution.x,
 				resolution.y,
 				DXGI_FORMAT_R32_TYPELESS,

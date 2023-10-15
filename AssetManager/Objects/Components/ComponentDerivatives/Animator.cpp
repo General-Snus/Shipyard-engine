@@ -9,7 +9,7 @@ cAnimator::cAnimator(const unsigned int anOwnerId) : Component(anOwnerId),myCurr
 	mySkeleton = (this->TryGetComponent<cSkeletalMeshRenderer>())->GetRawSkeleton();
 	if(!mySkeleton)
 	{
-		std::cout << "cSkeletalMeshRenderer component does not have a skeleton" << std::endl; 
+		std::cout << "cSkeletalMeshRenderer component does not have a skeleton" << std::endl;
 	}
 }
 
@@ -28,7 +28,7 @@ cAnimator::cAnimator(const unsigned int anOwnerId,const std::filesystem::path& a
 
 void cAnimator::Update()
 {
-	
+
 	if(myAnimations.size())
 	{
 		const float TimePerFrame = (1 / myAnimations[myCurrentAnimation]->frameRate);
@@ -80,7 +80,7 @@ void cAnimator::SetHierarchy(unsigned int aBoneID,CU::Matrix4x4<float> aParentMa
 	{
 		SetHierarchy(i,newBoneTransform);
 	}
-	myBoneTransforms[aBoneID] = mySkeleton->myBones[aBoneID].BindPoseInverse * newBoneTransform ; 
+	myBoneTransforms[aBoneID] = mySkeleton->myBones[aBoneID].BindPoseInverse * newBoneTransform;
 }
 
 eAnimationState cAnimator::GetState() const
@@ -102,7 +102,7 @@ void cAnimator::SetPlayingAnimation(unsigned int aAnimationIndex)
 	}
 	myCurrentAnimation = aAnimationIndex;
 	myCurrentFrame = 0;
-	myAnimationTimer = 0; 
+	myAnimationTimer = 0;
 }
 
 void cAnimator::UpdateAnimationHierarcy(float t)
