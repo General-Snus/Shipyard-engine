@@ -1,7 +1,7 @@
-#pragma once
- 
-#include <AssetManager/AssetManager.pch.h>
+#pragma once 
 #include <GraphicsEngine/DebugDrawer/DebugDrawer.h>
+#include <AssetManager/Objects/Components/Component.h>
+#include <ThirdParty/CU/CommonUtills/Matrix4x4.hpp>
 
 class Transform : public Component
 {

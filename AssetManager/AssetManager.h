@@ -6,8 +6,7 @@
 
 
 #include <AssetManager/Objects/Components/ComponentDerivatives/MeshRenderer.h>
-#include <AssetManager/Objects/Components/ComponentDerivatives/Transform.h> 
-#include "AssetManager.pch.h"
+#include <AssetManager/Objects/Components/ComponentDerivatives/Transform.h>  
 #include <GraphicsEngine/Rendering/Texture.h>
 #include "Objects/BaseAssets/TextureAsset.h"
 #include <ThirdParty/CU/Queue.hpp>

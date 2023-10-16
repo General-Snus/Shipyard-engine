@@ -1,33 +1,18 @@
 
 // Exclude things we don't need from the Windows headers
-#define WIN32_LEAN_AND_MEAN 
+#include <AssetManager/AssetManager.pch.h>
+#include <GraphicsEngine/GraphicsEngine.pch.h>
+
 #include "Modelviewer.h"
 
-#include "GraphicsEngine/GraphicsEngine.h"
+#define WIN32_LEAN_AND_MEAN 
 #include "Windows.h"
 
 #include <string>
 #include <stringapiset.h>
-
 #include <filesystem>
-
-#include "GraphicsEngine/InterOp/Helpers.h"
-#include "Windows/SplashWindow.h" 
-
-#include <AssetManager/GameObjectManager.h>
-#include <AssetManager/Objects/GameObjects/GameObject.h>
-#include <AssetManager/Objects/Components/ComponentManager.h>
-#include <AssetManager/Objects/Components/ComponentDerivatives/MeshRenderer.h>
-#include <AssetManager/Objects/Components/ComponentDerivatives/Transform.h>
-#include <AssetManager/Objects/Components/ComponentDerivatives/Animator.h>
-#include <AssetManager/Objects/Components/ComponentDerivatives/Skybox.h>
-#include <AssetManager/Objects/Components/ComponentDerivatives/CameraComponent.h>
-#include <AssetManager/Objects/Components/ComponentDerivatives/LightComponent.h>
-#include <AssetManager/Objects/Components/ComponentDerivatives/DEBUGCOMPONENTS/BackgroundColor.h>
-#include <AssetManager/Objects/Components/ComponentDerivatives/DEBUGCOMPONENTS/FrameStatistics.h>
-#include <AssetManager/Objects/Components/ComponentDerivatives/DEBUGCOMPONENTS/RenderMode.h>
-#include <AssetManager/AssetManager.h>
-#include <ThirdParty/CU/Math.hpp>
+#include "Windows/SplashWindow.h"  
+ 
 #include <functional>
 #include <fstream>
 #include <streambuf>
@@ -37,9 +22,11 @@
 #include <ImGUI/imgui_impl_win32.h>
 #include <ImGUI/imgui_impl_dx11.h>
 
+#include <ThirdParty/CU/Math.hpp>
 #include <ThirdParty/nlohmann/json.hpp> 
 #include <ThirdParty/CU/Math.hpp>  
 #include "Timer.h"
+#include "GraphicsEngine/InterOp/Helpers.h"
 
 #define _DEBUGDRAW
  #define Flashlight
@@ -176,11 +163,15 @@ void ModelViewer::LoadScene()
 		worldRoot.AddComponent<Skybox>();
 
 		worldRoot.AddComponent<cLight>(eLightType::Directional);
-
 		cLight& pLight = worldRoot.GetComponent<cLight>();
 		pLight.SetColor(CU::Vector3<float>(1,1,1));
 		pLight.SetPower(1.0f);
 		pLight.SetDirection({0,-1,1}); 
+
+		if (gom.GetAllComponents<BackgroundColor>().empty())
+		{ 
+			worldRoot.AddComponent<BackgroundColor>(CU::Vector4<float>(1.0f, 1.0f, 1.0f, 1.0f));
+		}
 	}
 
 
@@ -202,8 +193,7 @@ void ModelViewer::LoadScene()
 	test.AddComponent<Transform>();
 	test.GetComponent<Transform>().GetTransform()(4,1) = 100;;
 
-	{
-
+	{ 
 		GameObject test2 = gom.CreateGameObject();
 		test2.AddComponent<cMeshRenderer>("Models/Buddha.fbx");
 		test2.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BuddhaMaterial.json");
@@ -260,14 +250,14 @@ void ModelViewer::LoadScene()
 		ptr.lock()->Color = {(float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000};
 		//ptr.lock()->Color = {1,1,1};
 		ptr.lock()->Range = 1000.0f;;
-		ptr.lock()->Power = i * 600.0f * Kilo;
+		ptr.lock()->Power = i * 1000.0f * Kilo;
 		ptr.lock()->OuterConeAngle = i * 20.0f * DEG_TO_RAD;
 		ptr.lock()->InnerConeAngle = 1.0f * DEG_TO_RAD;
 		spotLight.GetComponent<cLight>().BindDirectionToTransform(true);
 
 	}
 
-	for(size_t i = 0; i < 20; i++)
+	for(size_t i = 0; i < 2; i++)
 	{
 		int x = rand() % 10000 - 5000;
 		int z = rand() % 10000 - 5000;
@@ -280,7 +270,7 @@ void ModelViewer::LoadScene()
 		std::weak_ptr<PointLight> ptr = pointLight.GetComponent<cLight>().GetData<PointLight>();
 		ptr.lock()->Color = {(float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000};
 		ptr.lock()->Range = 10000.0f;
-		ptr.lock()->Power = 500.0f * Kilo;
+		ptr.lock()->Power = 50.0f * Kilo;
 		pointLight.GetComponent<cLight>().BindDirectionToTransform(true);
 	}
 
@@ -292,15 +282,8 @@ void ModelViewer::LoadScene()
 	cLight& ptr = pointLight.GetComponent<cLight>();
 	ptr.SetColor({1,1,1});
 	ptr.SetRange(1000.0f);
-	ptr.SetPower(5000.0f * Kilo);
-	ptr.BindDirectionToTransform(true);
-
-
-	if(gom.GetAllComponents<BackgroundColor>().size() == 0)
-	{
-		GameObject newG = gom.CreateGameObject();
-		newG.AddComponent<BackgroundColor>(CU::Vector4<float>(1.0f,1.0f,1.0f,1.0f));
-	}
+	ptr.SetPower(500.0f * Kilo);
+	ptr.BindDirectionToTransform(true); 
 
 	{
 		GameObject test3 = gom.CreateGameObject();
@@ -315,8 +298,7 @@ void ModelViewer::Update()
 {
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
-	ImGui::NewFrame();
-	ImGui::ShowDemoWindow(); // Show demo window! :) 
+	ImGui::NewFrame(); 
 	CommonUtilities::Timer::GetInstance().Update();
 	UpdateScene();
 	GraphicsEngine::Get().BeginFrame();

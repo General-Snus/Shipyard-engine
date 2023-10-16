@@ -1,7 +1,7 @@
 #include "AssetManager.pch.h"
 #include <filesystem>
 #include <GraphicsEngine/Objects/Shader.h>
-#include <GraphicsEngine/Commands/GraphicCommands.h>
+#include <GraphicsEngine/GraphicCommands/GraphicCommands.h>
 
 #include <algorithm>
 #include <cctype>

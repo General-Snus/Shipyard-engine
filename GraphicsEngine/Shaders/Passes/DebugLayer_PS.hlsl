@@ -1,12 +1,11 @@
- 
-#include "GBuffer/GBufferPS.hlsl"
+ #include "../Headers/ShaderStructs.hlsli"
 
 
 DefaultPixelOutput main(BRDF_VS_to_PS input)
 {
     
     DefaultPixelOutput result;
-    float2 uv = input.uv;
+    float2 uv = input.UV;
     
     const float4 albedo = colorMap.Sample(defaultSampler, uv);
     const float4 Material = materialMap.Sample(defaultSampler, uv);

@@ -1,5 +1,25 @@
-// Functions required for convoluting a cubemap. 
+#include "../Registers.h"
+
 static const float PI = 3.14159265f;
+float3 PositionInBound(float3 aMin, float3 aMax, float3 aPosition)
+{
+    const float3 boundSize = aMax - aMin;
+    return aPosition / boundSize;
+}
+int GetNumMips(TextureCube mipMap)
+{
+    int iWidth = 0;
+    int iHeight = 0;
+    int iNumMips = 0;
+    mipMap.GetDimensions(0, iWidth, iHeight, iNumMips);
+    return iNumMips;
+}
+
+float3 LinearToGamma(float3 aColor)
+{
+    return pow(abs(aColor), 1.0f / 2.2f);
+}
+
 float2 Hammersley(float i, float numSamples)
 {
     
@@ -16,7 +36,7 @@ float2 Hammersley(float i, float numSamples)
 }
 
 float3 ImportanceSampleGGX(float2 aXi, float3 aNormal, float aRoughness)
-{  
+{
     const float roughnesSq = aRoughness * aRoughness;
     
     const float phi = 2.0f * 3.14159265f * aXi.x;
@@ -37,7 +57,6 @@ float3 ImportanceSampleGGX(float2 aXi, float3 aNormal, float aRoughness)
 
 // LUT creation function for caculating a BRDF lookup for the second half of the split-sum equation.
 // Run this once with float2 result = IntegrateBRDF(uv.x, uv.y); Causes a LUT to be generated.
-
 float GeometricAttenuation_Schlick_GGX_IBL(float aNdotV, float aRoughness)
 {
     // Note different k here when calculating G GGX for IBL!
@@ -62,7 +81,7 @@ float GeometricAttenuation_Smith_IBL(float3 aN, float3 aV, float3 aL, float aRou
 }
 
 float2 IntegrateBRDF(float aNdotV, float aRoughness)
-{ 
+{
     float3 V;
     V.x = sqrt(1.0f - aNdotV * aNdotV);
     V.y = 0.0;
@@ -74,7 +93,7 @@ float2 IntegrateBRDF(float aNdotV, float aRoughness)
     const float3 N = float3(0, 0, 1);
 
     const uint NUM_SAMPLES = 1024u;
-    for (uint i = 0u; i < NUM_SAMPLES; ++i)
+    for(uint i = 0u; i < NUM_SAMPLES; ++i)
     {
         const float2 xi = Hammersley(i, NUM_SAMPLES);
         const float3 H = ImportanceSampleGGX(xi, N, aRoughness);

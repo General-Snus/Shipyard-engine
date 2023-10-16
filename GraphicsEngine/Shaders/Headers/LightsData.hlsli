@@ -1,5 +1,3 @@
-#include "../Registers.h"
-
 struct  DirectionalLight
 {
     float3 Color;   //12
@@ -41,9 +39,3 @@ struct SpotLight
     float4x4 projection;
 };
 
-cbuffer LightBuffer : register(HLSL_REG_LightBuffer)
-{
-    DirectionalLight myDirectionalLight;    //32
-    PointLight myPointLight ;             //32
-    SpotLight mySpotLight ;               //64
-}

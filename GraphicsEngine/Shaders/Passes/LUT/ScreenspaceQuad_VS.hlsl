@@ -1,4 +1,4 @@
-#include "../../Headers/DefaultVertexToPixel.hlsli"
+#include "../../Headers/ShaderStructs.hlsli"
 
 BRDF_VS_to_PS main(unsigned int aVertexIndex : SV_VertexID)
 {
@@ -20,7 +20,7 @@ BRDF_VS_to_PS main(unsigned int aVertexIndex : SV_VertexID)
     
     BRDF_VS_to_PS returnValue;
     returnValue.position = pos[aVertexIndex];
-    returnValue.uv = uv[aVertexIndex];
+    returnValue.UV = uv[aVertexIndex];
     return returnValue;
 
 }

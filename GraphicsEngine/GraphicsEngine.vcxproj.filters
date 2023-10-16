@@ -48,7 +48,7 @@
     <ClInclude Include="Rendering\ForwardRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Commands\GraphicCommands.h">
+    <ClInclude Include="GraphicCommands\GraphicCommands.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\Buffers\FrameBuffer.h">
@@ -126,6 +126,63 @@
     <ClInclude Include="Shaders\Include\DebugLayer_PS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_DebugLayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_DrawDebugPrimitive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderMeshShadow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderSkeletalMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderSkeletalMeshShadow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderSkybox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetFrameBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetLightBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetRenderTarget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\ShadowRenderer\ShadowRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Include\PointLightShadow_PS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Include\PointLightShadow_VS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Include\LineDrawer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Include\PointLightShadow_GS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_Bloom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_LinearToGamma.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_LuminancePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_GaussianBlur.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsEngine.pch.cpp">
@@ -155,7 +212,7 @@
     <ClCompile Include="Rendering\ForwardRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Commands\GraphicCommands.cpp">
+    <ClCompile Include="GraphicCommands\GraphicCommands.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DebugDrawer\DebugDrawer.cpp">
@@ -164,16 +221,59 @@
     <ClCompile Include="Rendering\Buffers\G_Buffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetRenderTarget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_DebugLayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_DrawDebugPrimitive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderMeshShadow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderSkeletalMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderSkeletalMeshShadow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderSkybox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetFrameBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetLightBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\ShadowRenderer\ShadowRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_Bloom.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_LinearToGamma.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_LuminancePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_GaussianBlur.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\Headers\FrameBuffer.hlsli" />
     <None Include="Shaders\Headers\ObjectBuffer.hlsli" />
-    <None Include="Shaders\Headers\DefaultShaderStructs.hlsli" />
-    <None Include="Shaders\Headers\DefaultVertexToPixel.hlsli" />
-    <None Include="Shaders\Headers\DefaultVertexOutput.hlsli" />
+    <None Include="Shaders\Headers\ShaderStructs.hlsli" />
+    <None Include="Shaders\Headers\PBRFunctions.hlsli" />
+    <None Include="Shaders\Headers\Common.hlsli" />
     <None Include="Shaders\Headers\MaterialBuffer.hlsli" />
-    <None Include="Shaders\Headers\IBLBRDF.hlsli" />
-    <None Include="Shaders\Headers\LightBuffer.hlsli" />
+    <None Include="Shaders\Headers\LightsData.hlsli" />
     <None Include="Shaders\Passes\LineDrawer\LineDrawerStructs.hlsli" />
   </ItemGroup>
   <ItemGroup>
@@ -184,10 +284,15 @@
     <FxCompile Include="Shaders\Passes\LineDrawer\LineDrawer_VS.hlsl" />
     <FxCompile Include="Shaders\Passes\EnvironmentLight_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\GBuffer\GBufferPS.hlsl" />
-    <FxCompile Include="Shaders\Passes\PointLight_PS.hlsl" />
+    <FxCompile Include="Shaders\Passes\PointLight\LightPass\PointLight_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\SpotLight_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\DebugLayer_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\LineDrawer.hlsl" />
-    <FxCompile Include="Shaders\Passes\PointLight_GS.hlsl" />
+    <FxCompile Include="Shaders\Passes\PostProcessing\CopyPixels_PS.hlsl" />
+    <FxCompile Include="Shaders\Passes\PostProcessing\LuminancePass_PS.hlsl" />
+    <FxCompile Include="Shaders\Passes\PostProcessing\LinearToGammaPass.hlsl" />
+    <FxCompile Include="Shaders\Passes\PostProcessing\GaussianBlur_PS.hlsl" />
+    <FxCompile Include="Shaders\Passes\PostProcessing\Bloom_PS.hlsl" />
+    <FxCompile Include="Shaders\Passes\PostProcessing\ToneMapping_PS.hlsl" />
   </ItemGroup>
 </Project>

@@ -1,4 +1,5 @@
 #include "AssetManager.pch.h"
+#include <GraphicsEngine/GraphicsEngine.pch.h>
 #include "Transform.h"
 #include <ThirdParty/CU/Math.hpp>
 

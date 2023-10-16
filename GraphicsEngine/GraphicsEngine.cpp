@@ -6,6 +6,11 @@
 
 #include <Shaders/Include/Default_PS.h>
 #include <Shaders/Include/Default_VS.h>
+#include <Shaders/Include/LuminancePass_PS.h>
+#include <Shaders/Include/LinearToGammaPass.h>
+#include <Shaders/Include/CopyPixels_PS.h> 
+#include <Shaders/Include/GaussianBlur_PS.h> 
+#include <Shaders/Include/Bloom_PS.h> 
 
 #include <Shaders/Include/Default_C.h>
 #include <Shaders/Include/Default_N.h>
@@ -23,9 +28,16 @@
 
 #include "Rendering/Vertex.h"
 #include "Objects/Model.h"
-#include "Commands/GraphicCommands.h"
+#include "GraphicCommands/GraphicCommands.h"
 #include <AssetManager/Objects/BaseAssets/TextureAsset.h>
 #include <AssetManager/Objects/Components/ComponentDerivatives/LightComponent.h>
+#include <AssetManager/Objects/Components/ComponentDerivatives/CameraComponent.h>
+
+#include "GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h"
+#include "GraphicCommands/Commands/Headers/GfxCmd_SetRenderTarget.h"
+#include "GraphicCommands/Commands/Headers/GfxCmd_DebugLayer.h"
+#include "GraphicCommands/Commands/Headers/GfxCmd_SetLightBuffer.h" 
+#include "GraphicCommands/Commands/Headers/GfxCmd_GaussianBlur.h" 
 
 #include "Shaders/Registers.h"
 #include <ImGui/imgui.h>
@@ -34,6 +46,10 @@
 bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 {
 	GELogger = Logger::Create("GraphicsEngine");
+
+	DeferredCommandList.Initialize();
+	OverlayCommandList.Initialize();
+
 
 #ifdef _DEBUG
 	try
@@ -54,9 +70,10 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 			return false;
 		}
 
-
 		SetupDefaultVariables();
 		SetupBRDF();
+		SetupPostProcessing();
+
 
 		bool retFlag;
 		bool retVal = SetupDebugDrawline(retFlag);
@@ -106,7 +123,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_LineBuffer,myLineBuffer);
 
 		myG_Buffer.Init();
-
+		myShadowRenderer.Init();
 #ifdef _DEBUG
 	}
 	catch(const std::exception& e)
@@ -285,11 +302,10 @@ void GraphicsEngine::SetupBRDF()
 	);
 	RHI::ClearRenderTarget(BRDLookUpTable.get());
 
-	ComPtr<ID3D11VertexShader> brdfVS;
 	ComPtr<ID3D11PixelShader> brdfPS;
 
 	RHI::CreateVertexShader(
-		brdfVS,
+		myScreenSpaceQuadShader,
 		BuiltIn_brdfLUT_VS_ByteCode,
 		sizeof(BuiltIn_brdfLUT_VS_ByteCode)
 	);
@@ -299,7 +315,7 @@ void GraphicsEngine::SetupBRDF()
 		BuiltIn_brdfLUT_PS_ByteCode,
 		sizeof(BuiltIn_brdfLUT_PS_ByteCode)
 	);
-	RHI::SetVertexShader(brdfVS);
+	RHI::SetVertexShader(myScreenSpaceQuadShader);
 	RHI::SetPixelShader(brdfPS);
 
 	RHI::SetRenderTarget(BRDLookUpTable.get(),nullptr);
@@ -337,6 +353,103 @@ void GraphicsEngine::SetupBRDF()
 
 }
 
+void GraphicsEngine::SetupPostProcessing()
+{
+	RHI::DeviceSize size = RHI::GetDeviceSize();
+	SceneBuffer = std::make_shared<Texture>();
+	RHI::CreateTexture(
+		SceneBuffer.get(),
+		L"SceneBuffer",
+		size.Width,size.Height,
+		defaultTextureFormat,
+		D3D11_USAGE_DEFAULT,
+		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+		0
+	); 
+	 
+	halfSceneBuffer = std::make_shared<Texture>();
+	RHI::CreateTexture(
+		halfSceneBuffer.get(),
+		L"SceneBuffer",
+		size.Width / 2,size.Height / 2,
+		defaultTextureFormat,
+		D3D11_USAGE_DEFAULT,
+		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+		0
+	);
+	quaterSceneBuffer1 = std::make_shared<Texture>();
+	RHI::CreateTexture(
+		quaterSceneBuffer1.get(),
+		L"SceneBuffer",
+		size.Width / 4,size.Height / 4,
+		defaultTextureFormat,
+		D3D11_USAGE_DEFAULT,
+		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+		0
+	);
+	quaterSceneBuffer2 = std::make_shared<Texture>();
+	RHI::CreateTexture(
+		quaterSceneBuffer2.get(),
+		L"SceneBuffer",
+		size.Width / 4,size.Height / 4,
+		defaultTextureFormat,
+		D3D11_USAGE_DEFAULT,
+		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+		0
+	);
+	IntermediateA = std::make_shared<Texture>();
+	RHI::CreateTexture(
+		IntermediateA.get(),
+		L"IntermediateA",
+		size.Width,size.Height,
+		defaultTextureFormat,
+		D3D11_USAGE_DEFAULT,
+		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+		0
+	);
+
+	IntermediateB = std::make_shared<Texture>();
+	RHI::CreateTexture(
+		IntermediateB.get(),
+		L"IntermediateB",
+		size.Width,size.Height,
+		defaultTextureFormat,
+		D3D11_USAGE_DEFAULT,
+		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+		0
+	);
+
+	RHI::CreatePixelShader(
+		luminancePass,
+		BuiltIn_LuminancePass_PS_ByteCode,
+		sizeof(BuiltIn_LuminancePass_PS_ByteCode)
+	);
+	RHI::CreatePixelShader(
+		linearGammaPass,
+		BuiltIn_LinearToGammaPass_ByteCode,
+		sizeof(BuiltIn_LinearToGammaPass_ByteCode)
+	);
+
+	RHI::CreatePixelShader(
+		copyShader,
+		BuiltIn_CopyPixels_PS_ByteCode,
+		sizeof(BuiltIn_CopyPixels_PS_ByteCode)
+	);
+
+	RHI::CreatePixelShader(
+		gaussShader,
+		BuiltIn_GaussianBlur_PS_ByteCode,
+		sizeof(BuiltIn_GaussianBlur_PS_ByteCode)
+	);
+
+	RHI::CreatePixelShader(
+		bloomShader,
+		BuiltIn_Bloom_PS_ByteCode,
+		sizeof(BuiltIn_Bloom_PS_ByteCode)
+	);
+
+}
+
 void GraphicsEngine::SetLoggingWindow(HANDLE aHandle)
 {
 	GELogger.SetConsoleHandle(aHandle);
@@ -344,121 +457,70 @@ void GraphicsEngine::SetLoggingWindow(HANDLE aHandle)
 
 void GraphicsEngine::BeginFrame()
 {
+	myCamera = GameObjectManager::GetInstance().GetCamera().TryGetComponent<cCamera>();
+	if(!myCamera)
+	{
+		throw std::exception("No camera in scene. No render is possible");
+	}
 	// Here we should initialize our frame and clean up from the last one.  
 	RHI::ClearRenderTarget(myBackBuffer.get(),myBackgroundColor);
 	RHI::ClearDepthStencil(myDepthBuffer.get());
+
+	RHI::ClearRenderTarget(SceneBuffer.get(),{0.0f,0.0f,0.0f,0.0f});
+	RHI::ClearRenderTarget(halfSceneBuffer.get(),{0.0f,0.0f,0.0f,0.0f});
+	RHI::ClearRenderTarget(quaterSceneBuffer1.get(),{0.0f,0.0f,0.0f,0.0f});
+	RHI::ClearRenderTarget(quaterSceneBuffer2.get(),{0.0f,0.0f,0.0f,0.0f});
+	RHI::ClearRenderTarget(IntermediateA.get(),{0.0f,0.0f,0.0f,0.0f});
+	RHI::ClearRenderTarget(IntermediateB.get(),{0.0f,0.0f,0.0f,0.0f});
+
 	myG_Buffer.ClearTargets();
+	RHI::SetBlendState(nullptr);
 }
 
 void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 {
 	aDeltaTime; aTotalTime;
-
 	RHI::SetVertexShader(myVertexShader);
-	std::shared_ptr<Texture> shadowMap;
-	for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
-	{
-		if(i.GetIsShadowCaster() && !i.GetIsDirty())
-		{
-			if(i.GetType() == eLightType::Directional)
-			{
-				if(!i.GetIsRendered())
-				{
-					myLightBuffer.Data.myDirectionalLight = *i.GetData<DirectionalLight>().get();
-					RHI::UpdateConstantBufferData(myLightBuffer);
 
-					shadowMap = i.GetShadowMap(0);
-					RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,nullptr); // cant be bound to resources when rendering to it
-					RHI::ClearDepthStencil(shadowMap.get());
-					RHI::SetRenderTarget(nullptr,shadowMap.get());
-					GfxCmd_SetFrameBuffer(myLightBuffer.Data.myDirectionalLight.projection,myLightBuffer.Data.myDirectionalLight.lightView,0).Execute();
+	myCamera->SetCameraToFrameBuffer();
+	myG_Buffer.SetWriteTargetToBuffer(); //Let all write to textures 
+	DeferredCommandList.Execute();
 
-					for(const auto& command : ShadowCommandList)
-					{
-						command->Execute();
-					}
+	//decals
+	//if picking check
+	//SSAO
+	//Do ambience pass? Clarit
 
-					RHI::SetRenderTarget(nullptr,nullptr);
-					i.SetIsRendered(true);
-				}
-			}
+	//Render shadowmaps
+	myShadowRenderer.Execute();
 
-			if(i.GetType() == eLightType::Spot)
-			{
-				if(!i.GetIsRendered())
-				{
-					myLightBuffer.Data.mySpotLight = *i.GetData<SpotLight>().get();
-					RHI::UpdateConstantBufferData(myLightBuffer);
+	//Render all lights
+	myCamera->SetCameraToFrameBuffer();
+	GfxCmd_SetRenderTarget(SceneBuffer.get(),nullptr).ExecuteAndDestroy();
+	GfxCmd_SetLightBuffer().ExecuteAndDestroy();
 
-					shadowMap = i.GetShadowMap(0);
-					RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,nullptr); // cant be bound to resources when rendering to it
-					RHI::ClearDepthStencil(shadowMap.get());
-					RHI::SetRenderTarget(nullptr,shadowMap.get());
-					GfxCmd_SetFrameBuffer(myLightBuffer.Data.mySpotLight.projection,myLightBuffer.Data.mySpotLight.lightView,0).Execute();
+	//Forward pass for light
 
-					for(const auto& command : ShadowCommandList)
-					{
-						command->Execute();
-					}
+	//Particles
 
-					RHI::SetRenderTarget(nullptr,nullptr);
-					i.SetIsRendered(true);
-				}
-			}
-
-			if(i.GetType() == eLightType::Point)
-			{
-				if(!i.GetIsRendered())
-				{
-					myLightBuffer.Data.myPointLight = *i.GetData<PointLight>().get();
-					RHI::UpdateConstantBufferData(myLightBuffer);
-					for(int j = 0; j < 6; j++)
-					{
-						shadowMap = i.GetShadowMap(j);
-						RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,nullptr); // cant be bound to resources when rendering to it
-						RHI::ClearDepthStencil(shadowMap.get());
-						RHI::SetRenderTarget(nullptr,shadowMap.get());
-						GfxCmd_SetFrameBuffer(myLightBuffer.Data.myPointLight.projection, i.GetLightViewMatrix(j),0).Execute();
-
-						for(const auto& command : ShadowCommandList)
-						{
-							command->Execute();
-						}
-
-						RHI::SetRenderTarget(nullptr,nullptr);
-						i.SetIsRendered(true);
-					}
-				}
-			}
-		}
-	}
-
-	myG_Buffer.SetWriteTargetToBuffer(); //Let all write to textures
-	for(const auto& command : DeferredCommandList)
-	{
-		command->Execute();
-	}
-	RHI::SetRenderTarget(myBackBuffer.get(),nullptr);
-
-
-	//LIGHTS  
-	GfxCmd_SetLightBuffer().Execute();
-
-	GfxCmd_DebugLayer().Execute();
-	RHI::SetBlendState(AlphaBlendState);
-
-	for(const auto& command : this->OverlayCommandList)
-	{
-		command->Execute();
-	}
+	//Post processing
 	RHI::SetBlendState(nullptr);
+	GfxCmd_LuminancePass().ExecuteAndDestroy(); // Render to IntermediateA
+	GfxCmd_GaussianBlur().ExecuteAndDestroy();
+	GfxCmd_Bloom().ExecuteAndDestroy();
+	GfxCmd_LinearToGamma().ExecuteAndDestroy(); // Render: BakcBuffer Read: REG_Target01
+	 
+	//Debug layers 
+	GfxCmd_DebugLayer().ExecuteAndDestroy();
+	OverlayCommandList.Execute();
 }
 
 void GraphicsEngine::EndFrame()
 {
 	// We finish our frame here and present it on screen.
 	RHI::Present(0);
-	this->OverlayCommandList.clear();
-	this->DeferredCommandList.clear();
-	this->ShadowCommandList.clear();
+	myShadowRenderer.ResetShadowList();
+	DeferredCommandList.Reset();
+	OverlayCommandList.Reset();
 }
+

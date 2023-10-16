@@ -1,6 +1,7 @@
 #pragma once	
 #include "Vectors.hpp"
 
+#define CU CommonUtilities
 namespace CommonUtilities
 {
 	template<class T>

@@ -1,5 +1,4 @@
-#pragma once
-
+#pragma once 
 
 class cCamera : public Component
 {
@@ -10,6 +9,11 @@ public:
 	//void UpdatePositionVectors();
 	void Update() override;
 	void Render() override;
+
+	Vector3f GetPointerDirection(const CU::Vector2<int> position);
+	Vector3f GetPointerDirectionNDC(const Vector2f position) const;
+
+	void SetCameraToFrameBuffer();
 
 	CU::Vector4<float> WoldSpaceToPostProjectionSpace(CommonUtilities::Vector3<float> aEntity); 
 

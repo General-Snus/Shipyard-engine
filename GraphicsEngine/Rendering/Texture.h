@@ -4,6 +4,8 @@
 #include <array>
 #include <memory>
 #include <wrl.h>
+#include <d3d11.h>
+
 using namespace Microsoft::WRL;
 
 struct ID3D11Resource;

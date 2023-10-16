@@ -1,4 +1,5 @@
 #include "AssetManager.pch.h"
+#include <GraphicsEngine/GraphicsEngine.pch.h>
 #include "Skybox.h"
 
 Skybox::Skybox(const unsigned int anOwnerId) : Component(anOwnerId)

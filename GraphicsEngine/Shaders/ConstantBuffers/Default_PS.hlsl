@@ -1,10 +1,4 @@
-#include <../Headers/DefaultVertexToPixel.hlsli>
-#include <../Headers/DefaultVertexOutput.hlsli>
-#include <../Headers/FrameBuffer.hlsli>
-#include <../Headers/MaterialBuffer.hlsli>
-#include <../Headers/LightBuffer.hlsli>
-#include <../Headers/IBLBRDF.hlsli>
-
+ 
 //float Sine(float aValue)
 //{
 //    const float pi2 = 6.28318548f;
@@ -365,8 +359,4 @@
     
     
 //    return result;
-//}
-float4 main(DefaultVertexToPixel input) : SV_Target
-{
-    return float4(0,0,0,0);
-}
+//} 

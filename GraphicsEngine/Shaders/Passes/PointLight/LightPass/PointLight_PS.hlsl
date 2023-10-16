@@ -1,66 +1,7 @@
-#include "GBuffer/GBufferPS.hlsl"
-
-#include "../Headers/LightBuffer.hlsli"
-float3 PositionInBound(float3 aMin, float3 aMax, float3 aPosition)
-{
-    const float3 boundSize = aMax - aMin;
-    return aPosition / boundSize;
-}
-
-int GetNumMips(TextureCube mipMap)
-{
-    int iWidth = 0;
-    int iHeight = 0;
-    int iNumMips = 0;
-    mipMap.GetDimensions(0, iWidth, iHeight, iNumMips);
-    return iNumMips;
-}
-
-float3 LinearToGamma(float3 aColor)
-{
-    return pow(abs(aColor), 1.0f / 2.2f);
-}
-
-float3 CalculateDiffuseIBL(float3 normal, TextureCube enviromentCube)
-{
-    const int CubeMips = GetNumMips(enviromentCube) - 1;
-    const float3 cubeMap = enviromentCube.SampleLevel(defaultSampler, normal, CubeMips).rgb;
-    
-    return cubeMap;
-}
-
-float3 CalculateSpecularIBL(float3 specularColor, float3 normal, float3 cameraDirection, float roughness, TextureCube enviromentCube)
-{
-    const int CubeMips = GetNumMips(enviromentCube) - 1;
-    const float3 ReflectionVector = reflect(-cameraDirection, normal);
-    const float3 cubeMap = enviromentCube.SampleLevel(defaultSampler, ReflectionVector, roughness * CubeMips).rgb;
-    
-    const float NdotV = saturate(dot(normal, cameraDirection));
-    const float2 brdfLUT = BRDF_LUT_Texture.Sample(BRDFSampler, float2(NdotV, roughness)).xy;
-    
-    return cubeMap * (specularColor * brdfLUT.x + brdfLUT.y);;
-}
-
-float3 CalculateDiffuseLight(float3 diffuseColor)
-{
-    return (diffuseColor / PI);
-
-}
-
-float3 CalculateSpecularLight(float3 specularColor, float3 normal, float3 cameraDirection, float3 lightDirection, float3 halfAngle, float roughness)
-{
-    const float3 G = GeometricAttenuation_Smith_IBL(normal, cameraDirection, lightDirection, roughness);
-     
-    const float3 D = pow(roughness, 4) / (PI * pow((pow(dot(normal, halfAngle), 2) * (pow(roughness, 4) - 1) + 1), 2));
-    
-    const float fresnel = ((-5.55373 * saturate(dot(cameraDirection, halfAngle)) - 6.981316) * saturate(dot(cameraDirection, halfAngle)));
-    const float3 F = specularColor + (1 - specularColor) * pow(2, fresnel);
-    const float3 B = 4 * saturate(dot(normal, lightDirection)) * saturate(dot(normal, cameraDirection));
-    
-    const float3 directLightSpecular = (D * F * G) / B;
-    
-    return directLightSpecular;
-}
+#include "../../../Headers/ShaderStructs.hlsli"
+#include "../../../Headers/PBRFunctions.hlsli"
+#include "../../../Registers.h" 
+ 
 
 float3 CalculatePointLight(float3 diffuseColor, float3 specularColor, float4 worldPosition, float3 normal, float3 cameraDirection, PointLight pointLightData, float roughness, float shine)
 {
@@ -96,35 +37,35 @@ float3 CalculatePointLight(float3 diffuseColor, float3 specularColor, float4 wor
     float shadow = shadowMap.SampleCmpLevelZero(shadowCmpSampler, lightSpaceUV.xy, Depth).r;
      
     //Enable if quality is too low
-   //uint2 dim = 0;
-   //uint numMips = 0;
-   //shadowMap.GetDimensions(0, dim.x, dim.y, numMips);
-   //float2 texelSize = 1.0 / dim;
-   // 
-   //float sum = 0;
-   //float x, y;
-   //for(y = -1.5; y <= 1.5; y += 1.0)
-   //{
-   //    for(x = -1.5; x <= 1.5; x += 1.0)
-   //    {
-   //        float2 newUV;
-   //        newUV.x = lightSpaceUV.x + x * texelSize.x;
-   //        newUV.y = lightSpaceUV.y + y * texelSize.y;
-   //        sum += shadowMap.SampleCmpLevelZero(shadowCmpSampler, newUV, Depth).r;
-   //    }
-   //}
-   //shadow = sum / 16.0;
+   uint2 dim = 0;
+   uint numMips = 0;
+   shadowMap.GetDimensions(0, dim.x, dim.y, numMips);
+   float2 texelSize = 1.0 / dim;
+    
+   float sum = 0;
+   float x, y;
+   for(y = -1.5; y <= 1.5; y += 1.0)
+   {
+       for(x = -1.5; x <= 1.5; x += 1.0)
+       {
+           float2 newUV;
+           newUV.x = lightSpaceUV.x + x * texelSize.x;
+           newUV.y = lightSpaceUV.y + y * texelSize.y;
+           sum += shadowMap.SampleCmpLevelZero(shadowCmpSampler, newUV, Depth).r;
+       }
+   }
+   shadow = sum / 16.0;
     
     
     //return shadow * Attenuation;  
    return shadow * saturate(directLightDiffuse + directLightSpecular) * NdotL * Attenuation * pointLightData.Color * pointLightData.Power;
 }
 
+
 DefaultPixelOutput main(BRDF_VS_to_PS input)
-{
-   
+{   
     DefaultPixelOutput result;
-    float2 uv = input.uv;
+    float2 uv = input.UV;
     
     const float4 albedo = colorMap.Sample(defaultSampler, uv);
     const float4 Material = materialMap.Sample(defaultSampler, uv);
