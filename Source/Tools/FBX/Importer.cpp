@@ -107,7 +107,7 @@ namespace TGA
 				const FbxSystemUnit originalSystemUnit = fbxScene->GetGlobalSettings().GetOriginalSystemUnit();
 
 				outMesh.FileInfo.Application = applicationName;
-				outMesh.FileInfo.ApplicationVersion = applicationVersion; 
+				outMesh.FileInfo.ApplicationVersion = applicationVersion;
 
 				if(originalSystemUnit == FbxSystemUnit::mm)
 					outMesh.FileInfo.OriginalSystemUnit = SystemUnit::Millimeter;

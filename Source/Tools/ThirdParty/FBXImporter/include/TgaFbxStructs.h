@@ -53,11 +53,12 @@ namespace TGA
 			};
 
 			Matrix()
-				: Data{ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 }
-			{}
+				: Data{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}
+			{
+			}
 
-			const float& operator()(const int aRow, const int aColumn) const;
-			float& operator()(const int aRow, const int aColumn);
+			const float& operator()(const int aRow,const int aColumn) const;
+			float& operator()(const int aRow,const int aColumn);
 			float& operator[](const unsigned int& aIndex);
 			const float& operator[](const unsigned int& aIndex) const;
 			Matrix operator*(const Matrix& aRightMatrix) const;
@@ -66,25 +67,25 @@ namespace TGA
 
 		struct Box
 		{
-			float Min[3]{ 0, 0, 0 };
-			float Max[3]{ 0, 0, 0 };
+			float Min[3]{0, 0, 0};
+			float Max[3]{0, 0, 0};
 			bool IsValid = false;
 
-			Box& operator+=(const std::array<float, 3> aVector);
-			static Box FromAABB(const std::array<float, 3> anOrigin, const std::array<float, 3> anExtent);
+			Box& operator+=(const std::array<float,3> aVector);
+			static Box FromAABB(const std::array<float,3> anOrigin,const std::array<float,3> anExtent);
 		};
 
 		struct BoxSphereBounds
 		{
-			std::array<float, 3> BoxExtents = { 0, 0, 0 };
-			std::array<float, 3> Center = { 0, 0, 0 };
-			float Radius{ 0 };
+			std::array<float,3> BoxExtents = {0, 0, 0};
+			std::array<float,3> Center = {0, 0, 0};
+			float Radius{0};
 			BoxSphereBounds operator+(const BoxSphereBounds& aBounds) const;
 		};
 
 		struct Vertex
 		{
-			float Position[4] = { 0,0,0,1 };
+			float Position[4] = {0,0,0,1};
 			float VertexColors[4][4]
 			{
 				{0, 0, 0, 0},
@@ -101,28 +102,28 @@ namespace TGA
 				{0, 0}
 			};
 
-			float Normal[3] = { 0, 0, 0 };
-			float Tangent[3] = { 0, 0, 0 };
-			float BiNormal[3] = { 0, 0, 0 };
+			float Normal[3] = {0, 0, 0};
+			float Tangent[3] = {0, 0, 0};
+			float BiNormal[3] = {0, 0, 0};
 
-			unsigned int BoneIDs[4] = { 0, 0, 0, 0 };
-			float BoneWeights[4] = { 0, 0, 0, 0 };
+			unsigned int BoneIDs[4] = {0, 0, 0, 0};
+			float BoneWeights[4] = {0, 0, 0, 0};
 
 			bool operator==(const Vertex& other) const
 			{
 				// A vertex is just a POD object so we can do this.
-				return memcmp(this, &other, sizeof(Vertex)) == 0;
+				return memcmp(this,&other,sizeof(Vertex)) == 0;
 			}
 		};
 
-		struct Texture 
+		struct Texture
 		{
 			std::string Name;
 			std::string Path;
 			std::string RelativePath;
 		};
 
-		struct Material 
+		struct Material
 		{
 			std::string MaterialName;
 			Texture Emissive;
@@ -138,7 +139,37 @@ namespace TGA
 			Texture VectorDisplacement;
 		};
 
-		struct Skeleton 
+		enum class Axis : uint8_t
+		{
+			X = 0,
+			Y = 1,
+			Z = 2
+		};
+
+		enum class SystemUnit : uint8_t
+		{
+			Unknown,
+			Millimeter,
+			Centimeter,
+			Decimeter,
+			Meter,
+			Inch,
+			Foot,
+			Mile,
+			Yard
+		};
+
+		struct FileInfo
+		{
+			std::string Application;
+			std::string ApplicationVersion;
+			// The original Up axis of the file before conversion to DirectX Left Handed Y-Up.
+			Axis OriginalUpAxis;
+			// The system unit in the file before conversion to Centimeter.
+			SystemUnit OriginalSystemUnit = SystemUnit::Unknown;
+		};
+
+		struct Skeleton
 		{
 			std::string Name;
 
@@ -160,13 +191,13 @@ namespace TGA
 			};
 
 			std::vector<Bone> Bones;
-			std::unordered_map<std::string, Socket> Sockets;
-			std::unordered_map<std::string, size_t> BoneNameToIndex;
+			std::unordered_map<std::string,Socket> Sockets;
+			std::unordered_map<std::string,size_t> BoneNameToIndex;
 
-			const Bone* GetRoot() const { if (!Bones.empty()) { return &Bones[0]; } return nullptr; }
+			const Bone* GetRoot() const { if(!Bones.empty()) { return &Bones[0]; } return nullptr; }
 		};
 
-		struct Mesh 
+		struct Mesh
 		{
 			struct Element
 			{
@@ -192,6 +223,8 @@ namespace TGA
 				std::vector<LODLevel> Levels;
 			};
 
+			FileInfo FileInfo;
+
 			Skeleton Skeleton;
 
 			std::vector<Element> Elements;
@@ -209,7 +242,7 @@ namespace TGA
 			}
 		};
 
-		struct NavMesh 
+		struct NavMesh
 		{
 			struct NavMeshPolygon
 			{
@@ -229,21 +262,23 @@ namespace TGA
 			BoxSphereBounds BoxSphereBounds;
 		};
 
-		struct Animation 
+		struct Animation
 		{
 			struct Frame
 			{
 				// Stores Joint Name to Transform.
-				std::unordered_map<std::string, Matrix> GlobalTransforms;
+				std::unordered_map<std::string,Matrix> GlobalTransforms;
 				// Stores Joint Name to Transform for Bone Space Transforms.
-				std::unordered_map<std::string, Matrix> LocalTransforms;
+				std::unordered_map<std::string,Matrix> LocalTransforms;
 				// A list of events that are triggered this frame.
 				// Lets you use .find to see if it's here or not instead of
 				// looping.
-				std::unordered_map<std::string, bool> TriggeredEvents;
+				std::unordered_map<std::string,bool> TriggeredEvents;
 
-				std::unordered_map<std::string, Matrix> SocketTransforms;
+				std::unordered_map<std::string,Matrix> SocketTransforms;
 			};
+
+			FileInfo FileInfo;
 
 			// The animation frames.
 			std::vector<Frame> Frames;
