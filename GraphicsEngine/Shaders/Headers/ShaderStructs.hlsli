@@ -46,17 +46,26 @@ struct DefaultVertexToPixel
     float3 BiNormal : BINORMAL;
 };
 
-
+struct PostProcessVertexToPixel
+{ 
+    float2 UV : UV;
+};
 struct BRDF_VS_to_PS
 {
     float4 position : SV_POSITION;
-    float2 uv : UV;
+    float2 UV : UV;
 };
 
 struct DefaultPixelOutput
 {
     float4 Color : SV_TARGET;
 };
+
+struct PostProcessPixelOutput
+{
+    float4 Color : SV_TARGET;
+};
+
 
 struct BRDF_Result
 {
@@ -71,7 +80,8 @@ cbuffer FrameBuffer : register(HLSL_REG_FrameBuffer)
     float3 FB_CameraPosition;
     
     int FB_RenderMode;
-    float3 padding;
+    int2 FB_ScreenResolution; 
+    float1 padding;
 }
 
 cbuffer LightBuffer : register(HLSL_REG_LightBuffer)
@@ -111,6 +121,11 @@ Texture2D DepthMap : register(HLSL_REG_DepthMap);
 
 TextureCube enviromentCube : register(HLSL_REG_enviromentCube);
 Texture2D BRDF_LUT_Texture : register(HLSL_REG_BRDF_LUT_Texture);
+Texture2D Target0_Texture : register(HLSL_REG_Target0);
+Texture2D Target01_Texture : register(HLSL_REG_Target01);
+Texture2D Target02_Texture : register(HLSL_REG_Target02);
+Texture2D Target03_Texture : register(HLSL_REG_Target03);
+Texture2D Target04_Texture : register(HLSL_REG_Target04);
 
 SamplerComparisonState shadowCmpSampler : register(HLSL_REG_shadowCmpSampler);
 Texture2D shadowMap : register(HLSL_REG_dirLightShadowMap);

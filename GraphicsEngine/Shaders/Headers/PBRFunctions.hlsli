@@ -1,7 +1,6 @@
 #include "Common.hlsli" 
 #include "../Registers.h"
  
-static const float PI = 3.14159265f;
 
 float3 CalculateDiffuseIBL(float3 normal, TextureCube enviromentCube)
 {

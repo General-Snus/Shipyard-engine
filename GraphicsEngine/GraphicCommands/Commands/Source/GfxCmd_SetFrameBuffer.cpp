@@ -32,6 +32,10 @@ void GfxCmd_SetFrameBuffer::ExecuteAndDestroy()
 	buffert.Data.FB_CameraPosition[0] = myPosition.x;
 	buffert.Data.FB_CameraPosition[1] = myPosition.y;
 	buffert.Data.FB_CameraPosition[2] = myPosition.z;
+
+	buffert.Data.FB_ScreenResolution[0] = static_cast<int>(RHI::GetDeviceSize().Width);
+	buffert.Data.FB_ScreenResolution[1] = static_cast<int>(RHI::GetDeviceSize().Height);
+
 	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_GEOMETERY_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_FrameBuffer,buffert);
 	RHI::UpdateConstantBufferData(buffert);
 }

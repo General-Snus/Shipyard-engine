@@ -81,12 +81,14 @@
     <OutDir>$(SolutionDir)Bin\$(Configuration)\</OutDir>
     <LibraryPath>$(SolutionDir)Lib\$(Configuration)\;$(SolutionDir)ThirdParty\FBXImporter\Lib\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(SolutionDir)ThirdParty\FBXImporter\Include\;$(SolutionDir);$(ProjectDir);$(SolutionDir)\Mine;$(SolutionDir)\GraphicsEngine;$(SolutionDir)\AssetManager;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)Bin\$(Configuration)\</OutDir>
     <LibraryPath>$(SolutionDir)Lib\$(Configuration)\;$(SolutionDir)ThirdParty\FBXImporter\Lib\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_$(Configuration)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

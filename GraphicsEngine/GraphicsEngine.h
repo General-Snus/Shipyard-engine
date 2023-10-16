@@ -20,7 +20,23 @@
 #include <ThirdParty/CU/CommonUtills/Matrix4x4.hpp> 
 
 
+enum class eRenderTargets
+{
+	BackBuffer,
+	DepthBuffer,
+	SceneBuffer,
+	halfSceneBuffer,
+	quaterSceneBuffer1,
+	quaterSceneBuffer2,
+	IntermediateA,
+	IntermediateB,
+	count
+};
+
+
 using namespace Microsoft::WRL;
+
+class cCamera;
 
 class GraphicsEngine
 {
@@ -32,22 +48,47 @@ private:
 	LineBuffer myLineBuffer;
 	LightBuffer myLightBuffer;
 	G_Buffer myG_Buffer;
-
+	//Fill with render data for the deffered pass
 	GraphicsCommandList DeferredCommandList;
 	GraphicsCommandList OverlayCommandList;
 
 	SIZE myWindowSize{0,0};
 	HWND myWindowHandle{};
+	cCamera* myCamera;
 	CU::Vector4<float> myBackgroundColor;
 
 	std::shared_ptr<Texture> myBackBuffer;
 	std::shared_ptr<Texture> myDepthBuffer;
 
+	std::shared_ptr<Texture> SceneBuffer;
+	std::shared_ptr<Texture> halfSceneBuffer;
+	std::shared_ptr<Texture> quaterSceneBuffer1;
+	std::shared_ptr<Texture> quaterSceneBuffer2;
+
+	std::shared_ptr<Texture> IntermediateA;
+	std::shared_ptr<Texture> IntermediateB;
+
+
+
+	//Defualtl
 	ComPtr<ID3D11VertexShader> myVertexShader;
 	ComPtr<ID3D11PixelShader> myPixelShader;
-
 	std::shared_ptr<Shader> defaultVS;
 	std::shared_ptr<Shader> defaultPS;
+
+
+	//Post-pro
+	ComPtr<ID3D11VertexShader> myScreenSpaceQuadShader;
+	ComPtr<ID3D11PixelShader> luminancePass;
+	ComPtr<ID3D11PixelShader> linearGammaPass;
+	ComPtr<ID3D11PixelShader> copyShader;
+	ComPtr<ID3D11PixelShader> gaussShader;
+	ComPtr<ID3D11PixelShader> bloomShader;
+
+
+
+
+
 
 	//Debug
 	ComPtr<ID3D11Buffer> myLineVertexBuffer;
@@ -61,6 +102,10 @@ private:
 	std::shared_ptr<TextureHolder> defaultMatTexture;
 	std::shared_ptr<TextureHolder> defaultEffectTexture;
 	std::shared_ptr<TextureHolder> defaultCubeMap;
+
+
+
+
 
 	std::shared_ptr<Mesh> defaultMesh;
 	std::shared_ptr<Material> defaultMaterial;
@@ -95,6 +140,8 @@ public:
 	void SetupDefaultVariables();
 
 	void SetupBRDF();
+
+	void SetupPostProcessing();
 
 	void SetLoggingWindow(HANDLE aHandle);
 
@@ -138,6 +185,38 @@ public:
 
 	FORCEINLINE std::shared_ptr<Shader> GetDefaultVSShader() const { return defaultVS; }
 	FORCEINLINE std::shared_ptr<Shader> GetDefaultPSShader() const { return defaultPS; }
+
+	FORCEINLINE ComPtr<ID3D11VertexShader> GetQuadShader() const { return myScreenSpaceQuadShader; }
+	FORCEINLINE ComPtr<ID3D11PixelShader> GetLuminanceShader() const { return luminancePass; }
+	FORCEINLINE ComPtr<ID3D11PixelShader> GetLinearToGamma() const { return linearGammaPass; }
+	FORCEINLINE ComPtr<ID3D11PixelShader> GetCopyShader() const { return copyShader; }
+	FORCEINLINE ComPtr<ID3D11PixelShader> GetGaussShader() const { return gaussShader; }
+	FORCEINLINE ComPtr<ID3D11PixelShader> GetBloomShader() const { return bloomShader; }
+
+	FORCEINLINE std::shared_ptr<Texture> GetTargetTextures(eRenderTargets type) const
+	{
+		switch(type)
+		{
+		case::eRenderTargets::BackBuffer:
+			return myBackBuffer;
+		case::eRenderTargets::DepthBuffer:
+			return myDepthBuffer;
+		case::eRenderTargets::SceneBuffer:
+			return SceneBuffer;
+		case::eRenderTargets::halfSceneBuffer:
+			return halfSceneBuffer;
+		case::eRenderTargets::quaterSceneBuffer1:
+			return quaterSceneBuffer1;
+		case::eRenderTargets::quaterSceneBuffer2:
+			return quaterSceneBuffer2;
+		case::eRenderTargets::IntermediateA:
+			return IntermediateA;
+		case::eRenderTargets::IntermediateB:
+			return IntermediateB;
+		default:
+			return nullptr;
+		}
+	}
 
 	Texture* DepthBuffer()const { return myDepthBuffer.get(); };
 	Texture* BackBuffer()const { return myBackBuffer.get(); };

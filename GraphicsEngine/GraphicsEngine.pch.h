@@ -36,6 +36,9 @@
 #include <GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h>
 #include <GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_SetLightBuffer.h>
 #include <GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_SetRenderTarget.h>
+#include <GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_LuminancePass.h>
+#include <GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_Bloom.h>
+#include <GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_LinearToGamma.h>
 
 
 

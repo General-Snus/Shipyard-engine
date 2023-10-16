@@ -183,6 +183,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DebugDrawer\DebugDrawer.h" />
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_GaussianBlur.h" />
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_LuminancePass.h" />
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_LinearToGamma.h" />
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_Bloom.h" />
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_DebugLayer.h" />
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_DrawDebugPrimitive.h" />
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderMesh.h" />
@@ -235,6 +239,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DebugDrawer\DebugDrawer.cpp" />
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_GaussianBlur.cpp" />
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_LuminancePass.cpp" />
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_LinearToGamma.cpp" />
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_Bloom.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_DebugLayer.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_DrawDebugPrimitive.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderMesh.cpp" />
@@ -331,6 +339,42 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Shaders\Passes\PointLight\LightPass\PointLight_PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\Passes\PostProcessing\Bloom_PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\Passes\PostProcessing\CopyPixels_PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\Passes\PostProcessing\GaussianBlur_PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\Passes\PostProcessing\LinearToGammaPass.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\Passes\PostProcessing\LuminancePass_PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\Passes\PostProcessing\ToneMapping_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>

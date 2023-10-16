@@ -12,6 +12,7 @@
 #include<GraphicsEngine/GraphicsEngine.h> 
 #include <d3d11.h>
 
+
 void G_Buffer::Init()
 {
 	const int width = RHI::GetDeviceSize().Width;
@@ -172,7 +173,7 @@ void G_Buffer::SetWriteTargetToBuffer()
 	}
 
 	RHI::SetRenderTargets(vectorOfTextures,GraphicsEngine::Get().DepthBuffer());
-
+	
 }
 
 void G_Buffer::UseGBufferShader()

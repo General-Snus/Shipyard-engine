@@ -3,6 +3,6 @@
 
 float2 main(BRDF_VS_to_PS input) : SV_Target
 { 
-    float2 integratedBRDF = IntegrateBRDF(input.uv.x, input.uv.y);  
+    float2 integratedBRDF = IntegrateBRDF(input.UV.x, input.UV.y);  
     return integratedBRDF;
 }

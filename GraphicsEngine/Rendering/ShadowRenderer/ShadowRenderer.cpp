@@ -72,7 +72,7 @@ void ShadowRenderer::Execute()
 				}
 			}
 		}
-	} 
+	}
 }
 
 void ShadowRenderer::ResetShadowList()

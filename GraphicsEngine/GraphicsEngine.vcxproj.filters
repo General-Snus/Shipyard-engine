@@ -171,6 +171,18 @@
     <ClInclude Include="Shaders\Include\PointLightShadow_GS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_Bloom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_LinearToGamma.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_LuminancePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_GaussianBlur.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsEngine.pch.cpp">
@@ -242,6 +254,18 @@
     <ClCompile Include="Rendering\ShadowRenderer\ShadowRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_Bloom.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_LinearToGamma.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_LuminancePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_GaussianBlur.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Headers\ObjectBuffer.hlsli" />
@@ -264,5 +288,11 @@
     <FxCompile Include="Shaders\Passes\SpotLight_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\DebugLayer_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\LineDrawer.hlsl" />
+    <FxCompile Include="Shaders\Passes\PostProcessing\CopyPixels_PS.hlsl" />
+    <FxCompile Include="Shaders\Passes\PostProcessing\LuminancePass_PS.hlsl" />
+    <FxCompile Include="Shaders\Passes\PostProcessing\LinearToGammaPass.hlsl" />
+    <FxCompile Include="Shaders\Passes\PostProcessing\GaussianBlur_PS.hlsl" />
+    <FxCompile Include="Shaders\Passes\PostProcessing\Bloom_PS.hlsl" />
+    <FxCompile Include="Shaders\Passes\PostProcessing\ToneMapping_PS.hlsl" />
   </ItemGroup>
 </Project>

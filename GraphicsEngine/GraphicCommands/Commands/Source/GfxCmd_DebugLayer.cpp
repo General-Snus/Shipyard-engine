@@ -11,6 +11,7 @@ void GfxCmd_DebugLayer::ExecuteAndDestroy()
 {
 	if(ModelViewer::GetApplicationState().filter != DebugFilter::NoFilter)
 	{ 
+		RHI::SetBlendState(nullptr);
 		G_Buffer& gBuffer = GetGBuffer();
 		gBuffer.UseDebugShader();
 		RHI::ConfigureInputAssembler(
@@ -21,5 +22,6 @@ void GfxCmd_DebugLayer::ExecuteAndDestroy()
 			nullptr
 		);
 		RHI::Draw(4);
+		RHI::SetBlendState(GraphicsEngine::Get().GetAlphaBlendState());
 	}
 }

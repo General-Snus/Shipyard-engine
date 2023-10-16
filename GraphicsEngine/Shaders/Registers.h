@@ -1,8 +1,11 @@
 //General Graphics settings
   
-
-
-
+#define defaultTextureFormat DXGI_FORMAT_R16G16B16A16_FLOAT
+//DXGI_FORMAT_R32G32B32A32_FLOAT
+//DXGI_FORMAT_R32G32B32A32_TYPELESS
+//DXGI_FORMAT_R16G16B16A16_FLOAT 
+//DXGI_FORMAT_R16G16B16A16_UNORM
+//DXGI_FORMAT_R8G8B8A8_UNORM
 
 
 // Purpose: Registers for the shaders.
@@ -50,8 +53,23 @@
 #define REG_WorldPosition 5  
 
 #define HLSL_REG_DepthMap t6 
-#define REG_DepthMap 6   
- 
+#define REG_DepthMap 6  
+
+#define HLSL_REG_Target0 t10 
+#define REG_Target0 10   
+
+#define HLSL_REG_Target01 t11 
+#define REG_Target01 11   
+
+#define HLSL_REG_Target02 t12 
+#define REG_Target02 12   
+
+#define HLSL_REG_Target03 t13 
+#define REG_Target03 13
+
+#define HLSL_REG_Target04 t14 
+#define REG_Target04 14
+
 #define HLSL_REG_enviromentCube t100
 #define REG_enviromentCube 100 
 

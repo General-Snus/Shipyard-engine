@@ -1,5 +1,6 @@
 #include "../Registers.h"
 
+static const float PI = 3.14159265f;
 float3 PositionInBound(float3 aMin, float3 aMax, float3 aPosition)
 {
     const float3 boundSize = aMax - aMin;

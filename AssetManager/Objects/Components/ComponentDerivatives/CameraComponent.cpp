@@ -28,7 +28,7 @@ cCamera::cCamera(const unsigned int anOwnerId) : Component(anOwnerId)
 	std::weak_ptr<SpotLight> pLight = GetComponent<cLight>().GetData<SpotLight>();
 	pLight.lock()->Position = CU::Vector3<float>(0, 0, 0);
 	pLight.lock()->Color = CU::Vector3<float>(1, 1, 1);
-	pLight.lock()->Power = 500.0f * Mega;
+	pLight.lock()->Power = 5000.0f * Kilo;
 	pLight.lock()->Range = 1000;
 	pLight.lock()->Direction = { 0,-1,0 };
 	pLight.lock()->InnerConeAngle = 10 * DEG_TO_RAD;
@@ -94,7 +94,7 @@ void cCamera::Update()
 
 void cCamera::Render()
 {
-	GraphicsEngine::Get().DeferredCommand<GfxCmd_SetFrameBuffer>(myClipMatrix, this->GetGameObject().GetComponent<Transform>(), (int)ModelViewer::GetApplicationState().filter);
+	//GraphicsEngine::Get().DeferredCommand<GfxCmd_SetFrameBuffer>(myClipMatrix, this->GetGameObject().GetComponent<Transform>(), (int)ModelViewer::GetApplicationState().filter);
 }
 
 Vector3f cCamera::GetPointerDirection(const CU::Vector2<int> position)
@@ -123,6 +123,11 @@ Vector3f cCamera::GetPointerDirectionNDC(const Vector2f position) const
 
 
 
+}
+
+void cCamera::SetCameraToFrameBuffer()
+{
+	GfxCmd_SetFrameBuffer(myClipMatrix,this->GetGameObject().GetComponent<Transform>(),(int)ModelViewer::GetApplicationState().filter).ExecuteAndDestroy(); 
 }
 
 CU::Vector4<float> cCamera::WoldSpaceToPostProjectionSpace(CommonUtilities::Vector3<float> aEntity)

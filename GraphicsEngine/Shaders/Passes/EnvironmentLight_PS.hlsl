@@ -84,7 +84,7 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
 {
     //Buffer maps are now filled from gbuffer? not sent indivudually by the rendercommands??
     DefaultPixelOutput result;
-    float2 uv = input.uv;
+    float2 uv = input.UV;
     
     const float4 albedo = colorMap.Sample(defaultSampler, uv);
     const float4 Material = materialMap.Sample(defaultSampler, uv);
@@ -104,7 +104,7 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     + CalculateIndirectLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, enviromentCube, Material.g, Material.r);
     
     result.Color.rgb = (radiance + Effect.r) * albedo.rgb;
-    result.Color.rgb = saturate(LinearToGamma(result.Color.rgb));  
+    result.Color.rgb = (result.Color.rgb);  
     result.Color.a = 1.0f;
     return result;
 }

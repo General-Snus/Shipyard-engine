@@ -250,7 +250,7 @@ void ModelViewer::LoadScene()
 		ptr.lock()->Color = {(float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000};
 		//ptr.lock()->Color = {1,1,1};
 		ptr.lock()->Range = 1000.0f;;
-		ptr.lock()->Power = i * 600.0f * Kilo;
+		ptr.lock()->Power = i * 1000.0f * Kilo;
 		ptr.lock()->OuterConeAngle = i * 20.0f * DEG_TO_RAD;
 		ptr.lock()->InnerConeAngle = 1.0f * DEG_TO_RAD;
 		spotLight.GetComponent<cLight>().BindDirectionToTransform(true);
@@ -282,11 +282,8 @@ void ModelViewer::LoadScene()
 	cLight& ptr = pointLight.GetComponent<cLight>();
 	ptr.SetColor({1,1,1});
 	ptr.SetRange(1000.0f);
-	ptr.SetPower(5000.0f * Kilo);
-	ptr.BindDirectionToTransform(true);
-
-
-	
+	ptr.SetPower(500.0f * Kilo);
+	ptr.BindDirectionToTransform(true); 
 
 	{
 		GameObject test3 = gom.CreateGameObject();
@@ -301,8 +298,7 @@ void ModelViewer::Update()
 {
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
-	ImGui::NewFrame();
-	ImGui::ShowDemoWindow(); // Show demo window! :) 
+	ImGui::NewFrame(); 
 	CommonUtilities::Timer::GetInstance().Update();
 	UpdateScene();
 	GraphicsEngine::Get().BeginFrame();

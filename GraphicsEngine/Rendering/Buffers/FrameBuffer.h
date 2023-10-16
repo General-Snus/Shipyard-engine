@@ -10,7 +10,8 @@ struct FrameBufferData
 	float FB_CameraPosition[3] = {};// 12 bytes padding  
 
 	int FB_RenderMode;
-	float  padding[3];
+	int FB_ScreenResolution[2];
+	float padding;
 
 };
 
