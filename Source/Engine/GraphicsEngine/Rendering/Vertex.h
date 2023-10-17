@@ -1,7 +1,7 @@
 #pragma once
 #include <wrl.h>
 using namespace Microsoft::WRL;
-#include <Tools/ThirdParty/Cu/CommonUtills/Vectors.hpp>
+#include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 #include <d3d11.h>
 // We'll be writing this a lot so easier
 // to just typedef it here.

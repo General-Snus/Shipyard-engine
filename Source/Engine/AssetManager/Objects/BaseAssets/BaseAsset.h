@@ -1,6 +1,6 @@
 #pragma once 
 #include <Engine/GraphicsEngine/Rendering/Vertex.h>
-#include <Tools/ThirdParty/CU/CommonUtills/Sphere.hpp> 
+#include <Tools/Utilities/LinearAlgebra//Sphere.hpp> 
 #include <filesystem>
 class Material;
 

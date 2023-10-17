@@ -22,10 +22,9 @@
 #include <Tools/ImGUI/imgui_impl_win32.h>
 #include <Tools/ImGUI/imgui_impl_dx11.h>
 
-#include <Tools/ThirdParty/CU/Math.hpp>
-#include <Tools/ThirdParty/nlohmann/json.hpp> 
-#include <Tools/ThirdParty/CU/Math.hpp>  
-#include <Tools/ThirdParty/CU/Timer.h>
+#include <Tools/Utilities/Math.hpp>
+#include <Tools/ThirdParty/nlohmann/json.hpp>  
+#include <Tools/Utilities/Game/Timer.h>
 
 #define _DEBUGDRAW
  #define Flashlight

@@ -1,13 +1,14 @@
 #pragma once
 
-#include <Tools/ThirdParty/CU/CommonUtills/Matrix4x4.hpp> 
-#include <Tools/ThirdParty\CU\Math.hpp>
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp> 
+#include <Tools/Utilities/Math.hpp>
 
 #include <Engine/GraphicsEngine/Rendering/Buffers/FrameBuffer.h>
 #include <Engine/GraphicsEngine/Rendering/Buffers/ObjectBuffer.h>
 #include <Engine/GraphicsEngine/Rendering/Buffers/LightBuffer.h>
 #include <Engine/GraphicsEngine/Rendering/Buffers/LineBuffer.h>
 #include <Engine/GraphicsEngine/Rendering/Buffers/G_buffer.h>
+
 
 typedef CU::Matrix4x4<float>  Matrix;
  
@@ -77,4 +78,6 @@ public:
 	{
 		return myPtr; 
 	}
-};   
+};
+
+

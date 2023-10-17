@@ -14,9 +14,10 @@
 #include <unordered_map>
 #include <memory>
 
-#include <Tools/ThirdParty/CU/CommonUtills/Matrix4x4.hpp>
-#include <Tools/ThirdParty/CU/CommonUtills/Vectors.hpp>
-#include <Tools/ThirdParty/CU/Timer.h>
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
+#include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
+#include <Tools/Utilities/Game/Timer.h>
+#include <Tools/Utilities/Math.hpp>
 
 #include "Objects/BaseAssets/BaseAsset.h"
 #include "Objects/BaseAssets/Animations.h"
@@ -44,7 +45,6 @@
 #include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
 #include <Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h>
 #include "AssetManager.h"
-#include <Tools/ThirdParty/CU/Math.hpp>
 
 typedef CU::Vector3<float> Vector3f;
 typedef CU::Matrix4x4<float> Matrix;

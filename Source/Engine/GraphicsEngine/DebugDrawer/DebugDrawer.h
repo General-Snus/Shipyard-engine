@@ -1,6 +1,6 @@
 #pragma once
-#include <Tools/ThirdParty/CU/CommonUtills/Matrix4x4.hpp>
-#include <Tools/ThirdParty/CU/CommonUtills/Vectors.hpp>
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
+#include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 
 
 namespace Debug

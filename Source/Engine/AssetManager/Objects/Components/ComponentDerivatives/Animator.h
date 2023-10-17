@@ -2,7 +2,7 @@
 #include "../Component.h"
 
 #include <Engine/GraphicsEngine/Rendering/Vertex.h>
-#include <Tools/ThirdParty/CU/CommonUtills/Vector3.hpp>
+#include <Tools/Utilities/LinearAlgebra/Vector3.hpp>
 #include "MeshRenderer.h"
 
 #define boneLimit 128

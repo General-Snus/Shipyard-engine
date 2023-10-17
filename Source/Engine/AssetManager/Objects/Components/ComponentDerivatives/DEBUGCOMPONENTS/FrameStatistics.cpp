@@ -8,7 +8,7 @@
 #include <conio.h>
 #include <stdio.h>
 #include <pdh.h>
-#include <Tools/ThirdParty/CU/Math.hpp>
+#include <Tools/Utilities/Math.hpp>
 #include <d3d11.h>
 
 #pragma comment(lib,"pdh.lib") 

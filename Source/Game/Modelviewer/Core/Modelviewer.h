@@ -3,8 +3,8 @@
 #include "ApplicationState.h"
 #include "../Windows/SplashWindow.h" 
 #include <Tools/Logging/Logging.h> 
-#include <Tools/ThirdParty/CU/CommonUtills/Sphere.hpp>
-#include <Tools/ThirdParty/CU/CommonUtills/Matrix4x4.hpp> 
+#include <Tools/Utilities/LinearAlgebra/Sphere.hpp>
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp> 
 #include <Engine/AssetManager/Objects/GameObjects/GameObject.h>
 
 template<typename T>

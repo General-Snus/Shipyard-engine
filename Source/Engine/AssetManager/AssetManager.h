@@ -4,7 +4,7 @@
 
 #define AsUINT(v) static_cast<unsigned>(v) 
  
-#include <Tools/ThirdParty/CU/Queue.hpp>
+#include <Tools/Utilities/DataStructures/Queue.hpp>
 #include <thread>
 #include <future>
 

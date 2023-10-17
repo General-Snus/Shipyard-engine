@@ -2,7 +2,7 @@
 #include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
 #include "LightComponent.h"
 #include <Game/Modelviewer/Core/Modelviewer.h>
-#include <Tools/ThirdParty/CU/Math.hpp>
+#include <Tools/Utilities/Math.hpp>
 
 cLight::cLight(const unsigned int anOwnerId) : Component(anOwnerId),isDirty(true)
 {

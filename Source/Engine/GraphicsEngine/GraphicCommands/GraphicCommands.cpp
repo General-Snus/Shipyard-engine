@@ -1,7 +1,7 @@
 #include "GraphicsEngine.pch.h"
 #include "GraphicsEngine.h"
 #include "GraphicCommands.h" 
-#include <Tools/ThirdParty/CU/Timer.h>
+#include <Tools/Utilities/Game/Timer.h>
 #include <assert.h>
 #include <Tools/ImGui/imgui.h>
 
@@ -99,4 +99,4 @@ GraphicCommandBase* GraphicsCommandListIterator::Next()
 	GraphicCommandBase* cmd = myPtr;
 	myPtr = cmd->Next;
 	return cmd;
-}
+} 

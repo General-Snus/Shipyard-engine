@@ -2,7 +2,7 @@
 #include <Engine/AssetManager/Objects/Components/Component.h> 
 #include <Engine/AssetManager/Objects/Components/ComponentDerivatives/DEBUGCOMPONENTS/ImGuiComponent.h>
 #include <Engine/GraphicsEngine/Rendering/Vertex.h>
-#include <Tools/ThirdParty/CU/CommonUtills/Vector3.hpp>
+#include <Tools/Utilities/LinearAlgebra/Vector3.hpp>
 #include <Tools/ThirdParty/nlohmann/json.hpp> 
  
 	class BackgroundColor : public ImGuiComponent

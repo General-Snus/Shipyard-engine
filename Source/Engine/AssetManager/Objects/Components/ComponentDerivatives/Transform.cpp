@@ -1,7 +1,7 @@
 #include "AssetManager.pch.h"
 #include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
 #include "Transform.h"
-#include <Tools/ThirdParty/CU/Math.hpp>
+#include <Tools/Utilities/Math.hpp>
 
 Transform::Transform(const unsigned int anOwnerId) : Component(anOwnerId),isDirty(true)
 {

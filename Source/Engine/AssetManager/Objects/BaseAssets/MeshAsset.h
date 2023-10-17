@@ -1,6 +1,6 @@
 #pragma once
 #include "BaseAsset.h"
-#include <Tools/ThirdParty/CU/CommonUtills/Sphere.hpp> 
+#include <Tools/Utilities/LinearAlgebra/Sphere.hpp> 
 
 class Mesh : public AssetBase
 {
