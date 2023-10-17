@@ -187,8 +187,10 @@ void ModelViewer::LoadScene()
 		myMesh.GetComponent<cAnimator>().AddAnimation(L"Animations/Idle/A_C_TGA_Bro_Idle_Wave.fbx");
 	}
 	GameObject test = gom.CreateGameObject();
-	test.AddComponent<cMeshRenderer>();
+	test.AddComponent<cMeshRenderer>("Models/PlaneBillboard.fbx");
+	test.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BillboardSmiley.json");
 	test.AddComponent<Transform>();
+	test.GetComponent<Transform>().Rotate(Vector3f(-90,0,0),false);
 	test.GetComponent<Transform>().GetTransform()(4,1) = 100;;
 
 	{ 
@@ -248,7 +250,7 @@ void ModelViewer::LoadScene()
 		ptr.lock()->Color = {(float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000};
 		//ptr.lock()->Color = {1,1,1};
 		ptr.lock()->Range = 1000.0f;;
-		ptr.lock()->Power = i * 1000.0f * Kilo;
+		ptr.lock()->Power = i * 200.0f * Kilo;
 		ptr.lock()->OuterConeAngle = i * 20.0f * DEG_TO_RAD;
 		ptr.lock()->InnerConeAngle = 1.0f * DEG_TO_RAD;
 		spotLight.GetComponent<cLight>().BindDirectionToTransform(true);
@@ -280,7 +282,7 @@ void ModelViewer::LoadScene()
 	cLight& ptr = pointLight.GetComponent<cLight>();
 	ptr.SetColor({1,1,1});
 	ptr.SetRange(1000.0f);
-	ptr.SetPower(500.0f * Kilo);
+	ptr.SetPower(100.0f * Kilo);
 	ptr.BindDirectionToTransform(true); 
 
 	{

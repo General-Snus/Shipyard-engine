@@ -40,7 +40,7 @@
 #include "Objects/Components/ComponentDerivatives/DEBUGCOMPONENTS/FrameStatistics.h"
 #include "Objects/Components/ComponentDerivatives/DEBUGCOMPONENTS/RenderMode.h"
 
-#include <Tools/ThirdParty/FBXImporter/include/TGAFbx.h> 
+#include <Tools/FBX/TGAFbx.h>
 #include <Engine/GraphicsEngine/Rendering/Vertex.h> 
 #include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
 #include <Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h>

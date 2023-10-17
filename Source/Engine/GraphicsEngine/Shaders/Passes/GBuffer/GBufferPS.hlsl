@@ -17,6 +17,12 @@ GBufferOutput main(DefaultVertexToPixel input)
     const float2 uv = input.UV ;
     
     const float4 textureColor = colorMap.Sample(defaultSampler, uv) * DefaultMaterial.albedoColor;
+    
+    if(textureColor.a < 0.1f)
+    {
+        discard;
+    }
+    
     const float4 materialComponent = materialMap.Sample(defaultSampler, uv);
     const float2 textureNormal = normalMap.Sample(defaultSampler, uv).xy;
     const float4 effect = effectMap.Sample(defaultSampler, uv);

@@ -5,9 +5,9 @@ PostProcessPixelOutput main(BRDF_VS_to_PS input)
 {
     PostProcessPixelOutput output;
     //Values are fucked cuz it looks like shit with values from presentation
-    const float Direction = 2.0f;
-    const float Quality = 2.0f;
-    const float Radius = 1.0f;
+    const float Direction = 16.0f;
+    const float Quality = 4.0f;
+    const float Radius = 2.0f;
     
     const float2 rad = Radius / FB_ScreenResolution;
 

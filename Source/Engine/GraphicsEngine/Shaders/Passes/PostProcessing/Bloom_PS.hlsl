@@ -4,11 +4,11 @@ PostProcessPixelOutput main(BRDF_VS_to_PS input)
 {
     PostProcessPixelOutput output;
     
-    float3 color1 = Target0_Texture.Sample(defaultSampler, input.UV).rgb;
+    const float3 color1 = Target0_Texture.Sample(defaultSampler, input.UV).rgb;
+    const float3 color2 = Target01_Texture.Sample(defaultSampler, input.UV).rgb;
     //color1 += Target0_Texture.SampleLevel(defaultSampler, input.UV, 0, 1.5).rgb;
     //color1 += Target0_Texture.SampleLevel(defaultSampler, input.UV, 0, 2.5).rgb;
     //color1 /= 3;
-    const float3 color2 = Target01_Texture.Sample(defaultSampler, input.UV).rgb;
     
     
     //Additive

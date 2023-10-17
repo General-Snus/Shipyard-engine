@@ -98,7 +98,7 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     }
    
     const float3 radiance = totalPointLightContribution;
-    result.Color.rgb = radiance * albedo.rgb;     
+    result.Color.rgb = radiance;     
     result.Color.a = 1.0f;
     
     return result;

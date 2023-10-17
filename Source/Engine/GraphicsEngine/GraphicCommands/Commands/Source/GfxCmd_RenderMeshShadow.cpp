@@ -17,7 +17,7 @@ void GfxCmd_RenderMeshShadow::ExecuteAndDestroy()
 
 	RHI::UpdateConstantBufferData(objectBuffer);
 	RHI::Context->PSSetShader(nullptr,nullptr,0);
-
+	
 	for(const auto& aElement : myMesh->Elements)
 	{
 		RHI::ConfigureInputAssembler(

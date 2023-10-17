@@ -28,7 +28,7 @@ cCamera::cCamera(const unsigned int anOwnerId) : Component(anOwnerId)
 	std::weak_ptr<SpotLight> pLight = GetComponent<cLight>().GetData<SpotLight>();
 	pLight.lock()->Position = CU::Vector3<float>(0, 0, 0);
 	pLight.lock()->Color = CU::Vector3<float>(1, 1, 1);
-	pLight.lock()->Power = 5000.0f * Kilo;
+	pLight.lock()->Power = 2000.0f * Kilo;
 	pLight.lock()->Range = 1000;
 	pLight.lock()->Direction = { 0,-1,0 };
 	pLight.lock()->InnerConeAngle = 10 * DEG_TO_RAD;
