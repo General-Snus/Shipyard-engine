@@ -12,6 +12,10 @@
 #include <Shaders/Include/GaussianBlur_PS.h> 
 #include <Shaders/Include/Bloom_PS.h> 
 
+#include <Shaders/Include/ParticleShader_VS.h> 
+#include <Shaders/Include/ParticleShader_GS.h> 
+#include <Shaders/Include/ParticleShader_PS.h> 
+
 #include <Shaders/Include/Default_C.h>
 #include <Shaders/Include/Default_N.h>
 #include <Shaders/Include/Default_M.h>
@@ -27,6 +31,7 @@
 #include "Objects/Shader.h"
 
 #include "Rendering/Vertex.h" 
+#include "Rendering/ParticleRenderer/ParticleVertex.h" 
 #include "GraphicCommands/GraphicCommands.h"
 #include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
 #include <Engine/AssetManager/Objects/Components/ComponentDerivatives/LightComponent.h>
@@ -71,6 +76,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle, bool enableDeviceDebug)
 
 		SetupDefaultVariables();
 		SetupBRDF();
+		SetupParticleShaders();
 		SetupPostProcessing();
 
 
@@ -351,7 +357,7 @@ void GraphicsEngine::SetupBRDF()
 	RHI::SetSamplerState(myBRDFSampleState, REG_BRDFSampler);
 
 }
-
+  
 void GraphicsEngine::SetupPostProcessing()
 {
 	RHI::DeviceSize size = RHI::GetDeviceSize();
@@ -447,6 +453,27 @@ void GraphicsEngine::SetupPostProcessing()
 		sizeof(BuiltIn_Bloom_PS_ByteCode)
 	);
 
+}
+
+void GraphicsEngine::SetupParticleShaders()
+{
+	RHI::CreateVertexShaderAndInputLayout(
+		particleVertexShader,
+		Particlevertex::InputLayout,
+		Particlevertex::InputLayoutDefinition,
+		BuiltIn_ParticleShader_VS_ByteCode,
+		sizeof(BuiltIn_ParticleShader_VS_ByteCode)
+	);
+	RHI::CreateGeometryShader(
+		particleGeometryShader,
+		BuiltIn_ParticleShader_GS_ByteCode,
+		sizeof(BuiltIn_ParticleShader_GS_ByteCode)
+	);
+	RHI::CreatePixelShader(
+		particlePixelShader,
+		BuiltIn_ParticleShader_PS_ByteCode,
+		sizeof(BuiltIn_ParticleShader_PS_ByteCode)
+	); 
 }
 
 void GraphicsEngine::SetLoggingWindow(HANDLE aHandle)

@@ -183,6 +183,9 @@
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_GaussianBlur.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Rendering\ParticleRenderer\ParticleVertex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsEngine.pch.cpp">
@@ -266,6 +269,9 @@
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_GaussianBlur.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Rendering\ParticleRenderer\ParticleVertex.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Headers\ObjectBuffer.hlsli" />
@@ -294,5 +300,8 @@
     <FxCompile Include="Shaders\Passes\PostProcessing\GaussianBlur_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\PostProcessing\Bloom_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\PostProcessing\ToneMapping_PS.hlsl" />
+    <FxCompile Include="Shaders\Passes\Particles\ParticleShader_PS.hlsl" />
+    <FxCompile Include="Shaders\Passes\Particles\ParticleShader_GS.hlsl" />
+    <FxCompile Include="Shaders\Passes\Particles\ParticleShader_VS.hlsl" />
   </ItemGroup>
 </Project>

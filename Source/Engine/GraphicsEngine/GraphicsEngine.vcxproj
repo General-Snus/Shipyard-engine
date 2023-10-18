@@ -198,6 +198,7 @@
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetLightBuffer.h" />
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetRenderTarget.h" />
     <ClInclude Include="InterOp\ShaderInfo.h" />
+    <ClInclude Include="Rendering\ParticleRenderer\ParticleVertex.h" />
     <ClInclude Include="Rendering\Buffers\G_Buffer.h" />
     <ClInclude Include="Rendering\Buffers\LightBuffer.h" />
     <ClInclude Include="Rendering\Buffers\LineBuffer.h" />
@@ -253,6 +254,7 @@
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetFrameBuffer.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetLightBuffer.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetRenderTarget.cpp" />
+    <ClCompile Include="Rendering\ParticleRenderer\ParticleVertex.cpp" />
     <ClCompile Include="Rendering\Buffers\G_Buffer.cpp" />
     <ClCompile Include="Rendering\ForwardRenderer.cpp" />
     <ClCompile Include="GraphicCommands\GraphicCommands.cpp" />
@@ -332,6 +334,28 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\Passes\Particles\ParticleShader_GS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shaders\Passes\Particles\ParticleShader_PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\Passes\Particles\ParticleShader_VS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
     <FxCompile Include="Shaders\Passes\PointLight\LightPass\PointLight_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

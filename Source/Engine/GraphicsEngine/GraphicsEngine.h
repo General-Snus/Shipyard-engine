@@ -33,6 +33,24 @@ enum class eRenderTargets
 	count
 };
 
+enum class eShader
+{
+	defaultVS,
+	defaultPS,
+	particleVS,
+	particleGS,
+	particlePS,
+	screenSpaceQuad,
+	luminancePass,
+	linearGammaPass,
+	copyShader,
+	gaussShader,
+	bloomShader,
+	debugLinePS,
+	debugLineVS,
+	count
+};
+
 
 using namespace Microsoft::WRL;
 
@@ -76,6 +94,11 @@ private:
 	std::shared_ptr<Shader> defaultVS;
 	std::shared_ptr<Shader> defaultPS;
 
+	//Particle
+	ComPtr<ID3D11VertexShader> particleVertexShader;
+	ComPtr<ID3D11GeometryShader> particleGeometryShader;
+	ComPtr<ID3D11PixelShader> particlePixelShader;
+
 
 	//Post-pro
 	ComPtr<ID3D11VertexShader> myScreenSpaceQuadShader;
@@ -93,8 +116,8 @@ private:
 	//Debug
 	ComPtr<ID3D11Buffer> myLineVertexBuffer;
 	ComPtr<ID3D11Buffer> myLineIndexBuffer;
-	std::shared_ptr<Shader> debugLinePS;
-	std::shared_ptr<Shader> debugLineVS;
+	std::shared_ptr< Shader>  debugLineVS;
+	std::shared_ptr< Shader> debugLinePS;
 
 	std::shared_ptr<Texture> BRDLookUpTable;
 	std::shared_ptr<TextureHolder> defaultTexture;
@@ -116,7 +139,6 @@ private:
 
 	ComPtr<ID3D11BlendState> AlphaBlendState;
 	ComPtr<ID3D11BlendState> AdditiveBlendState;
-
 	ShadowRenderer myShadowRenderer;
 	// We're a container singleton, no instancing this outside the class.
 	GraphicsEngine() = default;
@@ -138,6 +160,8 @@ public:
 	bool SetupDebugDrawline(bool& retFlag);
 
 	void SetupDefaultVariables();
+
+	void SetupParticleShaders();
 
 	void SetupBRDF();
 
@@ -192,6 +216,55 @@ public:
 	FORCEINLINE ComPtr<ID3D11PixelShader> GetCopyShader() const { return copyShader; }
 	FORCEINLINE ComPtr<ID3D11PixelShader> GetGaussShader() const { return gaussShader; }
 	FORCEINLINE ComPtr<ID3D11PixelShader> GetBloomShader() const { return bloomShader; }
+	FORCEINLINE ComPtr<ID3D11VertexShader> GetParticleVSShader() const { return particleVertexShader; }
+	FORCEINLINE ComPtr<ID3D11GeometryShader> GetParticleGSShader() const { return particleGeometryShader; }
+	FORCEINLINE ComPtr<ID3D11PixelShader> GetParticlePSShader() const { return particlePixelShader; }
+
+	/*FORCEINLINE ComPtr<ID3D11DeviceChild> GetShader(eShader type) const
+	{
+		switch(type)
+		{
+		case eShader::defaultVS:
+			return myVertexShader.As<ID3D11DeviceChild>();
+
+		case eShader::defaultPS:
+			return myPixelShader.Get();
+
+		case eShader::particleVS:
+			return particleVertexShader.Get();
+
+		case eShader::particleGS:
+			return particleGeometryShader.Get();
+
+		case eShader::particlePS:
+			return particlePixelShader.Get();
+
+		case eShader::screenSpaceQuad:
+			return myScreenSpaceQuadShader.Get();
+
+		case eShader::luminancePass:
+			return luminancePass;
+
+		case eShader::linearGammaPass:
+			return linearGammaPass.Get();
+
+		case eShader::copyShader:
+			return copyShader.Get();
+
+		case eShader::gaussShader:
+			return gaussShader.Get();
+
+		case eShader::bloomShader:
+			return bloomShader.Get();
+
+		case eShader::debugLineVS:
+			return debugLineVS.Get();
+
+		case eShader::debugLinePS:
+			return debugLinePS.Get();
+		}
+	}
+	*/
 
 	FORCEINLINE std::shared_ptr<Texture> GetTargetTextures(eRenderTargets type) const
 	{
@@ -217,12 +290,12 @@ public:
 			return nullptr;
 		}
 	}
-	void RenderTextureTo(eRenderTargets from, eRenderTargets to);
+	void RenderTextureTo(eRenderTargets from,eRenderTargets to);
 	Texture* DepthBuffer()const { return myDepthBuffer.get(); };
 	Texture* BackBuffer()const { return myBackBuffer.get(); };
 
-	FORCEINLINE std::shared_ptr<Shader> GetDebugLineVS() const { return debugLineVS; }
-	FORCEINLINE std::shared_ptr<Shader> GetDebugLinePS() const { return debugLinePS; }
+	FORCEINLINE std::shared_ptr< Shader> GetDebugLineVS() const { return debugLineVS; }
+	FORCEINLINE std::shared_ptr< Shader> GetDebugLinePS() const { return debugLinePS; }
 
 	FORCEINLINE ComPtr<ID3D11BlendState> GetAlphaBlendState() const { return AlphaBlendState; }
 	FORCEINLINE ComPtr<ID3D11BlendState> GetAdditiveBlendState() const { return AdditiveBlendState; }

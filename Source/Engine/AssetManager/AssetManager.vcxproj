@@ -155,6 +155,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Objects\BaseAssets\ParticleEmitter.h" />
     <ClInclude Include="Objects\Components\ComponentDerivatives\DEBUGCOMPONENTS\RenderMode.h" />
     <ClInclude Include="Objects\Components\ComponentDerivatives\DEBUGCOMPONENTS\FrameStatistics.h" />
     <ClInclude Include="Objects\Components\ComponentDerivatives\CameraComponent.h" />
@@ -179,6 +180,7 @@
     <ClInclude Include="Objects\Components\ComponentDerivatives\Skybox.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Objects\BaseAssets\ParticleEmitter.cpp" />
     <ClCompile Include="Objects\Components\ComponentDerivatives\DEBUGCOMPONENTS\RenderMode.cpp" />
     <ClCompile Include="Objects\Components\ComponentDerivatives\DEBUGCOMPONENTS\FrameStatistics.cpp" />
     <ClCompile Include="Objects\Components\ComponentDerivatives\CameraComponent.cpp" />
