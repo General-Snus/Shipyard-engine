@@ -25,11 +25,16 @@ x86/
 [Ww][Ii][Nn]32/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
-bld/
-[Bb]in/
+bld/  
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+
+# Allowed libriaries and folders
+!/Source/Tools/FBX/ThirdParty/fbxsdk/lib/debug/
+!/Source/Tools/FBX/ThirdParty/fbxsdk/lib/release/
+!/[Bb]in/[Dd]ebug/
+!/[Bb]in/[Rr]elease/ 
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
@@ -96,6 +101,10 @@ StyleCopReport.xml
 *.pidb
 *.svclog
 *.scc
+*.ini
+*.cso
+*.exe
+*.json
 
 # Chutzpah Test files
 _Chutzpah*

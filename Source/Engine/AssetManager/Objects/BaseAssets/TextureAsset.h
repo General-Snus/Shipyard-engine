@@ -1,0 +1,27 @@
+#pragma once
+#include "BaseAsset.h"
+#include <Engine/GraphicsEngine/Rendering/Texture.h>
+
+enum class eTextureType
+{
+	ColorMap = 0,
+	NormalMap = 1,
+	MaterialMap = 2,
+	EffectMap = 3,
+	CubeMap = 100
+};
+
+class TextureHolder : public AssetBase
+{
+	friend class Material;
+public:
+	void Init() override;
+	TextureHolder(const std::filesystem::path& aFilePath);
+	TextureHolder(const std::filesystem::path& aFilePath,eTextureType atextureType);
+	std::shared_ptr<Texture> GetRawTexture() const { return RawTexture; }
+	eTextureType GetTextureType() const { return textureType; }
+	void SetTextureType(eTextureType aTextureType) { textureType = aTextureType; }
+private:
+	eTextureType textureType;
+	std::shared_ptr<Texture> RawTexture;
+};

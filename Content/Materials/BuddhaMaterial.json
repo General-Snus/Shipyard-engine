@@ -1,0 +1,26 @@
+
+{
+    "MaterialData": {
+        "albedoColor":  [1.0,1.0,1.0,1.0] ,
+        "UVTiling": [1.0,1.0],
+        "NormalStrength" : 1.0,
+        "Shine" : 50
+    },
+    "Textures" : [
+        {
+            "TextureName":  "ABababa",
+            "TexturePath":  "Textures/Buddha_C.dds",
+            "TextureType":  0
+        },
+        {
+            "TextureName":  "ABababa",
+            "TexturePath":  "Textures/Buddha_N.dds",
+            "TextureType":  1
+        },
+        {
+            "TextureName":  "ABababa",
+            "TexturePath":  "Textures/Buddha_M.dds",
+            "TextureType":  2
+        } 
+    ]
+}
