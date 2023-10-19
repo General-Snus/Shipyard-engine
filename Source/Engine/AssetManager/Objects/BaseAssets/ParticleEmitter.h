@@ -39,28 +39,25 @@ struct ParticleEmitterTemplate
 class ParticleEmitter : public AssetBase
 {
 private:
-	EmmiterSettingsData data;
+	EmmiterSettingsData settings;
 	ComPtr<ID3D11Buffer> vertexBuffer;
 	UINT stride;
 	UINT offset;
-	ComPtr<ID3D11VertexShader> vertexShader;
-	ComPtr<ID3D11GeometryShader> geometryShader;
-	ComPtr<ID3D11PixelShader> pixelShader;
 	UINT primitiveTopology;
 	ComPtr<ID3D11InputLayout> inputLayout;
 
 	std::vector<Particlevertex> particles;
-
-	void InitParticle(size_t aParticleIndex);
+	std::shared_ptr<Texture> texture;
+	void InitParticle(Particlevertex vertex);
 public:
 	virtual ~ParticleEmitter();
 
 	explicit ParticleEmitter(const std::filesystem::path& aFilePath);
 	explicit ParticleEmitter(const ParticleEmitterTemplate& aTemplate);
-	void Init() override; 
-
+	void Init() override;
+	void Update(float aDeltaTime); 
 	virtual void Draw();
 	virtual void SetAsResource() const;
 	
-	FORCEINLINE const EmmiterSettingsData& GetSettings() const { return data; }
+	FORCEINLINE const EmmiterSettingsData& GetSettings() const { return settings; }
 };

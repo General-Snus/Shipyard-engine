@@ -1,4 +1,18 @@
-float4 main( float4 pos : POSITION ) : SV_POSITION
+ #include "../../Headers/ParticleStruct.hlsli"
+ #include "../../Headers/ShaderStructs.hlsli"
+
+
+ParticleVertexData main(ParticleVertexData input)
 {
-	return pos;
+    ParticleVertexData data;
+    const float4 localPosition = input.Position;
+    const float4 worldPosition = mul(OB_Transform, localPosition);
+    
+    data.Position = worldPosition;
+    data.Color = input.Color;
+    data.LifeTime = input.LifeTime;
+    data.Scale = input.Scale;
+    data.Velocity = input.Velocity; 
+    
+    return data;
 }

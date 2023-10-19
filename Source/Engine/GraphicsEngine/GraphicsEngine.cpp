@@ -129,6 +129,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle, bool enableDeviceDebug)
 
 		myG_Buffer.Init();
 		myShadowRenderer.Init();
+		myParticleRenderer.Init();
 #ifdef _DEBUG
 	}
 	catch (const std::exception& e)
@@ -528,7 +529,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 	//Forward pass for light
 
 	//Particles
-
+	myParticleRenderer.Execute();
 	//Post processing
 	RHI::SetBlendState(nullptr);
 	GfxCmd_LuminancePass().ExecuteAndDestroy(); // Render to IntermediateA

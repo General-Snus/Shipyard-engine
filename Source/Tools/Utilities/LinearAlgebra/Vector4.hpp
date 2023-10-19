@@ -1,6 +1,9 @@
 #pragma once
 #include <assert.h>
-
+#include <cmath>
+#include <cassert> 
+#include <iostream>
+#include <algorithm>
 namespace CommonUtilities
 {
 	template <class T>
@@ -46,10 +49,21 @@ namespace CommonUtilities
 
 		//Normalizes the vector
 		void Normalize();
-
 		//Returns the dot product of this and aVector
 		T Dot(const Vector4<T>& aVector) const;
 	};
+
+	template <class T> inline Vector4<T> Lerp(Vector4<T> start_value,Vector4<T> end_value,float t)
+	{
+		const float val = std::clamp(t,0,1); //assures that the given parameter "t" is between 0 and 1
+
+		return Vector4<T>(
+			start_value.x + (end_value.x - start_value.x) *val,
+			start_value.y + (end_value.y - start_value.y) *val,
+			start_value.z + (end_value.z - start_value.z) *val,
+			start_value.w + (end_value.w - start_value.w) *val
+		);
+	}
 
 	//Returns the vector sum of aVector0 and aVector1
 	template <class T> Vector4<T> operator+(const Vector4<T>& aVector0,const Vector4<T>& aVector1)

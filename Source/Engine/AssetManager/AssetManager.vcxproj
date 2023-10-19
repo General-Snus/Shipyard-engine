@@ -178,6 +178,7 @@
     <ClInclude Include="Objects\Components\ComponentDerivatives\Transform.h" />
     <ClInclude Include="Objects\BaseAssets\TextureAsset.h" />
     <ClInclude Include="Objects\Components\ComponentDerivatives\Skybox.h" />
+    <ClInclude Include="Objects\Components\ComponentDerivatives\ParticleSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Objects\BaseAssets\ParticleEmitter.cpp" />
@@ -207,6 +208,7 @@
     <ClCompile Include="Objects\Components\ComponentDerivatives\Transform.cpp" />
     <ClCompile Include="Objects\BaseAssets\TextureAsset.cpp" />
     <ClCompile Include="Objects\Components\ComponentDerivatives\Skybox.cpp" />
+    <ClCompile Include="Objects\Components\ComponentDerivatives\ParticleSystem.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

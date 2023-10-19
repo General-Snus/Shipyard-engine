@@ -13,6 +13,7 @@
 
 #include "InterOp/RHI.h"
 #include "Rendering/ShadowRenderer/ShadowRenderer.h"
+#include "Rendering/ParticleRenderer/ParticleRenderer.h"
 
 #include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
 #include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
@@ -140,6 +141,7 @@ private:
 	ComPtr<ID3D11BlendState> AlphaBlendState;
 	ComPtr<ID3D11BlendState> AdditiveBlendState;
 	ShadowRenderer myShadowRenderer;
+	ParticleRenderer myParticleRenderer;
 	// We're a container singleton, no instancing this outside the class.
 	GraphicsEngine() = default;
 

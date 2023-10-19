@@ -1,4 +1,15 @@
-float4 main() : SV_TARGET
+ #include "../../Headers/ParticleStruct.hlsli"
+ #include "../../Headers/ShaderStructs.hlsli"
+
+ParticlePixelOutput main(ParticleGeometryToPixel input)
 {
-	return float4(1.0f, 1.0f, 1.0f, 1.0f);
+    ParticlePixelOutput output;
+    output.Color = colorMap.Sample(defaultSampler, input.UV) * input.Color;
+    
+    if(input.Color.a < 0.1f)
+    {   
+        discard;
+    }
+    
+    return output;
 }

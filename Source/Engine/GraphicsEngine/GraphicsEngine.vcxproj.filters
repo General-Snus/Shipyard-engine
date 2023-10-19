@@ -186,6 +186,9 @@
     <ClInclude Include="Rendering\ParticleRenderer\ParticleVertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Rendering\ParticleRenderer\ParticleRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsEngine.pch.cpp">
@@ -272,6 +275,9 @@
     <ClCompile Include="Rendering\ParticleRenderer\ParticleVertex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Rendering\ParticleRenderer\ParticleRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Headers\ObjectBuffer.hlsli" />
@@ -281,6 +287,7 @@
     <None Include="Shaders\Headers\MaterialBuffer.hlsli" />
     <None Include="Shaders\Headers\LightsData.hlsli" />
     <None Include="Shaders\Passes\LineDrawer\LineDrawerStructs.hlsli" />
+    <None Include="Shaders\Headers\ParticleStruct.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\DefaultShaders\Default_VS.hlsl" />

@@ -36,6 +36,7 @@
 #include "Objects/Components/ComponentDerivatives/Skybox.h"
 #include "Objects/Components/ComponentDerivatives/CameraComponent.h"
 #include "Objects/Components/ComponentDerivatives/LightComponent.h"
+#include "Objects/Components/ComponentDerivatives/ParticleSystem.h"
 #include "Objects/Components/ComponentDerivatives/DEBUGCOMPONENTS/BackgroundColor.h"
 #include "Objects/Components/ComponentDerivatives/DEBUGCOMPONENTS/FrameStatistics.h"
 #include "Objects/Components/ComponentDerivatives/DEBUGCOMPONENTS/RenderMode.h"

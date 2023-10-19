@@ -198,6 +198,7 @@
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetLightBuffer.h" />
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetRenderTarget.h" />
     <ClInclude Include="InterOp\ShaderInfo.h" />
+    <ClInclude Include="Rendering\ParticleRenderer\ParticleRenderer.h" />
     <ClInclude Include="Rendering\ParticleRenderer\ParticleVertex.h" />
     <ClInclude Include="Rendering\Buffers\G_Buffer.h" />
     <ClInclude Include="Rendering\Buffers\LightBuffer.h" />
@@ -254,6 +255,7 @@
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetFrameBuffer.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetLightBuffer.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetRenderTarget.cpp" />
+    <ClCompile Include="Rendering\ParticleRenderer\ParticleRenderer.cpp" />
     <ClCompile Include="Rendering\ParticleRenderer\ParticleVertex.cpp" />
     <ClCompile Include="Rendering\Buffers\G_Buffer.cpp" />
     <ClCompile Include="Rendering\ForwardRenderer.cpp" />
@@ -277,6 +279,7 @@
     <ClCompile Include="Rendering\ShadowRenderer\ShadowRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shaders\Headers\ParticleStruct.hlsli" />
     <None Include="Shaders\Headers\ShaderStructs.hlsli" />
     <None Include="Shaders\Headers\Common.hlsli" />
     <None Include="Shaders\Headers\PBRFunctions.hlsli" />

@@ -58,3 +58,12 @@ inline float Mod(float a,float b)
 {
 	return std::fmod(a,b);
 }
+
+
+inline float Lerp(float start_value,float end_value,float t)
+{
+	t = std::clamp<float>(t,0,1); //assures that the given parameter "t" is between 0 and 1
+
+	return start_value + (end_value - start_value) * t;
+}
+//TODO FIX THIS SHIT; ADD TO CU

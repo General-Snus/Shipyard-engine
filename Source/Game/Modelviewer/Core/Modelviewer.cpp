@@ -192,6 +192,11 @@ void ModelViewer::LoadScene()
 	test.AddComponent<Transform>();
 	test.GetComponent<Transform>().Rotate(Vector3f(-90,0,0),false);
 	test.GetComponent<Transform>().GetTransform()(4,1) = 100;;
+	ParticleEmitterTemplate temp;
+	
+
+
+	test.AddComponent<ParticleSystem>(temp);
 
 	{ 
 		GameObject test2 = gom.CreateGameObject();
