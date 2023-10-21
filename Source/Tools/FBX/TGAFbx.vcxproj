@@ -85,8 +85,10 @@
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <IncludePath>$(ProjectDir)ThirdParty\fbxsdk\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)ThirdParty\fbxsdk\lib\;$(LibraryPath)</LibraryPath>
-    <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
-    <CustomBuildBeforeTargets>Build</CustomBuildBeforeTargets>
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
+    <CustomBuildBeforeTargets>
+    </CustomBuildBeforeTargets>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -179,8 +181,10 @@
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
     </ProjectReference>
     <CustomBuildStep>
-      <Command>postbuild.bat $(Configuration) "$(SolutionDir)" "$(OutDir)"</Command>
-      <Outputs>blopp</Outputs>
+      <Command>
+      </Command>
+      <Outputs>
+      </Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
