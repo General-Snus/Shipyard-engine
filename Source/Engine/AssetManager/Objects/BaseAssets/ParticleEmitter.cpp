@@ -8,11 +8,11 @@
 
 
 
-void ParticleEmitter::InitParticle(Particlevertex vertex)
+void ParticleEmitter::InitParticle(Particlevertex& vertex)
 {
 	vertex.Color = settings.StartColor;
-	vertex.Lifetime = settings.LifeTime;
-	vertex.Position = {0,0,0,1};
+	vertex.Lifetime = 0;
+	vertex.Position = settings.StartPosition;
 	vertex.Scale = settings.StartSize;
 	vertex.Velocity = settings.StartVelocity;
 }
@@ -27,12 +27,19 @@ ParticleEmitter::ParticleEmitter(const std::filesystem::path& aFilePath) : Asset
 }
 
 ParticleEmitter::ParticleEmitter(const ParticleEmitterTemplate& aTemplate) : AssetBase(aTemplate.Path)
-{
+{ 
+	if(aTemplate.EmmiterSettings.ParticleTexture.empty())
+	{
+		texture = GraphicsEngine::Get().GetDefaultTexture(eTextureType::ParticleMap);
+	}
+	else
+	{
+		AssetManager::GetInstance().LoadAsset<TextureHolder>(aTemplate.EmmiterSettings.ParticleTexture,texture);
+	}
+
 	settings = aTemplate.EmmiterSettings;
-
 	primitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
-
-	if(settings.MaxParticles == 0)
+	if(settings.MaxParticles == 0 || (int)std::ceil(settings.SpawnRate * settings.LifeTime) < settings.MaxParticles)
 	{
 		settings.MaxParticles = (int)std::ceil(settings.SpawnRate * settings.LifeTime);
 	}
@@ -41,15 +48,15 @@ ParticleEmitter::ParticleEmitter(const ParticleEmitterTemplate& aTemplate) : Ass
 
 	for(auto& part : particles)
 	{
-		part.Color = settings.StartColor;
-		part.Lifetime = settings.LifeTime;
-		part.Position = {0,0,0,1};
-		part.Scale = settings.StartSize;
-		part.Velocity = settings.StartVelocity;
+		InitParticle(part);
 	}
 
-
-
+	if(!RHI::CreateDynamicVertexBuffer(vertexBuffer,particles.size(),sizeof(Particlevertex)))
+	{
+		std::cout << "Failed to create vertex buffer" << std::endl;
+		return;
+	}
+	inputLayout = Particlevertex::InputLayout;
 	stride = sizeof(Particlevertex);
 }
 
@@ -62,14 +69,13 @@ void ParticleEmitter::Update(float aDeltaTime)
 {
 	for(auto& aParticle : particles)
 	{
-		aParticle.Lifetime += aDeltaTime;
-
+		aParticle.Lifetime += aDeltaTime; 
 		if(aParticle.Lifetime >= this->settings.LifeTime)
 		{
 			InitParticle(aParticle);
 		}
 
-		aParticle.Velocity += settings.Acceleration * aDeltaTime;
+		//aParticle.Velocity += settings.Acceleration * aDeltaTime;
 
 		aParticle.Position.x += aParticle.Velocity.x * aDeltaTime;
 		aParticle.Position.y += aParticle.Velocity.y * aDeltaTime;
@@ -84,7 +90,7 @@ void ParticleEmitter::Update(float aDeltaTime)
 void ParticleEmitter::Draw()
 {
 	SetAsResource();
-	RHI::Draw(0);
+	RHI::Draw(static_cast<unsigned int>(particles.size()));
 }
 
 void ParticleEmitter::SetAsResource() const
@@ -93,6 +99,7 @@ void ParticleEmitter::SetAsResource() const
 
 	D3D11_MAPPED_SUBRESOURCE bufferData;
 	ZeroMemory(&bufferData,sizeof(D3D11_MAPPED_SUBRESOURCE));
+	
 	result = RHI::Context->Map(
 		vertexBuffer.Get(),
 		0,
@@ -109,12 +116,17 @@ void ParticleEmitter::SetAsResource() const
 
 	RHI::Context->Unmap(vertexBuffer.Get(),0);
 
-	RHI::Context->IASetInputLayout(inputLayout.Get());
-	RHI::Context->IASetPrimitiveTopology((D3D11_PRIMITIVE_TOPOLOGY)primitiveTopology);
-	RHI::Context->IASetVertexBuffers(0,1,vertexBuffer.GetAddressOf(),&stride,&offset);
-
-	if(texture)
+	RHI::ConfigureInputAssembler
+	(
+		primitiveTopology,
+		vertexBuffer,
+		nullptr,
+		stride,
+		Particlevertex::InputLayout
+	);
+	
+	if(texture->isLoadedComplete)
 	{
-		RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER,REG_colorMap,texture.get());
+		RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER,REG_colorMap,texture->GetRawTexture().get());
 	}
 }

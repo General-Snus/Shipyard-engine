@@ -20,13 +20,13 @@ public:
 	void DeleteGameObject(const GameObject aGameObject);
 
 	template <class T>
-	void AddComponent(const unsigned int aGameObjectID);
+	T& AddComponent(const unsigned int aGameObjectID);
 
 	template <class T>
-	void AddComponent(const unsigned int aGameObjectID,const T& aComponent);
+	T& AddComponent(const unsigned int aGameObjectID,const T& aComponent);
 
 	template <class T,typename... Args>
-	void AddComponent(const unsigned int aGameObjectID,Args... someParameters);
+	T& AddComponent(const unsigned int aGameObjectID,Args... someParameters);
 
 	template<class T>
 	std::vector<T>& GetAllComponents();
@@ -77,33 +77,34 @@ private:
 };
 
 template<class T>
-void GameObjectManager::AddComponent(const unsigned int aGameObjectID)
+T& GameObjectManager::AddComponent(const unsigned int aGameObjectID)
 {
 	if(myComponentManagers.find(&typeid(T)) == myComponentManagers.end())
 	{
 		AddManager<T>();
 	}
-	static_cast<ComponentManager<T>*>(myComponentManagers[&typeid(T)])->AddComponent(aGameObjectID);
+	return static_cast<ComponentManager<T>*>(myComponentManagers[&typeid(T)])->AddComponent(aGameObjectID);
+
 }
 
 template<class T>
-void GameObjectManager::AddComponent(const unsigned int aGameObjectID,const T& aComponent)
+T& GameObjectManager::AddComponent(const unsigned int aGameObjectID,const T& aComponent)
 {
 	if(myComponentManagers.find(&typeid(T)) == myComponentManagers.end())
 	{
 		AddManager<T>();
 	}
-	static_cast<ComponentManager<T>*>(myComponentManagers[&typeid(T)])->AddComponent(aGameObjectID,aComponent);
+	return static_cast<ComponentManager<T>*>(myComponentManagers[&typeid(T)])->AddComponent(aGameObjectID,aComponent);
 }
 
 template<class T,typename... Args>
-void GameObjectManager::AddComponent(const unsigned int aGameObjectID,Args ...someParameters)
+T& GameObjectManager::AddComponent(const unsigned int aGameObjectID,Args ...someParameters)
 {
 	if(myComponentManagers.find(&typeid(T)) == myComponentManagers.end())
 	{
 		AddManager<T>();
 	}
-	static_cast<ComponentManager<T>*>(myComponentManagers[&typeid(T)])->AddComponent(aGameObjectID,someParameters...);
+	return static_cast<ComponentManager<T>*>(myComponentManagers[&typeid(T)])->AddComponent(aGameObjectID,someParameters...);
 }
 
 template<class T>

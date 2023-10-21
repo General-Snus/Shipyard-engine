@@ -1,6 +1,8 @@
 #pragma once
 #include <Engine/GraphicsEngine/Rendering/ParticleRenderer/ParticleVertex.h>
+#include <Engine/AssetManager/Objects/Components/ComponentDerivatives/ParticleSystem.h>
 
+class ParticleSystem;
 struct EmmiterSettingsData
 {
 	enum emitterGeometry
@@ -18,16 +20,18 @@ struct EmmiterSettingsData
 	int MaxParticles = 1000;
 	emitterGeometry geometry = sphere;
 
-	Vector3f StartVelocity;
-	Vector3f EndVelocity;
+	Vector4f StartPosition = {0,0,0,1};	
+	Vector3f StartVelocity = {0,0,0};
+	Vector3f EndVelocity; 
+	Vector3f Acceleration = {0,-9.82f,0};
 
-	Vector3f Acceleration;
+	float StartSize = 1;
+	float EndSize = 1;
 
-	float StartSize;
-	float EndSize;
+	Vector4f StartColor = {1,1,1,1};
+	Vector4f EndColor = {1,1,1,1};
 
-	Vector4f StartColor;
-	Vector4f EndColor;
+	std::filesystem::path ParticleTexture;
 };
 
 struct ParticleEmitterTemplate
@@ -47,11 +51,11 @@ private:
 	ComPtr<ID3D11InputLayout> inputLayout;
 
 	std::vector<Particlevertex> particles;
-	std::shared_ptr<Texture> texture;
-	void InitParticle(Particlevertex vertex);
-public:
-	virtual ~ParticleEmitter();
+	std::shared_ptr<TextureHolder> texture;
+	void InitParticle(Particlevertex& vertex);
 
+public:
+	~ParticleEmitter(); 
 	explicit ParticleEmitter(const std::filesystem::path& aFilePath);
 	explicit ParticleEmitter(const ParticleEmitterTemplate& aTemplate);
 	void Init() override;

@@ -1,4 +1,11 @@
 #pragma once
+#include <wrl.h>
+#include <d3d11.h>
+#include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
+using namespace Microsoft::WRL;
+// We'll be writing this a lot so easier
+// to just typedef it here.
+typedef std::vector<D3D11_INPUT_ELEMENT_DESC> InputElementList;
 
 struct Particlevertex
 {

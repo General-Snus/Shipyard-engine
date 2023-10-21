@@ -108,12 +108,7 @@ private:
 	ComPtr<ID3D11PixelShader> copyShader;
 	ComPtr<ID3D11PixelShader> gaussShader;
 	ComPtr<ID3D11PixelShader> bloomShader;
-
-
-
-
-
-
+	  
 	//Debug
 	ComPtr<ID3D11Buffer> myLineVertexBuffer;
 	ComPtr<ID3D11Buffer> myLineIndexBuffer;
@@ -125,11 +120,8 @@ private:
 	std::shared_ptr<TextureHolder> defaultNormalTexture;
 	std::shared_ptr<TextureHolder> defaultMatTexture;
 	std::shared_ptr<TextureHolder> defaultEffectTexture;
+	std::shared_ptr<TextureHolder> defaultParticleTexture;
 	std::shared_ptr<TextureHolder> defaultCubeMap;
-
-
-
-
 
 	std::shared_ptr<Mesh> defaultMesh;
 	std::shared_ptr<Material> defaultMaterial;
@@ -319,6 +311,9 @@ public:
 
 		case eTextureType::EffectMap:
 			return defaultEffectTexture;
+
+		case eTextureType::ParticleMap:
+			return defaultParticleTexture;
 
 		case eTextureType::CubeMap:
 			return defaultCubeMap;

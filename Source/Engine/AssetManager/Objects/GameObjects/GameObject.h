@@ -11,13 +11,13 @@ public:
 	~GameObject() = default;
 
 	template <class T>
-	void AddComponent();
+	T& AddComponent();
 
 	template <class T>
-	void AddComponent(const T& aComponent);
+	T& AddComponent(const T& aComponent);
 
 	template <class T,typename... Args>
-	void AddComponent(Args... someParameters);
+	T& AddComponent(Args... someParameters);
 
 	template <class T>
 	const bool HasComponent();
@@ -44,21 +44,21 @@ private:
 }; 
 
 template<class T>
-inline void GameObject::AddComponent()
+inline T& GameObject::AddComponent()
 {
-	myManager->AddComponent<T>(myID);
+	return myManager->AddComponent<T>(myID);
 }
 
 template<class T>
-inline void GameObject::AddComponent(const T& aComponent)
+inline T& GameObject::AddComponent(const T& aComponent)
 {
-	myManager->AddComponent<T>(myID,aComponent);
+	return myManager->AddComponent<T>(myID,aComponent);
 }
 
 template<class T,typename ...Args>
-inline void GameObject::AddComponent(Args ...someParameters)
+inline T& GameObject::AddComponent(Args ...someParameters)
 {
-	myManager->AddComponent<T>(myID,someParameters...);
+	return myManager->AddComponent<T>(myID,someParameters...);
 }
 
 template<class T>

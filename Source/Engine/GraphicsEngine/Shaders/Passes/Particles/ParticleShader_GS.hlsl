@@ -1,7 +1,7 @@
  #include "../../Headers/ParticleStruct.hlsli"
  #include "../../Headers/ShaderStructs.hlsli"
 
-[maxvertexcount(3)]
+[maxvertexcount(4)]
 void main(
 	point ParticleVertexData input[1],
 	inout TriangleStream<ParticleGeometryToPixel> output

@@ -4,8 +4,7 @@ class ParticleRenderer
 	friend class GraphicsEngine;
 public:
 	void Init();
-	void Execute();
-	void ResetShadowList();
+	void Execute(); 
 private:
 
 	ComPtr<ID3D11VertexShader> vertexShader;

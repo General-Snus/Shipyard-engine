@@ -10,9 +10,18 @@ void ParticleRenderer::Init()
 
 void ParticleRenderer::Execute()
 {
-	std::shared_ptr<Texture> shadowMap;
+	RHI::SetVertexShader(vertexShader.Get());
+	RHI::SetGeometryShader(geometryShader.Get());
+	RHI::SetPixelShader(pixelShader.Get());
+
+
+
 	for(auto& i : GameObjectManager::GetInstance().GetAllComponents<ParticleSystem>())
 	{
 		i.Draw();
 	}
+
+	RHI::SetVertexShader(nullptr);
+	RHI::SetGeometryShader(nullptr);
+	RHI::SetPixelShader(nullptr);
 }

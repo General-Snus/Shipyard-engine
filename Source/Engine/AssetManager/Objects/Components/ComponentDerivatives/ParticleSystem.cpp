@@ -8,14 +8,11 @@ ParticleSystem::ParticleSystem(const unsigned int anOwnerId) : Component(anOwner
 
 ParticleSystem::ParticleSystem(const unsigned int anOwnerId,const std::filesystem::path& aFilePath) : Component(anOwnerId)
 {
-	myEmitters.reserve(1);
-	AssetManager::GetInstance().LoadAsset<ParticleEmitter>(aFilePath,myEmitters[0]);
+	aFilePath;
+	//myEmitters.reserve(1);
+	//AssetManager::GetInstance().LoadAsset<ParticleEmitter>(aFilePath,myEmitters[0]);
 }
-
-ParticleSystem::ParticleSystem(const unsigned int anOwnerId,const ParticleEmitterTemplate& aTemplate) : Component(anOwnerId)
-{
-	myEmitters.push_back(std::make_shared<ParticleEmitter>(aTemplate));
-}
+ 
 void ParticleSystem::Draw()
 {
 	for(auto& i : myEmitters)
@@ -24,6 +21,10 @@ void ParticleSystem::Draw()
 	}
 }
 
+void ParticleSystem::AddEmitter(const ParticleEmitterTemplate& aTemplate)
+{
+	myEmitters.push_back(std::make_shared<ParticleEmitter>(aTemplate));
+}
 void ParticleSystem::Update()
 {
 	for(auto& i : myEmitters)

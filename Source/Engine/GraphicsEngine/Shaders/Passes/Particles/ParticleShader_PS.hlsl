@@ -4,12 +4,12 @@
 ParticlePixelOutput main(ParticleGeometryToPixel input)
 {
     ParticlePixelOutput output;
-    output.Color = colorMap.Sample(defaultSampler, input.UV) * input.Color;
+    output.Color = colorMap.Sample(defaultSampler, input.UV);
     
-    if(input.Color.a < 0.1f)
+    if(input.Color.a < 0.05f)
     {   
         discard;
     }
-    
+    output.Color = output.Color * input.Color;
     return output;
 }

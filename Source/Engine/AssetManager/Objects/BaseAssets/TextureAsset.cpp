@@ -41,12 +41,16 @@ void TextureHolder::Init()
 		{
 			this->textureType = eTextureType::EffectMap;
 		}
+		if(typeOfTexture == "_P" || typeOfTexture == "_p")
+		{
+			this->textureType = eTextureType::ParticleMap;
+		}
 	}
 	if(!RHI::LoadTexture(RawTexture.get(),AssetPath.wstring()))
 	{
-		if(GraphicsEngine::Get().GetDefaultTexture()->GetRawTexture().get() != nullptr)
+		if(GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
 		{
-			RawTexture = GraphicsEngine::Get().GetDefaultTexture()->GetRawTexture();
+			RawTexture = GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture();
 			return;
 		}
 		std::cout << "Error: Default texture was not found" << " \n";
@@ -57,7 +61,6 @@ void TextureHolder::Init()
 TextureHolder::TextureHolder(const std::filesystem::path& aFilePath) : RawTexture(), AssetBase(aFilePath)
 {
 	RawTexture = std::make_shared<Texture>();
-	this->textureType = eTextureType::ColorMap;
-
+	this->textureType = eTextureType::ColorMap; 
 }
   

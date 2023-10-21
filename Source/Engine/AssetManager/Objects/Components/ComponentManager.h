@@ -41,12 +41,12 @@ public:
 
 	void Destroy() override;
 
-	void AddComponent(const unsigned int aGameObjectID);
+	T& AddComponent(const unsigned int aGameObjectID);
 
-	void AddComponent(const unsigned int aGameObjectID,const T& aComponent);
+	T& AddComponent(const unsigned int aGameObjectID,const T& aComponent);
 
 	template <typename... Args>
-	void AddComponent(const unsigned int aGameObjectID,Args... someParameters);
+	T& AddComponent(const unsigned int aGameObjectID,Args... someParameters);
 
 	const bool HasComponent(const unsigned int aGameObjectID) const;
 
@@ -76,29 +76,32 @@ inline void ComponentManager<T>::Destroy()
 }
 
 template<class T>
-void ComponentManager<T>::AddComponent(const unsigned int aGameObjectID)
+T& ComponentManager<T>::AddComponent(const unsigned int aGameObjectID)
 {
 	myGameObjectIDtoVectorIndex[aGameObjectID] = static_cast<unsigned int>(myComponents.size());
 	myVectorIndexToGameObjectID[static_cast<unsigned int>(myComponents.size())] = aGameObjectID;
 	myComponents.push_back( T(aGameObjectID));
+	return myComponents.back();
 }
 
 template<class T>
-inline void ComponentManager<T>::AddComponent(const unsigned int aGameObjectID,const T& aComponent)
+inline T& ComponentManager<T>::AddComponent(const unsigned int aGameObjectID,const T& aComponent)
 {
 	myGameObjectIDtoVectorIndex[aGameObjectID] = static_cast<unsigned int>(myComponents.size());
 	myVectorIndexToGameObjectID[static_cast<unsigned int>(myComponents.size())] = aGameObjectID;
 	myComponents.push_back(aComponent);
 	static_cast<Component*>(&myComponents.back())->SetOwnerID(aGameObjectID);
+	return myComponents.back();
 }
 
 template<class T>
 template<typename...  Args>
-inline void ComponentManager<T>::AddComponent(const unsigned int aGameObjectID,Args... someParameters)
+inline T& ComponentManager<T>::AddComponent(const unsigned int aGameObjectID,Args... someParameters)
 {
 	myGameObjectIDtoVectorIndex[aGameObjectID] = static_cast<unsigned int>(myComponents.size());
 	myVectorIndexToGameObjectID[static_cast<unsigned int>(myComponents.size())] = aGameObjectID;
 	myComponents.push_back(T(aGameObjectID,someParameters...));
+	return myComponents.back();
 }
 
 template<class T>

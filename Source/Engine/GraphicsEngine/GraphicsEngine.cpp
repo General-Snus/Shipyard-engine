@@ -278,6 +278,8 @@ void GraphicsEngine::SetupDefaultVariables()
 		BuiltIn_Default_FX_ByteCode,
 		sizeof(BuiltIn_Default_FX_ByteCode)
 	);
+	AssetManager::GetInstance().ForceLoadAsset<TextureHolder>(L"Textures/Default/DefaultParticle_P.dds",defaultParticleTexture);
+	defaultParticleTexture->SetTextureType(eTextureType::ParticleMap); 
 
 	defaultVS = std::make_shared<Shader>();
 	defaultPS = std::make_shared<Shader>();
@@ -529,6 +531,8 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 	//Forward pass for light
 
 	//Particles
+	RHI::SetBlendState(GraphicsEngine::Get().GetAdditiveBlendState());
+	GfxCmd_SetRenderTarget(SceneBuffer.get(),nullptr).ExecuteAndDestroy();
 	myParticleRenderer.Execute();
 	//Post processing
 	RHI::SetBlendState(nullptr);
