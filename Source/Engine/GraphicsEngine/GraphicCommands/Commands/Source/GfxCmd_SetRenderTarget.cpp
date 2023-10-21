@@ -1,7 +1,8 @@
 #include <GraphicsEngine.pch.h>
 #include "../Headers/GfxCmd_SetRenderTarget.h"
 
-GfxCmd_SetRenderTarget::GfxCmd_SetRenderTarget(Texture* aRenderTarget,Texture* aDepthStencil) : renderTarget(aRenderTarget),depthStencil(aDepthStencil)
+GfxCmd_SetRenderTarget::GfxCmd_SetRenderTarget(const Texture* aRenderTarget,const Texture* aDepthStencil)
+	: depthStencil(aDepthStencil),renderTarget(aRenderTarget)
 {
 }
 

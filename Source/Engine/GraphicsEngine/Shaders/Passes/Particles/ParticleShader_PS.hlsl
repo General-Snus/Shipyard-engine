@@ -1,6 +1,7 @@
  #include "../../Headers/ParticleStruct.hlsli"
  #include "../../Headers/ShaderStructs.hlsli"
 
+
 ParticlePixelOutput main(ParticleGeometryToPixel input)
 {
     ParticlePixelOutput output;

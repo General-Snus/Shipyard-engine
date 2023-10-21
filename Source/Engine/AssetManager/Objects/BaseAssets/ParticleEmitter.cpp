@@ -5,6 +5,9 @@
 #include <iostream>
 #include <Tools/Utilities/Math.hpp>
 #include <d3d11.h>
+#include <random>
+
+#include <Tools/ImGui/imgui.h>
 
 
 
@@ -14,6 +17,9 @@ void ParticleEmitter::InitParticle(Particlevertex& vertex)
 	vertex.Lifetime = 0;
 	vertex.Position = settings.StartPosition;
 	vertex.Scale = settings.StartSize;
+
+
+
 	vertex.Velocity = settings.StartVelocity;
 }
 
@@ -27,7 +33,7 @@ ParticleEmitter::ParticleEmitter(const std::filesystem::path& aFilePath) : Asset
 }
 
 ParticleEmitter::ParticleEmitter(const ParticleEmitterTemplate& aTemplate) : AssetBase(aTemplate.Path)
-{ 
+{
 	if(aTemplate.EmmiterSettings.ParticleTexture.empty())
 	{
 		texture = GraphicsEngine::Get().GetDefaultTexture(eTextureType::ParticleMap);
@@ -49,6 +55,7 @@ ParticleEmitter::ParticleEmitter(const ParticleEmitterTemplate& aTemplate) : Ass
 	for(auto& part : particles)
 	{
 		InitParticle(part);
+		part.Lifetime = settings.LifeTime + 1;
 	}
 
 	if(!RHI::CreateDynamicVertexBuffer(vertexBuffer,particles.size(),sizeof(Particlevertex)))
@@ -66,24 +73,31 @@ void ParticleEmitter::Init()
 }
 
 void ParticleEmitter::Update(float aDeltaTime)
-{
+{  
+	aDeltaTime = aDeltaTime * settings.SimulationSpeed;
+
+	secondCounter += settings.SpawnRate * aDeltaTime;
+	spawnedThisFrame = std::floor(secondCounter);
+	secondCounter -= spawnedThisFrame;
+
 	for(auto& aParticle : particles)
 	{
-		aParticle.Lifetime += aDeltaTime; 
-		if(aParticle.Lifetime >= this->settings.LifeTime)
+		aParticle.Lifetime += aDeltaTime;
+		if(aParticle.Lifetime >= this->settings.LifeTime && spawnedThisFrame > 1)
 		{
+			spawnedThisFrame--;
 			InitParticle(aParticle);
 		}
 
-		//aParticle.Velocity += settings.Acceleration * aDeltaTime;
+		aParticle.Velocity += settings.Acceleration * aDeltaTime;
 
 		aParticle.Position.x += aParticle.Velocity.x * aDeltaTime;
 		aParticle.Position.y += aParticle.Velocity.y * aDeltaTime;
 		aParticle.Position.z += aParticle.Velocity.z * aDeltaTime;
 
-		//aParticle.Color = CU::Lerp(settings.StartColor,settings.EndColor,aParticle.Lifetime / settings.LifeTime);
-		//aParticle.Scale = Lerp(settings.StartSize,settings.EndSize,aParticle.Lifetime / settings.LifeTime);
-
+		aParticle.Color = CU::Lerp(settings.StartColor,settings.EndColor,aParticle.Lifetime / settings.LifeTime);
+		float scaleAllAxis = Lerp(settings.StartSize,settings.EndSize,aParticle.Lifetime / settings.LifeTime);
+		aParticle.Scale = {scaleAllAxis,scaleAllAxis,scaleAllAxis};
 	}
 }
 
@@ -99,7 +113,7 @@ void ParticleEmitter::SetAsResource() const
 
 	D3D11_MAPPED_SUBRESOURCE bufferData;
 	ZeroMemory(&bufferData,sizeof(D3D11_MAPPED_SUBRESOURCE));
-	
+
 	result = RHI::Context->Map(
 		vertexBuffer.Get(),
 		0,
@@ -124,9 +138,9 @@ void ParticleEmitter::SetAsResource() const
 		stride,
 		Particlevertex::InputLayout
 	);
-	
+
 	if(texture->isLoadedComplete)
 	{
-		RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER,REG_colorMap,texture->GetRawTexture().get());
+		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_colorMap,texture->GetRawTexture().get()); 
 	}
 }

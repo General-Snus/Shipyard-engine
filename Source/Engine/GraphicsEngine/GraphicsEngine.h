@@ -61,6 +61,7 @@ class GraphicsEngine
 {
 	friend class GraphicCommandBase;
 	friend class ShadowRenderer;
+	friend class ParticleSystem;
 private:
 	FrameBuffer myFrameBuffer;
 	ObjectBuffer myObjectBuffer;
@@ -130,6 +131,15 @@ private:
 	ComPtr<ID3D11SamplerState> myShadowSampleState;
 	ComPtr<ID3D11SamplerState> myBRDFSampleState;
 
+	enum class eDepthStencilStates : unsigned int
+	{
+		DSS_ReadWrite,
+		DSS_ReadOnly,
+		DSS_COUNT,
+	};
+
+	ComPtr<ID3D11DepthStencilState> myDepthStencilStates[(int)eDepthStencilStates::DSS_COUNT];
+
 	ComPtr<ID3D11BlendState> AlphaBlendState;
 	ComPtr<ID3D11BlendState> AdditiveBlendState;
 	ShadowRenderer myShadowRenderer;
@@ -151,9 +161,11 @@ public:
 	 */
 	bool Initialize(HWND windowHandle,bool enableDeviceDebug);
 
-	bool SetupDebugDrawline(bool& retFlag);
+	bool SetupDebugDrawline(); 
 
 	void SetupDefaultVariables();
+	
+	void SetupBlendStates();
 
 	void SetupParticleShaders();
 
@@ -177,7 +189,15 @@ public:
 	 * Renders the current scene to the BackBuffer.
 	 */
 	void RenderFrame(float aDeltaTime,double aTotalTime);
+
+
+	void SetDepthState(eDepthStencilStates state)
+	{
+		RHI::Context->OMSetDepthStencilState(myDepthStencilStates[(int)state].Get(), 0);
+	}
+
 	CU::Vector4<float>& GetBackgroundColor() { return myBackgroundColor; }
+
 
 	template<typename CommandClass,typename ...Args>
 	FORCEINLINE void ShadowCommands(Args... args)
@@ -200,6 +220,8 @@ public:
 
 	[[nodiscard]] HWND FORCEINLINE GetWindowHandle() const { return myWindowHandle; }
 	[[nodiscard]] SIZE FORCEINLINE GetWindowSize() const { return myWindowSize; }
+
+
 
 	FORCEINLINE std::shared_ptr<Shader> GetDefaultVSShader() const { return defaultVS; }
 	FORCEINLINE std::shared_ptr<Shader> GetDefaultPSShader() const { return defaultPS; }
@@ -285,8 +307,8 @@ public:
 		}
 	}
 	void RenderTextureTo(eRenderTargets from,eRenderTargets to);
-	Texture* DepthBuffer()const { return myDepthBuffer.get(); };
-	Texture* BackBuffer()const { return myBackBuffer.get(); };
+	Texture* DepthBuffer() const { return myDepthBuffer.get(); };
+	Texture* BackBuffer() const { return myBackBuffer.get(); };
 
 	FORCEINLINE std::shared_ptr< Shader> GetDebugLineVS() const { return debugLineVS; }
 	FORCEINLINE std::shared_ptr< Shader> GetDebugLinePS() const { return debugLinePS; }

@@ -12,7 +12,7 @@
 #include <stringapiset.h>
 #include <filesystem>
 #include "Windows/SplashWindow.h"  
- 
+
 #include <functional>
 #include <fstream>
 #include <streambuf>
@@ -27,7 +27,7 @@
 #include <Tools/Utilities/Game/Timer.h>
 
 #define _DEBUGDRAW
- #define Flashlight
+#define Flashlight
 using json = nlohmann::json;
 
 bool ModelViewer::Initialize(HINSTANCE aHInstance,SIZE aWindowSize,WNDPROC aWindowProcess,LPCWSTR aWindowTitle)
@@ -164,11 +164,11 @@ void ModelViewer::LoadScene()
 		cLight& pLight = worldRoot.GetComponent<cLight>();
 		pLight.SetColor(CU::Vector3<float>(1,1,1));
 		pLight.SetPower(1.0f);
-		pLight.SetDirection({0,-1,1}); 
+		pLight.SetDirection({0,-1,1});
 
-		if (gom.GetAllComponents<BackgroundColor>().empty())
-		{ 
-			worldRoot.AddComponent<BackgroundColor>(CU::Vector4<float>(1.0f, 1.0f, 1.0f, 1.0f));
+		if(gom.GetAllComponents<BackgroundColor>().empty())
+		{
+			worldRoot.AddComponent<BackgroundColor>(CU::Vector4<float>(1.0f,1.0f,1.0f,1.0f));
 		}
 	}
 
@@ -186,21 +186,51 @@ void ModelViewer::LoadScene()
 		myMesh.GetComponent<cAnimator>().AddAnimation(L"Animations/Idle/A_C_TGA_Bro_Idle_Brething.fbx");
 		myMesh.GetComponent<cAnimator>().AddAnimation(L"Animations/Idle/A_C_TGA_Bro_Idle_Wave.fbx");
 	}
-	GameObject test = gom.CreateGameObject();
-	test.AddComponent<cMeshRenderer>("Models/PlaneBillboard.fbx");
-	test.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BillboardSmiley.json");
-	test.AddComponent<Transform>();
-	test.GetComponent<Transform>().Rotate(Vector3f(-90,0,0),false);
-	test.GetComponent<Transform>().GetTransform()(4,1) = 100;;
-	ParticleEmitterTemplate temp;
-	temp.EmmiterSettings.StartSize = 1000;
-	temp.EmmiterSettings.StartVelocity = Vector3f(0.0,10.0,0.0);
-	temp.EmmiterSettings.LifeTime = 1;
-	temp.EmmiterSettings.SpawnRate = 100;
-	ParticleSystem& cmp = test.AddComponent<ParticleSystem>();
-	cmp.AddEmitter(temp);
 
-	{ 
+	//Billboard
+	{
+		GameObject test = gom.CreateGameObject();
+		test.AddComponent<cMeshRenderer>("Models/PlaneBillboard.fbx");
+		test.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BillboardSmiley.json");
+		test.AddComponent<Transform>();
+		test.GetComponent<Transform>().Rotate(Vector3f(-90,0,0),false);
+		test.GetComponent<Transform>().GetTransform()(4,1) = 100;
+	}
+
+	//Particle System
+	{
+		myCustomHandler = gom.CreateGameObject();
+		ParticleSystem& cmp = myCustomHandler.AddComponent<ParticleSystem>();
+		auto& trans = myCustomHandler.AddComponent<Transform>();
+		trans.Move(GlobalUp * 500.f);
+
+		ParticleEmitterTemplate temp; 
+		temp.EmmiterSettings.StartSize = 100;
+		temp.EmmiterSettings.EndSize = 1;
+		temp.EmmiterSettings.StartColor = Vector4f(0,1,1,1);		 
+		temp.EmmiterSettings.Acceleration = {0,-982.f,0}; // cm scale bad fix plz
+		temp.EmmiterSettings.LifeTime = 3;
+		temp.EmmiterSettings.SpawnRate = 1000;
+		temp.EmmiterSettings.MaxParticles = 5000;
+
+		temp.EmmiterSettings.EndColor = Vector4f(1,0,0,1);
+		temp.EmmiterSettings.StartVelocity = Vector3f(-1000.0,1000.0,0.0);
+		cmp.AddEmitter(temp);
+
+		temp.EmmiterSettings.EndColor = Vector4f(0,1,0,1);
+		temp.EmmiterSettings.StartVelocity = Vector3f(1000.0,1000.0,0); 
+		cmp.AddEmitter(temp);
+
+		temp.EmmiterSettings.EndColor = Vector4f(0,0,1,1);
+		temp.EmmiterSettings.StartVelocity = Vector3f(0,1000.0,1000.0);  
+		cmp.AddEmitter(temp);
+
+		temp.EmmiterSettings.EndColor = Vector4f(1,0,1,1);
+		temp.EmmiterSettings.StartVelocity = Vector3f(0,1000.0,-1000.0);  
+		cmp.AddEmitter(temp); 
+	}
+
+	{
 		GameObject test2 = gom.CreateGameObject();
 		test2.AddComponent<cMeshRenderer>("Models/Buddha.fbx");
 		test2.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BuddhaMaterial.json");
@@ -268,11 +298,11 @@ void ModelViewer::LoadScene()
 	{
 		int x = rand() % 10000 - 5000;
 		int z = rand() % 10000 - 5000;
-		
+
 		GameObject pointLight = gom.CreateGameObject();
 		pointLight.AddComponent<Transform>();
 		pointLight.GetComponent<Transform>().SetPosition({(float)x,100,(float)z});
-		
+
 		pointLight.AddComponent<cLight>(eLightType::Point);
 		std::weak_ptr<PointLight> ptr = pointLight.GetComponent<cLight>().GetData<PointLight>();
 		ptr.lock()->Color = {(float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000};
@@ -290,7 +320,7 @@ void ModelViewer::LoadScene()
 	ptr.SetColor({1,1,1});
 	ptr.SetRange(1000.0f);
 	ptr.SetPower(100.0f * Kilo);
-	ptr.BindDirectionToTransform(true); 
+	ptr.BindDirectionToTransform(true);
 
 	{
 		GameObject test3 = gom.CreateGameObject();
@@ -305,7 +335,7 @@ void ModelViewer::Update()
 {
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
-	ImGui::NewFrame(); 
+	ImGui::NewFrame();
 	CommonUtilities::Timer::GetInstance().Update();
 	UpdateScene();
 	GraphicsEngine::Get().BeginFrame();
@@ -322,6 +352,7 @@ void ModelViewer::UpdateScene()
 	float delta = CU::Timer::GetInstance().GetDeltaTime();
 	GameObjectManager::GetInstance().Update();
 
+	myCustomHandler.GetComponent<Transform>().Rotate(Vector3f(0,10 * delta,0),true);
 	if(GetAsyncKeyState('1'))
 	{
 		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(0);
@@ -501,8 +532,8 @@ void ModelViewer::ExpandWorldBounds(CU::Sphere<float> sphere)
 
 	} //REFACTOR if updated real time the world expansion will cause the light/shadow to lagg behind, use this to update camera position, 
 	//REFACTOR not called on object moving outside worldbound causing same error as above
-} 
+}
 const CU::Sphere<float>& ModelViewer::GetWorldBounds() const
 {
 	return myWorldBounds;
-}  
+}

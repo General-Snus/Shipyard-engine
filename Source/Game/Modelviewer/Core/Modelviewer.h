@@ -79,6 +79,7 @@ public:
 private: 
 	CU::Sphere<float> myWorldBounds;
 	GameObject myMesh;
+	GameObject myCustomHandler;
 	Matrix myModelMatrix;
 	std::vector<SaveData<float>> mySaveData;
 

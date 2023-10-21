@@ -12,13 +12,22 @@ ParticleSystem::ParticleSystem(const unsigned int anOwnerId,const std::filesyste
 	//myEmitters.reserve(1);
 	//AssetManager::GetInstance().LoadAsset<ParticleEmitter>(aFilePath,myEmitters[0]);
 }
- 
+
 void ParticleSystem::Draw()
 {
+	GraphicsEngine::Get().SetDepthState(GraphicsEngine::eDepthStencilStates::DSS_ReadOnly);
+	Transform* trns = TryGetComponent<Transform>();
+	if(trns)
+	{
+		ObjectBuffer& objectBuffer = GraphicsEngine::Get().myObjectBuffer;
+		objectBuffer.Data.myTransform = trns->GetTransform();
+		RHI::UpdateConstantBufferData(objectBuffer);
+	}
 	for(auto& i : myEmitters)
 	{
 		i->Draw();
 	}
+	GraphicsEngine::Get().SetDepthState(GraphicsEngine::eDepthStencilStates::DSS_ReadWrite);
 }
 
 void ParticleSystem::AddEmitter(const ParticleEmitterTemplate& aTemplate)

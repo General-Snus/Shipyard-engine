@@ -5,7 +5,7 @@
 class ParticleSystem;
 struct EmmiterSettingsData
 {
-	enum emitterGeometry
+	enum class eEmitterGeometry
 	{
 		cone,
 		plane,
@@ -14,15 +14,15 @@ struct EmmiterSettingsData
 	};
 
 	float SpawnRate = 1;
-	float SpawnAngle = 0;
+	float SpawnAngle = 0; // NotImplemented
 	float LifeTime = 1;
-	float SimulationSpeed = 1;
+	float SimulationSpeed = 1; 
 	int MaxParticles = 1000;
-	emitterGeometry geometry = sphere;
+	eEmitterGeometry geometry = eEmitterGeometry::sphere; // NotImplemented
 
-	Vector4f StartPosition = {0,0,0,1};	
+	Vector4f StartPosition = {0,0,0,1};
 	Vector3f StartVelocity = {0,0,0};
-	Vector3f EndVelocity; 
+	Vector3f EndVelocity; // NotImplemented
 	Vector3f Acceleration = {0,-9.82f,0};
 
 	float StartSize = 1;
@@ -31,6 +31,7 @@ struct EmmiterSettingsData
 	Vector4f StartColor = {1,1,1,1};
 	Vector4f EndColor = {1,1,1,1};
 
+	bool InheriteTransform = true; // NotImplemented
 	std::filesystem::path ParticleTexture;
 };
 
@@ -53,7 +54,8 @@ private:
 	std::vector<Particlevertex> particles;
 	std::shared_ptr<TextureHolder> texture;
 	void InitParticle(Particlevertex& vertex);
-
+	float spawnedThisFrame = 0; 
+	float secondCounter = 0;
 public:
 	~ParticleEmitter(); 
 	explicit ParticleEmitter(const std::filesystem::path& aFilePath);
@@ -62,6 +64,7 @@ public:
 	void Update(float aDeltaTime); 
 	virtual void Draw();
 	virtual void SetAsResource() const;
+	
 	
 	FORCEINLINE const EmmiterSettingsData& GetSettings() const { return settings; }
 };

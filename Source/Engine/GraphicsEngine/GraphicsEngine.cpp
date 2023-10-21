@@ -49,11 +49,9 @@
 
 bool GraphicsEngine::Initialize(HWND windowHandle, bool enableDeviceDebug)
 {
-	GELogger = Logger::Create("GraphicsEngine");
-
+	GELogger = Logger::Create("GraphicsEngine"); 
 	DeferredCommandList.Initialize();
-	OverlayCommandList.Initialize();
-
+	OverlayCommandList.Initialize(); 
 
 #ifdef _DEBUG
 	try
@@ -78,42 +76,8 @@ bool GraphicsEngine::Initialize(HWND windowHandle, bool enableDeviceDebug)
 		SetupBRDF();
 		SetupParticleShaders();
 		SetupPostProcessing();
-
-
-		bool retFlag;
-		bool retVal = SetupDebugDrawline(retFlag);
-		if (retFlag) return retVal;
-
-
-		D3D11_BLEND_DESC blendDesc = {};
-		D3D11_RENDER_TARGET_BLEND_DESC& rtBlendDesc = blendDesc.RenderTarget[0];
-		rtBlendDesc.BlendEnable = TRUE;
-		rtBlendDesc.SrcBlend = D3D11_BLEND_ONE;
-		rtBlendDesc.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-		rtBlendDesc.BlendOp = D3D11_BLEND_OP_ADD;
-		rtBlendDesc.SrcBlendAlpha = D3D11_BLEND_ONE;
-		rtBlendDesc.DestBlendAlpha = D3D11_BLEND_ONE;
-		rtBlendDesc.BlendOpAlpha = D3D11_BLEND_OP_ADD;
-		rtBlendDesc.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-
-		if (!RHI::CreateBlendState(AlphaBlendState, blendDesc))
-		{
-			assert(false);
-		}
-
-		rtBlendDesc.SrcBlend = D3D11_BLEND_SRC_ALPHA;
-		rtBlendDesc.DestBlend = D3D11_BLEND_ONE;
-		rtBlendDesc.SrcBlendAlpha = D3D11_BLEND_ZERO;
-		rtBlendDesc.DestBlendAlpha = D3D11_BLEND_ONE;
-		rtBlendDesc.BlendOpAlpha = D3D11_BLEND_OP_ADD;
-		rtBlendDesc.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-
-
-		if (!RHI::CreateBlendState(AdditiveBlendState, blendDesc))
-		{
-			assert(false);
-		}
-
+		SetupBlendStates(); 
+		SetupDebugDrawline(); 
 
 		myLightBuffer.Initialize();
 		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER, REG_LightBuffer, myLightBuffer);
@@ -141,9 +105,8 @@ bool GraphicsEngine::Initialize(HWND windowHandle, bool enableDeviceDebug)
 	return true;
 }
 
-bool GraphicsEngine::SetupDebugDrawline(bool& retFlag)
-{
-	retFlag = true;
+bool GraphicsEngine::SetupDebugDrawline()
+{ 
 	debugLineVS = std::make_shared<Shader>();
 	RHI::LoadShaderFromMemory(
 		debugLineVS.get(),
@@ -175,9 +138,8 @@ bool GraphicsEngine::SetupDebugDrawline(bool& retFlag)
 	{
 		GELogger.Err("Failed to initialize the myLineVertexBuffer!");
 		return false;
-	}
-	retFlag = false;
-	return {};
+	} 
+	return true;
 }
 
 void GraphicsEngine::SetupDefaultVariables()
@@ -225,6 +187,23 @@ void GraphicsEngine::SetupDefaultVariables()
 		assert(false);
 	}
 	RHI::SetSamplerState(myShadowSampleState, REG_shadowCmpSampler);
+
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	depthStencilDesc.StencilEnable = false;
+
+	auto result = RHI::Device->CreateDepthStencilState(
+		&depthStencilDesc,
+		&myDepthStencilStates[(int)eDepthStencilStates::DSS_ReadOnly]);
+	if(FAILED(result))
+	{
+		GELogger.Log("Failed to create depth stencil read only state");
+		assert(false);
+	}
+	myDepthStencilStates[(int)eDepthStencilStates::DSS_ReadWrite] = nullptr; 
+
 
 	// TEMP: Load the default shader programs.
 	// This will be done elsewhere later on :).
@@ -299,6 +278,36 @@ void GraphicsEngine::SetupDefaultVariables()
 	AssetManager::GetInstance().ForceLoadAsset<Mesh>("default.fbx", defaultMesh);
 }
 
+void GraphicsEngine::SetupBlendStates()
+{
+	D3D11_BLEND_DESC blendDesc = {};
+	D3D11_RENDER_TARGET_BLEND_DESC& rtBlendDesc = blendDesc.RenderTarget[0];
+	rtBlendDesc.BlendEnable = TRUE;
+	rtBlendDesc.SrcBlend = D3D11_BLEND_ONE;
+	rtBlendDesc.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	rtBlendDesc.BlendOp = D3D11_BLEND_OP_ADD;
+	rtBlendDesc.SrcBlendAlpha = D3D11_BLEND_ONE;
+	rtBlendDesc.DestBlendAlpha = D3D11_BLEND_ONE;
+	rtBlendDesc.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	rtBlendDesc.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	if(!RHI::CreateBlendState(AlphaBlendState,blendDesc))
+	{
+		assert(false);
+	}
+
+	rtBlendDesc.SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	rtBlendDesc.DestBlend = D3D11_BLEND_ONE;
+	rtBlendDesc.SrcBlendAlpha = D3D11_BLEND_ZERO;
+	rtBlendDesc.DestBlendAlpha = D3D11_BLEND_ONE;
+	rtBlendDesc.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	rtBlendDesc.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	if(!RHI::CreateBlendState(AdditiveBlendState,blendDesc))
+	{
+		assert(false);
+	}
+}
 void GraphicsEngine::SetupBRDF()
 {
 	//Light
@@ -532,7 +541,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 
 	//Particles
 	RHI::SetBlendState(GraphicsEngine::Get().GetAdditiveBlendState());
-	GfxCmd_SetRenderTarget(SceneBuffer.get(),nullptr).ExecuteAndDestroy();
+	GfxCmd_SetRenderTarget(SceneBuffer.get(),myDepthBuffer.get()).ExecuteAndDestroy();
 	myParticleRenderer.Execute();
 	//Post processing
 	RHI::SetBlendState(nullptr);

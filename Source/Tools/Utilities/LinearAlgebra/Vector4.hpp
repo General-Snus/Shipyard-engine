@@ -55,13 +55,13 @@ namespace CommonUtilities
 
 	template <class T> inline Vector4<T> Lerp(Vector4<T> start_value,Vector4<T> end_value,float t)
 	{
-		const float val = std::clamp(t,0,1); //assures that the given parameter "t" is between 0 and 1
+		const float val = std::clamp<float>(t,0,1); //assures that the given parameter "t" is between 0 and 1
 
 		return Vector4<T>(
-			start_value.x + (end_value.x - start_value.x) *val,
-			start_value.y + (end_value.y - start_value.y) *val,
-			start_value.z + (end_value.z - start_value.z) *val,
-			start_value.w + (end_value.w - start_value.w) *val
+			start_value.x + (end_value.x - start_value.x) * val,
+			start_value.y + (end_value.y - start_value.y) * val,
+			start_value.z + (end_value.z - start_value.z) * val,
+			start_value.w + (end_value.w - start_value.w) * val
 		);
 	}
 

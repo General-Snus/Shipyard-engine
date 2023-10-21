@@ -12,9 +12,7 @@ void ParticleRenderer::Execute()
 {
 	RHI::SetVertexShader(vertexShader.Get());
 	RHI::SetGeometryShader(geometryShader.Get());
-	RHI::SetPixelShader(pixelShader.Get());
-
-
+	RHI::SetPixelShader(pixelShader.Get()); 
 
 	for(auto& i : GameObjectManager::GetInstance().GetAllComponents<ParticleSystem>())
 	{

@@ -25,12 +25,13 @@ void AssetManager::ThreadedLoading()
 {
 	if(myAssetQueue.GetSize())
 	{
-	lockForSet.lock();
-		std::shared_ptr<AssetBase> working = myAssetQueue.Dequeue(); 
+		lockForSet.lock();
+		std::shared_ptr<AssetBase> working = myAssetQueue.Dequeue();
 		working->Init();
 		working->isLoadedComplete = true;
-	lockForSet.unlock();
-		std::cout << "Loaded: " << working->AssetPath << "\n\n";
+		lockForSet.unlock();
+		std::string str = "Loaded: " + working->AssetPath.string() + "\n\n";
+		std::cout << str;
 	}
 }
 
