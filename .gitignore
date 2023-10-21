@@ -29,6 +29,7 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+/Source/Engine/GraphicsEngine/Shaders/Include/*.h
 
 # Allowed libriaries and folders
 !/Source/Tools/FBX/ThirdParty/fbxsdk/lib/debug/
