@@ -43,14 +43,15 @@ class ModelViewer
 	void UpdateScene();
 
 	void Update();
+	 
 
-	bool SaveDataToJson();
+	bool SaveDataToJson() const;
 
-	bool JsonToSaveData();
+	bool JsonToSaveData() const; 
 
 	bool ContainData(SaveData<float>& data);
 
-	bool SaveToMemory(eSaveToJsonArgument fnc, std::string identifier, void* arg);
+	bool SaveToMemory(eSaveToJsonArgument fnc,const std::string& identifier, void* arg);
 
 	bool SaveToMemory(SaveData<float>& arg);
 

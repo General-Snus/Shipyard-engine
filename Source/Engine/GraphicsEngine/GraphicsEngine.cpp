@@ -45,6 +45,7 @@
 
 #include "Shaders/Registers.h"
 #include <Tools/ImGui/imgui.h>
+#include <stdexcept> 
 
 
 bool GraphicsEngine::Initialize(HWND windowHandle, bool enableDeviceDebug)
@@ -488,7 +489,7 @@ void GraphicsEngine::SetupParticleShaders()
 	); 
 }
 
-void GraphicsEngine::SetLoggingWindow(HANDLE aHandle)
+void GraphicsEngine::SetLoggingWindow(HANDLE aHandle)  const
 {
 	GELogger.SetConsoleHandle(aHandle);
 }
@@ -498,8 +499,9 @@ void GraphicsEngine::BeginFrame()
 	myCamera = GameObjectManager::GetInstance().GetCamera().TryGetComponent<cCamera>();
 	if (!myCamera)
 	{
-		throw std::exception("No camera in scene. No render is possible");
+		GELogger.Err("No camera in scene. No render is possible");
 	}
+
 	// Here we should initialize our frame and clean up from the last one.  
 	RHI::ClearRenderTarget(myBackBuffer.get(), myBackgroundColor);
 	RHI::ClearDepthStencil(myDepthBuffer.get());
@@ -556,7 +558,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 	OverlayCommandList.Execute();
 }
 
-void GraphicsEngine::RenderTextureTo(eRenderTargets from, eRenderTargets to)
+void GraphicsEngine::RenderTextureTo(eRenderTargets from, eRenderTargets to)  const
 {
 	const Texture* texture1 = GraphicsEngine::Get().GetTargetTextures(from).get();
 	const Texture* texture2 = GraphicsEngine::Get().GetTargetTextures(to).get();

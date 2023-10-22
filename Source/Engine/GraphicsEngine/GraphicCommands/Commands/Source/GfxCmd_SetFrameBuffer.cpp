@@ -3,30 +3,29 @@
 #include <Engine/AssetManager/Objects/Components/ComponentDerivatives/Transform.h>
 #include "../Headers/GfxCmd_SetFrameBuffer.h"
 #include <Shaders/Registers.h>
-GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,const Transform& ref,int aRenderMode)
-{
-	myViewMatrix = Matrix::GetFastInverse(ref.GetTransform());
-	myProjectionMatrix = ProjectionMatrix;
-	myDeltaTime = static_cast<float>(CU::Timer::GetInstance().GetTotalTime());
-	myPosition = ref.GetPosition();
-	RenderMode = aRenderMode;
+GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,const Transform& ref,int aRenderMode) : 
+	myViewMatrix(Matrix::GetFastInverse(ref.GetTransform())), 
+	myProjectionMatrix(ProjectionMatrix), 
+	myPosition(ref.GetPosition()),
+	RenderMode(aRenderMode)
+{ 
 }
 
 //Remember to invert the matrix
-GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,const Matrix& ref,int aRenderMode)
-{
-	myViewMatrix = ref;
-	myProjectionMatrix = ProjectionMatrix;
-	myDeltaTime = static_cast<float>(CommonUtilities::Timer::GetInstance().GetTotalTime());
-	myPosition = {ref(4,1),ref(4,2),ref(4,3)};
-	RenderMode = aRenderMode;
+GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,const Matrix& ref,int aRenderMode) :
+	myViewMatrix(ref),
+	myProjectionMatrix(ProjectionMatrix),
+	myPosition({ref(4,1),ref(4,2),ref(4,3)}),
+	RenderMode(aRenderMode)
+{ 
 }
+
 void GfxCmd_SetFrameBuffer::ExecuteAndDestroy()
 {
 	FrameBuffer& buffert = GetFrameBuffer();
 	buffert.Data.ProjectionMatrix = myProjectionMatrix;
 	buffert.Data.ViewMatrix = myViewMatrix;
-	buffert.Data.Time = myDeltaTime;
+	buffert.Data.Time = CU::Timer::GetInstance().GetDeltaTime();
 	buffert.Data.FB_RenderMode = RenderMode;
 
 	buffert.Data.FB_CameraPosition[0] = myPosition.x;

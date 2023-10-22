@@ -172,7 +172,7 @@ void G_Buffer::SetWriteTargetToBuffer()
 		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,i,nullptr);
 	}
 
-	RHI::SetRenderTargets(vectorOfTextures,GraphicsEngine::Get().DepthBuffer());
+	RHI::SetRenderTargets(vectorOfTextures,GraphicsEngine::Get().GetTargetTextures(eRenderTargets::DepthBuffer).get());
 	
 }
 

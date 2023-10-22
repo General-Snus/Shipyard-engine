@@ -52,9 +52,6 @@ enum class eShader
 	count
 };
 
-
-using namespace Microsoft::WRL;
-
 class cCamera;
 
 class GraphicsEngine
@@ -138,7 +135,7 @@ private:
 		DSS_COUNT,
 	};
 
-	ComPtr<ID3D11DepthStencilState> myDepthStencilStates[(int)eDepthStencilStates::DSS_COUNT];
+	std::array<ComPtr<ID3D11DepthStencilState>,(int)eDepthStencilStates::DSS_COUNT> myDepthStencilStates ;
 
 	ComPtr<ID3D11BlendState> AlphaBlendState;
 	ComPtr<ID3D11BlendState> AdditiveBlendState;
@@ -169,11 +166,11 @@ public:
 
 	void SetupParticleShaders();
 
+	void SetLoggingWindow(HANDLE aHandle) const;
+
 	void SetupBRDF();
 
-	void SetupPostProcessing();
-
-	void SetLoggingWindow(HANDLE aHandle);
+	void SetupPostProcessing(); 
 
 	/**
 	 * Prepares the next frame for rendering by resetting states and clearing all render targets.
@@ -189,6 +186,8 @@ public:
 	 * Renders the current scene to the BackBuffer.
 	 */
 	void RenderFrame(float aDeltaTime,double aTotalTime);
+
+	void RenderTextureTo(eRenderTargets from,eRenderTargets to) const;
 
 
 	void SetDepthState(eDepthStencilStates state)
@@ -305,18 +304,14 @@ public:
 		default:
 			return nullptr;
 		}
-	}
-	void RenderTextureTo(eRenderTargets from,eRenderTargets to);
-	Texture* DepthBuffer() const { return myDepthBuffer.get(); };
-	Texture* BackBuffer() const { return myBackBuffer.get(); };
+	}  
 
 	FORCEINLINE std::shared_ptr< Shader> GetDebugLineVS() const { return debugLineVS; }
 	FORCEINLINE std::shared_ptr< Shader> GetDebugLinePS() const { return debugLinePS; }
 
 	FORCEINLINE ComPtr<ID3D11BlendState> GetAlphaBlendState() const { return AlphaBlendState; }
 	FORCEINLINE ComPtr<ID3D11BlendState> GetAdditiveBlendState() const { return AdditiveBlendState; }
-
-	FORCEINLINE std::shared_ptr<TextureHolder> GetDefaultTexture() const { return defaultTexture; }
+	 
 	FORCEINLINE std::shared_ptr<Material> GetDefaultMaterial() const { return defaultMaterial; }
 	FORCEINLINE std::shared_ptr<TextureHolder> GetDefaultTexture(eTextureType type) const
 	{

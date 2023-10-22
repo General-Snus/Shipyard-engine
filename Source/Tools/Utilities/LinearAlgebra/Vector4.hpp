@@ -303,4 +303,4 @@ namespace CommonUtilities
 	}
 
 }
-typedef CommonUtilities::Vector4<float> Vector4f;
+using Vector4f = CommonUtilities::Vector4<float>;

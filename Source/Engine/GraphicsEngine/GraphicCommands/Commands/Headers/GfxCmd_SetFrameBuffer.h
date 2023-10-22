@@ -6,8 +6,7 @@ class GfxCmd_SetFrameBuffer : public GraphicCommandBase
 private:
 	Matrix myViewMatrix;
 	Matrix myProjectionMatrix;
-	Vector3f myPosition;
-	float myDeltaTime;
+	Vector3f myPosition; 
 	int RenderMode;
 public:
 	GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,const Transform& ref,int aRenderMode);

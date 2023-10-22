@@ -17,7 +17,7 @@ namespace Debug
 	}
 
 
-	DebugPrimitive::DebugPrimitive(std::vector<DebugVertex>& myVertexs,std::vector<unsigned int>& myIndices) : thickness(1.0f)
+	DebugPrimitive::DebugPrimitive(const std::vector<DebugVertex>& myVertexs,const std::vector<unsigned int>& myIndices) : thickness(1.0f)
 	{
 		if(!RHI::CreateVertexBuffer(VertexBuffer,myVertexs))
 		{

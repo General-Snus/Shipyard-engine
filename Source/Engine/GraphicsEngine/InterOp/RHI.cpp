@@ -158,8 +158,8 @@ bool RHI::Initialize(HWND aWindowHandle, bool enableDeviceDebug, Texture* outBac
 	// Next we need to describes the scene depth. This will allow proper
 	// behavior when our 3D world is projected onto our 2D monitor.
 	D3D11_TEXTURE2D_DESC desc = {};
-	desc.Width = static_cast<unsigned int>(windowWidth);
-	desc.Height = static_cast<unsigned int>(windowHeight);
+	desc.Width =  windowWidth ;
+	desc.Height = windowHeight;
 	desc.MipLevels = 1;
 	desc.ArraySize = 1;
 	desc.Format = DXGI_FORMAT::DXGI_FORMAT_R32_TYPELESS;

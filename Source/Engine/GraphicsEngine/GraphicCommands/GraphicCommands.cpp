@@ -48,7 +48,7 @@ void GraphicsCommandList::Initialize(size_t aSize)
 	myData = new uint8_t[mySize];
 	memset(myData,0,mySize);
 
-	myRoot = reinterpret_cast<GraphicCommandBase*>(myData);
+	myRoot = std::bit_cast<GraphicCommandBase*>(myData);
 	myLink = &myRoot;
 }
 
@@ -70,7 +70,7 @@ void GraphicsCommandList::Execute()
 
 void GraphicsCommandList::StartOver()
 {
-	myRoot = reinterpret_cast<GraphicCommandBase*>(myData);
+	myRoot = std::bit_cast<GraphicCommandBase*>(myData);
 	myLink = &myRoot;
 	myCursor = 0;
 	isFinished = false;
@@ -82,17 +82,15 @@ void GraphicsCommandList::Reset()
 	if(isFinished)
 	{
 		memset(myData,0,mySize);
-		myRoot = reinterpret_cast<GraphicCommandBase*>(myData);
+		myRoot = std::bit_cast<GraphicCommandBase*>(myData);
 		myLink = &myRoot;
 		myCursor = 0;
 		isFinished = false;
 	}
 }
 
-GraphicsCommandListIterator::GraphicsCommandListIterator(const GraphicsCommandList& lst)
-{
-	myPtr = lst.myRoot;
-}
+GraphicsCommandListIterator::GraphicsCommandListIterator(const GraphicsCommandList& lst) : myPtr(lst.myRoot)
+{}
 
 GraphicCommandBase* GraphicsCommandListIterator::Next()
 {

@@ -18,13 +18,13 @@
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/Math.hpp>
+#include "Tools/Logging/Logging.h"
 
 #include "Objects/BaseAssets/BaseAsset.h"
 #include "Objects/BaseAssets/Animations.h"
 #include "Objects/BaseAssets/MaterialAsset.h"
 #include "Objects/BaseAssets/MeshAsset.h"
 #include "Objects/BaseAssets/TextureAsset.h" 
-
 
 #include "Objects/Components/Component.h" 
 #include "GameObjectManager.h"
@@ -52,4 +52,5 @@
 typedef CU::Vector3<float> Vector3f;
 typedef CU::Matrix4x4<float> Matrix;
 
+static inline Logger AMLogger;
 #endif //ASSETMANAGER_PCH_H 

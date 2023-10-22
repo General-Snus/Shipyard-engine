@@ -1,6 +1,6 @@
 #pragma once 
-typedef CU::Vector3<float> Vector3f;
-typedef CU::Matrix4x4<float> Matrix;
+using Vector3f = CU::Vector3<float>;
+using Matrix = CU::Matrix4x4<float>;
 
 struct SpotLight
 { 
@@ -35,7 +35,7 @@ struct PointLight
 struct DirectionalLight 
 { 
 	Vector3f Color;
-	float Power; // watt
+	float Power = 5; // watt
 
 	Vector4f Direction = {0,0,1,1}; 
 

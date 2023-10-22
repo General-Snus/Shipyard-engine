@@ -17,8 +17,7 @@
 #include "InterOp/Helpers.h"
 #include "InterOp/RHI.h"
 #include "Tools/Logging/Logging.h"
-#include "GraphicsEngine.h"
-
+#include "GraphicsEngine.h" 
 
 #include "Rendering/Buffers/FrameBuffer.h"
 #include "Rendering/Buffers/ObjectBuffer.h"
@@ -38,9 +37,7 @@
 #include "GraphicCommands/Commands/Headers/GfxCmd_SetRenderTarget.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_LuminancePass.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_Bloom.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_LinearToGamma.h"
-
-
+#include "GraphicCommands/Commands/Headers/GfxCmd_LinearToGamma.h" 
 
 static inline Logger GELogger;
 #endif //GRAPHICSENGINE_PCH

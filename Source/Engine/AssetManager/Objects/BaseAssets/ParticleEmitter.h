@@ -44,6 +44,7 @@ struct ParticleEmitterTemplate
 class ParticleEmitter : public AssetBase
 {
 private:
+	void InitParticle(Particlevertex& vertex) const;
 	EmmiterSettingsData settings;
 	ComPtr<ID3D11Buffer> vertexBuffer;
 	UINT stride;
@@ -52,12 +53,11 @@ private:
 	ComPtr<ID3D11InputLayout> inputLayout;
 
 	std::vector<Particlevertex> particles;
-	std::shared_ptr<TextureHolder> texture;
-	void InitParticle(Particlevertex& vertex);
+	std::shared_ptr<TextureHolder> texture; 
 	float spawnedThisFrame = 0; 
 	float secondCounter = 0;
 public:
-	~ParticleEmitter(); 
+	~ParticleEmitter() override = default;
 	explicit ParticleEmitter(const std::filesystem::path& aFilePath);
 	explicit ParticleEmitter(const ParticleEmitterTemplate& aTemplate);
 	void Init() override;

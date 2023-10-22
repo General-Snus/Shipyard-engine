@@ -105,8 +105,7 @@ int ModelViewer::Run()
 				SaveDataToJson();
 				ImGui_ImplDX11_Shutdown();
 				ImGui_ImplWin32_Shutdown();
-				ImGui::DestroyContext();
-				isRunning = false;
+				ImGui::DestroyContext(); 
 				return 0;
 			}
 		}
@@ -140,8 +139,7 @@ void ModelViewer::HideSplashScreen() const
 
 void ModelViewer::LoadScene()
 {
-	JsonToSaveData();
-	//myCamera = std::make_shared<MainCamera>();
+	JsonToSaveData(); 
 
 	GameObjectManager& gom = GameObjectManager::GetInstance();
 
@@ -237,8 +235,8 @@ void ModelViewer::LoadScene()
 		CU::Matrix4x4<float> aPosition;
 		aPosition = aPosition * CU::Matrix4x4<float>::CreateRotationAroundY(-PI);
 		test2.AddComponent<Transform>(aPosition);
-		test2.GetComponent<Transform>().GetTransform()(4,3) = 1000;;
-		test2.GetComponent<Transform>().GetTransform()(4,2) = -100;;
+		test2.GetComponent<Transform>().GetTransform()(4,3) = 1000;
+		test2.GetComponent<Transform>().GetTransform()(4,2) = -100;
 		test2.GetComponent<Transform>().SetScale(5);
 	}
 
@@ -267,7 +265,7 @@ void ModelViewer::LoadScene()
 		gO.AddComponent<cSkeletalMeshRenderer>(L"Models/SK_C_TGA_Bro.fbx");
 		gO.GetComponent<cSkeletalMeshRenderer>().SetMaterialPath(L"Materials/TGABroMaterial.json");
 		gO.AddComponent<Transform>();
-		gO.GetComponent<Transform>().SetPosition({-i * 300.0f,0});
+		gO.GetComponent<Transform>().SetPosition({-static_cast<float>(i) * 300.0f,0});
 		gO.GetComponent<Transform>().Rotate({0,180.0f,0},true);
 		gO.AddComponent<cAnimator>(L"Animations/Locomotion/A_C_TGA_Bro_Walk.fbx");
 		gO.GetComponent<cAnimator>().AddAnimation(L"Animations/Locomotion/A_C_TGA_Bro_Run.fbx");
@@ -282,13 +280,13 @@ void ModelViewer::LoadScene()
 		spotLight.AddComponent<cLight>(eLightType::Spot);
 		std::weak_ptr<SpotLight> ptr = spotLight.GetComponent<cLight>().GetData<SpotLight>();
 		spotLight.AddComponent<Transform>();
-		spotLight.GetComponent<Transform>().SetPosition({-i * 300.0f + 300 ,500,0});
+		spotLight.GetComponent<Transform>().SetPosition({-static_cast<float>(i) * 300.0f + 300 ,500,0});
 		spotLight.GetComponent<Transform>().Rotate({90,0,0},true);
-		ptr.lock()->Color = {(float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000};
+		ptr.lock()->Color = {RandomInRange(0.0f,1.0f),RandomInRange(0.0f,1.0f),RandomInRange(0.0f,1.0f)};
 		//ptr.lock()->Color = {1,1,1};
-		ptr.lock()->Range = 1000.0f;;
-		ptr.lock()->Power = i * 200.0f * Kilo;
-		ptr.lock()->OuterConeAngle = i * 20.0f * DEG_TO_RAD;
+		ptr.lock()->Range = 1000.0f; 
+		ptr.lock()->Power = static_cast<float>(i) * 200.0f * Kilo;
+		ptr.lock()->OuterConeAngle = static_cast<float>(i) * 20.0f * DEG_TO_RAD;
 		ptr.lock()->InnerConeAngle = 1.0f * DEG_TO_RAD;
 		spotLight.GetComponent<cLight>().BindDirectionToTransform(true);
 
@@ -296,8 +294,8 @@ void ModelViewer::LoadScene()
 
 	for(size_t i = 0; i < 2; i++)
 	{
-		int x = rand() % 10000 - 5000;
-		int z = rand() % 10000 - 5000;
+		int x = RandomInRange<int>(-5000,5000);
+		int z = RandomInRange<int>(-5000,5000);
 
 		GameObject pointLight = gom.CreateGameObject();
 		pointLight.AddComponent<Transform>();
@@ -305,7 +303,7 @@ void ModelViewer::LoadScene()
 
 		pointLight.AddComponent<cLight>(eLightType::Point);
 		std::weak_ptr<PointLight> ptr = pointLight.GetComponent<cLight>().GetData<PointLight>();
-		ptr.lock()->Color = {(float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000};
+		ptr.lock()->Color = {RandomInRange(0.0f,1.0f),RandomInRange(0.0f,1.0f),RandomInRange(0.0f,1.0f)};
 		ptr.lock()->Range = 10000.0f;
 		ptr.lock()->Power = 50.0f * Kilo;
 		pointLight.GetComponent<cLight>().BindDirectionToTransform(true);
@@ -325,7 +323,7 @@ void ModelViewer::LoadScene()
 	{
 		GameObject test3 = gom.CreateGameObject();
 		test3.AddComponent<cMeshRenderer>("Models/SteelFloor.fbx");
-		test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");;
+		test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
 		test3.AddComponent<Transform>();
 		test3.GetComponent<Transform>().GetTransform()(4,2) = -125;
 	}
@@ -352,7 +350,6 @@ void ModelViewer::UpdateScene()
 	float delta = CU::Timer::GetInstance().GetDeltaTime();
 	GameObjectManager::GetInstance().Update();
 
-	myCustomHandler.GetComponent<Transform>().Rotate(Vector3f(0,10 * delta,0),true);
 	if(GetAsyncKeyState('1'))
 	{
 		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(0);
@@ -369,11 +366,9 @@ void ModelViewer::UpdateScene()
 	{
 		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(3);
 	}
-	//for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
-	//{
-	//	i.GetComponent<Transform>().Rotate({0,delta * 100,0},false);
-	//} 
+
 	myMesh.GetComponent<Transform>().Rotate({0,delta * 100,0},false);
+	myCustomHandler.GetComponent<Transform>().Rotate(Vector3f(0,10 * delta,0),true);
 
 	for(auto& data : mySaveData)
 	{
@@ -387,7 +382,7 @@ void ModelViewer::UpdateScene()
 }
 
 
-bool ModelViewer::SaveDataToJson()
+bool ModelViewer::SaveDataToJson() const 
 {
 	std::string path = "myJson.json";
 	std::ofstream o(path);
@@ -402,7 +397,7 @@ bool ModelViewer::SaveDataToJson()
 
 	return true;
 }
-bool ModelViewer::JsonToSaveData()
+bool ModelViewer::JsonToSaveData() const
 {
 	std::string path = "myJson.json";
 	if(!std::filesystem::exists(path))
@@ -444,17 +439,17 @@ bool ModelViewer::ContainData(SaveData<float>& data)
 	}
 	return false;
 }
-bool ModelViewer::SaveToMemory(eSaveToJsonArgument fnc,std::string identifier,void* arg)
+bool ModelViewer::SaveToMemory(eSaveToJsonArgument fnc, const std::string& identifier, void* arg)
 {
 	switch(fnc)
 	{
 	case eSaveToJsonArgument::InputFloat3:
 	{
-		float* x = (float*)arg;
+		const auto* x = (float*)arg;
 		arg = (float*)arg + 1;
-		float* y = (float*)arg;
+		const auto* y = (float*)arg;
 		arg = (float*)arg + 1;
-		float* z = (float*)arg;
+		const auto* z = (float*)arg;
 
 		for(SaveData<float>& i : mySaveData)
 		{
@@ -479,7 +474,7 @@ bool ModelViewer::SaveToMemory(eSaveToJsonArgument fnc,std::string identifier,vo
 	}
 	case eSaveToJsonArgument::SaveBool:
 	{
-		bool* x = (bool*)arg;
+		auto* x = (bool*)arg;
 		for(SaveData<float>& i : mySaveData)
 		{
 			if(i.fnc == (int)fnc && i.identifier == identifier)
@@ -501,8 +496,7 @@ bool ModelViewer::SaveToMemory(eSaveToJsonArgument fnc,std::string identifier,vo
 		std::cout << "SaveFunction can not handle this argument";
 		return false;
 		break;
-	}
-	return false;
+	} 
 }
 bool ModelViewer::SaveToMemory(SaveData<float>& arg)
 {

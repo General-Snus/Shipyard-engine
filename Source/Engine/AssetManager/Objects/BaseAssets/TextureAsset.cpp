@@ -2,10 +2,9 @@
 #include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
 #include "TextureAsset.h"
 
-TextureHolder::TextureHolder(const std::filesystem::path& aFilePath,eTextureType atextureType) : AssetBase(aFilePath)
+TextureHolder::TextureHolder(const std::filesystem::path& aFilePath,eTextureType aTextureType) : AssetBase(aFilePath),textureType(aTextureType)
 {
-	RawTexture = std::make_shared<Texture>();
-	this->textureType = atextureType;
+	RawTexture = std::make_shared<Texture>(); 
 
 	/*if(!RHI::LoadTexture(RawTexture.get(),aFilePath.wstring()))
 	{
@@ -19,7 +18,7 @@ TextureHolder::TextureHolder(const std::filesystem::path& aFilePath,eTextureType
 }
 
 void TextureHolder::Init()
-{ 
+{
 	int position = (int)AssetPath.filename().string().find_last_of("_");
 	if(position > -1)
 	{
@@ -58,9 +57,8 @@ void TextureHolder::Init()
 	isLoadedComplete = true;
 }
 
-TextureHolder::TextureHolder(const std::filesystem::path& aFilePath) : RawTexture(), AssetBase(aFilePath)
+TextureHolder::TextureHolder(const std::filesystem::path& aFilePath) : AssetBase(aFilePath) 
 {
 	RawTexture = std::make_shared<Texture>();
-	this->textureType = eTextureType::ColorMap; 
+	this->textureType = eTextureType::ColorMap;
 }
-  

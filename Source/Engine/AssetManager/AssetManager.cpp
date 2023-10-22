@@ -6,14 +6,11 @@
 #include <algorithm>
 #include <cctype>
 #include <string>
-
-inline AssetManager::AssetManager()
+ 
+AssetManager::AssetManager()
 {
-
-}
-
-AssetManager::~AssetManager()
-{
+	AMLogger = Logger::Create("AssetManager");
+	AMLogger.SetPrintToVSOutput(false); 
 }
 
 AssetManager& AssetManager::GetInstance()
@@ -25,11 +22,12 @@ void AssetManager::ThreadedLoading()
 {
 	if(myAssetQueue.GetSize())
 	{
-		lockForSet.lock();
+
+		std::scoped_lock<std::mutex> lock(lockForSet);
+
 		std::shared_ptr<AssetBase> working = myAssetQueue.Dequeue();
 		working->Init();
-		working->isLoadedComplete = true;
-		lockForSet.unlock();
+		working->isLoadedComplete = true; 
 		std::string str = "Loaded: " + working->AssetPath.string() + "\n\n";
 		std::cout << str;
 	}

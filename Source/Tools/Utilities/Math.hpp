@@ -2,15 +2,17 @@
 #include <algorithm>
 #include <cmath>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
+#include <random>
+#include <numbers>
 
-constexpr float PI = 3.14159f;
+constexpr float PI = std::numbers::pi_v<float>;
 constexpr float PI2 = PI * 2.0f;
 constexpr float PIHALF = PI * 0.5f;
 constexpr float PIQUARTER = PI * 0.25f;
 
 constexpr float DEG_TO_RAD = PI / 180.0f;
 constexpr float RAD_TO_DEG = 180.0f / PI;
-constexpr float Sqrt2 = 1.41421356237309504880f;
+constexpr float Sqrt2 = std::numbers::sqrt2_v<float>;
 
 //Units
 constexpr float Micro = 0.000001f;
@@ -21,15 +23,15 @@ constexpr float Kilo = 1000.0f;
 constexpr float Mega = 1000000.0f;
 
 //Bytes
-constexpr float BitToByte = 1/8.f; 
-constexpr float ByteToBit = 8.f; 
+constexpr float BitToByte = 1 / 8.f;
+constexpr float ByteToBit = 8.f;
 
 
 constexpr int Byte = 1;
 constexpr int KiloByte = 1024;
 constexpr int MegaByte = 1048576;
 constexpr int GigaByte = 1073741824;
-constexpr float TeraByte = 1099511627776; 
+constexpr float TeraByte = 1099511627776;
 
 //Bytes
 
@@ -37,8 +39,25 @@ const Vector3f GlobalRight = Vector3f(1.0,0.0,0.0);
 const Vector3f GlobalUp = Vector3f(0.0,1.0,0.0);
 const Vector3f GlobalFwd = Vector3f(0.0,0.0,1.0);
 
+template <typename T = float>
+inline T RandomInRange(const T& a = 0.0f,const T& b = 1.0f)
+{
+	std::random_device rd;
+	std::mt19937 gen(rd()); 
 
+	auto rander = std::uniform_real_distribution<T>(a,b);
+	return rander(gen);
+}
 
+template <>
+inline int RandomInRange(const int& a,const int& b)
+{
+	std::random_device rd;
+	std::mt19937 gen(rd());
+
+	auto rander = std::uniform_int_distribution(a,b);
+	return rander(gen);
+}
 
 inline float Log2(float x)
 {

@@ -19,7 +19,7 @@ namespace Debug
 	struct DebugPrimitive
 	{
 		DebugPrimitive() = default;
-		DebugPrimitive(std::vector<DebugVertex>& myVertexs,std::vector<unsigned int>& myIndices);
+		DebugPrimitive(const std::vector<DebugVertex>& myVertexs,const std::vector<unsigned int>& myIndices);
 
 		ComPtr<ID3D11Buffer> VertexBuffer;
 		ComPtr<ID3D11Buffer> IndexBuffer; 

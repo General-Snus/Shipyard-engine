@@ -79,7 +79,7 @@ private:
 template<class T>
 T& GameObjectManager::AddComponent(const unsigned int aGameObjectID)
 {
-	if(myComponentManagers.find(&typeid(T)) == myComponentManagers.end())
+	if(!myComponentManagers.contains(&typeid(T)))
 	{
 		AddManager<T>();
 	}
@@ -90,7 +90,7 @@ T& GameObjectManager::AddComponent(const unsigned int aGameObjectID)
 template<class T>
 T& GameObjectManager::AddComponent(const unsigned int aGameObjectID,const T& aComponent)
 {
-	if(myComponentManagers.find(&typeid(T)) == myComponentManagers.end())
+	if(!myComponentManagers.contains(&typeid(T)))
 	{
 		AddManager<T>();
 	}
@@ -100,7 +100,7 @@ T& GameObjectManager::AddComponent(const unsigned int aGameObjectID,const T& aCo
 template<class T,typename... Args>
 T& GameObjectManager::AddComponent(const unsigned int aGameObjectID,Args ...someParameters)
 {
-	if(myComponentManagers.find(&typeid(T)) == myComponentManagers.end())
+	if(!myComponentManagers.contains(&typeid(T)))
 	{
 		AddManager<T>();
 	}
@@ -110,7 +110,7 @@ T& GameObjectManager::AddComponent(const unsigned int aGameObjectID,Args ...some
 template<class T>
 std::vector<T>& GameObjectManager::GetAllComponents()
 {
-	if(myComponentManagers.find(&typeid(T)) == myComponentManagers.end())
+	if(!myComponentManagers.contains(&typeid(T)))
 	{
 		AddManager<T>();
 	}
@@ -120,7 +120,7 @@ std::vector<T>& GameObjectManager::GetAllComponents()
 template<class T>
 T* GameObjectManager::TryGetComponent(const unsigned int aGameObjectID)
 {
-	if(myComponentManagers.find(&typeid(T)) != myComponentManagers.end())
+	if(myComponentManagers.contains(&typeid(T)))
 	{
 		return static_cast<ComponentManager<T>*>(myComponentManagers[&typeid(T)])->TryGetComponent(aGameObjectID);
 	}
@@ -133,7 +133,7 @@ T* GameObjectManager::TryGetComponent(const unsigned int aGameObjectID)
 template<class T>
 inline const bool GameObjectManager::HasComponent(const unsigned int aGameObjectID)
 {
-	if(myComponentManagers.find(&typeid(T)) != myComponentManagers.end())
+	if(myComponentManagers.contains(&typeid(T)))
 	{
 		return static_cast<const ComponentManager<T>*>(myComponentManagers[&typeid(T)])->HasComponent(aGameObjectID);
 	}
@@ -143,14 +143,14 @@ inline const bool GameObjectManager::HasComponent(const unsigned int aGameObject
 template<class T>
 inline T& GameObjectManager::GetComponent(const unsigned int aGameObjectID)
 {
-	assert(myComponentManagers.find(&typeid(T)) != myComponentManagers.end() && "GameObjectManager::GetComponent(...) component manager doesn't exist.");
+	assert(myComponentManagers.contains(&typeid(T)) && "GameObjectManager::GetComponent(...) component manager doesn't exist.");
 	return static_cast<ComponentManager<T>*>(myComponentManagers[&typeid(T)])->GetComponent(aGameObjectID);
 }
 
 template<class T>
 void GameObjectManager::SetUpdatePriority(const ComponentManagerBase::UpdatePriority aPriority)
 {
-	if(myComponentManagers.find(&typeid(T)) == myComponentManagers.end())
+	if(!myComponentManagers.contains(&typeid(T)))
 	{
 		myComponentManagers[&typeid(T)] = new ComponentManager<T>();
 	}

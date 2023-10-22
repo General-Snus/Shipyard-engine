@@ -11,7 +11,7 @@
 
 
 
-void ParticleEmitter::InitParticle(Particlevertex& vertex)
+void ParticleEmitter::InitParticle(Particlevertex& vertex) const
 {
 	vertex.Color = settings.StartColor;
 	vertex.Lifetime = 0;
@@ -23,13 +23,10 @@ void ParticleEmitter::InitParticle(Particlevertex& vertex)
 	vertex.Velocity = settings.StartVelocity;
 }
 
-ParticleEmitter::~ParticleEmitter()
+ParticleEmitter::ParticleEmitter(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)
 {
-}
-
-ParticleEmitter::ParticleEmitter(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)	
-{
-	throw std::exception("Not implemented");
+	AMLogger.Err("NotImplementedException");
+	assert(false);
 }
 
 ParticleEmitter::ParticleEmitter(const ParticleEmitterTemplate& aTemplate) : AssetBase(aTemplate.Path)
@@ -73,11 +70,11 @@ void ParticleEmitter::Init()
 }
 
 void ParticleEmitter::Update(float aDeltaTime)
-{  
+{
 	aDeltaTime = aDeltaTime * settings.SimulationSpeed;
 
 	secondCounter += settings.SpawnRate * aDeltaTime;
-	spawnedThisFrame = std::floor(secondCounter)+0.1f;//point exactness
+	spawnedThisFrame = std::floor(secondCounter) + 0.1f;//point exactness
 	secondCounter -= spawnedThisFrame;
 
 	for(auto& aParticle : particles)
@@ -109,7 +106,7 @@ void ParticleEmitter::Draw()
 
 void ParticleEmitter::SetAsResource() const
 {
-	HRESULT result = S_FALSE;
+	auto result = ((HRESULT)1L);
 
 	D3D11_MAPPED_SUBRESOURCE bufferData;
 	ZeroMemory(&bufferData,sizeof(D3D11_MAPPED_SUBRESOURCE));
@@ -120,6 +117,12 @@ void ParticleEmitter::SetAsResource() const
 		D3D11_MAP_WRITE_DISCARD,
 		0,
 		&bufferData);
+
+	if(FAILED(result))
+	{
+		AMLogger.Log("Failed to create vertex buffer for particle emitter");
+		assert(false);
+	}
 
 	memcpy_s(
 		bufferData.pData,
@@ -141,6 +144,6 @@ void ParticleEmitter::SetAsResource() const
 
 	if(texture->isLoadedComplete)
 	{
-		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_colorMap,texture->GetRawTexture().get()); 
+		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_colorMap,texture->GetRawTexture().get());
 	}
 }
