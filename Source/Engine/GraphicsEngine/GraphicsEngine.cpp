@@ -521,7 +521,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 	RHI::SetVertexShader(myVertexShader);
 
 	myCamera->SetCameraToFrameBuffer();
-	myG_Buffer.SetWriteTargetToBuffer(); //Let all write to textures 
+	myG_Buffer.SetWriteTargetToBuffer(); //Let all write to textures
 	DeferredCommandList.Execute();
 
 	//decals
@@ -535,7 +535,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 	//Render all lights
 	myCamera->SetCameraToFrameBuffer();
 	GfxCmd_SetRenderTarget(SceneBuffer.get(), nullptr).ExecuteAndDestroy();
-	GfxCmd_SetLightBuffer().ExecuteAndDestroy();
+	GfxCmd_SetLightBuffer().ExecuteAndDestroy(); //REFACTOR Change name to fit purpose
 
 	//Forward pass for light
 
@@ -543,6 +543,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 	RHI::SetBlendState(GraphicsEngine::Get().GetAdditiveBlendState());
 	GfxCmd_SetRenderTarget(SceneBuffer.get(),myDepthBuffer.get()).ExecuteAndDestroy();
 	myParticleRenderer.Execute();
+
 	//Post processing
 	RHI::SetBlendState(nullptr);
 	GfxCmd_LuminancePass().ExecuteAndDestroy(); // Render to IntermediateA

@@ -27,7 +27,7 @@ ParticleEmitter::~ParticleEmitter()
 {
 }
 
-ParticleEmitter::ParticleEmitter(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)
+ParticleEmitter::ParticleEmitter(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)	
 {
 	throw std::exception("Not implemented");
 }
@@ -77,7 +77,7 @@ void ParticleEmitter::Update(float aDeltaTime)
 	aDeltaTime = aDeltaTime * settings.SimulationSpeed;
 
 	secondCounter += settings.SpawnRate * aDeltaTime;
-	spawnedThisFrame = std::floor(secondCounter);
+	spawnedThisFrame = std::floor(secondCounter)+0.1f;//point exactness
 	secondCounter -= spawnedThisFrame;
 
 	for(auto& aParticle : particles)
