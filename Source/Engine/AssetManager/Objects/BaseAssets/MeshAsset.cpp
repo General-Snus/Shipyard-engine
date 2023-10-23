@@ -137,11 +137,30 @@ void Mesh::Init()
 			IndexData.insert(IndexData.end(),mdlIndicies.begin(),mdlIndicies.end());
 
 			ComPtr<ID3D11Buffer> vertexBuffer;
-			if(!RHI::CreateVertexBuffer<Vertex>(vertexBuffer,mdlVertices))
+			// After all not, Why shouldnt i keep the instances for my self?
+			D3D11_BUFFER_DESC vertexBufferDesc = {};
+			vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+			vertexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(Vertex) * mdlVertices.size());
+			vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+			vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+			vertexBufferDesc.MiscFlags = 0;
+			vertexBufferDesc.StructureByteStride = 0;
+
+			D3D11_SUBRESOURCE_DATA vertexData = {};
+			vertexData.pSysMem = mdlVertices.data();
+
+
+			auto result = RHI::Device->CreateBuffer(&vertexBufferDesc,&vertexData,vertexBuffer.GetAddressOf());
+			if(FAILED(result))
 			{
-				std::cout << "Failed to create vertex buffer" << std::endl;
+				AMLogger.Err("Failed to create mesh	 Instance buffer");
 				return;
 			}
+			//if(!RHI::CreateVertexBuffer<Vertex>(vertexBuffer,mdlVertices))
+			//{
+			//	std::cout << "Failed to create vertex buffer" << std::endl;
+			//	return;
+			//}
 			ComPtr<ID3D11Buffer> indexBuffer;
 			if(!RHI::CreateIndexBuffer(indexBuffer,mdlIndicies))
 			{

@@ -307,6 +307,7 @@ public:
 	 */
 	static void SetConstantBuffer(UINT aPipelineStages,unsigned aSlot,const ConstantBufferBase& aBuffer);
 
+	static void DrawIndexedInstanced(unsigned aIndexCount, unsigned anInstanceCount);
 	/**
 	 * Instructs the Graphics Card to execute a Draw call using the data loaded in the pipeline with the states that are currently set.
 	 * @param aCount The number of Vertices to draw.
@@ -314,6 +315,8 @@ public:
 	static void DrawIndexed(unsigned aCount);
 
 	static void Draw(unsigned aCount);
+
+
 
 	// This ought to be returning a Texture object which has a Resource, a SRV and a RTV. The latter two are created and populated on demand
 	// depending on the BindFlags, i.e. if(someBindFlagS |= D3D11_BIND_SHADER_RESOURCE) create SRV.

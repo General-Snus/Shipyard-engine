@@ -951,6 +951,11 @@ void RHI::SetConstantBuffer(UINT aPipelineStages, unsigned aSlot, const Constant
 	}
 }
 
+void RHI::DrawIndexedInstanced(unsigned aIndexCount,unsigned anInstanceCount)
+{
+	Context->DrawIndexedInstanced(aIndexCount, anInstanceCount, 0, 0, 0);
+}
+
 void RHI::DrawIndexed(unsigned aCount)
 {
 	Context->DrawIndexed(aCount, 0, 0);
