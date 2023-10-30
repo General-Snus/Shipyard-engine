@@ -194,7 +194,7 @@ namespace CommonUtilities
 	template<class U>
 	inline Vector2<T>::operator U() const
 	{
-		return  {x,y};
+		return {x,y};
 	}
 
 	template<class T>

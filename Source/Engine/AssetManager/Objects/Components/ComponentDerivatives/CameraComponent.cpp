@@ -3,7 +3,7 @@
 #include "CameraComponent.h"
 #include <Game/Modelviewer/Core/Modelviewer.h>
 #include <Engine/GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h>
-
+#include <Tools/Utilities/Input/InputHandler.hpp> 
 
 cCamera::cCamera(const unsigned int anOwnerId) : Component(anOwnerId)
 {
@@ -42,12 +42,25 @@ cCamera::~cCamera()
 
 void cCamera::Update()
 {
-	Transform& myTransform = this->GetGameObject().GetComponent<Transform>();
-
+	Transform& myTransform = this->GetGameObject().GetComponent<Transform>(); 
 	float aTimeDelta = CU::Timer::GetInstance().GetDeltaTime();
+
 	//UpdatePositionVectors();
 	const float mdf = 1000;
 	const float rotationSpeed = 100;
+
+
+	if(CU::InputHandler::GetInstance().IsKeyHeld((int)Keys::MOUSERBUTTON))
+	{ 
+		const Vector3f mouseDeltaVector = 
+		{
+			-static_cast<float>(CU::InputHandler::GetInstance().GetMousePositionDelta().y),
+			-static_cast<float>(CU::InputHandler::GetInstance().GetMousePositionDelta().x),
+			0.0f
+		};
+		myTransform.Rotate(mouseDeltaVector * rotationSpeed * 0.1f * CU::Timer::GetInstance().GetDeltaTime());
+	}
+
 	if (GetAsyncKeyState('W'))
 	{
 		myTransform.Move(myTransform.GetForward() * aTimeDelta * mdf);
@@ -69,7 +82,7 @@ void cCamera::Update()
 	}
 	if (GetAsyncKeyState('E'))
 	{
-		myTransform.Rotate({ 0,rotationSpeed * aTimeDelta }, true);
+		myTransform.Rotate({ 0,rotationSpeed * aTimeDelta });
 	}
 	if (GetAsyncKeyState('F'))
 	{
@@ -78,7 +91,7 @@ void cCamera::Update()
 
 	if (GetAsyncKeyState('Q'))
 	{
-		myTransform.Rotate({ 0,-rotationSpeed * aTimeDelta }, true);
+		myTransform.Rotate({ 0,-rotationSpeed * aTimeDelta });
 	}
 
 	if (GetAsyncKeyState(VK_SPACE))

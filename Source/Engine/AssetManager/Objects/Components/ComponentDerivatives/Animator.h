@@ -30,14 +30,14 @@ public:
 
 	void Update() override;
 
-	void RenderAnimation(const RenderData& aMesh,const CU::Matrix4x4<float> aTransform);
+	void RenderAnimation(const RenderData& aMesh,const Matrix& aTransform);
 	void AddAnimation(Animation aAnimation);
 	void AddAnimation(const std::filesystem::path& aFilePath);
 	eAnimationState GetState() const;
 	void SetState(eAnimationState aState);
 	void SetPlayingAnimation(unsigned int aAnimationIndex);
 private:
-	void SetHierarchy(unsigned int aBoneID,CU::Matrix4x4<float> aParentMatrix);
+	void SetHierarchy(unsigned int aBoneID,const CU::Matrix4x4<float>& aParentMatrix);
 	void UpdateAnimationHierarcy(float t);
 	eAnimationState myState;
 	int myCurrentAnimation;

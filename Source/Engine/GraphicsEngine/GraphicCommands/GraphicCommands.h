@@ -52,6 +52,7 @@ public:
 	}
 
 	void Execute();
+	void ForceSetDone();
 	void StartOver();
 	void Reset();
 

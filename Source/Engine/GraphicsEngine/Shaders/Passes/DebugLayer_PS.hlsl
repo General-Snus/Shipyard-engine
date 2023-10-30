@@ -16,9 +16,8 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     const float metallic = Material.b;
     const float roughness = Material.g;
     const float occlusion = Material.r;
+    const float depth = DepthMap.Sample(defaultSampler, uv).r;
     
-    
-#if _DEBUG
     switch(FB_RenderMode)
     {
     default:
@@ -94,7 +93,8 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     } 
      case 10:
     {
-    result.Color.rgb = 1;
+    result.Color.rgb = 0;
+    result.Color.r = depth;
     result.Color.a = 1.0f;
     break;
     } 
@@ -117,9 +117,6 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     break;
     } 
     
-} 
-#endif
-    
-    
+}    
     return result;
 }

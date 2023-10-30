@@ -68,6 +68,11 @@ void GraphicsCommandList::Execute()
 	}
 }
 
+void GraphicsCommandList::ForceSetDone()
+{
+	isFinished = true;
+}
+
 void GraphicsCommandList::StartOver()
 {
 	myRoot = std::bit_cast<GraphicCommandBase*>(myData);
@@ -75,7 +80,6 @@ void GraphicsCommandList::StartOver()
 	myCursor = 0;
 	isFinished = false;
 }
-
 
 void GraphicsCommandList::Reset()
 {

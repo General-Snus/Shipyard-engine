@@ -73,9 +73,10 @@ void ShadowRenderer::Execute()
 			}
 		}
 	}
+	ShadowCommandList.ForceSetDone();
 }
 
 void ShadowRenderer::ResetShadowList()
-{
-	ShadowCommandList.Reset();
+{ 
+	ShadowCommandList.Reset();  
 }

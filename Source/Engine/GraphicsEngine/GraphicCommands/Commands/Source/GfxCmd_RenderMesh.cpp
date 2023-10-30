@@ -2,9 +2,8 @@
 #include "../Headers/GfxCmd_RenderMesh.h" 
 #include <Engine/GraphicsEngine/Rendering/Buffers/ObjectBuffer.h>
 
-GfxCmd_RenderMesh::GfxCmd_RenderMesh(const RenderData& aData,const Matrix& aTransform) : myMesh(aData.myMesh)
-{ 
-	myTransform = aTransform;
+GfxCmd_RenderMesh::GfxCmd_RenderMesh(const RenderData& aData,const Matrix& aTransform) : myMesh(aData.myMesh) ,myTransform(aTransform)
+{  
 	MaxExtents = aData.myMesh->MaxBox;
 	MinExtents = aData.myMesh->MinBox;
 

@@ -53,7 +53,7 @@ void cAnimator::Update()
 	}
 }
 
-void cAnimator::RenderAnimation(const RenderData& aData,const CU::Matrix4x4<float> aTransform)
+void cAnimator::RenderAnimation(const RenderData& aData,const Matrix& aTransform)
 {
 	GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderSkeletalMeshShadow>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
 	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderSkeletalMesh>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
@@ -71,7 +71,7 @@ void cAnimator::AddAnimation(const std::filesystem::path& aFilePath)
 	myAnimations.push_back(animation);
 }
 
-void cAnimator::SetHierarchy(unsigned int aBoneID,CU::Matrix4x4<float> aParentMatrix)
+void cAnimator::SetHierarchy(unsigned int aBoneID,const CU::Matrix4x4<float>& aParentMatrix)
 {
 	std::string boneName = mySkeleton->myBones[aBoneID].Name;
 	CU::Matrix4x4<float> newBoneTransform = myAnimations[myCurrentAnimation]->Frames[myCurrentFrame].myTransforms[boneName] * aParentMatrix;

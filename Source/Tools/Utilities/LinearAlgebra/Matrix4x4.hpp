@@ -22,14 +22,15 @@ namespace CommonUtilities
 		static Matrix4x4<T> CreateRotationAroundX(const T aAngleInRadians);
 		static Matrix4x4<T> CreateRotationAroundY(const T aAngleInRadians);
 		static Matrix4x4<T> CreateRotationAroundZ(const T aAngleInRadians);
-		static Matrix4x4<T> CreateRotationMatrix(const Vector3<T>& aAnglesInRadians);
+		static Matrix4x4<T> CreateRotationMatrix(const Vector3<T>& aAnglesInRadians); 
 		static Matrix4x4<T> CreateScaleMatrix(const Vector3<T>& aScale);
+		static Matrix4x4<T> CreateTranslationMatrix(const Vector3<T> aPosition);
 
 		// Static function for creating a transpose of a matrix.
 		static Matrix4x4<T> Transpose(const Matrix4x4<T>& aMatrixToTranspose);
 		static Matrix4x4<T> GetFastInverse(const Matrix4x4<T>& aTransform);
 
-		static const Matrix4x4<T> LookAt(const Vector3<T>& aFrom,const Vector3<T>& aTarget,const Vector3<T>& anUp);
+		static Matrix4x4<T> LookAt(const Vector3<T>& aFrom,const Vector3<T>& aTarget,const Vector3<T>& anUp);
 		static Matrix4x4<T> CreateOrthographicProjection(float aLeftPlane,float aRightPlane,float aBottomPlane,float aTopPlane,float aNearPlane,float aFarPlane);
 		void SetFromRaw(const T arr[16]);
 	private:
@@ -271,6 +272,17 @@ namespace CommonUtilities
 		return output;
 	}
 	template<class T>
+	inline Matrix4x4<T> Matrix4x4<T>::CreateTranslationMatrix(const Vector3<T> aPosition)
+	{
+		Matrix4x4<T> output;
+
+		output(4,1) = aPosition.x;
+		output(4,2) = aPosition.y;
+		output(4,3) = aPosition.z;
+
+		return output;
+	}
+	template<class T>
 	inline Matrix4x4<T> Matrix4x4<T>::Transpose(const Matrix4x4<T>& aMatrixToTranspose)
 	{
 		Matrix4x4<T> output;
@@ -287,7 +299,7 @@ namespace CommonUtilities
 	}
 	template<class T>
 	inline Matrix4x4<T> Matrix4x4<T>::GetFastInverse(const Matrix4x4<T>& aTransform)
-	{ 
+	{
 		Matrix4x4<T> Rotation = aTransform;
 		Matrix4x4<T> Transform;
 		for(short i = 1; i <= 3; i++)
@@ -301,9 +313,9 @@ namespace CommonUtilities
 	}
 
 	template<class T>
-	inline const Matrix4x4<T> Matrix4x4<T>::LookAt(const Vector3<T>& aFrom,const Vector3<T>& aTarget,const Vector3<T>& anUp)
+	inline Matrix4x4<T> Matrix4x4<T>::LookAt(const Vector3<T>& aFrom,const Vector3<T>& aTarget,const Vector3<T>& anUp)
 	{
-		Matrix4x4<T> result; 
+		Matrix4x4<T> result;
 
 		Vector3<T> forward = (aTarget - aFrom).GetNormalized();
 		Vector3<T> right = anUp.Cross(forward).GetNormalized();
@@ -362,5 +374,5 @@ namespace CommonUtilities
 	}
 }
 
-typedef CU::Vector3<float> Vector3f;
-typedef CU::Matrix4x4<float> Matrix;
+using Vector3f = CU::Vector3<float>;
+using Matrix = CU::Matrix4x4<float>;

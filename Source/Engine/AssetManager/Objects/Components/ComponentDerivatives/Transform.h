@@ -8,11 +8,11 @@ class Transform : public Component
 public:
 	Transform() = delete; // Create a generic cube
 	Transform(const unsigned int anOwnerId); // Create a generic cube 
-	Transform(const unsigned int anOwnerId,const Matrix& aMatrix);
+	//Transform(const unsigned int anOwnerId,const Matrix& aMatrix);
 
 	void Update() override;
 	void Render() override;
-	Matrix& GetTransform();
+	// Matrix& GetTransform();
 	const Matrix& GetTransform() const;
 
 
@@ -28,11 +28,14 @@ public:
 
 	void SetPosition(Vector2f position);
 	void SetPosition(Vector3f position);
-	Vector3f GetPosition() const;   
+	void SetPosition(float X,float Y,float Z);
+	Vector3f GetPosition() const;
+
 	 
-	void Rotate(Vector2f angularRotation,bool worldSpace);
-	void Rotate(Vector3f angularRotation,bool worldSpace);
-	void ApplyTransformation(Matrix transformationMatrix);
+	void Rotate(float X,float Y,float Z);
+	void Rotate(Vector2f angularRotation);
+	void Rotate(Vector3f angularRotation);
+	//void ApplyTransformation(Matrix transformationMatrix);
 	 
 	void SetScale(float scale);
 	void SetScale(Vector2f scale);
@@ -46,6 +49,13 @@ public:
 private:
 	bool isDirty;
 	bool isDebugGizmoEnabled;
+	void MakeSaneRotation();
+	CU::Vector3<float> myPosition;
+	CU::Vector3<float> myRotation;
+	CU::Vector3<float> myScale;
+
+
+
 	CU::Matrix4x4<float> myTransform;
 	CU::Matrix4x4<float> myWorldSpaceTransform;
 	Debug::DebugPrimitive primitive;

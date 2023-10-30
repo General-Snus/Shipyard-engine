@@ -14,6 +14,7 @@ void GfxCmd_DebugLayer::ExecuteAndDestroy()
 		RHI::SetBlendState(nullptr);
 		G_Buffer& gBuffer = GetGBuffer();
 		gBuffer.UseDebugShader();
+		RHI::SetRenderTarget(GraphicsEngine::Get().GetTargetTextures(eRenderTargets::BackBuffer).get(),GraphicsEngine::Get().GetTargetTextures(eRenderTargets::DepthBuffer).get());
 		RHI::ConfigureInputAssembler(
 			D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
 			nullptr,

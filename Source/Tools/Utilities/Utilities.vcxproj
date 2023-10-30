@@ -167,6 +167,7 @@
     <ClInclude Include="Game\SolveSudoku.hpp" />
     <ClInclude Include="Game\Timer.h" />
     <ClInclude Include="Input\EnumKeys.h" />
+    <ClInclude Include="Input\InputHandler.hpp" />
     <ClInclude Include="LinearAlgebra\AABB3D.hpp" />
     <ClInclude Include="LinearAlgebra\Circle.hpp" />
     <ClInclude Include="LinearAlgebra\Intersection.hpp" />

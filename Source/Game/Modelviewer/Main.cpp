@@ -1,7 +1,7 @@
 ﻿#define WIN32_LEAN_AND_MEAN
 #include "Windows.h" 
 #include "resource.h"
-#include "Core/Modelviewer.h"
+#include "Core/Modelviewer.h" 
 
 LRESULT CALLBACK WinProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam);
 
@@ -16,14 +16,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(nCmdShow);
 
     constexpr SIZE windowSize = { 1920, 1080 };
-    constexpr LPCWSTR windowTitle = L"Modelviewer";
+    constexpr LPCWSTR windowTitle = L"Shipyard";
 
     ModelViewer& MV = ModelViewer::Get();
     
     FILE* consoleOut;
     AllocConsole();
     freopen_s(&consoleOut, "CONOUT$", "w", stdout);
-  //  freopen_s(&consoleOut, "CONOUT$", "w",stderr);
+    //freopen_s(&consoleOut, "CONOUT$", "w",stderr);
     setvbuf(consoleOut, nullptr, _IONBF, 1024);
 
 	HWND consoleWindow = GetConsoleWindow();

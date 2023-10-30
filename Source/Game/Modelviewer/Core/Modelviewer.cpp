@@ -25,9 +25,12 @@
 #include <Tools/Utilities/Math.hpp>
 #include <Tools/ThirdParty/nlohmann/json.hpp>  
 #include <Tools/Utilities/Game/Timer.h>
+#include <Tools/Utilities/Input/InputHandler.hpp>
 
 #define _DEBUGDRAW
 #define Flashlight
+#define ParticleSystemToggle
+
 using json = nlohmann::json;
 
 bool ModelViewer::Initialize(HINSTANCE aHInstance,SIZE aWindowSize,WNDPROC aWindowProcess,LPCWSTR aWindowTitle)
@@ -93,6 +96,7 @@ int ModelViewer::Run()
 	{
 		while(PeekMessage(&msg,nullptr,0,0,PM_REMOVE))
 		{
+
 			extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);
 			if(ImGui_ImplWin32_WndProcHandler(msg.hwnd,msg.message,msg.wParam,msg.lParam))
 				return true;
@@ -105,9 +109,11 @@ int ModelViewer::Run()
 				SaveDataToJson();
 				ImGui_ImplDX11_Shutdown();
 				ImGui_ImplWin32_Shutdown();
-				ImGui::DestroyContext(); 
+				ImGui::DestroyContext();
 				return 0;
 			}
+
+			CU::InputHandler::GetInstance().UpdateEvents(msg.message,msg.wParam,msg.lParam);
 		}
 		// REMEMBER!
 		// The frame update for the game does NOT happen inside the PeekMessage loop.
@@ -115,6 +121,8 @@ int ModelViewer::Run()
 		// the update several times per frame (once for each message).
 
 		Update();
+		CU::InputHandler::GetInstance().Update();
+		CU::InputHandler::GetInstance().UpdateMouseInput(msg.message);
 	}
 
 	return 0;
@@ -139,9 +147,14 @@ void ModelViewer::HideSplashScreen() const
 
 void ModelViewer::LoadScene()
 {
-	JsonToSaveData(); 
+	JsonToSaveData();
 
 	GameObjectManager& gom = GameObjectManager::GetInstance();
+	myCustomHandler = gom.CreateGameObject();
+	myMesh = gom.CreateGameObject();
+
+
+
 
 	{
 		GameObject camera = gom.CreateGameObject();
@@ -172,13 +185,12 @@ void ModelViewer::LoadScene()
 
 
 	{
-		myMesh = gom.CreateGameObject();
+		
 		myMesh.AddComponent<cSkeletalMeshRenderer>(L"Models/SK_C_TGA_Bro.fbx");
 		myMesh.GetComponent<cSkeletalMeshRenderer>().SetMaterialPath(L"Materials/TGABroMaterial.json");
 
-		CU::Matrix4x4<float> aPosition;
-		aPosition = aPosition * CU::Matrix4x4<float>::CreateRotationAroundY(-PI);
-		myMesh.AddComponent<Transform>(aPosition);
+		Transform& transform = myMesh.AddComponent<Transform>();
+		transform.Rotate(0,-180,0);
 		myMesh.AddComponent<cAnimator>(L"Animations/Locomotion/A_C_TGA_Bro_Walk.fbx");
 		myMesh.GetComponent<cAnimator>().AddAnimation(L"Animations/Locomotion/A_C_TGA_Bro_Run.fbx");
 		myMesh.GetComponent<cAnimator>().AddAnimation(L"Animations/Idle/A_C_TGA_Bro_Idle_Brething.fbx");
@@ -191,21 +203,20 @@ void ModelViewer::LoadScene()
 		test.AddComponent<cMeshRenderer>("Models/PlaneBillboard.fbx");
 		test.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BillboardSmiley.json");
 		test.AddComponent<Transform>();
-		test.GetComponent<Transform>().Rotate(Vector3f(-90,0,0),false);
-		test.GetComponent<Transform>().GetTransform()(4,1) = 100;
+		test.GetComponent<Transform>().Rotate(-90,0,0);
+		test.GetComponent<Transform>().SetPosition(100,0,0);
 	}
 
-	//Particle System
-	{
-		myCustomHandler = gom.CreateGameObject();
+#ifdef  ParticleSystemToggle
+	{ 
 		ParticleSystem& cmp = myCustomHandler.AddComponent<ParticleSystem>();
 		auto& trans = myCustomHandler.AddComponent<Transform>();
 		trans.Move(GlobalUp * 500.f);
 
-		ParticleEmitterTemplate temp; 
+		ParticleEmitterTemplate temp;
 		temp.EmmiterSettings.StartSize = 100;
 		temp.EmmiterSettings.EndSize = 1;
-		temp.EmmiterSettings.StartColor = Vector4f(0,1,1,1);		 
+		temp.EmmiterSettings.StartColor = Vector4f(0,1,1,1);
 		temp.EmmiterSettings.Acceleration = {0,-982.f,0}; // cm scale bad fix plz
 		temp.EmmiterSettings.LifeTime = 3;
 		temp.EmmiterSettings.SpawnRate = 1000;
@@ -216,39 +227,38 @@ void ModelViewer::LoadScene()
 		cmp.AddEmitter(temp);
 
 		temp.EmmiterSettings.EndColor = Vector4f(0,1,0,1);
-		temp.EmmiterSettings.StartVelocity = Vector3f(1000.0,1000.0,0); 
+		temp.EmmiterSettings.StartVelocity = Vector3f(1000.0,1000.0,0);
 		cmp.AddEmitter(temp);
 
 		temp.EmmiterSettings.EndColor = Vector4f(0,0,1,1);
-		temp.EmmiterSettings.StartVelocity = Vector3f(0,1000.0,1000.0);  
+		temp.EmmiterSettings.StartVelocity = Vector3f(0,1000.0,1000.0);
 		cmp.AddEmitter(temp);
 
 		temp.EmmiterSettings.EndColor = Vector4f(1,0,1,1);
-		temp.EmmiterSettings.StartVelocity = Vector3f(0,1000.0,-1000.0);  
-		cmp.AddEmitter(temp); 
+		temp.EmmiterSettings.StartVelocity = Vector3f(0,1000.0,-1000.0);
+		cmp.AddEmitter(temp);
 	}
+#endif //  ParticleSystem
 
 	{
 		GameObject test2 = gom.CreateGameObject();
 		test2.AddComponent<cMeshRenderer>("Models/Buddha.fbx");
 		test2.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BuddhaMaterial.json");
-		CU::Matrix4x4<float> aPosition;
-		aPosition = aPosition * CU::Matrix4x4<float>::CreateRotationAroundY(-PI);
-		test2.AddComponent<Transform>(aPosition);
-		test2.GetComponent<Transform>().GetTransform()(4,3) = 1000;
-		test2.GetComponent<Transform>().GetTransform()(4,2) = -100;
-		test2.GetComponent<Transform>().SetScale(5);
+		Transform& trans = test2.AddComponent<Transform>();
+		trans.SetPosition(Vector3f(0,-100,1000));
+		trans.Rotate(0,-180,0);
+		trans.SetScale(5);
 	}
 
 
 	{
 		GameObject Chest = gom.CreateGameObject();
-		CU::Matrix4x4<float> ChestPosition;
-		ChestPosition = ChestPosition * CU::Matrix4x4<float>::CreateRotationAroundY(-PI);
-		Chest.AddComponent<Transform>(ChestPosition);
+		Transform& trans = Chest.AddComponent<Transform>();
+		trans.Rotate(0,-180,0);
+		trans.SetPosition(300,0,0);
+
 		Chest.AddComponent<cMeshRenderer>("Models/Chest.fbx");
 		Chest.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/ChestMaterial.json");
-		Chest.GetComponent<Transform>().GetTransform()(4,1) = 300;
 	}
 
 	{
@@ -256,7 +266,7 @@ void ModelViewer::LoadScene()
 		Box.AddComponent<cMeshRenderer>("Models/Cube.fbx");
 		Box.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/CubeMaterial.json");
 		Box.AddComponent<Transform>();
-		Box.GetComponent<Transform>().GetTransform()(4,1) = 700;
+		Box.GetComponent<Transform>().SetPosition(700,0,0);
 	}
 
 	for(int i = 1; i < 5; i++)
@@ -266,7 +276,7 @@ void ModelViewer::LoadScene()
 		gO.GetComponent<cSkeletalMeshRenderer>().SetMaterialPath(L"Materials/TGABroMaterial.json");
 		gO.AddComponent<Transform>();
 		gO.GetComponent<Transform>().SetPosition({-static_cast<float>(i) * 300.0f,0});
-		gO.GetComponent<Transform>().Rotate({0,180.0f,0},true);
+		gO.GetComponent<Transform>().Rotate(0,180.0f,0);
 		gO.AddComponent<cAnimator>(L"Animations/Locomotion/A_C_TGA_Bro_Walk.fbx");
 		gO.GetComponent<cAnimator>().AddAnimation(L"Animations/Locomotion/A_C_TGA_Bro_Run.fbx");
 		gO.GetComponent<cAnimator>().AddAnimation(L"Animations/Idle/A_C_TGA_Bro_Idle_Brething.fbx");
@@ -281,12 +291,12 @@ void ModelViewer::LoadScene()
 		std::weak_ptr<SpotLight> ptr = spotLight.GetComponent<cLight>().GetData<SpotLight>();
 		spotLight.AddComponent<Transform>();
 		spotLight.GetComponent<Transform>().SetPosition({-static_cast<float>(i) * 300.0f + 300 ,500,0});
-		spotLight.GetComponent<Transform>().Rotate({90,0,0},true);
+		spotLight.GetComponent<Transform>().Rotate(90,0,0);
 		ptr.lock()->Color = {RandomInRange(0.0f,1.0f),RandomInRange(0.0f,1.0f),RandomInRange(0.0f,1.0f)};
 		//ptr.lock()->Color = {1,1,1};
-		ptr.lock()->Range = 1000.0f; 
+		ptr.lock()->Range = 1000.0f;
 		ptr.lock()->Power = static_cast<float>(i) * 200.0f * Kilo;
-		ptr.lock()->OuterConeAngle = static_cast<float>(i) * 20.0f * DEG_TO_RAD;
+		ptr.lock()->OuterConeAngle = static_cast<float>(i) * 18.0f * DEG_TO_RAD;
 		ptr.lock()->InnerConeAngle = 1.0f * DEG_TO_RAD;
 		spotLight.GetComponent<cLight>().BindDirectionToTransform(true);
 
@@ -325,7 +335,7 @@ void ModelViewer::LoadScene()
 		test3.AddComponent<cMeshRenderer>("Models/SteelFloor.fbx");
 		test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
 		test3.AddComponent<Transform>();
-		test3.GetComponent<Transform>().GetTransform()(4,2) = -125;
+		test3.GetComponent<Transform>().SetPosition(0,-125,0);
 	}
 }
 
@@ -367,8 +377,12 @@ void ModelViewer::UpdateScene()
 		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(3);
 	}
 
-	myMesh.GetComponent<Transform>().Rotate({0,delta * 100,0},false);
-	myCustomHandler.GetComponent<Transform>().Rotate(Vector3f(0,10 * delta,0),true);
+	myMesh.GetComponent<Transform>().Rotate(0,delta * 100,0);
+	/*Transform* transform = myCustomHandler.TryGetComponent<Transform>();
+	if(transform)
+	{
+		transform->Rotate(0,10 * delta,0);
+	}*/
 
 	for(auto& data : mySaveData)
 	{
@@ -382,7 +396,7 @@ void ModelViewer::UpdateScene()
 }
 
 
-bool ModelViewer::SaveDataToJson() const 
+bool ModelViewer::SaveDataToJson() const
 {
 	std::string path = "myJson.json";
 	std::ofstream o(path);
@@ -439,7 +453,7 @@ bool ModelViewer::ContainData(SaveData<float>& data)
 	}
 	return false;
 }
-bool ModelViewer::SaveToMemory(eSaveToJsonArgument fnc, const std::string& identifier, void* arg)
+bool ModelViewer::SaveToMemory(eSaveToJsonArgument fnc,const std::string& identifier,void* arg)
 {
 	switch(fnc)
 	{
@@ -496,7 +510,7 @@ bool ModelViewer::SaveToMemory(eSaveToJsonArgument fnc, const std::string& ident
 		std::cout << "SaveFunction can not handle this argument";
 		return false;
 		break;
-	} 
+	}
 }
 bool ModelViewer::SaveToMemory(SaveData<float>& arg)
 {
