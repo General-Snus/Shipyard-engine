@@ -14,7 +14,7 @@ Logger::Logger(const std::string& aNamespace)
 std::string Logger::Timestamp() const
 {
 	SYSTEMTIME st;
-	GetSystemTime(&st);
+	GetLocalTime(&st);
 
 	std::stringstream result;
 	result << std::setfill('0') << std::setw(2) << st.wYear;

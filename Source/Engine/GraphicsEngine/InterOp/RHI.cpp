@@ -868,6 +868,24 @@ void RHI::ConfigureInputAssembler(unsigned aTopology, const ComPtr<ID3D11Buffer>
 	Context->IASetIndexBuffer(anIxBuffer.Get(), indexBufferFormat, 0);
 }
 
+void RHI::ConfigureInputAssembler(unsigned aTopology,const std::vector<ComPtr<ID3D11Buffer>>& aVxBuffer,const ComPtr<ID3D11Buffer>& anIxBuffer,
+	std::vector<unsigned> aVertexStride,const ComPtr<ID3D11InputLayout>& anInputLayout)
+{
+	Context->IASetInputLayout(anInputLayout.Get());
+	Context->IASetPrimitiveTopology(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(aTopology));
+	constexpr unsigned vxOffset = 0;
+	for(int i = 0; i < aVxBuffer.size(); i++)
+	{
+		Context->IASetVertexBuffers(i,1,aVxBuffer[i].GetAddressOf(),&aVertexStride[i],&vxOffset);
+	}
+	DXGI_FORMAT indexBufferFormat = DXGI_FORMAT_R32_UINT;
+	if(anIxBuffer == nullptr)
+	{
+		indexBufferFormat = DXGI_FORMAT_UNKNOWN;
+	}
+	Context->IASetIndexBuffer(anIxBuffer.Get(),indexBufferFormat,0);
+}
+
 void RHI::SetVertexShader(const ComPtr<ID3D11VertexShader>& aVertexShader)
 {
 	Context->VSSetShader(aVertexShader.Get(), nullptr, 0);

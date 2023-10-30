@@ -1,7 +1,6 @@
 #include "GraphicsEngine.pch.h"
 #include "G_Buffer.h"
 
-#include <Shaders/Include/Default_PS.h>
 #include <Shaders/Include/Default_VS.h> 
 #include <Shaders/Include/GBufferPS.h>
 #include <Shaders/Include/ScreenspaceQuad_VS.h>

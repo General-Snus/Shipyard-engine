@@ -24,6 +24,7 @@ float CommonUtilities::Timer::GetDeltaTime() const
 	return myDeltaTime;
 }
 
+//Nano seconds
 double CommonUtilities::Timer::GetTotalTime() const
 {
 	return std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - myStartTime).count();

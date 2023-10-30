@@ -10,8 +10,10 @@ public:
 	void Init() override;
 
 	std::vector<Element> Elements;
-	std::vector<Vertex> VertexData;
-	std::vector<unsigned int> IndexData;
+	//std::vector<Vertex> VertexData;
+	//std::vector<unsigned int> IndexData;
+
+
 
 	CU::Vector3<float> MaxBox;
 	CU::Vector3<float> MinBox;

@@ -35,7 +35,7 @@ using json = nlohmann::json;
 
 bool ModelViewer::Initialize(HINSTANCE aHInstance,SIZE aWindowSize,WNDPROC aWindowProcess,LPCWSTR aWindowTitle)
 {
-	myLogger = Logger::Create("ModelViewer");
+	MVLogger = Logger::Create("ModelViewer");
 	myModuleHandle = aHInstance;
 
 	constexpr LPCWSTR windowClassName = L"ModelViewerMainWindow";
@@ -530,7 +530,7 @@ void ModelViewer::ExpandWorldBounds(CU::Sphere<float> sphere)
 {
 	if(myWorldBounds.ExpandSphere(sphere))
 	{
-		std::cout << "world bounds was expanded" << "\n";
+		MVLogger.Log("World bounds was expanded");
 		for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
 		{
 			i.SetIsDirty(true);

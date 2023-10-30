@@ -266,6 +266,8 @@ public:
 	 */
 	static void ConfigureInputAssembler(unsigned aTopology,const ComPtr<ID3D11Buffer>& aVxBuffer,const ComPtr<ID3D11Buffer>& anIxBuffer,unsigned aVertexStride,const ComPtr<ID3D11InputLayout>& anInputLayout);
 
+	static void ConfigureInputAssembler(unsigned aTopology,const std::vector<ComPtr<ID3D11Buffer>>& aVxBuffer,const ComPtr<ID3D11Buffer>& anIxBuffer,std::vector<unsigned> aVertexStride,const ComPtr<ID3D11InputLayout>& anInputLayout);
+
 	/**
 	 * Configures the 2nd stage of the Pipeline, the Vertex Shader Stage, to use the specified Vertex Shader program when drawing pixels.
 	 * @param aVertexShader The Vertex Shader program to to use.

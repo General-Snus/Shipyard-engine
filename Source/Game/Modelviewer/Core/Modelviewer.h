@@ -32,7 +32,7 @@ class ModelViewer
 
 	ApplicationState myApplicationState;
 
-	Logger myLogger;
+	Logger MVLogger;
 	ModelViewer() = default;
 
 	void ShowSplashScreen();
@@ -72,7 +72,7 @@ public:
 	}
 	FORCEINLINE static Logger& GetLogger()
 	{
-		return Get().myLogger;
+		return Get().MVLogger;
 	}
 
 	bool Initialize(HINSTANCE aHInstance,SIZE aWindowSize,WNDPROC aWindowProcess,LPCWSTR aWindowTitle);
