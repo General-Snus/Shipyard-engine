@@ -8,6 +8,7 @@
 #include <Engine/GraphicsEngine/Rendering/Buffers/LightBuffer.h>
 #include <Engine/GraphicsEngine/Rendering/Buffers/LineBuffer.h>
 #include <Engine/GraphicsEngine/Rendering/Buffers/G_buffer.h>
+#include <Engine/GraphicsEngine/Rendering/InstanceRenderer/InstanceRenderer.h>
 
 
 typedef CU::Matrix4x4<float>  Matrix;
@@ -20,6 +21,7 @@ protected:
 	LineBuffer& GetLineBuffer();
 	LightBuffer& GetLightBuffer();
 	G_Buffer& GetGBuffer();
+	InstanceRenderer& GetInstanceRenderer();
 public:
 	virtual ~GraphicCommandBase() = default;
 	virtual void ExecuteAndDestroy() = 0;

@@ -200,6 +200,7 @@
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetLightBuffer.h" />
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetRenderTarget.h" />
     <ClInclude Include="InterOp\ShaderInfo.h" />
+    <ClInclude Include="Rendering\InstanceRenderer\InstanceRenderer.h" />
     <ClInclude Include="Rendering\ParticleRenderer\ParticleRenderer.h" />
     <ClInclude Include="Rendering\ParticleRenderer\ParticleVertex.h" />
     <ClInclude Include="Rendering\Buffers\G_Buffer.h" />
@@ -257,6 +258,7 @@
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetFrameBuffer.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetLightBuffer.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetRenderTarget.cpp" />
+    <ClCompile Include="Rendering\InstanceRenderer\InstanceRenderer.cpp" />
     <ClCompile Include="Rendering\ParticleRenderer\ParticleRenderer.cpp" />
     <ClCompile Include="Rendering\ParticleRenderer\ParticleVertex.cpp" />
     <ClCompile Include="Rendering\Buffers\G_Buffer.cpp" />

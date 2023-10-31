@@ -17,6 +17,10 @@ G_Buffer& GraphicCommandBase::GetGBuffer()
 {
 	return GraphicsEngine::Get().myG_Buffer;
 }
+InstanceRenderer& GraphicCommandBase::GetInstanceRenderer()
+{
+	return GraphicsEngine::Get().myInstanceRenderer;
+}
 LineBuffer& GraphicCommandBase::GetLineBuffer()
 {
 	return GraphicsEngine::Get().myLineBuffer;

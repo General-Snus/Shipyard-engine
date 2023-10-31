@@ -141,6 +141,7 @@ private:
 	ComPtr<ID3D11BlendState> AdditiveBlendState;
 	ShadowRenderer myShadowRenderer;
 	ParticleRenderer myParticleRenderer;
+	InstanceRenderer myInstanceRenderer;
 	// We're a container singleton, no instancing this outside the class.
 	GraphicsEngine() = default;
 

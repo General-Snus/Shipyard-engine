@@ -5,8 +5,7 @@
 class GfxCmd_RenderMesh : public GraphicCommandBase
 {
 protected:
-	std::shared_ptr<Mesh> myMesh;
-	std::vector<std::weak_ptr<Material>> myMaterials;
+	const RenderData& myRenderData;
 	Matrix myTransform;
 	CU::Vector3<float> MinExtents; // 12 bytes 
 	CU::Vector3<float> MaxExtents; // 12 bytes  
