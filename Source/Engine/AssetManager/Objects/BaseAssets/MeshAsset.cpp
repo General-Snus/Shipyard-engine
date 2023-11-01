@@ -136,25 +136,7 @@ void Mesh::Init()
 			//VertexData.insert(VertexData.end(),mdlVertices.begin(),mdlVertices.end());
 			//IndexData.insert(IndexData.end(),mdlIndicies.begin(),mdlIndicies.end());
 
-			//// After all not, Why shouldnt i keep the instances for my self?
-			//D3D11_BUFFER_DESC vertexBufferDesc = {};
-			//vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-			//vertexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(Vertex) * mdlVertices.size());
-			//vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-			//vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-			//vertexBufferDesc.MiscFlags = 0;
-			//vertexBufferDesc.StructureByteStride = 0;
-
-			//D3D11_SUBRESOURCE_DATA vertexData = {};
-			//vertexData.pSysMem = mdlVertices.data();
-
-
-			//auto result = RHI::Device->CreateBuffer(&vertexBufferDesc,&vertexData,vertexBuffer.GetAddressOf());
-			//if(FAILED(result))
-			//{
-			//	AMLogger.Err("Failed to create mesh Instance buffer");
-			//	return; 
-			//}
+			//// After all not, Why shouldnt i keep the instances for my self? 
 			 ComPtr<ID3D11Buffer> vertexBuffer;
 			 if(!RHI::CreateVertexBuffer<Vertex>(vertexBuffer,mdlVertices))
 			 {
@@ -184,4 +166,29 @@ void Mesh::Init()
 	MaxBox = CU::Vector3<float>(inMesh.BoxBounds.Max[0],inMesh.BoxBounds.Max[1],inMesh.BoxBounds.Max[2]);
 	MinBox = CU::Vector3<float>(inMesh.BoxBounds.Min[0],inMesh.BoxBounds.Min[1],inMesh.BoxBounds.Min[2]);
 	isLoadedComplete = true;
+}
+
+void Mesh::UpdateInstanceBuffer()
+{
+	D3D11_BUFFER_DESC vertexBufferDesc{};
+	vertexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(Matrix) * myInstances.size());
+	vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	vertexBufferDesc.MiscFlags = 0;
+	vertexBufferDesc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA vertexSubResourceData{};
+	vertexSubResourceData.pSysMem =  myInstances.data();
+
+	HRESULT result; 
+	result = RHI::Device->CreateBuffer(&vertexBufferDesc,
+		&vertexSubResourceData,
+		myInstanceBuffer.GetAddressOf());
+
+	if(FAILED(result))
+	{
+		AMLogger.Log("Failed to create Instance buffer");
+		return;
+	}
 }

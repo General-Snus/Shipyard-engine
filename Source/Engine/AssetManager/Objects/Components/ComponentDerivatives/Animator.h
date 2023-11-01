@@ -30,7 +30,7 @@ public:
 
 	void Update() override;
 
-	void RenderAnimation(const RenderData& aMesh,const Matrix& aTransform);
+	void RenderAnimation(RenderData* aMesh,const Matrix& aTransform);
 	void AddAnimation(Animation aAnimation);
 	void AddAnimation(const std::filesystem::path& aFilePath);
 	eAnimationState GetState() const;

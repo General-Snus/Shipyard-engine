@@ -23,15 +23,15 @@ public:
 
 	FORCEINLINE const std::vector<Element>& GetElements() const
 	{
-		return myRenderData.myMesh->Elements;
+		return myRenderData->myMesh->Elements;
 	}
 	FORCEINLINE std::shared_ptr<Mesh> GetRawMesh() const
 	{
-		return myRenderData.myMesh;
+		return myRenderData->myMesh;
 	}
 
 protected:
-	RenderData myRenderData;
+	RenderData* myRenderData;
 };
 
 class cSkeletalMeshRenderer : public cMeshRenderer	

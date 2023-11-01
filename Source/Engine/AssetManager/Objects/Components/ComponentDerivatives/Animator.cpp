@@ -53,7 +53,7 @@ void cAnimator::Update()
 	}
 }
 
-void cAnimator::RenderAnimation(const RenderData& aData,const Matrix& aTransform)
+void cAnimator::RenderAnimation(RenderData* aData,const Matrix& aTransform)
 {
 	GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderSkeletalMeshShadow>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
 	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderSkeletalMesh>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));

@@ -2,7 +2,7 @@
 #include "../Headers/GfxCmd_RenderSkeletalMeshShadow.h"
 
 GfxCmd_RenderSkeletalMeshShadow::GfxCmd_RenderSkeletalMeshShadow(
-	const RenderData& aMesh,
+	RenderData* aMesh,
 	const Matrix& aTransform,
 	const Matrix* aBoneTransformList,
 	unsigned int aNumBones) :
@@ -24,15 +24,15 @@ void GfxCmd_RenderSkeletalMeshShadow::ExecuteAndDestroy()
 
 	RHI::UpdateConstantBufferData(objectBuffer);
 	RHI::Context->PSSetShader(nullptr,nullptr,0);
-
-	for(const auto& aElement : myMesh->Elements)
-	{
-		RHI::ConfigureInputAssembler(
-			aElement.PrimitiveTopology,
-			aElement.VertexBuffer,
-			aElement.IndexBuffer,
-			aElement.Stride,
-			Vertex::InputLayout);
-		RHI::DrawIndexed(aElement.NumIndices);
-	}
+	GetInstanceRenderer().AddInstance(myRenderData);
+	//for(const auto& aElement : myMesh->Elements)
+	//{
+	//	RHI::ConfigureInputAssembler(
+	//		aElement.PrimitiveTopology,
+	//		aElement.VertexBuffer,
+	//		aElement.IndexBuffer,
+	//		aElement.Stride,
+	//		Vertex::InputLayout);
+	//	RHI::DrawIndexed(aElement.NumIndices);
+	//}
 }

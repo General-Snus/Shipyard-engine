@@ -307,6 +307,7 @@ public:
 		}
 	}  
 
+	FORCEINLINE InstanceRenderer& GetInstanceRenderer() { return myInstanceRenderer; } 
 	FORCEINLINE std::shared_ptr< Shader> GetDebugLineVS() const { return debugLineVS; }
 	FORCEINLINE std::shared_ptr< Shader> GetDebugLinePS() const { return debugLinePS; }
 

@@ -3,7 +3,7 @@
 #include <Engine/AssetManager/Objects/Components/ComponentDerivatives/MeshRenderer.h>
 #include <Engine/GraphicsEngine/Rendering/Buffers/ObjectBuffer.h> 
 
-GfxCmd_RenderMeshShadow::GfxCmd_RenderMeshShadow(const RenderData& aMesh,const Matrix& aTransform) : GfxCmd_RenderMesh(aMesh,aTransform)
+GfxCmd_RenderMeshShadow::GfxCmd_RenderMeshShadow(RenderData* aMesh,const Matrix& aTransform) : GfxCmd_RenderMesh(aMesh,aTransform)
 {
 }
 
@@ -17,16 +17,16 @@ void GfxCmd_RenderMeshShadow::ExecuteAndDestroy()
 
 	RHI::UpdateConstantBufferData(objectBuffer);
 	RHI::Context->PSSetShader(nullptr,nullptr,0);
-	
-	for(const auto& aElement : myMesh->Elements)
-	{
-		RHI::ConfigureInputAssembler(
-			aElement.PrimitiveTopology,
-			aElement.VertexBuffer,
-			aElement.IndexBuffer,
-			aElement.Stride,
-			Vertex::InputLayout);
-		RHI::DrawIndexed(aElement.NumIndices);
-	}
+	GetInstanceRenderer().AddInstance(myRenderData);
+	//for(const auto& aElement : myMesh->Elements)
+	//{
+	//	RHI::ConfigureInputAssembler(
+	//		aElement.PrimitiveTopology,
+	//		aElement.VertexBuffer,
+	//		aElement.IndexBuffer,
+	//		aElement.Stride,
+	//		Vertex::InputLayout);
+	//	RHI::DrawIndexed(aElement.NumIndices);
+	//}
 }
 

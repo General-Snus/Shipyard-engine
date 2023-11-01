@@ -525,6 +525,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 	myCamera->SetCameraToFrameBuffer();
 	myG_Buffer.SetWriteTargetToBuffer(); //Let all write to textures
 	DeferredCommandList.Execute();
+	myInstanceRenderer.Execute();
 
 	//decals
 	//if picking check
