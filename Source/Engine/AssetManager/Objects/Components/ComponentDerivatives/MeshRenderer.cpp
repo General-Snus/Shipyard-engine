@@ -42,6 +42,7 @@ void cMeshRenderer::Render()
 		GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform());
 		return;
 	}
+	myRenderData->myMesh->myInstances.push_back(Matrix());
 	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,CU::Matrix4x4<float>());
 	GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,CU::Matrix4x4<float>());
 }
@@ -78,6 +79,7 @@ void cSkeletalMeshRenderer::Render()
 		GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform());
 		return;
 	}
+	myRenderData->myMesh->myInstances.push_back(Matrix());
 	GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,CU::Matrix4x4<float>());
 	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,CU::Matrix4x4<float>());
 }
