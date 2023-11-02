@@ -133,10 +133,13 @@ void Mesh::Init()
 			}
 			mdlIndicies = element.Indices;
 
+<<<<<<< Updated upstream
 			//VertexData.insert(VertexData.end(),mdlVertices.begin(),mdlVertices.end());
 			//IndexData.insert(IndexData.end(),mdlIndicies.begin(),mdlIndicies.end());
 
 			//// After all not, Why shouldnt i keep the instances for my self? 
+=======
+>>>>>>> Stashed changes
 			 ComPtr<ID3D11Buffer> vertexBuffer;
 			 if(!RHI::CreateVertexBuffer<Vertex>(vertexBuffer,mdlVertices))
 			 {

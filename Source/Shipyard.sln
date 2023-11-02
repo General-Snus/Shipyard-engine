@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32811.315
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MyDependencies", "MyDependencies", "{2D4972E0-2997-433C-94A8-FC0F50833957}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AssetManager", "Engine\AssetManager\AssetManager.vcxproj", "{EB78804E-5BF9-45D7-8E83-F03765BED7AB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{F691C6F0-CCCA-4376-A4F9-FB06F002C99E}"
