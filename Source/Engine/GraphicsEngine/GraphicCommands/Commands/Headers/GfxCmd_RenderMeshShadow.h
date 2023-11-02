@@ -5,7 +5,7 @@
 class GfxCmd_RenderMeshShadow : public GfxCmd_RenderMesh
 {
 public:
-	GfxCmd_RenderMeshShadow(RenderData* aMesh,const Matrix& aTransform);
+	GfxCmd_RenderMeshShadow(RenderData* aMesh,const Matrix& aTransform,bool instanced);
 	void Destroy() override {};
 	void ExecuteAndDestroy() override;
 };

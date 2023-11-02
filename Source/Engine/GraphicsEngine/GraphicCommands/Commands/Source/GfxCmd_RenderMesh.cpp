@@ -2,10 +2,10 @@
 #include "../Headers/GfxCmd_RenderMesh.h" 
 #include <Engine/GraphicsEngine/Rendering/Buffers/ObjectBuffer.h>
 
-GfxCmd_RenderMesh::GfxCmd_RenderMesh(RenderData* aData,const Matrix& aTransform) : myRenderData(aData),myTransform(aTransform)
+GfxCmd_RenderMesh::GfxCmd_RenderMesh(RenderData* aData,const Matrix& aTransform,bool instanced) : myRenderData(aData),myTransform(aTransform),instanced(instanced)
 {
 	MaxExtents = aData->myMesh->MaxBox;
-	MinExtents = aData->myMesh->MinBox; 
+	MinExtents = aData->myMesh->MinBox;
 }
 void GfxCmd_RenderMesh::ExecuteAndDestroy()
 {
@@ -14,32 +14,31 @@ void GfxCmd_RenderMesh::ExecuteAndDestroy()
 	objectBuffer.Data.MaxExtents = MaxExtents;
 	objectBuffer.Data.MinExtents = MinExtents;
 	objectBuffer.Data.hasBone = false;
+	objectBuffer.Data.isInstanced = instanced;
 
 	RHI::UpdateConstantBufferData(objectBuffer);
 
 	G_Buffer gBuffer = GetGBuffer();
 	gBuffer.UseGBufferShader();
 
-	GetInstanceRenderer().AddInstance(myRenderData);
-	//for(const auto& aElement : myMesh->Elements)
-	//{
-	//	if(myMaterials.size() > 0)
-	//	{
-	//		myMaterials[0].lock()->Update();
-	//	}
-	//
-	//	/*const std::vector<ComPtr<ID3D11Buffer>> vxBuffers
-	//	{
-	//		aElement.VertexBuffer,
-	//		myMesh->
-	//	}*/
-	//
-	//	RHI::ConfigureInputAssembler(
-	//		aElement.PrimitiveTopology,
-	//		aElement.VertexBuffer,
-	//		aElement.IndexBuffer,
-	//		aElement.Stride,
-	//		Vertex::InputLayout);
-	//	RHI::DrawIndexed(aElement.NumIndices);
-	//}
+	if(instanced)
+	{
+		GetInstanceRenderer().AddInstance(myRenderData);
+		return;
+	} 
+
+	for(const auto& aElement : myRenderData->myMesh->Elements)
+	{
+		if(myRenderData->myMaterials.size())
+		{
+			myRenderData->myMaterials[0].lock()->Update();
+		} 
+		RHI::ConfigureInputAssembler(
+			aElement.PrimitiveTopology,
+			aElement.VertexBuffer,
+			aElement.IndexBuffer,
+			aElement.Stride,
+			Vertex::InputLayout);
+		RHI::DrawIndexed(aElement.NumIndices);
+	}
 }

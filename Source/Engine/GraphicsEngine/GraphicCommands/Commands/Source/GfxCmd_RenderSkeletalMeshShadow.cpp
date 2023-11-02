@@ -17,6 +17,8 @@ void GfxCmd_RenderSkeletalMeshShadow::ExecuteAndDestroy()
 	objectBuffer.Data.MaxExtents = MaxExtents;
 	objectBuffer.Data.MinExtents = MinExtents;
 	objectBuffer.Data.hasBone = true;
+	objectBuffer.Data.isInstanced = false;
+
 	for(int i = 0; i < 128; i++)
 	{
 		objectBuffer.Data.myBoneTransforms[i] = myBoneTransforms[i];
@@ -24,15 +26,15 @@ void GfxCmd_RenderSkeletalMeshShadow::ExecuteAndDestroy()
 
 	RHI::UpdateConstantBufferData(objectBuffer);
 	RHI::Context->PSSetShader(nullptr,nullptr,0);
-	GetInstanceRenderer().AddInstance(myRenderData);
-	//for(const auto& aElement : myMesh->Elements)
-	//{
-	//	RHI::ConfigureInputAssembler(
-	//		aElement.PrimitiveTopology,
-	//		aElement.VertexBuffer,
-	//		aElement.IndexBuffer,
-	//		aElement.Stride,
-	//		Vertex::InputLayout);
-	//	RHI::DrawIndexed(aElement.NumIndices);
-	//}
+	//GetInstanceRenderer().AddInstance(myRenderData);
+	for(const auto& aElement :myRenderData->myMesh->Elements)
+	{
+		RHI::ConfigureInputAssembler(
+			aElement.PrimitiveTopology,
+			aElement.VertexBuffer,
+			aElement.IndexBuffer,
+			aElement.Stride,
+			Vertex::InputLayout);
+		RHI::DrawIndexed(aElement.NumIndices);
+	}
 }

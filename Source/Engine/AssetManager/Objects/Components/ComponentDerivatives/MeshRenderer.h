@@ -31,6 +31,7 @@ public:
 	}
 
 protected:
+	bool isInstanced = true;
 	RenderData* myRenderData;
 };
 

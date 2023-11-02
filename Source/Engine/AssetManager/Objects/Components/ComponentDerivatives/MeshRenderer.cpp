@@ -37,14 +37,20 @@ void cMeshRenderer::Render()
 	Transform* myTransform = this->TryGetComponent<Transform>();
 	if(myTransform != nullptr)
 	{
-		myRenderData->myMesh->myInstances.push_back(myTransform->GetTransform());
-		GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform());
-		GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform());
+		if(isInstanced)
+		{
+			myRenderData->myMesh->myInstances.push_back(myTransform->GetTransform());
+		}
+		GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),isInstanced);
+		GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform(),isInstanced);
 		return;
 	}
-	myRenderData->myMesh->myInstances.push_back(Matrix());
-	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,CU::Matrix4x4<float>());
-	GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,CU::Matrix4x4<float>());
+	if(isInstanced)
+	{
+		myRenderData->myMesh->myInstances.push_back(Matrix());
+	}
+	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,CU::Matrix4x4<float>(),isInstanced);
+	GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,CU::Matrix4x4<float>(),isInstanced);
 }
 
 cSkeletalMeshRenderer::cSkeletalMeshRenderer(const unsigned int anOwnerId) : cMeshRenderer(anOwnerId)
@@ -69,17 +75,17 @@ void cSkeletalMeshRenderer::Render()
 	if(myTransform != nullptr)
 	{
 		cAnimator* myAnimation = this->TryGetComponent<cAnimator>();
-		myRenderData->myMesh->myInstances.push_back(myTransform->GetTransform());
+		//myRenderData->myMesh->myInstances.push_back(myTransform->GetTransform());
 		if(myAnimation != nullptr)
 		{
 			myAnimation->RenderAnimation(myRenderData,myTransform->GetTransform());
 			return;
 		}
-		GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform());
-		GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform());
+		GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform(),false);
+		GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),false);
 		return;
 	}
-	myRenderData->myMesh->myInstances.push_back(Matrix());
-	GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,CU::Matrix4x4<float>());
-	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,CU::Matrix4x4<float>());
+	//myRenderData->myMesh->myInstances.push_back(Matrix());
+	GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,CU::Matrix4x4<float>(),false);
+	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,CU::Matrix4x4<float>(),false);
 }

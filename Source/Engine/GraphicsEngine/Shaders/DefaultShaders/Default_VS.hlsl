@@ -17,7 +17,7 @@ DefaultVertexToPixel main(DefaultVertexInput input)
     result.Tangent = input.Tangent;
     result.BiNormal = cross(input.Normal, input.Tangent);
     
-    if (hasBone)
+    if(hasBone)
     {
         float4x4 skinMatrix = 0;
         skinMatrix += OB_BoneTransform[input.BoneIds[0]] * input.BoneWeights[0];
@@ -26,29 +26,35 @@ DefaultVertexToPixel main(DefaultVertexInput input)
         skinMatrix += OB_BoneTransform[input.BoneIds[3]] * input.BoneWeights[3];
         result.Position = mul(skinMatrix, result.Position);
         
-        const float3x3 skinNormalRotation = (float3x3) transpose(skinMatrix);
+        const float3x3 skinNormalRotation = (float3x3)transpose(skinMatrix);
         result.Normal = mul(input.Normal, skinNormalRotation);
-        result.BiNormal = mul(result.BiNormal, (float3x3) skinMatrix);
-        result.Tangent = mul(result.Tangent, (float3x3) skinMatrix);
+        result.BiNormal = mul(result.BiNormal, (float3x3)skinMatrix);
+        result.Tangent = mul(result.Tangent, (float3x3)skinMatrix);
     }
     
-    const float3x3 worldNormalRotation = (float3x3)input.World;
+    
+    
+    float3x3 worldNormalRotation = (float3x3)OB_Transform;
+    result.WorldPosition = mul(OB_Transform, result.Position);
+    if(OB_Instanced)
+    {
+        worldNormalRotation = (float3x3)input.World;
+        result.WorldPosition = mul(input.World, result.Position);
+    }
     result.Normal = mul(result.Normal, transpose(worldNormalRotation));
     result.BiNormal = mul(result.BiNormal, worldNormalRotation);
     result.Tangent = mul(result.Tangent, worldNormalRotation);
     
     
-     //Local to world    
-    result.Position = mul(input.World, result.Position);
-    result.WorldPosition = result.Position;
-    result.Position = mul(FB_InvView, result.Position);
+     //Local to world     
+    result.Position = mul(FB_InvView, result.WorldPosition);
     result.Position = mul(FB_Proj, result.Position);
     
     float4 vertexColorBasedOnPositionInBox;
     vertexColorBasedOnPositionInBox.xy = input.UV.xy;
     vertexColorBasedOnPositionInBox.z = 1;
     vertexColorBasedOnPositionInBox.w = 1;
-    result.VxColor = vertexColorBasedOnPositionInBox; 
+    result.VxColor = vertexColorBasedOnPositionInBox;
     return result;
 }
   

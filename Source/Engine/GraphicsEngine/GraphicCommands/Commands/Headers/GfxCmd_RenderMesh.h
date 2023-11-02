@@ -9,9 +9,10 @@ protected:
 	Matrix myTransform;
 	CU::Vector3<float> MinExtents; // 12 bytes 
 	CU::Vector3<float> MaxExtents; // 12 bytes  
+	bool instanced;
 
 public:
-	GfxCmd_RenderMesh(RenderData* aData,const Matrix& aTransform);
+	GfxCmd_RenderMesh(RenderData* aData,const Matrix& aTransform,bool instanced);
 	void Destroy() override
 	{
 	};

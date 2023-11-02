@@ -2,7 +2,7 @@
 #include "../Headers/GfxCmd_RenderSkeletalMesh.h"
 
 GfxCmd_RenderSkeletalMesh::GfxCmd_RenderSkeletalMesh(RenderData* aData,
-	const Matrix& aTransform,const Matrix* aBoneTransformList,unsigned int aNumBones) : GfxCmd_RenderMesh(aData,aTransform)
+	const Matrix& aTransform,const Matrix* aBoneTransformList,unsigned int aNumBones) : GfxCmd_RenderMesh(aData,aTransform,false)
 {
 	aNumBones;
 	assert(aNumBones < 128);
@@ -18,6 +18,7 @@ void GfxCmd_RenderSkeletalMesh::ExecuteAndDestroy()
 	objectBuffer.Data.MaxExtents = MaxExtents;
 	objectBuffer.Data.MinExtents = MinExtents;
 	objectBuffer.Data.hasBone = true;
+	objectBuffer.Data.isInstanced = false;
 
 	for(int i = 0; i < 128; i++)
 	{
@@ -27,18 +28,18 @@ void GfxCmd_RenderSkeletalMesh::ExecuteAndDestroy()
 	RHI::UpdateConstantBufferData(objectBuffer);
 	G_Buffer gBuffer = GetGBuffer();
 	gBuffer.UseGBufferShader();
-	GetInstanceRenderer().AddInstance( myRenderData);
-	//for(const auto& aElement : myMesh->Elements)
-	//{
-	//	if (!myMaterials.empty())
-	//	{
-	//		myMaterials[0].lock()->Update();
-	//	} 
-	//	RHI::ConfigureInputAssembler(aElement.PrimitiveTopology,
-	//		aElement.VertexBuffer,
-	//		aElement.IndexBuffer,
-	//		aElement.Stride,
-	//		Vertex::InputLayout);
-	//	RHI::DrawIndexed(aElement.NumIndices);
-	//}
+	//GetInstanceRenderer().AddInstance( myRenderData);
+	for(const auto& aElement :  myRenderData->myMesh->Elements)
+	{
+		if (!myRenderData->myMaterials.empty())
+		{
+			myRenderData->myMaterials[0].lock()->Update();
+		} 
+		RHI::ConfigureInputAssembler(aElement.PrimitiveTopology,
+			aElement.VertexBuffer,
+			aElement.IndexBuffer,
+			aElement.Stride,
+			Vertex::InputLayout);
+		RHI::DrawIndexed(aElement.NumIndices);
+	}
 }
