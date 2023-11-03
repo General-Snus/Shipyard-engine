@@ -8,8 +8,9 @@ void InstanceRenderer::Init()
 
 void InstanceRenderer::Execute()
 {
-	for(auto& i : instanceRenderData)
+	for(auto& pair : instanceRenderData)
 	{
+		auto i = pair.second;
 		if(i->myMesh->isLoadedComplete)
 		{
 			i->myMesh->UpdateInstanceBuffer();
@@ -50,5 +51,13 @@ void InstanceRenderer::Execute()
 
 void InstanceRenderer::AddInstance(RenderData* aRenderData)
 {
-	instanceRenderData.emplace(aRenderData);
+	pairData aPair;
+	aPair.first = aRenderData->myMesh->AssetPath.string();
+	aPair.second = aRenderData;
+
+	if(!instanceRenderData.contains(aPair))
+	{
+		instanceRenderData.emplace(aPair);
+	}
 }
+ 

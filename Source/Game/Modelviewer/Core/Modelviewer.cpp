@@ -251,11 +251,17 @@ void ModelViewer::LoadScene()
 	}
 
 
+	for(size_t i = 0; i < 1000; i++)
 	{
+		float y = sin(2*PI*(i / 1000.0f)) * 1000;
+		float x = cos(2*PI*(i / 1000.0f)) * 1000;
+
+
+
 		GameObject Chest = gom.CreateGameObject();
 		Transform& trans = Chest.AddComponent<Transform>();
 		trans.Rotate(0,-180,0);
-		trans.SetPosition(300,0,0);
+		trans.SetPosition(x,0,y);
 
 		Chest.AddComponent<cMeshRenderer>("Models/Chest.fbx");
 		Chest.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/ChestMaterial.json");

@@ -1,14 +1,20 @@
 #pragma once
-
 #include <Engine/AssetManager/AssetManager.pch.h> 
 
 #define AsUINT(v) static_cast<unsigned>(v)
  
 struct RenderData
 {
+	bool operator==(const RenderData& other) const
+	{
+		return (myMesh->AssetPath == other.myMesh->AssetPath );
+	} 
 	std::shared_ptr<Mesh> myMesh;
 	std::vector<std::weak_ptr<Material>> myMaterials;
 };
+ 
+
+
 class cMeshRenderer : public Component
 {
 public:
