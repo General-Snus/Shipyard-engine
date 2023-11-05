@@ -97,8 +97,10 @@ void GraphicsCommandList::Reset()
 	}
 }
 
-GraphicsCommandListIterator::GraphicsCommandListIterator(const GraphicsCommandList& lst) : myPtr(lst.myRoot)
-{}
+GraphicsCommandListIterator::GraphicsCommandListIterator(const GraphicsCommandList& lst) 
+{
+	myPtr = lst.myRoot;
+}
 
 GraphicCommandBase* GraphicsCommandListIterator::Next()
 {

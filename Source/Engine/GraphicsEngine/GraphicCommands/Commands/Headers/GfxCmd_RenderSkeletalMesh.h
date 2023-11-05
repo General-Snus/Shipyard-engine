@@ -7,8 +7,8 @@ class GfxCmd_RenderSkeletalMesh : public GfxCmd_RenderMesh
 {
 protected:
 	Matrix myBoneTransforms[128];
-public:
-	GfxCmd_RenderSkeletalMesh(RenderData* aMesh,const Matrix& aTransform,const Matrix* aBoneTransformList,unsigned int aNumBones);
+public: 
 	void Destroy() override {};
+	GfxCmd_RenderSkeletalMesh(const std::shared_ptr<RenderData> aData,const Matrix& aTransform,const Matrix* aBoneTransformList,unsigned int aNumBones);
 	void ExecuteAndDestroy() override;
 };

@@ -6,17 +6,36 @@ void InstanceRenderer::Init()
 {
 }
 
-void InstanceRenderer::Execute()
+void InstanceRenderer::Execute(bool isShadowPass)
 {
-	for(auto& pair : instanceRenderData)
+	if(isShadowPass)
 	{
-		auto i = pair.second;
+		RHI::Context->PSSetShader(nullptr,nullptr,0);
+	}
+	else
+	{
+		G_Buffer& gBuffer = GraphicsEngine::Get().myG_Buffer;
+		gBuffer.UseGBufferShader();
+	}
+
+	for(const auto& [key,i] : instanceRenderData)
+	{ 
 		if(i->myMesh->isLoadedComplete)
 		{
-			i->myMesh->UpdateInstanceBuffer();
+			ObjectBuffer& objectBuffer = GraphicsEngine::Get().myObjectBuffer; 
+			objectBuffer.Data.myTransform = Matrix();
+			objectBuffer.Data.MaxExtents = i->myMesh->MaxBox;
+			objectBuffer.Data.MinExtents = i->myMesh->MinBox;
+			objectBuffer.Data.hasBone = false;
+			objectBuffer.Data.isInstanced = true;
+			RHI::UpdateConstantBufferData(GraphicsEngine::Get().myObjectBuffer);
+			if(!isShadowPass)
+			{
+				i->myMesh->UpdateInstanceBuffer();
+			}
 			for(const auto& aElement : i->myMesh->Elements)
 			{
-				if(i->myMaterials.size())
+				if(!isShadowPass && i->myMaterials.size())
 				{
 					i->myMaterials[0].lock()->Update();
 				}
@@ -26,7 +45,6 @@ void InstanceRenderer::Execute()
 					aElement.VertexBuffer,
 					i->myMesh->myInstanceBuffer
 				};
-
 
 				const std::vector<unsigned> vfBufferStrides
 				{
@@ -44,20 +62,19 @@ void InstanceRenderer::Execute()
 				RHI::DrawIndexedInstanced(aElement.NumIndices,static_cast<unsigned>(i->myMesh->myInstances.size()));
 			}
 		}
-		i->myMesh->myInstances.clear();
+	}
+}
+
+void InstanceRenderer::AddInstance(const std::shared_ptr<RenderData>& aRenderData)
+{
+	instanceRenderData[aRenderData->myMesh] = aRenderData;
+}
+
+void InstanceRenderer::Clear()
+{
+	for(const auto& [key,value] : instanceRenderData)
+	{
+		value->myMesh->myInstances.clear();
 	}
 	instanceRenderData.clear();
 }
-
-void InstanceRenderer::AddInstance(RenderData* aRenderData)
-{
-	pairData aPair;
-	aPair.first = aRenderData->myMesh->AssetPath.string();
-	aPair.second = aRenderData;
-
-	if(!instanceRenderData.contains(aPair))
-	{
-		instanceRenderData.emplace(aPair);
-	}
-}
- 

@@ -2,30 +2,29 @@
 #include "../Headers/GfxCmd_RenderMesh.h" 
 #include <Engine/GraphicsEngine/Rendering/Buffers/ObjectBuffer.h>
 
-GfxCmd_RenderMesh::GfxCmd_RenderMesh(RenderData* aData,const Matrix& aTransform,bool instanced) : myRenderData(aData),myTransform(aTransform),instanced(instanced)
+GfxCmd_RenderMesh::GfxCmd_RenderMesh(const std::shared_ptr<RenderData> aData,const Matrix& aTransform,bool instanced) : myRenderData(aData),myTransform(aTransform),instanced(instanced)
 {
 	MaxExtents = aData->myMesh->MaxBox;
 	MinExtents = aData->myMesh->MinBox;
 }
 void GfxCmd_RenderMesh::ExecuteAndDestroy()
 {
+	if(instanced)
+	{
+		GetInstanceRenderer().AddInstance(myRenderData);
+		return;
+	}
+
 	ObjectBuffer& objectBuffer = GetObjectBuffer();
 	objectBuffer.Data.myTransform = myTransform;
 	objectBuffer.Data.MaxExtents = MaxExtents;
 	objectBuffer.Data.MinExtents = MinExtents;
 	objectBuffer.Data.hasBone = false;
-	objectBuffer.Data.isInstanced = instanced;
-
+	objectBuffer.Data.isInstanced = instanced; 
 	RHI::UpdateConstantBufferData(objectBuffer);
 
-	G_Buffer gBuffer = GetGBuffer();
+	G_Buffer& gBuffer = GetGBuffer();
 	gBuffer.UseGBufferShader();
-
-	if(instanced)
-	{
-		GetInstanceRenderer().AddInstance(myRenderData);
-		return;
-	} 
 
 	for(const auto& aElement : myRenderData->myMesh->Elements)
 	{

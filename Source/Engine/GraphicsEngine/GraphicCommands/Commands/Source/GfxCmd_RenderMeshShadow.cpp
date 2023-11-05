@@ -3,7 +3,7 @@
 #include <Engine/AssetManager/Objects/Components/ComponentDerivatives/MeshRenderer.h>
 #include <Engine/GraphicsEngine/Rendering/Buffers/ObjectBuffer.h> 
 
-GfxCmd_RenderMeshShadow::GfxCmd_RenderMeshShadow(RenderData* aMesh,const Matrix& aTransform,bool instanced) : GfxCmd_RenderMesh(aMesh,aTransform,instanced)
+GfxCmd_RenderMeshShadow::GfxCmd_RenderMeshShadow(const std::shared_ptr<RenderData> aMesh,const Matrix& aTransform,bool instanced) : GfxCmd_RenderMesh(aMesh,aTransform,instanced)
 {
 }
 

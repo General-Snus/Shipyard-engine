@@ -4,11 +4,13 @@
 #define AsUINT(v) static_cast<unsigned>(v)
  
 struct RenderData
-{
-	bool operator==(const RenderData& other) const
+{ 
+	//Equal operator
+	inline bool operator==(const RenderData& aOther) const
 	{
-		return (myMesh->AssetPath == other.myMesh->AssetPath );
-	} 
+		__debugbreak();
+		return myMesh == aOther.myMesh;
+	}
 	std::shared_ptr<Mesh> myMesh;
 	std::vector<std::weak_ptr<Material>> myMaterials;
 };
@@ -38,7 +40,7 @@ public:
 
 protected:
 	bool isInstanced = true;
-	RenderData* myRenderData;
+	std::shared_ptr<RenderData> myRenderData;
 };
 
 class cSkeletalMeshRenderer : public cMeshRenderer	

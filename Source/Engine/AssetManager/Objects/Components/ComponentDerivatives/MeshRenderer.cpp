@@ -7,7 +7,7 @@
 
 cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId) : Component(anOwnerId)
 {
-	myRenderData = new RenderData();
+	myRenderData = std::make_shared<RenderData>();
 	myRenderData->myMaterials.resize(1);
 	AssetManager::GetInstance().LoadAsset<Mesh>("default.fbx",myRenderData->myMesh);
 
@@ -16,7 +16,7 @@ cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId) : Component(anOwnerId
 
 inline cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath) : Component(anOwnerId)
 {
-	myRenderData = new RenderData();
+	myRenderData = std::make_shared<RenderData>();
 	myRenderData->myMaterials.resize(1);
 	AssetManager::GetInstance().LoadAsset<Mesh>(aFilePath,myRenderData->myMesh);
 	myRenderData->myMaterials[0] = GraphicsEngine::Get().GetDefaultMaterial();
@@ -33,24 +33,26 @@ void cMeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath)
 	myRenderData->myMaterials[0] = mat; // REFACTOR : 0 is the wanted element,   
 }
 void cMeshRenderer::Render()
-{
-	Transform* myTransform = this->TryGetComponent<Transform>();
-	if(myTransform != nullptr)
+{ 
+	if(const auto* myTransform = this->TryGetComponent<Transform>())
 	{
-		if(isInstanced)
+		if(!isInstanced)
 		{
-			myRenderData->myMesh->myInstances.push_back(myTransform->GetTransform());
-		}
+			GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),isInstanced);
+			GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform(),isInstanced);
+			return;
+		} 
+		myRenderData->myMesh->myInstances.emplace_back(myTransform->GetTransform());
 		GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),isInstanced);
-		GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform(),isInstanced);
 		return;
 	}
-	if(isInstanced)
+	if(!isInstanced)
 	{
-		myRenderData->myMesh->myInstances.push_back(Matrix());
+		GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),isInstanced);
+		GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,Matrix(),isInstanced);
 	}
-	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,CU::Matrix4x4<float>(),isInstanced);
-	GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,CU::Matrix4x4<float>(),isInstanced);
+	myRenderData->myMesh->myInstances.emplace_back(Matrix());
+	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),isInstanced);
 }
 
 cSkeletalMeshRenderer::cSkeletalMeshRenderer(const unsigned int anOwnerId) : cMeshRenderer(anOwnerId)
@@ -70,13 +72,10 @@ void cSkeletalMeshRenderer::SetNewMesh(const std::filesystem::path& aFilePath)
 }
 
 void cSkeletalMeshRenderer::Render()
-{
-	Transform* myTransform = this->TryGetComponent<Transform>();
-	if(myTransform != nullptr)
-	{
-		cAnimator* myAnimation = this->TryGetComponent<cAnimator>();
-		//myRenderData->myMesh->myInstances.push_back(myTransform->GetTransform());
-		if(myAnimation != nullptr)
+{	
+	if(const auto* myTransform = this->TryGetComponent<Transform>())
+	{ 
+		if(const auto* myAnimation = this->TryGetComponent<cAnimator>())
 		{
 			myAnimation->RenderAnimation(myRenderData,myTransform->GetTransform());
 			return;
@@ -84,8 +83,7 @@ void cSkeletalMeshRenderer::Render()
 		GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform(),false);
 		GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),false);
 		return;
-	}
-	//myRenderData->myMesh->myInstances.push_back(Matrix());
-	GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,CU::Matrix4x4<float>(),false);
-	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,CU::Matrix4x4<float>(),false);
+	} 
+	GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,Matrix(),false);
+	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),false);
 }

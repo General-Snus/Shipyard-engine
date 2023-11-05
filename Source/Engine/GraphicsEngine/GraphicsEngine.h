@@ -59,6 +59,7 @@ class GraphicsEngine
 	friend class GraphicCommandBase;
 	friend class ShadowRenderer;
 	friend class ParticleSystem;
+	friend class InstanceRenderer;
 private:
 	FrameBuffer myFrameBuffer;
 	ObjectBuffer myObjectBuffer;

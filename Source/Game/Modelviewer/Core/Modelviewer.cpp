@@ -27,7 +27,7 @@
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/Input/InputHandler.hpp>
 
-#define _DEBUGDRAW
+//#define _DEBUGDRAW
 #define Flashlight
 #define ParticleSystemToggle
 
@@ -151,10 +151,7 @@ void ModelViewer::LoadScene()
 
 	GameObjectManager& gom = GameObjectManager::GetInstance();
 	myCustomHandler = gom.CreateGameObject();
-	myMesh = gom.CreateGameObject();
-
-
-
+	myMesh = gom.CreateGameObject(); 
 
 	{
 		GameObject camera = gom.CreateGameObject();
@@ -251,16 +248,18 @@ void ModelViewer::LoadScene()
 	}
 
 
-	for(size_t i = 0; i < 1000; i++)
+		const float Radius = 500.0f;
+	for(size_t i = 0; i < Radius; i++)
 	{
-		float y = sin(2*PI*(i / 1000.0f)) * 1000;
-		float x = cos(2*PI*(i / 1000.0f)) * 1000;
+		const float Radians = 2 * PI * (i / Radius);
+		float y = sin(Radians) * Radius;
+		float x = cos(Radians) * Radius;
 
 
 
 		GameObject Chest = gom.CreateGameObject();
 		Transform& trans = Chest.AddComponent<Transform>();
-		trans.Rotate(0,-180,0);
+		trans.SetRotation(0,-90-Radians*RAD_TO_DEG,0);
 		trans.SetPosition(x,0,y);
 
 		Chest.AddComponent<cMeshRenderer>("Models/Chest.fbx");
@@ -382,6 +381,14 @@ void ModelViewer::UpdateScene()
 	{
 		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(3);
 	}
+	//if(CU::InputHandler::GetInstance().IsKeyPressed((int)Keys::R))
+	{
+		for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
+		{
+			i.SetIsDirty(true);
+			i.SetIsRendered(false);
+		}
+	} 
 
 	myMesh.GetComponent<Transform>().Rotate(0,delta * 100,0);
 	/*Transform* transform = myCustomHandler.TryGetComponent<Transform>();
@@ -541,9 +548,7 @@ void ModelViewer::ExpandWorldBounds(CU::Sphere<float> sphere)
 		{
 			i.SetIsDirty(true);
 			i.SetIsRendered(false);
-		}
-
-
+		} 
 	} //REFACTOR if updated real time the world expansion will cause the light/shadow to lagg behind, use this to update camera position, 
 	//REFACTOR not called on object moving outside worldbound causing same error as above
 }

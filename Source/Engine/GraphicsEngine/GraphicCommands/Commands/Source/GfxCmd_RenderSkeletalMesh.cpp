@@ -1,7 +1,7 @@
 #include <GraphicsEngine.pch.h>
 #include "../Headers/GfxCmd_RenderSkeletalMesh.h"
 
-GfxCmd_RenderSkeletalMesh::GfxCmd_RenderSkeletalMesh(RenderData* aData,
+GfxCmd_RenderSkeletalMesh::GfxCmd_RenderSkeletalMesh(const std::shared_ptr<RenderData> aData,
 	const Matrix& aTransform,const Matrix* aBoneTransformList,unsigned int aNumBones) : GfxCmd_RenderMesh(aData,aTransform,false)
 {
 	aNumBones;
@@ -25,8 +25,8 @@ void GfxCmd_RenderSkeletalMesh::ExecuteAndDestroy()
 		objectBuffer.Data.myBoneTransforms[i] = myBoneTransforms[i];
 	}
 
-	RHI::UpdateConstantBufferData(objectBuffer);
-	G_Buffer gBuffer = GetGBuffer();
+	RHI::UpdateConstantBufferData(objectBuffer);	
+	G_Buffer& gBuffer = GetGBuffer();
 	gBuffer.UseGBufferShader();
 	//GetInstanceRenderer().AddInstance( myRenderData);
 	for(const auto& aElement :  myRenderData->myMesh->Elements)

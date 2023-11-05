@@ -15,11 +15,13 @@ void ShadowRenderer::Execute()
 	std::shared_ptr<Texture> shadowMap;
 	for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
 	{
-		if(i.GetIsShadowCaster() && !i.GetIsDirty())
+		if(i.GetIsShadowCaster() && i.GetIsDirty())
 		{
 			if(i.GetType() == eLightType::Directional && !i.GetIsRendered())
 			{
+				RHI::BeginEvent(L"DirectionalLight Shadow Pass");
 				buffer.Data.myDirectionalLight = *i.GetData<DirectionalLight>().get();
+				RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER,REG_LightBuffer,buffer);
 				RHI::UpdateConstantBufferData(buffer);
 				shadowMap = i.GetShadowMap(0);
 				RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER,REG_dirLightShadowMap,nullptr); // cant be bound to resources when rendering to it
@@ -28,15 +30,18 @@ void ShadowRenderer::Execute()
 				GfxCmd_SetFrameBuffer(buffer.Data.myDirectionalLight.projection,buffer.Data.myDirectionalLight.lightView,0).ExecuteAndDestroy();
 
 				ShadowCommandList.StartOver();
-				ShadowCommandList.Execute();
-
+				ShadowCommandList.Execute(); 
+				GraphicsEngine::Get().myInstanceRenderer.Execute(true);
 				RHI::SetRenderTarget(nullptr,nullptr);
-				 i.SetIsRendered(true); 
+				i.SetIsRendered(true);
+				RHI::EndEvent();
 			}
 
 			if(i.GetType() == eLightType::Spot && !i.GetIsRendered())
 			{
+				RHI::BeginEvent(L"SpotLight Shadow Pass");
 				buffer.Data.mySpotLight = *i.GetData<SpotLight>().get();
+				RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER,REG_LightBuffer,buffer);
 				RHI::UpdateConstantBufferData(buffer);
 
 				shadowMap = i.GetShadowMap(0);
@@ -47,16 +52,19 @@ void ShadowRenderer::Execute()
 
 				ShadowCommandList.StartOver();
 				ShadowCommandList.Execute();
-
+				GraphicsEngine::Get().myInstanceRenderer.Execute(true);
 				RHI::SetRenderTarget(nullptr,nullptr);
 				i.SetIsRendered(true);     
+				RHI::EndEvent();
 			}
 
 			if(i.GetType() == eLightType::Point && !i.GetIsRendered())
 			{
+				RHI::BeginEvent(L"PointLight Shadow Pass");
 				for(int j = 0; j < 6; j++)
 				{
 					buffer.Data.myPointLight = *i.GetData<PointLight>().get(); 
+					RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER,REG_LightBuffer,buffer);
 					RHI::UpdateConstantBufferData(buffer);
 
 					shadowMap = i.GetShadowMap(j);
@@ -67,9 +75,11 @@ void ShadowRenderer::Execute()
 
 					ShadowCommandList.StartOver();
 					ShadowCommandList.Execute();
+					GraphicsEngine::Get().myInstanceRenderer.Execute(true);
 					RHI::SetRenderTarget(nullptr,nullptr);
 					i.SetIsRendered(true); 
 				}
+				RHI::EndEvent();
 			}
 		}
 	}

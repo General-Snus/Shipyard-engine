@@ -2,7 +2,7 @@
 #include "../Headers/GfxCmd_RenderSkeletalMeshShadow.h"
 
 GfxCmd_RenderSkeletalMeshShadow::GfxCmd_RenderSkeletalMeshShadow(
-	RenderData* aMesh,
+	const std::shared_ptr<RenderData> aMesh,
 	const Matrix& aTransform,
 	const Matrix* aBoneTransformList,
 	unsigned int aNumBones) :
@@ -23,7 +23,7 @@ void GfxCmd_RenderSkeletalMeshShadow::ExecuteAndDestroy()
 	{
 		objectBuffer.Data.myBoneTransforms[i] = myBoneTransforms[i];
 	}
-
+	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER,REG_ObjectBuffer,objectBuffer);
 	RHI::UpdateConstantBufferData(objectBuffer);
 	RHI::Context->PSSetShader(nullptr,nullptr,0);
 	//GetInstanceRenderer().AddInstance(myRenderData);
