@@ -61,45 +61,45 @@ void cCamera::Update()
 		myTransform.Rotate(mouseDeltaVector * rotationSpeed * 0.1f * CU::Timer::GetInstance().GetDeltaTime());
 	}
 
-	if (GetAsyncKeyState('W'))
+	if(CU::InputHandler::GetInstance().IsKeyHeld((int)Keys::W))
 	{
 		myTransform.Move(myTransform.GetForward() * aTimeDelta * mdf);
 	}
 
-	if (GetAsyncKeyState('S'))
+	if(CU::InputHandler::GetInstance().IsKeyHeld((int)Keys::S))
 	{
 		myTransform.Move(-myTransform.GetForward() * aTimeDelta * mdf);
 	}
 
-	if (GetAsyncKeyState('D'))
+	if(CU::InputHandler::GetInstance().IsKeyHeld((int)Keys::D))
 	{
 		myTransform.Move(myTransform.GetRight() * aTimeDelta * mdf);
 	}
 
-	if (GetAsyncKeyState('A'))
+	if(CU::InputHandler::GetInstance().IsKeyHeld((int)Keys::A))
 	{
 		myTransform.Move(-myTransform.GetRight() * aTimeDelta * mdf);
 	}
-	if (GetAsyncKeyState('E'))
+	if(CU::InputHandler::GetInstance().IsKeyHeld((int)Keys::E))
 	{
 		myTransform.Rotate({ 0,rotationSpeed * aTimeDelta });
 	}
-	if (GetAsyncKeyState('F'))
+	if(CU::InputHandler::GetInstance().IsKeyPressed((int)Keys::F))
 	{
 		GetComponent<cLight>().BindDirectionToTransform(!GetComponent<cLight>().GetIsBound());
 	}
 
-	if (GetAsyncKeyState('Q'))
+	if(CU::InputHandler::GetInstance().IsKeyHeld((int)Keys::Q))
 	{
 		myTransform.Rotate({ 0,-rotationSpeed * aTimeDelta });
 	}
 
-	if (GetAsyncKeyState(VK_SPACE))
+	if(CU::InputHandler::GetInstance().IsKeyHeld((int)Keys::SPACE))
 	{
 		myTransform.Move(myTransform.GetUp() * aTimeDelta * mdf);
 	}
 
-	if (GetAsyncKeyState(VK_LSHIFT))
+	if(CU::InputHandler::GetInstance().IsKeyHeld((int)Keys::SHIFT))
 	{
 		myTransform.Move(-myTransform.GetUp() * aTimeDelta * mdf);
 	}

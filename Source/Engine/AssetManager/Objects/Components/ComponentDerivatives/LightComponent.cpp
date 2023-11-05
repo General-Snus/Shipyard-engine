@@ -18,20 +18,21 @@ cLight::cLight(const unsigned int anOwnerId,const eLightType type) : Component(a
 
 	switch(myLightType)
 	{
-	case eLightType::Directional:
+	using enum eLightType;
+	case Directional:
 		myDirectionLightData = std::make_shared<DirectionalLight>();
 		break;
-	case eLightType::Point:
+	case Point:
 		myPointLightData = std::make_shared<PointLight>();
 		for(int i = 0; i < 6; i++)
 		{
 			shadowMap[i] = std::make_shared<Texture>();
 		}
 		break;
-	case eLightType::Spot:
+	case Spot:
 		mySpotLightData = std::make_shared<SpotLight>(); 
 		break;
-	case eLightType::uninitialized:
+	case uninitialized:
 		break;
 	default:
 		break;
@@ -60,26 +61,27 @@ void cLight::SetIsShadowCaster(bool active)
 	{
 		isDirty = true;
 		std::wstring name = L"unNamedMap";
-		CU::Vector2<int> resolution = {512,512};
+		CU::Vector2 resolution = {512,512};
 		int mapsToCreate = 0;
 		switch(myLightType)
 		{
-		case eLightType::Directional:
+		using enum eLightType;
+		case Directional:
 			name = L"directionalLight";
 			resolution = {4096,4096};
 			mapsToCreate = 1;
 			break;
-		case eLightType::Point:
+		case Point:
 			name = L"pointLight";
 			resolution = {512,512};
 			mapsToCreate = 6;
 			break;
-		case eLightType::Spot:
+		case Spot:
 			name = L"spotLight";
 			resolution = {1024,1024};
 			mapsToCreate = 1;
 			break;
-		case eLightType::uninitialized:
+		case uninitialized:
 			break;
 		default:
 			break;
@@ -137,16 +139,17 @@ void cLight::SetPower(float power)
 	SetIsDirty(true);
 	switch(myLightType)
 	{
-	case eLightType::Directional:
+	using enum eLightType;
+	case Directional:
 		myDirectionLightData->Power = power;
 		break;
-	case eLightType::Point:
+	case Point:
 		myPointLightData->Power = power;
 		break;
-	case eLightType::Spot:
+	case Spot:
 		mySpotLightData->Power = power;
 		break;
-	case eLightType::uninitialized:
+	case uninitialized:
 		break;
 	default:
 		break;
@@ -156,16 +159,17 @@ float cLight::GetPower()
 {
 	switch(myLightType)
 	{
-	case eLightType::Directional:
+	using enum eLightType;
+	case Directional:
 		return myDirectionLightData->Power;
 		break;
-	case eLightType::Point:
+	case Point:
 		return myPointLightData->Power;
 		break;
-	case eLightType::Spot:
+	case Spot:
 		return mySpotLightData->Power;
 		break;
-	case eLightType::uninitialized:
+	case uninitialized:
 		break;
 	default:
 		break;
@@ -178,16 +182,17 @@ void cLight::SetColor(Vector3f color)
 	SetIsDirty(true);
 	switch(myLightType)
 	{
-	case eLightType::Directional:
+	using enum eLightType;
+	case Directional:
 		myDirectionLightData->Color = color;
 		break;
-	case eLightType::Point:
+	case Point:
 		myPointLightData->Color = color;
 		break;
-	case eLightType::Spot:
+	case Spot:
 		mySpotLightData->Color = color;
 		break;
-	case eLightType::uninitialized:
+	case uninitialized:
 		break;
 	default:
 		break;
@@ -197,16 +202,17 @@ Vector3f cLight::GetColor()
 {
 	switch(myLightType)
 	{
-	case eLightType::Directional:
+	using enum eLightType;
+	case Directional:
 		return myDirectionLightData->Color;
 		break;
-	case eLightType::Point:
+	case Point:
 		return myPointLightData->Color;
 		break;
-	case eLightType::Spot:
+	case Spot:
 		return mySpotLightData->Color;
 		break;
-	case eLightType::uninitialized:
+	case uninitialized:
 		break;
 	default:
 		break;
@@ -219,15 +225,16 @@ void cLight::SetPosition(Vector3f position)
 	SetIsDirty(true);
 	switch(myLightType)
 	{
-	case eLightType::Directional:
+	using enum eLightType;
+	case Directional:
 		break;
-	case eLightType::Point:
+	case Point:
 		myPointLightData->Position = position;
 		break;
-	case eLightType::Spot:
+	case Spot:
 		mySpotLightData->Position = position;
 		break;
-	case eLightType::uninitialized:
+	case uninitialized:
 		break;
 	default:
 		break;
@@ -237,16 +244,17 @@ Vector3f cLight::GetPosition()
 {
 	switch(myLightType)
 	{
-	case eLightType::Directional:
+	using enum eLightType;
+	case Directional:
 		return Vector3f();
 		break;
-	case eLightType::Point:
+	case Point:
 		return myPointLightData->Position;
 		break;
-	case eLightType::Spot:
+	case Spot:
 		return mySpotLightData->Position;
 		break;
-	case eLightType::uninitialized:
+	case uninitialized:
 		break;
 	default:
 		break;
@@ -259,15 +267,16 @@ void cLight::SetDirection(Vector3f direction)
 	SetIsDirty(true);
 	switch(myLightType)
 	{
-	case eLightType::Directional:
+	using enum eLightType;
+	case Directional:
 		myDirectionLightData->Direction = Vector4f(direction,1);
 		break;
-	case eLightType::Point:
+	case Point:
 		break;
-	case eLightType::Spot:
+	case Spot:
 		mySpotLightData->Direction = direction;
 		break;
-	case eLightType::uninitialized:
+	case uninitialized:
 		break;
 	default:
 		break;
@@ -277,20 +286,21 @@ Vector3f cLight::GetDirection()
 {
 	switch(myLightType)
 	{
-	case eLightType::Directional:
+	using enum eLightType;
+	case Directional:
 		return Vector3f(
 			myDirectionLightData->Direction.x,
 			myDirectionLightData->Direction.y,
 			myDirectionLightData->Direction.z
 		);
 		break;
-	case eLightType::Point:
+	case Point:
 		return Vector3f();
 		break;
-	case eLightType::Spot:
+	case Spot:
 		return mySpotLightData->Direction;
 		break;
-	case eLightType::uninitialized:
+	case uninitialized:
 		break;
 	default:
 		break;
@@ -303,15 +313,16 @@ void cLight::SetRange(float range)
 	SetIsDirty(true);
 	switch(myLightType)
 	{
-	case eLightType::Directional:
+	using enum eLightType;
+	case Directional:
 		break;
-	case eLightType::Point:
+	case Point:
 		myPointLightData->Range = range;
 		break;
-	case eLightType::Spot:
+	case Spot:
 		mySpotLightData->Range = range;
 		break;
-	case eLightType::uninitialized:
+	case uninitialized:
 		break;
 	default:
 		break;
@@ -321,16 +332,17 @@ float cLight::GetRange()
 {
 	switch(myLightType)
 	{
-	case eLightType::Directional:
+	using enum eLightType;
+	case Directional:
 		return 0;
 		break;
-	case eLightType::Point:
+	case Point:
 		return myPointLightData->Range;
 		break;
-	case eLightType::Spot:
+	case Spot:
 		return mySpotLightData->Range;
 		break;
-	case eLightType::uninitialized:
+	case uninitialized:
 		break;
 	default:
 		break;
@@ -344,14 +356,15 @@ void cLight::SetInnerAngle(float angle)
 	SetIsDirty(true);
 	switch(myLightType)
 	{
-	case eLightType::Directional:
+	using enum eLightType;
+	case Directional:
 		break;
-	case eLightType::Point:
+	case Point:
 		break;
-	case eLightType::Spot:
+	case Spot:
 		mySpotLightData->InnerConeAngle = angle;
 		break;
-	case eLightType::uninitialized:
+	case uninitialized:
 		break;
 	default:
 		break;
@@ -368,14 +381,15 @@ void cLight::SetOuterAngle(float angle)
 	SetIsDirty(true);
 	switch(myLightType)
 	{
-	case eLightType::Directional:
+	using enum eLightType;
+	case Directional:
 		break;
-	case eLightType::Point:
+	case Point:
 		break;
-	case eLightType::Spot:
+	case Spot:
 		mySpotLightData->OuterConeAngle = angle * DEG_TO_RAD;
 		break;
-	case eLightType::uninitialized:
+	case uninitialized:
 		break;
 	default:
 		break;
@@ -385,16 +399,17 @@ float cLight::GetOuterAngle()
 {
 	switch(myLightType)
 	{
-	case eLightType::Directional:
+	using enum eLightType;
+	case Directional:
 		return 0.0f;
 		break;
-	case eLightType::Point:
+	case Point:
 		return 0.0f;
 		break;
-	case eLightType::Spot:
+	case Spot:
 		return mySpotLightData->OuterConeAngle * RAD_TO_DEG;
 		break;
-	case eLightType::uninitialized:
+	case uninitialized:
 		break;
 	default:
 		break;
@@ -417,16 +432,17 @@ void cLight::Update()
 	{
 		switch(myLightType)
 		{
-		case eLightType::Directional:
+		using enum eLightType;
+		case Directional:
 			RedrawDirectionMap();
 			break;
-		case eLightType::Point:
+		case Point:
 			RedrawPointMap();
 			break;
-		case eLightType::Spot:
+		case Spot:
 			RedrawSpotMap();
 			break;
-		case eLightType::uninitialized:
+		case uninitialized:
 			break;
 		default:
 			break;
@@ -450,17 +466,18 @@ void cLight::ConformToTransform()
 	}
 	switch(myLightType)
 	{
-	case eLightType::Directional:
+	using enum eLightType;
+	case Directional:
 		myDirectionLightData->Direction = Vector4f(transform->GetForward(),1);
 		break;
-	case eLightType::Point:
+	case Point:
 		myPointLightData->Position = transform->GetPosition();
 		break;
-	case eLightType::Spot:
+	case Spot:
 		mySpotLightData->Position = transform->GetPosition();
 		mySpotLightData->Direction = transform->GetForward();
 		break;
-	case eLightType::uninitialized:
+	case uninitialized:
 		break;
 	default:
 		break;
@@ -471,14 +488,15 @@ void cLight::RedrawShadowMap()
 {
 	switch(myLightType)
 	{
-	case eLightType::Directional:
+	using enum eLightType;
+	case Directional:
 		RedrawDirectionMap();
 		break;
-	case eLightType::Point:
+	case Point:
 		break;
-	case eLightType::Spot:
+	case Spot:
 		break;
-	case eLightType::uninitialized:
+	case uninitialized:
 		break;
 	default:
 		break;

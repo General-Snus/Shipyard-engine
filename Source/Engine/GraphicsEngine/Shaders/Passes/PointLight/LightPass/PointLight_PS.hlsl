@@ -15,7 +15,8 @@ float3 CalculatePointLight(float3 diffuseColor, float3 specularColor, float4 wor
     const float linearAtt = 4.6 * pow(distance, -1);
     const float quadraticAtt = 8.9 * pow(distance, -0.5);
     
-    const float3 Attenuation = 1 / (constantAtt + distance * (linearAtt + quadraticAtt * distance));
+    //const float3 Attenuation = 1 / (constantAtt + distance * (linearAtt + quadraticAtt * distance));
+    const float3 Attenuation = 1 / pow(max(distance, myPointLight.Range), 2);
     
     float3 directLightSpecular = CalculateSpecularLight(specularColor, normal, cameraDirection, lightDirection, halfAngle, roughness);
     float3 directLightDiffuse = CalculateDiffuseLight(diffuseColor);

@@ -169,10 +169,12 @@ void ModelViewer::LoadScene()
 		worldRoot.AddComponent<Skybox>();
 
 		worldRoot.AddComponent<cLight>(eLightType::Directional);
+		Transform& transform = worldRoot.AddComponent<Transform>();
+		transform.SetRotation(0,0,-45);
 		cLight& pLight = worldRoot.GetComponent<cLight>();
 		pLight.SetColor(CU::Vector3<float>(1,1,1));
-		pLight.SetPower(1.0f);
-		pLight.SetDirection({0,-1,1});
+		pLight.SetPower(2.0f);
+		pLight.BindDirectionToTransform(true);
 
 		if(gom.GetAllComponents<BackgroundColor>().empty())
 		{
@@ -365,19 +367,19 @@ void ModelViewer::UpdateScene()
 	float delta = CU::Timer::GetInstance().GetDeltaTime();
 	GameObjectManager::GetInstance().Update();
 
-	if(GetAsyncKeyState('1'))
+	if(CU::InputHandler::GetInstance().IsKeyPressed((int)Keys::NUMPAD1))
 	{
 		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(0);
 	}
-	if(GetAsyncKeyState('2'))
+	if(CU::InputHandler::GetInstance().IsKeyPressed((int)Keys::NUMPAD2))
 	{
 		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(1);
 	}
-	if(GetAsyncKeyState('3'))
+	if(CU::InputHandler::GetInstance().IsKeyPressed((int)Keys::NUMPAD3))
 	{
 		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(2);
 	}
-	if(GetAsyncKeyState('4'))
+	if(CU::InputHandler::GetInstance().IsKeyPressed((int)Keys::NUMPAD4))
 	{
 		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(3);
 	}
@@ -389,7 +391,8 @@ void ModelViewer::UpdateScene()
 			i.SetIsRendered(false);
 		}
 	} 
-
+	Transform& pLight = GameObjectManager::GetInstance().GetWorldRoot().GetComponent<Transform>();
+	pLight.Rotate(0,delta ,0);
 	myMesh.GetComponent<Transform>().Rotate(0,delta * 100,0);
 	/*Transform* transform = myCustomHandler.TryGetComponent<Transform>();
 	if(transform)
