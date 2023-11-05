@@ -35,6 +35,9 @@ public:
 	void Rotate(float X,float Y,float Z);
 	void Rotate(Vector2f angularRotation);
 	void Rotate(Vector3f angularRotation);
+	void SetRotation(float X,float Y,float Z);
+	void SetRotation(Vector2f angularRotation);
+	void SetRotation(Vector3f angularRotation);
 	//void ApplyTransformation(Matrix transformationMatrix);
 	 
 	void SetScale(float scale);

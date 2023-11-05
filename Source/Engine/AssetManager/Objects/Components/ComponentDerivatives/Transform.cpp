@@ -37,17 +37,13 @@ void Transform::Update()
 
 void Transform::Render()
 { 
-#ifndef _DEBUGDRAW 
+#ifdef _DEBUGDRAW 
 	if(primitive.NumVertices != 0 && primitive.NumIndices != 0)
 	{
 		GraphicsEngine::Get().OverlayCommands<GfxCmd_DrawDebugPrimitive>(primitive,myTransform);
 	}
 #endif // _DEBUGDRAW 
-} 
-//CU::Matrix4x4<float>& Transform::GetTransform()
-//{
-//	return myTransform;
-//} 
+}  
 const CU::Matrix4x4<float>& Transform::GetTransform() const
 {
 	return myTransform;
@@ -215,7 +211,24 @@ void Transform::InitPrimitive()
 	
 	primitive = Debug::DebugPrimitive(myVertex,myIndices); 
 }
+void Transform::SetRotation(float X,float Y,float Z)
+{
+	myRotation = {X,Y,Z};
+	isDirty = true;
+}
 
+void Transform::SetRotation(Vector2f angularRotation)
+{
+	myRotation.x = angularRotation.x;
+	myRotation.y = angularRotation.y;
+	isDirty = true; 
+}
+
+void Transform::SetRotation(Vector3f angularRotation)
+{
+	myRotation = angularRotation;
+	isDirty = true; 
+}
 void Transform::SetScale(Vector2f scale)
 {
 	myScale.x = scale.x;

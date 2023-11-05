@@ -1,0 +1,80 @@
+#include <GraphicsEngine.pch.h>
+#include "InstanceRenderer.h"
+#
+#include <Engine/GraphicsEngine/InterOp/RHI.h>
+void InstanceRenderer::Init()
+{
+}
+
+void InstanceRenderer::Execute(bool isShadowPass)
+{
+	if(isShadowPass)
+	{
+		RHI::Context->PSSetShader(nullptr,nullptr,0);
+	}
+	else
+	{
+		G_Buffer& gBuffer = GraphicsEngine::Get().myG_Buffer;
+		gBuffer.UseGBufferShader();
+	}
+
+	for(const auto& [key,i] : instanceRenderData)
+	{ 
+		if(i->myMesh->isLoadedComplete)
+		{
+			ObjectBuffer& objectBuffer = GraphicsEngine::Get().myObjectBuffer; 
+			objectBuffer.Data.myTransform = Matrix();
+			objectBuffer.Data.MaxExtents = i->myMesh->MaxBox;
+			objectBuffer.Data.MinExtents = i->myMesh->MinBox;
+			objectBuffer.Data.hasBone = false;
+			objectBuffer.Data.isInstanced = true;
+			RHI::UpdateConstantBufferData(GraphicsEngine::Get().myObjectBuffer);
+			if(!isShadowPass)
+			{
+				i->myMesh->UpdateInstanceBuffer();
+			}
+			for(const auto& aElement : i->myMesh->Elements)
+			{
+				if(!isShadowPass && i->myMaterials.size())
+				{
+					i->myMaterials[0].lock()->Update();
+				}
+
+				const std::vector<ComPtr<ID3D11Buffer>> vxBuffers
+				{
+					aElement.VertexBuffer,
+					i->myMesh->myInstanceBuffer
+				};
+
+				const std::vector<unsigned> vfBufferStrides
+				{
+					aElement.Stride,
+					sizeof(Matrix)
+				};
+
+				RHI::ConfigureInputAssembler(
+					aElement.PrimitiveTopology,
+					vxBuffers,
+					aElement.IndexBuffer,
+					vfBufferStrides,
+					Vertex::InputLayout);
+
+				RHI::DrawIndexedInstanced(aElement.NumIndices,static_cast<unsigned>(i->myMesh->myInstances.size()));
+			}
+		}
+	}
+}
+
+void InstanceRenderer::AddInstance(const std::shared_ptr<RenderData>& aRenderData)
+{
+	instanceRenderData[aRenderData->myMesh] = aRenderData;
+}
+
+void InstanceRenderer::Clear()
+{
+	for(const auto& [key,value] : instanceRenderData)
+	{
+		value->myMesh->myInstances.clear();
+	}
+	instanceRenderData.clear();
+}

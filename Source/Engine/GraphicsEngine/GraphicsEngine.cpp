@@ -522,40 +522,59 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 	aDeltaTime; aTotalTime;
 	RHI::SetVertexShader(myVertexShader);
 
+
+	RHI::BeginEvent(L"Start writing to gbuffer");
 	myCamera->SetCameraToFrameBuffer();
 	myG_Buffer.SetWriteTargetToBuffer(); //Let all write to textures
 	DeferredCommandList.Execute();
-
+	myInstanceRenderer.Execute(false);
+	RHI::EndEvent();
 	//decals
 	//if picking check
 	//SSAO
 	//Do ambience pass? Clarit
 
 	//Render shadowmaps
+
+	RHI::BeginEvent(L"ShadowMaps");
 	myShadowRenderer.Execute();
+	RHI::EndEvent();
+
 
 	//Render all lights
+
+	RHI::BeginEvent(L"Lightning");
 	myCamera->SetCameraToFrameBuffer();
 	GfxCmd_SetRenderTarget(SceneBuffer.get(), nullptr).ExecuteAndDestroy();
 	GfxCmd_SetLightBuffer().ExecuteAndDestroy(); //REFACTOR Change name to fit purpose
+	RHI::EndEvent();
+	// //Forward pass for light
+	//Forbidden
 
-	//Forward pass for light
 
 	//Particles
+	RHI::BeginEvent(L"Particles");
 	RHI::SetBlendState(GraphicsEngine::Get().GetAdditiveBlendState());
 	GfxCmd_SetRenderTarget(SceneBuffer.get(),myDepthBuffer.get()).ExecuteAndDestroy();
 	myParticleRenderer.Execute();
+	RHI::EndEvent();
 
 	//Post processing
+	RHI::BeginEvent(L"PostPro");
 	RHI::SetBlendState(nullptr);
 	GfxCmd_LuminancePass().ExecuteAndDestroy(); // Render to IntermediateA
 	GfxCmd_GaussianBlur().ExecuteAndDestroy();
 	GfxCmd_Bloom().ExecuteAndDestroy();
 	GfxCmd_LinearToGamma().ExecuteAndDestroy(); // Render: BakcBuffer Read: REG_Target01
+	RHI::EndEvent();
 
 	//Debug layers 
+	RHI::BeginEvent(L"DebugLayers");
 	GfxCmd_DebugLayer().ExecuteAndDestroy();
+#ifdef  _DEBUGDRAW
 	OverlayCommandList.Execute();
+#endif //  _DEBUGDRAW
+	RHI::EndEvent();
 }
 
 void GraphicsEngine::RenderTextureTo(eRenderTargets from, eRenderTargets to)  const
@@ -583,5 +602,6 @@ void GraphicsEngine::EndFrame()
 	myShadowRenderer.ResetShadowList();
 	DeferredCommandList.Reset();
 	OverlayCommandList.Reset();
+	myInstanceRenderer.Clear();
 }
 

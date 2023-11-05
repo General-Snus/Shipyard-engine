@@ -1,8 +1,8 @@
 #include <GraphicsEngine.pch.h>
 #include "../Headers/GfxCmd_RenderSkeletalMesh.h"
 
-GfxCmd_RenderSkeletalMesh::GfxCmd_RenderSkeletalMesh(const RenderData& aData,
-	const Matrix& aTransform,const Matrix* aBoneTransformList,unsigned int aNumBones) : GfxCmd_RenderMesh(aData,aTransform)
+GfxCmd_RenderSkeletalMesh::GfxCmd_RenderSkeletalMesh(const std::shared_ptr<RenderData> aData,
+	const Matrix& aTransform,const Matrix* aBoneTransformList,unsigned int aNumBones) : GfxCmd_RenderMesh(aData,aTransform,false)
 {
 	aNumBones;
 	assert(aNumBones < 128);
@@ -18,21 +18,22 @@ void GfxCmd_RenderSkeletalMesh::ExecuteAndDestroy()
 	objectBuffer.Data.MaxExtents = MaxExtents;
 	objectBuffer.Data.MinExtents = MinExtents;
 	objectBuffer.Data.hasBone = true;
+	objectBuffer.Data.isInstanced = false;
 
 	for(int i = 0; i < 128; i++)
 	{
 		objectBuffer.Data.myBoneTransforms[i] = myBoneTransforms[i];
 	}
 
-	RHI::UpdateConstantBufferData(objectBuffer);
-	G_Buffer gBuffer = GetGBuffer();
+	RHI::UpdateConstantBufferData(objectBuffer);	
+	G_Buffer& gBuffer = GetGBuffer();
 	gBuffer.UseGBufferShader();
-
-	for(const auto& aElement : myMesh->Elements)
+	//GetInstanceRenderer().AddInstance( myRenderData);
+	for(const auto& aElement :  myRenderData->myMesh->Elements)
 	{
-		if (!myMaterials.empty())
+		if (!myRenderData->myMaterials.empty())
 		{
-			myMaterials[0].lock()->Update();
+			myRenderData->myMaterials[0].lock()->Update();
 		} 
 		RHI::ConfigureInputAssembler(aElement.PrimitiveTopology,
 			aElement.VertexBuffer,

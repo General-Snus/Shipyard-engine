@@ -16,11 +16,6 @@
             "TextureName":  "ABababa",
             "TexturePath":  "Textures/SteelFloor_n.dds",
             "TextureType":  1
-        },
-        {
-            "TextureName":  "ABababa",
-            "TexturePath":  "",
-            "TextureType":  2
         } 
     ]
 }

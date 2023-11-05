@@ -2,7 +2,7 @@
 #include "../Headers/GfxCmd_RenderSkeletalMeshShadow.h"
 
 GfxCmd_RenderSkeletalMeshShadow::GfxCmd_RenderSkeletalMeshShadow(
-	const RenderData& aMesh,
+	const std::shared_ptr<RenderData> aMesh,
 	const Matrix& aTransform,
 	const Matrix* aBoneTransformList,
 	unsigned int aNumBones) :
@@ -17,15 +17,17 @@ void GfxCmd_RenderSkeletalMeshShadow::ExecuteAndDestroy()
 	objectBuffer.Data.MaxExtents = MaxExtents;
 	objectBuffer.Data.MinExtents = MinExtents;
 	objectBuffer.Data.hasBone = true;
+	objectBuffer.Data.isInstanced = false;
+
 	for(int i = 0; i < 128; i++)
 	{
 		objectBuffer.Data.myBoneTransforms[i] = myBoneTransforms[i];
 	}
-
+	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER,REG_ObjectBuffer,objectBuffer);
 	RHI::UpdateConstantBufferData(objectBuffer);
 	RHI::Context->PSSetShader(nullptr,nullptr,0);
-
-	for(const auto& aElement : myMesh->Elements)
+	//GetInstanceRenderer().AddInstance(myRenderData);
+	for(const auto& aElement :myRenderData->myMesh->Elements)
 	{
 		RHI::ConfigureInputAssembler(
 			aElement.PrimitiveTopology,

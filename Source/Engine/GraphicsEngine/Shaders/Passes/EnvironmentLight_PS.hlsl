@@ -75,7 +75,7 @@ float4 worldPosition
     }
     shadow = sum / 16.0;
     
-    const float ShadowStrength = 2;
+    const float ShadowStrength = 1;
     return ShadowStrength * shadow * saturate(directLightDiffuse + directLightSpecular) * myDirectionalLight.Color * myDirectionalLight.Power * NdotL;
 }
 

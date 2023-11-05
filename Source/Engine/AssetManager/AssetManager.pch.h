@@ -13,6 +13,8 @@
 #include <filesystem> 
 #include <unordered_map>
 #include <memory>
+#include <vector>
+#include <functional>
 
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>

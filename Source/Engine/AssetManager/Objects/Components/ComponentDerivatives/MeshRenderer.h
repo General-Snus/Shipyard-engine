@@ -1,14 +1,22 @@
 #pragma once
-
 #include <Engine/AssetManager/AssetManager.pch.h> 
 
 #define AsUINT(v) static_cast<unsigned>(v)
  
 struct RenderData
-{
+{ 
+	//Equal operator
+	inline bool operator==(const RenderData& aOther) const
+	{
+		__debugbreak();
+		return myMesh == aOther.myMesh;
+	}
 	std::shared_ptr<Mesh> myMesh;
 	std::vector<std::weak_ptr<Material>> myMaterials;
 };
+ 
+
+
 class cMeshRenderer : public Component
 {
 public:
@@ -23,15 +31,16 @@ public:
 
 	FORCEINLINE const std::vector<Element>& GetElements() const
 	{
-		return myRenderData.myMesh->Elements;
+		return myRenderData->myMesh->Elements;
 	}
 	FORCEINLINE std::shared_ptr<Mesh> GetRawMesh() const
 	{
-		return myRenderData.myMesh;
+		return myRenderData->myMesh;
 	}
 
 protected:
-	RenderData myRenderData;
+	bool isInstanced = true;
+	std::shared_ptr<RenderData> myRenderData;
 };
 
 class cSkeletalMeshRenderer : public cMeshRenderer	

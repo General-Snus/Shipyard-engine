@@ -133,7 +133,11 @@ void Material::SetShader(std::shared_ptr<Shader> aVertexShader,std::shared_ptr<S
 }
 
 void Material::SetAsResources()
-{
+{ /*
+	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)eTextureType::ColorMap,nullptr);
+	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)eTextureType::NormalMap,nullptr);
+	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)eTextureType::MaterialMap,nullptr);
+	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)eTextureType::EffectMap,nullptr); */
 	for(const auto& i : textures)
 	{
 		if(!i)

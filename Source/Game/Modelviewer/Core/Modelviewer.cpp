@@ -27,7 +27,7 @@
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/Input/InputHandler.hpp>
 
-#define _DEBUGDRAW
+//#define _DEBUGDRAW
 #define Flashlight
 #define ParticleSystemToggle
 
@@ -151,10 +151,7 @@ void ModelViewer::LoadScene()
 
 	GameObjectManager& gom = GameObjectManager::GetInstance();
 	myCustomHandler = gom.CreateGameObject();
-	myMesh = gom.CreateGameObject();
-
-
-
+	myMesh = gom.CreateGameObject(); 
 
 	{
 		GameObject camera = gom.CreateGameObject();
@@ -172,10 +169,12 @@ void ModelViewer::LoadScene()
 		worldRoot.AddComponent<Skybox>();
 
 		worldRoot.AddComponent<cLight>(eLightType::Directional);
+		Transform& transform = worldRoot.AddComponent<Transform>();
+		transform.SetRotation(0,0,-45);
 		cLight& pLight = worldRoot.GetComponent<cLight>();
 		pLight.SetColor(CU::Vector3<float>(1,1,1));
-		pLight.SetPower(1.0f);
-		pLight.SetDirection({0,-1,1});
+		pLight.SetPower(2.0f);
+		pLight.BindDirectionToTransform(true);
 
 		if(gom.GetAllComponents<BackgroundColor>().empty())
 		{
@@ -251,11 +250,19 @@ void ModelViewer::LoadScene()
 	}
 
 
+		const float Radius = 500.0f;
+	for(size_t i = 0; i < Radius; i++)
 	{
+		const float Radians = 2 * PI * (i / Radius);
+		float y = sin(Radians) * Radius;
+		float x = cos(Radians) * Radius;
+
+
+
 		GameObject Chest = gom.CreateGameObject();
 		Transform& trans = Chest.AddComponent<Transform>();
-		trans.Rotate(0,-180,0);
-		trans.SetPosition(300,0,0);
+		trans.SetRotation(0,-90-Radians*RAD_TO_DEG,0);
+		trans.SetPosition(x,0,y);
 
 		Chest.AddComponent<cMeshRenderer>("Models/Chest.fbx");
 		Chest.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/ChestMaterial.json");
@@ -360,23 +367,32 @@ void ModelViewer::UpdateScene()
 	float delta = CU::Timer::GetInstance().GetDeltaTime();
 	GameObjectManager::GetInstance().Update();
 
-	if(GetAsyncKeyState('1'))
+	if(CU::InputHandler::GetInstance().IsKeyPressed((int)Keys::NUMPAD1))
 	{
 		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(0);
 	}
-	if(GetAsyncKeyState('2'))
+	if(CU::InputHandler::GetInstance().IsKeyPressed((int)Keys::NUMPAD2))
 	{
 		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(1);
 	}
-	if(GetAsyncKeyState('3'))
+	if(CU::InputHandler::GetInstance().IsKeyPressed((int)Keys::NUMPAD3))
 	{
 		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(2);
 	}
-	if(GetAsyncKeyState('4'))
+	if(CU::InputHandler::GetInstance().IsKeyPressed((int)Keys::NUMPAD4))
 	{
 		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(3);
 	}
-
+	//if(CU::InputHandler::GetInstance().IsKeyPressed((int)Keys::R))
+	{
+		for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
+		{
+			i.SetIsDirty(true);
+			i.SetIsRendered(false);
+		}
+	} 
+	Transform& pLight = GameObjectManager::GetInstance().GetWorldRoot().GetComponent<Transform>();
+	pLight.Rotate(0,delta ,0);
 	myMesh.GetComponent<Transform>().Rotate(0,delta * 100,0);
 	/*Transform* transform = myCustomHandler.TryGetComponent<Transform>();
 	if(transform)
@@ -535,9 +551,7 @@ void ModelViewer::ExpandWorldBounds(CU::Sphere<float> sphere)
 		{
 			i.SetIsDirty(true);
 			i.SetIsRendered(false);
-		}
-
-
+		} 
 	} //REFACTOR if updated real time the world expansion will cause the light/shadow to lagg behind, use this to update camera position, 
 	//REFACTOR not called on object moving outside worldbound causing same error as above
 }

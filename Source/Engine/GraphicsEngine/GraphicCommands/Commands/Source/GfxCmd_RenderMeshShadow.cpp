@@ -3,7 +3,7 @@
 #include <Engine/AssetManager/Objects/Components/ComponentDerivatives/MeshRenderer.h>
 #include <Engine/GraphicsEngine/Rendering/Buffers/ObjectBuffer.h> 
 
-GfxCmd_RenderMeshShadow::GfxCmd_RenderMeshShadow(const RenderData& aMesh,const Matrix& aTransform) : GfxCmd_RenderMesh(aMesh,aTransform)
+GfxCmd_RenderMeshShadow::GfxCmd_RenderMeshShadow(const std::shared_ptr<RenderData> aMesh,const Matrix& aTransform,bool instanced) : GfxCmd_RenderMesh(aMesh,aTransform,instanced)
 {
 }
 
@@ -14,12 +14,18 @@ void GfxCmd_RenderMeshShadow::ExecuteAndDestroy()
 	objectBuffer.Data.MaxExtents = MaxExtents;
 	objectBuffer.Data.MinExtents = MinExtents;
 	objectBuffer.Data.hasBone = false;
+	objectBuffer.Data.isInstanced = instanced;
 
 	RHI::UpdateConstantBufferData(objectBuffer);
 	RHI::Context->PSSetShader(nullptr,nullptr,0);
 	
-	for(const auto& aElement : myMesh->Elements)
+	if(instanced)
 	{
+		GetInstanceRenderer().AddInstance(myRenderData);
+		return;
+	}
+	for(const auto& aElement : myRenderData->myMesh->Elements)
+	{ 
 		RHI::ConfigureInputAssembler(
 			aElement.PrimitiveTopology,
 			aElement.VertexBuffer,

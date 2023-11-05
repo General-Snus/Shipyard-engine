@@ -59,6 +59,7 @@ class GraphicsEngine
 	friend class GraphicCommandBase;
 	friend class ShadowRenderer;
 	friend class ParticleSystem;
+	friend class InstanceRenderer;
 private:
 	FrameBuffer myFrameBuffer;
 	ObjectBuffer myObjectBuffer;
@@ -141,6 +142,7 @@ private:
 	ComPtr<ID3D11BlendState> AdditiveBlendState;
 	ShadowRenderer myShadowRenderer;
 	ParticleRenderer myParticleRenderer;
+	InstanceRenderer myInstanceRenderer;
 	// We're a container singleton, no instancing this outside the class.
 	GraphicsEngine() = default;
 
@@ -306,6 +308,7 @@ public:
 		}
 	}  
 
+	FORCEINLINE InstanceRenderer& GetInstanceRenderer() { return myInstanceRenderer; } 
 	FORCEINLINE std::shared_ptr< Shader> GetDebugLineVS() const { return debugLineVS; }
 	FORCEINLINE std::shared_ptr< Shader> GetDebugLinePS() const { return debugLinePS; }
 

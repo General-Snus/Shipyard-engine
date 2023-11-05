@@ -8,9 +8,10 @@
 #include <Engine/GraphicsEngine/Rendering/Buffers/LightBuffer.h>
 #include <Engine/GraphicsEngine/Rendering/Buffers/LineBuffer.h>
 #include <Engine/GraphicsEngine/Rendering/Buffers/G_buffer.h>
+#include <Engine/GraphicsEngine/Rendering/InstanceRenderer/InstanceRenderer.h>
 
 
-typedef CU::Matrix4x4<float>  Matrix;
+using Matrix =  CU::Matrix4x4<float>;
  
 class GraphicCommandBase
 {
@@ -20,6 +21,7 @@ protected:
 	LineBuffer& GetLineBuffer();
 	LightBuffer& GetLightBuffer();
 	G_Buffer& GetGBuffer();
+	InstanceRenderer& GetInstanceRenderer();
 public:
 	virtual ~GraphicCommandBase() = default;
 	virtual void ExecuteAndDestroy() = 0;
@@ -34,7 +36,7 @@ class GraphicsCommandList
 public:
 	GraphicsCommandList();
 	~GraphicsCommandList();
-	void Initialize(size_t aSize = 1*MegaByte); //5mb default
+	void Initialize(size_t aSize = 5*MegaByte); //5mb default
 
 	template<typename CommandClass, typename ...Args>
 	void AddCommand(Args ... arguments)
@@ -44,7 +46,7 @@ public:
 		{
 			throw std::out_of_range("CommandList is full");
 		}
-		GraphicCommandBase* ptr = reinterpret_cast<GraphicCommandBase*>(myData + myCursor);
+		auto* ptr = std::bit_cast<GraphicCommandBase*>(myData + myCursor);
 		myCursor += commandSize;
 		::new (ptr) CommandClass(arguments ...);
 		*myLink = ptr;
