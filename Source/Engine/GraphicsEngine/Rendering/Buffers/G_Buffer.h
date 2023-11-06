@@ -32,7 +32,7 @@ struct G_Buffer
 	ComPtr<ID3D11PixelShader> myDebugPixelShader; 
 	ComPtr<ID3D11PixelShader> myPointPixelShader;  
 	ComPtr<ID3D11PixelShader> mySpotShader; 
-
+	 
 	int mask = 0;
 	/* Can i send Gbuffer as a light?
 	std::shared_ptr<Texture> albedoTexture;
@@ -41,6 +41,8 @@ struct G_Buffer
 	std::shared_ptr<Texture> effectTexture; 
 	*/
 	void SetWriteTargetToBuffer();
+	void SetResourceTexture();
+	void UnsetResources();
 	void UseGBufferShader(); 
 	void UseEnviromentShader(); 
 	void UseDebugShader();

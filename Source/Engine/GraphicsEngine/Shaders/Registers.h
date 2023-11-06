@@ -13,6 +13,9 @@
 #define HLSL_REG_DefaultSampler s0 
 #define REG_DefaultSampler 0 
 
+#define HLSL_REG_PointSampler s13 
+#define REG_PointSampler 13 
+
 #define HLSL_REG_shadowCmpSampler s14 
 #define REG_shadowCmpSampler 14 
 
@@ -55,6 +58,9 @@
 #define HLSL_REG_DepthMap t6 
 #define REG_DepthMap 6  
 
+#define HLSL_REG_SSAO t7 
+#define REG_SSAO 7
+
 #define HLSL_REG_Target0 t10 
 #define REG_Target0 10   
 
@@ -75,6 +81,9 @@
 
 #define HLSL_REG_dirLightShadowMap t110 
 #define REG_dirLightShadowMap 110 
+
+#define HLSL_REG_Noise_Texture t126
+#define REG_Noise_Texture 126  
 
 #define HLSL_REG_BRDF_LUT_Texture t127
 #define REG_BRDF_LUT_Texture 127  

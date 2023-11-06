@@ -168,7 +168,7 @@ void Mesh::UpdateInstanceBuffer()
 	D3D11_BUFFER_DESC vertexBufferDesc{};
 	vertexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(Matrix) * myInstances.size());
 	vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;	
 	vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	vertexBufferDesc.MiscFlags = 0;
 	vertexBufferDesc.StructureByteStride = 0;
@@ -177,9 +177,11 @@ void Mesh::UpdateInstanceBuffer()
 	vertexSubResourceData.pSysMem =  myInstances.data();
 
 	HRESULT result; 
-	result = RHI::Device->CreateBuffer(&vertexBufferDesc,
+	result = RHI::Device->CreateBuffer(
+		&vertexBufferDesc,
 		&vertexSubResourceData,
-		myInstanceBuffer.GetAddressOf());
+		myInstanceBuffer.GetAddressOf()
+	);
 
 	if(FAILED(result))
 	{

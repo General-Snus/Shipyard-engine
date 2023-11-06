@@ -11,21 +11,22 @@
 #include <Shaders/Include/CopyPixels_PS.h> 
 #include <Shaders/Include/GaussianBlur_PS.h> 
 #include <Shaders/Include/Bloom_PS.h> 
+#include <Shaders/Include/SSAO_PS.h> 
 
 #include <Shaders/Include/ParticleShader_VS.h> 
 #include <Shaders/Include/ParticleShader_GS.h> 
 #include <Shaders/Include/ParticleShader_PS.h> 
 
-#include <Shaders/Include/Default_C.h>
-#include <Shaders/Include/Default_N.h>
-#include <Shaders/Include/Default_M.h>
-#include <Shaders/Include/Default_FX.h>
+#include <Objects/DataObjects/Default_C.h>
+#include <Objects/DataObjects/Default_N.h>
+#include <Objects/DataObjects/Default_M.h>
+#include <Objects/DataObjects/Default_FX.h>
 
 #include <Shaders/Include/LineDrawer_PS.h>
 #include <Shaders/Include/LineDrawer_VS.h>
 
 #include <Shaders/Include/brdfLUT_PS.h>
-#include <Shaders/Include/brdfLUT_VS.h>
+#include <Shaders/Include/ScreenspaceQuad_VS.h>
 #include <Shaders/Registers.h>
 
 #include "Objects/Shader.h"
@@ -42,10 +43,13 @@
 #include "GraphicCommands/Commands/Headers/GfxCmd_DebugLayer.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_SetLightBuffer.h" 
 #include "GraphicCommands/Commands/Headers/GfxCmd_GaussianBlur.h" 
+#include "GraphicCommands/Commands/Headers/GfxCmd_SSAO.h" 
 
 #include "Shaders/Registers.h"
 #include <Tools/ImGui/imgui.h>
 #include <stdexcept> 
+
+#include <Engine/GraphicsEngine/InterOp/DDSTextureLoader11.h>
 
 
 bool GraphicsEngine::Initialize(HWND windowHandle, bool enableDeviceDebug)
@@ -197,7 +201,8 @@ void GraphicsEngine::SetupDefaultVariables()
 
 	auto result = RHI::Device->CreateDepthStencilState(
 		&depthStencilDesc,
-		&myDepthStencilStates[(int)eDepthStencilStates::DSS_ReadOnly]);
+		&myDepthStencilStates[(int)eDepthStencilStates::DSS_ReadOnly]
+	);
 	if(FAILED(result))
 	{
 		GELogger.Log("Failed to create depth stencil read only state");
@@ -258,8 +263,31 @@ void GraphicsEngine::SetupDefaultVariables()
 		BuiltIn_Default_FX_ByteCode,
 		sizeof(BuiltIn_Default_FX_ByteCode)
 	);
+
+	//Particle
 	AssetManager::GetInstance().ForceLoadAsset<TextureHolder>(L"Textures/Default/DefaultParticle_P.dds",defaultParticleTexture);
-	defaultParticleTexture->SetTextureType(eTextureType::ParticleMap); 
+	defaultParticleTexture->SetTextureType(eTextureType::ParticleMap);
+	  
+
+
+
+	//NOISE
+	D3D11_SAMPLER_DESC pointSamplerDesc = {};
+	pointSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+	pointSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	pointSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	pointSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP; 
+
+	if(!RHI::CreateSamplerState(myPointSampleState,pointSamplerDesc))
+	{
+		GELogger.Log("Sampler state created");
+		assert(false);
+	}
+	RHI::SetSamplerState(myPointSampleState,REG_PointSampler);
+
+
+	AssetManager::GetInstance().ForceLoadAsset<TextureHolder>(L"Textures/Default/NoiseTable.dds",NoiseTable);
+	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_Noise_Texture,NoiseTable->GetRawTexture().get()); //Is there guarantee that this holds?
 
 	defaultVS = std::make_shared<Shader>();
 	defaultPS = std::make_shared<Shader>();
@@ -309,6 +337,7 @@ void GraphicsEngine::SetupBlendStates()
 		assert(false);
 	}
 }
+
 void GraphicsEngine::SetupBRDF()
 {
 	//Light
@@ -324,8 +353,8 @@ void GraphicsEngine::SetupBRDF()
 
 	RHI::CreateVertexShader(
 		myScreenSpaceQuadShader,
-		BuiltIn_brdfLUT_VS_ByteCode,
-		sizeof(BuiltIn_brdfLUT_VS_ByteCode)
+		BuiltIn_ScreenspaceQuad_VS_ByteCode,
+		sizeof(BuiltIn_ScreenspaceQuad_VS_ByteCode)
 	);
 
 	RHI::CreatePixelShader(
@@ -388,7 +417,7 @@ void GraphicsEngine::SetupPostProcessing()
 	halfSceneBuffer = std::make_shared<Texture>();
 	RHI::CreateTexture(
 		halfSceneBuffer.get(),
-		L"SceneBuffer",
+		L"halfSceneBuffer",
 		size.Width / 2, size.Height / 2,
 		defaultTextureFormat,
 		D3D11_USAGE_DEFAULT,
@@ -398,7 +427,7 @@ void GraphicsEngine::SetupPostProcessing()
 	quaterSceneBuffer1 = std::make_shared<Texture>();
 	RHI::CreateTexture(
 		quaterSceneBuffer1.get(),
-		L"SceneBuffer",
+		L"quaterSceneBuffer1",
 		size.Width / 4, size.Height / 4,
 		defaultTextureFormat,
 		D3D11_USAGE_DEFAULT,
@@ -408,7 +437,7 @@ void GraphicsEngine::SetupPostProcessing()
 	quaterSceneBuffer2 = std::make_shared<Texture>();
 	RHI::CreateTexture(
 		quaterSceneBuffer2.get(),
-		L"SceneBuffer",
+		L"quaterSceneBuffer2",
 		size.Width / 4, size.Height / 4,
 		defaultTextureFormat,
 		D3D11_USAGE_DEFAULT,
@@ -431,6 +460,17 @@ void GraphicsEngine::SetupPostProcessing()
 		IntermediateB.get(),
 		L"IntermediateB",
 		size.Width, size.Height,
+		defaultTextureFormat,
+		D3D11_USAGE_DEFAULT,
+		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+		0
+	);
+
+	SSAOTexture = std::make_shared<Texture>();
+	RHI::CreateTexture(
+		SSAOTexture.get(),
+		L"SSAOTexture",
+		size.Width,size.Height,
 		defaultTextureFormat,
 		D3D11_USAGE_DEFAULT,
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
@@ -464,6 +504,12 @@ void GraphicsEngine::SetupPostProcessing()
 		bloomShader,
 		BuiltIn_Bloom_PS_ByteCode,
 		sizeof(BuiltIn_Bloom_PS_ByteCode)
+	);
+
+	RHI::CreatePixelShader(
+		ScreenSpaceAmbienceOcclusion,
+		BuiltIn_SSAO_PS_ByteCode,
+		sizeof(BuiltIn_SSAO_PS_ByteCode)
 	);
 
 }
@@ -527,7 +573,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 	myCamera->SetCameraToFrameBuffer();
 	myG_Buffer.SetWriteTargetToBuffer(); //Let all write to textures
 	DeferredCommandList.Execute();
-	myInstanceRenderer.Execute(false);
+	myInstanceRenderer.Execute(false); 
 	RHI::EndEvent();
 	//decals
 	//if picking check
@@ -542,6 +588,9 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 
 
 	//Render all lights
+	RHI::BeginEvent(L"SSAO");
+	GfxCmd_SSAO().ExecuteAndDestroy();
+	RHI::EndEvent();
 
 	RHI::BeginEvent(L"Lightning");
 	myCamera->SetCameraToFrameBuffer();
@@ -570,6 +619,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 
 	//Debug layers 
 	RHI::BeginEvent(L"DebugLayers");
+	myCamera->SetCameraToFrameBuffer();
 	GfxCmd_DebugLayer().ExecuteAndDestroy();
 #ifdef  _DEBUGDRAW
 	OverlayCommandList.Execute();

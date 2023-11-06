@@ -3,12 +3,13 @@
 #include <Engine/AssetManager/Objects/Components/ComponentDerivatives/Transform.h>
 #include "../Headers/GfxCmd_SetFrameBuffer.h"
 #include <Shaders/Registers.h>
-GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,const Transform& ref,int aRenderMode) : 
+GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,const Transform& ref,int aRenderMode,const cCamera& camera) : 
 	myViewMatrix(Matrix::GetFastInverse(ref.GetTransform())), 
 	myProjectionMatrix(ProjectionMatrix), 
 	myPosition(ref.GetPosition()),
 	RenderMode(aRenderMode)
-{ 
+{
+	FB_FrustrumCorners = camera.GetFrustrumCorners();
 }
 
 //Remember to invert the matrix
@@ -34,6 +35,7 @@ void GfxCmd_SetFrameBuffer::ExecuteAndDestroy()
 
 	buffert.Data.FB_ScreenResolution[0] = static_cast<int>(RHI::GetDeviceSize().Width);
 	buffert.Data.FB_ScreenResolution[1] = static_cast<int>(RHI::GetDeviceSize().Height);
+	buffert.Data.FB_FrustrumCorners = FB_FrustrumCorners;
 
 	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_GEOMETERY_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_FrameBuffer,buffert);
 	RHI::UpdateConstantBufferData(buffert);

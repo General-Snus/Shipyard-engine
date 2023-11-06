@@ -1,4 +1,3 @@
-#include "../Headers/ShaderStructs.hlsli"
 #include "../Headers/PBRFunctions.hlsli" 
 
 float spotFallof(float spectatorAngle, float umbralAngle, float penumbralAngle)

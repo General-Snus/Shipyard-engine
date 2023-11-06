@@ -57,14 +57,15 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 
 void GfxCmd_SetLightBuffer::ExecuteAndDestroy()
 {
-	G_Buffer& gBuffer = GetGBuffer();
-
+	G_Buffer& gBuffer = GetGBuffer(); 
 	gBuffer.UseEnviromentShader();
-	for(auto& light : dirLight)
+
+	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_SSAO,GraphicsEngine::Get().GetTargetTextures(eRenderTargets::SSAO).get());
+	for(const auto& [light,shadowMap] : dirLight)
 	{
 		LightBuffer& buff = GetLightBuffer();
-		buff.Data.myDirectionalLight = *light.first;
-		RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,light.second);
+		buff.Data.myDirectionalLight = *light;
+		RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,shadowMap);
 
 		RHI::UpdateConstantBufferData(buff);
 		RHI::ConfigureInputAssembler(
@@ -76,13 +77,14 @@ void GfxCmd_SetLightBuffer::ExecuteAndDestroy()
 		);
 		RHI::Draw(4);
 	}
+	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_SSAO,nullptr);
 
 	gBuffer.UsePointlightShader();
-	for(auto& light : pointLight)
+	for(const auto& [light,shadowMap] : pointLight)
 	{
 		LightBuffer& buff = GetLightBuffer();
-		buff.Data.myPointLight = light.first;
-		RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,light.second);
+		buff.Data.myPointLight = light; //REFACTOR memory loss
+		RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,shadowMap);
 
 		RHI::UpdateConstantBufferData(buff);
 		RHI::ConfigureInputAssembler(
@@ -96,13 +98,13 @@ void GfxCmd_SetLightBuffer::ExecuteAndDestroy()
 	}
 
 	gBuffer.UseSpotlightShader();
-	for(auto& light : spotLight)
+	for(const auto& [light,shadowMap] : spotLight)
 	{
 		LightBuffer& buff = GetLightBuffer();
-		buff.Data.mySpotLight = *light.first;
-		if(light.second)
+		buff.Data.mySpotLight = *light;
+		if(shadowMap)
 		{
-			RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,light.second);
+			RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,shadowMap);
 		}
 
 		RHI::UpdateConstantBufferData(buff);

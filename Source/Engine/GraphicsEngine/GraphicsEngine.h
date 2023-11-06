@@ -31,6 +31,8 @@ enum class eRenderTargets
 	quaterSceneBuffer2,
 	IntermediateA,
 	IntermediateB,
+	SSAO,
+	NoiseTexture,
 	count
 };
 
@@ -87,6 +89,9 @@ private:
 	std::shared_ptr<Texture> IntermediateB;
 
 
+	//SSAO
+	std::shared_ptr<Texture> SSAOTexture;
+	ComPtr<ID3D11PixelShader> ScreenSpaceAmbienceOcclusion;
 
 	//Defualtl
 	ComPtr<ID3D11VertexShader> myVertexShader;
@@ -107,6 +112,7 @@ private:
 	ComPtr<ID3D11PixelShader> copyShader;
 	ComPtr<ID3D11PixelShader> gaussShader;
 	ComPtr<ID3D11PixelShader> bloomShader;
+
 	  
 	//Debug
 	ComPtr<ID3D11Buffer> myLineVertexBuffer;
@@ -115,6 +121,7 @@ private:
 	std::shared_ptr< Shader> debugLinePS;
 
 	std::shared_ptr<Texture> BRDLookUpTable;
+	std::shared_ptr<TextureHolder> NoiseTable;
 	std::shared_ptr<TextureHolder> defaultTexture;
 	std::shared_ptr<TextureHolder> defaultNormalTexture;
 	std::shared_ptr<TextureHolder> defaultMatTexture;
@@ -127,6 +134,7 @@ private:
 
 	ComPtr<ID3D11SamplerState> myDefaultSampleState;
 	ComPtr<ID3D11SamplerState> myShadowSampleState;
+	ComPtr<ID3D11SamplerState> myPointSampleState;
 	ComPtr<ID3D11SamplerState> myBRDFSampleState;
 
 	enum class eDepthStencilStates : unsigned int
@@ -229,6 +237,7 @@ public:
 
 	FORCEINLINE ComPtr<ID3D11VertexShader> GetQuadShader() const { return myScreenSpaceQuadShader; }
 	FORCEINLINE ComPtr<ID3D11PixelShader> GetLuminanceShader() const { return luminancePass; }
+	FORCEINLINE ComPtr<ID3D11PixelShader> GetSSAOShader() const { return ScreenSpaceAmbienceOcclusion; }
 	FORCEINLINE ComPtr<ID3D11PixelShader> GetLinearToGamma() const { return linearGammaPass; }
 	FORCEINLINE ComPtr<ID3D11PixelShader> GetCopyShader() const { return copyShader; }
 	FORCEINLINE ComPtr<ID3D11PixelShader> GetGaussShader() const { return gaussShader; }
@@ -303,6 +312,10 @@ public:
 			return IntermediateA;
 		case::eRenderTargets::IntermediateB:
 			return IntermediateB;
+		case::eRenderTargets::SSAO:
+			return SSAOTexture;
+		case::eRenderTargets::NoiseTexture:
+			return NoiseTable->GetRawTexture();
 		default:
 			return nullptr;
 		}

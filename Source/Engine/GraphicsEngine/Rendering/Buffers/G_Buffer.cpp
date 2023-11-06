@@ -140,7 +140,7 @@ void G_Buffer::Init()
 		D3D11_USAGE_DEFAULT,
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
 		0
-	);
+	); 
 
 	vectorOfTextures.push_back(albedoTexture.get());
 	vectorOfTextures.push_back(normalTexture.get());
@@ -148,7 +148,7 @@ void G_Buffer::Init()
 	vectorOfTextures.push_back(materialTexture.get());
 	vectorOfTextures.push_back(effectTexture.get());
 	vectorOfTextures.push_back(positionTexture.get());
-	vectorOfTextures.push_back(depthTexture.get());
+	vectorOfTextures.push_back(depthTexture.get()); 
 
 	//ID3D11Texture2D* depthStencilTexture = nullptr;
 	//
@@ -175,6 +175,22 @@ void G_Buffer::SetWriteTargetToBuffer()
 	
 }
 
+void G_Buffer::SetResourceTexture()
+{
+	for(int i = 0; i < vectorOfTextures.size(); i++)
+	{
+		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,i,vectorOfTextures[i]);
+	}
+}
+
+void G_Buffer::UnsetResources()
+{
+	for(int i = 0; i < vectorOfTextures.size(); i++)
+	{
+		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,i,nullptr);
+	}
+}
+
 void G_Buffer::UseGBufferShader()
 {
 	RHI::SetVertexShader(myVertexShader);
@@ -185,10 +201,7 @@ void G_Buffer::UseEnviromentShader()
 	RHI::SetVertexShader(myScreenSpaceShader);
 	RHI::SetPixelShader(myEnviromentPixelShader);
 
-	for(int i = 0; i < vectorOfTextures.size(); i++)
-	{
-		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,i,vectorOfTextures[i]);
-	} 
+	SetResourceTexture();
 }
 
 
@@ -197,10 +210,7 @@ void G_Buffer::UseDebugShader()
 	RHI::SetVertexShader(myScreenSpaceShader);
 	RHI::SetPixelShader(myDebugPixelShader);
 
-	for(int i = 0; i < vectorOfTextures.size(); i++)
-	{
-		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,i,vectorOfTextures[i]);
-	}
+	SetResourceTexture();
 }
 
 void G_Buffer::UsePointlightShader()
@@ -209,10 +219,7 @@ void G_Buffer::UsePointlightShader()
 	RHI::SetVertexShader(myScreenSpaceShader); 
 	RHI::SetPixelShader(myPointPixelShader);
 
-	for(int i = 0; i < vectorOfTextures.size(); i++)
-	{
-		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,i,vectorOfTextures[i]);
-	}
+	SetResourceTexture();
 }
 
 void G_Buffer::UseSpotlightShader()
@@ -221,19 +228,16 @@ void G_Buffer::UseSpotlightShader()
 	RHI::SetVertexShader(myScreenSpaceShader);
 	RHI::SetPixelShader(mySpotShader);
 
-	for(int i = 0; i < vectorOfTextures.size(); i++)
-	{
-		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,i,vectorOfTextures[i]);
-	}
+	SetResourceTexture();
 }
 
 void G_Buffer::ClearTargets()
-{
-
+{ 
 	for(int i = 0; i < vectorOfTextures.size(); i++)
 	{
 		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,i,nullptr);
 
 		RHI::ClearRenderTarget(vectorOfTextures[i]);
 	}
+
 }

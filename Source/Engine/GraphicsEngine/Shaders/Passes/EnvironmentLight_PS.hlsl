@@ -1,8 +1,4 @@
-#include "../Headers/ShaderStructs.hlsli"
-#include "../Headers/PBRFunctions.hlsli"
- 
-
-
+#include "../Headers/PBRFunctions.hlsli"  
 
 float3 CalculateIndirectLight(
 float3 diffuseColor,
@@ -84,7 +80,7 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
 {
     //Buffer maps are now filled from gbuffer? not sent indivudually by the rendercommands??
     DefaultPixelOutput result;
-    float2 uv = input.UV;
+    const float2 uv = input.UV;
     
     const float4 albedo = colorMap.Sample(defaultSampler, uv);
     const float4 Material = materialMap.Sample(defaultSampler, uv);
@@ -93,15 +89,15 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     const float4 worldPosition = float4(worldPositionMap.Sample(defaultSampler, uv).xyz, 1);
     const float metallic = Material.b;
     const float roughness = Material.g;
-    const float occlusion = Material.r;
+    const float occlusion = Material.r * SSAOMap.Sample(defaultSampler, uv).r;
     
     const float3 cameraDirection = normalize(FB_CameraPosition.xyz - worldPosition.xyz);
     const float3 diffuseColor = lerp((float3)0.0f, albedo.rgb, 1 - metallic);
     const float3 specularColor = lerp((float3)0.04f, albedo.rgb, metallic); 
     
     const float3 radiance =
-    CalculateDirectionLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, Material.g, worldPosition)
-    + CalculateIndirectLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, enviromentCube, Material.g, Material.r);
+    CalculateDirectionLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, roughness, worldPosition)
+    + CalculateIndirectLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, enviromentCube, roughness, occlusion);
     
     result.Color.rgb =  radiance + Effect.r * albedo.rgb; 
     result.Color.a = 1.0f;

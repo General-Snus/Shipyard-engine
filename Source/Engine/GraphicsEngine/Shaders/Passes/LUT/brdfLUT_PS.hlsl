@@ -1,4 +1,4 @@
-#include "../../Headers/ShaderStructs.hlsli"
+ 
 #include "../../Headers/PBRFunctions.hlsli"
 
 float2 main(BRDF_VS_to_PS input) : SV_Target
