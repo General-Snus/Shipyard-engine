@@ -22,11 +22,8 @@ void G_Buffer::Init()
 		BuiltIn_Default_VS_ByteCode,
 		sizeof(BuiltIn_Default_VS_ByteCode)
 	);
-	RHI::CreateVertexShader(
-		myScreenSpaceShader,
-		BuiltIn_ScreenspaceQuad_VS_ByteCode,
-		sizeof(BuiltIn_ScreenspaceQuad_VS_ByteCode)
-	);
+
+	myScreenSpaceShader = GraphicsEngine::Get().GetQuadShader(); 
 
 	RHI::CreatePixelShader(
 		myPixelShader,

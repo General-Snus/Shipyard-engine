@@ -92,6 +92,7 @@ private:
 	//SSAO
 	std::shared_ptr<Texture> SSAOTexture;
 	ComPtr<ID3D11PixelShader> ScreenSpaceAmbienceOcclusion;
+	ComPtr<ID3D11PixelShader> EdgeBlur;
 
 	//Defualtl
 	ComPtr<ID3D11VertexShader> myVertexShader;
@@ -136,6 +137,7 @@ private:
 	ComPtr<ID3D11SamplerState> myShadowSampleState;
 	ComPtr<ID3D11SamplerState> myPointSampleState;
 	ComPtr<ID3D11SamplerState> myBRDFSampleState;
+	ComPtr<ID3D11SamplerState> myNormalDepthSampleState;
 
 	enum class eDepthStencilStates : unsigned int
 	{
@@ -238,6 +240,7 @@ public:
 	FORCEINLINE ComPtr<ID3D11VertexShader> GetQuadShader() const { return myScreenSpaceQuadShader; }
 	FORCEINLINE ComPtr<ID3D11PixelShader> GetLuminanceShader() const { return luminancePass; }
 	FORCEINLINE ComPtr<ID3D11PixelShader> GetSSAOShader() const { return ScreenSpaceAmbienceOcclusion; }
+	FORCEINLINE ComPtr<ID3D11PixelShader> GetEdgeBlurShader() const { return EdgeBlur; }
 	FORCEINLINE ComPtr<ID3D11PixelShader> GetLinearToGamma() const { return linearGammaPass; }
 	FORCEINLINE ComPtr<ID3D11PixelShader> GetCopyShader() const { return copyShader; }
 	FORCEINLINE ComPtr<ID3D11PixelShader> GetGaussShader() const { return gaussShader; }

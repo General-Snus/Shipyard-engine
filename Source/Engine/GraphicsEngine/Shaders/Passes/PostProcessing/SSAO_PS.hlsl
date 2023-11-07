@@ -27,22 +27,28 @@ PostProcessPixelOutput main(BRDF_VS_to_PS input)
     const float2 random = GetRandom(input.UV,randomUVScale);
     const float4 pxPos = GetViewPosition(input.UV);
     const float4 pxNorm = GetViewNormal(input.UV);
+   // const float2 frustrumCorners[4] = {FB_FrustrumCorners[0].xy, FB_FrustrumCorners[1].xy, FB_FrustrumCorners[2].xy, FB_FrustrumCorners[3].xy};
     const float2 frustrumCorners[4] = {float2(1, 0), float2(-1, 0), float2(0, 1), float2(0, -1)};
     
     float occlusion = 0.0f;
-    for(uint i = 0; i < 4; i++)
+    const float lerpVar = saturate(pxPos.z / FB_FrustrumCorners[0].z);
+  //  const uint iterations = 4;
+     const uint iterations = lerp(6.0, 2.0, lerpVar);
+    [unroll]
+    for(uint i = 0; i < iterations; i++)
     {
         const uint idx = i % 4;
-        const float2 coord1 = reflect(frustrumCorners[idx],random) * radius;
+        const float2 coord1 = reflect(normalize(frustrumCorners[idx]), random) * radius;
         const float2 coord2 = float2((coord1.x - coord1.y) * offset, (coord1.x + coord1.y) * offset);
         
         occlusion += SSAO(input.UV, coord1*0.25f, pxPos.xyz, pxNorm.xyz, scale, bias, intensity);
-        occlusion += SSAO(input.UV, coord1*0.50f, pxPos.xyz, pxNorm.xyz, scale, bias, intensity);
+        occlusion += SSAO(input.UV, coord2*0.50f, pxPos.xyz, pxNorm.xyz, scale, bias, intensity);
         occlusion += SSAO(input.UV, coord1*0.75f, pxPos.xyz, pxNorm.xyz, scale, bias, intensity);
-        occlusion += SSAO(input.UV, coord1*1.00f, pxPos.xyz, pxNorm.xyz, scale, bias, intensity);
+        occlusion += SSAO(input.UV, coord2*1.00f, pxPos.xyz, pxNorm.xyz, scale, bias, intensity);
         
     }
-    result.Color.rgb = 1 - occlusion;
+    const float occludeTotal = 1 - occlusion;
+    result.Color.rgb = occludeTotal;
     result.Color.a = 1.0f;
     return result;
 }

@@ -18,7 +18,7 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     const float roughness = Material.g;
     const float occlusion = Material.r;
     const float depth = DepthMap.Sample(defaultSampler, uv).r;
-    const float3 ssao = SSAOMap.Sample(defaultSampler, uv);
+    const float4 ssao = SSAOMap.Sample(defaultSampler, uv);
     
     
     
@@ -104,19 +104,19 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
             }
         case 11:
     {
-                result.Color.rgb = ssao;
+                result.Color.rgb = ssao.rgb;
                 result.Color.a = 1.0f;
                 break;
             }
         case 12:
     {
-                result.Color.rgb = (GetViewPosition(input.UV) + 1.0f) / 2.0f;;
+                result.Color.rgb = (GetViewPosition(input.UV).rgb + 1.0f) / 2.0f;;
                 result.Color.a = 1.0f;
                 break;
             }
         case 13:
     {
-                result.Color.rgb = (GetViewNormal(input.UV) + 1.0f)/2.0f;
+                result.Color.rgb = (GetViewNormal(input.UV).rgb + 1.0f) / 2.0f;
                 result.Color.a = 1.0f;
                 break;
             }

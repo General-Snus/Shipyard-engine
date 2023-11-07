@@ -12,6 +12,7 @@
 #include <Shaders/Include/GaussianBlur_PS.h> 
 #include <Shaders/Include/Bloom_PS.h> 
 #include <Shaders/Include/SSAO_PS.h> 
+#include <Shaders/Include/EdgeBlur.h> 
 
 #include <Shaders/Include/ParticleShader_VS.h> 
 #include <Shaders/Include/ParticleShader_GS.h> 
@@ -402,6 +403,20 @@ void GraphicsEngine::SetupBRDF()
   
 void GraphicsEngine::SetupPostProcessing()
 {
+	D3D11_SAMPLER_DESC normalDepthSampler = {};
+	normalDepthSampler.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+	normalDepthSampler.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	normalDepthSampler.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	normalDepthSampler.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+
+	if(!RHI::CreateSamplerState(myNormalDepthSampleState,normalDepthSampler))
+	{
+		GELogger.Log("Sampler state created");
+		assert(false);
+	}
+
+	RHI::SetSamplerState(myNormalDepthSampleState,REG_normalDepthSampler);
+
 	RHI::DeviceSize size = RHI::GetDeviceSize();
 	SceneBuffer = std::make_shared<Texture>();
 	RHI::CreateTexture(
@@ -510,6 +525,13 @@ void GraphicsEngine::SetupPostProcessing()
 		ScreenSpaceAmbienceOcclusion,
 		BuiltIn_SSAO_PS_ByteCode,
 		sizeof(BuiltIn_SSAO_PS_ByteCode)
+	);
+
+
+	RHI::CreatePixelShader(
+		EdgeBlur,
+		BuiltIn_EdgeBlur_ByteCode,
+		sizeof(BuiltIn_EdgeBlur_ByteCode)
 	);
 
 }

@@ -17,4 +17,5 @@ public:
 	{
 	};
 	void ExecuteAndDestroy() override;
+	~GfxCmd_RenderMesh() override = default;
 };

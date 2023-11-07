@@ -330,6 +330,7 @@
     <None Include="Shaders\Headers\LightsData.hlsli" />
     <None Include="Shaders\Passes\LineDrawer\LineDrawerStructs.hlsli" />
     <None Include="Shaders\Headers\ParticleStruct.hlsli" />
+    <None Include="Shaders\Headers\Tonemaps.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\DefaultShaders\Default_VS.hlsl" />
@@ -354,6 +355,7 @@
     <FxCompile Include="Shaders\Passes\Particles\ParticleShader_VS.hlsl" />
     <FxCompile Include="Shaders\Passes\PostProcessing\SSAO_PS.hlsl" />
     <FxCompile Include="Shaders\DefaultShaders\Default_PS.hlsl" />
+    <FxCompile Include="Shaders\Passes\PostProcessing\EdgeBlur.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Objects\DataObjects\DefaultParticle_P.dds" />

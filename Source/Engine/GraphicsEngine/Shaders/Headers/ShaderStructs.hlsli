@@ -114,6 +114,7 @@ cbuffer ObjectBuffer : register(HLSL_REG_ObjectBuffer)
 
 SamplerState defaultSampler : register(HLSL_REG_DefaultSampler);
 SamplerState BRDFSampler : register(HLSL_REG_BRDFSampler);
+SamplerState NormalDepthSampler : register(HLSL_REG_normalDepthSampler);
 SamplerState PointSampler : register(HLSL_REG_PointSampler);
 SamplerComparisonState shadowCmpSampler : register(HLSL_REG_shadowCmpSampler);
 

@@ -131,13 +131,13 @@ void Mesh::Init()
 					boneWeight
 				);
 			}
-			mdlIndicies = element.Indices; 
-			 ComPtr<ID3D11Buffer> vertexBuffer;
-			 if(!RHI::CreateVertexBuffer<Vertex>(vertexBuffer,mdlVertices))
-			 {
-			 	std::cout << "Failed to create vertex buffer" << std::endl;
-			 	return;
-			 }
+			mdlIndicies = element.Indices;
+			ComPtr<ID3D11Buffer> vertexBuffer;
+			if(!RHI::CreateVertexBuffer<Vertex>(vertexBuffer,mdlVertices))
+			{
+				std::cout << "Failed to create vertex buffer" << std::endl;
+				return;
+			}
 			ComPtr<ID3D11Buffer> indexBuffer;
 			if(!RHI::CreateIndexBuffer(indexBuffer,mdlIndicies))
 			{
@@ -161,31 +161,59 @@ void Mesh::Init()
 	MaxBox = CU::Vector3<float>(inMesh.BoxBounds.Max[0],inMesh.BoxBounds.Max[1],inMesh.BoxBounds.Max[2]);
 	MinBox = CU::Vector3<float>(inMesh.BoxBounds.Min[0],inMesh.BoxBounds.Min[1],inMesh.BoxBounds.Min[2]);
 	isLoadedComplete = true;
-}
 
-void Mesh::UpdateInstanceBuffer()
-{
-	D3D11_BUFFER_DESC vertexBufferDesc{};
 	vertexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(Matrix) * myInstances.size());
 	vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;	
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	vertexBufferDesc.MiscFlags = 0;
 	vertexBufferDesc.StructureByteStride = 0;
+	 
 
+	HRESULT result;
+	result = RHI::Device->CreateBuffer(
+		&vertexBufferDesc,
+		nullptr,
+		myInstanceBuffer.GetAddressOf()
+	);
+	bufferSize = 0;
+	if(FAILED(result))
+	{
+		AMLogger.Log("Failed to create Instance buffer");
+		return;
+	}
+}
+
+void Mesh::ResizeBuffer()
+{
 	D3D11_SUBRESOURCE_DATA vertexSubResourceData{};
-	vertexSubResourceData.pSysMem =  myInstances.data();
+	vertexSubResourceData.pSysMem = myInstances.data();
+	vertexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(Matrix) * myInstances.size());
 
-	HRESULT result; 
+	HRESULT result;
 	result = RHI::Device->CreateBuffer(
 		&vertexBufferDesc,
 		&vertexSubResourceData,
 		myInstanceBuffer.GetAddressOf()
-	);
+	); 
 
 	if(FAILED(result))
 	{
 		AMLogger.Log("Failed to create Instance buffer");
 		return;
 	}
+	bufferSize = static_cast<int>(myInstances.size());
+
+}
+
+void Mesh::UpdateInstanceBuffer()
+{
+	if(myInstances.size() > bufferSize)
+	{
+		ResizeBuffer();
+	}
+	D3D11_MAPPED_SUBRESOURCE mappedResource{};
+	RHI::Context->Map(myInstanceBuffer.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&mappedResource);
+	memcpy(mappedResource.pData,myInstances.data(),sizeof(Matrix) * myInstances.size());
+	RHI::Context->Unmap(myInstanceBuffer.Get(),0);
 }

@@ -67,8 +67,8 @@ void cCamera::Update()
 
 	//UpdatePositionVectors();
 	const float mdf = 1000;
-	const float rotationSpeed = 100;
-
+	const float rotationSpeed = 100; 
+	myScreenSize = CU::Vector2<int>(RHI::GetDeviceSize().Width,RHI::GetDeviceSize().Height);
 
 	if(CU::InputHandler::GetInstance().IsKeyHeld((int)Keys::MOUSERBUTTON))
 	{ 
@@ -140,7 +140,7 @@ std::array<Vector4f,4> cCamera::GetFrustrumCorners() const
 	corners[2] = {	halfWidth, +halfHeight, mySettings.farfield, 0.0f };
 	corners[3] = { +halfWidth, -halfHeight, mySettings.farfield, 0.0f };
 
-	return std::array<Vector4f,4>();
+	return corners;
 }
 Vector3f cCamera::GetPointerDirection(const CU::Vector2<int> position)
 {

@@ -13,6 +13,9 @@
 #define HLSL_REG_DefaultSampler s0 
 #define REG_DefaultSampler 0 
 
+#define HLSL_REG_normalDepthSampler s12
+#define REG_normalDepthSampler 12
+
 #define HLSL_REG_PointSampler s13 
 #define REG_PointSampler 13 
 
