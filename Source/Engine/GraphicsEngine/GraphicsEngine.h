@@ -9,6 +9,7 @@
 #include "Rendering/Buffers/ObjectBuffer.h"
 #include "Rendering/Buffers/LineBuffer.h"
 #include "Rendering/Buffers/G_Buffer.h"
+#include "Rendering/Buffers/GraphicSettingsBuffer.h"
 #include "Rendering/Buffers/ConstantBuffer.h" 
 
 #include "InterOp/RHI.h"
@@ -20,6 +21,10 @@
 
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp> 
 
+struct GraphicsSettings
+{
+	int Tonemaptype = 0;
+};
 
 enum class eRenderTargets
 {
@@ -68,6 +73,7 @@ private:
 	LineBuffer myLineBuffer;
 	LightBuffer myLightBuffer;
 	G_Buffer myG_Buffer;
+	GraphicSettingsBuffer myGraphicSettingsBuffer;
 	//Fill with render data for the deffered pass
 	GraphicsCommandList DeferredCommandList;
 	GraphicsCommandList OverlayCommandList;
@@ -109,7 +115,7 @@ private:
 	//Post-pro
 	ComPtr<ID3D11VertexShader> myScreenSpaceQuadShader;
 	ComPtr<ID3D11PixelShader> luminancePass;
-	ComPtr<ID3D11PixelShader> linearGammaPass;
+	ComPtr<ID3D11PixelShader> TonemapPass;
 	ComPtr<ID3D11PixelShader> copyShader;
 	ComPtr<ID3D11PixelShader> gaussShader;
 	ComPtr<ID3D11PixelShader> bloomShader;
@@ -153,6 +159,8 @@ private:
 	ShadowRenderer myShadowRenderer;
 	ParticleRenderer myParticleRenderer;
 	InstanceRenderer myInstanceRenderer;
+	GraphicsSettings myGraphicSettings;
+
 	// We're a container singleton, no instancing this outside the class.
 	GraphicsEngine() = default;
 
@@ -177,6 +185,8 @@ public:
 	void SetupBlendStates();
 
 	void SetupParticleShaders();
+
+	void UpdateSettings();
 
 	void SetLoggingWindow(HANDLE aHandle) const;
 
@@ -241,7 +251,7 @@ public:
 	FORCEINLINE ComPtr<ID3D11PixelShader> GetLuminanceShader() const { return luminancePass; }
 	FORCEINLINE ComPtr<ID3D11PixelShader> GetSSAOShader() const { return ScreenSpaceAmbienceOcclusion; }
 	FORCEINLINE ComPtr<ID3D11PixelShader> GetEdgeBlurShader() const { return EdgeBlur; }
-	FORCEINLINE ComPtr<ID3D11PixelShader> GetLinearToGamma() const { return linearGammaPass; }
+	FORCEINLINE ComPtr<ID3D11PixelShader> GetTonemap() const { return TonemapPass; }
 	FORCEINLINE ComPtr<ID3D11PixelShader> GetCopyShader() const { return copyShader; }
 	FORCEINLINE ComPtr<ID3D11PixelShader> GetGaussShader() const { return gaussShader; }
 	FORCEINLINE ComPtr<ID3D11PixelShader> GetBloomShader() const { return bloomShader; }
@@ -325,6 +335,7 @@ public:
 	}  
 
 	FORCEINLINE InstanceRenderer& GetInstanceRenderer() { return myInstanceRenderer; } 
+	FORCEINLINE GraphicsSettings& GetSettings() { return myGraphicSettings; } 
 	FORCEINLINE std::shared_ptr< Shader> GetDebugLineVS() const { return debugLineVS; }
 	FORCEINLINE std::shared_ptr< Shader> GetDebugLinePS() const { return debugLinePS; }
 

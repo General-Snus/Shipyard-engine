@@ -1,10 +1,10 @@
 #pragma once
 #include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
 
-class GfxCmd_LinearToGamma : public GraphicCommandBase
+class GfxCmd_ToneMapPass : public GraphicCommandBase
 {
 public:
-	GfxCmd_LinearToGamma();
+	GfxCmd_ToneMapPass();
 	void Destroy() override {};
 	void ExecuteAndDestroy() override;
 

@@ -23,7 +23,8 @@ public:
 	~RenderMode() { OnExit(); };
 
 private:
-	int currentlyActive = 0;
+	int currentlyActiveTone = 0;
+	int currentlyActiveLayer = 0;
 	bool myRenderMode[(int)DebugFilter::count] = { false };
 
 };

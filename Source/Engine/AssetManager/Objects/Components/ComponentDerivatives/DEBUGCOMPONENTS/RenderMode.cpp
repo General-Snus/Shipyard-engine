@@ -3,12 +3,21 @@
 #include <Tools/ImGui/imgui.h> 
 #include <Game/Modelviewer/Core/Modelviewer.h>
 
+static inline std::string tonemaps[5] = {
+	"No tonemap",
+	"Tonemap_Reinhard2",
+	"Tonemap_UnrealEngine",
+	"Tonemap_ACES",
+	"Tonemap_Lottes"
+};
+
+
 void RenderMode::Update()
 { 
 	ImGui::Begin("Debug Filter"); 
 	for(int i = 0; i < (int)DebugFilter::count; i++)
 	{
-		if(currentlyActive == i)
+		if(currentlyActiveLayer == i)
 		{
 			ImGui::RadioButton(ApplicationState::layerNames[i].c_str(),true);
 		}
@@ -16,12 +25,31 @@ void RenderMode::Update()
 		{
 			if(ImGui::RadioButton(ApplicationState::layerNames[i].c_str(),false))
 			{
-				currentlyActive = i;
+				currentlyActiveLayer = i;
 				ModelViewer::GetApplicationState().filter = (DebugFilter)i;
 			}
 		}
-	} 
+	}
+	ImGui::End();
 
+	ImGui::Begin("Tonemap");
+	for(int i = 0; i < 5; i++)
+	{
+		if(currentlyActiveTone == i)
+		{
+			ImGui::RadioButton(tonemaps[i].c_str(),true);
+		}
+		else
+		{
+			if(ImGui::RadioButton(tonemaps[i].c_str(),false))
+			{
+				currentlyActiveTone = i;
+
+				GraphicsSettings& settings = GraphicsEngine::Get().GetSettings();
+				settings.Tonemaptype = i;
+			}
+		}
+	}
 	ImGui::End();
 }
 

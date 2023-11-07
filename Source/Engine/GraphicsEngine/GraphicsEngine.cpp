@@ -7,7 +7,7 @@
 #include <Shaders/Include/Default_PS.h>
 #include <Shaders/Include/Default_VS.h>
 #include <Shaders/Include/LuminancePass_PS.h>
-#include <Shaders/Include/LinearToGammaPass.h>
+#include <Shaders/Include/ToneMapping_PS.h>
 #include <Shaders/Include/CopyPixels_PS.h> 
 #include <Shaders/Include/GaussianBlur_PS.h> 
 #include <Shaders/Include/Bloom_PS.h> 
@@ -96,6 +96,9 @@ bool GraphicsEngine::Initialize(HWND windowHandle, bool enableDeviceDebug)
 
 		myLineBuffer.Initialize();
 		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER, REG_LineBuffer, myLineBuffer);
+
+		myGraphicSettingsBuffer.Initialize();
+		RHI::SetConstantBuffer(PIPELINE_STAGE_PIXEL_SHADER,REG_GraphicSettingsBuffer,myGraphicSettingsBuffer);
 
 		myG_Buffer.Init();
 		myShadowRenderer.Init();
@@ -498,9 +501,9 @@ void GraphicsEngine::SetupPostProcessing()
 		sizeof(BuiltIn_LuminancePass_PS_ByteCode)
 	);
 	RHI::CreatePixelShader(
-		linearGammaPass,
-		BuiltIn_LinearToGammaPass_ByteCode,
-		sizeof(BuiltIn_LinearToGammaPass_ByteCode)
+		TonemapPass,
+		BuiltIn_ToneMapping_PS_ByteCode,
+		sizeof(BuiltIn_ToneMapping_PS_ByteCode)
 	);
 
 	RHI::CreatePixelShader(
@@ -557,6 +560,12 @@ void GraphicsEngine::SetupParticleShaders()
 	); 
 }
 
+void GraphicsEngine::UpdateSettings()
+{
+	myGraphicSettingsBuffer.Data.GSB_ToneMap = myGraphicSettings.Tonemaptype;
+	RHI::UpdateConstantBufferData(myGraphicSettingsBuffer);
+}
+
 void GraphicsEngine::SetLoggingWindow(HANDLE aHandle)  const
 {
 	GELogger.SetConsoleHandle(aHandle);
@@ -569,6 +578,7 @@ void GraphicsEngine::BeginFrame()
 	{
 		GELogger.Err("No camera in scene. No render is possible");
 	}
+	UpdateSettings();
 
 	// Here we should initialize our frame and clean up from the last one.  
 	RHI::ClearRenderTarget(myBackBuffer.get(), myBackgroundColor);
@@ -580,7 +590,6 @@ void GraphicsEngine::BeginFrame()
 	RHI::ClearRenderTarget(quaterSceneBuffer2.get(), { 0.0f,0.0f,0.0f,0.0f });
 	RHI::ClearRenderTarget(IntermediateA.get(), { 0.0f,0.0f,0.0f,0.0f });
 	RHI::ClearRenderTarget(IntermediateB.get(), { 0.0f,0.0f,0.0f,0.0f });
-
 	myG_Buffer.ClearTargets();
 	RHI::SetBlendState(nullptr);
 }
@@ -636,7 +645,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 	GfxCmd_LuminancePass().ExecuteAndDestroy(); // Render to IntermediateA
 	GfxCmd_GaussianBlur().ExecuteAndDestroy();
 	GfxCmd_Bloom().ExecuteAndDestroy();
-	GfxCmd_LinearToGamma().ExecuteAndDestroy(); // Render: BakcBuffer Read: REG_Target01
+	GfxCmd_ToneMapPass().ExecuteAndDestroy(); // Render: BakcBuffer Read: REG_Target01
 	RHI::EndEvent();
 
 	//Debug layers 

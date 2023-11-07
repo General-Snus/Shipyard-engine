@@ -38,7 +38,10 @@
 #define REG_LightBuffer 3 
 
 #define HLSL_REG_LineBuffer b5 
-#define REG_LineBuffer 5 
+#define REG_LineBuffer 5
+
+#define HLSL_REG_GraphicSettingsBuffer b13 
+#define REG_GraphicSettingsBuffer 13
 
 #define HLSL_REG_colorMap t0 
 #define REG_colorMap 0 

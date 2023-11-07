@@ -174,7 +174,7 @@
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_Bloom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_LinearToGamma.h">
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_ToneMapPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_LuminancePass.h">
@@ -223,6 +223,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Shaders\Include\ToneMapping_PS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Buffers\GraphicSettingsBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -299,7 +302,7 @@
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_Bloom.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_LinearToGamma.cpp">
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_ToneMapPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_LuminancePass.cpp">

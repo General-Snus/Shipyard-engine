@@ -187,7 +187,7 @@
     <ClInclude Include="DebugDrawer\DebugDrawer.h" />
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_GaussianBlur.h" />
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_LuminancePass.h" />
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_LinearToGamma.h" />
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_ToneMapPass.h" />
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_Bloom.h" />
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_DebugLayer.h" />
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_DrawDebugPrimitive.h" />
@@ -201,6 +201,7 @@
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetRenderTarget.h" />
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SSAO.h" />
     <ClInclude Include="InterOp\ShaderInfo.h" />
+    <ClInclude Include="Rendering\Buffers\GraphicSettingsBuffer.h" />
     <ClInclude Include="Rendering\InstanceRenderer\InstanceRenderer.h" />
     <ClInclude Include="Rendering\ParticleRenderer\ParticleRenderer.h" />
     <ClInclude Include="Rendering\ParticleRenderer\ParticleVertex.h" />
@@ -257,7 +258,7 @@
     <ClCompile Include="DebugDrawer\DebugDrawer.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_GaussianBlur.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_LuminancePass.cpp" />
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_LinearToGamma.cpp" />
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_ToneMapPass.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_Bloom.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_DebugLayer.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_DrawDebugPrimitive.cpp" />

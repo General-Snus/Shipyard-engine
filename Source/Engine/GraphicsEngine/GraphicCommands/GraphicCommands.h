@@ -8,6 +8,7 @@
 #include <Engine/GraphicsEngine/Rendering/Buffers/LightBuffer.h>
 #include <Engine/GraphicsEngine/Rendering/Buffers/LineBuffer.h>
 #include <Engine/GraphicsEngine/Rendering/Buffers/G_buffer.h>
+#include <Engine/GraphicsEngine/Rendering/Buffers/GraphicSettingsBuffer.h>
 #include <Engine/GraphicsEngine/Rendering/InstanceRenderer/InstanceRenderer.h>
 
 
@@ -22,6 +23,7 @@ protected:
 	LightBuffer& GetLightBuffer();
 	G_Buffer& GetGBuffer();
 	InstanceRenderer& GetInstanceRenderer();
+	GraphicSettingsBuffer& GetGraphicSettings();
 public:
 	virtual ~GraphicCommandBase() = default;
 	virtual void ExecuteAndDestroy() = 0;

@@ -100,6 +100,12 @@ cbuffer DefaultMaterialBuffer : register(HLSL_REG_DefaultMaterialBuffer)
     DefaultMaterialData DefaultMaterial;
 };
 
+cbuffer GraphicSettingsBuffer : register(HLSL_REG_GraphicSettingsBuffer)
+{
+    int GSB_ToneMap; // 4 
+    float3 padding1;
+}
+
 
 cbuffer ObjectBuffer : register(HLSL_REG_ObjectBuffer)
 {

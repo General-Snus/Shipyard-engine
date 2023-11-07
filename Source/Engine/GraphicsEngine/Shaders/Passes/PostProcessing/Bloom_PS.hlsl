@@ -12,17 +12,17 @@ PostProcessPixelOutput main(BRDF_VS_to_PS input)
     
     
     //Additive
-    output.Color.rgb = color1 + color2;
-    /*
+    //output.Color.rgb = color1 + color2;
+     
     //Scaled
-    float3 scaledResource = color1 * (1 - saturate(color2));
-    output.Color.rgb = scaledResource * color2;
-    */
+    //float3 scaledResource = color1 * (1 - saturate(color2));
+    //output.Color.rgb = scaledResource * color2;
+    
     
     //LumnanceBased
-    //const float luminance = dot(color1, float3(0.2126, 0.7152, 0.0722));
-    //const float3 scaledResource = color2 * (1 - luminance);
-    //output.Color.rgb = scaledResource + color1;
+    const float luminance = dot(color1, float3(0.2126, 0.7152, 0.0722));
+    const float3 scaledResource = color2 * (1 - luminance);
+    output.Color.rgb = scaledResource + color1;
     
     
     output.Color.a = 1;
