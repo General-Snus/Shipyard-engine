@@ -1,4 +1,7 @@
+#define CommonGuard
 #include "../Registers.h"
+ 
+
 
 static const float PI = 3.14159265f;
 float3 PositionInBound(float3 aMin, float3 aMax, float3 aPosition)
@@ -14,6 +17,8 @@ int GetNumMips(TextureCube mipMap)
     mipMap.GetDimensions(0, iWidth, iHeight, iNumMips);
     return iNumMips;
 }
+
+
 
 float3 LinearToGamma(float3 aColor)
 {

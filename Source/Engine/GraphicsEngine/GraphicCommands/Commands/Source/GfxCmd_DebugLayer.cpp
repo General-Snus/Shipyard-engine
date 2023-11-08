@@ -14,7 +14,9 @@ void GfxCmd_DebugLayer::ExecuteAndDestroy()
 		RHI::SetBlendState(nullptr);
 		G_Buffer& gBuffer = GetGBuffer();
 		gBuffer.UseDebugShader();
-		RHI::SetRenderTarget(GraphicsEngine::Get().GetTargetTextures(eRenderTargets::BackBuffer).get(),GraphicsEngine::Get().GetTargetTextures(eRenderTargets::DepthBuffer).get());
+		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_SSAO,GraphicsEngine::Get().GetTargetTextures(eRenderTargets::SSAO).get());
+
+		RHI::SetRenderTarget(GraphicsEngine::Get().GetTargetTextures(eRenderTargets::BackBuffer).get(), nullptr);
 		RHI::ConfigureInputAssembler(
 			D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
 			nullptr,
@@ -23,6 +25,7 @@ void GfxCmd_DebugLayer::ExecuteAndDestroy()
 			nullptr
 		);
 		RHI::Draw(4);
+		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_SSAO,nullptr);
 		RHI::SetBlendState(GraphicsEngine::Get().GetAlphaBlendState());
 	}
 }

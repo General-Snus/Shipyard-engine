@@ -9,6 +9,7 @@
 #include "Rendering/Buffers/ObjectBuffer.h"
 #include "Rendering/Buffers/LineBuffer.h"
 #include "Rendering/Buffers/G_Buffer.h"
+#include "Rendering/Buffers/GraphicSettingsBuffer.h"
 #include "Rendering/Buffers/ConstantBuffer.h" 
 
 #include "InterOp/RHI.h"
@@ -20,6 +21,10 @@
 
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp> 
 
+struct GraphicsSettings
+{
+	int Tonemaptype = 0;
+};
 
 enum class eRenderTargets
 {
@@ -31,6 +36,8 @@ enum class eRenderTargets
 	quaterSceneBuffer2,
 	IntermediateA,
 	IntermediateB,
+	SSAO,
+	NoiseTexture,
 	count
 };
 
@@ -66,6 +73,7 @@ private:
 	LineBuffer myLineBuffer;
 	LightBuffer myLightBuffer;
 	G_Buffer myG_Buffer;
+	GraphicSettingsBuffer myGraphicSettingsBuffer;
 	//Fill with render data for the deffered pass
 	GraphicsCommandList DeferredCommandList;
 	GraphicsCommandList OverlayCommandList;
@@ -87,6 +95,10 @@ private:
 	std::shared_ptr<Texture> IntermediateB;
 
 
+	//SSAO
+	std::shared_ptr<Texture> SSAOTexture;
+	ComPtr<ID3D11PixelShader> ScreenSpaceAmbienceOcclusion;
+	ComPtr<ID3D11PixelShader> EdgeBlur;
 
 	//Defualtl
 	ComPtr<ID3D11VertexShader> myVertexShader;
@@ -103,10 +115,11 @@ private:
 	//Post-pro
 	ComPtr<ID3D11VertexShader> myScreenSpaceQuadShader;
 	ComPtr<ID3D11PixelShader> luminancePass;
-	ComPtr<ID3D11PixelShader> linearGammaPass;
+	ComPtr<ID3D11PixelShader> TonemapPass;
 	ComPtr<ID3D11PixelShader> copyShader;
 	ComPtr<ID3D11PixelShader> gaussShader;
 	ComPtr<ID3D11PixelShader> bloomShader;
+
 	  
 	//Debug
 	ComPtr<ID3D11Buffer> myLineVertexBuffer;
@@ -115,6 +128,7 @@ private:
 	std::shared_ptr< Shader> debugLinePS;
 
 	std::shared_ptr<Texture> BRDLookUpTable;
+	std::shared_ptr<TextureHolder> NoiseTable;
 	std::shared_ptr<TextureHolder> defaultTexture;
 	std::shared_ptr<TextureHolder> defaultNormalTexture;
 	std::shared_ptr<TextureHolder> defaultMatTexture;
@@ -127,7 +141,9 @@ private:
 
 	ComPtr<ID3D11SamplerState> myDefaultSampleState;
 	ComPtr<ID3D11SamplerState> myShadowSampleState;
+	ComPtr<ID3D11SamplerState> myPointSampleState;
 	ComPtr<ID3D11SamplerState> myBRDFSampleState;
+	ComPtr<ID3D11SamplerState> myNormalDepthSampleState;
 
 	enum class eDepthStencilStates : unsigned int
 	{
@@ -143,6 +159,8 @@ private:
 	ShadowRenderer myShadowRenderer;
 	ParticleRenderer myParticleRenderer;
 	InstanceRenderer myInstanceRenderer;
+	GraphicsSettings myGraphicSettings;
+
 	// We're a container singleton, no instancing this outside the class.
 	GraphicsEngine() = default;
 
@@ -167,6 +185,8 @@ public:
 	void SetupBlendStates();
 
 	void SetupParticleShaders();
+
+	void UpdateSettings();
 
 	void SetLoggingWindow(HANDLE aHandle) const;
 
@@ -229,7 +249,9 @@ public:
 
 	FORCEINLINE ComPtr<ID3D11VertexShader> GetQuadShader() const { return myScreenSpaceQuadShader; }
 	FORCEINLINE ComPtr<ID3D11PixelShader> GetLuminanceShader() const { return luminancePass; }
-	FORCEINLINE ComPtr<ID3D11PixelShader> GetLinearToGamma() const { return linearGammaPass; }
+	FORCEINLINE ComPtr<ID3D11PixelShader> GetSSAOShader() const { return ScreenSpaceAmbienceOcclusion; }
+	FORCEINLINE ComPtr<ID3D11PixelShader> GetEdgeBlurShader() const { return EdgeBlur; }
+	FORCEINLINE ComPtr<ID3D11PixelShader> GetTonemap() const { return TonemapPass; }
 	FORCEINLINE ComPtr<ID3D11PixelShader> GetCopyShader() const { return copyShader; }
 	FORCEINLINE ComPtr<ID3D11PixelShader> GetGaussShader() const { return gaussShader; }
 	FORCEINLINE ComPtr<ID3D11PixelShader> GetBloomShader() const { return bloomShader; }
@@ -303,12 +325,17 @@ public:
 			return IntermediateA;
 		case::eRenderTargets::IntermediateB:
 			return IntermediateB;
+		case::eRenderTargets::SSAO:
+			return SSAOTexture;
+		case::eRenderTargets::NoiseTexture:
+			return NoiseTable->GetRawTexture();
 		default:
 			return nullptr;
 		}
 	}  
 
 	FORCEINLINE InstanceRenderer& GetInstanceRenderer() { return myInstanceRenderer; } 
+	FORCEINLINE GraphicsSettings& GetSettings() { return myGraphicSettings; } 
 	FORCEINLINE std::shared_ptr< Shader> GetDebugLineVS() const { return debugLineVS; }
 	FORCEINLINE std::shared_ptr< Shader> GetDebugLinePS() const { return debugLinePS; }
 

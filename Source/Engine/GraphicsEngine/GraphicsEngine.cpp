@@ -7,25 +7,27 @@
 #include <Shaders/Include/Default_PS.h>
 #include <Shaders/Include/Default_VS.h>
 #include <Shaders/Include/LuminancePass_PS.h>
-#include <Shaders/Include/LinearToGammaPass.h>
+#include <Shaders/Include/ToneMapping_PS.h>
 #include <Shaders/Include/CopyPixels_PS.h> 
 #include <Shaders/Include/GaussianBlur_PS.h> 
 #include <Shaders/Include/Bloom_PS.h> 
+#include <Shaders/Include/SSAO_PS.h> 
+#include <Shaders/Include/EdgeBlur.h> 
 
 #include <Shaders/Include/ParticleShader_VS.h> 
 #include <Shaders/Include/ParticleShader_GS.h> 
 #include <Shaders/Include/ParticleShader_PS.h> 
 
-#include <Shaders/Include/Default_C.h>
-#include <Shaders/Include/Default_N.h>
-#include <Shaders/Include/Default_M.h>
-#include <Shaders/Include/Default_FX.h>
+#include <Objects/DataObjects/Default_C.h>
+#include <Objects/DataObjects/Default_N.h>
+#include <Objects/DataObjects/Default_M.h>
+#include <Objects/DataObjects/Default_FX.h>
 
 #include <Shaders/Include/LineDrawer_PS.h>
 #include <Shaders/Include/LineDrawer_VS.h>
 
 #include <Shaders/Include/brdfLUT_PS.h>
-#include <Shaders/Include/brdfLUT_VS.h>
+#include <Shaders/Include/ScreenspaceQuad_VS.h>
 #include <Shaders/Registers.h>
 
 #include "Objects/Shader.h"
@@ -42,17 +44,20 @@
 #include "GraphicCommands/Commands/Headers/GfxCmd_DebugLayer.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_SetLightBuffer.h" 
 #include "GraphicCommands/Commands/Headers/GfxCmd_GaussianBlur.h" 
+#include "GraphicCommands/Commands/Headers/GfxCmd_SSAO.h" 
 
 #include "Shaders/Registers.h"
 #include <Tools/ImGui/imgui.h>
 #include <stdexcept> 
 
+#include <Engine/GraphicsEngine/InterOp/DDSTextureLoader11.h>
 
-bool GraphicsEngine::Initialize(HWND windowHandle, bool enableDeviceDebug)
+
+bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 {
-	GELogger = Logger::Create("GraphicsEngine"); 
+	GELogger = Logger::Create("GraphicsEngine");
 	DeferredCommandList.Initialize();
-	OverlayCommandList.Initialize(); 
+	OverlayCommandList.Initialize();
 
 #ifdef _DEBUG
 	try
@@ -64,7 +69,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle, bool enableDeviceDebug)
 		myBackBuffer = std::make_unique<Texture>();
 		myDepthBuffer = std::make_unique<Texture>();
 
-		if (!RHI::Initialize(myWindowHandle,
+		if(!RHI::Initialize(myWindowHandle,
 			enableDeviceDebug,
 			myBackBuffer.get(),
 			myDepthBuffer.get()))
@@ -77,27 +82,30 @@ bool GraphicsEngine::Initialize(HWND windowHandle, bool enableDeviceDebug)
 		SetupBRDF();
 		SetupParticleShaders();
 		SetupPostProcessing();
-		SetupBlendStates(); 
-		SetupDebugDrawline(); 
+		SetupBlendStates();
+		SetupDebugDrawline();
 
 		myLightBuffer.Initialize();
-		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER, REG_LightBuffer, myLightBuffer);
+		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_LightBuffer,myLightBuffer);
 
 		myObjectBuffer.Initialize();
-		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER, REG_ObjectBuffer, myObjectBuffer);
+		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_ObjectBuffer,myObjectBuffer);
 
 		myFrameBuffer.Initialize();
-		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER, REG_FrameBuffer, myFrameBuffer);
+		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_FrameBuffer,myFrameBuffer);
 
 		myLineBuffer.Initialize();
-		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER, REG_LineBuffer, myLineBuffer);
+		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_LineBuffer,myLineBuffer);
+
+		myGraphicSettingsBuffer.Initialize();
+		RHI::SetConstantBuffer(PIPELINE_STAGE_PIXEL_SHADER,REG_GraphicSettingsBuffer,myGraphicSettingsBuffer);
 
 		myG_Buffer.Init();
 		myShadowRenderer.Init();
 		myParticleRenderer.Init();
 #ifdef _DEBUG
 	}
-	catch (const std::exception& e)
+	catch(const std::exception& e)
 	{
 		GELogger.LogException(e);
 		exit(-1);
@@ -107,7 +115,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle, bool enableDeviceDebug)
 }
 
 bool GraphicsEngine::SetupDebugDrawline()
-{ 
+{
 	debugLineVS = std::make_shared<Shader>();
 	RHI::LoadShaderFromMemory(
 		debugLineVS.get(),
@@ -132,14 +140,14 @@ bool GraphicsEngine::SetupDebugDrawline()
 		sizeof(BuiltIn_LineDrawer_VS_ByteCode)
 	);
 
-	if (!(
-		RHI::CreateDynamicVertexBuffer(myLineVertexBuffer, 65536, sizeof(Debug::DebugVertex)) &&
-		RHI::CreateDynamicIndexBuffer(myLineIndexBuffer, 65536)
+	if(!(
+		RHI::CreateDynamicVertexBuffer(myLineVertexBuffer,65536,sizeof(Debug::DebugVertex)) &&
+		RHI::CreateDynamicIndexBuffer(myLineIndexBuffer,65536)
 		))
 	{
 		GELogger.Err("Failed to initialize the myLineVertexBuffer!");
 		return false;
-	} 
+	}
 	return true;
 }
 
@@ -160,12 +168,12 @@ void GraphicsEngine::SetupDefaultVariables()
 	samplerDesc.MinLOD = -D3D11_FLOAT32_MAX;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-	if (!RHI::CreateSamplerState(myDefaultSampleState, samplerDesc))
+	if(!RHI::CreateSamplerState(myDefaultSampleState,samplerDesc))
 	{
 		GELogger.Log("Sampler state created");
 		assert(false);
 	}
-	RHI::SetSamplerState(myDefaultSampleState, REG_DefaultSampler);
+	RHI::SetSamplerState(myDefaultSampleState,REG_DefaultSampler);
 
 	D3D11_SAMPLER_DESC shadowSamplerDesc = {};
 	shadowSamplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
@@ -182,12 +190,12 @@ void GraphicsEngine::SetupDefaultVariables()
 	shadowSamplerDesc.MipLODBias = 0.f;
 	shadowSamplerDesc.MaxAnisotropy = 1;
 
-	if (!RHI::CreateSamplerState(myShadowSampleState, shadowSamplerDesc))
+	if(!RHI::CreateSamplerState(myShadowSampleState,shadowSamplerDesc))
 	{
 		GELogger.Log("Sampler state created");
 		assert(false);
 	}
-	RHI::SetSamplerState(myShadowSampleState, REG_shadowCmpSampler);
+	RHI::SetSamplerState(myShadowSampleState,REG_shadowCmpSampler);
 
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
 	depthStencilDesc.DepthEnable = true;
@@ -197,13 +205,14 @@ void GraphicsEngine::SetupDefaultVariables()
 
 	auto result = RHI::Device->CreateDepthStencilState(
 		&depthStencilDesc,
-		&myDepthStencilStates[(int)eDepthStencilStates::DSS_ReadOnly]);
+		&myDepthStencilStates[(int)eDepthStencilStates::DSS_ReadOnly]
+	);
 	if(FAILED(result))
 	{
 		GELogger.Log("Failed to create depth stencil read only state");
 		assert(false);
 	}
-	myDepthStencilStates[(int)eDepthStencilStates::DSS_ReadWrite] = nullptr; 
+	myDepthStencilStates[(int)eDepthStencilStates::DSS_ReadWrite] = nullptr;
 
 
 	// TEMP: Load the default shader programs.
@@ -227,7 +236,7 @@ void GraphicsEngine::SetupDefaultVariables()
 		sizeof(BuiltIn_Default_VS_ByteCode)
 	);
 
-	defaultTexture = std::make_shared<TextureHolder>("", eTextureType::ColorMap);
+	defaultTexture = std::make_shared<TextureHolder>("",eTextureType::ColorMap);
 	RHI::LoadTextureFromMemory(
 		defaultTexture->GetRawTexture().get(),
 		L"Default Color texture",
@@ -235,7 +244,7 @@ void GraphicsEngine::SetupDefaultVariables()
 		sizeof(BuiltIn_Default_C_ByteCode)
 	);
 
-	defaultNormalTexture = std::make_shared<TextureHolder>("", eTextureType::NormalMap);
+	defaultNormalTexture = std::make_shared<TextureHolder>("",eTextureType::NormalMap);
 	RHI::LoadTextureFromMemory(
 		defaultNormalTexture->GetRawTexture().get(),
 		L"Default Normal texture",
@@ -243,7 +252,7 @@ void GraphicsEngine::SetupDefaultVariables()
 		sizeof(BuiltIn_Default_N_ByteCode)
 	);
 
-	defaultMatTexture = std::make_shared<TextureHolder>("", eTextureType::MaterialMap);
+	defaultMatTexture = std::make_shared<TextureHolder>("",eTextureType::MaterialMap);
 	RHI::LoadTextureFromMemory(
 		defaultMatTexture->GetRawTexture().get(),
 		L"Default material texture",
@@ -251,15 +260,38 @@ void GraphicsEngine::SetupDefaultVariables()
 		sizeof(BuiltIn_Default_M_ByteCode)
 	);
 
-	defaultEffectTexture = std::make_shared<TextureHolder>("", eTextureType::EffectMap);
+	defaultEffectTexture = std::make_shared<TextureHolder>("",eTextureType::EffectMap);
 	RHI::LoadTextureFromMemory(
 		defaultEffectTexture->GetRawTexture().get(),
 		L"Default effect texture",
 		BuiltIn_Default_FX_ByteCode,
 		sizeof(BuiltIn_Default_FX_ByteCode)
 	);
+
+	//Particle
 	AssetManager::GetInstance().ForceLoadAsset<TextureHolder>(L"Textures/Default/DefaultParticle_P.dds",defaultParticleTexture);
-	defaultParticleTexture->SetTextureType(eTextureType::ParticleMap); 
+	defaultParticleTexture->SetTextureType(eTextureType::ParticleMap);
+
+
+
+
+	//NOISE
+	D3D11_SAMPLER_DESC pointSamplerDesc = {};
+	pointSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+	pointSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	pointSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	pointSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+
+	if(!RHI::CreateSamplerState(myPointSampleState,pointSamplerDesc))
+	{
+		GELogger.Log("Sampler state created");
+		assert(false);
+	}
+	RHI::SetSamplerState(myPointSampleState,REG_PointSampler);
+
+
+	AssetManager::GetInstance().ForceLoadAsset<TextureHolder>(L"Textures/Default/NoiseTable.dds",NoiseTable);
+	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_Noise_Texture,NoiseTable->GetRawTexture().get()); //Is there guarantee that this holds?
 
 	defaultVS = std::make_shared<Shader>();
 	defaultPS = std::make_shared<Shader>();
@@ -269,14 +301,14 @@ void GraphicsEngine::SetupDefaultVariables()
 	defaultPS->SetShader(myPixelShader);
 	defaultPS->myName = L"Default Pixel Shader";
 
-	AssetManager::GetInstance().ForceLoadAsset<Material>("Materials/Default.json", defaultMaterial);
-	defaultMaterial->SetShader(defaultVS, defaultPS);
+	AssetManager::GetInstance().ForceLoadAsset<Material>("Materials/Default.json",defaultMaterial);
+	defaultMaterial->SetShader(defaultVS,defaultPS);
 
-	AssetManager::GetInstance().ForceLoadAsset<TextureHolder>("Textures/skansen_cubemap.dds", defaultCubeMap);
+	AssetManager::GetInstance().ForceLoadAsset<TextureHolder>("Textures/skansen_cubemap.dds",defaultCubeMap);
 	defaultCubeMap->SetTextureType(eTextureType::CubeMap);
-	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER, REG_enviromentCube, defaultCubeMap->GetRawTexture().get());
+	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_enviromentCube,defaultCubeMap->GetRawTexture().get());
 
-	AssetManager::GetInstance().ForceLoadAsset<Mesh>("default.fbx", defaultMesh);
+	AssetManager::GetInstance().ForceLoadAsset<Mesh>("default.fbx",defaultMesh);
 }
 
 void GraphicsEngine::SetupBlendStates()
@@ -309,11 +341,12 @@ void GraphicsEngine::SetupBlendStates()
 		assert(false);
 	}
 }
+
 void GraphicsEngine::SetupBRDF()
 {
 	//Light
 	BRDLookUpTable = std::make_shared<Texture>();
-	RHI::CreateTexture(BRDLookUpTable.get(), L"brdfLUT", 512, 512,
+	RHI::CreateTexture(BRDLookUpTable.get(),L"brdfLUT",512,512,
 		DXGI_FORMAT_R16G16_FLOAT,
 		D3D11_USAGE_DEFAULT,
 		D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET
@@ -324,8 +357,8 @@ void GraphicsEngine::SetupBRDF()
 
 	RHI::CreateVertexShader(
 		myScreenSpaceQuadShader,
-		BuiltIn_brdfLUT_VS_ByteCode,
-		sizeof(BuiltIn_brdfLUT_VS_ByteCode)
+		BuiltIn_ScreenspaceQuad_VS_ByteCode,
+		sizeof(BuiltIn_ScreenspaceQuad_VS_ByteCode)
 	);
 
 	RHI::CreatePixelShader(
@@ -336,14 +369,14 @@ void GraphicsEngine::SetupBRDF()
 	RHI::SetVertexShader(myScreenSpaceQuadShader);
 	RHI::SetPixelShader(brdfPS);
 
-	RHI::SetRenderTarget(BRDLookUpTable.get(), nullptr);
+	RHI::SetRenderTarget(BRDLookUpTable.get(),nullptr);
 
 	RHI::ConfigureInputAssembler(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
-		nullptr, nullptr, 0, nullptr);
+		nullptr,nullptr,0,nullptr);
 	RHI::Draw(4);
 
-	RHI::SetRenderTarget(nullptr, nullptr);
-	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER, REG_BRDF_LUT_Texture, BRDLookUpTable.get());
+	RHI::SetRenderTarget(nullptr,nullptr);
+	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_BRDF_LUT_Texture,BRDLookUpTable.get());
 
 
 	D3D11_SAMPLER_DESC lutsamplerDesc = {};
@@ -361,24 +394,38 @@ void GraphicsEngine::SetupBRDF()
 	lutsamplerDesc.MinLOD = 0;
 	lutsamplerDesc.MaxLOD = 0;
 
-	if (!RHI::CreateSamplerState(myBRDFSampleState, lutsamplerDesc))
+	if(!RHI::CreateSamplerState(myBRDFSampleState,lutsamplerDesc))
 	{
 		GELogger.Log("Sampler state created");
 		assert(false);
 	}
 
-	RHI::SetSamplerState(myBRDFSampleState, REG_BRDFSampler);
+	RHI::SetSamplerState(myBRDFSampleState,REG_BRDFSampler);
 
 }
-  
+
 void GraphicsEngine::SetupPostProcessing()
 {
+	D3D11_SAMPLER_DESC normalDepthSampler = {};
+	normalDepthSampler.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+	normalDepthSampler.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	normalDepthSampler.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	normalDepthSampler.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+
+	if(!RHI::CreateSamplerState(myNormalDepthSampleState,normalDepthSampler))
+	{
+		GELogger.Log("Sampler state created");
+		assert(false);
+	}
+
+	RHI::SetSamplerState(myNormalDepthSampleState,REG_normalDepthSampler);
+
 	RHI::DeviceSize size = RHI::GetDeviceSize();
 	SceneBuffer = std::make_shared<Texture>();
 	RHI::CreateTexture(
 		SceneBuffer.get(),
 		L"SceneBuffer",
-		size.Width, size.Height,
+		size.Width,size.Height,
 		defaultTextureFormat,
 		D3D11_USAGE_DEFAULT,
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
@@ -388,8 +435,8 @@ void GraphicsEngine::SetupPostProcessing()
 	halfSceneBuffer = std::make_shared<Texture>();
 	RHI::CreateTexture(
 		halfSceneBuffer.get(),
-		L"SceneBuffer",
-		size.Width / 2, size.Height / 2,
+		L"halfSceneBuffer",
+		size.Width / 2,size.Height / 2,
 		defaultTextureFormat,
 		D3D11_USAGE_DEFAULT,
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
@@ -398,8 +445,8 @@ void GraphicsEngine::SetupPostProcessing()
 	quaterSceneBuffer1 = std::make_shared<Texture>();
 	RHI::CreateTexture(
 		quaterSceneBuffer1.get(),
-		L"SceneBuffer",
-		size.Width / 4, size.Height / 4,
+		L"quaterSceneBuffer1",
+		size.Width / 4,size.Height / 4,
 		defaultTextureFormat,
 		D3D11_USAGE_DEFAULT,
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
@@ -408,8 +455,8 @@ void GraphicsEngine::SetupPostProcessing()
 	quaterSceneBuffer2 = std::make_shared<Texture>();
 	RHI::CreateTexture(
 		quaterSceneBuffer2.get(),
-		L"SceneBuffer",
-		size.Width / 4, size.Height / 4,
+		L"quaterSceneBuffer2",
+		size.Width / 4,size.Height / 4,
 		defaultTextureFormat,
 		D3D11_USAGE_DEFAULT,
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
@@ -419,7 +466,7 @@ void GraphicsEngine::SetupPostProcessing()
 	RHI::CreateTexture(
 		IntermediateA.get(),
 		L"IntermediateA",
-		size.Width, size.Height,
+		size.Width,size.Height,
 		defaultTextureFormat,
 		D3D11_USAGE_DEFAULT,
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
@@ -430,7 +477,18 @@ void GraphicsEngine::SetupPostProcessing()
 	RHI::CreateTexture(
 		IntermediateB.get(),
 		L"IntermediateB",
-		size.Width, size.Height,
+		size.Width,size.Height,
+		defaultTextureFormat,
+		D3D11_USAGE_DEFAULT,
+		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+		0
+	);
+
+	SSAOTexture = std::make_shared<Texture>();
+	RHI::CreateTexture(
+		SSAOTexture.get(),
+		L"SSAOTexture",
+		size.Width,size.Height,
 		defaultTextureFormat,
 		D3D11_USAGE_DEFAULT,
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
@@ -443,9 +501,9 @@ void GraphicsEngine::SetupPostProcessing()
 		sizeof(BuiltIn_LuminancePass_PS_ByteCode)
 	);
 	RHI::CreatePixelShader(
-		linearGammaPass,
-		BuiltIn_LinearToGammaPass_ByteCode,
-		sizeof(BuiltIn_LinearToGammaPass_ByteCode)
+		TonemapPass,
+		BuiltIn_ToneMapping_PS_ByteCode,
+		sizeof(BuiltIn_ToneMapping_PS_ByteCode)
 	);
 
 	RHI::CreatePixelShader(
@@ -464,6 +522,19 @@ void GraphicsEngine::SetupPostProcessing()
 		bloomShader,
 		BuiltIn_Bloom_PS_ByteCode,
 		sizeof(BuiltIn_Bloom_PS_ByteCode)
+	);
+
+	RHI::CreatePixelShader(
+		ScreenSpaceAmbienceOcclusion,
+		BuiltIn_SSAO_PS_ByteCode,
+		sizeof(BuiltIn_SSAO_PS_ByteCode)
+	);
+
+
+	RHI::CreatePixelShader(
+		EdgeBlur,
+		BuiltIn_EdgeBlur_ByteCode,
+		sizeof(BuiltIn_EdgeBlur_ByteCode)
 	);
 
 }
@@ -486,7 +557,18 @@ void GraphicsEngine::SetupParticleShaders()
 		particlePixelShader,
 		BuiltIn_ParticleShader_PS_ByteCode,
 		sizeof(BuiltIn_ParticleShader_PS_ByteCode)
-	); 
+	);
+}
+
+void GraphicsEngine::UpdateSettings()
+{
+	myGraphicSettingsBuffer.Data.GSB_ToneMap = myGraphicSettings.Tonemaptype;
+	myGraphicSettingsBuffer.Data.GSB_AO_intensity = 0.35f;
+	myGraphicSettingsBuffer.Data.GSB_AO_scale = 0.01f;
+	myGraphicSettingsBuffer.Data.GSB_AO_bias = 0.5f;
+	myGraphicSettingsBuffer.Data.GSB_AO_radius = 0.002f;
+	myGraphicSettingsBuffer.Data.GSB_AO_offset = 0.707f;
+	RHI::UpdateConstantBufferData(myGraphicSettingsBuffer);
 }
 
 void GraphicsEngine::SetLoggingWindow(HANDLE aHandle)  const
@@ -497,27 +579,27 @@ void GraphicsEngine::SetLoggingWindow(HANDLE aHandle)  const
 void GraphicsEngine::BeginFrame()
 {
 	myCamera = GameObjectManager::GetInstance().GetCamera().TryGetComponent<cCamera>();
-	if (!myCamera)
+	if(!myCamera)
 	{
 		GELogger.Err("No camera in scene. No render is possible");
 	}
+	UpdateSettings();
 
 	// Here we should initialize our frame and clean up from the last one.  
-	RHI::ClearRenderTarget(myBackBuffer.get(), myBackgroundColor);
+	RHI::ClearRenderTarget(myBackBuffer.get(),myBackgroundColor);
 	RHI::ClearDepthStencil(myDepthBuffer.get());
 
-	RHI::ClearRenderTarget(SceneBuffer.get(), { 0.0f,0.0f,0.0f,0.0f });
-	RHI::ClearRenderTarget(halfSceneBuffer.get(), { 0.0f,0.0f,0.0f,0.0f });
-	RHI::ClearRenderTarget(quaterSceneBuffer1.get(), { 0.0f,0.0f,0.0f,0.0f });
-	RHI::ClearRenderTarget(quaterSceneBuffer2.get(), { 0.0f,0.0f,0.0f,0.0f });
-	RHI::ClearRenderTarget(IntermediateA.get(), { 0.0f,0.0f,0.0f,0.0f });
-	RHI::ClearRenderTarget(IntermediateB.get(), { 0.0f,0.0f,0.0f,0.0f });
-
+	RHI::ClearRenderTarget(SceneBuffer.get(),{0.0f,0.0f,0.0f,0.0f});
+	RHI::ClearRenderTarget(halfSceneBuffer.get(),{0.0f,0.0f,0.0f,0.0f});
+	RHI::ClearRenderTarget(quaterSceneBuffer1.get(),{0.0f,0.0f,0.0f,0.0f});
+	RHI::ClearRenderTarget(quaterSceneBuffer2.get(),{0.0f,0.0f,0.0f,0.0f});
+	RHI::ClearRenderTarget(IntermediateA.get(),{0.0f,0.0f,0.0f,0.0f});
+	RHI::ClearRenderTarget(IntermediateB.get(),{0.0f,0.0f,0.0f,0.0f});
 	myG_Buffer.ClearTargets();
 	RHI::SetBlendState(nullptr);
 }
 
-void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
+void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 {
 	aDeltaTime; aTotalTime;
 	RHI::SetVertexShader(myVertexShader);
@@ -542,10 +624,13 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 
 
 	//Render all lights
+	RHI::BeginEvent(L"SSAO");
+	myCamera->SetCameraToFrameBuffer();
+	GfxCmd_SSAO().ExecuteAndDestroy();
+	RHI::EndEvent();
 
 	RHI::BeginEvent(L"Lightning");
-	myCamera->SetCameraToFrameBuffer();
-	GfxCmd_SetRenderTarget(SceneBuffer.get(), nullptr).ExecuteAndDestroy();
+	GfxCmd_SetRenderTarget(SceneBuffer.get(),nullptr).ExecuteAndDestroy();
 	GfxCmd_SetLightBuffer().ExecuteAndDestroy(); //REFACTOR Change name to fit purpose
 	RHI::EndEvent();
 	// //Forward pass for light
@@ -565,11 +650,12 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 	GfxCmd_LuminancePass().ExecuteAndDestroy(); // Render to IntermediateA
 	GfxCmd_GaussianBlur().ExecuteAndDestroy();
 	GfxCmd_Bloom().ExecuteAndDestroy();
-	GfxCmd_LinearToGamma().ExecuteAndDestroy(); // Render: BakcBuffer Read: REG_Target01
+	GfxCmd_ToneMapPass().ExecuteAndDestroy(); // Render: BakcBuffer Read: REG_Target01
 	RHI::EndEvent();
 
 	//Debug layers 
 	RHI::BeginEvent(L"DebugLayers");
+	myCamera->SetCameraToFrameBuffer();
 	GfxCmd_DebugLayer().ExecuteAndDestroy();
 #ifdef  _DEBUGDRAW
 	OverlayCommandList.Execute();
@@ -577,13 +663,13 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 	RHI::EndEvent();
 }
 
-void GraphicsEngine::RenderTextureTo(eRenderTargets from, eRenderTargets to)  const
+void GraphicsEngine::RenderTextureTo(eRenderTargets from,eRenderTargets to)  const
 {
 	const Texture* texture1 = GraphicsEngine::Get().GetTargetTextures(from).get();
 	const Texture* texture2 = GraphicsEngine::Get().GetTargetTextures(to).get();
 
-	RHI::SetRenderTarget(texture2, nullptr);
-	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER, REG_Target0, texture1);
+	RHI::SetRenderTarget(texture2,nullptr);
+	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_Target0,texture1);
 	RHI::ConfigureInputAssembler(
 		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
 		nullptr,
@@ -592,7 +678,7 @@ void GraphicsEngine::RenderTextureTo(eRenderTargets from, eRenderTargets to)  co
 		nullptr
 	);
 	RHI::Draw(4);
-	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER, REG_Target0, nullptr);
+	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_Target0,nullptr);
 }
 
 void GraphicsEngine::EndFrame()

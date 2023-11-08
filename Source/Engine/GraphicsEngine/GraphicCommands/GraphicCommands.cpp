@@ -21,6 +21,10 @@ InstanceRenderer& GraphicCommandBase::GetInstanceRenderer()
 {
 	return GraphicsEngine::Get().myInstanceRenderer;
 }
+GraphicSettingsBuffer& GraphicCommandBase::GetGraphicSettings()
+{
+	return GraphicsEngine::Get().myGraphicSettingsBuffer;
+}
 LineBuffer& GraphicCommandBase::GetLineBuffer()
 {
 	return GraphicsEngine::Get().myLineBuffer;
@@ -38,8 +42,8 @@ GraphicsCommandList::~GraphicsCommandList()
 	while(it.HasCommand())
 	{
 		GraphicCommandBase* cmd = it.Next();
-		cmd->Destroy();
-	}
+ 		cmd->Destroy();
+	} 
 	delete[] myData;
 	myData = nullptr;
 	myRoot = nullptr;

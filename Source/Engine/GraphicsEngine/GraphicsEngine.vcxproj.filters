@@ -63,10 +63,10 @@
     <ClInclude Include="Objects\Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Shaders\Include\Default_N.h">
+    <ClInclude Include="Objects\DataObjects\Default_N.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Shaders\Include\Default_C.h">
+    <ClInclude Include="Objects\DataObjects\Default_C.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Shaders\Include\Default_VS.h">
@@ -84,7 +84,7 @@
     <ClInclude Include="Shaders\Include\brdfLUT_VS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Shaders\Include\Default_M.h">
+    <ClInclude Include="Objects\DataObjects\Default_M.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Shaders\Registers.h">
@@ -96,7 +96,7 @@
     <ClInclude Include="Rendering\Buffers\LineBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Shaders\Include\Default_FX.h">
+    <ClInclude Include="Objects\DataObjects\Default_FX.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\Buffers\G_Buffer.h">
@@ -174,7 +174,7 @@
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_Bloom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_LinearToGamma.h">
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_ToneMapPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_LuminancePass.h">
@@ -190,6 +190,42 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\InstanceRenderer\InstanceRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SSAO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Include\Bloom_PS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Include\CopyPixels_PS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Include\GaussianBlur_PS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Include\LinearToGammaPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Include\LuminancePass_PS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Include\ParticleShader_GS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Include\ParticleShader_PS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Include\ParticleShader_VS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Include\SSAO_PS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Include\ToneMapping_PS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Buffers\GraphicSettingsBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -266,7 +302,7 @@
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_Bloom.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_LinearToGamma.cpp">
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_ToneMapPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_LuminancePass.cpp">
@@ -284,6 +320,9 @@
     <ClCompile Include="Rendering\InstanceRenderer\InstanceRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SSAO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Headers\ObjectBuffer.hlsli" />
@@ -294,6 +333,7 @@
     <None Include="Shaders\Headers\LightsData.hlsli" />
     <None Include="Shaders\Passes\LineDrawer\LineDrawerStructs.hlsli" />
     <None Include="Shaders\Headers\ParticleStruct.hlsli" />
+    <None Include="Shaders\Headers\Tonemaps.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\DefaultShaders\Default_VS.hlsl" />
@@ -316,5 +356,12 @@
     <FxCompile Include="Shaders\Passes\Particles\ParticleShader_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\Particles\ParticleShader_GS.hlsl" />
     <FxCompile Include="Shaders\Passes\Particles\ParticleShader_VS.hlsl" />
+    <FxCompile Include="Shaders\Passes\PostProcessing\SSAO_PS.hlsl" />
+    <FxCompile Include="Shaders\DefaultShaders\Default_PS.hlsl" />
+    <FxCompile Include="Shaders\Passes\PostProcessing\EdgeBlur.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Objects\DataObjects\DefaultParticle_P.dds" />
+    <Image Include="Objects\DataObjects\NoiseTable.dds" />
   </ItemGroup>
 </Project>

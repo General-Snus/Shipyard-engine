@@ -37,7 +37,7 @@
 #include "GraphicCommands/Commands/Headers/GfxCmd_SetRenderTarget.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_LuminancePass.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_Bloom.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_LinearToGamma.h" 
+#include "GraphicCommands/Commands/Headers/GfxCmd_ToneMapPass.h" 
 
 static inline Logger GELogger;
 #endif //GRAPHICSENGINE_PCH

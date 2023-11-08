@@ -49,7 +49,7 @@ static inline std::string layerNames[(int)DebugFilter::count] = {
 	"Metallic",
 	"Emission",
 	"Depth",
-	"DirectionLight",
+	"SSAO",
 	"AmbientLight",
 	"PointLight",
 	"SpotLight",

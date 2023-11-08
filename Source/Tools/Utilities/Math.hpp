@@ -42,8 +42,8 @@ const Vector3f GlobalFwd = Vector3f(0.0,0.0,1.0);
 template <typename T = float>
 inline T RandomInRange(const T& a = 0.0f,const T& b = 1.0f)
 {
-	std::random_device rd;
-	std::mt19937 gen(rd()); 
+	static std::random_device rd;
+	static std::mt19937 gen(rd()); 
 
 	auto rander = std::uniform_real_distribution<T>(a,b);
 	return rander(gen);
