@@ -132,7 +132,7 @@ void cCamera::Render()
 std::array<Vector4f,4> cCamera::GetFrustrumCorners() const
 {
 	const float aspectRatio = std::bit_cast<float>(myScreenSize.x) / std::bit_cast<float>(myScreenSize.y);
-	const float halfHeight = mySettings.farfield * tanf(0.5f * mySettings.fow);
+	const float halfHeight = mySettings.farfield * tanf(0.25f * mySettings.fow);
 	const float halfWidth = aspectRatio * halfHeight;
 	std::array<Vector4f,4> corners;
 	corners[0] = { -halfWidth, -halfHeight, mySettings.farfield, 0.0f };

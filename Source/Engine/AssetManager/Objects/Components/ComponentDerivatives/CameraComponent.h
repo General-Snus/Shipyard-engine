@@ -4,11 +4,11 @@
 
 struct CameraSettings
 {
-	float fow = PI * (85.0f / 180.0f);;
+	float fow = PI * (90.0f / 180.0f);;
 	float fowmdf = 1.0f / (tanf(fow / 2.0f));;
 	float APRatio = 16.0f / 9.0f;;
-	float farfield = 1500;;
-	float nearField = .001f;;
+	float farfield = 15000.0f;
+	float nearField = .1f;;
 };
 
 class cCamera : public Component

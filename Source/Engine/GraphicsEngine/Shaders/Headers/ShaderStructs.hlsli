@@ -10,7 +10,7 @@ struct VertexOutput
 };
 struct GSOutput
 {
-    float4 posCS : SV_POSITION; 
+    float4 posCS : SV_POSITION;
 };
 
 struct GBufferOutput
@@ -36,7 +36,7 @@ struct DefaultVertexInput
     
     float4x4 World : WORLD;
     uint InstanceID : SV_InstanceID;
-}; 
+};
 
 struct DefaultVertexToPixel
 {
@@ -50,7 +50,7 @@ struct DefaultVertexToPixel
 };
 
 struct PostProcessVertexToPixel
-{ 
+{
     float2 UV : UV;
 };
 struct BRDF_VS_to_PS
@@ -73,7 +73,7 @@ struct PostProcessPixelOutput
 struct BRDF_Result
 {
     float2 color : SV_Target;
-}; 
+};
 
 cbuffer FrameBuffer : register(HLSL_REG_FrameBuffer)
 {
@@ -83,7 +83,7 @@ cbuffer FrameBuffer : register(HLSL_REG_FrameBuffer)
     float3 FB_CameraPosition;
     
     int FB_RenderMode;
-    int2 FB_ScreenResolution; 
+    int2 FB_ScreenResolution;
     float1 padding;
     float4 FB_FrustrumCorners[4];
 }
@@ -102,8 +102,17 @@ cbuffer DefaultMaterialBuffer : register(HLSL_REG_DefaultMaterialBuffer)
 
 cbuffer GraphicSettingsBuffer : register(HLSL_REG_GraphicSettingsBuffer)
 {
-    int GSB_ToneMap; // 4 
-    float3 padding1;
+    // 16
+    int GSB_ToneMap;
+    float GSB_AO_intensity;
+    float GSB_AO_scale;
+    float GSB_AO_bias;
+    
+    
+    //16
+    float GSB_AO_radius;
+    float GSB_AO_offset;
+    float2 padding1;
 }
 
 
@@ -113,7 +122,7 @@ cbuffer ObjectBuffer : register(HLSL_REG_ObjectBuffer)
     float3 OB_MinExtents; // 12 bytes
     bool hasBone; // 4 bytes
     float3 OB_MaxExtents; // 12 bytes
-    bool OB_Instanced; 
+    bool OB_Instanced;
     float4x4 OB_BoneTransform[128]; //64*128  
 }
 

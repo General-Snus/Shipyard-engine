@@ -43,7 +43,7 @@ GraphicsCommandList::~GraphicsCommandList()
 	{
 		GraphicCommandBase* cmd = it.Next();
  		cmd->Destroy();
-	}
+	} 
 	delete[] myData;
 	myData = nullptr;
 	myRoot = nullptr;

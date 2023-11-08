@@ -13,46 +13,45 @@ PostProcessPixelOutput main(BRDF_VS_to_PS input)
     int numMips = 0; 
     SSAOMap.GetDimensions(0, texWidth, texHeight, numMips); 
     
-    const float gTexelWidth = 1.0f / texWidth;
-    const float gTexelHeight = 1.0f / texHeight;
+    const float pixelWidth = 1.0f / texWidth;
+    const float pixelHeight = 1.0f / texHeight;
     const int gBlurRadius = 5;
      
     float4 color = gWeights[5] * SSAOMap.Sample(NormalDepthSampler, input.UV);
     float totalWeight = gWeights[5];
     const float4 centerNormalDepth = float4(normalMap.Sample(NormalDepthSampler, input.UV).rgb, 0);
 
-    for (float j = -gBlurRadius; j <= gBlurRadius; ++j)
+    for (float y = -gBlurRadius; y <= gBlurRadius; ++y)
     { 
-        for (float i = -gBlurRadius; i <= gBlurRadius; ++i)
+        for (float x = -gBlurRadius; x <= gBlurRadius; ++x)
         { 
-            if (i == 0)
+            if (x == 0)
             {
                 continue;
             }
-            float2 tex = float2(input.UV.x + i * gTexelWidth, input.UV.y + j * gTexelHeight);
+            float2 tex = float2(input.UV.x + x * pixelWidth, input.UV.y + y * pixelHeight);
             float4 neighborNormalDepth = float4(normalMap.Sample(NormalDepthSampler, tex).rgb, 0);
     
             if (dot(neighborNormalDepth.xyz, centerNormalDepth.xyz) >= 0.8f && abs(neighborNormalDepth.a - centerNormalDepth.a) <= 0.2f)
             {
-                float weight = gWeights[i + gBlurRadius];
+                float weight = gWeights[x + gBlurRadius];
                 color += weight * float4(SSAOMap.Sample(NormalDepthSampler, tex).rgb, 0);
                 totalWeight += weight;
             }
         } 
-        if (j == 0)
+        if (y == 0)
         {
             continue;
         }
-        float2 tex = input.UV + j * float2(0.0f, gTexelHeight);
+        float2 tex = input.UV + y * float2(0.0f, pixelHeight);
         float4 neighborNormalDepth = float4(normalMap.Sample(NormalDepthSampler, tex).rgb, 0);
         if (dot(neighborNormalDepth.xyz, centerNormalDepth.xyz) >= 0.8f && abs(neighborNormalDepth.a - centerNormalDepth.a) <= 0.2f)
         {
-            float weight = gWeights[j + gBlurRadius]; 
+            float weight = gWeights[y + gBlurRadius]; 
             color += weight * float4(SSAOMap.Sample(NormalDepthSampler, tex).rgb, 0);
             totalWeight += weight;
         } 
     } 
-    result.Color = color / totalWeight;  
-    result.Color.a = 1.0f;
+    result.Color = color / totalWeight;   
     return result;
 }
