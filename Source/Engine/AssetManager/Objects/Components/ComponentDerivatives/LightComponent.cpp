@@ -18,7 +18,7 @@ cLight::cLight(const unsigned int anOwnerId,const eLightType type) : Component(a
 
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		myDirectionLightData = std::make_shared<DirectionalLight>();
 		break;
@@ -30,7 +30,7 @@ cLight::cLight(const unsigned int anOwnerId,const eLightType type) : Component(a
 		}
 		break;
 	case Spot:
-		mySpotLightData = std::make_shared<SpotLight>(); 
+		mySpotLightData = std::make_shared<SpotLight>();
 		break;
 	case uninitialized:
 		break;
@@ -61,11 +61,11 @@ void cLight::SetIsShadowCaster(bool active)
 	{
 		isDirty = true;
 		std::wstring name = L"unNamedMap";
-		CU::Vector2 resolution = {512,512};
+		Vector2 resolution = {512,512};
 		int mapsToCreate = 0;
 		switch(myLightType)
 		{
-		using enum eLightType;
+			using enum eLightType;
 		case Directional:
 			name = L"directionalLight";
 			resolution = {4096,4096};
@@ -89,7 +89,7 @@ void cLight::SetIsShadowCaster(bool active)
 
 		for(int i = 0; i < mapsToCreate; i++)
 		{
-			shadowMap[i] = std::make_shared<Texture>(); 
+			shadowMap[i] = std::make_shared<Texture>();
 
 			if(!RHI::CreateTexture(
 				shadowMap[i].get(),
@@ -139,7 +139,7 @@ void cLight::SetPower(float power)
 	SetIsDirty(true);
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		myDirectionLightData->Power = power;
 		break;
@@ -159,7 +159,7 @@ float cLight::GetPower()
 {
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		return myDirectionLightData->Power;
 		break;
@@ -182,7 +182,7 @@ void cLight::SetColor(Vector3f color)
 	SetIsDirty(true);
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		myDirectionLightData->Color = color;
 		break;
@@ -202,7 +202,7 @@ Vector3f cLight::GetColor()
 {
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		return myDirectionLightData->Color;
 		break;
@@ -225,7 +225,7 @@ void cLight::SetPosition(Vector3f position)
 	SetIsDirty(true);
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		break;
 	case Point:
@@ -244,7 +244,7 @@ Vector3f cLight::GetPosition()
 {
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		return Vector3f();
 		break;
@@ -267,7 +267,7 @@ void cLight::SetDirection(Vector3f direction)
 	SetIsDirty(true);
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		myDirectionLightData->Direction = Vector4f(direction,1);
 		break;
@@ -286,7 +286,7 @@ Vector3f cLight::GetDirection()
 {
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		return Vector3f(
 			myDirectionLightData->Direction.x,
@@ -313,7 +313,7 @@ void cLight::SetRange(float range)
 	SetIsDirty(true);
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		break;
 	case Point:
@@ -332,7 +332,7 @@ float cLight::GetRange()
 {
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		return 0;
 		break;
@@ -356,7 +356,7 @@ void cLight::SetInnerAngle(float angle)
 	SetIsDirty(true);
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		break;
 	case Point:
@@ -381,7 +381,7 @@ void cLight::SetOuterAngle(float angle)
 	SetIsDirty(true);
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		break;
 	case Point:
@@ -399,7 +399,7 @@ float cLight::GetOuterAngle()
 {
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		return 0.0f;
 		break;
@@ -432,7 +432,7 @@ void cLight::Update()
 	{
 		switch(myLightType)
 		{
-		using enum eLightType;
+			using enum eLightType;
 		case Directional:
 			RedrawDirectionMap();
 			break;
@@ -466,7 +466,7 @@ void cLight::ConformToTransform()
 	}
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		myDirectionLightData->Direction = Vector4f(transform->GetForward(),1);
 		break;
@@ -488,7 +488,7 @@ void cLight::RedrawShadowMap()
 {
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		RedrawDirectionMap();
 		break;
@@ -507,11 +507,11 @@ void cLight::RedrawDirectionMap()
 {
 	//TODO GET ACTIVE SCENE
 	const float radius = 100000;//ModelViewer::Get().GetWorldBounds().GetRadius();
-	 Vector3f lightPosition = radius * 2.0f * -Vector3f(myDirectionLightData->Direction.GetNormalized().x,myDirectionLightData->Direction.GetNormalized().y,myDirectionLightData->Direction.GetNormalized().z);
-	 const Vector3f worldCenter = Vector3f();// ModelViewer::Get().GetWorldBounds().GetCenter();
+	Vector3f lightPosition = radius * 2.0f * -Vector3f(myDirectionLightData->Direction.GetNormalized().x,myDirectionLightData->Direction.GetNormalized().y,myDirectionLightData->Direction.GetNormalized().z);
+	const Vector3f worldCenter = Vector3f();// ModelViewer::Get().GetWorldBounds().GetCenter();
 
 	myDirectionLightData->Direction = Vector4f((worldCenter - lightPosition).GetNormalized(),1);
-	myDirectionLightData->lightView = CU::Matrix4x4<float>::LookAt(lightPosition,worldCenter,{0,1,0}); // REFACTOR, Magic value up
+	myDirectionLightData->lightView = Matrix::LookAt(lightPosition,worldCenter,{0,1,0}); // REFACTOR, Magic value up
 
 	const Vector4f cameraCenter = Vector4f(worldCenter,0.0f) * myDirectionLightData->lightView;
 	myDirectionLightData->lightView = Matrix::GetFastInverse(myDirectionLightData->lightView);
@@ -534,7 +534,7 @@ void cLight::RedrawDirectionMap()
 void cLight::RedrawPointMap()
 {
 	Vector3f lightPosition = myPointLightData->Position;
-	myPointLightData->lightView = CU::Matrix4x4<float>::LookAt(lightPosition,lightPosition + GlobalFwd,{0,1,0}); // REFACTOR, Magic value up
+	myPointLightData->lightView = Matrix::LookAt(lightPosition,lightPosition + GlobalFwd,{0,1,0}); // REFACTOR, Magic value up
 
 	const float fow = 90.0f * DEG_TO_RAD;
 	const float fowmdf = 1.0f / (tanf(fow / 2.0f));
@@ -556,7 +556,7 @@ void cLight::RedrawPointMap()
 void cLight::RedrawSpotMap()
 {
 	Vector3f lightPosition = mySpotLightData->Position;
-	mySpotLightData->lightView = CU::Matrix4x4<float>::LookAt(lightPosition,lightPosition + mySpotLightData->Direction.GetNormalized(),{0,1,0}); // REFACTOR, Magic value up
+	mySpotLightData->lightView = Matrix::LookAt(lightPosition,lightPosition + mySpotLightData->Direction.GetNormalized(),{0,1,0}); // REFACTOR, Magic value up
 
 	const float fow = mySpotLightData->OuterConeAngle;
 	const float fowmdf = 1.0f / (tanf(fow / 2.0f));

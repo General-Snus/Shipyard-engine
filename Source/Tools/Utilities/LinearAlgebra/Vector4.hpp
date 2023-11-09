@@ -3,9 +3,7 @@
 #include <cmath>
 #include <cassert> 
 #include <iostream>
-#include <algorithm>
-namespace CommonUtilities
-{
+#include <algorithm> 
 	template <class T>
 	class Vector4
 	{
@@ -300,7 +298,5 @@ namespace CommonUtilities
 			return x;
 		}
 		}
-	}
-
-}
-using Vector4f = CommonUtilities::Vector4<float>;
+	} 
+using Vector4f = Vector4<float>;

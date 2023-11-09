@@ -1,8 +1,5 @@
-#include "Vectors.hpp"
-namespace CommonUtilities
-{
-	template<class T>
-
+#include "Vectors.hpp" 
+	template<class T> 
 	class AABB3D
 	{
 	public:
@@ -79,5 +76,4 @@ namespace CommonUtilities
 	inline Vector3<T>  AABB3D<T>::GetMax() const
 	{
 		return MaxPoint;
-	}
-}
+	} 

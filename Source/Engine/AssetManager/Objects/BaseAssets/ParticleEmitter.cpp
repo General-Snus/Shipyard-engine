@@ -92,7 +92,7 @@ void ParticleEmitter::Update(float aDeltaTime)
 		aParticle.Position.y += aParticle.Velocity.y * aDeltaTime;
 		aParticle.Position.z += aParticle.Velocity.z * aDeltaTime;
 
-		aParticle.Color = CU::Lerp(settings.StartColor,settings.EndColor,aParticle.Lifetime / settings.LifeTime);
+		aParticle.Color = Lerp(settings.StartColor,settings.EndColor,aParticle.Lifetime / settings.LifeTime);
 		float scaleAllAxis = Lerp(settings.StartSize,settings.EndSize,aParticle.Lifetime / settings.LifeTime);
 		aParticle.Scale = {scaleAllAxis,scaleAllAxis,scaleAllAxis};
 	}

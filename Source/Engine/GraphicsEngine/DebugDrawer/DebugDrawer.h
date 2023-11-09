@@ -7,9 +7,9 @@ namespace Debug
 {
 	struct DebugVertex
 	{
-		DebugVertex(CU::Vector3<float> aPosition,CU::Vector3<float> aColor,float aThicc) : Position(aPosition.x,aPosition.y,aPosition.z,1),Color(aColor.x,aColor.y,aColor.z,1),thickness(aThicc) {  };
-		CU::Vector4<float> Position = {0,0,0,0};
-		CU::Vector4<float> Color = {0,0,0,0};
+		DebugVertex( Vector3f aPosition, Vector3f aColor,float aThicc) : Position(aPosition.x,aPosition.y,aPosition.z,1),Color(aColor.x,aColor.y,aColor.z,1),thickness(aThicc) {  };
+		Vector4f Position = {0,0,0,0};
+		Vector4f Color = {0,0,0,0};
 		float thickness = 0;
 
 		static const std::vector<D3D11_INPUT_ELEMENT_DESC> InputLayoutDescription;

@@ -1,10 +1,7 @@
 #pragma once
 #include <vector>
 #include <string>
-
-namespace CommonUtilities
-{
-
+ 
 	enum State : uint16_t
 	{
 		Empty = 1 << 0,
@@ -246,5 +243,4 @@ namespace CommonUtilities
 	inline uint32_t Hash(const std::string& aKey)
 	{
 		return MurmurHash2A(aKey.c_str(), (int)aKey.size(), 3984759834);
-	}
-}
+	} 

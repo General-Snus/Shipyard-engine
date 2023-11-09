@@ -20,11 +20,11 @@ void Animation::Init()
 		for(size_t i = 0; i < inAnim.Frames.size(); i++)
 		{
 			Frames.push_back(Frame());
-			//Frames.back().myTransforms = std::unordered_map<std::string,CU::Matrix4x4<float>>(); 
+			//Frames.back().myTransforms = std::unordered_map<std::string,Matrix4x4<float>>(); 
 
 			for(auto& ref : inAnim.Frames[i].LocalTransforms)
 			{
-				CU::Matrix4x4<float> mat;
+				Matrix mat;
 				mat.SetFromRaw(ref.second.Data);
 				Frames.back().myTransforms.emplace(ref.first,mat);
 			}
@@ -56,9 +56,9 @@ void Skeleton::Init()
 				for(auto& aBone : inMesh.Skeleton.Bones)
 				{
 					Bone bone;
-					CU::Matrix4x4<float> matrix;
+					Matrix matrix;
 					matrix.SetFromRaw(aBone.BindPoseInverse.Data);
-					matrix = CU::Matrix4x4<float>::Transpose(matrix);
+					matrix = Matrix::Transpose(matrix);
 
 					bone.BindPoseInverse = matrix;
 					bone.Children = aBone.Children;

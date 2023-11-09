@@ -44,8 +44,8 @@ public:
 	int Run();
 	 
 	 
-	void ExpandWorldBounds(CU::Sphere<float> sphere);
-	const CU::Sphere<float>& GetWorldBounds() const;
+	void ExpandWorldBounds(Sphere<float> sphere);
+	const Sphere<float>& GetWorldBounds() const;
 	// Acceleration Getters for components.
 	FORCEINLINE ApplicationState& GetApplicationState()
 	{
@@ -57,6 +57,6 @@ public:
 	}
 private:
 	GameLauncher myGameLauncher;
-	CU::Sphere<float> myWorldBounds; 
+	Sphere<float> myWorldBounds; 
 	std::vector<SaveData<float>> mySaveData; 
 };

@@ -4,7 +4,7 @@
 
 struct LineBufferData
 {
-    CU::Matrix4x4<float> myTransform; // 64 bytes 
+     Matrix myTransform; // 64 bytes 
 };
 
 typedef ConstantBuffer<LineBufferData> LineBuffer;

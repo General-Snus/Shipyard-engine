@@ -27,9 +27,9 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 			{
 				for(int j = 0; j < 6; j++)//REFACTOR
 				{
-					std::pair< PointLight,Texture*> pair;
-					pair.first = *i.GetData<PointLight>().get();
-					pair.first.lightView = i.GetLightViewMatrix(j);
+					std::pair<PointLight*,Texture*> pair;
+					pair.first = i.GetData<PointLight>().get();
+					pair.first->lightView = i.GetLightViewMatrix(j);
 					pair.second = i.GetShadowMap(j).get();
 					pointLight.push_back(pair);
 				}
@@ -83,7 +83,7 @@ void GfxCmd_SetLightBuffer::ExecuteAndDestroy()
 	for(const auto& [light,shadowMap] : pointLight)
 	{
 		LightBuffer& buff = GetLightBuffer();
-		buff.Data.myPointLight = light; //REFACTOR memory loss
+		buff.Data.myPointLight = *light; //REFACTOR memory loss
 		RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,shadowMap);
 
 		RHI::UpdateConstantBufferData(buff);

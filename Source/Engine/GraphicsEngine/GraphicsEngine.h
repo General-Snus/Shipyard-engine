@@ -81,7 +81,7 @@ private:
 	SIZE myWindowSize{0,0};
 	HWND myWindowHandle{};
 	cCamera* myCamera;
-	CU::Vector4<float> myBackgroundColor;
+	 Vector4f myBackgroundColor;
 
 	std::shared_ptr<Texture> myBackBuffer;
 	std::shared_ptr<Texture> myDepthBuffer;
@@ -217,7 +217,7 @@ public:
 		RHI::Context->OMSetDepthStencilState(myDepthStencilStates[(int)state].Get(), 0);
 	}
 
-	CU::Vector4<float>& GetBackgroundColor() { return myBackgroundColor; }
+	 Vector4f& GetBackgroundColor() { return myBackgroundColor; }
 
 
 	template<typename CommandClass,typename ...Args>

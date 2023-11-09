@@ -53,14 +53,14 @@ private:
 	bool isDirty;
 	bool isDebugGizmoEnabled;
 	void MakeSaneRotation();
-	CU::Vector3<float> myPosition;
-	CU::Vector3<float> myRotation;
-	CU::Vector3<float> myScale;
+	Vector3<float> myPosition;
+	Vector3<float> myRotation;
+	Vector3<float> myScale;
 
 
 
-	CU::Matrix4x4<float> myTransform;
-	CU::Matrix4x4<float> myWorldSpaceTransform;
+	Matrix4x4<float> myTransform;
+	Matrix4x4<float> myWorldSpaceTransform;
 	Debug::DebugPrimitive primitive;
 	
 	/*  

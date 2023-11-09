@@ -7,7 +7,7 @@ BackgroundColor::BackgroundColor(const unsigned int anOwnerId) : ImGuiComponent(
 {
 }
 
-BackgroundColor::BackgroundColor(const unsigned int anOwnerId, CU::Vector4<float> aColor) : ImGuiComponent(anOwnerId,eComponentType::backgroundColor), myColor(aColor)
+BackgroundColor::BackgroundColor(const unsigned int anOwnerId,Vector4f aColor) : ImGuiComponent(anOwnerId,eComponentType::backgroundColor), myColor(aColor)
 {
 }
 
@@ -17,7 +17,7 @@ void BackgroundColor::Update()
 	ImGui::ColorPicker4("BackgroundColor", &myColor.x);
 }
 
-void BackgroundColor::SetColor(CU::Vector4<float> aColor)
+void BackgroundColor::SetColor(Vector4f aColor)
 {
 	myColor = aColor;
 }

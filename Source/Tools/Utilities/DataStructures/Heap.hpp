@@ -4,9 +4,7 @@
 
 inline int Parent(int i) { return (i - 1) / 2; }
 inline int Child(int i,bool Right) { return (2 * i + (int)Right + 1); }
-
-namespace CommonUtilities {
-
+ 
 	template <class T>
 	class Heap
 	{  
@@ -122,5 +120,4 @@ namespace CommonUtilities {
 			arr[maxValue] = swap;
 			Downshift(maxValue);
 		}
-	} 
-}
+	}  

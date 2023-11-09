@@ -61,7 +61,7 @@ void Mesh::Init()
 			}
 		}
 
-		boxSphereBounds = CU::Sphere<float>(
+		boxSphereBounds = Sphere<float>(
 			{
 				inMesh.BoxSphereBounds.Center[0],
 				inMesh.BoxSphereBounds.Center[1],
@@ -78,44 +78,44 @@ void Mesh::Init()
 		{
 			for(const auto& vert : element.Vertices)
 			{
-				auto position = CU::Vector3<float>(
+				auto position = Vector3f(
 					vert.Position[0],
 					vert.Position[1],
 					vert.Position[2]
 				);
-				auto color = CU::Vector4<float>(
+				auto color = Vector4f(
 					RandomInRange<float>(0,1),
 					RandomInRange<float>(0,1),
 					RandomInRange<float>(0,1),
 					1.0f
 				);
 
-				auto boneId = CU::Vector4<unsigned int>(
+				auto boneId = Vector4<unsigned int>(
 					vert.BoneIDs[0],
 					vert.BoneIDs[1],
 					vert.BoneIDs[2],
 					vert.BoneIDs[3]
 				);
 
-				auto boneWeight = CU::Vector4<float>(
+				auto boneWeight = Vector4f(
 					vert.BoneWeights[0],
 					vert.BoneWeights[1],
 					vert.BoneWeights[2],
 					vert.BoneWeights[3]
 				);
 
-				auto UVCoord = CU::Vector2<float>(
+				auto UVCoord = Vector2f(
 					vert.UVs[0][0],
 					vert.UVs[0][1]
 				);
 
-				auto normal = CU::Vector3<float>(
+				auto normal = Vector3f(
 					vert.Normal[0],
 					vert.Normal[1],
 					vert.Normal[2]
 				);
 
-				auto tangent = CU::Vector3<float>(
+				auto tangent = Vector3f(
 					vert.Tangent[0],
 					vert.Tangent[1],
 					vert.Tangent[2]
@@ -158,8 +158,8 @@ void Mesh::Init()
 			mdlIndicies.clear();
 		}
 	}
-	MaxBox = CU::Vector3<float>(inMesh.BoxBounds.Max[0],inMesh.BoxBounds.Max[1],inMesh.BoxBounds.Max[2]);
-	MinBox = CU::Vector3<float>(inMesh.BoxBounds.Min[0],inMesh.BoxBounds.Min[1],inMesh.BoxBounds.Min[2]);
+	MaxBox = Vector3f(inMesh.BoxBounds.Max[0],inMesh.BoxBounds.Max[1],inMesh.BoxBounds.Max[2]);
+	MinBox = Vector3f(inMesh.BoxBounds.Min[0],inMesh.BoxBounds.Min[1],inMesh.BoxBounds.Min[2]);
 	isLoadedComplete = true;
 
 	vertexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(Matrix) * myInstances.size());

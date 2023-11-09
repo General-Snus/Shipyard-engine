@@ -22,15 +22,15 @@ public:
 	void Update() override;
 	void Render() override;
 	std::array<Vector4f,4> GetFrustrumCorners() const;
-	Vector3f GetPointerDirection(const CU::Vector2<int> position);
-	Vector3f GetPointerDirectionNDC(const Vector2f position) const;
+	Vector3f GetPointerDirection(const Vector2<int> position);
+	Vector3f GetPointerDirectionNDC(const Vector2<int> position) const;
 
 	void SetCameraToFrameBuffer();
 
-	CU::Vector4<float> WoldSpaceToPostProjectionSpace(CommonUtilities::Vector3<float> aEntity);
+	Vector4f WoldSpaceToPostProjectionSpace(Vector3f aEntity);
 
 private:
-	CU::Matrix4x4<float> myClipMatrix;
-	CU::Vector2<int> myScreenSize;
+	Matrix myClipMatrix;
+	Vector2<int> myScreenSize;
 	CameraSettings mySettings;
 };

@@ -10,21 +10,21 @@ class AssetBase
 public:
 	AssetBase(const std::filesystem::path& aFilePath);
 	virtual ~AssetBase() = default;
-	virtual void Init() = 0; 
+	virtual void Init() = 0;
 	bool isLoadedComplete;
 	const std::filesystem::path AssetPath;
 };
 
 struct Bone
 {
-	CU::Matrix4x4<float> BindPoseInverse;
+	Matrix BindPoseInverse;
 	int ParentIdx = -1;
 	std::string Name;
 	std::vector<unsigned> Children;
 };
 struct Frame
 {
-	std::unordered_map<std::string,CU::Matrix4x4<float>> myTransforms;
+	std::unordered_map<std::string,Matrix > myTransforms;
 };
 
 struct Element
@@ -34,5 +34,5 @@ struct Element
 	UINT NumVertices = 0;
 	UINT NumIndices = 0;
 	UINT PrimitiveTopology = 0;
-	UINT Stride = 0; 
+	UINT Stride = 0;
 };

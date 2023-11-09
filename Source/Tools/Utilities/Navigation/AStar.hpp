@@ -6,9 +6,7 @@
 #include "Vectors&Volumes/Vector2.hpp"
 #include "Vectors&Volumes/Vector4.hpp"
 
-namespace Assignment7Astar {
-
-	using namespace CommonUtilities;
+namespace Assignment7Astar { 
 
 #define mod(x,y) (x% y + y) % y
 
@@ -38,8 +36,8 @@ namespace Assignment7Astar {
 	inline float h(int node1, int nodeGoal)
 	{
 		node1; nodeGoal;
-		CommonUtilities::Vector2<float> node1Pos = { static_cast<float>(mod(node1,MapWidth)),		 static_cast<float>(floorf((float)node1 / (float)MapWidth)) };
-		CommonUtilities::Vector2<float> nodeGoalPos = { static_cast<float>(mod(nodeGoal,MapWidth)),  static_cast<float>(floorf((float)nodeGoal / (float)MapWidth)) };
+		 Vector2f node1Pos = { static_cast<float>(mod(node1,MapWidth)),		 static_cast<float>(floorf((float)node1 / (float)MapWidth)) };
+		 Vector2f nodeGoalPos = { static_cast<float>(mod(nodeGoal,MapWidth)),  static_cast<float>(floorf((float)nodeGoal / (float)MapWidth)) };
 
 		int d = 1;
 

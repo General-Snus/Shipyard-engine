@@ -23,13 +23,13 @@ void AssetManager::ThreadedLoading()
 {
 	if(myAssetQueue.GetSize())
 	{
-		const double timeStart = CU::Timer::GetInstance().GetTotalTime();	
+		const double timeStart = Timer::GetInstance().GetTotalTime();	
 		std::scoped_lock<std::mutex> lock(lockForSet);
 
 		std::shared_ptr<AssetBase> working = myAssetQueue.Dequeue();
 		working->Init();
 		working->isLoadedComplete = true;
-		const double timeEnd = CU::Timer::GetInstance().GetTotalTime();
+		const double timeEnd = Timer::GetInstance().GetTotalTime();
 		const double diff = (timeEnd - timeStart)*1000.0;
 		std::string str = "Loaded: " + working->AssetPath.string() + " in " + std::to_string(diff) + "ms \n";
 		AMLogger.Log(str);

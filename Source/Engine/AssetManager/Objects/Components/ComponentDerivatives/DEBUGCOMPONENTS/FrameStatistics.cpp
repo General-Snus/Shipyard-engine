@@ -20,7 +20,7 @@ double App_CPU_Usage();
 
 void FrameStatistics::Update()
 { 
-	const float framerate = 1 / CU::Timer::GetInstance().GetDeltaTime();
+	const float framerate = 1 / Timer::GetInstance().GetDeltaTime();
 
 	if(myDataIndex > MAX_DATA_COUNT - 1)
 	{

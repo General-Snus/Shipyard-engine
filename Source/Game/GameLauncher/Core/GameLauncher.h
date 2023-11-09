@@ -9,7 +9,7 @@ public:
 	GameLauncher() = default; 
 	void Init();
 	void Start(); 
-	void Update(); 
+	void Update(float delta); 
 	Logger GLLogger;
 private:  
 	GameObject myMesh;

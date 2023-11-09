@@ -28,12 +28,12 @@
 
 #include "../Windows/Window.h" 
 #include <Engine/AssetManager/Objects/GameObjects/GameObject.h>
-  
+
 using json = nlohmann::json;
 
 bool Editor::Initialize(HWND aHandle)
 {
-	MVLogger = Logger::Create("ModelViewer"); 
+	MVLogger = Logger::Create("ModelViewer");
 	ShowSplashScreen();
 
 	// TODO: Here we should init the Graphics Engine.
@@ -54,7 +54,7 @@ bool Editor::Initialize(HWND aHandle)
 	myGameLauncher.Init();
 	myGameLauncher.Start();
 
-	HideSplashScreen(); 
+	HideSplashScreen();
 	return true;
 }
 void Editor::DoWinProc(const MSG& aMessage)
@@ -77,15 +77,15 @@ void Editor::DoWinProc(const MSG& aMessage)
 		return;
 	}
 
-	CU::InputHandler::GetInstance().UpdateEvents(aMessage.message,aMessage.wParam,aMessage.lParam);
-	CU::InputHandler::GetInstance().UpdateMouseInput(aMessage.message);
+	InputHandler::GetInstance().UpdateEvents(aMessage.message,aMessage.wParam,aMessage.lParam);
+	InputHandler::GetInstance().UpdateMouseInput(aMessage.message);
 }
 
 int	 Editor::Run()
 {
+
 	Update();
-	CommonUtilities::Timer::GetInstance().Update();
-	CU::InputHandler::GetInstance().Update();
+	InputHandler::GetInstance().Update();
 	return 0;
 }
 
@@ -104,7 +104,7 @@ void Editor::HideSplashScreen() const
 	delete mySplashWindow;
 	ShowWindow(Window::windowHandler,SW_SHOW);
 	SetForegroundWindow(Window::windowHandler);
-} 
+}
 
 void Editor::Update()
 {
@@ -112,7 +112,10 @@ void Editor::Update()
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-	myGameLauncher.Update();
+	Timer::GetInstance().Update();
+	GameObjectManager::GetInstance().Update();
+	myGameLauncher.Update(Timer::GetInstance().GetDeltaTime());
+
 	GraphicsEngine::Get().BeginFrame();
 	GraphicsEngine::Get().RenderFrame(0,0);
 
@@ -120,7 +123,7 @@ void Editor::Update()
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
 	GraphicsEngine::Get().EndFrame();
-} 
+}
 
 bool Editor::SaveDataToJson() const
 {
@@ -252,7 +255,7 @@ bool Editor::SaveToMemory(SaveData<float>& arg)
 	return true;
 }
 
-void Editor::ExpandWorldBounds(CU::Sphere<float> sphere)
+void Editor::ExpandWorldBounds(Sphere<float> sphere)
 {
 	if(myWorldBounds.ExpandSphere(sphere))
 	{
@@ -265,7 +268,7 @@ void Editor::ExpandWorldBounds(CU::Sphere<float> sphere)
 	} //REFACTOR if updated real time the world expansion will cause the light/shadow to lagg behind, use this to update camera position, 
 	//REFACTOR not called on object moving outside worldbound causing same error as above
 }
-const CU::Sphere<float>& Editor::GetWorldBounds() const
+const Sphere<float>& Editor::GetWorldBounds() const
 {
 	return myWorldBounds;
 }

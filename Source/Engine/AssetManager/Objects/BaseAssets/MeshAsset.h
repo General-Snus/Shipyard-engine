@@ -19,9 +19,9 @@ public:
 	int bufferSize;
 	ComPtr<ID3D11Buffer> myInstanceBuffer;//TODO unique id meshrender if dirty remake? 
 	D3D11_BUFFER_DESC vertexBufferDesc{};
-	std::vector<CU::Matrix4x4<float>> myInstances;
-	CU::Vector3<float> MaxBox;
-	CU::Vector3<float> MinBox;
-	CU::Sphere<float> boxSphereBounds;
+	std::vector< Matrix > myInstances;
+	Vector3f MaxBox;
+	Vector3f MinBox;
+	Sphere<float> boxSphereBounds;
 };
 

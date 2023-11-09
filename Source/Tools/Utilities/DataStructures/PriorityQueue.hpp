@@ -2,8 +2,7 @@
 #include <vector>
 #include <assert.h>
 #include "Heap.hpp" 
-
-namespace CommonUtilities {
+ 
 	template <class T,class P>
 	struct PriorityQueueElement
 	{
@@ -79,5 +78,4 @@ namespace CommonUtilities {
 				return;
 			}
 		}
-	}
-}
+	} 

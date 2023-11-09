@@ -49,10 +49,7 @@
 #include <Engine/GraphicsEngine/Rendering/Vertex.h> 
 #include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
 #include <Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h>
-#include "AssetManager.h"
-
-typedef CU::Vector3<float> Vector3f;
-typedef CU::Matrix4x4<float> Matrix;
+#include "AssetManager.h" 
 
 static inline Logger AMLogger;
 #endif //ASSETMANAGER_PCH_H 

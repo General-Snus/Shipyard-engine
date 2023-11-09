@@ -4,9 +4,7 @@
 #include "EnumKeys.h"
 #include "../LinearAlgebra/Vector2.hpp"
 #include <WinUser.h>
-
-namespace CommonUtilities
-{
+ 
 	class InputHandler
 	{
 	public:
@@ -40,8 +38,8 @@ namespace CommonUtilities
 
 
 		unsigned int lastPressedKey;
-		CommonUtilities::Vector2<int> myMousePosition;
-		CommonUtilities::Vector2<int> myLastMousePosition;
+		Vector2<int> myMousePosition;
+		Vector2<int> myLastMousePosition;
 
 	}; 
 
@@ -135,6 +133,4 @@ namespace CommonUtilities
 	{
 		lastFrameUpdate = currentFrameUpdate;
 		currentFrameUpdate = liveKeyUpdate;
-	}
-
-}
+	} 

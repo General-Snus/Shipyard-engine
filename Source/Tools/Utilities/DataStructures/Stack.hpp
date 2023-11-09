@@ -1,8 +1,6 @@
 #pragma once
 #include <vector>
-#include <assert.h>
-namespace CommonUtilities {
-
+#include <assert.h> 
 	template <class T>
 	class Stack
 	{
@@ -75,6 +73,4 @@ namespace CommonUtilities {
 	inline bool Stack<T>::IsEmpty() const
 	{
 		return myContainer.size();
-	}
-
-}
+	} 

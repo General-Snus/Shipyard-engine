@@ -1,6 +1,4 @@
-#include "Vectors.hpp"
-namespace CommonUtilities
-{
+#include "Vectors.hpp" 
 	template<class T>
 	class Ray2d
 	{
@@ -65,5 +63,4 @@ namespace CommonUtilities
 	inline Vector2<T> Ray2d<T>::GetUnitVector() const
 	{
 		return UnitVector;
-	}
-}
+	} 

@@ -44,7 +44,7 @@ void Transform::Render()
 	}
 #endif // _DEBUGDRAW 
 }  
-const CU::Matrix4x4<float>& Transform::GetTransform() const
+const Matrix& Transform::GetTransform() const
 {
 	return myTransform;
 }

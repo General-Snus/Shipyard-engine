@@ -1,8 +1,6 @@
 #include "Vectors.hpp"
 #include "Line.hpp"
-#include <vector>
-namespace CommonUtilities
-{
+#include <vector> 
 	template<class T>
 	class LineVolume
 	{
@@ -55,11 +53,4 @@ namespace CommonUtilities
 			}
 		}
 		return true;
-	}
-
-
-
-
-
-
-}
+	} 

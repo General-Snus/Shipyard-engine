@@ -21,9 +21,9 @@
 #include <Tools/Utilities/Input/InputHandler.hpp>
 #include <Tools/Logging/Logging.h> 
 
-//#define _DEBUGDRAW
+#define _DEBUGDRAW
 #define Flashlight
-#define ParticleSystemToggle
+//#define ParticleSystemToggle
 
 using json = nlohmann::json;
 
@@ -57,13 +57,13 @@ void GameLauncher::Start()
 		Transform& transform = worldRoot.AddComponent<Transform>();
 		transform.SetRotation(0,0,-45);
 		cLight& pLight = worldRoot.GetComponent<cLight>();
-		pLight.SetColor(CU::Vector3<float>(1,1,1));
+		pLight.SetColor(Vector3f(1,1,1));
 		pLight.SetPower(2.0f);
 		pLight.BindDirectionToTransform(true);
 
 		if(gom.GetAllComponents<BackgroundColor>().empty())
 		{
-			worldRoot.AddComponent<BackgroundColor>(CU::Vector4<float>(1.0f,1.0f,1.0f,1.0f));
+			worldRoot.AddComponent<BackgroundColor>( Vector4f(1.0f,1.0f,1.0f,1.0f));
 		}
 	} 
 
@@ -72,12 +72,12 @@ void GameLauncher::Start()
 		myMesh.AddComponent<cSkeletalMeshRenderer>(L"Models/SK_C_TGA_Bro.fbx");
 		myMesh.GetComponent<cSkeletalMeshRenderer>().SetMaterialPath(L"Materials/TGABroMaterial.json");
 
-		Transform& transform = myMesh.AddComponent<Transform>();
+		auto& transform = myMesh.AddComponent<Transform>();
 		transform.Rotate(0,-180,0);
-		myMesh.AddComponent<cAnimator>(L"Animations/Locomotion/A_C_TGA_Bro_Walk.fbx");
-		myMesh.GetComponent<cAnimator>().AddAnimation(L"Animations/Locomotion/A_C_TGA_Bro_Run.fbx");
-		myMesh.GetComponent<cAnimator>().AddAnimation(L"Animations/Idle/A_C_TGA_Bro_Idle_Brething.fbx");
-		myMesh.GetComponent<cAnimator>().AddAnimation(L"Animations/Idle/A_C_TGA_Bro_Idle_Wave.fbx");
+		auto& animator = myMesh.AddComponent<cAnimator>(L"Animations/Locomotion/A_C_TGA_Bro_Walk.fbx");
+		animator.AddAnimation(L"Animations/Locomotion/A_C_TGA_Bro_Run.fbx");
+		animator.AddAnimation(L"Animations/Idle/A_C_TGA_Bro_Idle_Brething.fbx");
+		animator.AddAnimation(L"Animations/Idle/A_C_TGA_Bro_Idle_Wave.fbx");
 	}
 
 	//Billboard
@@ -134,14 +134,12 @@ void GameLauncher::Start()
 	}
 
 
-	const float Radius = 500.0f;
+	const float Radius = 1.0f;
 	for(size_t i = 0; i < Radius; i++)
 	{
 		const float Radians = 2 * PI * (i / Radius);
 		float y = sin(Radians) * Radius;
-		float x = cos(Radians) * Radius;
-
-
+		float x = cos(Radians) * Radius; 
 
 		GameObject Chest = gom.CreateGameObject();
 		Transform& trans = Chest.AddComponent<Transform>();
@@ -231,28 +229,25 @@ void GameLauncher::Start()
 	GLLogger.Log("GameLauncher start");
 } 
 
-void GameLauncher::Update()
-{
-	float delta = CU::Timer::GetInstance().GetDeltaTime();
-	GameObjectManager::GetInstance().Update();
-
-	if(CU::InputHandler::GetInstance().IsKeyPressed((int)Keys::NUMPAD1))
+void GameLauncher::Update(float delta)
+{ 
+	if(InputHandler::GetInstance().IsKeyPressed((int)Keys::NUMPAD1))
 	{
 		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(0);
 	}
-	if(CU::InputHandler::GetInstance().IsKeyPressed((int)Keys::NUMPAD2))
+	if(InputHandler::GetInstance().IsKeyPressed((int)Keys::NUMPAD2))
 	{
 		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(1);
 	}
-	if(CU::InputHandler::GetInstance().IsKeyPressed((int)Keys::NUMPAD3))
+	if(InputHandler::GetInstance().IsKeyPressed((int)Keys::NUMPAD3))
 	{
 		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(2);
 	}
-	if(CU::InputHandler::GetInstance().IsKeyPressed((int)Keys::NUMPAD4))
+	if(InputHandler::GetInstance().IsKeyPressed((int)Keys::NUMPAD4))
 	{
 		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(3);
 	}
-	//if(CU::InputHandler::GetInstance().IsKeyPressed((int)Keys::R))
+	//if(InputHandler::GetInstance().IsKeyPressed((int)Keys::R))
 	{
 		for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
 		{

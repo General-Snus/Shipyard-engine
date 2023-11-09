@@ -38,6 +38,6 @@ void ParticleSystem::Update()
 {
 	for(auto& i : myEmitters)
 	{
-		i->Update(CU::Timer::GetInstance().GetDeltaTime());
+		i->Update(Timer::GetInstance().GetDeltaTime());
 	}
 }

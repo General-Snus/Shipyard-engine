@@ -1,7 +1,5 @@
 #pragma once
-
-namespace CommonUtilities
-{
+ 
 	template<class T>
 	class DoublyLinkedListNode;
 
@@ -343,5 +341,4 @@ namespace CommonUtilities
 			iterator = iterator->myPrevious;
 		}
 		return false;
-	}
-}
+	} 

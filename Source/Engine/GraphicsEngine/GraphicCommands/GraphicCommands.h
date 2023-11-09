@@ -10,9 +10,7 @@
 #include <Engine/GraphicsEngine/Rendering/Buffers/G_buffer.h>
 #include <Engine/GraphicsEngine/Rendering/Buffers/GraphicSettingsBuffer.h>
 #include <Engine/GraphicsEngine/Rendering/InstanceRenderer/InstanceRenderer.h>
-
-
-using Matrix =  CU::Matrix4x4<float>;
+ 
  
 class GraphicCommandBase
 {

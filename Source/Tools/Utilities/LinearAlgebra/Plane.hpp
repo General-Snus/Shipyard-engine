@@ -1,6 +1,4 @@
-#include "Vectors.hpp"
-namespace CommonUtilities
-{
+#include "Vectors.hpp" 
 	template<class T>
 	class Plane
 	{
@@ -84,5 +82,4 @@ namespace CommonUtilities
 	inline const Vector3<T>& Plane<T>::GetOrigin() const
 	{
 		return myOrigin;
-	}
-}
+	} 

@@ -1,10 +1,7 @@
 #pragma once
 #include <vector>
 #include <assert.h>
-
-namespace CommonUtilities {
-
-
+ 
 	template <class T>
 	class Queue
 	{
@@ -103,5 +100,4 @@ namespace CommonUtilities {
 		myFront = (myFront + 1) % myAllocated;
 		mySize--;
 		return myContainer[returnValue];
-	}  
-}
+	}   
