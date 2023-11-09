@@ -1,8 +1,8 @@
-#include "AssetManager.pch.h"
-#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
 #include "LightComponent.h"
-#include <Game/Modelviewer/Core/Modelviewer.h>
+#include "AssetManager.pch.h"
+//#include <Editor/Editor/Core/Editor.h>
 #include <Tools/Utilities/Math.hpp>
+#include "../../BaseAssets/LightDataBase.h"
 
 cLight::cLight(const unsigned int anOwnerId) : Component(anOwnerId),isDirty(true)
 {
@@ -505,9 +505,10 @@ void cLight::RedrawShadowMap()
 
 void cLight::RedrawDirectionMap()
 {
-	const float radius = ModelViewer::Get().GetWorldBounds().GetRadius();
-	Vector3f lightPosition = radius * 2.0f * -Vector3f(myDirectionLightData->Direction.GetNormalized().x,myDirectionLightData->Direction.GetNormalized().y,myDirectionLightData->Direction.GetNormalized().z);
-	const Vector3f worldCenter = ModelViewer::Get().GetWorldBounds().GetCenter();
+	//TODO GET ACTIVE SCENE
+	const float radius = 100000;//ModelViewer::Get().GetWorldBounds().GetRadius();
+	 Vector3f lightPosition = radius * 2.0f * -Vector3f(myDirectionLightData->Direction.GetNormalized().x,myDirectionLightData->Direction.GetNormalized().y,myDirectionLightData->Direction.GetNormalized().z);
+	 const Vector3f worldCenter = Vector3f();// ModelViewer::Get().GetWorldBounds().GetCenter();
 
 	myDirectionLightData->Direction = Vector4f((worldCenter - lightPosition).GetNormalized(),1);
 	myDirectionLightData->lightView = CU::Matrix4x4<float>::LookAt(lightPosition,worldCenter,{0,1,0}); // REFACTOR, Magic value up

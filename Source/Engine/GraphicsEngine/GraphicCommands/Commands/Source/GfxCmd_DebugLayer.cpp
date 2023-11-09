@@ -1,6 +1,6 @@
 #include <GraphicsEngine.pch.h>
 #include "../Headers/GfxCmd_DebugLayer.h"
-#include <Game/Modelviewer/Core/Modelviewer.h>
+//#include <Game/Modelviewer/Core/Modelviewer.h>
 
 GfxCmd_DebugLayer::GfxCmd_DebugLayer()
 {
@@ -9,7 +9,9 @@ GfxCmd_DebugLayer::GfxCmd_DebugLayer()
 
 void GfxCmd_DebugLayer::ExecuteAndDestroy()
 {
-	if(ModelViewer::GetApplicationState().filter != DebugFilter::NoFilter)
+	//TODO fix this
+	//if(ModelViewer::GetApplicationState().filter != DebugFilter::NoFilter)
+	if(false)
 	{ 
 		RHI::SetBlendState(nullptr);
 		G_Buffer& gBuffer = GetGBuffer();

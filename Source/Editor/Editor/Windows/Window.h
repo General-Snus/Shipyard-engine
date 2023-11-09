@@ -1,0 +1,29 @@
+#pragma once
+#define WIN32_LEAN_AND_MEAN
+#include "Windows.h" 
+#include <functional>
+#include <WinUser.h>
+struct WinInitSettings
+{
+	LPCWSTR windowTitle;
+	SIZE windowSize;
+	HINSTANCE hInstance; 
+};
+
+
+
+class Window
+{
+public:
+
+	static void Init(const WinInitSettings& init);
+	static bool Update();
+	static LRESULT CALLBACK WinProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
+
+	static void SetCallbackFunction(std::function<void(MSG const& msg)> aCallback);
+	inline static HINSTANCE moduleHandler;
+	inline static HWND windowHandler;
+	//Cred goes to adira guy on reddit for wonderfull code
+	inline static std::function<void(const MSG& msg)> callback = nullptr;
+};
+

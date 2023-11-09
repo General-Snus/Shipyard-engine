@@ -1,6 +1,4 @@
 #pragma once 
-#include <Engine/AssetManager/AssetManager.pch.h> 
-#include "../../BaseAssets/LightDataBase.h"
 
 enum class eLightType
 {
@@ -9,9 +7,13 @@ enum class eLightType
 	Spot = 2,
 	uninitialized = 3
 };
-
+struct DirectionalLight;
+struct SpotLight;
+struct PointLight;
 class cLight : public Component
 {
+	
+
 	friend class GraphicsEngine;
 	friend class ShadowRenderer;
 	friend class GfxCmd_SetLightBuffer;

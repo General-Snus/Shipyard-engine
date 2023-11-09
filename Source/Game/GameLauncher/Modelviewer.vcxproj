@@ -24,6 +24,7 @@
     <ProjectGuid>{22A9F47B-5CE9-470B-AE62-562504394512}</ProjectGuid>
     <RootNamespace>Modelviewer</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>GameLauncher</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

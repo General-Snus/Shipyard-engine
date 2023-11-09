@@ -1,7 +1,7 @@
 #include "AssetManager.pch.h"
 #include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
 #include "CameraComponent.h"
-#include <Game/Modelviewer/Core/Modelviewer.h>
+#include <Editor/Editor/Core/Editor.h>
 #include <Engine/GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h>
 #include <Tools/Utilities/Input/InputHandler.hpp> 
 
@@ -175,7 +175,7 @@ void cCamera::SetCameraToFrameBuffer()
 	GfxCmd_SetFrameBuffer(
 		myClipMatrix,
 		this->GetGameObject().GetComponent<Transform>(),
-		(int)ModelViewer::GetApplicationState().filter,
+		0,//(int)Editor::GetApplicationState().filter, //TODO scene again
 		*this
 	).ExecuteAndDestroy(); 
 }
