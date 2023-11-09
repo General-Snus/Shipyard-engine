@@ -19,7 +19,9 @@
 #include <Tools/ThirdParty/nlohmann/json.hpp>   
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/Input/InputHandler.hpp>
-#include <Tools/Logging/Logging.h> 
+#include <Tools/Logging/Logging.h>
+#include <Tools/Optick/src/optick.h>
+
 
 #define _DEBUGDRAW
 #define Flashlight
@@ -230,7 +232,8 @@ void GameLauncher::Start()
 } 
 
 void GameLauncher::Update(float delta)
-{ 
+{
+	OPTICK_EVENT();
 	if(InputHandler::GetInstance().IsKeyPressed((int)Keys::NUMPAD1))
 	{
 		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(0);

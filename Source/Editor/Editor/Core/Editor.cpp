@@ -36,6 +36,7 @@ bool Editor::Initialize(HWND aHandle)
 {
 	MVLogger = Logger::Create("ModelViewer");
 	ShowSplashScreen(); 
+
 	// TODO: Here we should init the Graphics Engine.
 	GraphicsEngine::Get().Initialize(aHandle,true);
 	// Setup Dear ImGui context
@@ -110,8 +111,11 @@ void Editor::HideSplashScreen() const
 void Editor::Update()
 {
 	ImGui_ImplDX11_NewFrame();
+	OPTICK_CATEGORY("ImGui_ImplDX11_NewFrame",Optick::Category::UI);
 	ImGui_ImplWin32_NewFrame();
+	OPTICK_CATEGORY("ImGui_ImplWin32_NewFrame",Optick::Category::UI);
 	ImGui::NewFrame();
+	OPTICK_CATEGORY("ImGui::NewFrame",Optick::Category::UI);
 
 	Timer::GetInstance().Update();
 	GameObjectManager::GetInstance().Update();

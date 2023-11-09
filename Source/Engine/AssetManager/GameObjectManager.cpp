@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <string>
 
+#include <Tools/Optick/src/optick.h>
 
 GameObjectManager::~GameObjectManager()
 {
@@ -101,6 +102,7 @@ void GameObjectManager::SetLastGOAsCamera()
 
 void GameObjectManager::Update()
 {
+	OPTICK_EVENT();
 	for(size_t i = 0; i < myUpdateOrder.size(); i++)
 	{
 		myUpdateOrder[i].second->Update();
