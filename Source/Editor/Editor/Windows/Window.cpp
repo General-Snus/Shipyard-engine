@@ -80,3 +80,9 @@ void Window::SetCallbackFunction(std::function<void( MSG const& msg)> aCallback)
 {
 	callback = aCallback;
 }
+
+void Window::Destroy()
+{
+	callback = nullptr;
+	if(windowHandler) ::DestroyWindow(windowHandler);
+}

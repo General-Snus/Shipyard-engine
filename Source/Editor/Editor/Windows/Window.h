@@ -21,6 +21,8 @@ public:
 	static LRESULT CALLBACK WinProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
 
 	static void SetCallbackFunction(std::function<void(MSG const& msg)> aCallback);
+	static void Destroy();
+
 	inline static HINSTANCE moduleHandler;
 	inline static HWND windowHandler;
 	//Cred goes to adira guy on reddit for wonderfull code

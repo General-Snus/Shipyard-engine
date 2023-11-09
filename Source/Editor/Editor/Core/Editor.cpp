@@ -28,14 +28,14 @@
 
 #include "../Windows/Window.h" 
 #include <Engine/AssetManager/Objects/GameObjects/GameObject.h>
+#include <Tools/Optick/src/optick.h>
 
 using json = nlohmann::json;
 
 bool Editor::Initialize(HWND aHandle)
 {
 	MVLogger = Logger::Create("ModelViewer");
-	ShowSplashScreen();
-
+	ShowSplashScreen(); 
 	// TODO: Here we should init the Graphics Engine.
 	GraphicsEngine::Get().Initialize(aHandle,true);
 	// Setup Dear ImGui context
@@ -83,9 +83,10 @@ void Editor::DoWinProc(const MSG& aMessage)
 
 int	 Editor::Run()
 {
+	OPTICK_FRAME("MainThread");
+	InputHandler::GetInstance().Update();
 
 	Update();
-	InputHandler::GetInstance().Update();
 	return 0;
 }
 
@@ -120,8 +121,7 @@ void Editor::Update()
 	GraphicsEngine::Get().RenderFrame(0,0);
 
 	ImGui::Render();
-	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-
+	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData()); 
 	GraphicsEngine::Get().EndFrame();
 }
 

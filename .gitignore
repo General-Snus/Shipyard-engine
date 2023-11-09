@@ -35,7 +35,9 @@ bld/
 !/Source/Tools/FBX/ThirdParty/fbxsdk/lib/debug/
 !/Source/Tools/FBX/ThirdParty/fbxsdk/lib/release/
 !/[Bb]in/[Dd]ebug/
-!/[Bb]in/[Rr]elease/ 
+!/[Bb]in/[Rr]elease/
+!/Dependencies/[Dd]ebug/
+!/Dependencies/[Rr]elease/ 
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/

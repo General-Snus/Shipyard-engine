@@ -31,6 +31,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     {
         editor.Run();
     }
+    Window::Destroy();
     return true;
 }
 
