@@ -1,27 +1,24 @@
 #pragma once
-#include <memory>
+#include <vector>
 #include "ApplicationState.h"
 #include "../Windows/SplashWindow.h" 
 #include <Tools/Logging/Logging.h> 
 #include <Tools/Utilities/LinearAlgebra/Sphere.hpp>
-#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp> 
-#include <Engine/AssetManager/Objects/GameObjects/GameObject.h>
-
+#include <Game/GameLauncher/Core/GameLauncher.h>
 template<typename T>
 struct SaveData
 {
 	int fnc;
 	std::string identifier;
 	T* arg;
-};
-
-
+}; 
 enum class eSaveToJsonArgument
 {
 	InputFloat3,
 	InputFloat4,
 	SaveBool
 }; 
+class GameLauncher;
 
 class Editor
 {
@@ -30,10 +27,10 @@ private:
 	ApplicationState myApplicationState;
 	Logger MVLogger;
 	void ShowSplashScreen();
-	void HideSplashScreen() const; 
-	void LoadScene();
-	void UpdateScene();
+	void HideSplashScreen() const;  
+
 	void Update();
+
 	bool SaveDataToJson() const;
 	bool JsonToSaveData() const; 
 	bool ContainData(SaveData<float>& data);
@@ -58,11 +55,8 @@ public:
 	{
 		return MVLogger;
 	}
-private: 
-	CU::Sphere<float> myWorldBounds;
-	GameObject myMesh;
-	GameObject myCustomHandler;
-	Matrix myModelMatrix;
-	std::vector<SaveData<float>> mySaveData;
-
+private:
+	GameLauncher myGameLauncher;
+	CU::Sphere<float> myWorldBounds; 
+	std::vector<SaveData<float>> mySaveData; 
 };

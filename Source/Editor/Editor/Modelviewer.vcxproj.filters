@@ -63,7 +63,7 @@
     <Image Include="small.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="Modelviewer.ico">
+    <Image Include="EditorIcon.ico">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="TGPSplash.bmp">

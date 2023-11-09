@@ -41,13 +41,13 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -79,17 +79,17 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(SolutionDir);$(ProjectDir);$(SolutionDir)Engine\AssetManager\;$(SolutionDir)Engine\GraphicsEngine\;$(SolutionDir)Tools\Utilities\;$(IncludePath)</IncludePath>
-    <OutDir>$(SolutionDir)../Bin\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
     <LibraryPath>$(SolutionDir)..\Lib\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
-    <TargetName>$(ProjectName)_$(Configuration)</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(SolutionDir);$(ProjectDir);$(SolutionDir)Engine\AssetManager\;$(SolutionDir)Engine\GraphicsEngine\;$(SolutionDir)Tools\Utilities\;$(IncludePath)</IncludePath>
-    <OutDir>$(SolutionDir)../Bin\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
     <LibraryPath>$(SolutionDir)..\Lib\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
-    <TargetName>$(ProjectName)_$(Configuration)</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -127,8 +127,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>
-      </AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\CU\;</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
@@ -153,8 +152,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>
-      </AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\CU\;</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
@@ -170,25 +168,13 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Core\Modelviewer.h" />
-    <ClInclude Include="Core\ApplicationState.h" />
-    <ClInclude Include="Resource.h" />
-    <ClInclude Include="Windows\SplashWindow.h" />
-    <ClInclude Include="targetver.h" />
+    <ClInclude Include="Core\GameLauncher.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Core\ApplicationState.cpp" />
-    <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Core\Modelviewer.cpp" />
-    <ClCompile Include="Windows\SplashWindow.cpp" />
+    <ClCompile Include="Core\GameLauncher.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Modelviewer.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="Modelviewer.ico" />
-    <Image Include="small.ico" />
-    <Image Include="TGPSplash.bmp" />
+    <Image Include="GameIcon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
