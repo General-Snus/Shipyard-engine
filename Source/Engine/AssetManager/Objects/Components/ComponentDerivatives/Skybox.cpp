@@ -19,6 +19,7 @@ void Skybox::Update()
 
 void Skybox::Render()
 {
+	OPTICK_EVENT();
 	if(!myCubeMap->GetRawTexture()->IsValid())
 	{
 		return;

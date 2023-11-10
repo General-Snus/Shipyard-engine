@@ -33,7 +33,8 @@ void cMeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath)
 	myRenderData->myMaterials[0] = mat; // REFACTOR : 0 is the wanted element,   
 }
 void cMeshRenderer::Render()
-{ 
+{
+	OPTICK_EVENT();
 	if(const auto* myTransform = this->TryGetComponent<Transform>())
 	{
 		if(!isInstanced)
@@ -72,7 +73,8 @@ void cSkeletalMeshRenderer::SetNewMesh(const std::filesystem::path& aFilePath)
 }
 
 void cSkeletalMeshRenderer::Render()
-{	
+{
+	OPTICK_EVENT();
 	if(const auto* myTransform = this->TryGetComponent<Transform>())
 	{ 
 		if(const auto* myAnimation = this->TryGetComponent<cAnimator>())

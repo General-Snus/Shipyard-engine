@@ -62,6 +62,7 @@ cCamera::~cCamera()
 
 void cCamera::Update()
 {
+	OPTICK_EVENT();
 	Transform& myTransform = this->GetGameObject().GetComponent<Transform>();
 	float aTimeDelta = Timer::GetInstance().GetDeltaTime();
 
@@ -172,6 +173,7 @@ Vector3f cCamera::GetPointerDirectionNDC(const Vector2<int> position) const
 
 void cCamera::SetCameraToFrameBuffer()
 {
+	OPTICK_EVENT();
 	GfxCmd_SetFrameBuffer(
 		myClipMatrix,
 		this->GetGameObject().GetComponent<Transform>(),

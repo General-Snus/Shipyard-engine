@@ -22,6 +22,7 @@ Transform::Transform(const unsigned int anOwnerId,const Matrix& aMatrix) : Compo
 */
 void Transform::Update()
 {
+	OPTICK_EVENT();
 	if(isDirty)
 	{
 		MakeSaneRotation();
@@ -36,7 +37,8 @@ void Transform::Update()
 }
 
 void Transform::Render()
-{ 
+{
+	OPTICK_EVENT();
 #ifdef _DEBUGDRAW 
 	if(primitive.NumVertices != 0 && primitive.NumIndices != 0)
 	{

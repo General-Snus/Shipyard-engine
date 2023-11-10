@@ -10,6 +10,7 @@ void ShadowRenderer::Init()
 
 void ShadowRenderer::Execute()
 {
+	OPTICK_EVENT();
 	LightBuffer& buffer = GraphicsEngine::Get().myLightBuffer;  
 
 	std::shared_ptr<Texture> shadowMap;

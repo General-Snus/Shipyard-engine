@@ -208,6 +208,7 @@ void Mesh::ResizeBuffer()
 
 void Mesh::UpdateInstanceBuffer()
 {
+	OPTICK_EVENT();
 	if(myInstances.size() > bufferSize)
 	{
 		ResizeBuffer();

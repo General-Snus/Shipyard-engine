@@ -23,6 +23,7 @@ GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,cons
 
 void GfxCmd_SetFrameBuffer::ExecuteAndDestroy()
 {
+	OPTICK_EVENT();
 	FrameBuffer& buffert = GetFrameBuffer();
 	buffert.Data.ProjectionMatrix = myProjectionMatrix;
 	buffert.Data.ViewMatrix = myViewMatrix;

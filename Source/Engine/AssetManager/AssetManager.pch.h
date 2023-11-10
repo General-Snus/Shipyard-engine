@@ -21,6 +21,7 @@
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/Math.hpp>
 #include "Tools/Logging/Logging.h"
+#include <Tools/Optick/src/optick.h>
 
 #include "Objects/BaseAssets/BaseAsset.h"
 #include "Objects/BaseAssets/Animations.h"

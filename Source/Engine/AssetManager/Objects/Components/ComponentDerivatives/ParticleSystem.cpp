@@ -15,6 +15,7 @@ ParticleSystem::ParticleSystem(const unsigned int anOwnerId,const std::filesyste
 
 void ParticleSystem::Draw()
 {
+	OPTICK_EVENT();
 	GraphicsEngine::Get().SetDepthState(GraphicsEngine::eDepthStencilStates::DSS_ReadOnly);
 	Transform* trns = TryGetComponent<Transform>();
 	if(trns)
@@ -36,6 +37,7 @@ void ParticleSystem::AddEmitter(const ParticleEmitterTemplate& aTemplate)
 }
 void ParticleSystem::Update()
 {
+	OPTICK_EVENT();
 	for(auto& i : myEmitters)
 	{
 		i->Update(Timer::GetInstance().GetDeltaTime());

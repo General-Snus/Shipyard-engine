@@ -28,6 +28,7 @@ cAnimator::cAnimator(const unsigned int anOwnerId,const std::filesystem::path& a
 
 void cAnimator::Update()
 {
+	OPTICK_EVENT();
 
 	if(myAnimations.size())
 	{

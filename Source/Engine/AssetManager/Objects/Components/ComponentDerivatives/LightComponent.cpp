@@ -4,6 +4,7 @@
 #include <Tools/Utilities/Math.hpp>
 #include "../../BaseAssets/LightDataBase.h"
 
+#include <Tools/Optick/src/optick.h>
 cLight::cLight(const unsigned int anOwnerId) : Component(anOwnerId),isDirty(true)
 {
 	myLightType = eLightType::uninitialized;
@@ -424,6 +425,7 @@ std::shared_ptr<Texture> cLight::GetShadowMap(int number) const
 
 void cLight::Update()
 {
+	OPTICK_EVENT();
 	if(boundToTransform)
 	{
 		ConformToTransform();
@@ -454,6 +456,7 @@ void cLight::Update()
 
 void cLight::ConformToTransform()
 {
+	OPTICK_EVENT();
 	Transform* transform = this->TryGetComponent<Transform>();
 	if(transform == nullptr)
 	{
@@ -505,6 +508,7 @@ void cLight::RedrawShadowMap()
 
 void cLight::RedrawDirectionMap()
 {
+	OPTICK_EVENT();
 	//TODO GET ACTIVE SCENE
 	const float radius = 100000;//ModelViewer::Get().GetWorldBounds().GetRadius();
 	Vector3f lightPosition = radius * 2.0f * -Vector3f(myDirectionLightData->Direction.GetNormalized().x,myDirectionLightData->Direction.GetNormalized().y,myDirectionLightData->Direction.GetNormalized().z);
@@ -533,6 +537,7 @@ void cLight::RedrawDirectionMap()
 
 void cLight::RedrawPointMap()
 {
+	OPTICK_EVENT();
 	Vector3f lightPosition = myPointLightData->Position;
 	myPointLightData->lightView = Matrix::LookAt(lightPosition,lightPosition + GlobalFwd,{0,1,0}); // REFACTOR, Magic value up
 
@@ -555,6 +560,7 @@ void cLight::RedrawPointMap()
 
 void cLight::RedrawSpotMap()
 {
+	OPTICK_EVENT();
 	Vector3f lightPosition = mySpotLightData->Position;
 	mySpotLightData->lightView = Matrix::LookAt(lightPosition,lightPosition + mySpotLightData->Direction.GetNormalized(),{0,1,0}); // REFACTOR, Magic value up
 

@@ -8,6 +8,7 @@ void InstanceRenderer::Init()
 
 void InstanceRenderer::Execute(bool isShadowPass)
 {
+	OPTICK_EVENT();
 	if(isShadowPass)
 	{
 		RHI::Context->PSSetShader(nullptr,nullptr,0);
