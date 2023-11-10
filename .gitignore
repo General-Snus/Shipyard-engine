@@ -37,7 +37,7 @@ bld/
 !/[Bb]in/[Dd]ebug/
 !/[Bb]in/[Rr]elease/
 !/Dependencies/[Dd]ebug/
-!/Dependencies/[Rr]elease/ 
+!/Dependencies/[Rr]elease/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
@@ -407,4 +407,6 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
-Source/Engine/GraphicsEngine/Shaders/Include/*.h 
+Source/Engine/GraphicsEngine/Shaders/Include/*.h
+
+!Optick.exe
