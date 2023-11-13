@@ -416,7 +416,7 @@ namespace TGA
 					}
 				}
 			}
-
+			
 			FbxAMatrix tempmatrix = aMeshNode->EvaluateGlobalTransform();
 			FbxTransform tempxform = aMeshNode->GetTransform();
 

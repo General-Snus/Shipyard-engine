@@ -45,9 +45,9 @@ DefaultVertexToPixel main(DefaultVertexInput input)
     result.BiNormal = mul(result.BiNormal, worldNormalRotation);
     result.Tangent = mul(result.Tangent, worldNormalRotation);
      
-    result.Position = mul(FB_InvView,result.WorldPosition );
+    result.Position = mul(FB_InvView,result.WorldPosition);
     result.Position = mul(FB_Proj, result.Position);
-    result.Position.z = saturate(1 / result.Position.z);
+    //result.Position.z = 1 - clamp(result.Position.z, 0, 1);
    //
    //result.Position.z = log2(max(1e-6, 1.0 + result.Position.w)) * Fcoef - 1.0;
     

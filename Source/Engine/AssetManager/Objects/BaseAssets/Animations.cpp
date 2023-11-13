@@ -26,6 +26,7 @@ void Animation::Init()
 			{
 				Matrix mat;
 				mat.SetFromRaw(ref.second.Data);
+				//mat= mat * Matrix::CreateScaleMatrix(Vector3f(0.01f,0.01f,0.01f));//TODO Scaling
 				Frames.back().myTransforms.emplace(ref.first,mat);
 			}
 		}
@@ -59,6 +60,7 @@ void Skeleton::Init()
 					Matrix matrix;
 					matrix.SetFromRaw(aBone.BindPoseInverse.Data);
 					matrix = Matrix::Transpose(matrix);
+					//matrix= Matrix::CreateScaleMatrix(Vector3f(0.01f,0.01f,0.01f)) * matrix; //TODO Scaling
 
 					bone.BindPoseInverse = matrix;
 					bone.Children = aBone.Children;

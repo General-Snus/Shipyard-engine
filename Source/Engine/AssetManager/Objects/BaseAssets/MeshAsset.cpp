@@ -46,10 +46,11 @@ void Mesh::Init()
 
 	if(TGA::FBX::Importer::LoadMeshW(AssetPath,inMesh))
 	{
+		float scalar = 0.01f;//TODO Scaling
 		Vector3f greatestExtent = {
-			std::abs(inMesh.BoxSphereBounds.Center[0] - inMesh.BoxSphereBounds.BoxExtents[0]),
-			std::abs(inMesh.BoxSphereBounds.Center[1] - inMesh.BoxSphereBounds.BoxExtents[1]),
-			std::abs(inMesh.BoxSphereBounds.Center[2] - inMesh.BoxSphereBounds.BoxExtents[2])
+			std::abs(inMesh.BoxSphereBounds.Center[0] - inMesh.BoxSphereBounds.BoxExtents[0])*scalar,//TODO Scaling
+			std::abs(inMesh.BoxSphereBounds.Center[1] - inMesh.BoxSphereBounds.BoxExtents[1])*scalar,
+			std::abs(inMesh.BoxSphereBounds.Center[2] - inMesh.BoxSphereBounds.BoxExtents[2])*scalar
 		};
 
 		float radius = 0;
@@ -63,11 +64,11 @@ void Mesh::Init()
 
 		boxSphereBounds = Sphere<float>(
 			{
-				inMesh.BoxSphereBounds.Center[0],
-				inMesh.BoxSphereBounds.Center[1],
-				inMesh.BoxSphereBounds.Center[2]
+				inMesh.BoxSphereBounds.Center[0] * scalar,
+				inMesh.BoxSphereBounds.Center[1] * scalar,//TODO Scaling
+				inMesh.BoxSphereBounds.Center[2] * scalar
 			},
-			radius
+			radius* scalar
 		);
 
 		Editor::GetEditor().ExpandWorldBounds(boxSphereBounds); // TODO Make a scene contain the boxSphereBounds!!
@@ -79,9 +80,9 @@ void Mesh::Init()
 			for(const auto& vert : element.Vertices)
 			{
 				auto position = Vector3f(
-					vert.Position[0],
-					vert.Position[1],
-					vert.Position[2]
+					vert.Position[0]*scalar,
+					vert.Position[1]*scalar,
+					vert.Position[2]*scalar
 				);
 				auto color = Vector4f(
 					RandomInRange<float>(0,1),

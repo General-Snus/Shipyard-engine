@@ -115,8 +115,15 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
                 break;
             }
         case 13:
-    {
+            {
                 result.Color.rgb = (GetViewNormal(input.UV).rgb + 1.0f) / 2.0f;
+                result.Color.a = 1.0f;
+                break;
+            } 
+
+        case 14:
+            {
+                result.Color.rgb = normalize(input.position.xyz);
                 result.Color.a = 1.0f;
                 break;
             }

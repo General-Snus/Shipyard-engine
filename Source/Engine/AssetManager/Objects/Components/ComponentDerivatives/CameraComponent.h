@@ -32,6 +32,6 @@ public:
 private:
 	Matrix myClipMatrix;
 	Vector2<int> myScreenSize;
-	float cameraSpeed = 1000;
+	float cameraSpeed = 10;
 	CameraSettings mySettings;
 };

@@ -42,7 +42,7 @@ GraphicsCommandList::~GraphicsCommandList()
 	while(it.HasCommand())
 	{
 		GraphicCommandBase* cmd = it.Next();
- 		cmd->Destroy();
+ 		cmd->Destroy();	
 	} 
 	delete[] myData;
 	myData = nullptr;

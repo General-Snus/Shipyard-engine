@@ -21,6 +21,7 @@
 #include <Tools/Utilities/Input/InputHandler.hpp>
 #include <Tools/Logging/Logging.h>
 #include <Tools/Optick/src/optick.h>
+#include <Tools/ThirdParty/TaigaLoader/tga.h>
 
 
 #define _DEBUGDRAW
@@ -35,7 +36,7 @@ void GameLauncher::Init()
 }
 
 void GameLauncher::Start()
-{
+{ 
 	GameObjectManager& gom = GameObjectManager::GetInstance();
 	myCustomHandler = gom.CreateGameObject();
 	myMesh = gom.CreateGameObject();
@@ -89,7 +90,7 @@ void GameLauncher::Start()
 		test.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BillboardSmiley.json");
 		test.AddComponent<Transform>();
 		test.GetComponent<Transform>().Rotate(-90,0,0);
-		test.GetComponent<Transform>().SetPosition(100,0,0);
+		test.GetComponent<Transform>().SetPosition(1,0,0);
 	}
 
 #ifdef  ParticleSystemToggle
@@ -130,7 +131,7 @@ void GameLauncher::Start()
 		test2.AddComponent<cMeshRenderer>("Models/Buddha.fbx");
 		test2.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BuddhaMaterial.json");
 		Transform& trans = test2.AddComponent<Transform>();
-		trans.SetPosition(Vector3f(0,-100,1000));
+		trans.SetPosition(Vector3f(0,-1,10));
 		trans.Rotate(0,-180,0);
 		trans.SetScale(5);
 	}
@@ -159,7 +160,7 @@ void GameLauncher::Start()
 		Box.AddComponent<cMeshRenderer>("Models/Cube.fbx");
 		Box.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/CubeMaterial.json");
 		Box.AddComponent<Transform>();
-		Box.GetComponent<Transform>().SetPosition(700,0,0);
+		Box.GetComponent<Transform>().SetPosition(7,0,0);
 	}
 
 	for(int i = 1; i < 5; i++)
@@ -168,7 +169,7 @@ void GameLauncher::Start()
 		gO.AddComponent<cSkeletalMeshRenderer>(L"Models/SK_C_TGA_Bro.fbx");
 		gO.GetComponent<cSkeletalMeshRenderer>().SetMaterialPath(L"Materials/TGABroMaterial.json");
 		gO.AddComponent<Transform>();
-		gO.GetComponent<Transform>().SetPosition({-static_cast<float>(i) * 300.0f,0});
+		gO.GetComponent<Transform>().SetPosition({-static_cast<float>(i) * 3.0f,0});
 		gO.GetComponent<Transform>().Rotate(0,180.0f,0);
 		gO.AddComponent<cAnimator>(L"Animations/Locomotion/A_C_TGA_Bro_Walk.fbx");
 		gO.GetComponent<cAnimator>().AddAnimation(L"Animations/Locomotion/A_C_TGA_Bro_Run.fbx");
@@ -183,7 +184,7 @@ void GameLauncher::Start()
 		spotLight.AddComponent<cLight>(eLightType::Spot);
 		std::weak_ptr<SpotLight> ptr = spotLight.GetComponent<cLight>().GetData<SpotLight>();
 		spotLight.AddComponent<Transform>();
-		spotLight.GetComponent<Transform>().SetPosition({-static_cast<float>(i) * 300.0f + 300 ,500,0});
+		spotLight.GetComponent<Transform>().SetPosition({-static_cast<float>(i) * 3.0f + 3 ,5,0});
 		spotLight.GetComponent<Transform>().Rotate(90,0,0);
 		ptr.lock()->Color = {RandomInRange(0.0f,1.0f),RandomInRange(0.0f,1.0f),RandomInRange(0.0f,1.0f)};
 		//ptr.lock()->Color = {1,1,1};
@@ -197,12 +198,12 @@ void GameLauncher::Start()
 
 	for(size_t i = 0; i < 2; i++)
 	{
-		int x = RandomInRange<int>(-5000,5000);
-		int z = RandomInRange<int>(-5000,5000);
+		int x = RandomInRange<int>(-50,50);
+		int z = RandomInRange<int>(-50,50);
 
 		GameObject pointLight = gom.CreateGameObject();
 		pointLight.AddComponent<Transform>();
-		pointLight.GetComponent<Transform>().SetPosition({(float)x,100,(float)z});
+		pointLight.GetComponent<Transform>().SetPosition({(float)x,10,(float)z});
 
 		pointLight.AddComponent<cLight>(eLightType::Point);
 		std::weak_ptr<PointLight> ptr = pointLight.GetComponent<cLight>().GetData<PointLight>();
@@ -214,7 +215,7 @@ void GameLauncher::Start()
 
 	GameObject pointLight = gom.CreateGameObject();
 	pointLight.AddComponent<Transform>();
-	pointLight.GetComponent<Transform>().SetPosition({0,300,1000});
+	pointLight.GetComponent<Transform>().SetPosition({0,3,10});
 
 	pointLight.AddComponent<cLight>(eLightType::Point);
 	cLight& ptr = pointLight.GetComponent<cLight>();
@@ -228,7 +229,7 @@ void GameLauncher::Start()
 		test3.AddComponent<cMeshRenderer>("Models/SteelFloor.fbx");
 		test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
 		test3.AddComponent<Transform>();
-		test3.GetComponent<Transform>().SetPosition(0,-125,0);
+		test3.GetComponent<Transform>().SetPosition(0,-1.25,0);
 	}
 	GLLogger.Log("GameLauncher start");
 }

@@ -81,7 +81,7 @@ void cCamera::Update()
 	}
 	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::DOWN))
 	{
-		cameraSpeed = std::clamp(cameraSpeed * 0.99f,100.0f,(float)INT_MAX);
+		cameraSpeed = std::clamp(cameraSpeed * 0.99f,.5f,(float)INT_MAX);
 	}
 
 	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::MOUSERBUTTON))
