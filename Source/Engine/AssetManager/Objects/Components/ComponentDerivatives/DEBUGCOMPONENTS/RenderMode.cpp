@@ -1,7 +1,8 @@
 #include "AssetManager.pch.h"
 #include "RenderMode.h"
 #include <Tools/ImGui/imgui.h> 
-//#include <Game/Modelviewer/Core/Modelviewer.h>
+#include <Editor/Editor/Core/Editor.h> 
+
 //TODO FIX THIS WITH EDITOR SETTINGS??
 static inline std::string tonemaps[5] = {
 	"No tonemap",
@@ -26,7 +27,7 @@ void RenderMode::Update()
 			if(ImGui::RadioButton(ApplicationState::layerNames[i].c_str(),false))
 			{
 				currentlyActiveLayer = i;
-				//ModelViewer::GetApplicationState().filter = (DebugFilter)i;
+				Editor::GetApplicationState().filter = (DebugFilter)i;
 			}
 		}
 	}

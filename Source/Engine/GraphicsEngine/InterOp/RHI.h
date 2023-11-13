@@ -52,6 +52,7 @@ enum DepthState
 {
 	DS_Default,
 	DS_LessEqual,
+	DS_Reversed,
 	DS_COUNT
 };
 

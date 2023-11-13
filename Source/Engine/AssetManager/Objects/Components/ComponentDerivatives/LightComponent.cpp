@@ -531,8 +531,8 @@ void cLight::RedrawDirectionMap()
 		rightPlane,
 		bottomPlane,
 		topPlane,
-		nearPlane,
-		farPlane);
+		farPlane,nearPlane
+		);
 }
 
 void cLight::RedrawPointMap()
@@ -543,8 +543,8 @@ void cLight::RedrawPointMap()
 
 	const float fow = 90.0f * DEG_TO_RAD;
 	const float fowmdf = 1.0f / (tanf(fow / 2.0f));
-	const float farfield = myPointLightData->Range * 5;
-	const float nearField = 1.0f;
+	const float farfield = .01f;
+	const float nearField = myPointLightData->Range * 5;
 	const float prc = farfield / (farfield - nearField);
 	Matrix clipMatrix;
 	clipMatrix(1,1) = fowmdf;
@@ -566,8 +566,8 @@ void cLight::RedrawSpotMap()
 
 	const float fow = mySpotLightData->OuterConeAngle;
 	const float fowmdf = 1.0f / (tanf(fow / 2.0f));
-	const float farfield = mySpotLightData->Range * 2;
-	const float nearField = 1.0f;
+	const float farfield = 0.1f;
+	const float nearField = mySpotLightData->Range * 2;;
 	const float prc = farfield / (farfield - nearField);
 	Matrix clipMatrix;
 	clipMatrix(1,1) = fowmdf;

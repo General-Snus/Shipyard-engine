@@ -34,7 +34,7 @@ struct ApplicationState
 {
 	float CameraSpeed = 1000.0f;
 	float CameraRotationSpeed = 50.0f; 
-	DebugFilter filter = DebugFilter::NoFilter;  
+	DebugFilter filter = DebugFilter::NoFilter; 
 
 
 static inline std::string layerNames[(int)DebugFilter::count] = {

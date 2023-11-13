@@ -2,6 +2,8 @@
 #pragma once 
 #include "Vectors.hpp" 
 #include <cmath> 
+#include <DirectXMath.h>
+
 template <class T>
 class Matrix4x4
 {
@@ -11,6 +13,7 @@ public:
 	// Copy Constructor.
 	Matrix4x4<T>(const  Matrix4x4<T>& aMatrix);
 	Matrix4x4<T>(const  Vector4<Vector4<T>> aVector);
+	Matrix4x4(const DirectX::XMMATRIX aMatrix);
 	// () operator for accessing element (row, column) for read/write or read,respectively.
 	T& operator()(const int aRow,const int aColumn);
 	const T& operator()(const int aRow,const int aColumn) const;
@@ -50,6 +53,18 @@ inline Matrix4x4<T>::Matrix4x4(const Vector4<Vector4<T>> aVector)
 		for(int j = 0; j < 4; j++)
 		{
 			arr[i][j] = aVector[i][j];
+		}
+	}
+}
+
+template<>
+inline Matrix4x4<float>::Matrix4x4(const DirectX::XMMATRIX aMatrix)
+{
+	for(int i = 0; i < 4; i++)
+	{
+		for(int j = 0; j < 4; j++)
+		{
+			arr[i][j] = aMatrix.r[i].m128_f32[j];
 		}
 	}
 }

@@ -6,22 +6,23 @@ float2 GetRandom(float2 uv, float2 uvScale)
 {
     const float3 random = 2.0f * Noise_Texture.Sample(PointSampler, uv * uvScale).rgb - 1.0f;
     return random.xy;
-}
+} 
 
-float4 GetViewPosition(float2 uv)
+float3 GetViewPosition(float2 uv)
 {
-    const float4 worldPosition = float4(worldPositionMap.Sample(defaultSampler, uv).rgb, 1);
+    const float4 worldPosition = float4(worldPositionMap.Sample(defaultSampler, uv).xyz, 1);
     const float4 viewPosition = mul(FB_InvView, worldPosition);
-    return viewPosition;
-}
-
+    const float depth = DepthMap.Sample(NormalDepthSampler, uv).r;
+    return float3(viewPosition.x, viewPosition.y, depth);
+} 
 
 float4 GetViewNormal(float2 uv)
 {
-    const float4 worldNormal = float4(normalMap.Sample(defaultSampler, uv).rgb, 0);
+    const float4 worldNormal = float4(normalMap.Sample(defaultSampler, uv).xyz, 0);
     const float4 viewNormal = mul(FB_InvView, worldNormal);
     return viewNormal;
 }
+
 float3 CalculateDiffuseIBL(float3 normal, TextureCube enviromentCube)
 {
     const int CubeMips = GetNumMips(enviromentCube) - 1;

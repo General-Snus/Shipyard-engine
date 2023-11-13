@@ -2,7 +2,7 @@
 #include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
 
 #include "MeshAsset.h" 
-//#include <Editor/Editor/Core/Editor.h>
+#include <Editor/Editor/Core/Editor.h>
 #include <Tools/Utilities/Math.hpp>
 
 std::vector<std::string> GetTextureNames(const TGA::FBX::Material& material)
@@ -70,7 +70,7 @@ void Mesh::Init()
 			radius
 		);
 
-		//ModelViewer::Get().ExpandWorldBounds(boxSphereBounds); // TODO Make a scene contain the boxSphereBounds!!
+		Editor::GetEditor().ExpandWorldBounds(boxSphereBounds); // TODO Make a scene contain the boxSphereBounds!!
 		std::vector<Vertex> mdlVertices;
 		std::vector<unsigned int> mdlIndicies;
 

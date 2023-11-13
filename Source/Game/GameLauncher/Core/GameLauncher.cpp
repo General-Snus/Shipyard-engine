@@ -10,7 +10,7 @@
 #include <memory>
 #include <string>
 #include <stringapiset.h> 
- 
+
 #include <fstream>
 #include <streambuf>
 #include <assert.h> 
@@ -33,7 +33,7 @@ void GameLauncher::Init()
 {
 	GLLogger.Log("GameLauncher Init");
 }
- 
+
 void GameLauncher::Start()
 {
 	GameObjectManager& gom = GameObjectManager::GetInstance();
@@ -65,9 +65,9 @@ void GameLauncher::Start()
 
 		if(gom.GetAllComponents<BackgroundColor>().empty())
 		{
-			worldRoot.AddComponent<BackgroundColor>( Vector4f(1.0f,1.0f,1.0f,1.0f));
+			worldRoot.AddComponent<BackgroundColor>(Vector4f(1.0f,1.0f,1.0f,1.0f));
 		}
-	} 
+	}
 
 	{
 
@@ -139,15 +139,17 @@ void GameLauncher::Start()
 	const float Radius = 1.0f;
 	for(size_t i = 0; i < Radius; i++)
 	{
-		const float Radians = 2 * PI * (i / Radius);
-		float y = sin(Radians) * Radius;
-		float x = cos(Radians) * Radius; 
+		//const float Radians = 2 * PI * (i / Radius);
+		//float y = sin(Radians) * Radius;
+		//float x = cos(Radians) * Radius; 
+
 
 		GameObject Chest = gom.CreateGameObject();
 		Transform& trans = Chest.AddComponent<Transform>();
-		trans.SetRotation(0,-90 - Radians * RAD_TO_DEG,0);
-		trans.SetPosition(x,0,y);
-
+		//trans.SetRotation(0,-90 - Radians * RAD_TO_DEG,0);
+		trans.SetPosition(0,0,AU);
+		trans.SetScale(Kilo * 695700);
+		myCustomHandler = Chest;
 		Chest.AddComponent<cMeshRenderer>("Models/Chest.fbx");
 		Chest.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/ChestMaterial.json");
 	}
@@ -229,7 +231,7 @@ void GameLauncher::Start()
 		test3.GetComponent<Transform>().SetPosition(0,-125,0);
 	}
 	GLLogger.Log("GameLauncher start");
-} 
+}
 
 void GameLauncher::Update(float delta)
 {
@@ -261,12 +263,20 @@ void GameLauncher::Update(float delta)
 	Transform& pLight = GameObjectManager::GetInstance().GetWorldRoot().GetComponent<Transform>();
 	pLight.Rotate(0,delta,0);
 	myMesh.GetComponent<Transform>().Rotate(0,delta * 100,0);
-	/*Transform* transform = myCustomHandler.TryGetComponent<Transform>();
-	if(transform)
-	{
-		transform->Rotate(0,10 * delta,0);
-	}*/
+
+	//if(Transform* transform = myCustomHandler.TryGetComponent<Transform>())
+	//{
+	//	static float angle;
+	//	angle += 0.001f*delta; 
+	//	Vector2f transformPosition = Vector2f(transform->GetPosition().x,transform->GetPosition().z); 
+	//	Vector2f newPosition;
+	//	newPosition.x = transformPosition.x * cos(angle) + transformPosition.y * sin(angle);
+	//	newPosition.y = -transformPosition.x * sin(angle) + transformPosition.y * cos(angle);
+	//
+	//	transformPosition += newPosition ;
+	//	transform->SetPosition(transformPosition.x,0,transformPosition.y);
+	//	//transform->Rotate(0,10 * delta,0);
+	//}
 
 
 }
- 
