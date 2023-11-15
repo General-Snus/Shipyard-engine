@@ -105,7 +105,7 @@ namespace TGA
 				// 0 is X, 1 is Y, 2 is Z axis.
 				const int originalUpAxis = fbxScene->GetGlobalSettings().GetOriginalUpAxis();
 				const FbxSystemUnit originalSystemUnit = fbxScene->GetGlobalSettings().GetOriginalSystemUnit();
-				const float scaleFactor = fbxScene->GetGlobalSettings().GetSystemUnit().GetConversionFactorTo(FbxSystemUnit::m);
+				const double scaleFactor = fbxScene->GetGlobalSettings().GetSystemUnit().GetConversionFactorTo(FbxSystemUnit::m);
 				outMesh.FileInfo.Application = applicationName;
 				outMesh.FileInfo.ApplicationVersion = applicationVersion;
 
@@ -130,19 +130,16 @@ namespace TGA
 
 				if(fbxScene->GetGlobalSettings().GetSystemUnit() != FbxSystemUnit::m)
 				{
-					constexpr FbxSystemUnit::ConversionOptions sysUnitConversion =
-					{
-						true,
-						true,
-						true,
-						true,
-						true,
-						true
-					};
+					auto unitConverter = FbxSystemUnit(scaleFactor,1.0f);
 
-					FbxSystemUnit::m.ConvertScene(fbxScene,sysUnitConversion);
-					outMesh.FileInfo.OriginalSystemUnit = SystemUnit::Meter;
-					assert(fbxScene->GetGlobalSettings().GetSystemUnit() == FbxSystemUnit::m);
+					auto sysUnitConversion = FbxSystemUnit::ConversionOptions();
+					sysUnitConversion.mConvertRrsNodes = false; 
+
+					FbxSystemUnit::m.ConvertChildren(fbxScene->GetRootNode(),originalSystemUnit);
+					//FbxSystemUnit::m.ConvertScene(fbxScene,sysUnitConversion);
+					//outMesh.FileInfo.OriginalSystemUnit = SystemUnit::Meter;
+					auto sysUnit = fbxScene->GetGlobalSettings().GetSystemUnit();
+					assert(sysUnit != FbxSystemUnit::m);
 				}
 
 				// Load and set up Material data
@@ -169,8 +166,7 @@ namespace TGA
 				}
 
 				std::vector<FbxNode*> sceneMeshNodes;
-				sceneMeshNodes.reserve(numSceneMaterials);
-
+				sceneMeshNodes.reserve(numSceneMaterials); 
 				Internals::GatherMeshNodes(fbxScene->GetRootNode(),sceneMeshNodes);
 
 				std::vector<FbxNode*> sceneLODGroups;
@@ -199,7 +195,6 @@ namespace TGA
 						}
 					}
 				}
-
 				// This has to happen after ALL changes have been made to the scene. I.e. you need to
 				// run Triangulate and generate missing Tangents and BiNormals before you run this or
 				// generated things will point in the wrong direction.
@@ -423,6 +418,7 @@ namespace TGA
 					outAnimation.FileInfo.OriginalSystemUnit = SystemUnit::Meter;
 					assert(fbxScene->GetGlobalSettings().GetSystemUnit() == FbxSystemUnit::m);
 				}
+				fbxScene->GetGlobalSettings().SetOriginalSystemUnit(FbxSystemUnit::m) ;
 				FbxEnvironment::Get().fbxAxisSystem.DeepConvertScene(fbxScene);
 
 				Skeleton mdlSkeleton;

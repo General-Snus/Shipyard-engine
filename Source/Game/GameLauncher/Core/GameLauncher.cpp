@@ -21,7 +21,6 @@
 #include <Tools/Utilities/Input/InputHandler.hpp>
 #include <Tools/Logging/Logging.h>
 #include <Tools/Optick/src/optick.h>
-#include <Tools/ThirdParty/TaigaLoader/tga.h>
 
 
 #define _DEBUGDRAW
