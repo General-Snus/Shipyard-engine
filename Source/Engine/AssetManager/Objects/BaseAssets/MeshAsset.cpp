@@ -196,7 +196,9 @@ void Mesh::Init()
 		aiProcess_Triangulate |
 		aiProcess_JoinIdenticalVertices |
 		aiProcess_SortByPType |
-		aiProcess_GenBoundingBoxes);
+		aiProcess_GenBoundingBoxes|
+		aiProcess_GlobalScale |
+		aiProcess_ConvertToLeftHanded);
 
 	// If the import failed, report it
 	if(nullptr == scene)
@@ -405,6 +407,6 @@ void Mesh::UpdateInstanceBuffer()
 	}
 	D3D11_MAPPED_SUBRESOURCE mappedResource{};
 	RHI::Context->Map(myInstanceBuffer.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&mappedResource);
-	memcpy(mappedResource.pData,myInstances.data(),sizeof(Matrix) * myInstances.size());
+ 	memcpy(mappedResource.pData,myInstances.data(),sizeof(Matrix) * myInstances.size());
 	RHI::Context->Unmap(myInstanceBuffer.Get(),0);
 }

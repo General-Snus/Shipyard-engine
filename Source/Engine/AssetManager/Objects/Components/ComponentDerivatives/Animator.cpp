@@ -75,6 +75,7 @@ void cAnimator::AddAnimation(const std::filesystem::path& aFilePath)
 void cAnimator::SetHierarchy(unsigned int aBoneID,const Matrix& aParentMatrix)
 {
 	std::string boneName = mySkeleton->myBones[aBoneID].Name;
+
 	Matrix newBoneTransform = myAnimations[myCurrentAnimation]->Frames[myCurrentFrame].myTransforms[boneName] * aParentMatrix;
 
 	for(unsigned int i : mySkeleton->myBones[aBoneID].Children)
@@ -107,14 +108,17 @@ void cAnimator::SetPlayingAnimation(unsigned int aAnimationIndex)
 }
 
 void cAnimator::UpdateAnimationHierarcy(float t)
-{
+{ 
 	t;
-	Transform* transform = this->TryGetComponent<Transform>();
-	if(transform != nullptr)
+	if(mySkeleton->isLoadedComplete)
 	{
+		auto* transform = TryGetComponent<Transform>();
+		if( transform)
+		{
+			SetHierarchy(0,Matrix());
+			return;
+		}
 		SetHierarchy(0,Matrix());
-		return;
 	}
-	SetHierarchy(0,Matrix());
 
 }

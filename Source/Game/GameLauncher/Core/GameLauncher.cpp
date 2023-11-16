@@ -88,7 +88,7 @@ void GameLauncher::Start()
 		test.AddComponent<cMeshRenderer>("Models/PlaneBillboard.fbx");
 		test.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BillboardSmiley.json");
 		test.AddComponent<Transform>();
-		test.GetComponent<Transform>().Rotate(-90,0,0);
+		test.GetComponent<Transform>().Rotate(90,180,0);
 		test.GetComponent<Transform>().SetPosition(1,0,0);
 	}
 
@@ -130,8 +130,7 @@ void GameLauncher::Start()
 		test2.AddComponent<cMeshRenderer>("Models/Buddha.fbx");
 		test2.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BuddhaMaterial.json");
 		Transform& trans = test2.AddComponent<Transform>();
-		trans.SetPosition(Vector3f(0,-1,10));
-		trans.Rotate(0,-180,0);
+		trans.SetPosition(Vector3f(0,-1,10)); 
 		trans.SetScale(5);
 	}
 

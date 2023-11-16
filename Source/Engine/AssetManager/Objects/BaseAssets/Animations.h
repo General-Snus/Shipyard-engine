@@ -8,7 +8,7 @@ public:
 	Skeleton(const std::filesystem::path& aFilePath);
 	std::vector<Bone> myBones;
 	std::string myName;
-	//std::unordered_map<std::string,size_t> BoneNameToIndex;
+	std::unordered_map<std::string,unsigned int> BoneNameToIndex;
 	const Bone* GetRoot() const { if(!myBones.empty()) { return &myBones[0]; } return nullptr; }
 };
 
