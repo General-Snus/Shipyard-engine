@@ -133,7 +133,7 @@ void G_Buffer::Init()
 		L"Default depth texture",
 		width,
 		height,
-		DXGI_FORMAT_R32G32B32A32_FLOAT,
+		DXGI_FORMAT_R32_FLOAT,
 		D3D11_USAGE_DEFAULT,
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
 		0
@@ -141,11 +141,11 @@ void G_Buffer::Init()
 
 	vectorOfTextures.push_back(albedoTexture.get());
 	vectorOfTextures.push_back(normalTexture.get());
-	vectorOfTextures.push_back(vertexNormalsTexture.get());
 	vectorOfTextures.push_back(materialTexture.get());
 	vectorOfTextures.push_back(effectTexture.get());
+	vectorOfTextures.push_back(vertexNormalsTexture.get());
 	vectorOfTextures.push_back(positionTexture.get());
-	vectorOfTextures.push_back(depthTexture.get()); 
+	 vectorOfTextures.push_back(depthTexture.get()); 
 
 	//ID3D11Texture2D* depthStencilTexture = nullptr;
 	//
@@ -232,9 +232,24 @@ void G_Buffer::ClearTargets()
 { 
 	for(int i = 0; i < vectorOfTextures.size(); i++)
 	{
-		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,i,nullptr);
+		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,i,nullptr); 
 
+		//if(i == (int)eGbufferTex::Depth)
+		//{
+		//	RHI::ClearDepthStencil(vectorOfTextures[i]);
+		//	continue;
+		//} 
 		RHI::ClearRenderTarget(vectorOfTextures[i]);
 	}
 
+}
+
+void G_Buffer::SetTexture(eGbufferTex texture)
+{
+	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)texture,vectorOfTextures[(int)texture]);
+}
+
+void G_Buffer::UnSetTexture(eGbufferTex texture)
+{
+	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)texture,nullptr);
 }

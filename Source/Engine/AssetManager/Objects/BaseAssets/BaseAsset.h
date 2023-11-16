@@ -14,14 +14,16 @@ public:
 	bool isLoadedComplete;
 	const std::filesystem::path AssetPath;
 };
-
+ 
 struct Bone
 {
 	Matrix BindPoseInverse;
 	int ParentIdx = -1;
 	std::string Name;
 	std::vector<unsigned> Children;
-};
+}; 
+
+
 struct Frame
 {
 	std::unordered_map<std::string,Matrix > myTransforms;

@@ -35,7 +35,7 @@ using json = nlohmann::json;
 bool Editor::Initialize(HWND aHandle)
 {
 	MVLogger = Logger::Create("ModelViewer");
-	ShowSplashScreen(); 
+	ShowSplashScreen();
 
 	// TODO: Here we should init the Graphics Engine.
 	GraphicsEngine::Get().Initialize(aHandle,true);
@@ -81,16 +81,15 @@ void Editor::DoWinProc(const MSG& aMessage)
 	InputHandler::GetInstance().UpdateEvents(aMessage.message,aMessage.wParam,aMessage.lParam);
 	InputHandler::GetInstance().UpdateMouseInput(aMessage.message);
 }
-
 int	 Editor::Run()
 {
 	OPTICK_FRAME("MainThread");
 	InputHandler::GetInstance().Update();
-
+	UpdateImGui();
 	Update();
+	Render();
 	return 0;
 }
-
 void Editor::ShowSplashScreen()
 {
 	if(!mySplashWindow)
@@ -99,7 +98,6 @@ void Editor::ShowSplashScreen()
 		mySplashWindow->Init(Window::moduleHandler);
 	}
 }
-
 void Editor::HideSplashScreen() const
 {
 	mySplashWindow->Close();
@@ -107,8 +105,11 @@ void Editor::HideSplashScreen() const
 	ShowWindow(Window::windowHandler,SW_SHOW);
 	SetForegroundWindow(Window::windowHandler);
 }
+void LogicThread()
+{
 
-void Editor::Update()
+}
+void Editor::UpdateImGui()
 {
 	ImGui_ImplDX11_NewFrame();
 	OPTICK_CATEGORY("ImGui_ImplDX11_NewFrame",Optick::Category::UI);
@@ -116,16 +117,20 @@ void Editor::Update()
 	OPTICK_CATEGORY("ImGui_ImplWin32_NewFrame",Optick::Category::UI);
 	ImGui::NewFrame();
 	OPTICK_CATEGORY("ImGui::NewFrame",Optick::Category::UI);
-
+}
+void Editor::Update()
+{
 	Timer::GetInstance().Update();
 	GameObjectManager::GetInstance().Update();
 	myGameLauncher.Update(Timer::GetInstance().GetDeltaTime());
-
+}
+void Editor::Render()
+{ 
 	GraphicsEngine::Get().BeginFrame();
 	GraphicsEngine::Get().RenderFrame(0,0);
 
 	ImGui::Render();
-	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData()); 
+	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 	GraphicsEngine::Get().EndFrame();
 }
 
@@ -259,11 +264,26 @@ bool Editor::SaveToMemory(SaveData<float>& arg)
 	return true;
 }
 
+RECT Editor::GetViewportRECT()
+{
+	static RECT ViewportRect;
+	return ViewportRect;
+}
+
+Vector2<int> Editor::GetViewportResolution()
+{
+	RECT ViewportRect = GetViewportRECT();
+	return Vector2<int>(
+		ViewportRect.right - ViewportRect.left,
+		ViewportRect.top - ViewportRect.bottom
+	);
+}
+
 void Editor::ExpandWorldBounds(Sphere<float> sphere)
 {
 	if(myWorldBounds.ExpandSphere(sphere))
 	{
-		MVLogger.Log("World bounds was expanded");
+		//MVLogger.Log("World bounds was expanded");
 		for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
 		{
 			i.SetIsDirty(true);
@@ -272,7 +292,7 @@ void Editor::ExpandWorldBounds(Sphere<float> sphere)
 	} //REFACTOR if updated real time the world expansion will cause the light/shadow to lagg behind, use this to update camera position, 
 	//REFACTOR not called on object moving outside worldbound causing same error as above
 }
-const Sphere<float>& Editor::GetWorldBounds() const
+const Sphere<float>& Editor::GetWorldBounds()
 {
 	return myWorldBounds;
 }

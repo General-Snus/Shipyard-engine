@@ -7,7 +7,7 @@ float3 PositionInBound(float3 aMin, float3 aMax, float3 aPosition)
 }
 
 DefaultVertexToPixel main(DefaultVertexInput input)
-{
+{ 
     DefaultVertexToPixel result;
     result.UV = input.UV;
     result.Position = input.Position;
@@ -44,11 +44,12 @@ DefaultVertexToPixel main(DefaultVertexInput input)
     result.Normal = mul(result.Normal, transpose(worldNormalRotation));
     result.BiNormal = mul(result.BiNormal, worldNormalRotation);
     result.Tangent = mul(result.Tangent, worldNormalRotation);
-    
-    
-     //Local to world     
-    result.Position = mul(FB_InvView, result.WorldPosition);
+     
+    result.Position = mul(FB_InvView,result.WorldPosition);
     result.Position = mul(FB_Proj, result.Position);
+    //result.Position.z = 1 - clamp(result.Position.z, 0, 1);
+   //
+   //result.Position.z = log2(max(1e-6, 1.0 + result.Position.w)) * Fcoef - 1.0;
     
     float4 vertexColorBasedOnPositionInBox;
     vertexColorBasedOnPositionInBox.xy = input.UV.xy;

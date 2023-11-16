@@ -4,11 +4,11 @@
 
 struct CameraSettings
 {
-	float fow = PI * (90.0f / 180.0f);;
-	float fowmdf = 1.0f / (tanf(fow / 2.0f));;
+	float fow = PI * (90.0f / 180.0f);; 
 	float APRatio = 16.0f / 9.0f;;
-	float farfield = 15000.0f;
-	float nearField = .1f;;
+	float farfield = 1000000.0f;
+	//float farfield = std::numeric_limits<float>::infinity();
+	float nearField = 1.0f;
 };
 
 class cCamera : public Component
@@ -32,5 +32,6 @@ public:
 private:
 	Matrix myClipMatrix;
 	Vector2<int> myScreenSize;
+	float cameraSpeed = 10;
 	CameraSettings mySettings;
 };

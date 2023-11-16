@@ -1,15 +1,18 @@
 #include "AssetManager.pch.h"
 #include "Animations.h"
+ 
+ 
 
 void Animation::Init()
 {
-	TGA::FBX::Importer::InitImporter();
-	TGA::FBX::Animation inAnim;
-
 	if(!std::filesystem::exists(AssetPath))
 	{
 		assert(false && "Animation file does not exist");
 	}
+
+#if UseTGAImporter == 0
+	TGA::FBX::Importer::InitImporter();
+	TGA::FBX::Animation inAnim;
 
 	if(TGA::FBX::Importer::LoadAnimationW(AssetPath,inAnim))
 	{
@@ -22,30 +25,108 @@ void Animation::Init()
 			Frames.push_back(Frame());
 			//Frames.back().myTransforms = std::unordered_map<std::string,Matrix4x4<float>>(); 
 
-			for(auto& ref : inAnim.Frames[i].LocalTransforms)
+			for(const auto& ref : inAnim.Frames[i].LocalTransforms)
 			{
 				Matrix mat;
 				mat.SetFromRaw(ref.second.Data);
+				mat(4,1) *= .01f;
+				mat(4,2) *= .01f;
+				mat(4,3) *= .01f;
 				Frames.back().myTransforms.emplace(ref.first,mat);
 			}
 		}
+		isLoadedComplete = true;
 	}
-	isLoadedComplete = true;
+
+#else
+	Assimp::Importer importer;
+	const aiScene* scene = importer.ReadFile(AssetPath.string(),(unsigned int)
+		aiProcess_CalcTangentSpace |
+		aiProcess_Triangulate |
+		aiProcess_JoinIdenticalVertices |
+		aiProcess_SortByPType |
+		aiProcess_GenBoundingBoxes |
+		aiProcess_GlobalScale |
+		aiProcess_ConvertToLeftHanded);
+
+	if(scene->HasAnimations())
+	{
+		if(scene->mNumAnimations > 1)
+		{
+			AMLogger.Warn("Attempt at loading multiple animation in one file in " + AssetPath.string());
+		}
+		if(scene->mAnimations[0]->mDuration <= 0)
+		{
+			AMLogger.Warn("Attempt at loading animation with a duration of zero at " + AssetPath.string());
+		}
+		duration = scene->mAnimations[0]->mDuration;
+
+
+		if(scene->mAnimations[0]->mTicksPerSecond == 0)
+		{
+			AMLogger.Warn("Attempt at loading animation with a framerate of zero at " + AssetPath.string());
+		}
+		frameRate = static_cast<float>(scene->mAnimations[0]->mTicksPerSecond);
+		numFrames = scene->mAnimations[0]->mNumChannels;// static_cast<unsigned int>(inAnim.Frames.size());
+
+		for(size_t i = 0; i < numFrames; i++)
+		{
+			Frames.push_back(Frame());
+			aiNodeAnim* channel = scene->mAnimations[0]->mChannels[i];
+			for(size_t j = 0; j < channel->mNumPositionKeys; j++)
+			{ 
+				Matrix mat;
+				const Vector3f scale = {
+					channel->mScalingKeys[j].mValue.x,
+					channel->mScalingKeys[j].mValue.y,
+					channel->mScalingKeys[j].mValue.z
+				};
+				mat *= Matrix::CreateScaleMatrix(scale);
+
+				const Vector3f rotation = {
+					channel->mRotationKeys[j].mValue.x,
+					channel->mRotationKeys[j].mValue.y,
+					channel->mRotationKeys[j].mValue.z
+				};
+				mat *= Matrix::CreateRotationMatrix(rotation);
+
+				const Vector3f transform = {
+					channel->mPositionKeys[j].mValue.x,
+					channel->mPositionKeys[j].mValue.y,
+					channel->mPositionKeys[j].mValue.z
+				};
+				mat *= Matrix::CreateTranslationMatrix(transform);
+
+				Frames.back().myTransforms.emplace(channel->mNodeName.C_Str(),mat);
+			}
+
+		}
+		isLoadedComplete = true;
+	}
+	else
+	{
+		AMLogger.Err("Failed to load animation from " + AssetPath.string());
+	}
+#endif
+
+
 }
 
 Animation::Animation(const std::filesystem::path& aFilePath) : AssetBase(aFilePath),duration(0),frameRate(0),numFrames(0)
 {
-	
-} 
+
+}
+
 
 void Skeleton::Init()
 {
-	TGA::FBX::Importer::InitImporter();
-	TGA::FBX::Mesh inMesh;
 	if(!std::filesystem::exists(AssetPath))
 	{
 		assert(false && "Mesh file does not exist");
 	}
+#if UseTGAImporter == 1
+	TGA::FBX::Importer::InitImporter();
+	TGA::FBX::Mesh inMesh;
 	try
 	{
 		if(TGA::FBX::Importer::LoadMeshW(AssetPath,inMesh))
@@ -59,6 +140,7 @@ void Skeleton::Init()
 					Matrix matrix;
 					matrix.SetFromRaw(aBone.BindPoseInverse.Data);
 					matrix = Matrix::Transpose(matrix);
+					matrix = matrix * Matrix::CreateScaleMatrix(Vector3f(0.01f,0.01f,0.01f)); //TODO Scaling
 
 					bone.BindPoseInverse = matrix;
 					bone.Children = aBone.Children;
@@ -68,13 +150,79 @@ void Skeleton::Init()
 					myBones.push_back(bone);
 				}
 			}
+			isLoadedComplete = true;
 		}
 	}
 	catch(const std::exception& e)
 	{
 		std::cout << "Error: Meshloader failed to load: " << AssetPath << "\n" << e.what() << "\n";
 	}
-	isLoadedComplete = true;
+#else
+	Assimp::Importer importer;
+	importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, false);
+	const aiScene* scene = importer.ReadFile(AssetPath.string(),(unsigned int)
+		aiProcess_GlobalScale |
+		aiProcess_PopulateArmatureData | aiProcess_ValidateDataStructure
+
+	);
+
+	if(scene->HasMeshes())
+	{
+
+		myName = scene->mMeshes[0]->mName.C_Str();
+		//myName = scene->mSkeletons[0]->mName.C_Str();
+		for(unsigned int i = 0; i < scene->mNumMeshes; i++)
+		{
+			for(unsigned int j = 0; j < scene->mMeshes[i]->mNumBones; j++)
+			{
+				unsigned int boneIndex = 0;
+				aiNode* skeletonBone = scene->mMeshes[i]->mBones[j]->mNode;
+				std::string name = skeletonBone->mName.C_Str();
+
+				if(!BoneNameToIndex.contains(name))
+				{
+					boneIndex = static_cast<unsigned int>(myBones.size());
+					Bone bone;
+					bone.Name = name;
+					myBones.push_back(bone);
+				}
+				else
+				{
+					boneIndex = BoneNameToIndex[name];
+				}
+				BoneNameToIndex[name] = boneIndex;
+				Matrix matrix(scene->mMeshes[i]->mBones[j]->mOffsetMatrix.Inverse());
+				myBones[boneIndex].BindPoseInverse = matrix;
+			}
+
+			for(unsigned int j = 0; j < scene->mMeshes[i]->mNumBones; j++)
+			{
+				aiNode* skeletonBone = scene->mMeshes[i]->mBones[j]->mNode;
+				std::string name = skeletonBone->mName.C_Str();
+
+				if(BoneNameToIndex.contains(skeletonBone->mParent->mName.C_Str())) // hidden nodes sits above the skeleton stopping me from checking if root
+				{
+					std::string rootName = skeletonBone->mParent->mName.C_Str();
+					myBones[BoneNameToIndex[name]].ParentIdx = BoneNameToIndex[rootName];
+				}
+				for(unsigned int k = 0; k < skeletonBone->mNumChildren; k++)
+				{
+					std::string childName = skeletonBone->mChildren[k]->mName.C_Str();
+					if(BoneNameToIndex.contains(childName))
+					{
+						myBones[BoneNameToIndex[name]].Children.push_back(BoneNameToIndex[childName]);
+					}
+				}
+			}
+		}
+
+		isLoadedComplete = true;
+	}
+	else
+	{
+		AMLogger.Err("Failed to load skeleton from " + AssetPath.string());
+	}
+#endif
 }
 
 Skeleton::Skeleton(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)

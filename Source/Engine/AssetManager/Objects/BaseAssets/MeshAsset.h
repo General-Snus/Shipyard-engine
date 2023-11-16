@@ -2,12 +2,17 @@
 #include "BaseAsset.h"
 #include <Tools/Utilities/LinearAlgebra/Sphere.hpp> 
 
+struct aiMesh;
+struct aiScene;
+#define UseTGAImporter 0
 class Mesh : public AssetBase
 {
 public:
 	Mesh() = default;
 	Mesh(const std::filesystem::path& aFilePath);
 	void Init() override;
+
+	void processMesh(aiMesh* mesh,const aiScene* scene);
 
 	void ResizeBuffer();
 

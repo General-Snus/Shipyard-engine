@@ -28,11 +28,16 @@ void AssetManager::ThreadedLoading()
 
 		std::shared_ptr<AssetBase> working = myAssetQueue.Dequeue();
 		working->Init();
-		working->isLoadedComplete = true;
-		const double timeEnd = Timer::GetInstance().GetTotalTime();
-		const double diff = (timeEnd - timeStart)*1000.0;
-		std::string str = "Loaded: " + working->AssetPath.string() + " in " + std::to_string(diff) + "ms \n";
-		AMLogger.Log(str);
+		if(working->isLoadedComplete)
+		{
+			const double timeEnd = Timer::GetInstance().GetTotalTime();
+			const double diff = (timeEnd - timeStart)*1000.0;
+			std::string str = "Loaded: " + working->AssetPath.string() + " in " + std::to_string(diff) + "ms \n";
+			AMLogger.Log(str);
+			return;
+		}
+		std::string str = "Failed to load " + working->AssetPath.string();
+		AMLogger.Warn(str);
 	}
 }
 

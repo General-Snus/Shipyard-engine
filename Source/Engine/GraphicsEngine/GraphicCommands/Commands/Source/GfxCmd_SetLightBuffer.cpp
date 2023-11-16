@@ -117,4 +117,5 @@ void GfxCmd_SetLightBuffer::ExecuteAndDestroy()
 		);
 		RHI::Draw(4);
 	}
+	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,nullptr);
 }

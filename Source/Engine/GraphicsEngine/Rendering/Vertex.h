@@ -17,6 +17,18 @@ struct Vertex
 	Vector4<unsigned int> myBoneIds;
 	Vector4f myBoneWeights;
 
+	void AddBoneWeightAndID(float newWeight,unsigned int aId)
+	{
+		for(int i = 0; i < 4; i++)
+		{
+			if(myBoneWeights[i] == 0.0f)
+			{
+				myBoneWeights[i] = newWeight;
+				myBoneIds[i] = aId; 
+				return;
+			}
+		}
+	} 
 	 
 	Vertex(	Vector3f aPosition,
 			Vector4f aColor,

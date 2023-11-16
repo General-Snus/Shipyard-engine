@@ -29,7 +29,9 @@ private:
 	void ShowSplashScreen();
 	void HideSplashScreen() const;  
 
-	void Update();
+	void UpdateImGui(); 
+	void Update(); 
+	void Render();
 
 	bool SaveDataToJson() const;
 	bool JsonToSaveData() const; 
@@ -44,19 +46,30 @@ public:
 	int Run();
 	 
 	 
-	void ExpandWorldBounds(Sphere<float> sphere);
-	const Sphere<float>& GetWorldBounds() const;
 	// Acceleration Getters for components.
-	FORCEINLINE ApplicationState& GetApplicationState()
+	static ApplicationState& GetApplicationState()
 	{
+		static ApplicationState myApplicationState;
 		return myApplicationState;
+	}
+
+	static Editor& GetEditor() // HATE
+	{
+		static Editor aEditorInstance;
+		return aEditorInstance;
 	}
 	FORCEINLINE Logger& GetLogger()
 	{
 		return MVLogger;
 	}
-private:
+
+	static RECT GetViewportRECT();
+	static Vector2<int> GetViewportResolution();
+
+	void ExpandWorldBounds(Sphere<float> sphere);
+	const Sphere<float>& GetWorldBounds();
+private: 
+	Sphere<float> myWorldBounds;
 	GameLauncher myGameLauncher;
-	Sphere<float> myWorldBounds; 
 	std::vector<SaveData<float>> mySaveData; 
 };

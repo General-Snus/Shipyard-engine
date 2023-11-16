@@ -77,7 +77,7 @@ GetPosition
 
 
 GetScale
-
+//Rotate aroundpoint
 void SetParent(Transform)
 GetParent
 void SetChild(Transform)

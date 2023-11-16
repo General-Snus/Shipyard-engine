@@ -12,7 +12,8 @@ GBufferOutput main(DefaultVertexToPixel input)
     normalize(input.Normal)
     );
     
-    const float3 cameraDirection = normalize(FB_CameraPosition.xyz - input.WorldPosition.xyz);
+    const float3 cameraDirection = FB_CameraPosition.xyz - input.WorldPosition.xyz;
+    const float3 cameraNormalizedDirection = normalize(cameraDirection);
    // result.Color.rgb = (input.Normal.rgb + 1) / 2.0f;
     const float2 uv = input.UV ;
     
@@ -52,6 +53,6 @@ GBufferOutput main(DefaultVertexToPixel input)
     result.VertexNormal.w = 1;
     
     result.WorldPosition = input.WorldPosition;
-    result.Depth = 1;
+    result.Depth = saturate(length(cameraDirection));
     return result;
 }
