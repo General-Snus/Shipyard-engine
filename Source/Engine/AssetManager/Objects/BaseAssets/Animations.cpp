@@ -5,12 +5,20 @@
 
 void Animation::Init()
 {
+	this->duration = 0;
+	this->frameRate = 0;
+	this->Frames.clear();
+	this->numFrames = 0;
+	this->isLoadedComplete = false;
+
+
+
 	if(!std::filesystem::exists(AssetPath))
 	{
 		assert(false && "Animation file does not exist");
 	}
 
-#if UseTGAImporter == 0
+#if UseTGAImporter == 1
 	TGA::FBX::Importer::InitImporter();
 	TGA::FBX::Animation inAnim;
 
@@ -28,10 +36,7 @@ void Animation::Init()
 			for(const auto& ref : inAnim.Frames[i].LocalTransforms)
 			{
 				Matrix mat;
-				mat.SetFromRaw(ref.second.Data);
-				mat(4,1) *= .01f;
-				mat(4,2) *= .01f;
-				mat(4,3) *= .01f;
+				mat.SetFromRaw(ref.second.Data); 
 				Frames.back().myTransforms.emplace(ref.first,mat);
 			}
 		}
@@ -39,7 +44,8 @@ void Animation::Init()
 	}
 
 #else
-	Assimp::Importer importer;
+	Assimp::Importer importer; 
+	importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS,false);
 	const aiScene* scene = importer.ReadFile(AssetPath.string(),(unsigned int)
 		aiProcess_CalcTangentSpace |
 		aiProcess_Triangulate |
@@ -66,14 +72,17 @@ void Animation::Init()
 		{
 			AMLogger.Warn("Attempt at loading animation with a framerate of zero at " + AssetPath.string());
 		}
-		frameRate = static_cast<float>(scene->mAnimations[0]->mTicksPerSecond);
-		numFrames = scene->mAnimations[0]->mNumChannels;// static_cast<unsigned int>(inAnim.Frames.size());
 
-		for(size_t i = 0; i < numFrames; i++)
-		{
-			Frames.push_back(Frame());
-			aiNodeAnim* channel = scene->mAnimations[0]->mChannels[i];
-			for(size_t j = 0; j < channel->mNumPositionKeys; j++)
+		frameRate = static_cast<float>(scene->mAnimations[0]->mTicksPerSecond);
+		numFrames = scene->mAnimations[0]->mChannels[0]->mNumPositionKeys;// static_cast<unsigned int>(inAnim.Frames.size());
+		Frames.resize(numFrames);
+
+		const unsigned int numAnimatedBone = scene->mAnimations[0]->mNumChannels;
+		for(unsigned int i = 0; i < numAnimatedBone; i++)
+		{ 
+			const aiNodeAnim* channel = scene->mAnimations[0]->mChannels[i];
+			std::string name = channel->mNodeName.C_Str();
+			for(unsigned int j = 0; j < numFrames; j++)
 			{ 
 				Matrix mat;
 				const Vector3f scale = {
@@ -96,8 +105,14 @@ void Animation::Init()
 					channel->mPositionKeys[j].mValue.z
 				};
 				mat *= Matrix::CreateTranslationMatrix(transform);
+				auto frameNumber = static_cast<int>(channel->mPositionKeys[j].mTime);
 
-				Frames.back().myTransforms.emplace(channel->mNodeName.C_Str(),mat);
+				if(const size_t pos = name.find_last_of(':'); pos != std::string::npos)
+				{
+					name  = name.substr(pos + 1);
+				}
+
+				Frames[frameNumber].myTransforms.emplace(name,mat);
 			}
 
 		}
@@ -139,8 +154,7 @@ void Skeleton::Init()
 					Bone bone;
 					Matrix matrix;
 					matrix.SetFromRaw(aBone.BindPoseInverse.Data);
-					matrix = Matrix::Transpose(matrix);
-					matrix = matrix * Matrix::CreateScaleMatrix(Vector3f(0.01f,0.01f,0.01f)); //TODO Scaling
+					matrix = Matrix::Transpose(matrix); 
 
 					bone.BindPoseInverse = matrix;
 					bone.Children = aBone.Children;
@@ -160,15 +174,14 @@ void Skeleton::Init()
 #else
 	Assimp::Importer importer;
 	importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, false);
+	importer.SetPropertyBool(AI_CONFIG_FBX_USE_SKELETON_BONE_CONTAINER,true);
 	const aiScene* scene = importer.ReadFile(AssetPath.string(),(unsigned int)
 		aiProcess_GlobalScale |
-		aiProcess_PopulateArmatureData | aiProcess_ValidateDataStructure
-
+		aiProcess_PopulateArmatureData | aiProcess_ValidateDataStructure 
 	);
 
 	if(scene->HasMeshes())
-	{
-
+	{ 
 		myName = scene->mMeshes[0]->mName.C_Str();
 		//myName = scene->mSkeletons[0]->mName.C_Str();
 		for(unsigned int i = 0; i < scene->mNumMeshes; i++)
@@ -191,7 +204,8 @@ void Skeleton::Init()
 					boneIndex = BoneNameToIndex[name];
 				}
 				BoneNameToIndex[name] = boneIndex;
-				Matrix matrix(scene->mMeshes[i]->mBones[j]->mOffsetMatrix.Inverse());
+				Matrix matrix(scene->mMeshes[i]->mBones[j]->mOffsetMatrix);
+				matrix = Matrix::Transpose(matrix);
 				myBones[boneIndex].BindPoseInverse = matrix;
 			}
 

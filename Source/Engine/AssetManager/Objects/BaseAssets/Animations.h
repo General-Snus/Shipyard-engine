@@ -17,8 +17,7 @@ class Animation : public AssetBase
 public:
 	void Init() override;
 	Animation(const std::filesystem::path& aFilePath);
-	Animation() = delete; // Create a generic cube
-	//Animation(const TGA::FBX::Animation& aFBXanim);
+	Animation() = delete; // Create a generic cube 
 private:
 	friend class cAnimator;
 	double duration;
