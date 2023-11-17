@@ -15,7 +15,7 @@ PostProcessPixelOutput main(BRDF_VS_to_PS input)
     
     const float pixelWidth = 1.0f / texWidth;
     const float pixelHeight = 1.0f / texHeight;
-    const int gBlurRadius = 3;
+    const int gBlurRadius = 5;
      
     float4 color = gWeights[5] * SSAOMap.Sample(defaultSampler, input.UV);
     float totalWeight = gWeights[5];

@@ -564,7 +564,7 @@ void GraphicsEngine::UpdateSettings()
 {
 	myGraphicSettingsBuffer.Data.GSB_ToneMap = myGraphicSettings.Tonemaptype;
 	myGraphicSettingsBuffer.Data.GSB_AO_intensity = 0.35f;
-	myGraphicSettingsBuffer.Data.GSB_AO_scale = 0.01f;
+	myGraphicSettingsBuffer.Data.GSB_AO_scale = 0.05f;
 	myGraphicSettingsBuffer.Data.GSB_AO_bias = 0.5f;
 	myGraphicSettingsBuffer.Data.GSB_AO_radius = 0.002f;
 	myGraphicSettingsBuffer.Data.GSB_AO_offset = 0.707f;
@@ -616,22 +616,23 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	RHI::SetRenderTarget(nullptr,nullptr);
 	myG_Buffer.UnsetResources();
 	RHI::EndEvent();
+
 	//decals
 	//if picking check
 	//SSAO
 	//Do ambience pass? Clarit
 	//Render all lights
-	//OPTICK_EVENT("SSAO");
-	//RHI::BeginEvent(L"SSAO");
-	//myCamera->SetCameraToFrameBuffer();
-	//GfxCmd_SSAO().ExecuteAndDestroy();
-	//RHI::EndEvent();
-	//
+	OPTICK_EVENT("SSAO");
+	RHI::BeginEvent(L"SSAO");
+	myCamera->SetCameraToFrameBuffer();
+	GfxCmd_SSAO().ExecuteAndDestroy();
+	RHI::EndEvent();
+	 
 	////Render shadowmaps
-	//OPTICK_EVENT("ShadowMaps");
-	//RHI::BeginEvent(L"ShadowMaps");
-	//myShadowRenderer.Execute();
-	//RHI::EndEvent();
+	OPTICK_EVENT("ShadowMaps");
+	RHI::BeginEvent(L"ShadowMaps");
+	myShadowRenderer.Execute();
+	RHI::EndEvent();
 
 
 	

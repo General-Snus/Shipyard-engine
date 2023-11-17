@@ -8,12 +8,11 @@ float2 GetRandom(float2 uv, float2 uvScale)
     return random.xy;
 } 
 
-float3 GetViewPosition(float2 uv)
+float4 GetViewPosition(float2 uv)
 {
     const float4 worldPosition = float4(worldPositionMap.Sample(defaultSampler, uv).xyz, 1);
-    const float4 viewPosition = mul(FB_InvView, worldPosition);
-    const float depth = DepthMap.Sample(NormalDepthSampler, uv).r;
-    return float3(viewPosition.x, viewPosition.y, depth);
+    const float4 viewPosition = mul(FB_InvView, worldPosition); 
+    return viewPosition;
 } 
 
 float4 GetViewNormal(float2 uv)

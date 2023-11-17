@@ -531,8 +531,10 @@ void cLight::RedrawDirectionMap()
 		rightPlane,
 		bottomPlane,
 		topPlane,
-		farPlane,nearPlane
-		);
+		farPlane,
+		nearPlane
+
+	);
 }
 
 void cLight::RedrawPointMap()
@@ -542,19 +544,10 @@ void cLight::RedrawPointMap()
 	myPointLightData->lightView = Matrix::LookAt(lightPosition,lightPosition + GlobalFwd,{0,1,0}); // REFACTOR, Magic value up
 
 	const float fow = 90.0f * DEG_TO_RAD;
-	const float fowmdf = 1.0f / (tanf(fow / 2.0f));
-	const float farfield = .01f;
-	const float nearField = myPointLightData->Range * 5;
-	const float prc = farfield / (farfield - nearField);
-	Matrix clipMatrix;
-	clipMatrix(1,1) = fowmdf;
-	clipMatrix(2,2) = fowmdf;
-	clipMatrix(3,3) = prc;
-	clipMatrix(3,4) = 1 / prc;
-	clipMatrix(4,3) = nearField * -prc;
-	clipMatrix(4,4) = 0;
+	const float farfield = myPointLightData->Range * 5;
+	const float nearField = .01f;
 
-	myPointLightData->projection = clipMatrix;
+	myPointLightData->projection = DirectX::XMMatrixPerspectiveFovLH(fow,1,farfield,nearField);;
 	myPointLightData->lightView = Matrix::GetFastInverse(myPointLightData->lightView);
 }
 
@@ -565,19 +558,9 @@ void cLight::RedrawSpotMap()
 	mySpotLightData->lightView = Matrix::LookAt(lightPosition,lightPosition + mySpotLightData->Direction.GetNormalized(),{0,1,0}); // REFACTOR, Magic value up
 
 	const float fow = mySpotLightData->OuterConeAngle;
-	const float fowmdf = 1.0f / (tanf(fow / 2.0f));
-	const float farfield = 0.1f;
-	const float nearField = mySpotLightData->Range * 2;;
-	const float prc = farfield / (farfield - nearField);
-	Matrix clipMatrix;
-	clipMatrix(1,1) = fowmdf;
-	clipMatrix(2,2) = fowmdf;
-	clipMatrix(3,3) = prc;
-	clipMatrix(3,4) = 1 / prc;
-	clipMatrix(4,3) = nearField * -prc;
-	clipMatrix(4,4) = 0;
-
-	mySpotLightData->projection = clipMatrix;
+	const float farfield = mySpotLightData->Range * 2;
+	const float nearField = 0.01f;
+	mySpotLightData->projection = DirectX::XMMatrixPerspectiveFovLH(fow,1,farfield,nearField);;
 	mySpotLightData->lightView = Matrix::GetFastInverse(mySpotLightData->lightView);
 }
 

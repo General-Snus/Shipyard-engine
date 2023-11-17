@@ -47,8 +47,8 @@ float4 worldPosition
     lightSpaceUV.y = 1- ((lightSpacePos.y / lightSpacePos.w) * .5 + 0.5f);
      
     const float bias = max(0.05 * (1.0 - NdotL), 0.005);
-    float Depth = (lightSpacePos.z / lightSpacePos.w) - bias  ;
-    float shadow = shadowMap.SampleCmpLevelZero(shadowCmpSampler, lightSpaceUV.xy,Depth).r; 
+    const float Depth = (lightSpacePos.z / lightSpacePos.w) - bias  ;
+    //const float shadow =  shadowMap.SampleCmpLevelZero(shadowCmpSampler, lightSpaceUV.xy,Depth).r; 
     
     
     uint2 dim = 0;
@@ -66,10 +66,10 @@ float4 worldPosition
             newUV.x = lightSpaceUV.x + x*texelSize.x;
             newUV.y = lightSpaceUV.y + y * texelSize.y;
             
-            sum += shadowMap.SampleCmpLevelZero(shadowCmpSampler, newUV, Depth).r;
+            sum +=  shadowMap.SampleCmpLevelZero(shadowCmpSampler, newUV, Depth).r;
         }
     }
-    shadow = sum / 16.0;
+    const float shadow = sum / 16.0;
     
     const float ShadowStrength = 1;
     return ShadowStrength * shadow * saturate(directLightDiffuse + directLightSpecular) * myDirectionalLight.Color * myDirectionalLight.Power * NdotL;

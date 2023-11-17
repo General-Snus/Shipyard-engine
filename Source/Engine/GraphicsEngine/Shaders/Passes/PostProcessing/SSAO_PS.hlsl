@@ -26,7 +26,7 @@ PostProcessPixelOutput main(BRDF_VS_to_PS input)
     
     const float2 randomUVScale = FB_ScreenResolution / float2(noiseWidth, noiseHeight);
     const float2 random = GetRandom(input.UV, randomUVScale);
-    const float3 pxPos = GetViewPosition(input.UV);
+    const float4 pxPos = GetViewPosition(input.UV);
     const float4 pxNorm = GetViewNormal(input.UV);
     const float2 frustrumCorners[4] = {FB_FrustrumCorners[0].xy, FB_FrustrumCorners[1].xy, FB_FrustrumCorners[2].xy, FB_FrustrumCorners[3].xy};
     //const float2 frustrumCorners[4] = {float2(1, 0), float2(-1, 0), float2(0, 1), float2(0, -1)};

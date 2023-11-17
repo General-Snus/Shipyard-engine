@@ -6,8 +6,7 @@
 
 #ifndef ASSETMANAGER_PCH_H
 #define ASSETMANAGER_PCH_H
-
-#define CU   CommonUtilities  
+ 
 // add headers that you want to pre-compile here
 #include <iostream> 
 #include <filesystem> 
@@ -57,4 +56,6 @@
 #include "AssetManager.h" 
 
 static inline Logger AMLogger;
+
+#define UseTGAImporter 0
 #endif //ASSETMANAGER_PCH_H 

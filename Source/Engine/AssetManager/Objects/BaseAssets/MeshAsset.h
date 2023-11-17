@@ -4,7 +4,6 @@
 
 struct aiMesh;
 struct aiScene;
-#define UseTGAImporter 0
 class Mesh : public AssetBase
 {
 public:

@@ -6,6 +6,7 @@
 void ShadowRenderer::Init()
 {
 	ShadowCommandList.Initialize((size_t) 10 * MegaByte); 
+	myVertexShader = GraphicsEngine::Get().myVertexShader;
 }
 
 void ShadowRenderer::Execute()
@@ -13,6 +14,8 @@ void ShadowRenderer::Execute()
 	OPTICK_EVENT();
 	LightBuffer& buffer = GraphicsEngine::Get().myLightBuffer;  
 
+	RHI::SetVertexShader(myVertexShader);
+	RHI::SetPixelShader(nullptr) ;
 	std::shared_ptr<Texture> shadowMap;
 	for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
 	{

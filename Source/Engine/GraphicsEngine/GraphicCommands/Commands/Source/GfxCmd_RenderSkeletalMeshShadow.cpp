@@ -25,7 +25,6 @@ void GfxCmd_RenderSkeletalMeshShadow::ExecuteAndDestroy()
 	}
 	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER,REG_ObjectBuffer,objectBuffer);
 	RHI::UpdateConstantBufferData(objectBuffer);
-	RHI::Context->PSSetShader(nullptr,nullptr,0);
 	//GetInstanceRenderer().AddInstance(myRenderData);
 	for(const auto& aElement :myRenderData->myMesh->Elements)
 	{

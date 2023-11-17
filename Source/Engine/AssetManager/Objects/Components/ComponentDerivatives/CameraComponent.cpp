@@ -144,15 +144,21 @@ void cCamera::Render()
 	//GraphicsEngine::Get().DeferredCommand<GfxCmd_SetFrameBuffer>(myClipMatrix, this->GetGameObject().GetComponent<Transform>(), (int)ModelViewer::GetApplicationState().filter);
 }
 std::array<Vector4f,4> cCamera::GetFrustrumCorners() const
-{
+{	
+	const float farplane = 10000; // I dont use farplanes but some effect wants them anyway
 	const float aspectRatio = std::bit_cast<float>(myScreenSize.x) / std::bit_cast<float>(myScreenSize.y);
-	const float halfHeight = mySettings.farfield * tanf(0.25f * mySettings.fow);
+	const float halfHeight = farplane * tanf(0.25f * mySettings.fow);
 	const float halfWidth = aspectRatio * halfHeight;
 	std::array<Vector4f,4> corners;
-	corners[0] = {-halfWidth, -halfHeight, mySettings.farfield, 0.0f};
-	corners[1] = {-halfWidth,	halfHeight, mySettings.farfield, 0.0f};
-	corners[2] = {halfWidth, +halfHeight, mySettings.farfield, 0.0f};
-	corners[3] = {+halfWidth, -halfHeight, mySettings.farfield, 0.0f};
+	corners[0] = {-halfWidth, -halfHeight, farplane, 0.0f};
+	corners[1] = {-halfWidth,	halfHeight, farplane, 0.0f};
+	corners[2] = {halfWidth, +halfHeight, farplane, 0.0f};
+	corners[3] = {+halfWidth, -halfHeight, farplane, 0.0f};
+
+	for(auto& i : corners)
+	{
+		i.Normalize();
+	}
 
 	return corners;
 }

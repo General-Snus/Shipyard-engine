@@ -65,7 +65,7 @@ void GfxCmd_SetLightBuffer::ExecuteAndDestroy()
 	{
 		LightBuffer& buff = GetLightBuffer();
 		buff.Data.myDirectionalLight = *light;
-		RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,shadowMap);
+		RHI::SetTextureResource( PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,shadowMap);
 
 		RHI::UpdateConstantBufferData(buff);
 		RHI::ConfigureInputAssembler(
@@ -83,8 +83,8 @@ void GfxCmd_SetLightBuffer::ExecuteAndDestroy()
 	for(const auto& [light,shadowMap] : pointLight)
 	{
 		LightBuffer& buff = GetLightBuffer();
-		buff.Data.myPointLight = *light; //REFACTOR memory loss
-		RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,shadowMap);
+		buff.Data.myPointLight = *light;  
+		RHI::SetTextureResource(  PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,shadowMap);
 
 		RHI::UpdateConstantBufferData(buff);
 		RHI::ConfigureInputAssembler(
@@ -104,7 +104,7 @@ void GfxCmd_SetLightBuffer::ExecuteAndDestroy()
 		buff.Data.mySpotLight = *light;
 		if(shadowMap)
 		{
-			RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,shadowMap);
+			RHI::SetTextureResource(  PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,shadowMap);
 		}
 
 		RHI::UpdateConstantBufferData(buff);
