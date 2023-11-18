@@ -5,7 +5,7 @@ enum class eLightType
 	Directional = 0,
 	Point = 1,
 	Spot = 2,
-	uninitialized = 3
+	uninitialized = 3 
 };
 struct DirectionalLight;
 struct SpotLight;

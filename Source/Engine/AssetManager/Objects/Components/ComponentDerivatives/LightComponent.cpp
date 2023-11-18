@@ -510,8 +510,9 @@ void cLight::RedrawDirectionMap()
 {
 	OPTICK_EVENT();
 	//TODO GET ACTIVE SCENE
-	const float radius = 100000;//ModelViewer::Get().GetWorldBounds().GetRadius();
-	Vector3f lightPosition = radius * 2.0f * -Vector3f(myDirectionLightData->Direction.GetNormalized().x,myDirectionLightData->Direction.GetNormalized().y,myDirectionLightData->Direction.GetNormalized().z);
+	const float radius = 100;//ModelViewer::Get().GetWorldBounds().GetRadius();
+	myDirectionLightData->Direction.Normalize();
+	Vector3f lightPosition = radius * 2.0f * -Vector3f(myDirectionLightData->Direction.x,myDirectionLightData->Direction.y,myDirectionLightData->Direction.z);
 	const Vector3f worldCenter = Vector3f();// ModelViewer::Get().GetWorldBounds().GetCenter();
 
 	myDirectionLightData->Direction = Vector4f((worldCenter - lightPosition).GetNormalized(),1);
@@ -530,10 +531,9 @@ void cLight::RedrawDirectionMap()
 		leftPlane,
 		rightPlane,
 		bottomPlane,
-		topPlane,
+		topPlane, 
 		farPlane,
 		nearPlane
-
 	);
 }
 

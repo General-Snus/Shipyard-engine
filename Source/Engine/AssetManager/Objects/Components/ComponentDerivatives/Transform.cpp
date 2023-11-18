@@ -183,7 +183,7 @@ void Transform::SetGizmo(bool enabled)
 
 void Transform::InitPrimitive()
 { 
-	float size = 10.0f;
+	float size = 1.0f;
 	float thicc = 15.0f;
 	std::vector<Debug::DebugVertex> myVertex;
 	std::vector<unsigned int> myIndices;

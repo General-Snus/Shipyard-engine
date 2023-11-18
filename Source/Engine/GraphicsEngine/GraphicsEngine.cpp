@@ -176,19 +176,19 @@ void GraphicsEngine::SetupDefaultVariables()
 	RHI::SetSamplerState(myDefaultSampleState,REG_DefaultSampler);
 
 	D3D11_SAMPLER_DESC shadowSamplerDesc = {};
-	shadowSamplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+	shadowSamplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
 	shadowSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
 	shadowSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
 	shadowSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
-	shadowSamplerDesc.BorderColor[0] = 0.f;
-	shadowSamplerDesc.BorderColor[1] = 0.f;
-	shadowSamplerDesc.BorderColor[2] = 0.f;
-	shadowSamplerDesc.BorderColor[3] = 0.f;
-	shadowSamplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+	shadowSamplerDesc.BorderColor[0] = 1.f;
+	shadowSamplerDesc.BorderColor[1] = 1.f;
+	shadowSamplerDesc.BorderColor[2] = 1.f;
+	shadowSamplerDesc.BorderColor[3] = 1.f;
+	shadowSamplerDesc.ComparisonFunc = D3D11_COMPARISON_GREATER_EQUAL;/*
 	shadowSamplerDesc.MinLOD = -D3D11_FLOAT32_MAX;
 	shadowSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	shadowSamplerDesc.MipLODBias = 0.f;
-	shadowSamplerDesc.MaxAnisotropy = 1;
+	shadowSamplerDesc.MaxAnisotropy = 1;*/
 
 	if(!RHI::CreateSamplerState(myShadowSampleState,shadowSamplerDesc))
 	{

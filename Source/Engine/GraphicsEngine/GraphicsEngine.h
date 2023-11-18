@@ -20,6 +20,7 @@
 #include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
 
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp> 
+	#define _DEBUGDRAW
 
 struct GraphicsSettings
 {

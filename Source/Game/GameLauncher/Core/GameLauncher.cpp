@@ -23,7 +23,7 @@
 #include <Tools/Optick/src/optick.h>
 
 
-#define _DEBUGDRAW
+
 #define Flashlight
 //#define ParticleSystemToggle
 
@@ -60,7 +60,7 @@ void GameLauncher::Start()
 		transform.SetRotation(0,0,-45);
 		cLight& pLight = worldRoot.GetComponent<cLight>();
 		pLight.SetColor(Vector3f(1,1,1));
-		pLight.SetPower(2.0f);
+		pLight.SetPower(5.0f);
 		pLight.BindDirectionToTransform(true);
 
 		if(gom.GetAllComponents<BackgroundColor>().empty())
