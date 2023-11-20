@@ -29,7 +29,12 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+
+# Debugging software
 /Source/Engine/GraphicsEngine/Shaders/Include/*.h
+/Source/Editor/Editor/Intel® VTune™ Profiler Results/*
+Source/GPUCache/*
+Source/DawnCache/*
 
 # Allowed libriaries and folders
 !/Source/Tools/FBX/ThirdParty/fbxsdk/lib/debug/

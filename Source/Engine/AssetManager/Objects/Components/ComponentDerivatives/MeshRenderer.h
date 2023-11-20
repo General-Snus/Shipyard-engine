@@ -7,8 +7,7 @@ struct RenderData
 { 
 	//Equal operator
 	inline bool operator==(const RenderData& aOther) const
-	{
-		__debugbreak();
+	{ 
 		return myMesh == aOther.myMesh;
 	}
 	std::shared_ptr<Mesh> myMesh;
@@ -36,6 +35,15 @@ public:
 	FORCEINLINE std::shared_ptr<Mesh> GetRawMesh() const
 	{
 		return myRenderData->myMesh;
+	}
+
+	FORCEINLINE bool IsDefaultMesh()
+	{
+		if(myRenderData->myMesh->AssetPath == L"../../Content/default.fbx") // What am i doing with my life
+		{
+			return true;
+		}
+		return false;
 	}
 
 protected:
