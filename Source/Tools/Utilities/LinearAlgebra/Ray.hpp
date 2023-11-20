@@ -1,6 +1,4 @@
-#include "Vectors.hpp"
-namespace CommonUtilities
-{
+#include "Vectors.hpp" 
 	template<class T>
 	class Ray
 	{
@@ -65,5 +63,4 @@ namespace CommonUtilities
 	inline Vector3<T> Ray<T>::GetUnitVector() const
 	{
 		return UnitVector;
-	}
-}
+	} 

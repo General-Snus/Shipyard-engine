@@ -210,6 +210,12 @@ bool RHI::Initialize(HWND aWindowHandle, bool enableDeviceDebug, Texture* outBac
 	depthStencilDesc.StencilEnable = false;
 	Device->CreateDepthStencilState(&depthStencilDesc, myDepthStates[DS_LessEqual].GetAddressOf());
 
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_GREATER_EQUAL;
+	depthStencilDesc.StencilEnable = false;
+	Device->CreateDepthStencilState(&depthStencilDesc,myDepthStates[DS_Reversed].GetAddressOf());
+
 	Context->QueryInterface(__uuidof(ID3DUserDefinedAnnotation), &myAnnotationObject);
 
 	//D3D11_FEATURE_DATA_D3D11_OPTIONS1 data;
@@ -1143,7 +1149,7 @@ bool RHI::CreateTextureCube(Texture* outTexture, const std::wstring& aName, size
 
 	outTexture->myViewport = D3D11_VIEWPORT({ 0.0f, 0.0f,
 		static_cast<float>(aWidth), static_cast<float>(aHeight),
-		0.0f, 1.0f });
+		1.0f, 0.0f });
 
 	return true;
 }
@@ -1368,7 +1374,7 @@ void RHI::ClearDepthStencil(const Texture* aTexture)
 		std::throw_with_nested(std::runtime_error("Attempted to clear depth on a non-depth texture!"));
 	}
 
-	RHI::Context->ClearDepthStencilView(aTexture->myDSV.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	RHI::Context->ClearDepthStencilView(aTexture->myDSV.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 0.0f, 0);
 }
 
 void RHI::BeginEvent(const std::wstring& anEventName)

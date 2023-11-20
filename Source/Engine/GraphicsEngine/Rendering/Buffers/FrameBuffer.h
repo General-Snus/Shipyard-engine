@@ -4,8 +4,8 @@
 
 struct FrameBufferData
 {
-	CommonUtilities::Matrix4x4<float> ViewMatrix; // 64 bytes
-	CommonUtilities::Matrix4x4<float> ProjectionMatrix; // 64 bytes
+	Matrix ViewMatrix; // 64 bytes
+	Matrix ProjectionMatrix; // 64 bytes
 	float Time = 0; // 4 bytes 
 	std::array<float,3> FB_CameraPosition = {0,0,0};
 	int FB_RenderMode = 0;

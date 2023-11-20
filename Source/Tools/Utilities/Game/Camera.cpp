@@ -23,13 +23,13 @@ MainCamera::MainCamera()
 
 }
 
-inline MainCamera::MainCamera(CommonUtilities::Vector3<float> aPosition,CommonUtilities::Vector3<float> aRotation)
+inline MainCamera::MainCamera(Vector3f aPosition,Vector3f aRotation)
 {
 	aPosition; aRotation;
 
-	CommonUtilities::Vector3<float> RightAxis = {1,0,0};
-	CommonUtilities::Vector3<float> DownAxis = {0,-1,0};;
-	CommonUtilities::Vector3<float> ForwardAxis = {0,0,1};;
+	Vector3f RightAxis = {1,0,0};
+	Vector3f DownAxis = {0,-1,0};;
+	Vector3f ForwardAxis = {0,0,1};;
 	for(int i = 0; i < 3; i++)
 	{
 		myTransform(1,i + 1) = RightAxis[i];
@@ -116,13 +116,13 @@ void MainCamera::Update(float aTimeDelta)
 	if(GetAsyncKeyState('Q'))
 	{
 		myTransform = myTransform.CreateRotationAroundY(-2.0f * aTimeDelta) * myTransform;
-	} 
+	}
 }
 
-CommonUtilities::Vector4<float> MainCamera::WoldSpaceToPostProjectionSpace(CommonUtilities::Vector3<float> aEntity)
+Vector4f MainCamera::WoldSpaceToPostProjectionSpace(Vector3f aEntity)
 {
 	//Get actuall world space coordinate
-	CommonUtilities::Vector4<float> outPosition = {aEntity.x,aEntity.y,aEntity.z,1}; 
+	Vector4f outPosition = {aEntity.x,aEntity.y,aEntity.z,1};
 
 	//Punkt -> CameraSpace
 	outPosition = outPosition * myTransform.GetFastInverse(myTransform);
@@ -132,12 +132,12 @@ CommonUtilities::Vector4<float> MainCamera::WoldSpaceToPostProjectionSpace(Commo
 
 	outPosition.x /= outPosition.w;
 	outPosition.y /= outPosition.w;
-	outPosition.z /= outPosition.w; 
+	outPosition.z /= outPosition.w;
 
 	return outPosition;
 }
 
-CommonUtilities::Matrix4x4<float> MainCamera::GetTransform()
+Matrix  MainCamera::GetTransform()
 {
 	return myTransform;
 }

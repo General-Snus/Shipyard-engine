@@ -6,8 +6,7 @@
 
 #ifndef ASSETMANAGER_PCH_H
 #define ASSETMANAGER_PCH_H
-
-#define CU   CommonUtilities  
+ 
 // add headers that you want to pre-compile here
 #include <iostream> 
 #include <filesystem> 
@@ -16,11 +15,16 @@
 #include <vector>
 #include <functional>
 
+#include <assimp/Importer.hpp>      // C++ importer interface 
+#include <assimp/scene.h>           // Output data structure
+#include <assimp/postprocess.h>     // Post processing flags
+
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/Math.hpp>
 #include "Tools/Logging/Logging.h"
+#include <Tools/Optick/src/optick.h>
 
 #include "Objects/BaseAssets/BaseAsset.h"
 #include "Objects/BaseAssets/Animations.h"
@@ -49,10 +53,9 @@
 #include <Engine/GraphicsEngine/Rendering/Vertex.h> 
 #include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
 #include <Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h>
-#include "AssetManager.h"
-
-typedef CU::Vector3<float> Vector3f;
-typedef CU::Matrix4x4<float> Matrix;
+#include "AssetManager.h" 
 
 static inline Logger AMLogger;
+
+#define UseTGAImporter 0
 #endif //ASSETMANAGER_PCH_H 

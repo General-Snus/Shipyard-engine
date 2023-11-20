@@ -4,11 +4,11 @@
 
 struct CameraSettings
 {
-	float fow = PI * (90.0f / 180.0f);;
-	float fowmdf = 1.0f / (tanf(fow / 2.0f));;
+	float fow = PI * (90.0f / 180.0f);; 
 	float APRatio = 16.0f / 9.0f;;
-	float farfield = 15000.0f;
-	float nearField = .1f;;
+	float farfield = 1000000.0f;
+	//float farfield = std::numeric_limits<float>::infinity();
+	float nearField = 1.0f;
 };
 
 class cCamera : public Component
@@ -22,15 +22,16 @@ public:
 	void Update() override;
 	void Render() override;
 	std::array<Vector4f,4> GetFrustrumCorners() const;
-	Vector3f GetPointerDirection(const CU::Vector2<int> position);
-	Vector3f GetPointerDirectionNDC(const Vector2f position) const;
+	Vector3f GetPointerDirection(const Vector2<int> position);
+	Vector3f GetPointerDirectionNDC(const Vector2<int> position) const;
 
 	void SetCameraToFrameBuffer();
 
-	CU::Vector4<float> WoldSpaceToPostProjectionSpace(CommonUtilities::Vector3<float> aEntity);
+	Vector4f WoldSpaceToPostProjectionSpace(Vector3f aEntity);
 
 private:
-	CU::Matrix4x4<float> myClipMatrix;
-	CU::Vector2<int> myScreenSize;
+	Matrix myClipMatrix;
+	Vector2<int> myScreenSize;
+	float cameraSpeed = 10;
 	CameraSettings mySettings;
 };

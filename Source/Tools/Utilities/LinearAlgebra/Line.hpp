@@ -1,6 +1,4 @@
-#include "Vectors.hpp"
-namespace CommonUtilities
-{
+#include "Vectors.hpp" 
 	template<class T>
 	class Line
 	{
@@ -92,5 +90,4 @@ namespace CommonUtilities
 	inline const Vector2<T> Line<T>::GetOrigin() const
 	{
 		return ZeroPoint;
-	}
-}
+	} 

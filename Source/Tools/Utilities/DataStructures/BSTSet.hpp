@@ -1,7 +1,5 @@
 #pragma once
-
-namespace CommonUtilities
-{
+ 
 	template<class T>
 	class Node;
 
@@ -228,5 +226,4 @@ namespace CommonUtilities
 		delete myRightChild;
 		myLeftChild = nullptr;
 		myRightChild = nullptr; 
-	}
-}
+	} 

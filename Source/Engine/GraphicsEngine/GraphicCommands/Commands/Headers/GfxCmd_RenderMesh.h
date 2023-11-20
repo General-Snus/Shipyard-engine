@@ -7,8 +7,8 @@ class GfxCmd_RenderMesh : public GraphicCommandBase
 protected:
 	const std::shared_ptr<RenderData> myRenderData;
 	const Matrix  myTransform;
-	CU::Vector3<float> MinExtents; // 12 bytes 
-	CU::Vector3<float> MaxExtents; // 12 bytes  
+	Vector3f MinExtents; // 12 bytes 
+	Vector3f MaxExtents; // 12 bytes  
 	bool instanced;
 
 public:

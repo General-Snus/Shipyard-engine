@@ -73,7 +73,7 @@ private:
 	std::mutex lockForSet;
 	std::vector<std::future<void>> myThreads;
 
-	CU::Queue<std::shared_ptr<AssetBase>> myAssetQueue;
+	Queue<std::shared_ptr<AssetBase>> myAssetQueue;
 
 	template<class T>
 	std::shared_ptr<Library> GetLibraryOfType();

@@ -28,11 +28,12 @@ cAnimator::cAnimator(const unsigned int anOwnerId,const std::filesystem::path& a
 
 void cAnimator::Update()
 {
+	OPTICK_EVENT();
 
 	if(myAnimations.size())
 	{
 		const float TimePerFrame = (1 / myAnimations[myCurrentAnimation]->frameRate);
-		myAnimationTimer += CU::Timer::GetInstance().GetDeltaTime();
+		myAnimationTimer += Timer::GetInstance().GetDeltaTime();
 		if(myAnimationTimer >= TimePerFrame)
 		{
 			float percentage = myAnimationTimer / TimePerFrame;
@@ -71,10 +72,11 @@ void cAnimator::AddAnimation(const std::filesystem::path& aFilePath)
 	myAnimations.push_back(animation);
 }
 
-void cAnimator::SetHierarchy(unsigned int aBoneID,const CU::Matrix4x4<float>& aParentMatrix)
+void cAnimator::SetHierarchy(unsigned int aBoneID,const Matrix& aParentMatrix)
 {
 	std::string boneName = mySkeleton->myBones[aBoneID].Name;
-	CU::Matrix4x4<float> newBoneTransform = myAnimations[myCurrentAnimation]->Frames[myCurrentFrame].myTransforms[boneName] * aParentMatrix;
+
+	Matrix newBoneTransform = myAnimations[myCurrentAnimation]->Frames[myCurrentFrame].myTransforms[boneName] * aParentMatrix;
 
 	for(unsigned int i : mySkeleton->myBones[aBoneID].Children)
 	{
@@ -106,14 +108,17 @@ void cAnimator::SetPlayingAnimation(unsigned int aAnimationIndex)
 }
 
 void cAnimator::UpdateAnimationHierarcy(float t)
-{
+{ 
 	t;
-	Transform* transform = this->TryGetComponent<Transform>();
-	if(transform != nullptr)
+	if(mySkeleton->isLoadedComplete)
 	{
-		SetHierarchy(0,CU::Matrix4x4<float>());
-		return;
+		auto* transform = TryGetComponent<Transform>();
+		if( transform)
+		{
+			SetHierarchy(0,Matrix());
+			return;
+		}
+		SetHierarchy(0,Matrix());
 	}
-	SetHierarchy(0,CU::Matrix4x4<float>());
 
 }

@@ -50,9 +50,12 @@ void TextureHolder::Init()
 		if(GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
 		{
 			RawTexture = GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture();
+			isLoadedComplete = true;
 			return;
 		}
 		std::cout << "Error: Default texture was not found" << " \n";
+		isLoadedComplete = false;
+		return;
 	}
 	isLoadedComplete = true;
 }

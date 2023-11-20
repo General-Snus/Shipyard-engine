@@ -5,13 +5,17 @@
 
 void ShadowRenderer::Init()
 {
-	ShadowCommandList.Initialize((size_t) 5 * MegaByte); 
+	ShadowCommandList.Initialize((size_t) 10 * MegaByte); 
+	myVertexShader = GraphicsEngine::Get().myVertexShader;
 }
 
 void ShadowRenderer::Execute()
 {
+	OPTICK_EVENT();
 	LightBuffer& buffer = GraphicsEngine::Get().myLightBuffer;  
 
+	RHI::SetVertexShader(myVertexShader);
+	RHI::SetPixelShader(nullptr) ;
 	std::shared_ptr<Texture> shadowMap;
 	for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
 	{
@@ -25,8 +29,8 @@ void ShadowRenderer::Execute()
 				RHI::UpdateConstantBufferData(buffer);
 				shadowMap = i.GetShadowMap(0);
 				RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER,REG_dirLightShadowMap,nullptr); // cant be bound to resources when rendering to it
-				RHI::ClearDepthStencil(shadowMap.get());
 				RHI::SetRenderTarget(nullptr,shadowMap.get());
+				RHI::ClearDepthStencil(shadowMap.get());
 				GfxCmd_SetFrameBuffer(buffer.Data.myDirectionalLight.projection,buffer.Data.myDirectionalLight.lightView,0).ExecuteAndDestroy();
 
 				ShadowCommandList.StartOver();
@@ -46,8 +50,8 @@ void ShadowRenderer::Execute()
 
 				shadowMap = i.GetShadowMap(0);
 				RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER,REG_dirLightShadowMap,nullptr); // cant be bound to resources when rendering to it
-				RHI::ClearDepthStencil(shadowMap.get());
 				RHI::SetRenderTarget(nullptr,shadowMap.get());
+				RHI::ClearDepthStencil(shadowMap.get());
 				GfxCmd_SetFrameBuffer(buffer.Data.mySpotLight.projection,buffer.Data.mySpotLight.lightView,0).ExecuteAndDestroy();
 
 				ShadowCommandList.StartOver();
@@ -69,8 +73,8 @@ void ShadowRenderer::Execute()
 
 					shadowMap = i.GetShadowMap(j);
 					RHI::SetTextureResource(PIPELINE_STAGE_VERTEX_SHADER,REG_dirLightShadowMap,nullptr); // cant be bound to resources when rendering to it
-					RHI::ClearDepthStencil(shadowMap.get());
 					RHI::SetRenderTarget(nullptr,shadowMap.get());
+					RHI::ClearDepthStencil(shadowMap.get());
 					GfxCmd_SetFrameBuffer(buffer.Data.myPointLight.projection,i.GetLightViewMatrix(j),0).ExecuteAndDestroy();
 
 					ShadowCommandList.StartOver();
@@ -88,5 +92,6 @@ void ShadowRenderer::Execute()
 
 void ShadowRenderer::ResetShadowList()
 { 
-	ShadowCommandList.Reset();  
+	ShadowCommandList.ForceSetDone();
+	ShadowCommandList.Reset();
 }

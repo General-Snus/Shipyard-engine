@@ -5,8 +5,19 @@
 #include <vector>
 #include <d3d11.h>
 
-struct G_Buffer
+enum class eGbufferTex
 {
+	Albedo = 0,
+	Normal,
+	Material,
+	Effect,
+	VertexNormals,
+	Position,
+	Depth
+};
+
+struct G_Buffer
+{ 
 	// Set default values from graphicsEngine
 	void Init();
 
@@ -49,6 +60,9 @@ struct G_Buffer
 	void UsePointlightShader();
 	void UseSpotlightShader();
 	void ClearTargets();
+
+	void SetTexture(eGbufferTex texture);
+	void UnSetTexture(eGbufferTex texture);
 
 };
  

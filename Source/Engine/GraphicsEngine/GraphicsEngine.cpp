@@ -51,7 +51,7 @@
 #include <stdexcept> 
 
 #include <Engine/GraphicsEngine/InterOp/DDSTextureLoader11.h>
-
+#include <Tools/Optick/src/optick.h>
 
 bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 {
@@ -63,8 +63,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 	try
 	{
 #endif
-		GELogger.SetPrintToVSOutput(false);
-
+		GELogger.SetPrintToVSOutput(false); 
 		myWindowHandle = windowHandle;
 		myBackBuffer = std::make_unique<Texture>();
 		myDepthBuffer = std::make_unique<Texture>();
@@ -76,8 +75,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 		{
 			GELogger.Err("Failed to initialize the RHI!");
 			return false;
-		}
-
+		} 
 		SetupDefaultVariables();
 		SetupBRDF();
 		SetupParticleShaders();
@@ -103,6 +101,8 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 		myG_Buffer.Init();
 		myShadowRenderer.Init();
 		myParticleRenderer.Init();
+		 RHI::SetDepthState(DepthState::DS_Reversed);
+
 #ifdef _DEBUG
 	}
 	catch(const std::exception& e)
@@ -176,19 +176,19 @@ void GraphicsEngine::SetupDefaultVariables()
 	RHI::SetSamplerState(myDefaultSampleState,REG_DefaultSampler);
 
 	D3D11_SAMPLER_DESC shadowSamplerDesc = {};
-	shadowSamplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+	shadowSamplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
 	shadowSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
 	shadowSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
 	shadowSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
-	shadowSamplerDesc.BorderColor[0] = 0.f;
-	shadowSamplerDesc.BorderColor[1] = 0.f;
-	shadowSamplerDesc.BorderColor[2] = 0.f;
-	shadowSamplerDesc.BorderColor[3] = 0.f;
-	shadowSamplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+	shadowSamplerDesc.BorderColor[0] = 1.f;
+	shadowSamplerDesc.BorderColor[1] = 1.f;
+	shadowSamplerDesc.BorderColor[2] = 1.f;
+	shadowSamplerDesc.BorderColor[3] = 1.f;
+	shadowSamplerDesc.ComparisonFunc = D3D11_COMPARISON_GREATER_EQUAL;/*
 	shadowSamplerDesc.MinLOD = -D3D11_FLOAT32_MAX;
 	shadowSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	shadowSamplerDesc.MipLODBias = 0.f;
-	shadowSamplerDesc.MaxAnisotropy = 1;
+	shadowSamplerDesc.MaxAnisotropy = 1;*/
 
 	if(!RHI::CreateSamplerState(myShadowSampleState,shadowSamplerDesc))
 	{
@@ -200,7 +200,7 @@ void GraphicsEngine::SetupDefaultVariables()
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
 	depthStencilDesc.DepthEnable = true;
 	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_GREATER;
 	depthStencilDesc.StencilEnable = false;
 
 	auto result = RHI::Device->CreateDepthStencilState(
@@ -488,7 +488,7 @@ void GraphicsEngine::SetupPostProcessing()
 	RHI::CreateTexture(
 		SSAOTexture.get(),
 		L"SSAOTexture",
-		size.Width,size.Height,
+		size.Width/2,size.Height/2,
 		defaultTextureFormat,
 		D3D11_USAGE_DEFAULT,
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
@@ -564,7 +564,7 @@ void GraphicsEngine::UpdateSettings()
 {
 	myGraphicSettingsBuffer.Data.GSB_ToneMap = myGraphicSettings.Tonemaptype;
 	myGraphicSettingsBuffer.Data.GSB_AO_intensity = 0.35f;
-	myGraphicSettingsBuffer.Data.GSB_AO_scale = 0.01f;
+	myGraphicSettingsBuffer.Data.GSB_AO_scale = 0.05f;
 	myGraphicSettingsBuffer.Data.GSB_AO_bias = 0.5f;
 	myGraphicSettingsBuffer.Data.GSB_AO_radius = 0.002f;
 	myGraphicSettingsBuffer.Data.GSB_AO_offset = 0.707f;
@@ -601,35 +601,45 @@ void GraphicsEngine::BeginFrame()
 
 void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 {
+	OPTICK_EVENT() 
 	aDeltaTime; aTotalTime;
 	RHI::SetVertexShader(myVertexShader);
 
-
+	OPTICK_EVENT("Gbuffer") 
 	RHI::BeginEvent(L"Start writing to gbuffer");
 	myCamera->SetCameraToFrameBuffer();
 	myG_Buffer.SetWriteTargetToBuffer(); //Let all write to textures
+	OPTICK_EVENT("Deferred") 
 	DeferredCommandList.Execute();
+	OPTICK_EVENT("Instanced Deferred") 
 	myInstanceRenderer.Execute(false);
+	RHI::SetRenderTarget(nullptr,nullptr);
+	myG_Buffer.UnsetResources();
 	RHI::EndEvent();
+
 	//decals
 	//if picking check
 	//SSAO
 	//Do ambience pass? Clarit
-
-	//Render shadowmaps
-
+	//Render all lights
+	OPTICK_EVENT("SSAO");
+	RHI::BeginEvent(L"SSAO");
+	myCamera->SetCameraToFrameBuffer();
+	GfxCmd_SSAO().ExecuteAndDestroy();
+	RHI::EndEvent();
+	 
+	////Render shadowmaps
+	OPTICK_EVENT("ShadowMaps");
 	RHI::BeginEvent(L"ShadowMaps");
 	myShadowRenderer.Execute();
 	RHI::EndEvent();
 
 
-	//Render all lights
-	RHI::BeginEvent(L"SSAO");
-	myCamera->SetCameraToFrameBuffer();
-	GfxCmd_SSAO().ExecuteAndDestroy();
-	RHI::EndEvent();
+	
 
+	OPTICK_EVENT("Lightning");
 	RHI::BeginEvent(L"Lightning");
+	myCamera->SetCameraToFrameBuffer();
 	GfxCmd_SetRenderTarget(SceneBuffer.get(),nullptr).ExecuteAndDestroy();
 	GfxCmd_SetLightBuffer().ExecuteAndDestroy(); //REFACTOR Change name to fit purpose
 	RHI::EndEvent();
@@ -638,6 +648,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 
 
 	//Particles
+	OPTICK_EVENT("Particles");
 	RHI::BeginEvent(L"Particles");
 	RHI::SetBlendState(GraphicsEngine::Get().GetAdditiveBlendState());
 	GfxCmd_SetRenderTarget(SceneBuffer.get(),myDepthBuffer.get()).ExecuteAndDestroy();
@@ -645,6 +656,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	RHI::EndEvent();
 
 	//Post processing
+	OPTICK_EVENT("Postpro");
 	RHI::BeginEvent(L"PostPro");
 	RHI::SetBlendState(nullptr);
 	GfxCmd_LuminancePass().ExecuteAndDestroy(); // Render to IntermediateA
@@ -653,7 +665,8 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	GfxCmd_ToneMapPass().ExecuteAndDestroy(); // Render: BakcBuffer Read: REG_Target01
 	RHI::EndEvent();
 
-	//Debug layers 
+	//Debug layers
+	OPTICK_EVENT("DebugLayers");
 	RHI::BeginEvent(L"DebugLayers");
 	myCamera->SetCameraToFrameBuffer();
 	GfxCmd_DebugLayer().ExecuteAndDestroy();
@@ -683,11 +696,17 @@ void GraphicsEngine::RenderTextureTo(eRenderTargets from,eRenderTargets to)  con
 
 void GraphicsEngine::EndFrame()
 {
-	// We finish our frame here and present it on screen.
+	OPTICK_EVENT();
+	// We finish our frame here and present it on screen. 
 	RHI::Present(0);
+	OPTICK_EVENT("ResetShadowList")
 	myShadowRenderer.ResetShadowList();
+	OPTICK_EVENT("DeferredCommandList")
 	DeferredCommandList.Reset();
+	OPTICK_EVENT("OverlayCommandList")
 	OverlayCommandList.Reset();
+	OPTICK_EVENT("myInstanceRenderer")
 	myInstanceRenderer.Clear();
+	OPTICK_EVENT("ClearedEndFrame")
 }
 

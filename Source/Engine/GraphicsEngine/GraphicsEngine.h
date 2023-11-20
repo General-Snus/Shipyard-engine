@@ -20,6 +20,7 @@
 #include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
 
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp> 
+	#define _DEBUGDRAW
 
 struct GraphicsSettings
 {
@@ -81,7 +82,7 @@ private:
 	SIZE myWindowSize{0,0};
 	HWND myWindowHandle{};
 	cCamera* myCamera;
-	CU::Vector4<float> myBackgroundColor;
+	Vector4f myBackgroundColor;
 
 	std::shared_ptr<Texture> myBackBuffer;
 	std::shared_ptr<Texture> myDepthBuffer;
@@ -120,7 +121,7 @@ private:
 	ComPtr<ID3D11PixelShader> gaussShader;
 	ComPtr<ID3D11PixelShader> bloomShader;
 
-	  
+
 	//Debug
 	ComPtr<ID3D11Buffer> myLineVertexBuffer;
 	ComPtr<ID3D11Buffer> myLineIndexBuffer;
@@ -152,7 +153,7 @@ private:
 		DSS_COUNT,
 	};
 
-	std::array<ComPtr<ID3D11DepthStencilState>,(int)eDepthStencilStates::DSS_COUNT> myDepthStencilStates ;
+	std::array<ComPtr<ID3D11DepthStencilState>,(int)eDepthStencilStates::DSS_COUNT> myDepthStencilStates;
 
 	ComPtr<ID3D11BlendState> AlphaBlendState;
 	ComPtr<ID3D11BlendState> AdditiveBlendState;
@@ -178,10 +179,10 @@ public:
 	 */
 	bool Initialize(HWND windowHandle,bool enableDeviceDebug);
 
-	bool SetupDebugDrawline(); 
+	bool SetupDebugDrawline();
 
 	void SetupDefaultVariables();
-	
+
 	void SetupBlendStates();
 
 	void SetupParticleShaders();
@@ -192,7 +193,7 @@ public:
 
 	void SetupBRDF();
 
-	void SetupPostProcessing(); 
+	void SetupPostProcessing();
 
 	/**
 	 * Prepares the next frame for rendering by resetting states and clearing all render targets.
@@ -214,10 +215,10 @@ public:
 
 	void SetDepthState(eDepthStencilStates state)
 	{
-		RHI::Context->OMSetDepthStencilState(myDepthStencilStates[(int)state].Get(), 0);
+		RHI::Context->OMSetDepthStencilState(myDepthStencilStates[(int)state].Get(),0);
 	}
 
-	CU::Vector4<float>& GetBackgroundColor() { return myBackgroundColor; }
+	Vector4f& GetBackgroundColor() { return myBackgroundColor; }
 
 
 	template<typename CommandClass,typename ...Args>
@@ -332,16 +333,16 @@ public:
 		default:
 			return nullptr;
 		}
-	}  
+	}
 
-	FORCEINLINE InstanceRenderer& GetInstanceRenderer() { return myInstanceRenderer; } 
-	FORCEINLINE GraphicsSettings& GetSettings() { return myGraphicSettings; } 
+	FORCEINLINE InstanceRenderer& GetInstanceRenderer() { return myInstanceRenderer; }
+	FORCEINLINE GraphicsSettings& GetSettings() { return myGraphicSettings; }
 	FORCEINLINE std::shared_ptr< Shader> GetDebugLineVS() const { return debugLineVS; }
 	FORCEINLINE std::shared_ptr< Shader> GetDebugLinePS() const { return debugLinePS; }
 
 	FORCEINLINE ComPtr<ID3D11BlendState> GetAlphaBlendState() const { return AlphaBlendState; }
 	FORCEINLINE ComPtr<ID3D11BlendState> GetAdditiveBlendState() const { return AdditiveBlendState; }
-	 
+
 	FORCEINLINE std::shared_ptr<Material> GetDefaultMaterial() const { return defaultMaterial; }
 	FORCEINLINE std::shared_ptr<TextureHolder> GetDefaultTexture(eTextureType type) const
 	{

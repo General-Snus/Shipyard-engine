@@ -9,22 +9,34 @@ typedef std::vector<D3D11_INPUT_ELEMENT_DESC> InputElementList;
 
 struct Vertex
 {
-	CommonUtilities::Vector4<float> myPosition;
-	CommonUtilities::Vector4<float> myColor;
-	CommonUtilities::Vector2<float> myUV;
-	CommonUtilities::Vector3<float> myNormal;
-	CommonUtilities::Vector3<float> myTangent;
-	CommonUtilities::Vector4<unsigned int> myBoneIds;
-	CommonUtilities::Vector4<float> myBoneWeights;
+	Vector4f myPosition;
+	Vector4f myColor;
+	Vector2f myUV;
+	Vector3f myNormal;
+	Vector3f myTangent;
+	Vector4<unsigned int> myBoneIds;
+	Vector4f myBoneWeights;
 
+	void AddBoneWeightAndID(float newWeight,unsigned int aId)
+	{
+		for(int i = 0; i < 4; i++)
+		{
+			if(myBoneWeights[i] == 0.0f)
+			{
+				myBoneWeights[i] = newWeight;
+				myBoneIds[i] = aId; 
+				return;
+			}
+		}
+	} 
 	 
-	Vertex(CommonUtilities::Vector3<float> aPosition,
-			CommonUtilities::Vector4<float> aColor,
-			CommonUtilities::Vector2<float> aUV,
-			CommonUtilities::Vector3<float> aNormal,
-			CommonUtilities::Vector3<float> aTangent,
-			CommonUtilities::Vector4<unsigned int> aBoneIds,
-			CommonUtilities::Vector4<float> aBoneWeights
+	Vertex(	Vector3f aPosition,
+			Vector4f aColor,
+			Vector2f aUV,
+			Vector3f aNormal,
+			Vector3f aTangent,
+			Vector4<unsigned int> aBoneIds,
+			Vector4f aBoneWeights
 		)
 	{
 		myPosition.x = aPosition.x;

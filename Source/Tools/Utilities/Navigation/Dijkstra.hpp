@@ -3,11 +3,7 @@
 #include <stack>
 #include "PriorityQueue.hpp"
 #include "Stack.hpp"
-
-namespace CommonUtilities {
-
-
-
+ 
 	static const int neigbours = 4;
 	static const int MapWidth = 20;
 	static const int MapHeight = 20;
@@ -116,5 +112,4 @@ namespace CommonUtilities {
 		delete[] dist;
 		delete[] edgeTo;
 		return outArg;
-	}
-}
+	} 

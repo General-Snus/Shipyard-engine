@@ -1,7 +1,4 @@
-#pragma once 
-using Vector3f = CU::Vector3<float>;
-using Matrix = CU::Matrix4x4<float>;
-
+#pragma once  
 struct SpotLight
 { 
 	Vector3f Color = {1,1,1};

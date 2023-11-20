@@ -97,8 +97,7 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
             }
         case 10:
     {
-                result.Color.rgb = 0;
-                result.Color.r = depth;
+                result.Color.rgb = depth; 
                 result.Color.a = 1.0f;
                 break;
             }
@@ -110,13 +109,21 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
             }
         case 12:
     {
-                result.Color.rgb = (GetViewPosition(input.UV).rgb + 1.0f) / 2.0f;;
+                result.Color.rgb = GetViewPosition(input.UV).z;
+               // result.Color.rgb = (GetViewPosition(input.UV).rgb + 1.0f) / 2.0f;;
                 result.Color.a = 1.0f;
                 break;
             }
         case 13:
-    {
+            {
                 result.Color.rgb = (GetViewNormal(input.UV).rgb + 1.0f) / 2.0f;
+                result.Color.a = 1.0f;
+                break;
+            } 
+
+        case 14:
+            {
+                result.Color.rgb = normalize(input.position.xyz);
                 result.Color.a = 1.0f;
                 break;
             }

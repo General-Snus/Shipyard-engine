@@ -1,7 +1,5 @@
 #include "Vectors.hpp"
-
-namespace CommonUtilities
-{
+ 
 	template<class T>
 	class Circle
 	{
@@ -72,5 +70,4 @@ namespace CommonUtilities
 	inline T Circle<T>::GetRadius() const
 	{
 		return Radius;
-	}
-}
+	} 

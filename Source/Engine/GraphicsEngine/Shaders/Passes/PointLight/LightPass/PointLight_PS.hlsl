@@ -34,8 +34,8 @@ float3 CalculatePointLight(float3 diffuseColor, float3 specularColor, float4 wor
     lightSpaceUV.x = ((lightSpacePos.x / lightSpacePos.w) * .5 + 0.5);
     lightSpaceUV.y = 1 - ((lightSpacePos.y / lightSpacePos.w) * .5 + 0.5f);
     const float bias = 0.0005;
-    float Depth = (lightSpacePos.z / lightSpacePos.w) - bias;
-    float shadow = shadowMap.SampleCmpLevelZero(shadowCmpSampler, lightSpaceUV.xy, Depth).r;
+    float Depth = (lightSpacePos.z / lightSpacePos.w) + bias;
+    //float shadow = shadowMap.SampleCmpLevelZero(shadowCmpSampler, lightSpaceUV.xy, Depth).r;
      
     //Enable if quality is too low
    uint2 dim = 0;
@@ -55,7 +55,7 @@ float3 CalculatePointLight(float3 diffuseColor, float3 specularColor, float4 wor
            sum += shadowMap.SampleCmpLevelZero(shadowCmpSampler, newUV, Depth).r;
        }
    }
-   shadow = sum / 16.0;
+    const float shadow = sum / 16.0;
     
     
     //return shadow * Attenuation;  

@@ -2,8 +2,7 @@
 #include <vector>
 #include <algorithm>
 #include <iterator>
-#include <functional>
-namespace CommonUtilities {
+#include <functional> 
 	template <class T>
 	void SelectionSort(std::vector<T>& aVector)
 	{
@@ -157,6 +156,4 @@ namespace CommonUtilities {
 	void MergeSort(std::vector<T>& aVector)
 	{		 
 		MergeSort(aVector,0,static_cast<int>(aVector.size() - 1));
-	}
-}
-
+	} 

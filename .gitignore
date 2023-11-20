@@ -29,13 +29,20 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+
+# Debugging software
 /Source/Engine/GraphicsEngine/Shaders/Include/*.h
+/Source/Editor/Editor/Intel® VTune™ Profiler Results/*
+Source/GPUCache/*
+Source/DawnCache/*
 
 # Allowed libriaries and folders
 !/Source/Tools/FBX/ThirdParty/fbxsdk/lib/debug/
 !/Source/Tools/FBX/ThirdParty/fbxsdk/lib/release/
 !/[Bb]in/[Dd]ebug/
-!/[Bb]in/[Rr]elease/ 
+!/[Bb]in/[Rr]elease/
+!/Dependencies/[Dd]ebug/
+!/Dependencies/[Rr]elease/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
@@ -405,4 +412,6 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
-Source/Engine/GraphicsEngine/Shaders/Include/*.h 
+Source/Engine/GraphicsEngine/Shaders/Include/*.h
+
+!Optick.exe

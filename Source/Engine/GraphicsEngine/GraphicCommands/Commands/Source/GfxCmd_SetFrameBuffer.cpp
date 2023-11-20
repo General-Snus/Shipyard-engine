@@ -23,10 +23,11 @@ GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,cons
 
 void GfxCmd_SetFrameBuffer::ExecuteAndDestroy()
 {
+	OPTICK_EVENT();
 	FrameBuffer& buffert = GetFrameBuffer();
 	buffert.Data.ProjectionMatrix = myProjectionMatrix;
 	buffert.Data.ViewMatrix = myViewMatrix;
-	buffert.Data.Time = CU::Timer::GetInstance().GetDeltaTime();
+	buffert.Data.Time = Timer::GetInstance().GetDeltaTime();
 	buffert.Data.FB_RenderMode = RenderMode;
 
 	buffert.Data.FB_CameraPosition[0] = myPosition.x;

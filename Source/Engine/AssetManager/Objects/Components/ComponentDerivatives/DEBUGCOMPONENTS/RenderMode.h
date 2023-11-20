@@ -1,16 +1,7 @@
 #pragma once
 #include <Engine/AssetManager/Objects/Components/Component.h> 
 #include <Engine/AssetManager/Objects/Components/ComponentDerivatives/DEBUGCOMPONENTS/ImGuiComponent.h>
-#include <Game/Modelviewer/Core/ApplicationState.h>
-
-
-
-
-
-
-
-
-
+#include <Editor/Editor/Core/ApplicationState.h> 
 
 class RenderMode : public ImGuiComponent
 {

@@ -6,9 +6,7 @@
 #include "Ray2d.hpp" 
 #include "Sphere.hpp"
 #include "Circle.hpp"
- 
-namespace CommonUtilities
-{
+  
 	// If the ray is parallel to the plane, aOutIntersectionPoint remains unchanged. If
 	// the ray is in the plane, true is returned, if not, false is returned. If the ray
 	// isn't parallel to the plane, the intersection point is stored in
@@ -181,6 +179,4 @@ namespace CommonUtilities
 			return true;
 		}
 		return false;
-	}
-
-}
+	} 

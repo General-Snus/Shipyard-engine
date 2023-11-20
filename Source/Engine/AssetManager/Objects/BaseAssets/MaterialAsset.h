@@ -8,8 +8,8 @@ class TextureHolder;
 
 struct MaterialData
 {
-	CU::Vector4<float> albedoColor = {1.f,1.f,1.f,1.f};
-	CU::Vector2<float> UVTiling = {1.f,1.f};
+	Vector4f albedoColor = {1.f,1.f,1.f,1.f};
+	Vector2f UVTiling = {1.f,1.f};
 	float NormalStrength = 1.0f;
 	float Shine = 100.f;
 };

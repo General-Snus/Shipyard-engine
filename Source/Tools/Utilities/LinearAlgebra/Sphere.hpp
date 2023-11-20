@@ -1,9 +1,6 @@
 #pragma once	
 #include "Vectors.hpp"
-
-#define CU CommonUtilities
-namespace CommonUtilities
-{
+ 
 	template<class T>
 	class Sphere
 	{
@@ -88,5 +85,4 @@ namespace CommonUtilities
 	inline T Sphere<T>::GetRadius() const
 	{
 		return Radius;
-	}
-}
+	} 

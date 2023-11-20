@@ -1,7 +1,5 @@
 #pragma once
-#include <array>
-namespace CommonUtilities
-{
+#include <array> 
 	template <typename Type, int size, typename	CountType = unsigned short, bool UseSafeModeFlag = true>
 	class VectorOnStack
 	{
@@ -109,5 +107,4 @@ namespace CommonUtilities
 	{
 		// Konstruktor kod, klassen ska vara i fullt skick att
 		// användas efter konstruktorn har körts.
-	}
-}
+	} 

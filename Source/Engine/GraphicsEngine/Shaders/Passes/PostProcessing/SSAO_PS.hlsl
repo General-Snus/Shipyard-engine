@@ -31,12 +31,8 @@ PostProcessPixelOutput main(BRDF_VS_to_PS input)
     const float2 frustrumCorners[4] = {FB_FrustrumCorners[0].xy, FB_FrustrumCorners[1].xy, FB_FrustrumCorners[2].xy, FB_FrustrumCorners[3].xy};
     //const float2 frustrumCorners[4] = {float2(1, 0), float2(-1, 0), float2(0, 1), float2(0, -1)};
     
-    float occlusion = 0.0f;
-    const float lerpVar = saturate(pxPos.z / FB_FrustrumCorners[0].z);
-  //const uint iterations = 4;
-    const uint iterations = lerp(7.0, 3.0, lerpVar);
-    [unroll]
-    for(uint i = 0; i < iterations; i++)
+    float occlusion = 0.0f;  
+    for(uint i = 0; i < 4; i++)
     {
         const uint idx = i % 4;
         const float2 coord1 = reflect(frustrumCorners[idx], random) * radius;

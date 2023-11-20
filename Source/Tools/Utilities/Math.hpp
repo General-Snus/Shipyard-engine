@@ -22,6 +22,7 @@ constexpr float Deci = 0.1f;
 constexpr float Kilo = 1000.0f;
 constexpr float Mega = 1000000.0f;
 
+const float AU = 1.495978707f*std::powf(10,11);
 //Bytes
 constexpr float BitToByte = 1 / 8.f;
 constexpr float ByteToBit = 8.f;

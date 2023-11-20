@@ -3,9 +3,7 @@
 #include "Matrix4x4.hpp"
 #include "Matrix3x3.hpp"
 #include <iostream>
-
-namespace CommonUtilities
-{
+ 
 	template <typename T = float>
 	class Quaternion
 	{
@@ -169,5 +167,4 @@ namespace CommonUtilities
 			break;
 		}
 
-	}
-}
+	} 

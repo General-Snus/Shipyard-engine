@@ -37,13 +37,13 @@ public:
 	void SetState(eAnimationState aState);
 	void SetPlayingAnimation(unsigned int aAnimationIndex);
 private:
-	void SetHierarchy(unsigned int aBoneID,const CU::Matrix4x4<float>& aParentMatrix);
+	void SetHierarchy(unsigned int aBoneID,const  Matrix& aParentMatrix);
 	void UpdateAnimationHierarcy(float t);
 	eAnimationState myState;
 	int myCurrentAnimation;
 	float myAnimationTimer;
 	unsigned int myCurrentFrame;
-	std::array<CU::Matrix4x4<float>,boneLimit> myBoneTransforms;
+	std::array< Matrix,boneLimit> myBoneTransforms;
 	std::vector < std::shared_ptr<Animation> > myAnimations;
 	std::shared_ptr<Skeleton> mySkeleton;
 };

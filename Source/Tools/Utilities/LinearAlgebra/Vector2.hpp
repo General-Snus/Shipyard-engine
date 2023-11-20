@@ -1,9 +1,7 @@
 #pragma once
 #include <assert.h>
 
-namespace CommonUtilities
-{
-	template <class T>
+ template <class T>
 	class Vector2
 	{
 	public:
@@ -237,7 +235,5 @@ namespace CommonUtilities
 			return x;
 		}
 		}
-	}
-
-}
-typedef CommonUtilities::Vector2<float> Vector2f;
+	} 
+using Vector2f = Vector2<float> ;

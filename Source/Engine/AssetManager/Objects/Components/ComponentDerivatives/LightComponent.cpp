@@ -1,9 +1,10 @@
-#include "AssetManager.pch.h"
-#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
 #include "LightComponent.h"
-#include <Game/Modelviewer/Core/Modelviewer.h>
+#include "AssetManager.pch.h"
+//#include <Editor/Editor/Core/Editor.h>
 #include <Tools/Utilities/Math.hpp>
+#include "../../BaseAssets/LightDataBase.h"
 
+#include <Tools/Optick/src/optick.h>
 cLight::cLight(const unsigned int anOwnerId) : Component(anOwnerId),isDirty(true)
 {
 	myLightType = eLightType::uninitialized;
@@ -18,7 +19,7 @@ cLight::cLight(const unsigned int anOwnerId,const eLightType type) : Component(a
 
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		myDirectionLightData = std::make_shared<DirectionalLight>();
 		break;
@@ -30,7 +31,7 @@ cLight::cLight(const unsigned int anOwnerId,const eLightType type) : Component(a
 		}
 		break;
 	case Spot:
-		mySpotLightData = std::make_shared<SpotLight>(); 
+		mySpotLightData = std::make_shared<SpotLight>();
 		break;
 	case uninitialized:
 		break;
@@ -61,11 +62,11 @@ void cLight::SetIsShadowCaster(bool active)
 	{
 		isDirty = true;
 		std::wstring name = L"unNamedMap";
-		CU::Vector2 resolution = {512,512};
+		Vector2 resolution = {512,512};
 		int mapsToCreate = 0;
 		switch(myLightType)
 		{
-		using enum eLightType;
+			using enum eLightType;
 		case Directional:
 			name = L"directionalLight";
 			resolution = {4096,4096};
@@ -89,7 +90,7 @@ void cLight::SetIsShadowCaster(bool active)
 
 		for(int i = 0; i < mapsToCreate; i++)
 		{
-			shadowMap[i] = std::make_shared<Texture>(); 
+			shadowMap[i] = std::make_shared<Texture>();
 
 			if(!RHI::CreateTexture(
 				shadowMap[i].get(),
@@ -139,7 +140,7 @@ void cLight::SetPower(float power)
 	SetIsDirty(true);
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		myDirectionLightData->Power = power;
 		break;
@@ -159,7 +160,7 @@ float cLight::GetPower()
 {
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		return myDirectionLightData->Power;
 		break;
@@ -182,7 +183,7 @@ void cLight::SetColor(Vector3f color)
 	SetIsDirty(true);
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		myDirectionLightData->Color = color;
 		break;
@@ -202,7 +203,7 @@ Vector3f cLight::GetColor()
 {
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		return myDirectionLightData->Color;
 		break;
@@ -225,7 +226,7 @@ void cLight::SetPosition(Vector3f position)
 	SetIsDirty(true);
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		break;
 	case Point:
@@ -244,7 +245,7 @@ Vector3f cLight::GetPosition()
 {
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		return Vector3f();
 		break;
@@ -267,7 +268,7 @@ void cLight::SetDirection(Vector3f direction)
 	SetIsDirty(true);
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		myDirectionLightData->Direction = Vector4f(direction,1);
 		break;
@@ -286,7 +287,7 @@ Vector3f cLight::GetDirection()
 {
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		return Vector3f(
 			myDirectionLightData->Direction.x,
@@ -313,7 +314,7 @@ void cLight::SetRange(float range)
 	SetIsDirty(true);
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		break;
 	case Point:
@@ -332,7 +333,7 @@ float cLight::GetRange()
 {
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		return 0;
 		break;
@@ -356,7 +357,7 @@ void cLight::SetInnerAngle(float angle)
 	SetIsDirty(true);
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		break;
 	case Point:
@@ -381,7 +382,7 @@ void cLight::SetOuterAngle(float angle)
 	SetIsDirty(true);
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		break;
 	case Point:
@@ -399,7 +400,7 @@ float cLight::GetOuterAngle()
 {
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		return 0.0f;
 		break;
@@ -424,6 +425,7 @@ std::shared_ptr<Texture> cLight::GetShadowMap(int number) const
 
 void cLight::Update()
 {
+	OPTICK_EVENT();
 	if(boundToTransform)
 	{
 		ConformToTransform();
@@ -432,7 +434,7 @@ void cLight::Update()
 	{
 		switch(myLightType)
 		{
-		using enum eLightType;
+			using enum eLightType;
 		case Directional:
 			RedrawDirectionMap();
 			break;
@@ -454,6 +456,7 @@ void cLight::Update()
 
 void cLight::ConformToTransform()
 {
+	OPTICK_EVENT();
 	Transform* transform = this->TryGetComponent<Transform>();
 	if(transform == nullptr)
 	{
@@ -466,7 +469,7 @@ void cLight::ConformToTransform()
 	}
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		myDirectionLightData->Direction = Vector4f(transform->GetForward(),1);
 		break;
@@ -488,7 +491,7 @@ void cLight::RedrawShadowMap()
 {
 	switch(myLightType)
 	{
-	using enum eLightType;
+		using enum eLightType;
 	case Directional:
 		RedrawDirectionMap();
 		break;
@@ -505,12 +508,15 @@ void cLight::RedrawShadowMap()
 
 void cLight::RedrawDirectionMap()
 {
-	const float radius = ModelViewer::Get().GetWorldBounds().GetRadius();
-	Vector3f lightPosition = radius * 2.0f * -Vector3f(myDirectionLightData->Direction.GetNormalized().x,myDirectionLightData->Direction.GetNormalized().y,myDirectionLightData->Direction.GetNormalized().z);
-	const Vector3f worldCenter = ModelViewer::Get().GetWorldBounds().GetCenter();
+	OPTICK_EVENT();
+	//TODO GET ACTIVE SCENE
+	const float radius = 100;//ModelViewer::Get().GetWorldBounds().GetRadius();
+	myDirectionLightData->Direction.Normalize();
+	Vector3f lightPosition = radius * 2.0f * -Vector3f(myDirectionLightData->Direction.x,myDirectionLightData->Direction.y,myDirectionLightData->Direction.z);
+	const Vector3f worldCenter = Vector3f();// ModelViewer::Get().GetWorldBounds().GetCenter();
 
 	myDirectionLightData->Direction = Vector4f((worldCenter - lightPosition).GetNormalized(),1);
-	myDirectionLightData->lightView = CU::Matrix4x4<float>::LookAt(lightPosition,worldCenter,{0,1,0}); // REFACTOR, Magic value up
+	myDirectionLightData->lightView = Matrix::LookAt(lightPosition,worldCenter,{0,1,0}); // REFACTOR, Magic value up
 
 	const Vector4f cameraCenter = Vector4f(worldCenter,0.0f) * myDirectionLightData->lightView;
 	myDirectionLightData->lightView = Matrix::GetFastInverse(myDirectionLightData->lightView);
@@ -525,52 +531,36 @@ void cLight::RedrawDirectionMap()
 		leftPlane,
 		rightPlane,
 		bottomPlane,
-		topPlane,
-		nearPlane,
-		farPlane);
+		topPlane, 
+		farPlane,
+		nearPlane
+	);
 }
 
 void cLight::RedrawPointMap()
 {
+	OPTICK_EVENT();
 	Vector3f lightPosition = myPointLightData->Position;
-	myPointLightData->lightView = CU::Matrix4x4<float>::LookAt(lightPosition,lightPosition + GlobalFwd,{0,1,0}); // REFACTOR, Magic value up
+	myPointLightData->lightView = Matrix::LookAt(lightPosition,lightPosition + GlobalFwd,{0,1,0}); // REFACTOR, Magic value up
 
 	const float fow = 90.0f * DEG_TO_RAD;
-	const float fowmdf = 1.0f / (tanf(fow / 2.0f));
 	const float farfield = myPointLightData->Range * 5;
-	const float nearField = 1.0f;
-	const float prc = farfield / (farfield - nearField);
-	Matrix clipMatrix;
-	clipMatrix(1,1) = fowmdf;
-	clipMatrix(2,2) = fowmdf;
-	clipMatrix(3,3) = prc;
-	clipMatrix(3,4) = 1 / prc;
-	clipMatrix(4,3) = nearField * -prc;
-	clipMatrix(4,4) = 0;
+	const float nearField = .01f;
 
-	myPointLightData->projection = clipMatrix;
+	myPointLightData->projection = DirectX::XMMatrixPerspectiveFovLH(fow,1,farfield,nearField);;
 	myPointLightData->lightView = Matrix::GetFastInverse(myPointLightData->lightView);
 }
 
 void cLight::RedrawSpotMap()
 {
+	OPTICK_EVENT();
 	Vector3f lightPosition = mySpotLightData->Position;
-	mySpotLightData->lightView = CU::Matrix4x4<float>::LookAt(lightPosition,lightPosition + mySpotLightData->Direction.GetNormalized(),{0,1,0}); // REFACTOR, Magic value up
+	mySpotLightData->lightView = Matrix::LookAt(lightPosition,lightPosition + mySpotLightData->Direction.GetNormalized(),{0,1,0}); // REFACTOR, Magic value up
 
 	const float fow = mySpotLightData->OuterConeAngle;
-	const float fowmdf = 1.0f / (tanf(fow / 2.0f));
 	const float farfield = mySpotLightData->Range * 2;
-	const float nearField = 1.0f;
-	const float prc = farfield / (farfield - nearField);
-	Matrix clipMatrix;
-	clipMatrix(1,1) = fowmdf;
-	clipMatrix(2,2) = fowmdf;
-	clipMatrix(3,3) = prc;
-	clipMatrix(3,4) = 1 / prc;
-	clipMatrix(4,3) = nearField * -prc;
-	clipMatrix(4,4) = 0;
-
-	mySpotLightData->projection = clipMatrix;
+	const float nearField = 0.01f;
+	mySpotLightData->projection = DirectX::XMMatrixPerspectiveFovLH(fow,1,farfield,nearField);;
 	mySpotLightData->lightView = Matrix::GetFastInverse(mySpotLightData->lightView);
 }
 

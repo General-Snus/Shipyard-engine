@@ -22,6 +22,7 @@ Transform::Transform(const unsigned int anOwnerId,const Matrix& aMatrix) : Compo
 */
 void Transform::Update()
 {
+	OPTICK_EVENT();
 	if(isDirty)
 	{
 		MakeSaneRotation();
@@ -36,7 +37,8 @@ void Transform::Update()
 }
 
 void Transform::Render()
-{ 
+{
+	OPTICK_EVENT();
 #ifdef _DEBUGDRAW 
 	if(primitive.NumVertices != 0 && primitive.NumIndices != 0)
 	{
@@ -44,7 +46,7 @@ void Transform::Render()
 	}
 #endif // _DEBUGDRAW 
 }  
-const CU::Matrix4x4<float>& Transform::GetTransform() const
+const Matrix& Transform::GetTransform() const
 {
 	return myTransform;
 }
@@ -181,7 +183,7 @@ void Transform::SetGizmo(bool enabled)
 
 void Transform::InitPrimitive()
 { 
-	float size = 10.0f;
+	float size = 1.0f;
 	float thicc = 15.0f;
 	std::vector<Debug::DebugVertex> myVertex;
 	std::vector<unsigned int> myIndices;
