@@ -36,8 +36,8 @@
 #include "Rendering/ParticleRenderer/ParticleVertex.h" 
 #include "GraphicCommands/GraphicCommands.h"
 #include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
-#include <Engine/AssetManager/Objects/Components/ComponentDerivatives/LightComponent.h>
-#include <Engine/AssetManager/Objects/Components/ComponentDerivatives/CameraComponent.h>
+#include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>
+#include <Engine/AssetManager/ComponentSystem/Components/CameraComponent.h>
 
 #include "GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_SetRenderTarget.h"

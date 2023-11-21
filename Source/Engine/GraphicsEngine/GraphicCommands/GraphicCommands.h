@@ -51,6 +51,7 @@ public:
 		::new (ptr) CommandClass(arguments ...);
 		*myLink = ptr;
 		myLink = &ptr->Next;
+		isEmpty = false;
 	}
 
 	void Execute();
@@ -68,6 +69,7 @@ private:
 
 	bool isExecuting = false;
 	bool isFinished = false;
+	bool isEmpty = true;
 };
 
 class GraphicsCommandListIterator

@@ -1,6 +1,6 @@
 #pragma once 
 #include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
-#include <Engine/AssetManager/Objects/Components/ComponentDerivatives/MeshRenderer.h>
+#include <Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h>
 
 class GfxCmd_RenderMesh : public GraphicCommandBase
 {

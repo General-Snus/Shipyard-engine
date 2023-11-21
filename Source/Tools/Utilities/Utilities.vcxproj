@@ -153,6 +153,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AI\AgentSystem\Actor.h" />
+    <ClInclude Include="AI\AgentSystem\AIEventManager.h" />
+    <ClInclude Include="AI\AgentSystem\Controller.h" />
+    <ClInclude Include="AI\AgentSystem\EventController.h" />
+    <ClInclude Include="AI\AgentSystem\PlayerController.h" />
+    <ClInclude Include="AI\AgentSystem\PollingController.h" />
+    <ClInclude Include="AI\AgentSystem\PollingStation.h" />
+    <ClInclude Include="AI\NavMesh\NavMesh.h" />
     <ClInclude Include="DataStructures\BSTSet.hpp" />
     <ClInclude Include="DataStructures\DoublyLinkedList.hpp" />
     <ClInclude Include="DataStructures\HashMap.hpp" />
@@ -191,6 +199,14 @@
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AI\AgentSystem\Actor.cpp" />
+    <ClCompile Include="AI\AgentSystem\AIEventManager.cpp" />
+    <ClCompile Include="AI\AgentSystem\Controller.cpp" />
+    <ClCompile Include="AI\AgentSystem\EventController.cpp" />
+    <ClCompile Include="AI\AgentSystem\PlayerController.cpp" />
+    <ClCompile Include="AI\AgentSystem\PollingController.cpp" />
+    <ClCompile Include="AI\AgentSystem\PollingStation.cpp" />
+    <ClCompile Include="AI\NavMesh\NavMesh.cpp" />
     <ClCompile Include="Game\Camera.cpp" />
     <ClCompile Include="Game\Timer.cpp" />
     <ClCompile Include="pch.cpp">

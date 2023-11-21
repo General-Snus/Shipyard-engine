@@ -1,6 +1,6 @@
 #pragma once
 #include <Engine/GraphicsEngine/Rendering/ParticleRenderer/ParticleVertex.h>
-#include <Engine/AssetManager/Objects/Components/ComponentDerivatives/ParticleSystem.h>
+#include <Engine/AssetManager/ComponentSystem/Components/ParticleSystem.h>
 
 class ParticleSystem;
 struct EmmiterSettingsData

@@ -1,5 +1,6 @@
 #pragma once
 #include <assert.h> 
+#include <cmath>
 template <class T>
 class Vector3
 {
@@ -169,7 +170,7 @@ inline T Vector3<T>::LengthSqr() const
 template<class T>
 inline T Vector3<T>::Length() const
 {
-	return static_cast<T>(sqrt(LengthSqr()));
+	return static_cast<T>(std::sqrt(LengthSqr()));
 }
 
 template<class T>

@@ -1,6 +1,6 @@
 #include <GraphicsEngine.pch.h>
 #include "../Headers/GfxCmd_RenderMeshShadow.h"
-#include <Engine/AssetManager/Objects/Components/ComponentDerivatives/MeshRenderer.h>
+#include <Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h>
 #include <Engine/GraphicsEngine/Rendering/Buffers/ObjectBuffer.h> 
 
 GfxCmd_RenderMeshShadow::GfxCmd_RenderMeshShadow(const std::shared_ptr<RenderData> aMesh,const Matrix& aTransform,bool instanced) : GfxCmd_RenderMesh(aMesh,aTransform,instanced)

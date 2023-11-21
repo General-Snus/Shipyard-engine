@@ -1,5 +1,5 @@
 #pragma once
-#include <Engine/AssetManager/Objects/GameObjects/GameObject.h>
+#include <Engine/AssetManager/ComponentSystem/GameObject.h>
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp> 
 
 class Logger;

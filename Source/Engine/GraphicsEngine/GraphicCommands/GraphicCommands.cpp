@@ -42,8 +42,8 @@ GraphicsCommandList::~GraphicsCommandList()
 	while(it.HasCommand())
 	{
 		GraphicCommandBase* cmd = it.Next();
- 		cmd->Destroy();	
-	} 
+		cmd->Destroy();
+	}
 	delete[] myData;
 	myData = nullptr;
 	myRoot = nullptr;
@@ -58,18 +58,21 @@ void GraphicsCommandList::Initialize(size_t aSize)
 
 	myRoot = std::bit_cast<GraphicCommandBase*>(myData);
 	myLink = &myRoot;
+
+	isEmpty= true;
 }
 
 void GraphicsCommandList::Execute()
-{
-	if(!isExecuting && !isFinished)
+{ 
+	if(!isExecuting && !isFinished && !isEmpty)
 	{
 		isExecuting = true;
-		GraphicsCommandListIterator it(*this);
+		GraphicsCommandListIterator it(*this); 
+
 		while(it.HasCommand())
 		{
 			GraphicCommandBase* cmd = it.Next();
-			cmd->ExecuteAndDestroy(); 
+			cmd->ExecuteAndDestroy();
 		}
 		isFinished = true;
 		isExecuting = false;
@@ -98,10 +101,11 @@ void GraphicsCommandList::Reset()
 		myLink = &myRoot;
 		myCursor = 0;
 		isFinished = false;
+		isEmpty = true;
 	}
 }
 
-GraphicsCommandListIterator::GraphicsCommandListIterator(const GraphicsCommandList& lst) 
+GraphicsCommandListIterator::GraphicsCommandListIterator(const GraphicsCommandList& lst)
 {
 	myPtr = lst.myRoot;
 }
@@ -111,4 +115,4 @@ GraphicCommandBase* GraphicsCommandListIterator::Next()
 	GraphicCommandBase* cmd = myPtr;
 	myPtr = cmd->Next;
 	return cmd;
-} 
+}
