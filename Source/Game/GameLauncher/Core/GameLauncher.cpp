@@ -25,7 +25,11 @@
 
 #include <Tools/Utilities/AI/AgentSystem/AIEventManager.h>
 #include <Tools/Utilities/AI/AgentSystem/EventController.h>
+#include <Tools/Utilities/AI/AgentSystem/PollingStation.h>
+#include <Tools/Utilities/AI/AgentSystem/PollingController.h>
 #include <Tools/Utilities/AI/AgentSystem/Actor.h>
+
+#include <Engine/AssetManager/ComponentSystem/Components/ActorSystem/cActor.h>
 
 
 #define Flashlight
@@ -39,7 +43,7 @@ void GameLauncher::Init()
 }
 
 void GameLauncher::Start()
-{ 
+{
 	GameObjectManager& gom = GameObjectManager::GetInstance();
 	myCustomHandler = gom.CreateGameObject();
 	myMesh = gom.CreateGameObject();
@@ -64,14 +68,14 @@ void GameLauncher::Start()
 		transform.SetRotation(0,0,-45);
 		cLight& pLight = worldRoot.GetComponent<cLight>();
 		pLight.SetColor(Vector3f(1,1,1));
-		pLight.SetPower(5.0f);
+		pLight.SetPower(1.0f);
 		pLight.BindDirectionToTransform(true);
 
 		if(gom.GetAllComponents<BackgroundColor>().empty())
 		{
 			worldRoot.AddComponent<BackgroundColor>(Vector4f(1.0f,1.0f,1.0f,1.0f));
 		}
-	} 
+	}
 	{
 		GameObject test3 = gom.CreateGameObject();
 		test3.AddComponent<cMeshRenderer>("Models/SteelFloor.fbx");
@@ -83,45 +87,74 @@ void GameLauncher::Start()
 	//Movement1
 
 
-
-
+	Actor* player;
+	std::vector<Actor*> drones;
+	drones.reserve(3);
 	//World interfacing
 	{
 		//Drone
-		GameObject drone = gom.CreateGameObject();
-		drone.AddComponent<cMeshRenderer>("Models/C64.fbx");
+		myCustomHandler = gom.CreateGameObject();
+		myCustomHandler.AddComponent<cMeshRenderer>("Models/C64.fbx");
 
-		auto& transform = drone.AddComponent<Transform>();
-		transform.SetPosition(-10,0,0);
-		transform.Rotate(-90,0,0); 
-		 
-		auto& actor = drone.AddComponent<cActor>();
-		actor.GetActor()->SetController(new EventController());
+		auto& transform = myCustomHandler.AddComponent<Transform>();
+		transform.SetPosition(0,0,0);
+		transform.Rotate(-90,0,0);
+
+		auto& actor = myCustomHandler.AddComponent<cActor>();
+		player = actor.GetActor();
+		player->SetController(new EventController());
 	}
 
+	for(size_t i = 0; i < drones.size(); i++)
 	{
+		float x = RandomInRange<float>(-10.f,10.f);
+		float z = RandomInRange<float>(-10.f,10.f);
 		//Drone
 		GameObject drone = gom.CreateGameObject();
 		drone.AddComponent<cMeshRenderer>("Models/C64.fbx");
 
 		auto& transform = drone.AddComponent<Transform>();
-		transform.SetPosition(10,0,0);
+		transform.SetPosition(x,0,z);
+		transform.Rotate(-90,0,0);
+
+		auto& actor = drone.AddComponent<cActor>();
+		actor.GetActor()->SetController(new EventController());
+		AIEventManager::Instance().RegisterListener(eAIEvent::playerHacking,actor.GetActor()->GetController());
+	}
+
+	std::vector<Actor*> computers;
+	computers.resize(3);
+	for(size_t i = 0; i < 3; i++)
+	{
+		float x = RandomInRange<float>(-10.f,10.f);
+		float z = RandomInRange<float>(-10.f,10.f);
+
+		GameObject drone = gom.CreateGameObject();
+		drone.AddComponent<cMeshRenderer>("Models/Cube.fbx");
+		auto& transform = drone.AddComponent<Transform>();
+		transform.SetPosition(x,0,z);
+		transform.SetScale(.5f);
+		auto& actor = drone.AddComponent<cActor>();
+		computers[i] = actor.GetActor();
+	}
+
+	const auto* playerPollingStation = new PollingStation(*player,computers);
+	for(size_t i = 0; i < 2; i++)
+	{
+		float x = RandomInRange<float>(-10.f,10.f);
+		float z = RandomInRange<float>(-10.f,10.f);
+		//Drone
+		GameObject drone = gom.CreateGameObject();
+		drone.AddComponent<cMeshRenderer>("Models/C64.fbx");
+
+		auto& transform = drone.AddComponent<Transform>();
+		transform.SetPosition(x,0,z);
 		transform.Rotate(-90,0,0);
 
 
 		auto& actor = drone.AddComponent<cActor>();
-		actor.GetActor()->SetController(new EventController());
+		actor.GetActor()->SetController(new PollingController(*playerPollingStation));
 	}
-
-
-
-
-
-
-
-
-
-
 
 
 	GLLogger.Log("GameLauncher start");
@@ -129,23 +162,27 @@ void GameLauncher::Start()
 
 void GameLauncher::Update(float delta)
 {
-	OPTICK_EVENT(); 
+	OPTICK_EVENT();
 	//Movement1
+	AIEventManager::Instance().Update();
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::NUMPAD8))
+	{
+		myCustomHandler.GetComponent<Transform>().Move(0,0,1 * delta);
+	}
+	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::NUMPAD2))
+	{
+		myCustomHandler.GetComponent<Transform>().Move(0,0,-1 * delta);
+	}
+	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::NUMPAD6))
+	{
+		myCustomHandler.GetComponent<Transform>().Move(1 * delta,0,0);
+	}
+	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::NUMPAD4))
+	{
+		myCustomHandler.GetComponent<Transform>().Move(-1 * delta,0,0);
+	}
 
 
 	//Other
@@ -158,5 +195,5 @@ void GameLauncher::Update(float delta)
 	}
 
 	Transform& pLight = GameObjectManager::GetInstance().GetWorldRoot().GetComponent<Transform>();
-	pLight.Rotate(0,delta,0); 
+	pLight.Rotate(0,delta,0);
 }

@@ -67,20 +67,21 @@ Vector3f Transform::GetUp()
 }
 
 void Transform::Move(Vector2f translation)
-{
-	//myTransform(4,1) += translation.x;
-	//myTransform(4,2) += translation.y;
+{ 
 	myPosition.x += translation.x;
 	myPosition.y += translation.y;
 	isDirty = true;
 }
 
 void Transform::Move(Vector3f translation)
-{
-	//myTransform(4,1) += translation.x;
-	//myTransform(4,2) += translation.y;
-	//myTransform(4,3) += translation.z;
+{ 
 	myPosition += translation;
+	isDirty = true;
+}
+
+void Transform::Move(float X,float Y,float Z)
+{
+	myPosition += {X,Y,Z}; 
 	isDirty = true;
 }
 

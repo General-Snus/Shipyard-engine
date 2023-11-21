@@ -1,5 +1,6 @@
 #include "AssetManager.pch.h"
-#include "../cActor.h" 
+#include "../cActor.h"  
+#include <Tools/Utilities/AI/AgentSystem/Actor.h>
 
 cActor::cActor(const unsigned int anOwnerID) : Component(anOwnerID)
 {
@@ -19,10 +20,15 @@ void cActor::Update()
 	if(transform) //Actors will was accepted, do checks around here if allowed to move external forces such as transform lock
 	{
 		transform->Move(myActor->Update(deltatime));
-		myActor->SetPosition(myActor->GetPosition());
+		myActor->SetPosition(transform->GetPosition());
 	}
 }
 
 void cActor::Render()
 {
+}
+
+Actor* cActor::GetActor()
+{
+	return myActor;
 }

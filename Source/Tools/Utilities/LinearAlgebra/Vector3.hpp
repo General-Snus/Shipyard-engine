@@ -177,6 +177,12 @@ template<class T>
 inline Vector3<T> Vector3<T>::GetNormalized() const
 {
 	const T len = 1 / Length();
+
+	if(len != len || isinf(len)) //IEEE FLOAT NAN
+	{
+		return Vector3<T>(0,0,0);
+	}
+
 	return Vector3<T>(
 		x * len,
 		y * len,

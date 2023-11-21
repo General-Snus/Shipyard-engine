@@ -25,6 +25,7 @@ public:
 
 	void Move(Vector2f translation);
 	void Move(Vector3f translation);
+	void Move(float X,float Y,float Z);
 
 	void SetPosition(Vector2f position);
 	void SetPosition(Vector3f position);

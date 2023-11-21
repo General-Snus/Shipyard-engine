@@ -8,18 +8,19 @@
 class Actor 
 { 
 	friend class AIEventManager;
+	friend class cActor;
 public:
 	Actor() = default;
 	Actor(const Actor&) = default;
 	~Actor() = default;
 
+	Vector3f GetPosition() const { return position; } 
+	Controller* GetController() const { return controller; } 
+	void SetController(Controller* aController);
+
+private:
 	Vector3f Update(float aTimeDelta);
 	void SetPosition(const Vector3f aPosition) { position = aPosition; }
-	Vector3f GetPosition() const { return position; } 
-
-	void SetController(Controller* aController);
-	Controller* GetController() const { return controller; } 
-private:
 	Vector3f position; 
 	Controller* controller; 
 };

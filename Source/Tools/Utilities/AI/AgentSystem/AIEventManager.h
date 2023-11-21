@@ -24,7 +24,7 @@ public:
 	void RegisterListener(const eAIEvent eventType,Controller* aController);
 	void Update();
 
-	AIEventManager& Instance()
+	static AIEventManager& Instance()
 	{
 		static AIEventManager instance;
 		return instance;
