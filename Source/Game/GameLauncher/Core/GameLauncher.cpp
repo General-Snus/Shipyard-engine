@@ -31,8 +31,6 @@
 
 #include <Engine/AssetManager/ComponentSystem/Components/ActorSystem/cActor.h>
 
-
-#define Flashlight
 //#define ParticleSystemToggle
 
 using json = nlohmann::json;
@@ -50,8 +48,14 @@ void GameLauncher::Start()
 
 	{
 		GameObject camera = gom.CreateGameObject();
-		camera.AddComponent<cCamera>();
+		  camera.AddComponent<cCamera>(); 
 		gom.SetLastGOAsCamera();
+
+
+		auto& transform = camera.AddComponent<Transform>();
+		transform.SetPosition(0,25,0);
+		transform.SetRotation(90,0,0);
+	
 	}
 
 	{
@@ -60,9 +64,7 @@ void GameLauncher::Start()
 
 		worldRoot.AddComponent<FrameStatistics>();
 		worldRoot.AddComponent<RenderMode>();
-
 		worldRoot.AddComponent<Skybox>();
-
 		worldRoot.AddComponent<cLight>(eLightType::Directional);
 		Transform& transform = worldRoot.AddComponent<Transform>();
 		transform.SetRotation(0,0,-45);
@@ -91,14 +93,13 @@ void GameLauncher::Start()
 	std::vector<Actor*> drones;
 	drones.reserve(3);
 	//World interfacing
-	{
+	{	
 		//Drone
 		myCustomHandler = gom.CreateGameObject();
-		myCustomHandler.AddComponent<cMeshRenderer>("Models/C64.fbx");
-
+		auto & mesh = myCustomHandler.AddComponent<cMeshRenderer>("Models/C64.fbx");
+		mesh.SetMaterialPath("Materials/C64Player.json");
 		auto& transform = myCustomHandler.AddComponent<Transform>();
-		transform.SetPosition(0,0,0);
-		transform.Rotate(-90,0,0);
+		transform.SetPosition(0,0,0); 
 
 		auto& actor = myCustomHandler.AddComponent<cActor>();
 		player = actor.GetActor();
@@ -111,11 +112,10 @@ void GameLauncher::Start()
 		float z = RandomInRange<float>(-10.f,10.f);
 		//Drone
 		GameObject drone = gom.CreateGameObject();
-		drone.AddComponent<cMeshRenderer>("Models/C64.fbx");
-
+		auto& mesh = drone.AddComponent<cMeshRenderer>("Models/C64.fbx");
+		mesh.SetMaterialPath("Materials/C64Enemy.json");
 		auto& transform = drone.AddComponent<Transform>();
-		transform.SetPosition(x,0,z);
-		transform.Rotate(-90,0,0);
+		transform.SetPosition(x,0,z); 
 
 		auto& actor = drone.AddComponent<cActor>();
 		actor.GetActor()->SetController(new EventController());
@@ -130,7 +130,9 @@ void GameLauncher::Start()
 		float z = RandomInRange<float>(-10.f,10.f);
 
 		GameObject drone = gom.CreateGameObject();
-		drone.AddComponent<cMeshRenderer>("Models/Cube.fbx");
+		auto& mesh = drone.AddComponent<cMeshRenderer>("Models/Cube.fbx");
+		mesh.SetMaterialPath("Materials/C64.json");
+
 		auto& transform = drone.AddComponent<Transform>();
 		transform.SetPosition(x,0,z);
 		transform.SetScale(.5f);
@@ -145,17 +147,15 @@ void GameLauncher::Start()
 		float z = RandomInRange<float>(-10.f,10.f);
 		//Drone
 		GameObject drone = gom.CreateGameObject();
-		drone.AddComponent<cMeshRenderer>("Models/C64.fbx");
+		auto& mesh = drone.AddComponent<cMeshRenderer>("Models/C64.fbx");
+		mesh.SetMaterialPath("Materials/C64Enemy.json");
 
 		auto& transform = drone.AddComponent<Transform>();
-		transform.SetPosition(x,0,z);
-		transform.Rotate(-90,0,0);
-
+		transform.SetPosition(x,0,z);  
 
 		auto& actor = drone.AddComponent<cActor>();
 		actor.GetActor()->SetController(new PollingController(*playerPollingStation));
-	}
-
+	} 
 
 	GLLogger.Log("GameLauncher start");
 }
@@ -164,8 +164,7 @@ void GameLauncher::Update(float delta)
 {
 	OPTICK_EVENT();
 	//Movement1
-	AIEventManager::Instance().Update();
-
+	AIEventManager::Instance().Update(); 
 
 	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::NUMPAD8))
 	{
@@ -194,6 +193,6 @@ void GameLauncher::Update(float delta)
 		}
 	}
 
-	Transform& pLight = GameObjectManager::GetInstance().GetWorldRoot().GetComponent<Transform>();
-	pLight.Rotate(0,delta,0);
+	//Transform& pLight = GameObjectManager::GetInstance().GetWorldRoot().GetComponent<Transform>();
+	//pLight.Rotate(0,delta,0);
 }

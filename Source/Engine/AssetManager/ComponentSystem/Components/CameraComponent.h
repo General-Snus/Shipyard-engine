@@ -11,6 +11,7 @@ struct CameraSettings
 	float nearField = 1.0f;
 };
 
+//#define Flashlight
 class cCamera : public Component
 {
 public:

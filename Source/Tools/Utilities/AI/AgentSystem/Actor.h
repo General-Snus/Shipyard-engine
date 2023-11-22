@@ -2,6 +2,11 @@
 #include "Controller.h" 
 #include <filesystem>
 
+struct SteeringOutput
+{
+	Vector3f movement;
+	Vector3f rotation;
+};
 
 //An actor has a want but no way to achieve it
 //An actor will be listend to by a c[omponent]Actor that can act upon the actors wants

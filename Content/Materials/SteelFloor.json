@@ -1,7 +1,7 @@
 
 {
     "MaterialData": {
-        "albedoColor":  [0.5,0.5,0.5,0.5] ,
+        "albedoColor":  [1.0,0.8,0.8,1] ,
         "UVTiling": [1.0,1.0],
         "NormalStrength" : 1.0,
         "Shine" : 50

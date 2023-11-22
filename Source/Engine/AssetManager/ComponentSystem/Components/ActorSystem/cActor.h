@@ -1,7 +1,7 @@
 #pragma once 
 #include "../../Component.h"
-
-class Actor;
+#include <Tools/Utilities/AI/AgentSystem/Actor.h>
+ 
 class cActor : public Component
 {
 public:

@@ -21,7 +21,10 @@ cCamera::cCamera(const unsigned int anOwnerId) : Component(anOwnerId)
 	myClipMatrix(3,4) = 1;
 	myClipMatrix(4,3) = mySettings.nearField;
 	myClipMatrix(4,4) = 0.0f;
-	//myClipMatrix = DirectX::XMMatrixPerspectiveFovLH(mySettings.fowmdf,mySettings.APRatio,mySettings.farfield,mySettings.nearField); 
+	myClipMatrix = DirectX::XMMatrixOrthographicLH(40,40,1000000,mySettings.nearField);
+
+	//myClipMatrix = DirectX::XMMatrixPerspectiveFovLH(mySettings.fowmdf,mySettings.APRatio,mySettings.farfield,mySettings.nearField);3
+#ifdef Flashlight
 	GetGameObject().AddComponent<cLight>(eLightType::Spot);
 	std::weak_ptr<SpotLight> pLight = GetComponent<cLight>().GetData<SpotLight>();
 	pLight.lock()->Position = Vector3f(0,0,0);
@@ -32,6 +35,7 @@ cCamera::cCamera(const unsigned int anOwnerId) : Component(anOwnerId)
 	pLight.lock()->InnerConeAngle = 10 * DEG_TO_RAD;
 	pLight.lock()->OuterConeAngle = 45 * DEG_TO_RAD;
 	GetComponent<cLight>().BindDirectionToTransform(true);
+#endif
 }
 
 cCamera::cCamera(const unsigned int anOwnerId,CameraSettings settings) : Component(anOwnerId)
@@ -45,9 +49,11 @@ cCamera::cCamera(const unsigned int anOwnerId,CameraSettings settings) : Compone
 	//myClipMatrix(3,3) = settings.farfield / (settings.farfield - settings.nearField);
 	//myClipMatrix(4,3) = settings.nearField * settings.farfield / (settings.farfield - settings.nearField);
 	//myClipMatrix(3,4) = 1;
-	myClipMatrix = DirectX::XMMatrixPerspectiveFovLH(settings.fow,settings.APRatio,settings.farfield,settings.nearField);
+	myClipMatrix = DirectX::XMMatrixOrthographicLH(20,20,settings.farfield,settings.nearField);
+	//myClipMatrix = DirectX::XMMatrixPerspectiveFovLH(settings.fow,settings.APRatio,settings.farfield,settings.nearField);
 
-	mySettings = settings;
+	mySettings = settings; 
+#ifdef Flashlight
 	GetGameObject().AddComponent<cLight>(eLightType::Spot);
 	std::weak_ptr<SpotLight> pLight = GetComponent<cLight>().GetData<SpotLight>();
 	pLight.lock()->Position = Vector3f(0,0,0);
@@ -58,6 +64,7 @@ cCamera::cCamera(const unsigned int anOwnerId,CameraSettings settings) : Compone
 	pLight.lock()->InnerConeAngle = 10 * DEG_TO_RAD;
 	pLight.lock()->OuterConeAngle = 45 * DEG_TO_RAD;
 	GetComponent<cLight>().BindDirectionToTransform(true);
+#endif
 }
 
 cCamera::~cCamera()
