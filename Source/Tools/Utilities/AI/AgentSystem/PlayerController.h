@@ -7,7 +7,7 @@ class PlayerController : public Controller
 {
 public:
 	explicit PlayerController();
-	Vector3f Update(const Vector3f aPosition) override;
+	SteeringOutput Update(const SteeringInput& aPosition) override;
 
 private:
 	void Input(const Vector3f& currentPosition);

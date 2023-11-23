@@ -6,27 +6,28 @@ PlayerController::PlayerController()
 	this->controllerType = eControllerType::player;
 }
 
-Vector3f PlayerController::Update(const  Vector3f aPosition)
+SteeringOutput PlayerController::Update(const  SteeringInput& input)
 {
-	Input(aPosition);
+	SteeringOutput output;
+	Input(input.position);
 	Render();
 
 	if(myPath.myPath.size())
 	{
-		if((aPosition - myPath.myPath[0]).Length() < nodeDistance)
+		if((input.position - myPath.myPath[0]).Length() < nodeDistance)
 		{
 			myPath.myPath.erase(myPath.myPath.begin());
 		}
 		if(myPath.myPath.size())
 		{
-			return (myPath.myPath[0] - aPosition);
+			output.movement= (myPath.myPath[0] - input.position);
 		}
 		else
 		{
-			return Vector3f();
+			output.movement= Vector3f();
 		}
 	}
-	return Vector3f();
+	return output;
 }
 
 void PlayerController::Input(const Vector3f& currentPosition)

@@ -5,7 +5,7 @@ class EventController : public Controller
 {
 public: 
 	explicit EventController();
-	Vector3f Update(const Vector3f aPosition) override;
+	SteeringOutput Update(const SteeringInput& aPosition) override;
 	void Recieve(const AIEvent& aEvent) override;
 private:
 	bool pathToTarget;

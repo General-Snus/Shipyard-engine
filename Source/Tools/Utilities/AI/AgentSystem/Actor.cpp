@@ -1,11 +1,11 @@
 #include "Actor.h"  
-Vector3f Actor::Update(float aTimeDelta)
+SteeringOutput Actor::Update(const SteeringInput& input )
 {
 	if(controller)
 	{ 
-		return controller->Update(position).GetNormalized() * aTimeDelta; //Velocity
+		return controller->Update(input); //Velocity
 	}
-	return Vector3f(0,0,0);
+	return SteeringOutput();
 }
  
 
@@ -13,3 +13,4 @@ void Actor::SetController(Controller* aController)
 {
 	controller = aController;
 }
+

@@ -2,6 +2,17 @@
 #include "../../LinearAlgebra/Vector3.hpp"
 #include "AIEventManager.h"
 
+struct SteeringOutput
+{
+	Vector3f movement;
+	Vector3f rotation;
+};
+
+struct SteeringInput
+{
+	Vector3f position;
+	Vector3f rotation;
+};
 enum class eControllerType : int
 {
 	dummy,player,event,polling,count
@@ -10,7 +21,7 @@ enum class eControllerType : int
 class Controller
 {
 public:
-	virtual Vector3f Update(const Vector3f aPosition) = 0;
+	virtual SteeringOutput Update(const SteeringInput& input) = 0;
 	virtual void Recieve(const AIEvent& aEvent);
 
 protected:

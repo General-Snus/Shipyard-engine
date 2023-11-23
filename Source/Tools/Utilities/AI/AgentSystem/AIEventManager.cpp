@@ -1,7 +1,8 @@
+
 #include "AIEventManager.h"
-#include "Actor.h"
 #include "EventController.h"
 #include "PlayerController.h" 
+#include "Actor.h"
 
 AIEventManager::AIEventManager()
 {

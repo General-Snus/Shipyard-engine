@@ -1,6 +1,7 @@
 #pragma once 
 #include "../../Component.h"
 #include <Tools/Utilities/AI/AgentSystem/Actor.h>
+#include <Tools/Utilities/AI/AgentSystem/Controller.h>
  
 class cActor : public Component
 {
@@ -10,6 +11,8 @@ public:
 	void Init() override;
 	void Update() override;
 	void Render() override; 
+	Controller* GetController() const;
+	void SetController(Controller* aController);
 	Actor* GetActor(); 
 private:
 	Actor* myActor = nullptr;

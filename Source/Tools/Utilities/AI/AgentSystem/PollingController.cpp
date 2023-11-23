@@ -6,15 +6,16 @@ PollingController::PollingController(const PollingStation& aPollingStation) : po
 	this->controllerType = eControllerType::polling;
 }
 
-Vector3f PollingController::Update(const  Vector3f aPosition)
+SteeringOutput PollingController::Update(const  SteeringInput& aInput)
 {
+	SteeringOutput output;
 	constexpr float hackingDistance = 1.0f;
 	for(const auto& i : pollingStation.GetComputersPosition())
 	{
-		if( (pollingStation.GetPlayerPosition()-i).Length() < hackingDistance)
+		if((pollingStation.GetPlayerPosition() - i).Length() < hackingDistance)
 		{
-			return (i - aPosition);
+			output.movement= (i - aInput.position);
 		}
 	}
-	return Vector3f();
+	return output;
 }

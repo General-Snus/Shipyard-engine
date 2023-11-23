@@ -8,7 +8,7 @@ class PollingController : public Controller
 {
 public:
 	explicit PollingController(const PollingStation& aPollingStation);
-	Vector3f Update(const  Vector3f aPosition) override;
+	SteeringOutput Update(const SteeringInput& aPosition) override;
 
 private:
 	const PollingStation& pollingStation;

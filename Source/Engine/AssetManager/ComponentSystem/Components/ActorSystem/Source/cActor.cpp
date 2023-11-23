@@ -1,34 +1,46 @@
 #include "AssetManager.pch.h"
-#include "../cActor.h"  
-#include <Tools/Utilities/AI/AgentSystem/Actor.h>
+#include "../cActor.h"   
 
 cActor::cActor(const unsigned int anOwnerID) : Component(anOwnerID)
-{
-	myActor = new Actor(); //TODO Actor pool? alla mina vänner hatar raw pekare
+{myActor = new Actor();
 }
 
 void cActor::Init()
 {
-	
+
 }
 
 void cActor::Update()
 {
 	auto* transform = TryGetComponent<Transform>();
 	float deltatime = Timer::GetInstance().GetDeltaTime();
-	
+
 	if(transform) //Actors will was accepted, do checks around here if allowed to move external forces such as transform lock
 	{
-		transform->Move(myActor->Update(deltatime));
-		myActor->SetPosition(transform->GetPosition());
+		SteeringInput input;
+		SteeringOutput output;
+		//Update here
+
+
+			//output = myActor->Update(input); //Velocity
+		transform->Move(output.movement * deltatime);
+		transform->Move(output.rotation * deltatime);
 	}
 }
-
+Actor* cActor::GetActor()
+{
+	return myActor;
+}
 void cActor::Render()
 {
 }
 
-Actor* cActor::GetActor()
+Controller* cActor::GetController() const
 {
-	return myActor;
+	return myActor->GetController();
+}
+
+void cActor::SetController(Controller* aController)
+{
+	myActor->SetController(aController);
 }

@@ -101,9 +101,9 @@ void GameLauncher::Start()
 		auto& transform = myCustomHandler.AddComponent<Transform>();
 		transform.SetPosition(0,0,0); 
 
-		auto& actor = myCustomHandler.AddComponent<cActor>();
+		auto& actor = myCustomHandler.AddComponent<cActor>(); 
+		actor.SetController(new EventController());
 		player = actor.GetActor();
-		player->SetController(new EventController());
 	}
 
 	for(size_t i = 0; i < drones.size(); i++)
@@ -118,8 +118,8 @@ void GameLauncher::Start()
 		transform.SetPosition(x,0,z); 
 
 		auto& actor = drone.AddComponent<cActor>();
-		actor.GetActor()->SetController(new EventController());
-		AIEventManager::Instance().RegisterListener(eAIEvent::playerHacking,actor.GetActor()->GetController());
+		actor.SetController(new EventController());
+		AIEventManager::Instance().RegisterListener(eAIEvent::playerHacking,actor.GetController());
 	}
 
 	std::vector<Actor*> computers;
@@ -154,7 +154,7 @@ void GameLauncher::Start()
 		transform.SetPosition(x,0,z);  
 
 		auto& actor = drone.AddComponent<cActor>();
-		actor.GetActor()->SetController(new PollingController(*playerPollingStation));
+		actor.SetController(new PollingController(*playerPollingStation));
 	} 
 
 	GLLogger.Log("GameLauncher start");

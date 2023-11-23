@@ -36,7 +36,7 @@ private:
 
 	std::unordered_map<eAIEvent, std::vector<Controller*>> eventListener; 
 	int pathToward;
-	const Actor* player;
-	const std::vector<Actor*> computers;  
+	Actor* player;
+	std::vector<Actor*> computers;  
 };
  

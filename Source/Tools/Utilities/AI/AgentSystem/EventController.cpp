@@ -5,8 +5,9 @@ EventController::EventController()
 	this->controllerType = eControllerType::event;
 }
 
-Vector3f EventController::Update(const Vector3f aPosition)
+SteeringOutput EventController::Update(const SteeringInput& input)
 {
+	SteeringOutput output;
 	if(pathToTarget)
 	{
 		pathToTarget = false;
@@ -14,20 +15,20 @@ Vector3f EventController::Update(const Vector3f aPosition)
 	}
 	if(myPath.myPath.size())
 	{
-		if((aPosition - myPath.myPath[0]).Length() < nodeDistance)
+		if((input.position - myPath.myPath[0]).Length() < nodeDistance)
 		{
 			myPath.myPath.erase(myPath.myPath.begin());
 		}
 		if(myPath.myPath.size())
 		{
-			return (myPath.myPath[0] - aPosition);
+			output.movement = (myPath.myPath[0] - input.position);
 		}
 		else
 		{
-			return  Vector3f();
+			output.movement = Vector3f();
 		}
 	}
-	return  Vector3f();
+	return output;
 }
 
 void EventController::Recieve(const AIEvent& aEvent)
