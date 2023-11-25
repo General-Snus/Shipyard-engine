@@ -4,8 +4,8 @@
 class ImGuiComponent : public Component 
 {  
 public:
-	ImGuiComponent(const unsigned int anOwnerID) : Component(anOwnerID) {  }
-	ImGuiComponent(const unsigned int anOwnerID,eComponentType aComponentType) : Component(anOwnerID,aComponentType) {  }
+	ImGuiComponent(const SY::UUID anOwnerID) : Component(anOwnerID) {  }
+	ImGuiComponent(const SY::UUID anOwnerID,eComponentType aComponentType) : Component(anOwnerID,aComponentType) {  }
 	~ImGuiComponent() { } 
 
 	virtual void OnStart()  {};

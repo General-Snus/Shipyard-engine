@@ -160,6 +160,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ComponentSystem\Components\ActorSystem\cActor.h" />
+    <ClInclude Include="ComponentSystem\Components\Physics\cPhysics_Kinematic.h" />
+    <ClInclude Include="ComponentSystem\Components\Physics\cPhysics_Newtonian.h" />
+    <ClInclude Include="ComponentSystem\UUID.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\Actor.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\AIEventManager.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\Controller.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\EventController.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\PlayerController.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\PollingController.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\PollingStation.h" />
+    <ClInclude Include="Objects\AI\NavMesh\NavMesh.h" />
     <ClInclude Include="Objects\BaseAssets\ParticleEmitter.h" />
     <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\RenderMode.h" />
     <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\FrameStatistics.h" />
@@ -187,6 +198,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\cActor.cpp" />
+    <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysics_Kinematic.cpp" />
+    <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysics_Newtonian.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\Actor.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\AIEventManager.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Controller.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\EventController.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\PlayerController.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\PollingController.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\PollingStation.cpp" />
+    <ClCompile Include="Objects\AI\NavMesh\NavMesh.cpp" />
     <ClCompile Include="Objects\BaseAssets\ParticleEmitter.cpp" />
     <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\RenderMode.cpp" />
     <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\FrameStatistics.cpp" />

@@ -1,6 +1,7 @@
 #include "TGAFbx.pch.h"
 #include "Internals.h"
 #define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
 #include "Windows.h"
 
 namespace TGA

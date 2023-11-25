@@ -90,6 +90,39 @@
     <ClInclude Include="ComponentSystem\Components\ActorSystem\cActor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\Controller.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\EventController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\PlayerController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\PollingController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\Actor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\AIEventManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\PollingStation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\NavMesh\NavMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ComponentSystem\Components\Physics\cPhysics_Kinematic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ComponentSystem\Components\Physics\cPhysics_Newtonian.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ComponentSystem\UUID.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssetManager.pch.cpp">
@@ -162,6 +195,36 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\cActor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Controller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\EventController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\PlayerController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\PollingController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\Actor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\AIEventManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\PollingStation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\NavMesh\NavMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysics_Kinematic.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysics_Newtonian.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

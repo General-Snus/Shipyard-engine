@@ -23,11 +23,11 @@
 #include <Tools/Optick/src/optick.h>
 
 
-#include <Tools/Utilities/AI/AgentSystem/AIEventManager.h>
-#include <Tools/Utilities/AI/AgentSystem/EventController.h>
-#include <Tools/Utilities/AI/AgentSystem/PollingStation.h>
-#include <Tools/Utilities/AI/AgentSystem/PollingController.h>
-#include <Tools/Utilities/AI/AgentSystem/Actor.h>
+#include <Objects/AI/AgentSystem/AIEventManager.h>
+#include <Objects/AI/AgentSystem/Controllers/EventController.h>
+#include <Objects/AI/AgentSystem/PollingStation.h>
+#include <Objects/AI/AgentSystem/Controllers/PollingController.h>
+#include <Objects/AI/AgentSystem/Actor.h>
 
 #include <Engine/AssetManager/ComponentSystem/Components/ActorSystem/cActor.h>
 
@@ -48,14 +48,14 @@ void GameLauncher::Start()
 
 	{
 		GameObject camera = gom.CreateGameObject();
-		  camera.AddComponent<cCamera>(); 
+		camera.AddComponent<cCamera>();
 		gom.SetLastGOAsCamera();
 
 
 		auto& transform = camera.AddComponent<Transform>();
 		transform.SetPosition(0,25,0);
 		transform.SetRotation(90,0,0);
-	
+
 	}
 
 	{
@@ -89,21 +89,21 @@ void GameLauncher::Start()
 	//Movement1
 
 
-	Actor* player;
-	std::vector<Actor*> drones;
+	SY::UUID player;
+	std::vector<cActor*> drones;
 	drones.reserve(3);
 	//World interfacing
-	{	
+	{
 		//Drone
 		myCustomHandler = gom.CreateGameObject();
-		auto & mesh = myCustomHandler.AddComponent<cMeshRenderer>("Models/C64.fbx");
+		auto& mesh = myCustomHandler.AddComponent<cMeshRenderer>("Models/C64.fbx");
 		mesh.SetMaterialPath("Materials/C64Player.json");
 		auto& transform = myCustomHandler.AddComponent<Transform>();
-		transform.SetPosition(0,0,0); 
+		transform.SetPosition(0,0,0);
 
-		auto& actor = myCustomHandler.AddComponent<cActor>(); 
+		auto& actor = myCustomHandler.AddComponent<cActor>();
 		actor.SetController(new EventController());
-		player = actor.GetActor();
+		player = myCustomHandler.GetID();
 	}
 
 	for(size_t i = 0; i < drones.size(); i++)
@@ -115,14 +115,14 @@ void GameLauncher::Start()
 		auto& mesh = drone.AddComponent<cMeshRenderer>("Models/C64.fbx");
 		mesh.SetMaterialPath("Materials/C64Enemy.json");
 		auto& transform = drone.AddComponent<Transform>();
-		transform.SetPosition(x,0,z); 
+		transform.SetPosition(x,0,z);
 
 		auto& actor = drone.AddComponent<cActor>();
 		actor.SetController(new EventController());
 		AIEventManager::Instance().RegisterListener(eAIEvent::playerHacking,actor.GetController());
 	}
 
-	std::vector<Actor*> computers;
+	std::vector<SY::UUID> computers;
 	computers.resize(3);
 	for(size_t i = 0; i < 3; i++)
 	{
@@ -136,11 +136,11 @@ void GameLauncher::Start()
 		auto& transform = drone.AddComponent<Transform>();
 		transform.SetPosition(x,0,z);
 		transform.SetScale(.5f);
-		auto& actor = drone.AddComponent<cActor>();
-		computers[i] = actor.GetActor();
+		drone.AddComponent<cActor>();
+		computers[i] = drone.GetID();
 	}
 
-	const auto* playerPollingStation = new PollingStation(*player,computers);
+	const auto* playerPollingStation = new PollingStation(player,computers);
 	for(size_t i = 0; i < 2; i++)
 	{
 		float x = RandomInRange<float>(-10.f,10.f);
@@ -151,20 +151,20 @@ void GameLauncher::Start()
 		mesh.SetMaterialPath("Materials/C64Enemy.json");
 
 		auto& transform = drone.AddComponent<Transform>();
-		transform.SetPosition(x,0,z);  
+		transform.SetPosition(x,0,z);
 
 		auto& actor = drone.AddComponent<cActor>();
 		actor.SetController(new PollingController(*playerPollingStation));
-	} 
+	}
 
 	GLLogger.Log("GameLauncher start");
 }
 
 void GameLauncher::Update(float delta)
 {
-	OPTICK_EVENT();
-	//Movement1
-	AIEventManager::Instance().Update(); 
+	OPTICK_EVENT()
+		//Movement1
+		AIEventManager::Instance().Update();
 
 	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::NUMPAD8))
 	{

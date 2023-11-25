@@ -2,12 +2,12 @@
 #include <unordered_map>
 #include <vector>
 #include <cassert>  
-
+#include "UUID.h"
 //Original creation by Simon
 
 class Component; 
 class ComponentManagerBase
-{
+{ 
 public:
 	enum class UpdatePriority
 	{
@@ -21,8 +21,8 @@ public:
 	virtual void Destroy() = 0;
 	virtual void Update() = 0;
 	virtual void Render() = 0;
-	virtual void DeleteGameObject(const unsigned int aGameObjectID) = 0;
-	virtual void CollidedWith(const unsigned int aFirstID,const unsigned int aTargetID) = 0;
+	virtual void DeleteGameObject(const SY::UUID aGameObjectID) = 0;
+	virtual void CollidedWith(const SY::UUID aFirstID,const SY::UUID aTargetID) = 0;
 
 	void SetUpdatePriority(const UpdatePriority aPriority) { myUpdatePriority = aPriority; }
 	const UpdatePriority GetUpdatePriority() const { return myUpdatePriority; }
@@ -41,29 +41,29 @@ public:
 
 	void Destroy() override;
 
-	T& AddComponent(const unsigned int aGameObjectID);
+	T& AddComponent(const SY::UUID aGameObjectID);
 
-	T& AddComponent(const unsigned int aGameObjectID,const T& aComponent);
+	T& AddComponent(const SY::UUID aGameObjectID,const T& aComponent);
 
 	template <typename... Args>
-	T& AddComponent(const unsigned int aGameObjectID,Args... someParameters);
+	T& AddComponent(const SY::UUID aGameObjectID,Args... someParameters);
 
-	const bool HasComponent(const unsigned int aGameObjectID) const;
+	const bool HasComponent(const SY::UUID aGameObjectID) const;
 
 	std::vector<T>& GetAllComponents();
 
-	T& GetComponent(const unsigned int aGameObjectID);
+	T& GetComponent(const SY::UUID aGameObjectID);
 
-	T* TryGetComponent(const unsigned int aGameObjectID);
+	T* TryGetComponent(const SY::UUID aGameObjectID);
 
 	void Update() override;
 	void Render() override;
-	void DeleteGameObject(const unsigned int aGameObjectID) override;
-	void CollidedWith(const unsigned int aFirstID,const unsigned int aTargetID) override;
+	void DeleteGameObject(const SY::UUID aGameObjectID) override;
+	void CollidedWith(const SY::UUID aFirstID,const SY::UUID aTargetID) override;
 
 private:
-	std::unordered_map<unsigned int,unsigned int> myGameObjectIDtoVectorIndex;
-	std::unordered_map<unsigned int,unsigned int> myVectorIndexToGameObjectID;
+	std::unordered_map<SY::UUID,unsigned int> myGameObjectIDtoVectorIndex;
+	std::unordered_map<unsigned int,SY::UUID> myVectorIndexToGameObjectID;
 	std::vector<T> myComponents;
 }; 
 
@@ -76,16 +76,16 @@ inline void ComponentManager<T>::Destroy()
 }
 
 template<class T>
-T& ComponentManager<T>::AddComponent(const unsigned int aGameObjectID)
+T& ComponentManager<T>::AddComponent(const SY::UUID aGameObjectID)
 {
 	myGameObjectIDtoVectorIndex[aGameObjectID] = static_cast<unsigned int>(myComponents.size());
 	myVectorIndexToGameObjectID[static_cast<unsigned int>(myComponents.size())] = aGameObjectID;
-	myComponents.push_back( T(aGameObjectID));
+	myComponents.push_back(T(aGameObjectID));
 	return myComponents.back();
 }
 
 template<class T>
-inline T& ComponentManager<T>::AddComponent(const unsigned int aGameObjectID,const T& aComponent)
+inline T& ComponentManager<T>::AddComponent(const SY::UUID aGameObjectID,const T& aComponent)
 {
 	myGameObjectIDtoVectorIndex[aGameObjectID] = static_cast<unsigned int>(myComponents.size());
 	myVectorIndexToGameObjectID[static_cast<unsigned int>(myComponents.size())] = aGameObjectID;
@@ -96,7 +96,7 @@ inline T& ComponentManager<T>::AddComponent(const unsigned int aGameObjectID,con
 
 template<class T>
 template<typename...  Args>
-inline T& ComponentManager<T>::AddComponent(const unsigned int aGameObjectID,Args... someParameters)
+inline T& ComponentManager<T>::AddComponent(const SY::UUID aGameObjectID,Args... someParameters)
 {
 	myGameObjectIDtoVectorIndex[aGameObjectID] = static_cast<unsigned int>(myComponents.size());
 	myVectorIndexToGameObjectID[static_cast<unsigned int>(myComponents.size())] = aGameObjectID;
@@ -105,7 +105,7 @@ inline T& ComponentManager<T>::AddComponent(const unsigned int aGameObjectID,Arg
 }
 
 template<class T>
-inline const bool ComponentManager<T>::HasComponent(const unsigned int aGameObjectID) const
+inline const bool ComponentManager<T>::HasComponent(const SY::UUID aGameObjectID) const
 {
 	return myGameObjectIDtoVectorIndex.find(aGameObjectID) != myGameObjectIDtoVectorIndex.end();
 }
@@ -117,14 +117,14 @@ inline std::vector<T>& ComponentManager<T>::GetAllComponents()
 }
 
 template<class T>
-inline T& ComponentManager<T>::GetComponent(const unsigned int aGameObjectID)
+inline T& ComponentManager<T>::GetComponent(const SY::UUID aGameObjectID)
 {
 	assert(myGameObjectIDtoVectorIndex.find(aGameObjectID) != myGameObjectIDtoVectorIndex.end() && "ComponentManager::GetComponent(...) tried to get a missing component. Maybe it's best if you use TryGetComponent instead.");
 	return myComponents[myGameObjectIDtoVectorIndex[aGameObjectID]];
 }
 
 template<class T>
-T* ComponentManager<T>::TryGetComponent(const unsigned int aGameObjectID)
+T* ComponentManager<T>::TryGetComponent(const SY::UUID aGameObjectID)
 {
 	if(myGameObjectIDtoVectorIndex.find(aGameObjectID) != myGameObjectIDtoVectorIndex.end())
 	{
@@ -142,7 +142,7 @@ void ComponentManager<T>::Update()
 {
 	for(size_t i = 0; i < myComponents.size(); i++)
 	{
-		if(myComponents[i].IsActive())
+		if(myComponents[i].IsActive() && !myComponents[i].IsAdopted())
 		{
 			myComponents[i].Update();
 		}
@@ -162,7 +162,7 @@ void ComponentManager<T>::Render()
 }
 
 template<class T>
-void ComponentManager<T>::DeleteGameObject(const unsigned int aGameObjectID)
+void ComponentManager<T>::DeleteGameObject(const SY::UUID aGameObjectID)
 {
 	auto it = myGameObjectIDtoVectorIndex.find(aGameObjectID);		// Find the game object
 	if(it == myGameObjectIDtoVectorIndex.end()) return;			// If it doesn't exist, don't do anything
@@ -182,7 +182,7 @@ void ComponentManager<T>::DeleteGameObject(const unsigned int aGameObjectID)
 }
 
 template<class T>
-void ComponentManager<T>::CollidedWith(const unsigned int aFirstID,const unsigned int aTargetID)
+void ComponentManager<T>::CollidedWith(const SY::UUID aFirstID,const SY::UUID aTargetID)
 {
 	if(myGameObjectIDtoVectorIndex.find(aFirstID) != myGameObjectIDtoVectorIndex.end())
 	{

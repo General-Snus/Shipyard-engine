@@ -1,8 +1,7 @@
 #pragma once
 
 #include "GameObjectManager.h"
-#define AsUINT(v) static_cast<unsigned>(v) 
- 
+#define AsUINT(v) static_cast<unsigned>(v)  
 
 class GameObject
 {
@@ -31,14 +30,14 @@ public:
 	bool GetActive(); 
 	void SetActive(const bool aState);
 
-	inline const unsigned int GetID() const { return myID; } 
-	const bool IsValid() const { return myID != UINT_MAX; }
+	inline const SY::UUID GetID() const { return myID; }
+	const bool IsValid() const { return myID.IsValid(); }
 
 private:
 	friend class GameObjectManager; //Only the asset manager can create and destroy components
 
-	GameObject(const unsigned int anID,GameObjectManager* aManager) : myID(anID),myManager(aManager) {}
-	unsigned int myID = UINT_MAX;
+	GameObject(const SY::UUID anID,GameObjectManager* aManager) : myID(anID),myManager(aManager) {}
+	SY::UUID myID = UINT_MAX;
 	GameObjectManager* myManager = nullptr;
 }; 
 

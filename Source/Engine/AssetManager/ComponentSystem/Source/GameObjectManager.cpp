@@ -21,7 +21,7 @@ const GameObject GameObjectManager::CreateGameObject()
 	return GameObject(myLastID++,this);
 }
 
-void GameObjectManager::DeleteGameObject(const unsigned int aGameObjectID)
+void GameObjectManager::DeleteGameObject(const SY::UUID aGameObjectID)
 {
 	myObjectsToDelete.push_back(aGameObjectID);
 }
@@ -31,7 +31,7 @@ void GameObjectManager::DeleteGameObject(const GameObject aGameObject)
 	myObjectsToDelete.push_back(aGameObject.myID);
 }
 
-bool GameObjectManager::GetActive(const unsigned int aGameObjectID)
+bool GameObjectManager::GetActive(const SY::UUID aGameObjectID)
 {
 	if(myGameObjects.find(aGameObjectID) != myGameObjects.end())
 	{
@@ -57,7 +57,7 @@ GameObject GameObjectManager::GetCamera()
 	return GameObject(myCamera,this);
 }
 
-GameObject GameObjectManager::GetGameObject(unsigned int anID)
+GameObject GameObjectManager::GetGameObject(SY::UUID anID)
 {
 	if(myGameObjects.find(anID) != myGameObjects.end())
 	{
@@ -68,7 +68,7 @@ GameObject GameObjectManager::GetGameObject(unsigned int anID)
 	return GameObject(69420,this);
 }
 
-void GameObjectManager::CollidedWith(const unsigned int aFirstID,const unsigned int aTargetID)
+void GameObjectManager::CollidedWith(const SY::UUID aFirstID,const SY::UUID aTargetID)
 {
 	for(auto& cm : myComponentManagers)
 	{
@@ -76,7 +76,7 @@ void GameObjectManager::CollidedWith(const unsigned int aFirstID,const unsigned 
 	}
 }
 
-void GameObjectManager::SetActive(const unsigned int aGameObjectID,const bool aState)
+void GameObjectManager::SetActive(const SY::UUID aGameObjectID,const bool aState)
 {
 	if(myGameObjects.find(aGameObjectID) != myGameObjects.end())
 	{

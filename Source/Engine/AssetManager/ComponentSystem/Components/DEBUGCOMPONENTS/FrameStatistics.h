@@ -6,7 +6,7 @@ class FrameStatistics : public ImGuiComponent
 {
 public:
 	FrameStatistics() = delete;
-	FrameStatistics(const unsigned int anOwnerId) : ImGuiComponent(anOwnerId) { OnStart(); };
+	FrameStatistics(const SY::UUID anOwnerId) : ImGuiComponent(anOwnerId) { OnStart(); };
 	void Update() override;
 	void OnExit() override;
 	void OnStart() override;

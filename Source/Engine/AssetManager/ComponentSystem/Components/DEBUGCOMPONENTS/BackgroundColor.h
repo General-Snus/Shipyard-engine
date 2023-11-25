@@ -3,14 +3,14 @@
 #include <Engine/AssetManager/ComponentSystem/Components/DEBUGCOMPONENTS/ImGuiComponent.h>
 #include <Engine/GraphicsEngine/Rendering/Vertex.h>
 #include <Tools/Utilities/LinearAlgebra/Vector3.hpp>
-#include <Tools/ThirdParty/nlohmann/json.hpp> 
+#include <Tools/ThirdParty/nlohmann/json_fwd.hpp> 
 
 class BackgroundColor : public ImGuiComponent
 {
 public:
 	BackgroundColor() = delete; // Create a generic cube
-	BackgroundColor(const unsigned int anOwnerId); // Create a generic cube   
-	BackgroundColor(const unsigned int anOwnerId,Vector4f aColor); // Create a generic cube   
+	BackgroundColor(const SY::UUID anOwnerId); // Create a generic cube   
+	BackgroundColor(const SY::UUID anOwnerId,Vector4f aColor); // Create a generic cube   
 	~BackgroundColor() = default;
 	void Update() override;
 	void SetColor(Vector4f aColor);

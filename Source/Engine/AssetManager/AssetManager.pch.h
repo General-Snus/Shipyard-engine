@@ -55,7 +55,8 @@
 #include <Engine/GraphicsEngine/Rendering/Vertex.h> 
 #include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
 #include <Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h>
-#include "AssetManager.h" 
+#include "AssetManager.h"
+#include "ComponentSystem/UUID.h"
 
 static inline Logger AMLogger;
 

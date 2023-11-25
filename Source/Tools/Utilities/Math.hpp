@@ -1,7 +1,7 @@
 #pragma once
 #include <algorithm>
 #include <cmath>
-#include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
+#include "LinearAlgebra/Vectors.hpp"
 #include <random>
 #include <numbers>
 

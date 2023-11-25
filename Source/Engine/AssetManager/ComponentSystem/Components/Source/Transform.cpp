@@ -232,6 +232,10 @@ void Transform::SetRotation(Vector3f angularRotation)
 	myRotation = angularRotation;
 	isDirty = true; 
 }
+Vector3f Transform::GetRotation() const
+{
+	return myRotation;
+}
 void Transform::SetScale(Vector2f scale)
 {
 	myScale.x = scale.x;

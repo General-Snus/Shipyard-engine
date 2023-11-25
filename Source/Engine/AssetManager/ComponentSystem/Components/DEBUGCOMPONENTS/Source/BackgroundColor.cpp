@@ -3,11 +3,11 @@
 #include <Engine/GraphicsEngine/GraphicsEngine.h> 
 #include <Tools/ImGui/imgui.h>
 
-BackgroundColor::BackgroundColor(const unsigned int anOwnerId) : ImGuiComponent(anOwnerId,eComponentType::backgroundColor)
+BackgroundColor::BackgroundColor(const SY::UUID  anOwnerId) : ImGuiComponent(anOwnerId,eComponentType::backgroundColor)
 {
 }
 
-BackgroundColor::BackgroundColor(const unsigned int anOwnerId,Vector4f aColor) : ImGuiComponent(anOwnerId,eComponentType::backgroundColor), myColor(aColor)
+BackgroundColor::BackgroundColor(const SY::UUID anOwnerId,Vector4f aColor) : ImGuiComponent(anOwnerId,eComponentType::backgroundColor), myColor(aColor)
 {
 }
 

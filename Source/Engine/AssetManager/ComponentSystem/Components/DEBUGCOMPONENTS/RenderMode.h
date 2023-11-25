@@ -7,7 +7,7 @@ class RenderMode : public ImGuiComponent
 {
 public:
 	RenderMode() = delete;
-	RenderMode(const unsigned int anOwnerId) : ImGuiComponent(anOwnerId) { OnStart(); };
+	RenderMode(const SY::UUID anOwnerId) : ImGuiComponent(anOwnerId) { OnStart(); };
 	void Update() override;
 	void OnExit() override;
 	void OnStart() override;

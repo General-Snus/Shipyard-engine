@@ -1,12 +1,12 @@
 #pragma once
+#include "ComponentSystem/ComponentManager.h"
 #include <iostream>
 #include <unordered_map>
 #include <vector>
 #include <typeinfo>
-#include "ComponentSystem/ComponentManager.h"
  
 class GameObject;
-
+ 
 class GameObjectManager
 {
 public:
@@ -16,39 +16,39 @@ public:
 	static GameObjectManager& GetInstance();
 
 	const GameObject CreateGameObject();
-	void DeleteGameObject(const unsigned int aGameObjectID);
+	void DeleteGameObject(const SY::UUID aGameObjectID);
 	void DeleteGameObject(const GameObject aGameObject);
 
 	template <class T>
-	T& AddComponent(const unsigned int aGameObjectID);
+	T& AddComponent(const SY::UUID aGameObjectID);
 
 	template <class T>
-	T& AddComponent(const unsigned int aGameObjectID,const T& aComponent);
+	T& AddComponent(const SY::UUID aGameObjectID,const T& aComponent);
 
 	template <class T,typename... Args>
-	T& AddComponent(const unsigned int aGameObjectID,Args... someParameters);
+	T& AddComponent(const SY::UUID aGameObjectID,Args... someParameters);
 
 	template<class T>
 	std::vector<T>& GetAllComponents();
 
 	template <class T>
-	T* TryGetComponent(const unsigned int aGameObjectID);
+	T* TryGetComponent(const SY::UUID aGameObjectID);
 
 	template <class T>
-	const bool HasComponent(const unsigned int aGameObjectID);
+	const bool HasComponent(const SY::UUID aGameObjectID);
 
 	template <class T>
-	T& GetComponent(const unsigned int aGameObjectID);
+	T& GetComponent(const SY::UUID aGameObjectID);
 
-	bool GetActive(const unsigned int aGameObjectID);
+	bool GetActive(const SY::UUID aGameObjectID);
 
 	GameObject GetWorldRoot();
 	GameObject GetPlayer();
 	GameObject GetCamera(); 
-	GameObject GetGameObject(unsigned int anID);
+	GameObject GetGameObject(SY::UUID anID);
 
-	void CollidedWith(const unsigned int aFirstID,const unsigned int aTargetID); 
-	void SetActive(const unsigned int aGameObjectID,const bool aState);
+	void CollidedWith(const SY::UUID aFirstID,const SY::UUID aTargetID);
+	void SetActive(const SY::UUID aGameObjectID,const bool aState);
 
 	void SetLastGOAsPlayer();
 	void SetLastGOAsWorld(); 
@@ -67,7 +67,7 @@ private:
 	void DeleteObjects();
 
 	std::unordered_map<const std::type_info*,ComponentManagerBase*> myComponentManagers = { };
-	std::unordered_map<unsigned int,bool> myGameObjects = { };
+	std::unordered_map<SY::UUID,bool> myGameObjects = { };
 	std::vector<std::pair<const std::type_info*,ComponentManagerBase*>> myUpdateOrder = { };
 	std::vector<unsigned int> myObjectsToDelete = { };
 	unsigned int myLastID = 0;
@@ -77,7 +77,7 @@ private:
 };
 
 template<class T>
-T& GameObjectManager::AddComponent(const unsigned int aGameObjectID)
+T& GameObjectManager::AddComponent(const SY::UUID aGameObjectID)
 {
 	if(!myComponentManagers.contains(&typeid(T)))
 	{
@@ -88,7 +88,7 @@ T& GameObjectManager::AddComponent(const unsigned int aGameObjectID)
 }
 
 template<class T>
-T& GameObjectManager::AddComponent(const unsigned int aGameObjectID,const T& aComponent)
+T& GameObjectManager::AddComponent(const SY::UUID aGameObjectID,const T& aComponent)
 {
 	if(!myComponentManagers.contains(&typeid(T)))
 	{
@@ -98,7 +98,7 @@ T& GameObjectManager::AddComponent(const unsigned int aGameObjectID,const T& aCo
 }
 
 template<class T,typename... Args>
-T& GameObjectManager::AddComponent(const unsigned int aGameObjectID,Args ...someParameters)
+T& GameObjectManager::AddComponent(const SY::UUID aGameObjectID,Args ...someParameters)
 {
 	if(!myComponentManagers.contains(&typeid(T)))
 	{
@@ -118,7 +118,7 @@ std::vector<T>& GameObjectManager::GetAllComponents()
 }
 
 template<class T>
-T* GameObjectManager::TryGetComponent(const unsigned int aGameObjectID)
+T* GameObjectManager::TryGetComponent(const SY::UUID aGameObjectID)
 {
 	if(myComponentManagers.contains(&typeid(T)))
 	{
@@ -131,7 +131,7 @@ T* GameObjectManager::TryGetComponent(const unsigned int aGameObjectID)
 }
 
 template<class T>
-inline const bool GameObjectManager::HasComponent(const unsigned int aGameObjectID)
+inline const bool GameObjectManager::HasComponent(const SY::UUID aGameObjectID)
 {
 	if(myComponentManagers.contains(&typeid(T)))
 	{
@@ -141,7 +141,7 @@ inline const bool GameObjectManager::HasComponent(const unsigned int aGameObject
 }
 
 template<class T>
-inline T& GameObjectManager::GetComponent(const unsigned int aGameObjectID)
+inline T& GameObjectManager::GetComponent(const SY::UUID aGameObjectID)
 {
 	assert(myComponentManagers.contains(&typeid(T)) && "GameObjectManager::GetComponent(...) component manager doesn't exist.");
 	return static_cast<ComponentManager<T>*>(myComponentManagers[&typeid(T)])->GetComponent(aGameObjectID);
