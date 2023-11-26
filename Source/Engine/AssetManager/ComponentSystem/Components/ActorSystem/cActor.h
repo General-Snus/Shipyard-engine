@@ -6,7 +6,7 @@
 class cActor : public Component
 {
 public:
-	cActor(const unsigned int anOwnerID);
+	cActor(const SY::UUID anOwnerID);
 	~cActor() = default;  
 	void Init() override;
 	void Update() override;

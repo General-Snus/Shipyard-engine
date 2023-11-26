@@ -1,12 +1,7 @@
-
-#include "AIEventManager.h"
-#include "Controllers/EventController.h"
-#include "Controllers/PlayerController.h" 
-#include "Actor.h"
+#include <AssetManager.pch.h>
 
 AIEventManager::AIEventManager()
-{
-	pathToward = -1;
+{ 
 }
 
 void AIEventManager::RegisterListener(const eAIEvent aEventType,Controller* aController)
@@ -16,6 +11,8 @@ void AIEventManager::RegisterListener(const eAIEvent aEventType,Controller* aCon
 
 void AIEventManager::Update()
 {
+	/*
+	* Example code for a custom hacking event
 	if(CheckForHackingEvent())
 	{
 		AIEvent event{};
@@ -23,8 +20,10 @@ void AIEventManager::Update()
 		event.type = eAIEvent::playerHacking;
 		DispatchEvent(event);
 	}
+	*/
 }
-
+/*
+* Example code for a custom hacking event
 bool AIEventManager::CheckForHackingEvent()
 {
 	constexpr float hackingDistance = 100.0f;
@@ -40,6 +39,7 @@ bool AIEventManager::CheckForHackingEvent()
 	}
 	return false;
 }
+*/
 
 void AIEventManager::DispatchEvent(const AIEvent& aEvent)
 {

@@ -26,6 +26,14 @@
 #include "Tools/Logging/Logging.h"
 #include <Tools/Optick/src/optick.h>
 
+
+#include "Objects/AI/NavMesh/NavMesh.h"
+#include "Objects/AI/AgentSystem/Controllers/Controller.h"
+#include "Objects/AI/AgentSystem/AIEventManager.h"
+#include "Objects/AI/AgentSystem/Controllers/DefaultControllers/EventController.h"
+#include "Objects/AI/AgentSystem/Controllers/PlayerController.h"  
+#include "Objects/AI/AgentSystem/Controllers/WanderController.h"  
+
 #include "Objects/BaseAssets/BaseAsset.h"
 #include "Objects/BaseAssets/Animations.h"
 #include "Objects/BaseAssets/MaterialAsset.h"
@@ -45,6 +53,8 @@
 #include "ComponentSystem/Components/LightComponent.h"
 #include "ComponentSystem/Components/ParticleSystem.h"
 #include "ComponentSystem/Components/ActorSystem/cActor.h"
+#include "ComponentSystem/Components/Physics/cPhysics_Kinematic.h"
+#include "ComponentSystem/Components/Physics/cPhysics_Newtonian.h"
 #include "ComponentSystem/Components/DEBUGCOMPONENTS/BackgroundColor.h"
 #include "ComponentSystem/Components/DEBUGCOMPONENTS/FrameStatistics.h"
 #include "ComponentSystem/Components/DEBUGCOMPONENTS/RenderMode.h"

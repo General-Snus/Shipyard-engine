@@ -22,21 +22,15 @@ class AIEventManager
 {
 public:  
 	void RegisterListener(const eAIEvent eventType,Controller* aController);
-	void Update();
-
+	void Update(); 
 	static AIEventManager& Instance()
 	{
 		static AIEventManager instance;
 		return instance;
 	};
 private: 
-	AIEventManager();
-	bool CheckForHackingEvent();
-	void DispatchEvent(const AIEvent& aEvent);
-
-	std::unordered_map<eAIEvent, std::vector<Controller*>> eventListener; 
-	int pathToward;
-	Actor* player;
-	std::vector<Actor*> computers;  
+	AIEventManager(); 
+	void DispatchEvent(const AIEvent& aEvent); 
+	std::unordered_map<eAIEvent, std::vector<Controller*>> eventListener;  
 };
  

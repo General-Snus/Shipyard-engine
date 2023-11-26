@@ -6,7 +6,7 @@ class PlayerController : public Controller
 {
 public:
 	explicit PlayerController();
-	SteeringOutput Update(GameObject input) override;
+	bool Update(GameObject input) override;
 
 private:
 	void Input(const Vector3f& currentPosition); 

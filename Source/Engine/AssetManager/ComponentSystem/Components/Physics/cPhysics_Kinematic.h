@@ -2,16 +2,19 @@
 class cPhysics_Kinematic : public Component
 {
 public:
+	cPhysics_Kinematic(const SY::UUID anOwnerID);
 	void Init() override;
 	void Update() override;
-	void Render() override;
+	void Render() override; 
 
-	void SetVelocity(const Vector3f& aVelocity);
-	void SetAcceleration(const Vector3f& anAcceleration);
-	void AddVelocity(const Vector3f& aVelocity);
-	void AddAcceleration(const Vector3f& anAcceleration);
-private:
 	Vector3f ph_velocity;
 	Vector3f ph_acceleration;
+	Vector3f ph_Angular_acceleration;
+	Vector3f ph_Angular_velocity;
+	bool bindAngleToVelocity;
+	bool localVelocity;
+	float ph_maxSpeed;
+private:
+
 };
 

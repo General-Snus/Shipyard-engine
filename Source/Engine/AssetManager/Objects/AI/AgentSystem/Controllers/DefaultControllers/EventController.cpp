@@ -6,9 +6,8 @@ EventController::EventController()
 	this->controllerType = eControllerType::event;
 }
 
-SteeringOutput EventController::Update(GameObject  input)
+bool EventController::Update(GameObject input)
 {
-	SteeringOutput output;
 	auto* transform = input.TryGetComponent<Transform>();
 
 	if(pathToTarget)
@@ -21,7 +20,7 @@ SteeringOutput EventController::Update(GameObject  input)
 		//myPath = GetNavMesh().PathFind(aPosition,end);
 	}
 
-	return output;
+	return true;
 }
 
 void EventController::Recieve(const AIEvent& aEvent)

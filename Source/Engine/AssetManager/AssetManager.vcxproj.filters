@@ -93,13 +93,13 @@
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\Controller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\AI\AgentSystem\Controllers\EventController.h">
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\EventController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\PlayerController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\AI\AgentSystem\Controllers\PollingController.h">
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\PollingController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Objects\AI\AgentSystem\Actor.h">
@@ -121,6 +121,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ComponentSystem\UUID.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\WanderController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -200,13 +203,13 @@
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Controller.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\AI\AgentSystem\Controllers\EventController.cpp">
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\EventController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\PlayerController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\AI\AgentSystem\Controllers\PollingController.cpp">
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\PollingController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Objects\AI\AgentSystem\Actor.cpp">
@@ -225,6 +228,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysics_Newtonian.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\WanderController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

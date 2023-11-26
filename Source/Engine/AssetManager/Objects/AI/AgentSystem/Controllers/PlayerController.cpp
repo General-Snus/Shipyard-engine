@@ -7,15 +7,14 @@ PlayerController::PlayerController()
 	this->controllerType = eControllerType::player;
 }
 
-SteeringOutput PlayerController::Update(GameObject input)
-{
-	SteeringOutput output;
+bool PlayerController::Update(GameObject input)
+{ 
 	auto* transform = input.TryGetComponent<Transform>();
 
 	Input(transform->GetPosition());
 
 	 
-	return output;
+	return true;
 }
 
 void PlayerController::Input(const Vector3f& currentPosition)

@@ -23,10 +23,10 @@
 #include <Tools/Optick/src/optick.h>
 
 
+#include <Objects/AI/AgentSystem/Controllers/DefaultControllers/EventController.h>
+#include <Objects/AI/AgentSystem/Controllers/DefaultControllers/PollingController.h>
 #include <Objects/AI/AgentSystem/AIEventManager.h>
-#include <Objects/AI/AgentSystem/Controllers/EventController.h>
 #include <Objects/AI/AgentSystem/PollingStation.h>
-#include <Objects/AI/AgentSystem/Controllers/PollingController.h>
 #include <Objects/AI/AgentSystem/Actor.h>
 
 #include <Engine/AssetManager/ComponentSystem/Components/ActorSystem/cActor.h>
@@ -117,8 +117,8 @@ void GameLauncher::Start()
 		auto& transform = drone.AddComponent<Transform>();
 		transform.SetPosition(x,0,z);
 
-		auto& actor = drone.AddComponent<cActor>();
-		actor.SetController(new EventController());
+		auto& actor = drone.AddComponent<cActor>(); 
+		actor.SetController(new WanderController(PollingStation(1,{0,1,2}),drone));
 		AIEventManager::Instance().RegisterListener(eAIEvent::playerHacking,actor.GetController());
 	}
 
@@ -154,7 +154,7 @@ void GameLauncher::Start()
 		transform.SetPosition(x,0,z);
 
 		auto& actor = drone.AddComponent<cActor>();
-		actor.SetController(new PollingController(*playerPollingStation));
+		actor.SetController(new WanderController(*playerPollingStation,drone));
 	}
 
 	GLLogger.Log("GameLauncher start");

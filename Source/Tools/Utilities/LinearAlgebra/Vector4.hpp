@@ -300,3 +300,5 @@
 		}
 	} 
 using Vector4f = Vector4<float>;
+using Vector4i = Vector4<int>;
+using Vector4ui = Vector4<unsigned int>;

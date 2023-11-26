@@ -288,4 +288,7 @@ inline const T& Vector3<T>::operator[](int value) const
 	}
 	}
 }
+
 using Vector3f = Vector3<float>;
+using Vector3i = Vector3<int>;
+using Vector3ui = Vector3<unsigned int>;

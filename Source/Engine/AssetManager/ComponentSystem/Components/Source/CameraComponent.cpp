@@ -12,18 +12,16 @@ cCamera::cCamera(const unsigned int anOwnerId) : Component(anOwnerId)
 	GetGameObject().AddComponent<Transform>();
 	GetGameObject().GetComponent<Transform>().SetGizmo(false);
 
-	const float  tangens = 1.0f / (tanf(mySettings.fow/2));
-	//const float  Q = mySettings.farfield / (mySettings.farfield - mySettings.nearField);
 
-	myClipMatrix(1,1) = tangens;
-	myClipMatrix(2,2) = mySettings.APRatio * tangens;
-	myClipMatrix(3,3) = 0;
-	myClipMatrix(3,4) = 1;
-	myClipMatrix(4,3) = mySettings.nearField;
-	myClipMatrix(4,4) = 0.0f;
-	myClipMatrix = DirectX::XMMatrixOrthographicLH(40,40,1000000,mySettings.nearField);
+	if(!mySettings.isOrtho)
+	{
+		myClipMatrix = DirectX::XMMatrixPerspectiveFovLH(mySettings.fow,mySettings.APRatio,mySettings.farfield,mySettings.nearField);
+	}
+	else
+	{
+		myClipMatrix = DirectX::XMMatrixOrthographicLH(40,40,1000000,mySettings.nearField);
+	}
 
-	//myClipMatrix = DirectX::XMMatrixPerspectiveFovLH(mySettings.fowmdf,mySettings.APRatio,mySettings.farfield,mySettings.nearField);3
 #ifdef Flashlight
 	GetGameObject().AddComponent<cLight>(eLightType::Spot);
 	std::weak_ptr<SpotLight> pLight = GetComponent<cLight>().GetData<SpotLight>();
@@ -42,17 +40,17 @@ cCamera::cCamera(const unsigned int anOwnerId,CameraSettings settings) : Compone
 {
 	GetGameObject().AddComponent<Transform>();
 	GetGameObject().GetComponent<Transform>().SetGizmo(false);
+	mySettings = settings;
 
-	//myClipMatrix(1,1) = settings.fowmdf;
-	//myClipMatrix(2,2) = settings.APRatio * settings.fowmdf;
-	//myClipMatrix(3,3) = settings.APRatio * settings.fowmdf;
-	//myClipMatrix(3,3) = settings.farfield / (settings.farfield - settings.nearField);
-	//myClipMatrix(4,3) = settings.nearField * settings.farfield / (settings.farfield - settings.nearField);
-	//myClipMatrix(3,4) = 1;
-	myClipMatrix = DirectX::XMMatrixOrthographicLH(20,20,settings.farfield,settings.nearField);
-	//myClipMatrix = DirectX::XMMatrixPerspectiveFovLH(settings.fow,settings.APRatio,settings.farfield,settings.nearField);
+	if(!mySettings.isOrtho)
+	{
+		myClipMatrix = DirectX::XMMatrixPerspectiveFovLH(mySettings.fow,mySettings.APRatio,mySettings.farfield,mySettings.nearField);
+	}
+	else
+	{
+		myClipMatrix = DirectX::XMMatrixOrthographicLH(40,40,1000000,mySettings.nearField);
+	}
 
-	mySettings = settings; 
 #ifdef Flashlight
 	GetGameObject().AddComponent<cLight>(eLightType::Spot);
 	std::weak_ptr<SpotLight> pLight = GetComponent<cLight>().GetData<SpotLight>();
@@ -151,7 +149,7 @@ void cCamera::Render()
 	//GraphicsEngine::Get().DeferredCommand<GfxCmd_SetFrameBuffer>(myClipMatrix, this->GetGameObject().GetComponent<Transform>(), (int)ModelViewer::GetApplicationState().filter);
 }
 std::array<Vector4f,4> cCamera::GetFrustrumCorners() const
-{	
+{
 	const float farplane = 10000; // I dont use farplanes but some effect wants them anyway
 	const float aspectRatio = std::bit_cast<float>(myScreenSize.x) / std::bit_cast<float>(myScreenSize.y);
 	const float halfHeight = farplane * tanf(0.25f * mySettings.fow);

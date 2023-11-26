@@ -1,9 +1,9 @@
+//MOTHBALLED
+#ifdef  MOTHBALLED
+
 #pragma once  
 #include "Controllers/Controller.h" 
 #include <filesystem>
-
-//MOTHBALLED
-
 
 //An actor has a want but no way to achieve it
 //An actor will be listend to by a c[omponent]Actor that can act upon the actors wants
@@ -27,3 +27,4 @@ private:
 	Controller* controller; 
 };
  
+#endif //  MOTHBALLED

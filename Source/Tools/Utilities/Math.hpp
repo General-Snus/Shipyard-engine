@@ -60,6 +60,7 @@ inline int RandomInRange(const int& a,const int& b)
 	return rander(gen);
 }
 
+
 inline float Log2(float x)
 {
 	const float invLog2 = 1.442695040888963387004650940071f;
