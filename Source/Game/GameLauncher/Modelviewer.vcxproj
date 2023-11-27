@@ -80,18 +80,21 @@
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir);$(ProjectDir);$(SolutionDir)Engine\AssetManager\;$(SolutionDir)Engine\GraphicsEngine\;$(SolutionDir)Tools\Utilities\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir);$(ProjectDir);$(SolutionDir)Engine\AssetManager\;$(SolutionDir)Engine\GraphicsEngine\;$(SolutionDir)Tools\Utilities\;$(SolutionDir)Tools\Assimp\include;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
     <LibraryPath>$(SolutionDir)..\Lib\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir);$(ProjectDir);$(SolutionDir)Engine\AssetManager\;$(SolutionDir)Engine\GraphicsEngine\;$(SolutionDir)Tools\Utilities\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir);$(ProjectDir);$(SolutionDir)Engine\AssetManager\;$(SolutionDir)Engine\GraphicsEngine\;$(SolutionDir)Tools\Utilities\;$(SolutionDir)Tools\Assimp\include;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
     <LibraryPath>$(SolutionDir)..\Lib\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgEnabled>false</VcpkgEnabled>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

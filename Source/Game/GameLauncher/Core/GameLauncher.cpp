@@ -59,7 +59,7 @@ void GameLauncher::Start()
 		worldRoot.AddComponent<Skybox>();
 		worldRoot.AddComponent<cLight>(eLightType::Directional);
 		Transform& transform = worldRoot.AddComponent<Transform>();
-		transform.SetRotation(0,0,-45);
+		transform.SetRotation(0,45,-45);
 		cLight& pLight = worldRoot.GetComponent<cLight>();
 		pLight.SetColor(Vector3f(1,1,1));
 		pLight.SetPower(1.0f);
