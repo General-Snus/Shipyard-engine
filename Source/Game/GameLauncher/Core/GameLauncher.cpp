@@ -9,8 +9,7 @@
 
 #include <memory>
 #include <string>
-#include <stringapiset.h> 
-
+#include <stringapiset.h>  
 #include <fstream>
 #include <streambuf>
 #include <assert.h> 
@@ -20,16 +19,7 @@
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/Input/InputHandler.hpp>
 #include <Tools/Logging/Logging.h>
-#include <Tools/Optick/src/optick.h>
-
-
-#include <Objects/AI/AgentSystem/Controllers/DefaultControllers/EventController.h>
-#include <Objects/AI/AgentSystem/Controllers/DefaultControllers/PollingController.h>
-#include <Objects/AI/AgentSystem/AIEventManager.h>
-#include <Objects/AI/AgentSystem/PollingStation.h>
-#include <Objects/AI/AgentSystem/Actor.h>
-
-#include <Engine/AssetManager/ComponentSystem/Components/ActorSystem/cActor.h>
+#include <Tools/Optick/src/optick.h>  
 
 //#define ParticleSystemToggle
 
@@ -43,8 +33,11 @@ void GameLauncher::Init()
 void GameLauncher::Start()
 {
 	GameObjectManager& gom = GameObjectManager::GetInstance();
+
+#pragma region BaseSetup
 	myCustomHandler = gom.CreateGameObject();
 	myMesh = gom.CreateGameObject();
+
 
 	{
 		GameObject camera = gom.CreateGameObject();
@@ -57,7 +50,6 @@ void GameLauncher::Start()
 		transform.SetRotation(90,0,0);
 
 	}
-
 	{
 		GameObject worldRoot = gom.CreateGameObject();
 		gom.SetLastGOAsWorld();
@@ -82,80 +74,64 @@ void GameLauncher::Start()
 		GameObject test3 = gom.CreateGameObject();
 		test3.AddComponent<cMeshRenderer>("Models/SteelFloor.fbx");
 		test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
-		test3.AddComponent<Transform>();
-		test3.GetComponent<Transform>().SetPosition(0,-1.25,0);
+		auto& transform = test3.AddComponent<Transform>();
+		transform.SetPosition(0,-1.5f,0);
+		transform.SetScale(Vector3f(50.0f,1.0f,50.0f));
+		transform.SetGizmo(false);
 	}
+#pragma endregion
 
-	//Movement1
-
-
+	//Movement1 
 	SY::UUID player;
-	std::vector<cActor*> drones;
-	drones.reserve(3);
-	//World interfacing
-	{
-		//Drone
-		myCustomHandler = gom.CreateGameObject();
-		auto& mesh = myCustomHandler.AddComponent<cMeshRenderer>("Models/C64.fbx");
-		mesh.SetMaterialPath("Materials/C64Player.json");
-		auto& transform = myCustomHandler.AddComponent<Transform>();
-		transform.SetPosition(0,0,0);
+	std::vector<GameObject> entities;
+	entities.resize(15); //Safety resize if we dont add more it wont realloc and span wont loose connection
 
-		auto& actor = myCustomHandler.AddComponent<cActor>();
-		actor.SetController(new EventController());
-		player = myCustomHandler.GetID();
-	}
+	auto wanderer = std::span(entities.begin(),1);//1 from position 0
+	auto seekers = std::span(entities.begin() + 1,4); //4 from position 1
+	auto separatists = std::span(entities.begin() + 5,10); //10 from position 6
 
-	for(size_t i = 0; i < drones.size(); i++)
+	for(auto& obj : entities)
 	{
-		float x = RandomInRange<float>(-10.f,10.f);
-		float z = RandomInRange<float>(-10.f,10.f);
+		float x = RandomEngine::RandomInRange<float>(-10.f,10.f);
+		float z = RandomEngine::RandomInRange<float>(-10.f,10.f);
+
 		//Drone
 		GameObject drone = gom.CreateGameObject();
-		auto& mesh = drone.AddComponent<cMeshRenderer>("Models/C64.fbx");
-		mesh.SetMaterialPath("Materials/C64Enemy.json");
 		auto& transform = drone.AddComponent<Transform>();
 		transform.SetPosition(x,0,z);
 
-		auto& actor = drone.AddComponent<cActor>(); 
-		actor.SetController(new WanderController(PollingStation(1,{0,1,2}),drone));
-		AIEventManager::Instance().RegisterListener(eAIEvent::playerHacking,actor.GetController());
+		obj = drone;
 	}
 
-	std::vector<SY::UUID> computers;
-	computers.resize(3);
-	for(size_t i = 0; i < 3; i++)
+	for(auto& obj : wanderer)
 	{
-		float x = RandomInRange<float>(-10.f,10.f);
-		float z = RandomInRange<float>(-10.f,10.f);
+		//Drone 
+		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/C64.fbx");
+		mesh.SetMaterialPath("Materials/C64Player.json"); 
 
-		GameObject drone = gom.CreateGameObject();
-		auto& mesh = drone.AddComponent<cMeshRenderer>("Models/Cube.fbx");
-		mesh.SetMaterialPath("Materials/C64.json");
-
-		auto& transform = drone.AddComponent<Transform>();
-		transform.SetPosition(x,0,z);
-		transform.SetScale(.5f);
-		drone.AddComponent<cActor>();
-		computers[i] = drone.GetID();
+		auto& actor = obj.AddComponent<cActor>();
+		actor.SetController(new WanderController(obj));
 	}
-
-	const auto* playerPollingStation = new PollingStation(player,computers);
-	for(size_t i = 0; i < 2; i++)
-	{
-		float x = RandomInRange<float>(-10.f,10.f);
-		float z = RandomInRange<float>(-10.f,10.f);
-		//Drone
-		GameObject drone = gom.CreateGameObject();
-		auto& mesh = drone.AddComponent<cMeshRenderer>("Models/C64.fbx");
+	
+	auto* seekerStation = new Target_PollingStation(wanderer[0]);
+	for(auto& obj : seekers)
+	{ 
+		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/C64.fbx");
 		mesh.SetMaterialPath("Materials/C64Enemy.json");
 
-		auto& transform = drone.AddComponent<Transform>();
-		transform.SetPosition(x,0,z);
-
-		auto& actor = drone.AddComponent<cActor>();
-		actor.SetController(new WanderController(*playerPollingStation,drone));
+		auto& actor = obj.AddComponent<cActor>();
+		actor.SetController(new SeekerController(seekerStation,obj));
 	}
+
+	auto* separatistsStation = new MultipleTargets_PollingStation(entities);
+	for(auto& obj : separatists)
+	{
+		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/C64.fbx");
+		mesh.SetMaterialPath("Materials/C64Enemy.json");
+
+		auto& actor = obj.AddComponent<cActor>();
+		actor.SetController(new SeparationController(separatistsStation,obj)); // how do i remove the object itself
+	} 
 
 	GLLogger.Log("GameLauncher start");
 }

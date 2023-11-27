@@ -115,39 +115,9 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 }
 
 bool GraphicsEngine::SetupDebugDrawline()
-{
-	debugLineVS = std::make_shared<Shader>();
-	RHI::LoadShaderFromMemory(
-		debugLineVS.get(),
-		L"LineVertexShader",
-		BuiltIn_LineDrawer_VS_ByteCode,
-		sizeof(BuiltIn_LineDrawer_VS_ByteCode)
-	);
-
-	debugLinePS = std::make_shared<Shader>();
-	RHI::LoadShaderFromMemory(
-		debugLinePS.get(),
-		L"LinePixelShader",
-		BuiltIn_LineDrawer_PS_ByteCode,
-		sizeof(BuiltIn_LineDrawer_PS_ByteCode)
-	);
-
-	//Create DebugVertex input layout
-	RHI::CreateInputLayout(
-		Debug::DebugVertex::InputLayout,
-		Debug::DebugVertex::InputLayoutDescription,
-		BuiltIn_LineDrawer_VS_ByteCode,
-		sizeof(BuiltIn_LineDrawer_VS_ByteCode)
-	);
-
-	if(!(
-		RHI::CreateDynamicVertexBuffer(myLineVertexBuffer,65536,sizeof(Debug::DebugVertex)) &&
-		RHI::CreateDynamicIndexBuffer(myLineIndexBuffer,65536)
-		))
-	{
-		GELogger.Err("Failed to initialize the myLineVertexBuffer!");
-		return false;
-	}
+{ 
+	DebugDrawer::Get().Initialize();
+	DebugDrawer::Get().AddDebugGrid({0.f, 0.0f, 0.f},1000,10,{1.0f, 1.0f, 1.0f});
 	return true;
 }
 
@@ -668,6 +638,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	myCamera->SetCameraToFrameBuffer();
 	GfxCmd_DebugLayer().ExecuteAndDestroy();
 #ifdef  _DEBUGDRAW
+	DebugDrawer::Get().Render();
 	OverlayCommandList.Execute();
 #endif //  _DEBUGDRAW
 	RHI::EndEvent();

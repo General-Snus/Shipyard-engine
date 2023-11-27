@@ -1,5 +1,5 @@
 //MOTHBALLED
-#ifdef  MOTHBALLED
+#if  MOTHBALLED == 1
 
 #pragma once  
 #include "Controllers/Controller.h" 

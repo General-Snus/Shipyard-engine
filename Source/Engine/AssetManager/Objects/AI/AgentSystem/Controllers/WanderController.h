@@ -1,9 +1,9 @@
 #pragma once
-#include "DefaultControllers/PollingController.h" 
-class WanderController : public PollingController
+
+class WanderController : public Controller
 {
 public:
-	explicit WanderController(const PollingStation& aPollingStation,GameObject componentCheck);
+	explicit WanderController(GameObject componentCheck);
 	bool Update(GameObject input) override;
 	void Recieve(const AIEvent& aEvent) override;
 private:

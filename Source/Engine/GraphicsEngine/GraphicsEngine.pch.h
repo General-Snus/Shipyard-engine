@@ -6,8 +6,7 @@
 
 #ifndef GRAPHICSENGINE_PCH
 #define GRAPHICSENGINE_PCH
-#define NOMINMAX
-#define CU CommonUtilities
+#define NOMINMAX 
 
 // add headers that you want to pre-compile here
 #include <Windows.h>

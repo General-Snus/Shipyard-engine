@@ -3,6 +3,9 @@
 #include <Engine/AssetManager/ComponentSystem/Component.h>
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
 
+
+
+//LEFTHANDED X RIGHT Y UP Z FORWARD AS GOD INTENDED
 class Transform : public Component
 {
 public:
@@ -32,19 +35,24 @@ public:
 	void SetPosition(float X,float Y,float Z);
 	Vector3f GetPosition() const;
 
-	 
+	
 	void Rotate(float X,float Y,float Z);
 	void Rotate(Vector2f angularRotation);
 	void Rotate(Vector3f angularRotation);
 	void SetRotation(float X,float Y,float Z);
 	void SetRotation(Vector2f angularRotation);
 	void SetRotation(Vector3f angularRotation);
-	Vector3f GetRotation() const;
-	//void ApplyTransformation(Matrix transformationMatrix);
-	 
+	void LookAt(Vector3f target);
+
+	//"You will eventually regret any use of Euler angles."
+	//John Carmack
+	Vector3f GetRotation() const; 
+	//Not mathematicly sound
+	Vector3f VectorToEulerAngles(Vector3f input) const;
+
 	void SetScale(float scale);
 	void SetScale(Vector2f scale);
-	void SetScale(Vector3f scale); 
+	void SetScale(Vector3f scale);
 
 	bool GetIsDirty() const;
 
@@ -59,13 +67,11 @@ private:
 	Vector3<float> myRotation;
 	Vector3<float> myScale;
 
-
-
 	Matrix4x4<float> myTransform;
 	Matrix4x4<float> myWorldSpaceTransform;
-	Debug::DebugPrimitive primitive;
-	
-	/*  
+	DebugDrawer::PrimitiveHandle primitive;
+
+	/*
 
 *  ALL IN RADIANS FOR NOW, HEADER FOR CONVERTIONS CONST
 
@@ -73,7 +79,7 @@ void LookAt
 void GetEulerAxis
 void SetRotatation
 void
- 
+
 void SetPosition
 GetPosition
 

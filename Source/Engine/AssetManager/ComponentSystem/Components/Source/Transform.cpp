@@ -9,9 +9,7 @@ Transform::Transform(const unsigned int anOwnerId) : Component(anOwnerId),isDirt
 	myPosition = Vector3f();
 	myRotation = Vector3f();
 	myScale = Vector3f(1,1,1);
-
-
-	InitPrimitive();
+	isDebugGizmoEnabled = false;
 }
 /*
 Transform::Transform(const unsigned int anOwnerId,const Matrix& aMatrix) : Component(anOwnerId),isDirty(true)
@@ -31,8 +29,12 @@ void Transform::Update()
 			Matrix::CreateRotationAroundX(myRotation.x * DEG_TO_RAD) *
 			Matrix::CreateRotationAroundY(myRotation.y * DEG_TO_RAD) *
 			Matrix::CreateRotationAroundZ(myRotation.z * DEG_TO_RAD) *
-			Matrix::CreateTranslationMatrix(myPosition); 
+			Matrix::CreateTranslationMatrix(myPosition);
 		isDirty = false;
+
+#ifdef _DEBUGDRAW 
+		DebugDrawer::Get().SetDebugPrimitiveTransform(primitive,myTransform);
+#endif // _DEBUGDRAW 
 	}
 }
 
@@ -40,12 +42,9 @@ void Transform::Render()
 {
 	OPTICK_EVENT();
 #ifdef _DEBUGDRAW 
-	if(primitive.NumVertices != 0 && primitive.NumIndices != 0)
-	{
-		GraphicsEngine::Get().OverlayCommands<GfxCmd_DrawDebugPrimitive>(primitive,myTransform);
-	}
+
 #endif // _DEBUGDRAW 
-}  
+}
 const Matrix& Transform::GetTransform() const
 {
 	return myTransform;
@@ -67,21 +66,21 @@ Vector3f Transform::GetUp()
 }
 
 void Transform::Move(Vector2f translation)
-{ 
+{
 	myPosition.x += translation.x;
 	myPosition.y += translation.y;
 	isDirty = true;
 }
 
 void Transform::Move(Vector3f translation)
-{ 
+{
 	myPosition += translation;
 	isDirty = true;
 }
 
 void Transform::Move(float X,float Y,float Z)
 {
-	myPosition += {X,Y,Z}; 
+	myPosition += {X,Y,Z};
 	isDirty = true;
 }
 
@@ -94,12 +93,12 @@ void Transform::SetPosition(Vector2f position)
 	isDirty = true;
 }
 void Transform::SetPosition(Vector3f position)
-{ 
+{
 	myPosition = position;
 	isDirty = true;
 }
-void Transform::SetPosition(float X, float Y,float Z)
-{ 
+void Transform::SetPosition(float X,float Y,float Z)
+{
 	myPosition = {X,Y,Z};
 	isDirty = true;
 }
@@ -109,10 +108,10 @@ Vector3f Transform::GetPosition() const
 	return {myTransform(4,1),myTransform(4,2),myTransform(4,3)};
 };
 
-void Transform::Rotate(float X, float Y, float Z)
+void Transform::Rotate(float X,float Y,float Z)
 {
 	myRotation += {X,Y,Z};
-	isDirty = true; 
+	isDirty = true;
 }
 
 void Transform::Rotate(Vector2f angularRotation)
@@ -145,9 +144,9 @@ void Transform::MakeSaneRotation()
 }
 
 void Transform::Rotate(Vector3f angularRotation)
-{ 
+{
 	myRotation += angularRotation;
-	isDirty = true;  
+	isDirty = true;
 }
 
 /*
@@ -174,46 +173,15 @@ void Transform::SetGizmo(bool enabled)
 	isDebugGizmoEnabled = enabled;
 	if(enabled)
 	{
-		InitPrimitive();
+		primitive = DebugDrawer::Get().AddDebugGizmo(Vector3f(),1.0f);
+		DebugDrawer::Get().SetDebugPrimitiveTransform(primitive,myTransform);
 	}
 	else
 	{
-		primitive = Debug::DebugPrimitive();
+		DebugDrawer::Get().RemoveDebugPrimitive(primitive);
 	}
 }
 
-void Transform::InitPrimitive()
-{ 
-	float size = 1.0f;
-	float thicc = 15.0f;
-	std::vector<Debug::DebugVertex> myVertex;
-	std::vector<unsigned int> myIndices;
-	//X 
-	myVertex.push_back(
-		Debug::DebugVertex({0,0,0},{1,0,0},thicc));
-	myVertex.push_back(
-		Debug::DebugVertex({size,0,0},{1,0,0},thicc));
-	myIndices.push_back(0);
-	myIndices.push_back(1);
-
-	//Y
-	myVertex.push_back(
-		Debug::DebugVertex({0,0,0},{0,1,0},thicc));
-	myVertex.push_back(
-		Debug::DebugVertex({0,size,0},{0,1,0},thicc));
-	myIndices.push_back(2);
-	myIndices.push_back(3);
-
-	//Z
-	myVertex.push_back(
-		Debug::DebugVertex({0,0,0},{0,0,1},thicc));
-	myVertex.push_back(
-		Debug::DebugVertex({0,0,size},{0,0,1},thicc));
-	myIndices.push_back(4);
-	myIndices.push_back(5); 
-	
-	primitive = Debug::DebugPrimitive(myVertex,myIndices); 
-}
 void Transform::SetRotation(float X,float Y,float Z)
 {
 	myRotation = {X,Y,Z};
@@ -224,24 +192,34 @@ void Transform::SetRotation(Vector2f angularRotation)
 {
 	myRotation.x = angularRotation.x;
 	myRotation.y = angularRotation.y;
-	isDirty = true; 
+	isDirty = true;
 }
 
 void Transform::SetRotation(Vector3f angularRotation)
 {
 	myRotation = angularRotation;
-	isDirty = true; 
+	isDirty = true;
+}
+void Transform::LookAt(Vector3f target)
+{
+	target;
+	throw std::exception("Not implemented");
 }
 Vector3f Transform::GetRotation() const
 {
 	return myRotation;
+}
+Vector3f Transform::VectorToEulerAngles(Vector3f input) const
+{
+	input;
+	//Fuck euler angles remove this pos
+	return Vector3f();
 }
 void Transform::SetScale(Vector2f scale)
 {
 	myScale.x = scale.x;
 	myScale.y = scale.y;
 	isDirty = true;
-	//ApplyTransformation(Matrix::CreateScaleMatrix({scale.x,scale.y,1}));
 }
 
 void Transform::SetScale(float scale)

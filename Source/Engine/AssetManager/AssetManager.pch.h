@@ -14,6 +14,7 @@
 #include <memory>
 #include <vector>
 #include <functional>
+#include <ranges>
 
 #include <assimp/Importer.hpp>      // C++ importer interface 
 #include <assimp/scene.h>           // Output data structure
@@ -24,8 +25,7 @@
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/Math.hpp>
 #include "Tools/Logging/Logging.h"
-#include <Tools/Optick/src/optick.h>
-
+#include <Tools/Optick/src/optick.h> 
 
 #include "Objects/AI/NavMesh/NavMesh.h"
 #include "Objects/AI/AgentSystem/Controllers/Controller.h"
@@ -33,6 +33,11 @@
 #include "Objects/AI/AgentSystem/Controllers/DefaultControllers/EventController.h"
 #include "Objects/AI/AgentSystem/Controllers/PlayerController.h"  
 #include "Objects/AI/AgentSystem/Controllers/WanderController.h"  
+#include "Objects/AI/AgentSystem/Controllers/SeekerController.h"  
+#include "Objects/AI/AgentSystem/Controllers/SeparationController.h"
+
+#include "Objects/AI/AgentSystem/PollingStations/PollingStation.h"  
+#include "Objects/AI/AgentSystem/PollingStations/Target_PollingStation.h"  
 
 #include "Objects/BaseAssets/BaseAsset.h"
 #include "Objects/BaseAssets/Animations.h"

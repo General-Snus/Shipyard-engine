@@ -4,6 +4,7 @@ class cPhysics_Kinematic : public Component
 public:
 	cPhysics_Kinematic(const SY::UUID anOwnerID);
 	void Init() override;
+	void UpdatePrimitive();
 	void Update() override;
 	void Render() override; 
 
@@ -15,6 +16,7 @@ public:
 	bool localVelocity;
 	float ph_maxSpeed;
 private:
-
+	void InitPrimitive();
+	std::vector<DebugDrawer::PrimitiveHandle> myHandles;
 };
 

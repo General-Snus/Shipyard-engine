@@ -108,7 +108,7 @@
     <ClInclude Include="Objects\AI\AgentSystem\AIEventManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\AI\AgentSystem\PollingStation.h">
+    <ClInclude Include="Objects\AI\AgentSystem\PollingStations\PollingStation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Objects\AI\NavMesh\NavMesh.h">
@@ -124,6 +124,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\WanderController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\SeparationController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\SeekerController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\PollingStations\Target_PollingStation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -200,25 +209,25 @@
     <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\cActor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Controller.cpp">
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\Controller.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\EventController.cpp">
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\Source\EventController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\AI\AgentSystem\Controllers\PlayerController.cpp">
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\PlayerController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\PollingController.cpp">
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\Source\PollingController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\AI\AgentSystem\Actor.cpp">
+    <ClCompile Include="Objects\AI\AgentSystem\Source\Actor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\AI\AgentSystem\AIEventManager.cpp">
+    <ClCompile Include="Objects\AI\AgentSystem\Source\AIEventManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\AI\AgentSystem\PollingStation.cpp">
+    <ClCompile Include="Objects\AI\AgentSystem\PollingStations\Source\PollingStation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Objects\AI\NavMesh\NavMesh.cpp">
@@ -230,7 +239,16 @@
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysics_Newtonian.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\AI\AgentSystem\Controllers\WanderController.cpp">
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\WanderController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\SeparationController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\SeekerController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\PollingStations\Source\Target_PollingStation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

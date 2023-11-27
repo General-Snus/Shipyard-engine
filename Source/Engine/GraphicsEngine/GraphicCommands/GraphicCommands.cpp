@@ -38,11 +38,14 @@ GraphicsCommandList::GraphicsCommandList() = default;
 
 GraphicsCommandList::~GraphicsCommandList()
 {
-	GraphicsCommandListIterator it(*this);
-	while(it.HasCommand())
+	if(!isEmpty)
 	{
-		GraphicCommandBase* cmd = it.Next();
-		cmd->Destroy();
+		GraphicsCommandListIterator it(*this);
+		while(it.HasCommand())
+		{
+			GraphicCommandBase* cmd = it.Next();
+			cmd->Destroy();
+		}
 	}
 	delete[] myData;
 	myData = nullptr;
@@ -59,15 +62,15 @@ void GraphicsCommandList::Initialize(size_t aSize)
 	myRoot = std::bit_cast<GraphicCommandBase*>(myData);
 	myLink = &myRoot;
 
-	isEmpty= true;
+	isEmpty = true;
 }
 
 void GraphicsCommandList::Execute()
-{ 
+{
 	if(!isExecuting && !isFinished && !isEmpty)
 	{
 		isExecuting = true;
-		GraphicsCommandListIterator it(*this); 
+		GraphicsCommandListIterator it(*this);
 
 		while(it.HasCommand())
 		{

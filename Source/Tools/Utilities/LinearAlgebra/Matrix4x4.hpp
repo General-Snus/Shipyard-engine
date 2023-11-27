@@ -31,6 +31,7 @@ public:
 	// Static function for creating a transpose of a matrix.
 	static Matrix4x4<T> Transpose(const Matrix4x4<T>& aMatrixToTranspose);
 	static Matrix4x4<T> GetFastInverse(const Matrix4x4<T>& aTransform);
+	static Vector3<T> ReadPosition(const Matrix4x4<T>& aMatrix);
 
 	static Matrix4x4<T> LookAt(const Vector3<T>& aFrom,const Vector3<T>& aTarget,const Vector3<T>& anUp);
 	static Matrix4x4<T> CreateOrthographicProjection(float aLeftPlane,float aRightPlane,float aBottomPlane,float aTopPlane,float aNearPlane,float aFarPlane);
@@ -347,7 +348,11 @@ inline Matrix4x4<T> Matrix4x4<T>::GetFastInverse(const Matrix4x4<T>& aTransform)
 
 	return Transform * Rotation;  //Version 1 no scaling
 }
-
+template<class T>
+inline Vector3<T> Matrix4x4<T>::ReadPosition(const Matrix4x4<T>& aMatrix)
+{
+	return Vector3<T>(aMatrix.arr[3][0],aMatrix.arr[3][1],aMatrix.arr[3][2]);
+}
 template<class T>
 inline Matrix4x4<T> Matrix4x4<T>::LookAt(const Vector3<T>& aFrom,const Vector3<T>& aTarget,const Vector3<T>& anUp)
 {

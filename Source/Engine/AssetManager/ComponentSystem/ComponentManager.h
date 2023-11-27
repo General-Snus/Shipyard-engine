@@ -81,6 +81,7 @@ T& ComponentManager<T>::AddComponent(const SY::UUID aGameObjectID)
 	myGameObjectIDtoVectorIndex[aGameObjectID] = static_cast<unsigned int>(myComponents.size());
 	myVectorIndexToGameObjectID[static_cast<unsigned int>(myComponents.size())] = aGameObjectID;
 	myComponents.push_back(T(aGameObjectID));
+	static_cast<Component*>(&myComponents.back())->Init();
 	return myComponents.back();
 }
 
@@ -91,6 +92,7 @@ inline T& ComponentManager<T>::AddComponent(const SY::UUID aGameObjectID,const T
 	myVectorIndexToGameObjectID[static_cast<unsigned int>(myComponents.size())] = aGameObjectID;
 	myComponents.push_back(aComponent);
 	static_cast<Component*>(&myComponents.back())->SetOwnerID(aGameObjectID);
+	static_cast<Component*>(&myComponents.back())->Init();
 	return myComponents.back();
 }
 
@@ -101,6 +103,7 @@ inline T& ComponentManager<T>::AddComponent(const SY::UUID aGameObjectID,Args...
 	myGameObjectIDtoVectorIndex[aGameObjectID] = static_cast<unsigned int>(myComponents.size());
 	myVectorIndexToGameObjectID[static_cast<unsigned int>(myComponents.size())] = aGameObjectID;
 	myComponents.push_back(T(aGameObjectID,someParameters...));
+	static_cast<Component*>(&myComponents.back())->Init();
 	return myComponents.back();
 }
 

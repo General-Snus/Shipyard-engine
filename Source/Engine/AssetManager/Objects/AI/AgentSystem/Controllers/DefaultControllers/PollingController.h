@@ -7,9 +7,9 @@ class PollingStation;
 class PollingController : public Controller
 {
 public:
-	explicit PollingController(const PollingStation& aPollingStation);
+	explicit PollingController(PollingStation* aPollingStation);
 	bool Update(GameObject input) override;
 
-private:
-	const PollingStation& pollingStation; 
+protected:
+	PollingStation* pollingStation; 
 };
