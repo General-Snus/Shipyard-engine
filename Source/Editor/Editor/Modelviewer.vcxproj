@@ -93,6 +93,9 @@
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <TargetName>Shipyard_$(ProjectName)_$(Configuration)</TargetName>
   </PropertyGroup>
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgEnabled>false</VcpkgEnabled>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -144,6 +147,9 @@
     <FxCompile>
       <ObjectFileOutput>$(SolutionDir)Bin\$(Configuration)\Content\Shaders\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
+    <PostBuildEvent>
+      <Command>xcopy /y /d /s "$(SolutionDir)..\Dependencies\$(Configuration)\PostBuildCopy\" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -170,6 +176,9 @@
     <FxCompile>
       <ObjectFileOutput>$(SolutionDir)Bin\$(Configuration)\Content\Shaders\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
+    <PostBuildEvent>
+      <Command>xcopy /y /d /s "$(SolutionDir)..\Dependencies\$(Configuration)\PostBuildCopy\" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Core\Editor.h" />
