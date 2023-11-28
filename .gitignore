@@ -38,9 +38,7 @@ Source/DawnCache/*
 
 # Allowed libriaries and folders
 !/Source/Tools/FBX/ThirdParty/fbxsdk/lib/debug/
-!/Source/Tools/FBX/ThirdParty/fbxsdk/lib/release/
-!/[Bb]in/[Dd]ebug/
-!/[Bb]in/[Rr]elease/
+!/Source/Tools/FBX/ThirdParty/fbxsdk/lib/release/ 
 !/Dependencies/[Dd]ebug/
 !/Dependencies/[Rr]elease/
 
