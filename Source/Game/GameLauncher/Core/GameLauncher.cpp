@@ -106,8 +106,8 @@ void GameLauncher::Start()
 	for(auto& obj : wanderer)
 	{
 		//Drone 
-		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/C64.fbx");
-		mesh.SetMaterialPath("Materials/C64Player.json"); 
+		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/C64Wanderer.fbx");
+		mesh.SetMaterialPath("Materials/C64Wanderer.json"); 
 
 		auto& actor = obj.AddComponent<cActor>();
 		actor.SetController(new WanderController(obj));
@@ -116,8 +116,8 @@ void GameLauncher::Start()
 	auto* seekerStation = new Target_PollingStation(wanderer[0]);
 	for(auto& obj : seekers)
 	{ 
-		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/C64.fbx");
-		mesh.SetMaterialPath("Materials/C64Enemy.json");
+		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/C64Seeker.fbx");
+		mesh.SetMaterialPath("Materials/C64Seeker.json");
 
 		auto& actor = obj.AddComponent<cActor>();
 		actor.SetController(new SeekerController(seekerStation,obj));
@@ -127,7 +127,7 @@ void GameLauncher::Start()
 	for(auto& obj : separatists)
 	{
 		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/C64.fbx");
-		mesh.SetMaterialPath("Materials/C64Enemy.json");
+		mesh.SetMaterialPath("Materials/C64Separatist.json");
 
 		auto& actor = obj.AddComponent<cActor>();
 		actor.SetController(new SeparationController(separatistsStation,obj)); // how do i remove the object itself

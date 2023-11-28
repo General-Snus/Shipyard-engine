@@ -190,15 +190,24 @@ inline Vector3<T> Vector3<T>::GetNormalized() const
 	);
 }
 
+
 template<class T>
 inline void Vector3<T>::Normalize()
 {
 	const T len = 1 / Length();
 
+	if(len != len || isinf(len)) //IEEE FLOAT NAN
+	{
+		x = 0;
+		y = 0;
+		z = 0;
+		return;
+	}
+
 	x = x * len;
 	y = y * len;
 	z = z * len;
-}
+} 
 
 template<class T>
 inline T Vector3<T>::Dot(const Vector3<T>& aVector) const

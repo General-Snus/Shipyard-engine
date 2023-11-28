@@ -17,23 +17,28 @@ void cPhysics_Kinematic::Init()
 	if(!TryGetComponent<Transform>())
 	{
 		this->GetGameObject().AddComponent<Transform>();
+		InitPrimitive();
 	} 
-	InitPrimitive();
 }
 void cPhysics_Kinematic::InitPrimitive()
 {
-	auto& rf = GetComponent<Transform>().GetTransform();
 
 	for(DebugDrawer::PrimitiveHandle& handle : myHandles)
 	{
 		DebugDrawer::Get().RemoveDebugPrimitive(handle);
 	}
 
+	Matrix rf = GetComponent<Transform>().GetTransform();
+	if(!localVelocity)
+	{
+		rf = Matrix::CreateTranslationMatrix(GetComponent<Transform>().GetPosition());
+	}
+
 	myHandles.clear();
+	//Velocity  
 	DebugDrawer::PrimitiveHandle handle = DebugDrawer::Get().AddDebugLine({0,0,0},ph_velocity,Vector3f(1.0f,0.0f,0.0f));
 	DebugDrawer::Get().SetDebugPrimitiveTransform(handle,rf);
 	myHandles.push_back(handle);
-	//Velocity  
 	//Acceleration
 	handle = DebugDrawer::Get().AddDebugLine({0,0,0},ph_acceleration,Vector3f(0.0f,0.0f,1.0f));
 	DebugDrawer::Get().SetDebugPrimitiveTransform(handle,rf);

@@ -1,5 +1,6 @@
 #include "AssetManager.pch.h"
 #include "../SeparationController.h"
+#include <Tools/Utilities/LinearAlgebra/Quaternions.hpp>
 
 SeparationController::SeparationController(MultipleTargets_PollingStation* station,GameObject componentCheck) : PollingController(station)
 {
@@ -7,16 +8,16 @@ SeparationController::SeparationController(MultipleTargets_PollingStation* stati
 	if(!componentCheck.TryGetComponent<cPhysics_Kinematic>())
 	{
 		auto& phy = componentCheck.AddComponent<cPhysics_Kinematic>();
-		phy.localVelocity = true;
+		phy.localVelocity = false;
 		phy.ph_maxSpeed = 5.0f;
 	}
-
 }
 
 bool SeparationController::Update(GameObject input)
 {
 	auto* physicsComponent = input.TryGetComponent<cPhysics_Kinematic>();
 	auto& transform = input.GetComponent<Transform>(); // You can use Get directly if you are sure it will exist, its faster and force safe code
+	auto fwd = transform.GetForward();
 
 	//Dampening
  	physicsComponent->ph_acceleration = -physicsComponent->ph_velocity.GetNormalized() *.1f;
@@ -39,7 +40,12 @@ bool SeparationController::Update(GameObject input)
 			physicsComponent->ph_acceleration += strength * -direction;
 		}
 	}
-	
+
+	auto angles = Quaternionf::RotationFromTo(fwd,physicsComponent->ph_velocity).GetEulerAngles() * RAD_TO_DEG;
+	//Scrub data that can accidentaly enter the system from my bad non quaternion math
+	angles.x = 0;
+	angles.z = 0;
+	physicsComponent->ph_Angular_velocity = angles;
 
 	{//Special circumstance limit area
 		const float mapsize = 50.0f;
