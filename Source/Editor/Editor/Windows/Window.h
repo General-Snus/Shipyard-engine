@@ -1,5 +1,4 @@
 #pragma once
-#define WIN32_LEAN_AND_MEAN
 #include "Windows.h" 
 #include <functional>
 #include <WinUser.h>
@@ -22,6 +21,8 @@ public:
 
 	static void SetCallbackFunction(std::function<void(MSG const& msg)> aCallback);
 	static void Destroy();
+
+	static void MoveConsoleToOtherMonitor();
 
 	inline static HINSTANCE moduleHandler;
 	inline static HWND windowHandler;

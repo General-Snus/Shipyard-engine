@@ -1,6 +1,6 @@
 #include <GraphicsEngine.pch.h>
 #include "../Headers/GfxCmd_SetLightBuffer.h"
-#include <Engine/AssetManager/Objects/Components/ComponentDerivatives/LightComponent.h>
+#include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>
 
 GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 {

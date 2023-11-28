@@ -44,6 +44,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <EnableUnitySupport>true</EnableUnitySupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -51,6 +52,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <EnableUnitySupport>true</EnableUnitySupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -157,43 +159,70 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ComponentSystem\Components\ActorSystem\cActor.h" />
+    <ClInclude Include="ComponentSystem\Components\Physics\cPhysics_Kinematic.h" />
+    <ClInclude Include="ComponentSystem\Components\Physics\cPhysics_Newtonian.h" />
+    <ClInclude Include="ComponentSystem\UUID.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\Actor.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\AIEventManager.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\Controller.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\EventController.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\PlayerController.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\PollingController.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\PollingStations\PollingStation.h" />
+    <ClInclude Include="Objects\AI\NavMesh\NavMesh.h" />
     <ClInclude Include="Objects\BaseAssets\ParticleEmitter.h" />
-    <ClInclude Include="Objects\Components\ComponentDerivatives\DEBUGCOMPONENTS\RenderMode.h" />
-    <ClInclude Include="Objects\Components\ComponentDerivatives\DEBUGCOMPONENTS\FrameStatistics.h" />
-    <ClInclude Include="Objects\Components\ComponentDerivatives\CameraComponent.h" />
-    <ClInclude Include="Objects\Components\ComponentDerivatives\LightComponent.h" />
+    <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\RenderMode.h" />
+    <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\FrameStatistics.h" />
+    <ClInclude Include="ComponentSystem\Components\CameraComponent.h" />
+    <ClInclude Include="ComponentSystem\Components\LightComponent.h" />
     <ClInclude Include="Objects\BaseAssets\LightDataBase.h" />
     <ClInclude Include="Objects\BaseAssets\MaterialAsset.h" />
     <ClInclude Include="Objects\BaseAssets\Animations.h" />
     <ClInclude Include="Objects\BaseAssets\BaseAsset.h" />
     <ClInclude Include="Objects\BaseAssets\MeshAsset.h" />
-    <ClInclude Include="Objects\Components\ComponentDerivatives\Animator.h" />
+    <ClInclude Include="ComponentSystem\Components\Animator.h" />
     <ClInclude Include="AssetManager.h" />
     <ClInclude Include="AssetManager.pch.h" />
-    <ClInclude Include="Objects\Components\ComponentDerivatives\DEBUGCOMPONENTS\ImGuiComponent.h" />
-    <ClInclude Include="Objects\Components\ComponentDerivatives\DEBUGCOMPONENTS\BackgroundColor.h" />
-    <ClInclude Include="Objects\Components\ComponentManager.h" />
-    <ClInclude Include="GameObjectManager.h" />
-    <ClInclude Include="Objects\Components\Component.h" />
-    <ClInclude Include="Objects\GameObjects\GameObject.h" />
-    <ClInclude Include="Objects\Components\ComponentDerivatives\MeshRenderer.h" />
-    <ClInclude Include="Objects\Components\ComponentDerivatives\Transform.h" />
+    <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\ImGuiComponent.h" />
+    <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\BackgroundColor.h" />
+    <ClInclude Include="ComponentSystem\ComponentManager.h" />
+    <ClInclude Include="ComponentSystem\GameObjectManager.h" />
+    <ClInclude Include="ComponentSystem\Component.h" />
+    <ClInclude Include="ComponentSystem\GameObject.h" />
+    <ClInclude Include="ComponentSystem\Components\MeshRenderer.h" />
+    <ClInclude Include="ComponentSystem\Components\Transform.h" />
     <ClInclude Include="Objects\BaseAssets\TextureAsset.h" />
-    <ClInclude Include="Objects\Components\ComponentDerivatives\Skybox.h" />
-    <ClInclude Include="Objects\Components\ComponentDerivatives\ParticleSystem.h" />
+    <ClInclude Include="ComponentSystem\Components\Skybox.h" />
+    <ClInclude Include="ComponentSystem\Components\ParticleSystem.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\WanderController.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\SeekerController.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\SeparationController.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\PollingStations\Target_PollingStation.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\cActor.cpp" />
+    <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysics_Kinematic.cpp" />
+    <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysics_Newtonian.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\Source\Actor.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\Source\AIEventManager.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\Controller.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\Source\EventController.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\PlayerController.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\Source\PollingController.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\PollingStations\Source\PollingStation.cpp" />
+    <ClCompile Include="Objects\AI\NavMesh\NavMesh.cpp" />
     <ClCompile Include="Objects\BaseAssets\ParticleEmitter.cpp" />
-    <ClCompile Include="Objects\Components\ComponentDerivatives\DEBUGCOMPONENTS\RenderMode.cpp" />
-    <ClCompile Include="Objects\Components\ComponentDerivatives\DEBUGCOMPONENTS\FrameStatistics.cpp" />
-    <ClCompile Include="Objects\Components\ComponentDerivatives\CameraComponent.cpp" />
-    <ClCompile Include="Objects\Components\ComponentDerivatives\LightComponent.cpp" />
+    <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\RenderMode.cpp" />
+    <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\FrameStatistics.cpp" />
+    <ClCompile Include="ComponentSystem\Components\Source\CameraComponent.cpp" />
+    <ClCompile Include="ComponentSystem\Components\Source\LightComponent.cpp" />
     <ClCompile Include="Objects\BaseAssets\LightDataBase.cpp" />
     <ClCompile Include="Objects\BaseAssets\MaterialAsset.cpp" />
     <ClCompile Include="Objects\BaseAssets\Animations.cpp" />
     <ClCompile Include="Objects\BaseAssets\BaseAsset.cpp" />
     <ClCompile Include="Objects\BaseAssets\MeshAsset.cpp" />
-    <ClCompile Include="Objects\Components\ComponentDerivatives\Animator.cpp" />
+    <ClCompile Include="ComponentSystem\Components\Source\Animator.cpp" />
     <ClCompile Include="AssetManager.cpp" />
     <ClCompile Include="AssetManager.pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -201,16 +230,20 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Objects\Components\ComponentDerivatives\DEBUGCOMPONENTS\BackgroundColor.cpp" />
-    <ClCompile Include="Objects\Components\ComponentManager.cpp" />
-    <ClCompile Include="GameObjectManager.cpp" />
-    <ClCompile Include="Objects\Components\Component.cpp" />
-    <ClCompile Include="Objects\GameObjects\GameObject.cpp" />
-    <ClCompile Include="Objects\Components\ComponentDerivatives\MeshRenderer.cpp" />
-    <ClCompile Include="Objects\Components\ComponentDerivatives\Transform.cpp" />
+    <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\BackgroundColor.cpp" />
+    <ClCompile Include="ComponentSystem\Source\ComponentManager.cpp" />
+    <ClCompile Include="ComponentSystem\Source\GameObjectManager.cpp" />
+    <ClCompile Include="ComponentSystem\Source\Component.cpp" />
+    <ClCompile Include="ComponentSystem\Source\GameObject.cpp" />
+    <ClCompile Include="ComponentSystem\Components\Source\MeshRenderer.cpp" />
+    <ClCompile Include="ComponentSystem\Components\Source\Transform.cpp" />
     <ClCompile Include="Objects\BaseAssets\TextureAsset.cpp" />
-    <ClCompile Include="Objects\Components\ComponentDerivatives\Skybox.cpp" />
-    <ClCompile Include="Objects\Components\ComponentDerivatives\ParticleSystem.cpp" />
+    <ClCompile Include="ComponentSystem\Components\Source\Skybox.cpp" />
+    <ClCompile Include="ComponentSystem\Components\Source\ParticleSystem.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\WanderController.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\SeekerController.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\SeparationController.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\PollingStations\Source\Target_PollingStation.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

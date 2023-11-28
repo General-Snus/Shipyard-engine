@@ -2,14 +2,15 @@
 #include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
 #include <Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h>
 
-
+#if MOTHBALLED == 1
 class GfxCmd_DrawDebugPrimitive : public GraphicCommandBase
 {
 private:
-	Debug::DebugPrimitive myPrimitive;
+	DebugDrawer::PrimitiveHandle myPrimitive;
 	Matrix myTransform;
 public:
-	GfxCmd_DrawDebugPrimitive(Debug::DebugPrimitive primitive,Matrix Transform);
+	GfxCmd_DrawDebugPrimitive(DebugDrawer::PrimitiveHandle primitive,Matrix Transform);
 	void Destroy() override {};
 	void ExecuteAndDestroy() override;
 };
+#endif	

@@ -21,31 +21,31 @@
     <ClInclude Include="AssetManager.pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\GameObjects\GameObject.h">
+    <ClInclude Include="ComponentSystem\GameObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\Components\ComponentDerivatives\MeshRenderer.h">
+    <ClInclude Include="ComponentSystem\Components\MeshRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\Components\Component.h">
+    <ClInclude Include="ComponentSystem\Component.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameObjectManager.h">
+    <ClInclude Include="ComponentSystem\GameObjectManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\Components\ComponentManager.h">
+    <ClInclude Include="ComponentSystem\ComponentManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\Components\ComponentDerivatives\DEBUGCOMPONENTS\BackgroundColor.h">
+    <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\BackgroundColor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\Components\ComponentDerivatives\DEBUGCOMPONENTS\ImGuiComponent.h">
+    <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\ImGuiComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\Components\ComponentDerivatives\Animator.h">
+    <ClInclude Include="ComponentSystem\Components\Animator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\Components\ComponentDerivatives\Transform.h">
+    <ClInclude Include="ComponentSystem\Components\Transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Objects\BaseAssets\MeshAsset.h">
@@ -63,28 +63,76 @@
     <ClInclude Include="Objects\BaseAssets\TextureAsset.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\Components\ComponentDerivatives\Skybox.h">
+    <ClInclude Include="ComponentSystem\Components\Skybox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\Components\ComponentDerivatives\LightComponent.h">
+    <ClInclude Include="ComponentSystem\Components\LightComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Objects\BaseAssets\LightDataBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\Components\ComponentDerivatives\CameraComponent.h">
+    <ClInclude Include="ComponentSystem\Components\CameraComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\Components\ComponentDerivatives\DEBUGCOMPONENTS\FrameStatistics.h">
+    <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\FrameStatistics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\Components\ComponentDerivatives\DEBUGCOMPONENTS\RenderMode.h">
+    <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\RenderMode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Objects\BaseAssets\ParticleEmitter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\Components\ComponentDerivatives\ParticleSystem.h">
+    <ClInclude Include="ComponentSystem\Components\ParticleSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ComponentSystem\Components\ActorSystem\cActor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\Controller.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\EventController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\PlayerController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\PollingController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\Actor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\AIEventManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\PollingStations\PollingStation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\NavMesh\NavMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ComponentSystem\Components\Physics\cPhysics_Kinematic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ComponentSystem\Components\Physics\cPhysics_Newtonian.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ComponentSystem\UUID.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\WanderController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\SeparationController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\SeekerController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\PollingStations\Target_PollingStation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -95,28 +143,28 @@
     <ClCompile Include="AssetManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\GameObjects\GameObject.cpp">
+    <ClCompile Include="ComponentSystem\Source\GameObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\Components\ComponentDerivatives\MeshRenderer.cpp">
+    <ClCompile Include="ComponentSystem\Components\Source\MeshRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\Components\Component.cpp">
+    <ClCompile Include="ComponentSystem\Source\Component.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GameObjectManager.cpp">
+    <ClCompile Include="ComponentSystem\Source\GameObjectManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\Components\ComponentManager.cpp">
+    <ClCompile Include="ComponentSystem\Source\ComponentManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\Components\ComponentDerivatives\DEBUGCOMPONENTS\BackgroundColor.cpp">
+    <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\BackgroundColor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\Components\ComponentDerivatives\Animator.cpp">
+    <ClCompile Include="ComponentSystem\Components\Source\Animator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\Components\ComponentDerivatives\Transform.cpp">
+    <ClCompile Include="ComponentSystem\Components\Source\Transform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Objects\BaseAssets\MeshAsset.cpp">
@@ -134,28 +182,73 @@
     <ClCompile Include="Objects\BaseAssets\TextureAsset.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\Components\ComponentDerivatives\Skybox.cpp">
+    <ClCompile Include="ComponentSystem\Components\Source\Skybox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\Components\ComponentDerivatives\LightComponent.cpp">
+    <ClCompile Include="ComponentSystem\Components\Source\LightComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Objects\BaseAssets\LightDataBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\Components\ComponentDerivatives\CameraComponent.cpp">
+    <ClCompile Include="ComponentSystem\Components\Source\CameraComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\Components\ComponentDerivatives\DEBUGCOMPONENTS\FrameStatistics.cpp">
+    <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\FrameStatistics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\Components\ComponentDerivatives\DEBUGCOMPONENTS\RenderMode.cpp">
+    <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\RenderMode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Objects\BaseAssets\ParticleEmitter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\Components\ComponentDerivatives\ParticleSystem.cpp">
+    <ClCompile Include="ComponentSystem\Components\Source\ParticleSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\cActor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\Controller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\Source\EventController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\PlayerController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\Source\PollingController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\Source\Actor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\Source\AIEventManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\PollingStations\Source\PollingStation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\NavMesh\NavMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysics_Kinematic.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysics_Newtonian.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\WanderController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\SeparationController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\SeekerController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\PollingStations\Source\Target_PollingStation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

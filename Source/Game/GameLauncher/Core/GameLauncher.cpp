@@ -9,8 +9,7 @@
 
 #include <memory>
 #include <string>
-#include <stringapiset.h> 
-
+#include <stringapiset.h>  
 #include <fstream>
 #include <streambuf>
 #include <assert.h> 
@@ -20,11 +19,8 @@
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/Input/InputHandler.hpp>
 #include <Tools/Logging/Logging.h>
-#include <Tools/Optick/src/optick.h>
+#include <Tools/Optick/src/optick.h>  
 
-
-
-#define Flashlight
 //#define ParticleSystemToggle
 
 using json = nlohmann::json;
@@ -35,32 +31,38 @@ void GameLauncher::Init()
 }
 
 void GameLauncher::Start()
-{ 
+{
 	GameObjectManager& gom = GameObjectManager::GetInstance();
+
+#pragma region BaseSetup
 	myCustomHandler = gom.CreateGameObject();
 	myMesh = gom.CreateGameObject();
+
 
 	{
 		GameObject camera = gom.CreateGameObject();
 		camera.AddComponent<cCamera>();
 		gom.SetLastGOAsCamera();
-	}
 
+
+		auto& transform = camera.AddComponent<Transform>();
+		transform.SetPosition(0,25,0);
+		transform.SetRotation(90,0,0);
+
+	}
 	{
 		GameObject worldRoot = gom.CreateGameObject();
 		gom.SetLastGOAsWorld();
 
 		worldRoot.AddComponent<FrameStatistics>();
 		worldRoot.AddComponent<RenderMode>();
-
 		worldRoot.AddComponent<Skybox>();
-
 		worldRoot.AddComponent<cLight>(eLightType::Directional);
 		Transform& transform = worldRoot.AddComponent<Transform>();
-		transform.SetRotation(0,0,-45);
+		transform.SetRotation(0,45,-45);
 		cLight& pLight = worldRoot.GetComponent<cLight>();
 		pLight.SetColor(Vector3f(1,1,1));
-		pLight.SetPower(5.0f);
+		pLight.SetPower(1.0f);
 		pLight.BindDirectionToTransform(true);
 
 		if(gom.GetAllComponents<BackgroundColor>().empty())
@@ -68,214 +70,105 @@ void GameLauncher::Start()
 			worldRoot.AddComponent<BackgroundColor>(Vector4f(1.0f,1.0f,1.0f,1.0f));
 		}
 	}
-
-	{
-
-		myMesh.AddComponent<cSkeletalMeshRenderer>(L"Models/SK_C_TGA_Bro.fbx");
-		myMesh.GetComponent<cSkeletalMeshRenderer>().SetMaterialPath(L"Materials/TGABroMaterial.json");
-
-		auto& transform = myMesh.AddComponent<Transform>();
-		transform.Rotate(0,-180,0);
-		auto& animator = myMesh.AddComponent<cAnimator>(L"Animations/Locomotion/A_C_TGA_Bro_Walk.fbx");
-		animator.AddAnimation(L"Animations/Locomotion/A_C_TGA_Bro_Run.fbx");
-		animator.AddAnimation(L"Animations/Idle/A_C_TGA_Bro_Idle_Brething.fbx");
-		animator.AddAnimation(L"Animations/Idle/A_C_TGA_Bro_Idle_Wave.fbx");
-	}
-
-	//Billboard
-	{
-		GameObject test = gom.CreateGameObject();
-		test.AddComponent<cMeshRenderer>("Models/PlaneBillboard.fbx");
-		test.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BillboardSmiley.json");
-		test.AddComponent<Transform>();
-		test.GetComponent<Transform>().Rotate(90,180,0);
-		test.GetComponent<Transform>().SetPosition(1,0,0);
-	}
-
-#ifdef  ParticleSystemToggle
-	{
-		ParticleSystem& cmp = myCustomHandler.AddComponent<ParticleSystem>();
-		auto& trans = myCustomHandler.AddComponent<Transform>();
-		trans.Move(GlobalUp * 500.f);
-
-		ParticleEmitterTemplate temp;
-		temp.EmmiterSettings.StartSize = 100;
-		temp.EmmiterSettings.EndSize = 1;
-		temp.EmmiterSettings.StartColor = Vector4f(0,1,1,1);
-		temp.EmmiterSettings.Acceleration = {0,-982.f,0}; // cm scale bad fix plz
-		temp.EmmiterSettings.LifeTime = 3;
-		temp.EmmiterSettings.SpawnRate = 1000;
-		temp.EmmiterSettings.MaxParticles = 5000;
-
-		temp.EmmiterSettings.EndColor = Vector4f(1,0,0,1);
-		temp.EmmiterSettings.StartVelocity = Vector3f(-1000.0,1000.0,0.0);
-		cmp.AddEmitter(temp);
-
-		temp.EmmiterSettings.EndColor = Vector4f(0,1,0,1);
-		temp.EmmiterSettings.StartVelocity = Vector3f(1000.0,1000.0,0);
-		cmp.AddEmitter(temp);
-
-		temp.EmmiterSettings.EndColor = Vector4f(0,0,1,1);
-		temp.EmmiterSettings.StartVelocity = Vector3f(0,1000.0,1000.0);
-		cmp.AddEmitter(temp);
-
-		temp.EmmiterSettings.EndColor = Vector4f(1,0,1,1);
-		temp.EmmiterSettings.StartVelocity = Vector3f(0,1000.0,-1000.0);
-		cmp.AddEmitter(temp);
-	}
-#endif //  ParticleSystem
-
-	{
-		GameObject test2 = gom.CreateGameObject();
-		test2.AddComponent<cMeshRenderer>("Models/Buddha.fbx");
-		test2.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BuddhaMaterial.json");
-		Transform& trans = test2.AddComponent<Transform>();
-		trans.SetPosition(Vector3f(0,-1,10)); 
-		trans.SetScale(5);
-	}
-
-
-	const float Radius = 1.0f;
-	for(size_t i = 0; i < Radius; i++)
-	{
-		//const float Radians = 2 * PI * (i / Radius);
-		//float y = sin(Radians) * Radius;
-		//float x = cos(Radians) * Radius; 
-
-
-		GameObject Chest = gom.CreateGameObject();
-		Transform& trans = Chest.AddComponent<Transform>();
-		//trans.SetRotation(0,-90 - Radians * RAD_TO_DEG,0);
-		trans.SetPosition(0,0,AU);
-		trans.SetScale(Kilo * 695700);
-		myCustomHandler = Chest;
-		Chest.AddComponent<cMeshRenderer>("Models/Chest.fbx");
-		Chest.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/ChestMaterial.json");
-	}
-
-	{
-		GameObject Box = gom.CreateGameObject();
-		Box.AddComponent<cMeshRenderer>("Models/Cube.fbx");
-		Box.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/CubeMaterial.json");
-		Box.AddComponent<Transform>();
-		Box.GetComponent<Transform>().SetPosition(7,0,0);
-	}
-
-	for(int i = 1; i < 5; i++)
-	{
-		GameObject gO = gom.CreateGameObject();
-		gO.AddComponent<cSkeletalMeshRenderer>(L"Models/SK_C_TGA_Bro.fbx");
-		gO.GetComponent<cSkeletalMeshRenderer>().SetMaterialPath(L"Materials/TGABroMaterial.json");
-		gO.AddComponent<Transform>();
-		gO.GetComponent<Transform>().SetPosition({-static_cast<float>(i) * 3.0f,0});
-		gO.GetComponent<Transform>().Rotate(0,180.0f,0);
-		gO.AddComponent<cAnimator>(L"Animations/Locomotion/A_C_TGA_Bro_Walk.fbx");
-		gO.GetComponent<cAnimator>().AddAnimation(L"Animations/Locomotion/A_C_TGA_Bro_Run.fbx");
-		gO.GetComponent<cAnimator>().AddAnimation(L"Animations/Idle/A_C_TGA_Bro_Idle_Brething.fbx");
-		gO.GetComponent<cAnimator>().AddAnimation(L"Animations/Idle/A_C_TGA_Bro_Idle_Wave.fbx");
-		gO.GetComponent<cAnimator>().SetPlayingAnimation(i - 1);
-	}
-
-	for(int i = 1; i < 10; i++)
-	{
-		GameObject spotLight = gom.CreateGameObject();
-		spotLight.AddComponent<cLight>(eLightType::Spot);
-		std::weak_ptr<SpotLight> ptr = spotLight.GetComponent<cLight>().GetData<SpotLight>();
-		spotLight.AddComponent<Transform>();
-		spotLight.GetComponent<Transform>().SetPosition({-static_cast<float>(i) * 3.0f + 3 ,5,0});
-		spotLight.GetComponent<Transform>().Rotate(90,0,0);
-		ptr.lock()->Color = {RandomInRange(0.0f,1.0f),RandomInRange(0.0f,1.0f),RandomInRange(0.0f,1.0f)};
-		//ptr.lock()->Color = {1,1,1};
-		ptr.lock()->Range = 1000.0f;
-		ptr.lock()->Power = static_cast<float>(i) * 200.0f * Kilo;
-		ptr.lock()->OuterConeAngle = static_cast<float>(i) * 18.0f * DEG_TO_RAD;
-		ptr.lock()->InnerConeAngle = 1.0f * DEG_TO_RAD;
-		spotLight.GetComponent<cLight>().BindDirectionToTransform(true);
-
-	}
-
-	for(size_t i = 0; i < 2; i++)
-	{
-		int x = RandomInRange<int>(-50,50);
-		int z = RandomInRange<int>(-50,50);
-
-		GameObject pointLight = gom.CreateGameObject();
-		pointLight.AddComponent<Transform>();
-		pointLight.GetComponent<Transform>().SetPosition({(float)x,10,(float)z});
-
-		pointLight.AddComponent<cLight>(eLightType::Point);
-		std::weak_ptr<PointLight> ptr = pointLight.GetComponent<cLight>().GetData<PointLight>();
-		ptr.lock()->Color = {RandomInRange(0.0f,1.0f),RandomInRange(0.0f,1.0f),RandomInRange(0.0f,1.0f)};
-		ptr.lock()->Range = 10000.0f;
-		ptr.lock()->Power = 50.0f * Kilo;
-		pointLight.GetComponent<cLight>().BindDirectionToTransform(true);
-	}
-
-	GameObject pointLight = gom.CreateGameObject();
-	pointLight.AddComponent<Transform>();
-	pointLight.GetComponent<Transform>().SetPosition({0,3,10});
-
-	pointLight.AddComponent<cLight>(eLightType::Point);
-	cLight& ptr = pointLight.GetComponent<cLight>();
-	ptr.SetColor({1,1,1});
-	ptr.SetRange(1000.0f);
-	ptr.SetPower(100.0f * Kilo);
-	ptr.BindDirectionToTransform(true);
-
 	{
 		GameObject test3 = gom.CreateGameObject();
 		test3.AddComponent<cMeshRenderer>("Models/SteelFloor.fbx");
 		test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
-		test3.AddComponent<Transform>();
-		test3.GetComponent<Transform>().SetPosition(0,-1.25,0);
+		auto& transform = test3.AddComponent<Transform>();
+		transform.SetPosition(0,-1.5f,0);
+		transform.SetScale(Vector3f(50.0f,1.0f,50.0f));
+		transform.SetGizmo(false);
 	}
+#pragma endregion
+
+	//Movement1 
+	SY::UUID player;
+	std::vector<GameObject> entities;
+	entities.resize(15); //Safety resize if we dont add more it wont realloc and span wont loose connection
+
+	auto wanderer = std::span(entities.begin(),1);//1 from position 0
+	auto seekers = std::span(entities.begin() + 1,4); //4 from position 1
+	auto separatists = std::span(entities.begin() + 5,10); //10 from position 6
+
+	for(auto& obj : entities)
+	{
+		float x = RandomEngine::RandomInRange<float>(-10.f,10.f);
+		float z = RandomEngine::RandomInRange<float>(-10.f,10.f);
+
+		//Drone
+		GameObject drone = gom.CreateGameObject();
+		auto& transform = drone.AddComponent<Transform>();
+		transform.SetPosition(x,0,z);
+
+		obj = drone;
+	}
+
+	for(auto& obj : wanderer)
+	{
+		//Drone 
+		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/C64Wanderer.fbx");
+		mesh.SetMaterialPath("Materials/C64Wanderer.json"); 
+
+		auto& actor = obj.AddComponent<cActor>();
+		actor.SetController(new WanderController(obj));
+	}
+	
+	auto* seekerStation = new Target_PollingStation(wanderer[0]);
+	for(auto& obj : seekers)
+	{ 
+		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/C64Seeker.fbx");
+		mesh.SetMaterialPath("Materials/C64Seeker.json");
+
+		auto& actor = obj.AddComponent<cActor>();
+		actor.SetController(new SeekerController(seekerStation,obj));
+	}
+
+	auto* separatistsStation = new MultipleTargets_PollingStation(entities);
+	for(auto& obj : separatists)
+	{
+		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/C64.fbx");
+		mesh.SetMaterialPath("Materials/C64Separatist.json");
+
+		auto& actor = obj.AddComponent<cActor>();
+		actor.SetController(new SeparationController(separatistsStation,obj)); // how do i remove the object itself
+	} 
+
 	GLLogger.Log("GameLauncher start");
 }
 
 void GameLauncher::Update(float delta)
 {
-	OPTICK_EVENT();
-	if(InputHandler::GetInstance().IsKeyPressed((int)Keys::NUMPAD1))
+	OPTICK_EVENT()
+		//Movement1
+		AIEventManager::Instance().Update();
+
+	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::NUMPAD8))
 	{
-		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(0);
+		myCustomHandler.GetComponent<Transform>().Move(0,0,1 * delta);
 	}
-	if(InputHandler::GetInstance().IsKeyPressed((int)Keys::NUMPAD2))
+	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::NUMPAD2))
 	{
-		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(1);
+		myCustomHandler.GetComponent<Transform>().Move(0,0,-1 * delta);
 	}
-	if(InputHandler::GetInstance().IsKeyPressed((int)Keys::NUMPAD3))
+	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::NUMPAD6))
 	{
-		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(2);
+		myCustomHandler.GetComponent<Transform>().Move(1 * delta,0,0);
 	}
-	if(InputHandler::GetInstance().IsKeyPressed((int)Keys::NUMPAD4))
+	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::NUMPAD4))
 	{
-		myMesh.GetComponent<cAnimator>().SetPlayingAnimation(3);
+		myCustomHandler.GetComponent<Transform>().Move(-1 * delta,0,0);
 	}
-	//if(InputHandler::GetInstance().IsKeyPressed((int)Keys::R))
+
+
+	//Other
 	{
-		for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
+		for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>()) // TODO optimize this once you have a lot of lights and lightobjects
 		{
 			i.SetIsDirty(true);
 			i.SetIsRendered(false);
 		}
 	}
-	Transform& pLight = GameObjectManager::GetInstance().GetWorldRoot().GetComponent<Transform>();
-	pLight.Rotate(0,delta,0);
-	myMesh.GetComponent<Transform>().Rotate(0,delta * 100,0);
 
-	//if(Transform* transform = myCustomHandler.TryGetComponent<Transform>())
-	//{
-	//	static float angle;
-	//	angle += 0.001f*delta; 
-	//	Vector2f transformPosition = Vector2f(transform->GetPosition().x,transform->GetPosition().z); 
-	//	Vector2f newPosition;
-	//	newPosition.x = transformPosition.x * cos(angle) + transformPosition.y * sin(angle);
-	//	newPosition.y = -transformPosition.x * sin(angle) + transformPosition.y * cos(angle);
-	//
-	//	transformPosition += newPosition ;
-	//	transform->SetPosition(transformPosition.x,0,transformPosition.y);
-	//	//transform->Rotate(0,10 * delta,0);
-	//}
-
-
+	//Transform& pLight = GameObjectManager::GetInstance().GetWorldRoot().GetComponent<Transform>();
+	//pLight.Rotate(0,delta,0);
 }

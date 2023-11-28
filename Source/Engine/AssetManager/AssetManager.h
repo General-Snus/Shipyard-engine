@@ -1,7 +1,5 @@
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
-
 #define AsUINT(v) static_cast<unsigned>(v) 
 
 #include <Tools/Utilities/DataStructures/Queue.hpp>

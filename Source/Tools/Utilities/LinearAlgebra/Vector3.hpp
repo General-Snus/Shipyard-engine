@@ -1,5 +1,6 @@
 #pragma once
 #include <assert.h> 
+#include <cmath>
 template <class T>
 class Vector3
 {
@@ -169,13 +170,19 @@ inline T Vector3<T>::LengthSqr() const
 template<class T>
 inline T Vector3<T>::Length() const
 {
-	return static_cast<T>(sqrt(LengthSqr()));
+	return static_cast<T>(std::sqrt(LengthSqr()));
 }
 
 template<class T>
 inline Vector3<T> Vector3<T>::GetNormalized() const
 {
 	const T len = 1 / Length();
+
+	if(len != len || isinf(len)) //IEEE FLOAT NAN
+	{
+		return Vector3<T>(0,0,0);
+	}
+
 	return Vector3<T>(
 		x * len,
 		y * len,
@@ -183,15 +190,24 @@ inline Vector3<T> Vector3<T>::GetNormalized() const
 	);
 }
 
+
 template<class T>
 inline void Vector3<T>::Normalize()
 {
 	const T len = 1 / Length();
 
+	if(len != len || isinf(len)) //IEEE FLOAT NAN
+	{
+		x = 0;
+		y = 0;
+		z = 0;
+		return;
+	}
+
 	x = x * len;
 	y = y * len;
 	z = z * len;
-}
+} 
 
 template<class T>
 inline T Vector3<T>::Dot(const Vector3<T>& aVector) const
@@ -281,4 +297,7 @@ inline const T& Vector3<T>::operator[](int value) const
 	}
 	}
 }
+
 using Vector3f = Vector3<float>;
+using Vector3i = Vector3<int>;
+using Vector3ui = Vector3<unsigned int>;

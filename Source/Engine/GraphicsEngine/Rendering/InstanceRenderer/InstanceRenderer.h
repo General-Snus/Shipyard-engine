@@ -3,7 +3,7 @@
 #include <set>
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
 #include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
-#include <Engine/AssetManager/Objects/Components/ComponentDerivatives/MeshRenderer.h>  
+#include <Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h>  
 
 struct renderDataHash
 {

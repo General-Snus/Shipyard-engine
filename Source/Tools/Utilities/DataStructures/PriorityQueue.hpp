@@ -56,9 +56,9 @@
 	template <class T,class P>
 	inline bool PriorityQueue<T,P>::Contains(const T& value)
 	{
-		for(int i = 0; i < GetSize(); i++)
+		for(int i = 0; i < this->GetSize(); i++)
 		{
-			if(GetArray()[i].value == value)
+			if(this->GetArray()[i].value == value)
 			{
 				return true;
 			}
@@ -69,12 +69,12 @@
 	template <class T,class P>
 	inline void PriorityQueue<T,P>::ChangePriority(const T& value,P newPriority)
 	{
-		for(int i = 0; i < GetSize(); i++)
+		for(int i = 0; i < Heap<T>::GetSize(); i++)
 		{
-			if(GetArray()[i].value == value)
+			if(this->GetArray()[i].value == value)
 			{
-				GetArray()[i].priority = newPriority;
-				Upshift(i); // Reorder the element in the heap
+				this->GetArray()[i].priority = newPriority;
+				this->Upshift(i); // Reorder the element in the heap
 				return;
 			}
 		}

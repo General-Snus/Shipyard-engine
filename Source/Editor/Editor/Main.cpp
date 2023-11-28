@@ -1,4 +1,4 @@
-﻿#define WIN32_LEAN_AND_MEAN 
+﻿
 #include "resource.h"
 #include "Core/Editor.h" 
 #include "Windows/Window.h"

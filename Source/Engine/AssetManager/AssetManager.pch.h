@@ -14,6 +14,7 @@
 #include <memory>
 #include <vector>
 #include <functional>
+#include <ranges>
 
 #include <assimp/Importer.hpp>      // C++ importer interface 
 #include <assimp/scene.h>           // Output data structure
@@ -24,28 +25,44 @@
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/Math.hpp>
 #include "Tools/Logging/Logging.h"
-#include <Tools/Optick/src/optick.h>
+#include <Tools/Optick/src/optick.h> 
+
+#include "Objects/AI/NavMesh/NavMesh.h"
+#include "Objects/AI/AgentSystem/Controllers/Controller.h"
+#include "Objects/AI/AgentSystem/AIEventManager.h"
+#include "Objects/AI/AgentSystem/Controllers/DefaultControllers/EventController.h"
+#include "Objects/AI/AgentSystem/Controllers/PlayerController.h"  
+#include "Objects/AI/AgentSystem/Controllers/WanderController.h"  
+#include "Objects/AI/AgentSystem/Controllers/SeekerController.h"  
+#include "Objects/AI/AgentSystem/Controllers/SeparationController.h"
+
+#include "Objects/AI/AgentSystem/PollingStations/PollingStation.h"  
+#include "Objects/AI/AgentSystem/PollingStations/Target_PollingStation.h"  
 
 #include "Objects/BaseAssets/BaseAsset.h"
 #include "Objects/BaseAssets/Animations.h"
 #include "Objects/BaseAssets/MaterialAsset.h"
 #include "Objects/BaseAssets/MeshAsset.h"
 #include "Objects/BaseAssets/TextureAsset.h" 
+#include "Objects/BaseAssets/LightDataBase.h" 
 
-#include "Objects/Components/Component.h" 
-#include "GameObjectManager.h"
-#include "Objects/GameObjects/GameObject.h"
-#include "Objects/Components/ComponentManager.h"
-#include "Objects/Components/ComponentDerivatives/MeshRenderer.h"
-#include "Objects/Components/ComponentDerivatives/Transform.h"
-#include "Objects/Components/ComponentDerivatives/Animator.h"
-#include "Objects/Components/ComponentDerivatives/Skybox.h"
-#include "Objects/Components/ComponentDerivatives/CameraComponent.h"
-#include "Objects/Components/ComponentDerivatives/LightComponent.h"
-#include "Objects/Components/ComponentDerivatives/ParticleSystem.h"
-#include "Objects/Components/ComponentDerivatives/DEBUGCOMPONENTS/BackgroundColor.h"
-#include "Objects/Components/ComponentDerivatives/DEBUGCOMPONENTS/FrameStatistics.h"
-#include "Objects/Components/ComponentDerivatives/DEBUGCOMPONENTS/RenderMode.h"
+#include "ComponentSystem/Component.h" 
+#include "ComponentSystem/GameObjectManager.h"
+#include "ComponentSystem/GameObject.h"
+#include "ComponentSystem/ComponentManager.h"
+#include "ComponentSystem/Components/MeshRenderer.h"
+#include "ComponentSystem/Components/Transform.h"
+#include "ComponentSystem/Components/Animator.h"
+#include "ComponentSystem/Components/Skybox.h"
+#include "ComponentSystem/Components/CameraComponent.h"
+#include "ComponentSystem/Components/LightComponent.h"
+#include "ComponentSystem/Components/ParticleSystem.h"
+#include "ComponentSystem/Components/ActorSystem/cActor.h"
+#include "ComponentSystem/Components/Physics/cPhysics_Kinematic.h"
+#include "ComponentSystem/Components/Physics/cPhysics_Newtonian.h"
+#include "ComponentSystem/Components/DEBUGCOMPONENTS/BackgroundColor.h"
+#include "ComponentSystem/Components/DEBUGCOMPONENTS/FrameStatistics.h"
+#include "ComponentSystem/Components/DEBUGCOMPONENTS/RenderMode.h"
 
 #include <Engine/GraphicsEngine/InterOp/RHI.h>
 #include <Engine/GraphicsEngine/GraphicsEngine.h>
@@ -53,7 +70,8 @@
 #include <Engine/GraphicsEngine/Rendering/Vertex.h> 
 #include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
 #include <Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h>
-#include "AssetManager.h" 
+#include "AssetManager.h"
+#include "ComponentSystem/UUID.h"
 
 static inline Logger AMLogger;
 

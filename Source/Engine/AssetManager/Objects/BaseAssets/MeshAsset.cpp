@@ -263,9 +263,9 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 			mesh->mVertices[i].z
 		);
 		auto color = Vector4f(
-			RandomInRange<float>(0,1),
-			RandomInRange<float>(0,1),
-			RandomInRange<float>(0,1),
+			RandomEngine::RandomInRange<float>(0,1),
+			RandomEngine::RandomInRange<float>(0,1),
+			RandomEngine::RandomInRange<float>(0,1),
 			1.0f
 		);
 

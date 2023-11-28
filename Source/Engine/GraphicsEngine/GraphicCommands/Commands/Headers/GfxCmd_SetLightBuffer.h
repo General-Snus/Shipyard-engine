@@ -1,6 +1,6 @@
 #pragma once 
 #include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
-#include <Engine/AssetManager/Objects/Components/ComponentDerivatives/LightComponent.h>
+#include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>
 
 class GfxCmd_SetLightBuffer : public GraphicCommandBase
 {

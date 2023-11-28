@@ -12,7 +12,7 @@ public:
 	// Copy Constructor.
 	Matrix3x3<T>(const Matrix3x3<T>& aMatrix);
 	// Copies the top left 3x3 part of the Matrix4x4.
-	Matrix3x3<T>(const CommonUtilities::Matrix4x4<T>& aMatrix);
+	Matrix3x3<T>(const Matrix4x4<T>& aMatrix);
 	// () operator for accessing element (row, column) for read/write or read,respectively.
 	T& operator()(const int aRow,const int aColumn);
 	const T& operator()(const int aRow,const int aColumn) const;

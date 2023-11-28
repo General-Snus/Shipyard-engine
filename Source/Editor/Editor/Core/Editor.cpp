@@ -3,8 +3,6 @@
 #include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
 
 #include "Editor.h"
-
-#define WIN32_LEAN_AND_MEAN 
 #include "Windows.h"
 
 #include <string>
@@ -27,7 +25,7 @@
 #include <Tools/Utilities/Input/InputHandler.hpp>
 
 #include "../Windows/Window.h" 
-#include <Engine/AssetManager/Objects/GameObjects/GameObject.h>
+#include <Engine/AssetManager/ComponentSystem/GameObject.h>
 #include <Tools/Optick/src/optick.h>
 
 using json = nlohmann::json;
@@ -104,11 +102,7 @@ void Editor::HideSplashScreen() const
 	delete mySplashWindow;
 	ShowWindow(Window::windowHandler,SW_SHOW);
 	SetForegroundWindow(Window::windowHandler);
-}
-void LogicThread()
-{
-
-}
+} 
 void Editor::UpdateImGui()
 {
 	ImGui_ImplDX11_NewFrame();

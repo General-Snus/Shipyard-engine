@@ -1,6 +1,6 @@
 #include "GraphicsEngine.pch.h"
 #include "ParticleRenderer.h"
-#include <Engine/AssetManager/Objects/Components/ComponentDerivatives/ParticleSystem.h>
+#include <Engine/AssetManager/ComponentSystem/Components/ParticleSystem.h>
 void ParticleRenderer::Init()
 {
 	vertexShader = GraphicsEngine::Get().GetParticleVSShader();

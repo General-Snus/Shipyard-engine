@@ -36,8 +36,8 @@
 #include "Rendering/ParticleRenderer/ParticleVertex.h" 
 #include "GraphicCommands/GraphicCommands.h"
 #include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
-#include <Engine/AssetManager/Objects/Components/ComponentDerivatives/LightComponent.h>
-#include <Engine/AssetManager/Objects/Components/ComponentDerivatives/CameraComponent.h>
+#include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>
+#include <Engine/AssetManager/ComponentSystem/Components/CameraComponent.h>
 
 #include "GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_SetRenderTarget.h"
@@ -115,39 +115,9 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 }
 
 bool GraphicsEngine::SetupDebugDrawline()
-{
-	debugLineVS = std::make_shared<Shader>();
-	RHI::LoadShaderFromMemory(
-		debugLineVS.get(),
-		L"LineVertexShader",
-		BuiltIn_LineDrawer_VS_ByteCode,
-		sizeof(BuiltIn_LineDrawer_VS_ByteCode)
-	);
-
-	debugLinePS = std::make_shared<Shader>();
-	RHI::LoadShaderFromMemory(
-		debugLinePS.get(),
-		L"LinePixelShader",
-		BuiltIn_LineDrawer_PS_ByteCode,
-		sizeof(BuiltIn_LineDrawer_PS_ByteCode)
-	);
-
-	//Create DebugVertex input layout
-	RHI::CreateInputLayout(
-		Debug::DebugVertex::InputLayout,
-		Debug::DebugVertex::InputLayoutDescription,
-		BuiltIn_LineDrawer_VS_ByteCode,
-		sizeof(BuiltIn_LineDrawer_VS_ByteCode)
-	);
-
-	if(!(
-		RHI::CreateDynamicVertexBuffer(myLineVertexBuffer,65536,sizeof(Debug::DebugVertex)) &&
-		RHI::CreateDynamicIndexBuffer(myLineIndexBuffer,65536)
-		))
-	{
-		GELogger.Err("Failed to initialize the myLineVertexBuffer!");
-		return false;
-	}
+{ 
+	DebugDrawer::Get().Initialize();
+	DebugDrawer::Get().AddDebugGrid({0.f, 0.0f, 0.f},1000,10,{1.0f, 1.0f, 1.0f});
 	return true;
 }
 
@@ -214,9 +184,6 @@ void GraphicsEngine::SetupDefaultVariables()
 	}
 	myDepthStencilStates[(int)eDepthStencilStates::DSS_ReadWrite] = nullptr;
 
-
-	// TEMP: Load the default shader programs.
-	// This will be done elsewhere later on :).
 	RHI::CreateVertexShaderAndInputLayout(
 		myVertexShader,
 		Vertex::InputLayout,
@@ -622,14 +589,14 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	//SSAO
 	//Do ambience pass? Clarit
 	//Render all lights
-	OPTICK_EVENT("SSAO");
+	OPTICK_EVENT("SSAO")
 	RHI::BeginEvent(L"SSAO");
 	myCamera->SetCameraToFrameBuffer();
 	GfxCmd_SSAO().ExecuteAndDestroy();
 	RHI::EndEvent();
 	 
 	////Render shadowmaps
-	OPTICK_EVENT("ShadowMaps");
+	OPTICK_EVENT("ShadowMaps")
 	RHI::BeginEvent(L"ShadowMaps");
 	myShadowRenderer.Execute();
 	RHI::EndEvent();
@@ -637,7 +604,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 
 	
 
-	OPTICK_EVENT("Lightning");
+	OPTICK_EVENT("Lightning")
 	RHI::BeginEvent(L"Lightning");
 	myCamera->SetCameraToFrameBuffer();
 	GfxCmd_SetRenderTarget(SceneBuffer.get(),nullptr).ExecuteAndDestroy();
@@ -648,7 +615,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 
 
 	//Particles
-	OPTICK_EVENT("Particles");
+	OPTICK_EVENT("Particles")
 	RHI::BeginEvent(L"Particles");
 	RHI::SetBlendState(GraphicsEngine::Get().GetAdditiveBlendState());
 	GfxCmd_SetRenderTarget(SceneBuffer.get(),myDepthBuffer.get()).ExecuteAndDestroy();
@@ -656,21 +623,22 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	RHI::EndEvent();
 
 	//Post processing
-	OPTICK_EVENT("Postpro");
+	OPTICK_EVENT("Postpro")
 	RHI::BeginEvent(L"PostPro");
 	RHI::SetBlendState(nullptr);
 	GfxCmd_LuminancePass().ExecuteAndDestroy(); // Render to IntermediateA
 	GfxCmd_GaussianBlur().ExecuteAndDestroy();
 	GfxCmd_Bloom().ExecuteAndDestroy();
-	GfxCmd_ToneMapPass().ExecuteAndDestroy(); // Render: BakcBuffer Read: REG_Target01
+	GfxCmd_ToneMapPass().ExecuteAndDestroy(); // Render: BackBuffer Read: REG_Target01
 	RHI::EndEvent();
 
 	//Debug layers
-	OPTICK_EVENT("DebugLayers");
+	OPTICK_EVENT("DebugLayers")
 	RHI::BeginEvent(L"DebugLayers");
 	myCamera->SetCameraToFrameBuffer();
 	GfxCmd_DebugLayer().ExecuteAndDestroy();
 #ifdef  _DEBUGDRAW
+	DebugDrawer::Get().Render();
 	OverlayCommandList.Execute();
 #endif //  _DEBUGDRAW
 	RHI::EndEvent();
@@ -696,7 +664,7 @@ void GraphicsEngine::RenderTextureTo(eRenderTargets from,eRenderTargets to)  con
 
 void GraphicsEngine::EndFrame()
 {
-	OPTICK_EVENT();
+	OPTICK_EVENT()
 	// We finish our frame here and present it on screen. 
 	RHI::Present(0);
 	OPTICK_EVENT("ResetShadowList")
