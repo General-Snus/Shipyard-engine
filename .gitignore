@@ -111,8 +111,7 @@ StyleCopReport.xml
 *.scc
 *.ini
 *.cso
-*.exe
-*.json
+*.exe 
 
 # Chutzpah Test files
 _Chutzpah*

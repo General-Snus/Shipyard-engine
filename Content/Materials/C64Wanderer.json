@@ -1,0 +1,16 @@
+
+{
+    "MaterialData": {
+        "albedoColor":  [0,1,0,1] ,
+        "UVTiling": [1.0,1.0],
+        "NormalStrength" : 1.0,
+        "Shine" : 50
+    },
+    "Textures" : [
+        {
+            "TextureName":  "",
+            "TexturePath":  "",
+            "TextureType":  0
+        }
+    ]
+}
