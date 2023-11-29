@@ -58,11 +58,8 @@ int Run(HINSTANCE& hInstance)
 };
 
 LONG WINAPI ExceptionFilterFunction(_EXCEPTION_POINTERS* aExceptionP)
-{
-
-
-	CreateMiniDump(aExceptionP);
-
+{ 
+	CreateMiniDump(aExceptionP); 
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 
@@ -106,6 +103,8 @@ void CreateMiniDump(EXCEPTION_POINTERS* someExceptionPointers)
 	bMiniDumpSuccessful = MiniDumpWriteDump(GetCurrentProcess(),GetCurrentProcessId(),
 		hDumpFile,MiniDumpWithDataSegs,&ExpParam,NULL,NULL);
 
+
+	//Straight up screen dump
 	BITMAPFILEHEADER bfHeader;
 	BITMAPINFOHEADER biHeader;
 	BITMAPINFO bInfo;
