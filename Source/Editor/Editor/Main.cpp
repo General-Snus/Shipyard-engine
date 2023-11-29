@@ -73,11 +73,11 @@ void CreateMiniDump(EXCEPTION_POINTERS* someExceptionPointers)
 	const WCHAR* szTitle = L"ShipyardLog";;
 	DWORD dwBufferSize = MAX_PATH;
 	HANDLE hDumpFile;
-	SYSTEMTIME stLocalTime;
+	SYSTEMTIME sysTime;
 	MINIDUMP_EXCEPTION_INFORMATION ExpParam;
 	WCHAR bmpFileName[MAX_PATH];
 
-	GetLocalTime(&stLocalTime);
+	GetLocalTime(&sysTime);
 	GetTempPath(dwBufferSize,szPath); 
 
 	// Creating here because windows defender is angsty about me writing anywhere else apparently
@@ -86,8 +86,8 @@ void CreateMiniDump(EXCEPTION_POINTERS* someExceptionPointers)
 
 	StringCchPrintf(szDirectoryName,MAX_PATH,L"%s%s\\%s_%04d%02d%02d-%02d%02d",
 		szPath,szAppName,szTitle,
-		stLocalTime.wYear,stLocalTime.wMonth,stLocalTime.wDay,
-		stLocalTime.wHour,stLocalTime.wMinute);
+		sysTime.wYear,sysTime.wMonth,sysTime.wDay,
+		sysTime.wHour,sysTime.wMinute);
 
 	CreateDirectory(szDirectoryName,NULL);
 	StringCchPrintf(szFileName,MAX_PATH,L"%s%s",szDirectoryName,L"\\MiniDump.dmp");

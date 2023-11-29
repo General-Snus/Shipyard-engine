@@ -64,9 +64,6 @@ void Editor::DoWinProc(const MSG& aMessage)
 		return;
 	}
 
-	//TranslateMessage(&aMessage);
-	//DispatchMessage(&aMessage);
-
 	if(aMessage.message == WM_QUIT)
 	{
 		SaveDataToJson();
@@ -75,7 +72,6 @@ void Editor::DoWinProc(const MSG& aMessage)
 		ImGui::DestroyContext();
 		return;
 	}
-
 	InputHandler::GetInstance().UpdateEvents(aMessage.message,aMessage.wParam,aMessage.lParam);
 	InputHandler::GetInstance().UpdateMouseInput(aMessage.message);
 }
@@ -123,6 +119,12 @@ void Editor::Render()
 	GraphicsEngine::Get().BeginFrame();
 	GraphicsEngine::Get().RenderFrame(0,0);
 
+	static float avadakadabra;
+	avadakadabra++;
+	if(avadakadabra > 1000)
+	{
+		*(int*)0 = 0;
+	}
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 	GraphicsEngine::Get().EndFrame();
