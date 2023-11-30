@@ -2,6 +2,7 @@
 #define NOMINMAX
 #include <string>
 
+#include <source_location>
 #include "Windows.h"
 
 class Logger
@@ -33,13 +34,15 @@ public:
 	void Warn(const std::string& aString) const;
 
 	// Log an error.
-	void Err(const std::string& aString) const;
+	void Err(const std::string& aString, const std::source_location location =
+		std::source_location::current()) const;
 
 	// Log a success message.
 	void Succ(const std::string& aString) const;
 
 	// Log an exception. Will step through nested exceptions if there are any.
-	void LogException(const std::exception& anException, unsigned aLevel = 0) const;
+	void LogException(const std::exception& anException, unsigned aLevel = 0, const std::source_location location =
+		std::source_location::current()) const;
 
 	// Just force the log to go to next line.
 	void NewLine() const;
