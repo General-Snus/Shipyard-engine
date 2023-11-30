@@ -3,7 +3,7 @@
 #include "Core/Editor.h" 
 #include "Windows/Window.h" 
 #include <Windows.h> // Mean and lean is in compiler defines
-
+#include <Tools/ThirdParty/dpp/dpp.h>
 
 #include <dbghelp.h>
 #include <shellapi.h>
@@ -58,8 +58,8 @@ int Run(HINSTANCE& hInstance)
 };
 
 LONG WINAPI ExceptionFilterFunction(_EXCEPTION_POINTERS* aExceptionP)
-{ 
-	CreateMiniDump(aExceptionP); 
+{
+	CreateMiniDump(aExceptionP);
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 
@@ -78,7 +78,7 @@ void CreateMiniDump(EXCEPTION_POINTERS* someExceptionPointers)
 	WCHAR bmpFileName[MAX_PATH];
 
 	GetLocalTime(&sysTime);
-	GetTempPath(dwBufferSize,szPath); 
+	GetTempPath(dwBufferSize,szPath);
 
 	// Creating here because windows defender is angsty about me writing anywhere else apparently
 	// Apparently fine to copy beause it have greater controll then??
@@ -174,9 +174,9 @@ void CreateMiniDump(EXCEPTION_POINTERS* someExceptionPointers)
 	if(std::filesystem::exists(newDirectory))
 	{
 		std::filesystem::copy(directory,newDirectory,
-			std::filesystem::copy_options::recursive| std::filesystem::copy_options::overwrite_existing); 
-	}  
-	
+			std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing);
+	}
+
 
 	std::wstring message = L"I CRASHED? IMPOSSIBLE!\nLog can be found at ";
 	message.append(std::filesystem::absolute(newDirectory).wstring());
@@ -185,6 +185,16 @@ void CreateMiniDump(EXCEPTION_POINTERS* someExceptionPointers)
 	MessageBeep(MB_ICONERROR); //funny
 	MessageBox(NULL,message.c_str(),L"DAMMNATION!",
 		MB_ICONERROR | MB_OK);
+
+	dpp::cluster bot("");
+	dpp::webhook wh("https://discord.com/api/webhooks/1179732203417120838/3K8hA2cj4heYzeuqPx8uBQSHKxSDw7iZynL4XV8C9YH7jlbfr6kiKSaXp-gvBr-PtZpI");
+
+	// create a message
+	dpp::message msg1("The program crashed! Here are the logs!"); 
+	auto filePath1 = newDirectory.string() + "\\MiniDump.dmp";  
+	msg1.add_file("MiniDump.dmp",dpp::utility::read_file(filePath1)); 
+	bot.execute_webhook(wh,msg1,true); 
+	 
 	return;
 
 }
