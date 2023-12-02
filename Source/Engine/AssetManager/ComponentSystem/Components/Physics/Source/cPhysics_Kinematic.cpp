@@ -56,8 +56,8 @@ void cPhysics_Kinematic::Update()
 		if(ph_velocity.Length() > ph_maxSpeed)
 		{
 			ph_velocity.Normalize();
-			ph_velocity *= ph_maxSpeed; 
-			throw std::runtime_error{"I find your lack of speed disturbing"};
+			ph_velocity *= ph_maxSpeed;
+			throw std::runtime_error("Velocity is higher than max speed");
 		}
 
 		if(localVelocity)

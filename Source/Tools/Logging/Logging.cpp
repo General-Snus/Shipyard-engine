@@ -97,7 +97,7 @@ void Logger::Warn(const std::string& aString) const
 	}
 }
 
-void Logger::Err(const std::string& aString) const
+void Logger::Err(const std::string& aString, const std::source_location location) const
 {
 	if (isInitialized)
 	{
@@ -114,9 +114,15 @@ void Logger::Err(const std::string& aString) const
 			SetConsoleTextAttribute(myHandle, BACKGROUND_RED);
 			std::cout << "[  ERROR  ]";
 			SetConsoleTextAttribute(myHandle, FOREGROUND_RED | FOREGROUND_INTENSITY);
-			std::cout << " " << aString << std::endl;
+			std::cout << " " << aString << "\n";
 			SetConsoleTextAttribute(myHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 		}
+
+		std::wcout << "file: "
+			<< location.file_name() << '('
+			<< location.line() << ':'
+			<< location.column() << ") `"
+			<< location.function_name() << std::endl;
 	}
 }
 
@@ -143,7 +149,7 @@ void Logger::Succ(const std::string& aString) const
 	}
 }
 
-void Logger::LogException(const std::exception& anException, unsigned aLevel) const
+void Logger::LogException(const std::exception& anException, unsigned aLevel, const std::source_location location) const
 {
 	if (isInitialized)
 	{
@@ -161,9 +167,15 @@ void Logger::LogException(const std::exception& anException, unsigned aLevel) co
 			std::wcout << "[  FATAL  ]";
 			std::wcout << std::string(aLevel, ' ').c_str();
 			SetConsoleTextAttribute(myHandle, FOREGROUND_RED | FOREGROUND_INTENSITY);
-			std::wcout << " " << anException.what() << std::endl;
+			std::wcout << " " << anException.what() << "\n";
 			SetConsoleTextAttribute(myHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 		}
+
+		std::wcout << "file: "
+			<< location.file_name() << '('
+			<< location.line() << ':'
+			<< location.column() << ") `"
+			<< location.function_name() << std::endl;
 
 		try
 		{
