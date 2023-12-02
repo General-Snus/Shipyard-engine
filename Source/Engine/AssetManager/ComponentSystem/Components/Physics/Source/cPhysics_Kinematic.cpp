@@ -57,6 +57,7 @@ void cPhysics_Kinematic::Update()
 		{
 			ph_velocity.Normalize();
 			ph_velocity *= ph_maxSpeed; 
+			throw std::runtime_error{"I find your lack of speed disturbing"};
 		}
 
 		if(localVelocity)

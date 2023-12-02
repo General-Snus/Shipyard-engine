@@ -118,14 +118,6 @@ void Editor::Render()
 { 
 	GraphicsEngine::Get().BeginFrame();
 	GraphicsEngine::Get().RenderFrame(0,0);
-
-	static float avadakadabra;
-	avadakadabra++;
-	if(avadakadabra > 1000)
-	{
-		auto volatile bad_ptr = (double*)(-9ll);  // Unaligned and near end-of-page
-		bad_ptr[0] = (6.022141e23 / 0.01) + bad_ptr[1];
-	}
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 	GraphicsEngine::Get().EndFrame();

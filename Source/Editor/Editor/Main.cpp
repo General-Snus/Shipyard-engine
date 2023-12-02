@@ -6,8 +6,7 @@
 #include <Tools/ThirdParty/dpp/dpp.h>
 
 #include <dbghelp.h>
-#include <shellapi.h>
-#include <shlobj.h>
+#include <shellapi.h> 
 #include <Strsafe.h>
 #include <stdio.h>
 #include <wchar.h>
@@ -57,13 +56,7 @@ int Run(HINSTANCE& hInstance)
 	return 1;
 };
 
-LONG WINAPI ExceptionFilterFunction(_EXCEPTION_POINTERS* aExceptionP)
-{
-	CreateMiniDump(aExceptionP);
-	return EXCEPTION_EXECUTE_HANDLER;
-}
-
-void CreateMiniDump(EXCEPTION_POINTERS* someExceptionPointers)
+LONG WINAPI ExceptionFilterFunction(_EXCEPTION_POINTERS* someExceptionPointers)
 {
 	BOOL bMiniDumpSuccessful;
 	WCHAR szPath[MAX_PATH];
@@ -88,8 +81,8 @@ void CreateMiniDump(EXCEPTION_POINTERS* someExceptionPointers)
 		szPath,szAppName,szTitle,
 		sysTime.wYear,sysTime.wMonth,sysTime.wDay,
 		sysTime.wHour,sysTime.wMinute);
-
-	CreateDirectory(szDirectoryName,NULL);
+	 
+	std::filesystem::create_directories(szDirectoryName);
 	StringCchPrintf(szFileName,MAX_PATH,L"%s%s",szDirectoryName,L"\\MiniDump.dmp");
 	StringCchPrintf(bmpFileName,MAX_PATH,L"%s%s",szDirectoryName,L"\\Screendump.bmp");
 
@@ -127,11 +120,11 @@ void CreateMiniDump(EXCEPTION_POINTERS* someExceptionPointers)
 	hDC = GetDC(NULL);
 	hTempBitmap = GetCurrentObject(hDC,OBJ_BITMAP);
 	GetObjectW(hTempBitmap,sizeof(BITMAP),&bAllDesktops);
+	DeleteObject(hTempBitmap);
 
 	lWidth = bAllDesktops.bmWidth;
 	lHeight = bAllDesktops.bmHeight;
 
-	DeleteObject(hTempBitmap);
 
 	bfHeader.bfType = (WORD)('B' | ('M' << 8));
 	bfHeader.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
@@ -151,18 +144,15 @@ void CreateMiniDump(EXCEPTION_POINTERS* someExceptionPointers)
 	SelectObject(hMemDC,hBitmap);
 	BitBlt(hMemDC,0,0,lWidth,lHeight,hDC,x,y,SRCCOPY);
 	hFile = CreateFileW(bmpFileName,GENERIC_WRITE | GENERIC_READ,0,NULL,CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL,NULL);
-	if(INVALID_HANDLE_VALUE == hFile)
+
+	if(hFile != INVALID_HANDLE_VALUE)
 	{
-		DeleteDC(hMemDC);
-		ReleaseDC(NULL,hDC);
-		DeleteObject(hBitmap);
-		return;
+		WriteFile(hFile,&bfHeader,sizeof(BITMAPFILEHEADER),&dwWritten,NULL);
+		WriteFile(hFile,&biHeader,sizeof(BITMAPINFOHEADER),&dwWritten,NULL);
+		WriteFile(hFile,bBits,cbBits,&dwWritten,NULL);
+		FlushFileBuffers(hFile);
+		CloseHandle(hFile); 
 	}
-	WriteFile(hFile,&bfHeader,sizeof(BITMAPFILEHEADER),&dwWritten,NULL);
-	WriteFile(hFile,&biHeader,sizeof(BITMAPINFOHEADER),&dwWritten,NULL);
-	WriteFile(hFile,bBits,cbBits,&dwWritten,NULL);
-	FlushFileBuffers(hFile);
-	CloseHandle(hFile);
 	DeleteDC(hMemDC);
 	ReleaseDC(NULL,hDC);
 	DeleteObject(hBitmap);
@@ -182,19 +172,18 @@ void CreateMiniDump(EXCEPTION_POINTERS* someExceptionPointers)
 	message.append(std::filesystem::absolute(newDirectory).wstring());
 	message.append(L"\nPlease pray for me!!");
 
-	MessageBeep(MB_ICONERROR); //funny
-	MessageBox(NULL,message.c_str(),L"DAMMNATION!",
+	MessageBeep(MB_ICONERROR);
+	MessageBoxW(NULL,message.c_str(),L"DAMMNATION!",
 		MB_ICONERROR | MB_OK);
 
 	dpp::cluster bot("");
 	dpp::webhook wh("https://discord.com/api/webhooks/1179732203417120838/3K8hA2cj4heYzeuqPx8uBQSHKxSDw7iZynL4XV8C9YH7jlbfr6kiKSaXp-gvBr-PtZpI");
 
 	// create a message
-	dpp::message msg1("The program crashed! Here are the logs!"); 
-	auto filePath1 = newDirectory.string() + "\\MiniDump.dmp";  
-	msg1.add_file("MiniDump.dmp",dpp::utility::read_file(filePath1)); 
-	bot.execute_webhook(wh,msg1,true); 
-	 
-	return;
+	dpp::message msg1("The program crashed! Here are the logs!");
+	auto filePath1 = newDirectory.string() + "\\MiniDump.dmp";
+	msg1.add_file("MiniDump.dmp",dpp::utility::read_file(filePath1));
+	bot.execute_webhook(wh,msg1,true);
 
+	return EXCEPTION_EXECUTE_HANDLER;
 }
