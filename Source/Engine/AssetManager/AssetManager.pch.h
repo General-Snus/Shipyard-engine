@@ -38,6 +38,7 @@
 
 #include "Objects/AI/AgentSystem/PollingStations/PollingStation.h"  
 #include "Objects/AI/AgentSystem/PollingStations/Target_PollingStation.h"  
+#include "Objects/AI/AgentSystem/SteeringBehaviour.h"  
 
 #include "Objects/BaseAssets/BaseAsset.h"
 #include "Objects/BaseAssets/Animations.h"

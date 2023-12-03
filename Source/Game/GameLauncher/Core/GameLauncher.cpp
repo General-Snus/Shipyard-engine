@@ -82,13 +82,17 @@ void GameLauncher::Start()
 #pragma endregion
 
 	//Movement1 
+	int wanderAmount = 4;
+	int seekersAmount = 40;
+	int sepAmount = 0;
+
+
 	SY::UUID player;
 	std::vector<GameObject> entities;
-	entities.resize(15); //Safety resize if we dont add more it wont realloc and span wont loose connection
-
-	auto wanderer = std::span(entities.begin(),1);//1 from position 0
-	auto seekers = std::span(entities.begin() + 1,4); //4 from position 1
-	auto separatists = std::span(entities.begin() + 5,10); //10 from position 6
+	entities.resize(wanderAmount+ seekersAmount + sepAmount); //Safety resize if we dont add more it wont realloc and span wont loose connection
+	auto wanderer = std::span(entities.begin(),wanderAmount);//1 from position 0
+	auto seekers = std::span(entities.begin() + wanderAmount,seekersAmount); //4 from position 1
+	auto separatists = std::span(entities.begin() + seekersAmount,sepAmount); //10 from position 6
 
 	for(auto& obj : entities)
 	{
@@ -113,24 +117,25 @@ void GameLauncher::Start()
 		actor.SetController(new WanderController(obj));
 	}
 	
-	auto* seekerStation = new Target_PollingStation(wanderer[0]);
+	auto* seekerStation = new MultipleTargets_PollingStation(std::vector(entities.begin(),entities.begin() + wanderAmount));
+	auto* seekerFormationStation = new MultipleTargets_PollingStation(std::vector(entities.begin()+wanderAmount,entities.begin()+seekersAmount));
 	for(auto& obj : seekers)
 	{ 
 		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/C64Seeker.fbx");
 		mesh.SetMaterialPath("Materials/C64Seeker.json");
 
 		auto& actor = obj.AddComponent<cActor>();
-		actor.SetController(new SeekerController(seekerStation,obj));
+		actor.SetController(new SeekerController(seekerStation,seekerFormationStation,obj));
 	}
 
-	auto* separatistsStation = new MultipleTargets_PollingStation(entities);
+	auto* separatistStation = new MultipleTargets_PollingStation(entities);
 	for(auto& obj : separatists)
 	{
 		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/C64.fbx");
 		mesh.SetMaterialPath("Materials/C64Separatist.json");
 
 		auto& actor = obj.AddComponent<cActor>();
-		actor.SetController(new SeparationController(separatistsStation,obj)); // how do i remove the object itself
+		actor.SetController(new SeparationController(separatistStation,obj)); // how do i remove the object itself
 	} 
 
 	GLLogger.Log("GameLauncher start");

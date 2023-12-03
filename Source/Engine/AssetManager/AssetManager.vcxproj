@@ -199,6 +199,7 @@
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\SeekerController.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\SeparationController.h" />
     <ClInclude Include="Objects\AI\AgentSystem\PollingStations\Target_PollingStation.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\SteeringBehaviour.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\cActor.cpp" />
@@ -244,6 +245,7 @@
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\SeekerController.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\SeparationController.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\PollingStations\Source\Target_PollingStation.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\Source\SteeringBehaviour.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

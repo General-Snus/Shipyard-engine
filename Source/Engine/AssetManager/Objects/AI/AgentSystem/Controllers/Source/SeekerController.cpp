@@ -1,46 +1,44 @@
 #include "AssetManager.pch.h"
 #include "../SeekerController.h"
-#include <Tools/Utilities/LinearAlgebra/Quaternions.hpp>
 
-SeekerController::SeekerController(Target_PollingStation* aPollingStation,GameObject componentCheck) : PollingController(aPollingStation)
+SeekerController::SeekerController(MultipleTargets_PollingStation* aPollingStation,MultipleTargets_PollingStation* formationStation,GameObject componentCheck) : PollingController(aPollingStation),FormationStation(formationStation)
 {
 	//Check for required components
 	if(!componentCheck.TryGetComponent<cPhysics_Kinematic>())
 	{
 		auto& phy = componentCheck.AddComponent<cPhysics_Kinematic>();
-		phy.localVelocity = true;
+		phy.localVelocity = false;
+		phy.ph_maxSpeed = 4.5f;
 	}
 }
 
 bool SeekerController::Update(GameObject input)
 {
-	auto* physicsComponent = input.TryGetComponent<cPhysics_Kinematic>();
+	auto& physicsComponent = input.GetComponent<cPhysics_Kinematic>();
 	auto& transform = input.GetComponent<Transform>(); // You can use Get directly if you are sure it will exist, its faster and force safe code
 
-	auto targetPos = reinterpret_cast<Target_PollingStation*>(pollingStation)->GetTargetPosition();
-	auto direction = (targetPos - transform.GetPosition()).GetNormalized();
-	auto fwd = transform.GetForward(); 
+	Vector3f position = transform.GetPosition();
+	Vector3f fwd = transform.GetForward();
+	Vector3f targetPos = reinterpret_cast<MultipleTargets_PollingStation*>(pollingStation)->GetClosestTargetPosition(position);
+	Vector3f direction = (targetPos - position).GetNormalized();
 
-	auto angles = Quaternionf::RotationFromTo(fwd,direction).GetEulerAngles() * RAD_TO_DEG;
+	SteeringBehaviour::DampenVelocity(&physicsComponent);
+	SteeringBehaviour::LookAt(&physicsComponent,direction,fwd,5.0f);
+	physicsComponent.ph_acceleration += 5.0f * direction;
 
-	//Scrub data that can accidentaly enter the system from my bad non quaternion math
-	angles.x = 0;
-	angles.z = 0;
+	auto arg = reinterpret_cast<MultipleTargets_PollingStation*>(FormationStation)->GetTargetPosition();
+	SteeringBehaviour::SeparationSettings settings;
+	settings.decayCoefficient = 10.0f;
+	settings.threshold = 2.0f;
+	SteeringBehaviour::Separation(arg,&physicsComponent,position,input.GetID(),settings);
 
-	physicsComponent->ph_Angular_velocity = angles;
-	physicsComponent->ph_velocity = 4.5f * GlobalFwd;  
+	SteeringBehaviour::Cohesion(&physicsComponent,position,reinterpret_cast<MultipleTargets_PollingStation*>(FormationStation),5.f,2.0f);
+	//physicsComponent.ph_velocity.Normalize();
+	//physicsComponent.ph_velocity *= 4.5f;
 
-	{//Special circumstance limit area
-		const float mapsize = 50.0f;
-		Vector3f position = transform.GetPosition();//varför funkar inte mod som i matte :,( hur var det detta som tog längst tid av allt
-		position = {
-			(Mod<float>((position.x),mapsize)),
-			position.y,
-			(Mod<float>((position.z),mapsize))
-		};
-		transform.SetPosition(position);
-		return true;
-	}
+	transform.SetPosition(SteeringBehaviour::SetPositionInBounds(position,50.0f));
+
+	return true;
 }
 
 void SeekerController::Recieve(const AIEvent& aEvent)

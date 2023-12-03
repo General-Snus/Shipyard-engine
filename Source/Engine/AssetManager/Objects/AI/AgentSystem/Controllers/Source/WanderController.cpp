@@ -15,24 +15,18 @@ WanderController::WanderController(GameObject componentCheck)
 bool WanderController::Update(GameObject input)
 {
 	auto* physicsComponent = input.TryGetComponent<cPhysics_Kinematic>();
+	auto& transform = input.GetComponent<Transform>();
+
+	Vector3f position = transform.GetPosition();
+
 	physicsComponent->ph_velocity = 5.0f * GlobalFwd;
-	physicsComponent->ph_Angular_velocity = {0, 150 * RandomEngine::RandomBinomial(), 0};
+	//physicsComponent->ph_Angular_velocity = {0, 30 * RandomEngine::RandomBinomial(), 0};
+	physicsComponent->ph_Angular_velocity = {0,std::powf(RandomEngine::RandomBinomial(),5) * 3600, 0};
 	//physicsComponent->ph_Angular_velocity = {150 * RandomEngine::RandomBinomial(), 150 * RandomEngine::RandomBinomial(), 0}; 3d!
 
 
-	{//Special circumstance limit area
-		const float mapsize = 50.0f;
-		auto& transform = input.GetComponent<Transform>(); // You can use Get directly if you are sure it will exist, its faster and force safe code
-		Vector3f position = transform.GetPosition();//varför funkar inte mod som i matte :,( hur var det detta som tog längst tid av allt
-		position = {
-			(Mod<float>((position.x),mapsize)),
-			//(Mod<float>((position.y),mapsize*.5)),
-			position.y,
-			(Mod<float>((position.z),mapsize))
-		};
-		transform.SetPosition(position);
-		return true;
-	}
+	transform.SetPosition(SteeringBehaviour::SetPositionInBounds(position,50.0f));
+	return true;
 }
 
 void WanderController::Recieve(const AIEvent& aEvent)
