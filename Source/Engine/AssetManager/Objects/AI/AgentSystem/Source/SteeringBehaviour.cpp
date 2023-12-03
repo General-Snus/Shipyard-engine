@@ -38,15 +38,10 @@ void SteeringBehaviour::DampenAngularVelocity(cPhysics_Kinematic* kinematic,floa
 	throw std::logic_error("The method or operation is not implemented.");
 }
 
-void SteeringBehaviour::VelocityMatching(cPhysics_Kinematic* kinematic,Vector3f targetVelocity,float timeToMatch,float MaxAcceleration)
+void SteeringBehaviour::VelocityMatching(cPhysics_Kinematic* kinematic,Vector3f targetVelocity,float timeToMatch)
 {
-	Vector3f acceleration = (targetVelocity - kinematic->ph_velocity) / timeToMatch;
-	if(acceleration.Length() > MaxAcceleration)
-	{
-		acceleration.Normalize();
-		acceleration *= MaxAcceleration;
-	}
-	kinematic->ph_acceleration = acceleration;
+	Vector3f acceleration = (targetVelocity - kinematic->ph_velocity) / timeToMatch; 
+	kinematic->ph_acceleration += acceleration;
 }
 
 void SteeringBehaviour::Cohesion(cPhysics_Kinematic* kinematic,Vector3f position,MultipleTargets_PollingStation* pollingStation,float radius,float strength)
@@ -57,6 +52,16 @@ void SteeringBehaviour::Cohesion(cPhysics_Kinematic* kinematic,Vector3f position
 	{
 		kinematic->ph_acceleration += (CoM - position).GetNormalized() * strength;
 	}
+}
+
+void SteeringBehaviour::Wander(cPhysics_Kinematic* kinematic,Vector3f forward,float strength)
+{
+	kinematic->ph_Angular_velocity += {0,std::powf(RandomEngine::RandomBinomial(),5)* strength,0};
+	kinematic->ph_acceleration += forward * strength;
+	//kinematic->ph_acceleration += {
+	//	std::powf(RandomEngine::RandomBinomial(),5)* strength,
+	//	0,
+	//	std::powf(RandomEngine::RandomBinomial(),5)* strength};
 }
 
 void SteeringBehaviour::Separation(const std::vector<MultipleTargets_PollingStation::DataTuple>& arg,cPhysics_Kinematic* physicsComponent,const Vector3f& position,const SY::UUID IgnoreID,SeparationSettings settings)

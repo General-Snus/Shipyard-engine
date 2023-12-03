@@ -9,6 +9,7 @@ WanderController::WanderController(GameObject componentCheck)
 	{
 		auto& phy = componentCheck.AddComponent<cPhysics_Kinematic>();
 		phy.localVelocity = true;
+		phy.ph_maxSpeed = 5.0f;
 	}
 }
 
@@ -19,10 +20,8 @@ bool WanderController::Update(GameObject input)
 
 	Vector3f position = transform.GetPosition();
 
-	physicsComponent->ph_velocity = 5.0f * GlobalFwd;
-	//physicsComponent->ph_Angular_velocity = {0, 30 * RandomEngine::RandomBinomial(), 0};
-	physicsComponent->ph_Angular_velocity = {0,std::powf(RandomEngine::RandomBinomial(),5) * 3600, 0};
-	//physicsComponent->ph_Angular_velocity = {150 * RandomEngine::RandomBinomial(), 150 * RandomEngine::RandomBinomial(), 0}; 3d!
+	physicsComponent->ph_acceleration += GlobalFwd; 
+	physicsComponent->ph_Angular_velocity = {0,std::powf(RandomEngine::RandomBinomial(),5) * 5000, 0}; 
 
 
 	transform.SetPosition(SteeringBehaviour::SetPositionInBounds(position,50.0f));

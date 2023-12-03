@@ -81,18 +81,38 @@ void GameLauncher::Start()
 	}
 #pragma endregion
 
-	//Movement1 
-	int wanderAmount = 4;
-	int seekersAmount = 40;
-	int sepAmount = 0;
+	//Movement1  
+	int actorAmount = 40;
+	int collidersAmount = 4;
 
 
 	SY::UUID player;
+	std::vector<GameObject> colliders;
+	colliders.resize(collidersAmount);
+	std::vector<Vector2f> colliderPositions =
+	{
+		Vector2f(1,1),
+		Vector2f(1,-1),
+		Vector2f(-1,-1),
+		Vector2f(-1,1)
+	};
+	for(size_t i = 0; i < colliders.size(); i++)
+	{
+		float position = 15.0f;
+		float x = position * colliderPositions[i].x;
+		float z = position * colliderPositions[i].y;
+
+		//Drone
+		colliders[i] = gom.CreateGameObject();
+		auto& transform = colliders[i].AddComponent<Transform>();
+		transform.SetPosition(x,0,z);
+		auto& mesh = colliders[i].AddComponent<cMeshRenderer>("Models/Cube.fbx");
+		mesh.SetMaterialPath("Materials/C64Separatist.json");
+	} 
+
 	std::vector<GameObject> entities;
-	entities.resize(wanderAmount+ seekersAmount + sepAmount); //Safety resize if we dont add more it wont realloc and span wont loose connection
-	auto wanderer = std::span(entities.begin(),wanderAmount);//1 from position 0
-	auto seekers = std::span(entities.begin() + wanderAmount,seekersAmount); //4 from position 1
-	auto separatists = std::span(entities.begin() + seekersAmount,sepAmount); //10 from position 6
+	entities.resize(actorAmount); //Safety resize if we dont add more it wont realloc and span wont loose connection
+	 
 
 	for(auto& obj : entities)
 	{
@@ -100,43 +120,26 @@ void GameLauncher::Start()
 		float z = RandomEngine::RandomInRange<float>(-10.f,10.f);
 
 		//Drone
-		GameObject drone = gom.CreateGameObject();
-		auto& transform = drone.AddComponent<Transform>();
+		obj = gom.CreateGameObject();
+		auto& transform = obj.AddComponent<Transform>();
 		transform.SetPosition(x,0,z);
+		transform.SetRotation(
+			0,
+			RandomEngine::RandomInRange(0.f,360.f),
+			0); 
 
-		obj = drone;
-	}
 
-	for(auto& obj : wanderer)
-	{
-		//Drone 
-		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/C64Wanderer.fbx");
-		mesh.SetMaterialPath("Materials/C64Wanderer.json"); 
-
-		auto& actor = obj.AddComponent<cActor>();
-		actor.SetController(new WanderController(obj));
-	}
-	
-	auto* seekerStation = new MultipleTargets_PollingStation(std::vector(entities.begin(),entities.begin() + wanderAmount));
-	auto* seekerFormationStation = new MultipleTargets_PollingStation(std::vector(entities.begin()+wanderAmount,entities.begin()+seekersAmount));
-	for(auto& obj : seekers)
-	{ 
 		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/C64Seeker.fbx");
 		mesh.SetMaterialPath("Materials/C64Seeker.json");
-
-		auto& actor = obj.AddComponent<cActor>();
-		actor.SetController(new SeekerController(seekerStation,seekerFormationStation,obj));
 	}
 
-	auto* separatistStation = new MultipleTargets_PollingStation(entities);
-	for(auto& obj : separatists)
+	auto* colliderPollingStation = new MultipleTargets_PollingStation(colliders);
+	auto* formationPollingStation = new MultipleTargets_PollingStation(entities);
+	for(auto& obj : entities)
 	{
-		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/C64.fbx");
-		mesh.SetMaterialPath("Materials/C64Separatist.json");
-
 		auto& actor = obj.AddComponent<cActor>();
-		actor.SetController(new SeparationController(separatistStation,obj)); // how do i remove the object itself
-	} 
+		actor.SetController(new AIController(colliderPollingStation,formationPollingStation,obj));
+	}
 
 	GLLogger.Log("GameLauncher start");
 }

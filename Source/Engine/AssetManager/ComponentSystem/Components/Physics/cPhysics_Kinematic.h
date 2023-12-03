@@ -18,7 +18,8 @@ public:
 	bool bindAngleToVelocity;
 	bool localVelocity;
 	float ph_maxSpeed;
-private:
+	float ph_maxAcceleration;
+private: 
 	void InitPrimitive();
 	std::vector<DebugDrawer::PrimitiveHandle> myHandles;
 };

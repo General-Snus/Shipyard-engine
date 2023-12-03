@@ -28,6 +28,9 @@ public:
 	std::vector<DataTuple> GetTargetPosition();
 	Vector3f GetClosestTargetPosition(Vector3f myPosition);
 
+	Vector3f GetAverageVelocity();
+	Vector3f GetAverageVelocityWithinCircle(Vector3f myPosition,float radius);
+
 	//Returns all agents in circle
 	std::vector<DataTuple> GetTargetsWithinCircle(Vector3f position,float radius);
 

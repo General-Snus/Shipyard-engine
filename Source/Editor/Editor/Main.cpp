@@ -34,18 +34,20 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	UNREFERENCED_PARAMETER(nCmdShow);
-
-#ifdef GuardedMain 
-	__try
+	if(IsDebuggerPresent())
 	{
 		Run(hInstance);
 	}
-	__except(ExceptionFilterFunction(GetExceptionInformation()))
+	else
 	{
+		__try
+		{
+			Run(hInstance);
+		}
+		__except(ExceptionFilterFunction(GetExceptionInformation()))
+		{
+		}
 	}
-#else
-	Run(hInstance);
-#endif
 	return true;
 }
 
@@ -196,7 +198,7 @@ void CreateMiniDump(EXCEPTION_POINTERS* someExceptionPointers)
 		}
 
 	}
-					std::cout << arg.message() << " \n\n";
+	std::cout << arg.message() << " \n\n";
 
 
 	std::wstring message = L"I CRASHED? IMPOSSIBLE!\nLog can be found at ";

@@ -49,6 +49,38 @@ Vector3f MultipleTargets_PollingStation::GetClosestTargetPosition(Vector3f myPos
 	return closestPosition;
 }
 
+Vector3f MultipleTargets_PollingStation::GetAverageVelocity()
+{
+	auto totalVelocity = Vector3f();
+	for(auto& g : targets)
+	{ 
+		totalVelocity += g.GetComponent<cPhysics_Kinematic>().ph_velocity;
+	}
+
+	totalVelocity /= (float)targets.size();
+	return totalVelocity;
+}
+
+Vector3f MultipleTargets_PollingStation::GetAverageVelocityWithinCircle(Vector3f position,float radius)
+{
+	if(targets.empty())
+	{
+		return Vector3f();
+	}
+
+	auto totalVelocity = Vector3f();
+	for(auto& g : targets)
+	{
+		if((g.GetComponent<Transform>().GetPosition() - position).Length() < radius)
+		{
+			totalVelocity += g.GetComponent<cPhysics_Kinematic>().ph_velocity;
+		}
+	}
+
+	totalVelocity /= (float)targets.size(); 
+	return totalVelocity;
+}
+
 std::vector<MultipleTargets_PollingStation::DataTuple> MultipleTargets_PollingStation::GetTargetsWithinCircle(Vector3f position,float radius)
 {
 	std::vector<DataTuple> returnVector;
