@@ -108,11 +108,11 @@ void GameLauncher::Start()
 		transform.SetPosition(x,0,z);
 		auto& mesh = colliders[i].AddComponent<cMeshRenderer>("Models/Cube.fbx");
 		mesh.SetMaterialPath("Materials/C64Separatist.json");
-	} 
+	}
 
 	std::vector<GameObject> entities;
 	entities.resize(actorAmount); //Safety resize if we dont add more it wont realloc and span wont loose connection
-	 
+
 
 	for(auto& obj : entities)
 	{
@@ -126,7 +126,7 @@ void GameLauncher::Start()
 		transform.SetRotation(
 			0,
 			RandomEngine::RandomInRange(0.f,360.f),
-			0); 
+			0);
 
 
 		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/C64Seeker.fbx");
@@ -146,27 +146,15 @@ void GameLauncher::Start()
 
 void GameLauncher::Update(float delta)
 {
+	delta;
 	OPTICK_EVENT()
-		//Movement1
-		AIEventManager::Instance().Update();
 
-	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::NUMPAD8))
+	//Movement1
+	AIEventManager::Instance().Update();
+	if(InputHandler::GetInstance().IsKeyPressed((int)Keys::K))
 	{
-		myCustomHandler.GetComponent<Transform>().Move(0,0,1 * delta);
+		GraphicsEngine::Get().GetSettings().DebugRenderer_Active = !GraphicsEngine::Get().GetSettings().DebugRenderer_Active;
 	}
-	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::NUMPAD2))
-	{
-		myCustomHandler.GetComponent<Transform>().Move(0,0,-1 * delta);
-	}
-	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::NUMPAD6))
-	{
-		myCustomHandler.GetComponent<Transform>().Move(1 * delta,0,0);
-	}
-	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::NUMPAD4))
-	{
-		myCustomHandler.GetComponent<Transform>().Move(-1 * delta,0,0);
-	}
-
 
 	//Other
 	{

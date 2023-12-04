@@ -53,6 +53,9 @@ bool Editor::Initialize(HWND aHandle)
 	myGameLauncher.Init();
 	myGameLauncher.Start();
 
+	GameObjectManager::GetInstance().SetUpdatePriority<Transform>(ComponentManagerBase::UpdatePriority::Transform);
+	GameObjectManager::GetInstance().SetUpdatePriority<cPhysics_Kinematic>(ComponentManagerBase::UpdatePriority::Physics);
+
 	HideSplashScreen();
 	return true;
 }

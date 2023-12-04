@@ -71,13 +71,11 @@ void Transform::Move(Vector2f translation)
 	myPosition.y += translation.y;
 	isDirty = true;
 }
-
 void Transform::Move(Vector3f translation)
 {
 	myPosition += translation;
 	isDirty = true;
 }
-
 void Transform::Move(float X,float Y,float Z)
 {
 	myPosition += {X,Y,Z};

@@ -129,7 +129,7 @@
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\SeparationController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\AI\AgentSystem\Controllers\SeekerController.h">
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\AIController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Objects\AI\AgentSystem\PollingStations\Target_PollingStation.h">
@@ -248,7 +248,7 @@
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\SeparationController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\SeekerController.cpp">
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\AIController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Objects\AI\AgentSystem\PollingStations\Source\Target_PollingStation.cpp">

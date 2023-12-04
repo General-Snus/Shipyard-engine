@@ -20,11 +20,12 @@
 #include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
 
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp> 
-	#define _DEBUGDRAW
+#define _DEBUGDRAW
 
 struct GraphicsSettings
 {
 	int Tonemaptype = 0;
+	bool DebugRenderer_Active = true	;
 };
 
 enum class eRenderTargets

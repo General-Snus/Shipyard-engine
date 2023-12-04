@@ -196,7 +196,7 @@
     <ClInclude Include="ComponentSystem\Components\Skybox.h" />
     <ClInclude Include="ComponentSystem\Components\ParticleSystem.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\WanderController.h" />
-    <ClInclude Include="Objects\AI\AgentSystem\Controllers\SeekerController.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\AIController.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\SeparationController.h" />
     <ClInclude Include="Objects\AI\AgentSystem\PollingStations\Target_PollingStation.h" />
     <ClInclude Include="Objects\AI\AgentSystem\SteeringBehaviour.h" />
@@ -242,7 +242,7 @@
     <ClCompile Include="ComponentSystem\Components\Source\Skybox.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\ParticleSystem.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\WanderController.cpp" />
-    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\SeekerController.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\AIController.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\SeparationController.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\PollingStations\Source\Target_PollingStation.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Source\SteeringBehaviour.cpp" />
