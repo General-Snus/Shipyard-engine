@@ -58,7 +58,6 @@ void cPhysics_Kinematic::Update()
 		{
 			ph_velocity.Normalize();
 			ph_velocity *= ph_maxSpeed;
-			//throw std::runtime_error("Velocity is higher than max speed");
 		}
 
 
@@ -66,7 +65,6 @@ void cPhysics_Kinematic::Update()
 		{
 			ph_acceleration.Normalize();
 			ph_acceleration *= ph_maxAcceleration;
-			//throw std::runtime_error("Velocity is higher than max speed");
 		}
 
 
@@ -80,7 +78,6 @@ void cPhysics_Kinematic::Update()
 		}
 		transform->Rotate(ph_Angular_velocity * delta);
 		transform->Move(ph_velocity * delta);
-
 		//Todo
 	/*
 	if bound convert velocity to angle and set rotation

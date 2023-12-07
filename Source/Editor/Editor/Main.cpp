@@ -112,7 +112,7 @@ void CreateMiniDump(EXCEPTION_POINTERS* someExceptionPointers)
 	ExpParam.ClientPointers = TRUE;
 
 	bMiniDumpSuccessful = MiniDumpWriteDump(GetCurrentProcess(),GetCurrentProcessId(),
-		hDumpFile,MiniDumpWithDataSegs,&ExpParam,NULL,NULL);
+		hDumpFile,MiniDumpWithIndirectlyReferencedMemory,&ExpParam,NULL,NULL);
 	//Straight up screen dump
 	BITMAPFILEHEADER bfHeader;
 	BITMAPINFOHEADER biHeader;
