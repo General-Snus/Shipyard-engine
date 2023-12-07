@@ -33,11 +33,12 @@
 #include "Objects/AI/AgentSystem/Controllers/DefaultControllers/EventController.h"
 #include "Objects/AI/AgentSystem/Controllers/PlayerController.h"  
 #include "Objects/AI/AgentSystem/Controllers/WanderController.h"  
-#include "Objects/AI/AgentSystem/Controllers/SeekerController.h"  
+#include "Objects/AI/AgentSystem/Controllers/AIController.h"  
 #include "Objects/AI/AgentSystem/Controllers/SeparationController.h"
 
 #include "Objects/AI/AgentSystem/PollingStations/PollingStation.h"  
 #include "Objects/AI/AgentSystem/PollingStations/Target_PollingStation.h"  
+#include "Objects/AI/AgentSystem/SteeringBehaviour.h"  
 
 #include "Objects/BaseAssets/BaseAsset.h"
 #include "Objects/BaseAssets/Animations.h"

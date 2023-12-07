@@ -12,6 +12,8 @@ public:
 	enum class UpdatePriority
 	{
 		Normal = 100,
+		Physics,
+		Transform,
 		Collision,
 		Render
 	};

@@ -9,6 +9,7 @@ cPhysics_Kinematic::cPhysics_Kinematic(const SY::UUID anOwnerID) : Component(anO
 	ph_Angular_velocity = {0.0f, 0.0f, 0.0f};
 	ph_Angular_acceleration = {0.0f, 0.0f, 0.0f};
 	ph_maxSpeed = 100.0f;
+	ph_maxAcceleration = 100.0f;
 }
 
 void cPhysics_Kinematic::Init()
@@ -57,8 +58,15 @@ void cPhysics_Kinematic::Update()
 		{
 			ph_velocity.Normalize();
 			ph_velocity *= ph_maxSpeed;
-			throw std::runtime_error("Velocity is higher than max speed");
 		}
+
+
+		if(ph_acceleration.Length() > ph_maxAcceleration)
+		{
+			ph_acceleration.Normalize();
+			ph_acceleration *= ph_maxAcceleration;
+		}
+
 
 		if(localVelocity)
 		{
@@ -70,7 +78,6 @@ void cPhysics_Kinematic::Update()
 		}
 		transform->Rotate(ph_Angular_velocity * delta);
 		transform->Move(ph_velocity * delta);
-
 		//Todo
 	/*
 	if bound convert velocity to angle and set rotation

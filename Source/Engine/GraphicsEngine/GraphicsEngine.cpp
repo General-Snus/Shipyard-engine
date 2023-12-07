@@ -63,7 +63,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 	try
 	{
 #endif
-		GELogger.SetPrintToVSOutput(false); 
+		GELogger.SetPrintToVSOutput(false);
 		myWindowHandle = windowHandle;
 		myBackBuffer = std::make_unique<Texture>();
 		myDepthBuffer = std::make_unique<Texture>();
@@ -75,7 +75,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 		{
 			GELogger.Err("Failed to initialize the RHI!");
 			return false;
-		} 
+		}
 		SetupDefaultVariables();
 		SetupBRDF();
 		SetupParticleShaders();
@@ -101,7 +101,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 		myG_Buffer.Init();
 		myShadowRenderer.Init();
 		myParticleRenderer.Init();
-		 RHI::SetDepthState(DepthState::DS_Reversed);
+		RHI::SetDepthState(DepthState::DS_Reversed);
 
 #ifdef _DEBUG
 	}
@@ -115,7 +115,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 }
 
 bool GraphicsEngine::SetupDebugDrawline()
-{ 
+{
 	DebugDrawer::Get().Initialize();
 	DebugDrawer::Get().AddDebugGrid({0.f, 0.0f, 0.f},1000,10,{1.0f, 1.0f, 1.0f});
 	return true;
@@ -455,7 +455,7 @@ void GraphicsEngine::SetupPostProcessing()
 	RHI::CreateTexture(
 		SSAOTexture.get(),
 		L"SSAOTexture",
-		size.Width/2,size.Height/2,
+		size.Width / 2,size.Height / 2,
 		defaultTextureFormat,
 		D3D11_USAGE_DEFAULT,
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
@@ -568,18 +568,18 @@ void GraphicsEngine::BeginFrame()
 
 void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 {
-	OPTICK_EVENT() 
-	aDeltaTime; aTotalTime;
+	OPTICK_EVENT()
+		aDeltaTime; aTotalTime;
 	RHI::SetVertexShader(myVertexShader);
 
-	OPTICK_EVENT("Gbuffer") 
-	RHI::BeginEvent(L"Start writing to gbuffer");
+	OPTICK_EVENT("Gbuffer")
+		RHI::BeginEvent(L"Start writing to gbuffer");
 	myCamera->SetCameraToFrameBuffer();
 	myG_Buffer.SetWriteTargetToBuffer(); //Let all write to textures
-	OPTICK_EVENT("Deferred") 
-	DeferredCommandList.Execute();
-	OPTICK_EVENT("Instanced Deferred") 
-	myInstanceRenderer.Execute(false);
+	OPTICK_EVENT("Deferred")
+		DeferredCommandList.Execute();
+	OPTICK_EVENT("Instanced Deferred")
+		myInstanceRenderer.Execute(false);
 	RHI::SetRenderTarget(nullptr,nullptr);
 	myG_Buffer.UnsetResources();
 	RHI::EndEvent();
@@ -590,22 +590,19 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	//Do ambience pass? Clarit
 	//Render all lights
 	OPTICK_EVENT("SSAO")
-	RHI::BeginEvent(L"SSAO");
+		RHI::BeginEvent(L"SSAO");
 	myCamera->SetCameraToFrameBuffer();
 	GfxCmd_SSAO().ExecuteAndDestroy();
 	RHI::EndEvent();
-	 
+
 	////Render shadowmaps
 	OPTICK_EVENT("ShadowMaps")
-	RHI::BeginEvent(L"ShadowMaps");
+		RHI::BeginEvent(L"ShadowMaps");
 	myShadowRenderer.Execute();
 	RHI::EndEvent();
 
-
-	
-
 	OPTICK_EVENT("Lightning")
-	RHI::BeginEvent(L"Lightning");
+		RHI::BeginEvent(L"Lightning");
 	myCamera->SetCameraToFrameBuffer();
 	GfxCmd_SetRenderTarget(SceneBuffer.get(),nullptr).ExecuteAndDestroy();
 	GfxCmd_SetLightBuffer().ExecuteAndDestroy(); //REFACTOR Change name to fit purpose
@@ -616,7 +613,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 
 	//Particles
 	OPTICK_EVENT("Particles")
-	RHI::BeginEvent(L"Particles");
+		RHI::BeginEvent(L"Particles");
 	RHI::SetBlendState(GraphicsEngine::Get().GetAdditiveBlendState());
 	GfxCmd_SetRenderTarget(SceneBuffer.get(),myDepthBuffer.get()).ExecuteAndDestroy();
 	myParticleRenderer.Execute();
@@ -624,7 +621,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 
 	//Post processing
 	OPTICK_EVENT("Postpro")
-	RHI::BeginEvent(L"PostPro");
+		RHI::BeginEvent(L"PostPro");
 	RHI::SetBlendState(nullptr);
 	GfxCmd_LuminancePass().ExecuteAndDestroy(); // Render to IntermediateA
 	GfxCmd_GaussianBlur().ExecuteAndDestroy();
@@ -634,11 +631,14 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 
 	//Debug layers
 	OPTICK_EVENT("DebugLayers")
-	RHI::BeginEvent(L"DebugLayers");
+		RHI::BeginEvent(L"DebugLayers");
 	myCamera->SetCameraToFrameBuffer();
 	GfxCmd_DebugLayer().ExecuteAndDestroy();
 #ifdef  _DEBUGDRAW
-	DebugDrawer::Get().Render();
+	if(myGraphicSettings.DebugRenderer_Active)
+	{
+		DebugDrawer::Get().Render();
+	}
 	OverlayCommandList.Execute();
 #endif //  _DEBUGDRAW
 	RHI::EndEvent();
@@ -665,16 +665,16 @@ void GraphicsEngine::RenderTextureTo(eRenderTargets from,eRenderTargets to)  con
 void GraphicsEngine::EndFrame()
 {
 	OPTICK_EVENT()
-	// We finish our frame here and present it on screen. 
-	RHI::Present(0);
+		// We finish our frame here and present it on screen. 
+		RHI::Present(0);
 	OPTICK_EVENT("ResetShadowList")
-	myShadowRenderer.ResetShadowList();
+		myShadowRenderer.ResetShadowList();
 	OPTICK_EVENT("DeferredCommandList")
-	DeferredCommandList.Reset();
+		DeferredCommandList.Reset();
 	OPTICK_EVENT("OverlayCommandList")
-	OverlayCommandList.Reset();
+		OverlayCommandList.Reset();
 	OPTICK_EVENT("myInstanceRenderer")
-	myInstanceRenderer.Clear();
+		myInstanceRenderer.Clear();
 	OPTICK_EVENT("ClearedEndFrame")
 }
 

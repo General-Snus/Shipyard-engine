@@ -81,14 +81,38 @@ void GameLauncher::Start()
 	}
 #pragma endregion
 
-	//Movement1 
-	SY::UUID player;
-	std::vector<GameObject> entities;
-	entities.resize(15); //Safety resize if we dont add more it wont realloc and span wont loose connection
+	//Movement1  
+	int actorAmount = 40;
+	int collidersAmount = 4;
 
-	auto wanderer = std::span(entities.begin(),1);//1 from position 0
-	auto seekers = std::span(entities.begin() + 1,4); //4 from position 1
-	auto separatists = std::span(entities.begin() + 5,10); //10 from position 6
+
+	SY::UUID player;
+	std::vector<GameObject> colliders;
+	colliders.resize(collidersAmount);
+	std::vector<Vector2f> colliderPositions =
+	{
+		Vector2f(1,1),
+		Vector2f(1,-1),
+		Vector2f(-1,-1),
+		Vector2f(-1,1)
+	};
+	for(size_t i = 0; i < colliders.size(); i++)
+	{
+		float position = 15.0f;
+		float x = position * colliderPositions[i].x;
+		float z = position * colliderPositions[i].y;
+
+		//Drone
+		colliders[i] = gom.CreateGameObject();
+		auto& transform = colliders[i].AddComponent<Transform>();
+		transform.SetPosition(x,0,z);
+		auto& mesh = colliders[i].AddComponent<cMeshRenderer>("Models/Cube.fbx");
+		mesh.SetMaterialPath("Materials/C64Separatist.json");
+	}
+
+	std::vector<GameObject> entities;
+	entities.resize(actorAmount); //Safety resize if we dont add more it wont realloc and span wont loose connection
+
 
 	for(auto& obj : entities)
 	{
@@ -96,69 +120,41 @@ void GameLauncher::Start()
 		float z = RandomEngine::RandomInRange<float>(-10.f,10.f);
 
 		//Drone
-		GameObject drone = gom.CreateGameObject();
-		auto& transform = drone.AddComponent<Transform>();
+		obj = gom.CreateGameObject();
+		auto& transform = obj.AddComponent<Transform>();
 		transform.SetPosition(x,0,z);
+		transform.SetRotation(
+			0,
+			RandomEngine::RandomInRange(0.f,360.f),
+			0);
 
-		obj = drone;
-	}
 
-	for(auto& obj : wanderer)
-	{
-		//Drone 
-		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/C64Wanderer.fbx");
-		mesh.SetMaterialPath("Materials/C64Wanderer.json"); 
-
-		auto& actor = obj.AddComponent<cActor>();
-		actor.SetController(new WanderController(obj));
-	}
-	
-	auto* seekerStation = new Target_PollingStation(wanderer[0]);
-	for(auto& obj : seekers)
-	{ 
 		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/C64Seeker.fbx");
 		mesh.SetMaterialPath("Materials/C64Seeker.json");
-
-		auto& actor = obj.AddComponent<cActor>();
-		actor.SetController(new SeekerController(seekerStation,obj));
 	}
 
-	auto* separatistsStation = new MultipleTargets_PollingStation(entities);
-	for(auto& obj : separatists)
+	auto* colliderPollingStation = new MultipleTargets_PollingStation(colliders);
+	auto* formationPollingStation = new MultipleTargets_PollingStation(entities);
+	for(auto& obj : entities)
 	{
-		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/C64.fbx");
-		mesh.SetMaterialPath("Materials/C64Separatist.json");
-
 		auto& actor = obj.AddComponent<cActor>();
-		actor.SetController(new SeparationController(separatistsStation,obj)); // how do i remove the object itself
-	} 
+		actor.SetController(new AIController(colliderPollingStation,formationPollingStation,obj));
+	}
 
 	GLLogger.Log("GameLauncher start");
 }
 
 void GameLauncher::Update(float delta)
 {
+	delta;
 	OPTICK_EVENT()
-		//Movement1
-		AIEventManager::Instance().Update();
 
-	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::NUMPAD8))
+	//Movement1
+	AIEventManager::Instance().Update();
+	if(InputHandler::GetInstance().IsKeyPressed((int)Keys::K))
 	{
-		myCustomHandler.GetComponent<Transform>().Move(0,0,1 * delta);
+		GraphicsEngine::Get().GetSettings().DebugRenderer_Active = !GraphicsEngine::Get().GetSettings().DebugRenderer_Active;
 	}
-	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::NUMPAD2))
-	{
-		myCustomHandler.GetComponent<Transform>().Move(0,0,-1 * delta);
-	}
-	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::NUMPAD6))
-	{
-		myCustomHandler.GetComponent<Transform>().Move(1 * delta,0,0);
-	}
-	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::NUMPAD4))
-	{
-		myCustomHandler.GetComponent<Transform>().Move(-1 * delta,0,0);
-	}
-
 
 	//Other
 	{
