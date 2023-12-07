@@ -70,6 +70,7 @@ void GameLauncher::Start()
 			worldRoot.AddComponent<BackgroundColor>(Vector4f(1.0f,1.0f,1.0f,1.0f));
 		}
 	}
+
 	{
 		GameObject test3 = gom.CreateGameObject();
 		test3.AddComponent<cMeshRenderer>("Models/SteelFloor.fbx");
@@ -77,6 +78,14 @@ void GameLauncher::Start()
 		auto& transform = test3.AddComponent<Transform>();
 		transform.SetPosition(0,-1.5f,0);
 		transform.SetScale(Vector3f(50.0f,1.0f,50.0f));
+		transform.SetGizmo(false);
+	}
+	{
+		GameObject sponza = gom.CreateGameObject();
+		sponza.AddComponent<cMeshRenderer>("Models/Sponza.fbx");
+		//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
+		auto& transform = sponza.AddComponent<Transform>();
+		transform.SetPosition(50,0,0);
 		transform.SetGizmo(false);
 	}
 #pragma endregion
@@ -149,8 +158,8 @@ void GameLauncher::Update(float delta)
 	delta;
 	OPTICK_EVENT()
 
-	//Movement1
-	AIEventManager::Instance().Update();
+		//Movement1
+		AIEventManager::Instance().Update();
 	if(InputHandler::GetInstance().IsKeyPressed((int)Keys::K))
 	{
 		GraphicsEngine::Get().GetSettings().DebugRenderer_Active = !GraphicsEngine::Get().GetSettings().DebugRenderer_Active;
