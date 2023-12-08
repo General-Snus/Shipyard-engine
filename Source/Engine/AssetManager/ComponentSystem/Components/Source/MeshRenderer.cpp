@@ -1,6 +1,7 @@
 #include "AssetManager.pch.h"
 #include <Engine/GraphicsEngine/GraphicsEngine.pch.h>  
 #include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
+#include <Tools/Utilities/System/ThreadPool.hpp>
 
 cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId) : Component(anOwnerId)
 {
@@ -11,12 +12,41 @@ cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId) : Component(anOwnerId
 	myRenderData->myMaterials[0] = GraphicsEngine::Get().GetDefaultMaterial();
 }
 
+void waitForLoad(std::shared_ptr<Mesh> arg,SY::UUID rnd)
+{
+	int a = 0;
+	while(arg->isLoadedComplete == false)
+	{
+		a++;
+	}
+	if(auto* comp = GameObjectManager::GetInstance().TryGetComponent<cMeshRenderer>(rnd))
+	{
+		comp->TrySetMaterialFromMesh();
+	}
+}
+
 inline cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath) : Component(anOwnerId)
 {
 	myRenderData = std::make_shared<RenderData>();
 	myRenderData->myMaterials.resize(1);
+
 	AssetManager::GetInstance().LoadAsset<Mesh>(aFilePath,myRenderData->myMesh);
+	ThreadPool::Get().SubmitWork(std::bind(&waitForLoad,myRenderData->myMesh,myOwnerID)); 
 	myRenderData->myMaterials[0] = GraphicsEngine::Get().GetDefaultMaterial();
+}
+
+bool cMeshRenderer::TrySetMaterialFromMesh()
+{
+	for(auto& [id,materialName] : myRenderData->myMesh->idToMaterial)
+	{ 
+		std::shared_ptr<Material> mat;
+		AssetManager::GetInstance().ForceLoadAsset<Material>(materialName,mat); // still on thread, lets keep going
+		if(mat->isLoadedComplete)
+		{
+			myRenderData->myMaterials.push_back(mat); 
+		}
+	}
+	return true;
 }
 
 void cMeshRenderer::SetNewMesh(const std::filesystem::path& aFilePath)

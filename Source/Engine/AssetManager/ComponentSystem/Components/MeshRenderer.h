@@ -11,7 +11,7 @@ struct RenderData
 		return myMesh == aOther.myMesh;
 	}
 	std::shared_ptr<Mesh> myMesh;
-	std::vector<std::weak_ptr<Material>> myMaterials;
+	std::vector<std::shared_ptr<Material>> myMaterials;
 };
  
 
@@ -20,8 +20,9 @@ class cMeshRenderer : public Component
 {
 public:
 	cMeshRenderer() = delete; // Create a generic cube
-	cMeshRenderer(const unsigned int anOwnerId); // Create a generic cube 
+	cMeshRenderer(const unsigned int anOwnerId); // Create a generic cube  
 	cMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath);
+	bool TrySetMaterialFromMesh();
 	void Render() override;
 
 	void SetNewMesh(const std::filesystem::path& aFilePath);

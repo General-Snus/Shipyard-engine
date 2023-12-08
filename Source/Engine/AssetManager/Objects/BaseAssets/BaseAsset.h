@@ -2,16 +2,18 @@
 #include <Engine/GraphicsEngine/Rendering/Vertex.h>
 #include <Tools/Utilities/LinearAlgebra//Sphere.hpp> 
 #include <filesystem>
+#include <functional>
 class Material;
 
 
 class AssetBase
 {
-public:
+public:  
 	AssetBase(const std::filesystem::path& aFilePath);
 	virtual ~AssetBase() = default;
 	virtual void Init() = 0;
 	bool isLoadedComplete;
+	std::vector<std::function<void()>> callBackOnFinished;
 	const std::filesystem::path AssetPath;
 };
  
@@ -37,4 +39,5 @@ struct Element
 	UINT NumIndices = 0;
 	UINT PrimitiveTopology = 0;
 	UINT Stride = 0;
+	unsigned int MaterialIndex = 0;
 };

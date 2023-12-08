@@ -30,7 +30,7 @@ void GfxCmd_RenderMesh::ExecuteAndDestroy()
 	{
 		if(myRenderData->myMaterials.size())
 		{
-			myRenderData->myMaterials[0].lock()->Update();
+			myRenderData->myMaterials[0]->Update();
 		} 
 		RHI::ConfigureInputAssembler(
 			aElement.PrimitiveTopology,

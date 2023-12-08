@@ -2,7 +2,7 @@
 #include "BaseAsset.h"
 #include <Engine/GraphicsEngine/Rendering/Texture.h>
 
-enum class eTextureType
+enum class eTextureType  
 {
 	ColorMap = 0,
 	NormalMap = 1,

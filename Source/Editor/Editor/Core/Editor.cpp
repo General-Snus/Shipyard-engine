@@ -27,6 +27,7 @@
 #include "../Windows/Window.h" 
 #include <Engine/AssetManager/ComponentSystem/GameObject.h>
 #include <Tools/Optick/src/optick.h>
+#include <Tools/Utilities/System/ThreadPool.hpp>
 
 using json = nlohmann::json;
 
@@ -34,6 +35,8 @@ bool Editor::Initialize(HWND aHandle)
 {
 	MVLogger = Logger::Create("ModelViewer");
 	ShowSplashScreen();
+
+	ThreadPool::Get().Init();
 
 	// TODO: Here we should init the Graphics Engine.
 	GraphicsEngine::Get().Initialize(aHandle,true);
@@ -43,8 +46,7 @@ bool Editor::Initialize(HWND aHandle)
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-	//io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
-
+	//io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch 
 	// Setup Platform/Renderer backends
 	ImGui_ImplWin32_Init(aHandle);
 	ImGui_ImplDX11_Init(RHI::Device.Get(),RHI::Context.Get());
@@ -80,8 +82,8 @@ void Editor::DoWinProc(const MSG& aMessage)
 }
 int	 Editor::Run()
 {
-	OPTICK_FRAME("MainThread");
-	InputHandler::GetInstance().Update();
+	OPTICK_FRAME("MainThread")
+		InputHandler::GetInstance().Update();
 	UpdateImGui();
 	Update();
 	Render();
@@ -101,7 +103,7 @@ void Editor::HideSplashScreen() const
 	delete mySplashWindow;
 	ShowWindow(Window::windowHandler,SW_SHOW);
 	SetForegroundWindow(Window::windowHandler);
-} 
+}
 void Editor::UpdateImGui()
 {
 	ImGui_ImplDX11_NewFrame();
@@ -118,7 +120,7 @@ void Editor::Update()
 	myGameLauncher.Update(Timer::GetInstance().GetDeltaTime());
 }
 void Editor::Render()
-{ 
+{
 	GraphicsEngine::Get().BeginFrame();
 	GraphicsEngine::Get().RenderFrame(0,0);
 	ImGui::Render();

@@ -33,7 +33,7 @@ void GfxCmd_RenderSkeletalMesh::ExecuteAndDestroy()
 	{
 		if (!myRenderData->myMaterials.empty())
 		{
-			myRenderData->myMaterials[0].lock()->Update();
+			myRenderData->myMaterials[0]->Update();
 		} 
 		RHI::ConfigureInputAssembler(aElement.PrimitiveTopology,
 			aElement.VertexBuffer,

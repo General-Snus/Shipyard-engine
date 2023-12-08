@@ -1,6 +1,7 @@
 #pragma once
 #include "GameObject.h"
 #include "GameObjectManager.h"
+#include <memory>
 
 enum class eComponentType
 {
@@ -8,7 +9,7 @@ enum class eComponentType
 	backgroundColor,
 };
 
-class Component
+class Component : public std::enable_shared_from_this<Component>
 {
 public:
 	Component(const SY::UUID anOwnerID) : myOwnerID(anOwnerID),myIsActive(true),myComponentType(eComponentType::base) {}

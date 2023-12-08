@@ -2,9 +2,8 @@
 
 #define AsUINT(v) static_cast<unsigned>(v) 
 
-#include <Tools/Utilities/DataStructures/Queue.hpp>
-#include <thread>
-#include <future>
+#include <Tools/Utilities/DataStructures/Queue.hpp> 
+#include <Tools/Utilities/System/ThreadPool.hpp>
 #include <unordered_map>
 
 
@@ -56,9 +55,12 @@ public:
 	static AssetManager& GetInstance();
 
 	template<class T>
+	void LoadAsset(const std::filesystem::path& aFilePath);
+	template<class T>
 	void LoadAsset(const std::filesystem::path& aFilePath, std::shared_ptr<T>& outAsset);
 	template<class T>
-	void LoadAsset(const std::filesystem::path& aFilePath, bool useExact, std::shared_ptr<T>& outAsset);
+	void LoadAsset(const std::filesystem::path& aFilePath, bool useExact, std::shared_ptr<T>& outAsset); 
+
 	template<class T>
 	void HasAsset(const std::filesystem::path& aFilePath, bool useExact) const; 
 	template<class T>
@@ -66,10 +68,10 @@ public:
 	template<class T>
 	void ForceLoadAsset(const std::filesystem::path& aFilePath, bool useExact, std::shared_ptr<T>& outAsset);
 
+	const std::filesystem::path AssetPath = L"../../Content/";
 private:
 	void ThreadedLoading();
-	std::mutex lockForSet;
-	std::vector<std::future<void>> myThreads;
+	std::mutex lockForSet; 
 
 	Queue<std::shared_ptr<AssetBase>> myAssetQueue;
 
@@ -77,7 +79,6 @@ private:
 	std::shared_ptr<Library> GetLibraryOfType();
 
 	std::unordered_map<const std::type_info*, std::shared_ptr<Library>> myLibraries;
-	const std::filesystem::path AssetPath = L"../../Content/";
 };
 template<class T>
 void AssetManager::ForceLoadAsset(const std::filesystem::path& aFilePath, std::shared_ptr<T>& outAsset)
@@ -116,6 +117,13 @@ void AssetManager::ForceLoadAsset(const std::filesystem::path& aFilePath, bool u
 	outAsset = ptr;
 }
 
+template<class T>
+void AssetManager::LoadAsset(const std::filesystem::path& aFilePath)
+{
+	std::shared_ptr<T> ptr;
+	LoadAsset<T>(aFilePath,false,ptr);
+}
+
 /// <summary>
 /// Holds the current thread until the asset is loaded
 /// </summary> 
@@ -124,6 +132,7 @@ void AssetManager::LoadAsset(const std::filesystem::path& aFilePath, std::shared
 {
 	LoadAsset<T>(aFilePath, false, outAsset);
 }
+
 
 /// <summary>
 /// Holds the current thread until the asset is loaded
@@ -149,19 +158,19 @@ void AssetManager::LoadAsset(const std::filesystem::path& aFilePath, bool useExa
 			std::pair<std::filesystem::path, std::shared_ptr<T>> newObject(aFilePath, std::make_shared<T>(aFilePath));
 			ptr = library->Add(newObject);
 			myAssetQueue.EnqueueUnique(newObject.second);
-			myThreads.push_back(std::async([this]() { this->ThreadedLoading(); }));
+			ThreadPool::Get().SubmitWork(std::bind(&AssetManager::ThreadedLoading,this));
 		}
 		else
 		{
 			std::pair<std::filesystem::path, std::shared_ptr<T>> newObject(aFilePath, std::make_shared<T>(AssetPath / aFilePath));
 			ptr = library->Add<T>(newObject);
 			myAssetQueue.EnqueueUnique(newObject.second);
-			myThreads.push_back(std::async([this]() { this->ThreadedLoading(); }));
+			ThreadPool::Get().SubmitWork(std::bind(&AssetManager::ThreadedLoading,this));
 		}
 	}
 	outAsset = ptr;
 }
-
+ 
 template<class T>
 inline void AssetManager::HasAsset(const std::filesystem::path& aFilePath, bool useExact) const
 {

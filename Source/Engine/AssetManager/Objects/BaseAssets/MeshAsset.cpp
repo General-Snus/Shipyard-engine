@@ -196,7 +196,7 @@ void Mesh::Init()
 		aiProcess_Triangulate |
 		aiProcess_JoinIdenticalVertices |
 		aiProcess_SortByPType |
-		aiProcess_GenBoundingBoxes|
+		aiProcess_GenBoundingBoxes |
 		aiProcess_GlobalScale |
 		aiProcess_ConvertToLeftHanded);
 
@@ -208,10 +208,117 @@ void Mesh::Init()
 		AMLogger.LogException(failedMeshLoad,2);
 		return;
 	}
-	Editor::GetEditor().ExpandWorldBounds(boxSphereBounds); // TODO Make a scene contain the boxSphereBounds!! 
+	Editor::GetEditor().ExpandWorldBounds(boxSphereBounds); // TODO Make a scene contain the boxSphereBounds!!
+
+
+
 	for(size_t i = 0; i < scene->mNumMeshes; i++)
 	{
 		processMesh(scene->mMeshes[i],scene);
+	}
+	//FillMatPath
+	for(auto& [key,matPath] : idToMaterial)
+	{
+		std::filesystem::path texturePath;
+		int textureLoaded = 0;
+		Vector4f color;
+		auto material = scene->mMaterials[key];
+		material->Get(AI_MATKEY_COLOR_DIFFUSE,color);
+
+		Material::DataMaterial dataMat;
+		dataMat.materialData.Data.albedoColor = color;
+		dataMat.textures.resize(4);
+
+
+		aiString  str;
+		matPath = "Materials/Temporary/";
+		matPath += material->GetName().C_Str();
+
+		std::wstring mdf = matPath.wstring();
+		std::wstring illegalChars = L":?\"<>|";
+		for(auto& i : mdf)
+		{
+			bool found = illegalChars.find(i) != std::string::npos;
+			if(found)
+			{
+				i = '_';
+			}
+		}
+		matPath = mdf;
+		matPath.replace_extension("json");
+
+		std::pair<std::filesystem::path,std::shared_ptr<TextureHolder>> holder;
+		if(material->GetTextureCount(aiTextureType_BASE_COLOR))
+		{
+			material->GetTexture(aiTextureType_BASE_COLOR,0,&str);
+			holder.first = str.C_Str();
+			dataMat.textures[0] = holder;
+			textureLoaded++;
+		}
+
+		if(material->GetTextureCount(aiTextureType_DIFFUSE))
+		{
+			material->GetTexture(aiTextureType_DIFFUSE,0,&str);
+			material->GetTexture(aiTextureType_BASE_COLOR,0,&str);
+			holder.first = str.C_Str();
+			dataMat.textures[0] = holder;
+			textureLoaded++;
+		}
+
+		if(material->GetTextureCount(aiTextureType_NORMALS))
+		{
+			material->GetTexture(aiTextureType_NORMALS,0,&str);
+			material->GetTexture(aiTextureType_BASE_COLOR,0,&str);
+			holder.first = str.C_Str();
+			dataMat.textures[1] = holder;
+			textureLoaded++;
+		}
+
+		if(material->GetTextureCount(aiTextureType_DIFFUSE_ROUGHNESS))
+		{
+			material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS,0,&str);
+			material->GetTexture(aiTextureType_BASE_COLOR,0,&str);
+			holder.first = str.C_Str();
+			dataMat.textures[2] = holder;
+			textureLoaded++;
+		}
+
+		if(material->GetTextureCount(aiTextureType_AMBIENT_OCCLUSION))
+		{
+			material->GetTexture(aiTextureType_AMBIENT_OCCLUSION,0,&str);
+			material->GetTexture(aiTextureType_BASE_COLOR,0,&str);
+			holder.first = str.C_Str();
+			dataMat.textures[2] = holder;
+			textureLoaded++;
+		}
+
+		if(material->GetTextureCount(aiTextureType_METALNESS))
+		{
+			material->GetTexture(aiTextureType_METALNESS,0,&str);
+			material->GetTexture(aiTextureType_BASE_COLOR,0,&str);
+			holder.first = str.C_Str();
+			dataMat.textures[2] = holder;
+			textureLoaded++;
+		}
+
+		if(material->GetTextureCount(aiTextureType_EMISSIVE))
+		{
+			material->GetTexture(aiTextureType_EMISSIVE,0,&str);
+			material->GetTexture(aiTextureType_BASE_COLOR,0,&str);
+			holder.first = str.C_Str();
+			dataMat.textures[3] = holder;
+			textureLoaded++;
+		}
+
+		if(!textureLoaded)
+		{
+			continue;
+		}
+
+
+		Material::CreateJson(dataMat,matPath);
+		AssetManager::GetInstance().LoadAsset<Material>(matPath);
+
 	}
 
 
@@ -369,6 +476,9 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 		sizeof(Vertex)
 	};
 
+	toAdd.MaterialIndex = mesh->mMaterialIndex;
+	idToMaterial.try_emplace(mesh->mMaterialIndex,"");
+
 	Elements.push_back(toAdd);
 	mdlVertices.clear();
 	mdlIndicies.clear();
@@ -407,6 +517,6 @@ void Mesh::UpdateInstanceBuffer()
 	}
 	D3D11_MAPPED_SUBRESOURCE mappedResource{};
 	RHI::Context->Map(myInstanceBuffer.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&mappedResource);
- 	memcpy(mappedResource.pData,myInstances.data(),sizeof(Matrix) * myInstances.size());
+	memcpy(mappedResource.pData,myInstances.data(),sizeof(Matrix) * myInstances.size());
 	RHI::Context->Unmap(myInstanceBuffer.Get(),0);
 }

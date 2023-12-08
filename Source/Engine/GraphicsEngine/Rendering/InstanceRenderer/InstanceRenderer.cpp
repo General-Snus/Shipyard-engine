@@ -38,7 +38,10 @@ void InstanceRenderer::Execute(bool isShadowPass)
 			{
 				if(!isShadowPass && i->myMaterials.size())
 				{
-					i->myMaterials[0].lock()->Update();
+					if(aElement.MaterialIndex < i->myMaterials.size())
+					{
+						i->myMaterials[aElement.MaterialIndex]->Update();
+					}
 				}
 
 				const std::vector<ComPtr<ID3D11Buffer>> vxBuffers
