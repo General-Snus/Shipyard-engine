@@ -5,47 +5,39 @@
 #include <Tools/Logging/Logging.h> 
 #include <Tools/Utilities/LinearAlgebra/Sphere.hpp>
 #include <Game/GameLauncher/Core/GameLauncher.h>
-template<typename T>
-struct SaveData
-{
-	int fnc;
-	std::string identifier;
-	T* arg;
-}; 
-enum class eSaveToJsonArgument
-{
-	InputFloat3,
-	InputFloat4,
-	SaveBool
-}; 
+
 class GameLauncher;
 
 class Editor
 {
+	enum eMenuLayers
+	{
+		count
+	};
 private:
 	SplashWindow* mySplashWindow = nullptr;
 	ApplicationState myApplicationState;
 	Logger MVLogger;
 	void ShowSplashScreen();
-	void HideSplashScreen() const;  
+	void HideSplashScreen() const;
 
-	void UpdateImGui(); 
-	void Update(); 
+	void UpdateImGui();
+	void Update();
 	void Render();
 
-	bool SaveDataToJson() const;
-	bool JsonToSaveData() const; 
-	bool ContainData(SaveData<float>& data);
-	bool SaveToMemory(eSaveToJsonArgument fnc,const std::string& identifier, void* arg);
-	bool SaveToMemory(SaveData<float>& arg);
+#pragma region IMGUI
+	void TopBar();
+
+#pragma endregion
+
 
 public:
 	Editor() = default;
 	bool Initialize(HWND aHandle);
 	void DoWinProc(const MSG& msg);
 	int Run();
-	 
-	 
+
+
 	// Acceleration Getters for components.
 	static ApplicationState& GetApplicationState()
 	{
@@ -68,8 +60,12 @@ public:
 
 	void ExpandWorldBounds(Sphere<float> sphere);
 	const Sphere<float>& GetWorldBounds();
-private: 
+
+	const bool GetIsGUIActive() const { return IsGUIActive;	};
+	void SetIsGUIActive(bool set) { IsGUIActive = set; };
+private:
 	Sphere<float> myWorldBounds;
 	GameLauncher myGameLauncher;
-	std::vector<SaveData<float>> mySaveData; 
+	bool IsGUIActive = true;
+	std::array<bool,count> activeWindows = {false};
 };

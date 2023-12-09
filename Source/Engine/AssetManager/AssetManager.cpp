@@ -11,13 +11,36 @@
 AssetManager::AssetManager()
 {
 	AMLogger = Logger::Create("AssetManager");
-	AMLogger.SetPrintToVSOutput(false);
+	AMLogger.SetPrintToVSOutput(false); 
+	RecusiveNameSave();
 }
 
 AssetManager& AssetManager::GetInstance()
 {
 	static AssetManager singleton;
 	return singleton;
+}
+void AssetManager::RecusiveNameSave()
+{
+	for(const auto& file : std::filesystem::recursive_directory_iterator(AssetPath))
+	{
+		if(file.path().has_extension())
+		{
+			std::filesystem::path filePath = file.path();
+			std::filesystem::path fileExt = file.path().extension();
+			nameToPathMap.try_emplace(filePath.filename(),filePath);
+		}	 
+	}
+
+}
+bool AssetManager::AdaptPath(std::filesystem::path& path)
+{
+	if(nameToPathMap.contains(path))
+	{
+		path = nameToPathMap.at(path);
+		return true;
+	} 
+	return false;
 }
 void AssetManager::ThreadedLoading()
 {
@@ -33,7 +56,7 @@ void AssetManager::ThreadedLoading()
 			{
 				const double timeEnd = Timer::GetInstance().GetTotalTime();
 				const double diff = (timeEnd - timeStart) * 1000.0;
-				std::string str = "Loaded: " + working->AssetPath.string() + " in " + std::to_string(diff) + "ms \n";
+				std::string str = "Loaded: " + working->GetAssetPath().string() + " in " + std::to_string(diff) + "ms \n";
 				AMLogger.Log(str);
 
 				for(const auto& callback : working->callBackOnFinished)
@@ -43,7 +66,7 @@ void AssetManager::ThreadedLoading()
 				working->callBackOnFinished.clear();
 				return;
 			}
-			std::string str = "Failed to load " + working->AssetPath.string();
+			std::string str = "Failed to load " + working->GetAssetPath().string();
 			AMLogger.Warn(str);
 		}
 	}

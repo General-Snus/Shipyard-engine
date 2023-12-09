@@ -13,8 +13,10 @@ public:
 	virtual ~AssetBase() = default;
 	virtual void Init() = 0;
 	bool isLoadedComplete;
+	inline const std::filesystem::path& GetAssetPath() const { return AssetPath;	};
 	std::vector<std::function<void()>> callBackOnFinished;
-	const std::filesystem::path AssetPath;
+protected:
+	std::filesystem::path AssetPath;
 };
  
 struct Bone

@@ -1,10 +1,11 @@
 #include "AssetManager.pch.h"
 #include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
-#include "TextureAsset.h"
+#include <Tools/ThirdParty/DirectXTK/WICTextureLoader.h>
+#include "TextureAsset.h" 
 
 TextureHolder::TextureHolder(const std::filesystem::path& aFilePath,eTextureType aTextureType) : AssetBase(aFilePath),textureType(aTextureType)
 {
-	RawTexture = std::make_shared<Texture>(); 
+	RawTexture = std::make_shared<Texture>();
 
 	/*if(!RHI::LoadTexture(RawTexture.get(),aFilePath.wstring()))
 	{
@@ -45,7 +46,57 @@ void TextureHolder::Init()
 			this->textureType = eTextureType::ParticleMap;
 		}
 	}
-	if(!RHI::LoadTexture(RawTexture.get(),AssetPath.wstring()))
+
+	if(AssetPath.extension() == ".png")
+	{
+		if(!std::filesystem::exists(AssetPath))
+		{
+			if(!AssetManager::GetInstance().AdaptPath(AssetPath))
+			{
+				if(GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
+				{
+					RawTexture = GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture();
+					isLoadedComplete = true;
+					return;
+				}
+				isLoadedComplete = false;
+				return;
+			}
+		}
+
+		if(!DirectX::CreateWICTextureFromFile(
+			RHI::Device.Get(),
+			AssetPath.wstring().c_str(),
+			RawTexture->myTexture.GetAddressOf(),
+			RawTexture->mySRV.GetAddressOf()))
+		{
+			if(GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
+			{
+				RawTexture = GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture();
+				isLoadedComplete = true;
+				return;
+			}
+			std::cout << "Error: Default texture was not found" << " \n";
+			isLoadedComplete = false;
+			return;
+		}
+	}
+	else if(AssetPath.extension() == ".dds")
+	{
+		if(!RHI::LoadTexture(RawTexture.get(),AssetPath.wstring()))
+		{
+			if(GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
+			{
+				RawTexture = GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture();
+				isLoadedComplete = true;
+				return;
+			}
+			std::cout << "Error: Default texture was not found" << " \n";
+			isLoadedComplete = false;
+			return;
+		}
+	}
+	else
 	{
 		if(GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
 		{
@@ -60,7 +111,7 @@ void TextureHolder::Init()
 	isLoadedComplete = true;
 }
 
-TextureHolder::TextureHolder(const std::filesystem::path& aFilePath) : AssetBase(aFilePath) 
+TextureHolder::TextureHolder(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)
 {
 	RawTexture = std::make_shared<Texture>();
 	this->textureType = eTextureType::ColorMap;

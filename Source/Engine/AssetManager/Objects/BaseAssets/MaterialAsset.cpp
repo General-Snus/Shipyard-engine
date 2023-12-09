@@ -93,9 +93,9 @@ void Material::Init()
 				data.materialData.Data.NormalStrength = js["NormalStrength"];
 				data.materialData.Data.Shine = js["Shine"];
 			}
-			catch(const std::exception&)
+			catch(const std::exception& e)
 			{
-				std::cout << "Unsuccessfull loading of material data file at path: " << AssetPath << "\n";
+				std::cout << "Unsuccessfull loading of material data file at path: " << AssetPath << " " << e.what() << "\n";
 			}
 		}
 		{

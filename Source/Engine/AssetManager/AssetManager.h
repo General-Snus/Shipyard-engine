@@ -68,16 +68,20 @@ public:
 	template<class T>
 	void ForceLoadAsset(const std::filesystem::path& aFilePath, bool useExact, std::shared_ptr<T>& outAsset);
 
+	void RecusiveNameSave();
+	bool AdaptPath(std::filesystem::path& path);
+
 	const std::filesystem::path AssetPath = L"../../Content/";
 private:
 	void ThreadedLoading();
-	std::mutex lockForSet; 
-
+	std::mutex lockForSet;
 	Queue<std::shared_ptr<AssetBase>> myAssetQueue;
+
+	//NameToPath
+	std::unordered_map<std::filesystem::path,std::filesystem::path> nameToPathMap;
 
 	template<class T>
 	std::shared_ptr<Library> GetLibraryOfType();
-
 	std::unordered_map<const std::type_info*, std::shared_ptr<Library>> myLibraries;
 };
 template<class T>
