@@ -12,15 +12,10 @@ AssetManager::AssetManager()
 {
 	AMLogger = Logger::Create("AssetManager");
 	AMLogger.SetPrintToVSOutput(false); 
-	RecusiveNameSave();
+	RecursiveNameSave();
 }
-
-AssetManager& AssetManager::GetInstance()
-{
-	static AssetManager singleton;
-	return singleton;
-}
-void AssetManager::RecusiveNameSave()
+ 
+void AssetManager::RecursiveNameSave()
 {
 	for(const auto& file : std::filesystem::recursive_directory_iterator(AssetPath))
 	{
@@ -28,7 +23,7 @@ void AssetManager::RecusiveNameSave()
 		{
 			std::filesystem::path filePath = file.path();
 			std::filesystem::path fileExt = file.path().extension();
-			nameToPathMap.try_emplace(filePath.filename(),filePath);
+			nameToPathMap.try_emplace(AssetPath/filePath.filename(),filePath);
 		}	 
 	}
 
@@ -42,28 +37,22 @@ bool AssetManager::AdaptPath(std::filesystem::path& path)
 	} 
 	return false;
 }
+ 
 void AssetManager::ThreadedLoading()
 {
 	if(myAssetQueue.GetSize())
 	{
 		const double timeStart = Timer::GetInstance().GetTotalTime(); 
 		{
-			std::scoped_lock<std::mutex> lock(lockForSet);
 			std::shared_ptr<AssetBase> working = myAssetQueue.Dequeue();
-			working->Init();
-
+			working->Init(); 
 			if(working->isLoadedComplete)
 			{
+				//this->assetCallbackMaster.UpdateStatusOf<T>(working->GetAssetPath(),AssetCallbackMaster::created); 
 				const double timeEnd = Timer::GetInstance().GetTotalTime();
 				const double diff = (timeEnd - timeStart) * 1000.0;
 				std::string str = "Loaded: " + working->GetAssetPath().string() + " in " + std::to_string(diff) + "ms \n";
-				AMLogger.Log(str);
-
-				for(const auto& callback : working->callBackOnFinished)
-				{
-					callback();
-				}
-				working->callBackOnFinished.clear();
+				AMLogger.Log(str); 
 				return;
 			}
 			std::string str = "Failed to load " + working->GetAssetPath().string();

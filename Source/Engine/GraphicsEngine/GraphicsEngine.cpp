@@ -52,6 +52,7 @@
 
 #include <Engine/GraphicsEngine/InterOp/DDSTextureLoader11.h>
 #include <Tools/Optick/src/optick.h>
+ 
 
 bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 {
@@ -76,6 +77,20 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 			GELogger.Err("Failed to initialize the RHI!");
 			return false;
 		}
+//#if (_WIN32_WINNT >= 0x0A00 /*_WIN32_WINNT_WIN10*/)
+//		Microsoft::WRL::Wrappers::RoInitializeWrapper initialize(RO_INIT_MULTITHREADED);
+//		if(FAILED(initialize))
+//		{
+//			GELogger.Err("Failed to initialize the WRL!");
+//			return false;
+//		}
+//#else
+//		HRESULT hr = CoInitializeEx(nullptr,COINIT_MULTITHREADED);
+//		if(FAILED(hr))
+//			// error
+//#endif
+
+
 		SetupDefaultVariables();
 		SetupBRDF();
 		SetupParticleShaders();
@@ -236,7 +251,7 @@ void GraphicsEngine::SetupDefaultVariables()
 	);
 
 	//Particle
-	AssetManager::GetInstance().ForceLoadAsset<TextureHolder>(L"Textures/Default/DefaultParticle_P.dds",defaultParticleTexture);
+	AssetManager::Get().ForceLoadAsset<TextureHolder>(L"Textures/Default/DefaultParticle_P.dds",defaultParticleTexture);
 	defaultParticleTexture->SetTextureType(eTextureType::ParticleMap);
 
 
@@ -257,7 +272,7 @@ void GraphicsEngine::SetupDefaultVariables()
 	RHI::SetSamplerState(myPointSampleState,REG_PointSampler);
 
 
-	AssetManager::GetInstance().ForceLoadAsset<TextureHolder>(L"Textures/Default/NoiseTable.dds",NoiseTable);
+	AssetManager::Get().ForceLoadAsset<TextureHolder>(L"Textures/Default/NoiseTable.dds",NoiseTable);
 	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_Noise_Texture,NoiseTable->GetRawTexture().get()); //Is there guarantee that this holds?
 
 	defaultVS = std::make_shared<Shader>();
@@ -268,14 +283,14 @@ void GraphicsEngine::SetupDefaultVariables()
 	defaultPS->SetShader(myPixelShader);
 	defaultPS->myName = L"Default Pixel Shader";
 
-	AssetManager::GetInstance().ForceLoadAsset<Material>("Materials/Default.json",defaultMaterial);
+	AssetManager::Get().ForceLoadAsset<Material>("Materials/Default.json",defaultMaterial);
 	defaultMaterial->SetShader(defaultVS,defaultPS);
 
-	AssetManager::GetInstance().ForceLoadAsset<TextureHolder>("Textures/skansen_cubemap.dds",defaultCubeMap);
+	AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/skansen_cubemap.dds",defaultCubeMap);
 	defaultCubeMap->SetTextureType(eTextureType::CubeMap);
 	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_enviromentCube,defaultCubeMap->GetRawTexture().get());
 
-	AssetManager::GetInstance().ForceLoadAsset<Mesh>("default.fbx",defaultMesh);
+	AssetManager::Get().ForceLoadAsset<Mesh>("default.fbx",defaultMesh);
 }
 
 void GraphicsEngine::SetupBlendStates()
@@ -568,18 +583,18 @@ void GraphicsEngine::BeginFrame()
 
 void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 {
-	OPTICK_EVENT()
-		aDeltaTime; aTotalTime;
+	OPTICK_EVENT();
+	aDeltaTime; aTotalTime;
 	RHI::SetVertexShader(myVertexShader);
 
-	OPTICK_EVENT("Gbuffer")
-		RHI::BeginEvent(L"Start writing to gbuffer");
+	OPTICK_EVENT("Gbuffer");
+	RHI::BeginEvent(L"Start writing to gbuffer");
 	myCamera->SetCameraToFrameBuffer();
 	myG_Buffer.SetWriteTargetToBuffer(); //Let all write to textures
-	OPTICK_EVENT("Deferred")
-		DeferredCommandList.Execute();
-	OPTICK_EVENT("Instanced Deferred")
-		myInstanceRenderer.Execute(false);
+	OPTICK_EVENT("Deferred");
+	DeferredCommandList.Execute();
+	OPTICK_EVENT("Instanced Deferred");
+	myInstanceRenderer.Execute(false);
 	RHI::SetRenderTarget(nullptr,nullptr);
 	myG_Buffer.UnsetResources();
 	RHI::EndEvent();

@@ -138,6 +138,9 @@
     <ClInclude Include="Objects\AI\AgentSystem\SteeringBehaviour.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AssetManagerUtills.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssetManager.pch.cpp">
@@ -255,6 +258,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Objects\AI\AgentSystem\Source\SteeringBehaviour.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetManagerUtills.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

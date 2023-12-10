@@ -3,11 +3,12 @@
 #include <vector>
 #include <cassert>  
 #include "UUID.h"
+#include <Engine/AssetManager/AssetManagerUtills.hpp>
 //Original creation by Simon
 
-class Component; 
+class Component;
 class ComponentManagerBase
-{ 
+{
 public:
 	enum class UpdatePriority
 	{
@@ -24,7 +25,7 @@ public:
 	virtual void Update() = 0;
 	virtual void Render() = 0;
 	virtual void DeleteGameObject(const SY::UUID aGameObjectID) = 0;
-	virtual void CollidedWith(const SY::UUID aFirstID,const SY::UUID aTargetID) = 0;
+	virtual void CollidedWith(const SY::UUID aFirstID,const SY::UUID aTargetID) = 0; 
 
 	void SetUpdatePriority(const UpdatePriority aPriority) { myUpdatePriority = aPriority; }
 	const UpdatePriority GetUpdatePriority() const { return myUpdatePriority; }
@@ -60,14 +61,13 @@ public:
 
 	void Update() override;
 	void Render() override;
-	void DeleteGameObject(const SY::UUID aGameObjectID) override;
+	void DeleteGameObject(const SY::UUID aGameObjectID) override; 
 	void CollidedWith(const SY::UUID aFirstID,const SY::UUID aTargetID) override;
-
 private:
 	std::unordered_map<SY::UUID,unsigned int> myGameObjectIDtoVectorIndex;
 	std::unordered_map<unsigned int,SY::UUID> myVectorIndexToGameObjectID;
 	std::vector<T> myComponents;
-}; 
+};
 
 template<class T>
 inline void ComponentManager<T>::Destroy()
@@ -108,7 +108,7 @@ inline T& ComponentManager<T>::AddComponent(const SY::UUID aGameObjectID,Args...
 	static_cast<Component*>(&myComponents.back())->Init();
 	return myComponents.back();
 }
-
+ 
 template<class T>
 inline const bool ComponentManager<T>::HasComponent(const SY::UUID aGameObjectID) const
 {
@@ -135,7 +135,7 @@ T* ComponentManager<T>::TryGetComponent(const SY::UUID aGameObjectID)
 	{
 		return &myComponents[myGameObjectIDtoVectorIndex[aGameObjectID]];
 	}
-	
+
 	//std::cout << "ComponentManager: Tried to get a component but the game object did not exist.ID : " << aGameObjectID << " \n";
 	//assert(false && "ComponentManager: Tried to get a component but the game object did not exist. ID: " + aGameObjectID);
 	//ERROR_PRINT("ComponentManager: Tried to get a component but the game object did not exist. ID: " + aGameObjectID);
@@ -175,7 +175,8 @@ void ComponentManager<T>::DeleteGameObject(const SY::UUID aGameObjectID)
 	unsigned int index = it->second;								// Get the component index of the game object
 	unsigned int id = myVectorIndexToGameObjectID[static_cast<unsigned int>(myComponents.size() - 1)]; // Get the id of the game object with the last component
 
-	std::swap(myComponents[index],myComponents[myComponents.size() - 1]); // Swap the last component with the component to remove (cyclic remove)
+	myComponents[index] = myComponents[myComponents.size() - 1]; // Swap the last component with the component to remove (cyclic remove)
+	//std::swap(myComponents[index],myComponents[myComponents.size() - 1]); // Swap the last component with the component to remove (cyclic remove)
 	myComponents.pop_back();										// Remove the newly last component (the component to remove)
 
 	myGameObjectIDtoVectorIndex[id] = index;						// Change the previously last game object to refer to the new component index

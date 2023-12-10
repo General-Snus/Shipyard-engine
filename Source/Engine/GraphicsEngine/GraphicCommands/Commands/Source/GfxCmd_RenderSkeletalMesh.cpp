@@ -31,9 +31,9 @@ void GfxCmd_RenderSkeletalMesh::ExecuteAndDestroy()
 	//GetInstanceRenderer().AddInstance( myRenderData);
 	for(const auto& aElement :  myRenderData->myMesh->Elements)
 	{
-		if (!myRenderData->myMaterials.empty())
+		if (!myRenderData->overrideMaterial.empty())
 		{
-			myRenderData->myMaterials[0]->Update();
+			myRenderData->overrideMaterial[0]->Update();
 		} 
 		RHI::ConfigureInputAssembler(aElement.PrimitiveTopology,
 			aElement.VertexBuffer,

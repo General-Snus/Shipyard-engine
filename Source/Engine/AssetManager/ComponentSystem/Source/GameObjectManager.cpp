@@ -87,6 +87,7 @@ void GameObjectManager::SetActive(const SY::UUID aGameObjectID,const bool aState
 	//ERROR_PRINT("GameObjectManager: Tried to set active on a missing GameObject. ID: " + aGameObjectID);
 }
 
+
 void GameObjectManager::SetLastGOAsPlayer()
 {
 	myPlayer = myLastID - 1;
@@ -143,7 +144,7 @@ void GameObjectManager::DeleteObjects()
 		else
 		{
 			std::string err = "GameObjectManager::DeleteGameObject(): Tried to get delete a missing GameObject. ID: " + std::to_string(myObjectsToDelete[i]);
-			assert(false && err.c_str()); 
+			assert(false && err.c_str());
 		}
 	}
 

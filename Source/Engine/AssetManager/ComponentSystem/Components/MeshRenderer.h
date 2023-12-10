@@ -1,32 +1,29 @@
 #pragma once
-#include <Engine/AssetManager/AssetManager.pch.h> 
-
+#include <Engine/AssetManager/AssetManager.pch.h>
 #define AsUINT(v) static_cast<unsigned>(v)
- 
+
 struct RenderData
-{ 
+{
 	//Equal operator
 	inline bool operator==(const RenderData& aOther) const
-	{ 
+	{
 		return myMesh == aOther.myMesh;
 	}
 	std::shared_ptr<Mesh> myMesh;
-	std::vector<std::shared_ptr<Material>> myMaterials;
-};
- 
-
+	std::vector<std::shared_ptr<Material>> overrideMaterial; //if this exist it will override the material on the mesh
+}; 
 
 class cMeshRenderer : public Component
 {
 public:
 	cMeshRenderer() = delete; // Create a generic cube
 	cMeshRenderer(const unsigned int anOwnerId); // Create a generic cube  
-	cMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath);
-	bool TrySetMaterialFromMesh();
+	cMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath); 
 	void Render() override;
 
 	void SetNewMesh(const std::filesystem::path& aFilePath);
 	void SetMaterialPath(const std::filesystem::path& aFilePath);
+	void SetMaterialPath(const std::filesystem::path& aFilePath,int elementIndex);
 	~cMeshRenderer() override = default;
 
 	FORCEINLINE const std::vector<Element>& GetElements() const
@@ -49,10 +46,11 @@ public:
 
 protected:
 	bool isInstanced = true;
-	std::shared_ptr<RenderData> myRenderData;
+	std::shared_ptr<RenderData> myRenderData; 
 };
 
-class cSkeletalMeshRenderer : public cMeshRenderer	
+
+class cSkeletalMeshRenderer : public cMeshRenderer
 {
 public:
 	cSkeletalMeshRenderer() = delete;

@@ -2,6 +2,8 @@
 #include <string>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 
+#include <d3d11_1.h>
+
 void Window::Init(const WinInitSettings& init)
 { 
     FILE* consoleOut;
@@ -41,6 +43,11 @@ void Window::Init(const WinInitSettings& init)
 		nullptr
 	);
 
+	HRESULT hr = CoInitializeEx(nullptr,COINIT_MULTITHREADED);
+	if(FAILED(hr))
+	{
+		return;
+	}
 	//TODO error repport on fail
 }
 

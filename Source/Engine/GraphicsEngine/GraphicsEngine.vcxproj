@@ -82,14 +82,14 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(ProjectDir);$(SolutionDir)ThirdParty\FBXImporter\Include\;$(SolutionDir)\;$(IncludePath);$(SolutionDir)ThirdParty\CU\;$(SolutionDir)Tools\Assimp\include</IncludePath>
+    <IncludePath>$(ProjectDir);$(SolutionDir)ThirdParty\FBXImporter\Include\;$(SolutionDir)\;$(IncludePath);$(SolutionDir)ThirdParty\CU\;$(SolutionDir)Tools\Assimp\include;$(SolutionDir)Tools\ThirdParty\DirectXTK\</IncludePath>
     <LibraryPath>$(SolutionDir)ThirdParty\FBXImporter\Lib\$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(ProjectDir);$(SolutionDir)ThirdParty\FBXImporter\Include\;$(SolutionDir)\;$(IncludePath);$(SolutionDir)ThirdParty\CU\;$(SolutionDir)Tools\Assimp\include</IncludePath>
+    <IncludePath>$(ProjectDir);$(SolutionDir)ThirdParty\FBXImporter\Include\;$(SolutionDir)\;$(IncludePath);$(SolutionDir)ThirdParty\CU\;$(SolutionDir)Tools\Assimp\include;$(SolutionDir)Tools\ThirdParty\DirectXTK\</IncludePath>
     <LibraryPath>$(SolutionDir)ThirdParty\FBXImporter\Lib\$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

@@ -1,11 +1,11 @@
-#pragma once
-
+#pragma once 
 #define AsUINT(v) static_cast<unsigned>(v) 
 
 #include <Tools/Utilities/DataStructures/Queue.hpp> 
 #include <Tools/Utilities/System/ThreadPool.hpp>
+#include <Tools/Utilities/System/SingletonTemplate.h>
 #include <unordered_map>
-
+#include "AssetManagerUtills.hpp"
 
 struct Frame;
 struct Element;
@@ -32,9 +32,9 @@ struct LoadTask
 
 class Library
 {
+	friend class AssetManager;
 public:
 	Library() = default;
-
 	template<class T>
 	std::shared_ptr<T> Add(const std::pair<std::filesystem::path, std::shared_ptr<T>>& pair);
 
@@ -47,12 +47,12 @@ private:
 	std::unordered_map <std::filesystem::path, std::shared_ptr<AssetBase>> content;
 };
 
-class AssetManager
+class AssetManager : public Singleton<AssetManager>
 {
+	friend class Singleton<AssetManager>;
 public:
 	AssetManager();
-	~AssetManager() = default;
-	static AssetManager& GetInstance();
+	~AssetManager() = default; 
 
 	template<class T>
 	void LoadAsset(const std::filesystem::path& aFilePath);
@@ -67,28 +67,36 @@ public:
 	void ForceLoadAsset(const std::filesystem::path& aFilePath, std::shared_ptr<T>& outAsset);
 	template<class T>
 	void ForceLoadAsset(const std::filesystem::path& aFilePath, bool useExact, std::shared_ptr<T>& outAsset);
+	 
+	void SubscribeToChanges( const std::filesystem::path& aFilePath,const SY::UUID gameobjectID); 
 
-	void RecusiveNameSave();
 	bool AdaptPath(std::filesystem::path& path);
 
-	const std::filesystem::path AssetPath = L"../../Content/";
+	const std::filesystem::path AssetPath = L"../../Content/"; 
 private:
-	void ThreadedLoading();
-	std::mutex lockForSet;
+
+	//thread 
+	void ThreadedLoading(); 
 	Queue<std::shared_ptr<AssetBase>> myAssetQueue;
 
 	//NameToPath
+	void RecursiveNameSave();
 	std::unordered_map<std::filesystem::path,std::filesystem::path> nameToPathMap;
+	//AssetCallbackMaster assetCallbackMaster;
 
+	//Libraries
 	template<class T>
 	std::shared_ptr<Library> GetLibraryOfType();
 	std::unordered_map<const std::type_info*, std::shared_ptr<Library>> myLibraries;
 };
+ 
+
 template<class T>
 void AssetManager::ForceLoadAsset(const std::filesystem::path& aFilePath, std::shared_ptr<T>& outAsset)
 {
 	ForceLoadAsset<T>(aFilePath, false, outAsset);
 }
+
 template<class T>
 void AssetManager::ForceLoadAsset(const std::filesystem::path& aFilePath, bool useExact, std::shared_ptr<T>& outAsset)
 {
@@ -121,6 +129,16 @@ void AssetManager::ForceLoadAsset(const std::filesystem::path& aFilePath, bool u
 	outAsset = ptr;
 }
 
+//Runs function F, get asset send function f asset 
+inline void AssetManager::SubscribeToChanges(const std::filesystem::path& aFilePath,const SY::UUID gameobjectID)
+{ 
+	aFilePath; gameobjectID;
+	//AssetCallbackMaster::dataStruct arg; 
+	//arg.subscribed = gameobjectID;
+	//
+	//assetCallbackMaster.callbacks.try_emplace(aFilePath,arg);
+}
+
 template<class T>
 void AssetManager::LoadAsset(const std::filesystem::path& aFilePath)
 {
@@ -136,7 +154,6 @@ void AssetManager::LoadAsset(const std::filesystem::path& aFilePath, std::shared
 {
 	LoadAsset<T>(aFilePath, false, outAsset);
 }
-
 
 /// <summary>
 /// Holds the current thread until the asset is loaded

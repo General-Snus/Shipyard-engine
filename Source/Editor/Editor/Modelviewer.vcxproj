@@ -143,6 +143,7 @@
       <AdditionalDependencies>d3d11.lib;dxguid.lib;GameLauncher.lib;TGAFbx.lib;GraphicsEngine.lib;AssetManager.lib;Utilities.lib;Logging.lib;ImGUI.lib;OptickCore.lib;assimp-vc143-mt.lib;dbghelp.lib;dbgeng.lib;dpp.lib;DirectXTK.lib</AdditionalDependencies>
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
     <FxCompile>
       <ObjectFileOutput>$(SolutionDir)Bin\$(Configuration)\Content\Shaders\%(Filename).cso</ObjectFileOutput>
@@ -176,6 +177,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>d3d11.lib;dxguid.lib;GameLauncher.lib;TGAFbx.lib;GraphicsEngine.lib;AssetManager.lib;Utilities.lib;Logging.lib;ImGUI.lib;OptickCore.lib;assimp-vc143-mt.lib;dbghelp.lib;dbgeng.lib;dpp.lib;DirectXTK.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
     <FxCompile>
       <ObjectFileOutput>$(SolutionDir)Bin\$(Configuration)\Content\Shaders\%(Filename).cso</ObjectFileOutput>

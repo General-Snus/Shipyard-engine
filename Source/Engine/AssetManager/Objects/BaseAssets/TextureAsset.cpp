@@ -18,6 +18,41 @@ TextureHolder::TextureHolder(const std::filesystem::path& aFilePath,eTextureType
 	}*/
 }
 
+bool TextureHolder::LoadPngTexture(Texture* outTexture,const std::wstring& aFileName)
+{
+	outTexture->myName = aFileName;
+	outTexture->myBindFlags = D3D11_BIND_SHADER_RESOURCE;
+	outTexture->myUsageFlags = D3D11_USAGE_DEFAULT;
+	outTexture->myAccessFlags = 0;
+
+	auto res = DirectX::CreateWICTextureFromFile(
+		RHI::Device.Get(),
+		aFileName.c_str(),
+		outTexture->myTexture.GetAddressOf(),
+		outTexture->mySRV.GetAddressOf());
+	if(res < 0)
+	{
+		return false;
+	}
+
+	res = RHI::Device.Get()->CreateShaderResourceView(outTexture->myTexture.Get(),nullptr,outTexture->mySRV.GetAddressOf());
+	if(res < 0)
+	{
+		return false;
+	}
+
+	std::wstring textureName = aFileName;
+	if(const size_t pos = textureName.find_last_of(L'\\'); pos != std::wstring::npos)
+	{
+		textureName = textureName.substr(pos + 1);
+	}
+
+	textureName = textureName.substr(0,textureName.size() - 4);
+	outTexture->myName = textureName;
+
+	return true;
+}
+
 void TextureHolder::Init()
 {
 	int position = (int)AssetPath.filename().string().find_last_of("_");
@@ -51,7 +86,7 @@ void TextureHolder::Init()
 	{
 		if(!std::filesystem::exists(AssetPath))
 		{
-			if(!AssetManager::GetInstance().AdaptPath(AssetPath))
+			if(!AssetManager::Get().AdaptPath(AssetPath))
 			{
 				if(GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
 				{
@@ -64,11 +99,7 @@ void TextureHolder::Init()
 			}
 		}
 
-		if(!DirectX::CreateWICTextureFromFile(
-			RHI::Device.Get(),
-			AssetPath.wstring().c_str(),
-			RawTexture->myTexture.GetAddressOf(),
-			RawTexture->mySRV.GetAddressOf()))
+		if(!LoadPngTexture(RawTexture.get(),AssetPath))
 		{
 			if(GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
 			{
@@ -80,6 +111,14 @@ void TextureHolder::Init()
 			isLoadedComplete = false;
 			return;
 		}
+		if(!RawTexture->mySRV)
+		{
+			std::cout << "Error: Default texture was not found" << " \n";
+			isLoadedComplete = false;
+			return;
+		}
+		isLoadedComplete = true;
+		return;
 	}
 	else if(AssetPath.extension() == ".dds")
 	{
@@ -106,9 +145,8 @@ void TextureHolder::Init()
 		}
 		std::cout << "Error: Default texture was not found" << " \n";
 		isLoadedComplete = false;
-		return;
+		return; 
 	}
-	isLoadedComplete = true;
 }
 
 TextureHolder::TextureHolder(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)

@@ -32,19 +32,21 @@ std::vector<std::string> GetTextureNames(const TGA::FBX::Material& material)
 }
 
 Mesh::Mesh(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)
-{
+{ 
+ 
+}
 
+const std::unordered_map<unsigned int,std::shared_ptr<Material>>& Mesh::GetMaterialList()
+{
+	return materials;
 }
 
 void Mesh::Init()
 {
-
 	if(!std::filesystem::exists(AssetPath))
 	{
 		assert(false && "Mesh file does not exist");
 	}
-
-
 #if UseTGAImporter == 1
 
 	TGA::FBX::Importer::InitImporter();
@@ -208,15 +210,13 @@ void Mesh::Init()
 		AMLogger.LogException(failedMeshLoad,2);
 		return;
 	}
-	Editor::GetEditor().ExpandWorldBounds(boxSphereBounds); // TODO Make a scene contain the boxSphereBounds!!
-
-
+	Editor::GetEditor().ExpandWorldBounds(boxSphereBounds); // TODO Make a scene contain the boxSphereBounds!! 
 
 	for(size_t i = 0; i < scene->mNumMeshes; i++)
 	{
 		processMesh(scene->mMeshes[i],scene);
 	}
-	//FillMatPath
+	//FillMatPath   
 	for(auto& [key,matPath] : idToMaterial)
 	{
 		std::filesystem::path texturePath;
@@ -226,7 +226,7 @@ void Mesh::Init()
 		material->Get(AI_MATKEY_COLOR_DIFFUSE,color);
 
 		Material::DataMaterial dataMat;
-		dataMat.materialData.Data.albedoColor = color;
+		//dataMat.materialData.Data.albedoColor = color;
 		dataMat.textures.resize(4);
 
 
@@ -256,10 +256,9 @@ void Mesh::Init()
 			textureLoaded++;
 		}
 
-		if(material->GetTextureCount(aiTextureType_DIFFUSE))
+		if(material->GetTextureCount(aiTextureType_DIFFUSE) && !str.length)
 		{
 			material->GetTexture(aiTextureType_DIFFUSE,0,&str);
-			material->GetTexture(aiTextureType_BASE_COLOR,0,&str);
 			holder.first = str.C_Str();
 			dataMat.textures[0] = holder;
 			textureLoaded++;
@@ -268,7 +267,6 @@ void Mesh::Init()
 		if(material->GetTextureCount(aiTextureType_NORMALS))
 		{
 			material->GetTexture(aiTextureType_NORMALS,0,&str);
-			material->GetTexture(aiTextureType_BASE_COLOR,0,&str);
 			holder.first = str.C_Str();
 			dataMat.textures[1] = holder;
 			textureLoaded++;
@@ -277,7 +275,6 @@ void Mesh::Init()
 		if(material->GetTextureCount(aiTextureType_DIFFUSE_ROUGHNESS))
 		{
 			material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS,0,&str);
-			material->GetTexture(aiTextureType_BASE_COLOR,0,&str);
 			holder.first = str.C_Str();
 			dataMat.textures[2] = holder;
 			textureLoaded++;
@@ -286,7 +283,6 @@ void Mesh::Init()
 		if(material->GetTextureCount(aiTextureType_AMBIENT_OCCLUSION))
 		{
 			material->GetTexture(aiTextureType_AMBIENT_OCCLUSION,0,&str);
-			material->GetTexture(aiTextureType_BASE_COLOR,0,&str);
 			holder.first = str.C_Str();
 			dataMat.textures[2] = holder;
 			textureLoaded++;
@@ -295,7 +291,6 @@ void Mesh::Init()
 		if(material->GetTextureCount(aiTextureType_METALNESS))
 		{
 			material->GetTexture(aiTextureType_METALNESS,0,&str);
-			material->GetTexture(aiTextureType_BASE_COLOR,0,&str);
 			holder.first = str.C_Str();
 			dataMat.textures[2] = holder;
 			textureLoaded++;
@@ -304,7 +299,6 @@ void Mesh::Init()
 		if(material->GetTextureCount(aiTextureType_EMISSIVE))
 		{
 			material->GetTexture(aiTextureType_EMISSIVE,0,&str);
-			material->GetTexture(aiTextureType_BASE_COLOR,0,&str);
 			holder.first = str.C_Str();
 			dataMat.textures[3] = holder;
 			textureLoaded++;
@@ -312,15 +306,12 @@ void Mesh::Init()
 
 		if(!textureLoaded)
 		{
+			materials[key] = GraphicsEngine::Get().GetDefaultMaterial();
 			continue;
-		}
-
-
+		} 
 		Material::CreateJson(dataMat,matPath);
-		AssetManager::GetInstance().LoadAsset<Material>(matPath);
-
-	}
-
+		AssetManager::Get().LoadAsset<Material>(matPath,materials[key]);
+	} 
 
 	MaxBox = Vector3f(scene->mMeshes[0]->mAABB.mMax.x,scene->mMeshes[0]->mAABB.mMax.y,scene->mMeshes[0]->mAABB.mMax.z);
 	MinBox = Vector3f(scene->mMeshes[0]->mAABB.mMin.x,scene->mMeshes[0]->mAABB.mMin.y,scene->mMeshes[0]->mAABB.mMin.z);
@@ -418,7 +409,6 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 				mesh->mNormals[i].z
 			);
 		}
-
 
 		auto tangent = Vector3f(
 			mesh->mTangents[i].x,

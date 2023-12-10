@@ -159,6 +159,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AssetManagerUtills.hpp" />
     <ClInclude Include="ComponentSystem\Components\ActorSystem\cActor.h" />
     <ClInclude Include="ComponentSystem\Components\Physics\cPhysics_Kinematic.h" />
     <ClInclude Include="ComponentSystem\Components\Physics\cPhysics_Newtonian.h" />
@@ -202,6 +203,7 @@
     <ClInclude Include="Objects\AI\AgentSystem\SteeringBehaviour.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AssetManagerUtills.cpp" />
     <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\cActor.cpp" />
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysics_Kinematic.cpp" />
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysics_Newtonian.cpp" />

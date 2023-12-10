@@ -36,12 +36,26 @@ void InstanceRenderer::Execute(bool isShadowPass)
 			}
 			for(const auto& aElement : i->myMesh->Elements)
 			{
-				if(!isShadowPass && i->myMaterials.size())
+				if(!isShadowPass)
 				{
-					if(aElement.MaterialIndex < i->myMaterials.size())
+					if(!i->overrideMaterial.empty())
 					{
-						i->myMaterials[aElement.MaterialIndex]->Update();
+						for(const auto& mat : i->overrideMaterial)
+						{
+							mat->Update();
+						}
 					}
+					else
+					{
+						if(auto materialPtr = i->myMesh->GetMaterialList().at(aElement.MaterialIndex))
+						{
+							 i->myMesh->GetMaterialList().at(aElement.MaterialIndex)->Update();
+						}
+						else
+						{
+							GraphicsEngine::Get().defaultMaterial->Update();
+						}
+					} 
 				}
 
 				const std::vector<ComPtr<ID3D11Buffer>> vxBuffers

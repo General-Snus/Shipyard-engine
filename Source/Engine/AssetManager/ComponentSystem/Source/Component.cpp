@@ -1,6 +1,7 @@
 #include "AssetManager.pch.h"
 #include "../Component.h"
 #include <cmath>
+ 
 
 void Component::Abandon()
 {

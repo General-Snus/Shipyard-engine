@@ -9,7 +9,7 @@ Skybox::Skybox(const unsigned int anOwnerId) : Component(anOwnerId)
 
 Skybox::Skybox(const unsigned int anOwnerId,const std::filesystem::path aPath) : Component(anOwnerId)
 {
-	AssetManager::GetInstance().LoadAsset<TextureHolder>(aPath,myCubeMap);
+	AssetManager::Get().LoadAsset<TextureHolder>(aPath,myCubeMap);
 	myCubeMap->SetTextureType(eTextureType::CubeMap);
 }
 

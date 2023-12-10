@@ -7,7 +7,7 @@
 #include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
 
 bool Material::CreateJson(const DataMaterial& data,const std::filesystem::path& writePath)
-{ 
+{
 	nlohmann::json json = nlohmann::json::basic_json();
 	{
 		nlohmann::json& js = json["MaterialData"];
@@ -33,11 +33,11 @@ bool Material::CreateJson(const DataMaterial& data,const std::filesystem::path& 
 			arr["TextureType"] = i;
 			i++;
 
-
 			json["Textures"].push_back(arr);
 		}
-	} 
-	std::ofstream stream(writePath.string());
+	}
+
+	std::ofstream stream(AssetManager::Get().AssetPath / writePath.string());
 	stream << std::setw(4) << json;
 	stream.close();
 	return true;
@@ -95,54 +95,42 @@ void Material::Init()
 			}
 			catch(const std::exception& e)
 			{
-				std::cout << "Unsuccessfull loading of material data file at path: " << AssetPath << " " << e.what() << "\n";
+				std::cout << "Unsuccessfull loading of material data file at path: " << AssetPath << " " << e.what() << "\n"; 
 			}
 		}
 		{
 			try
 			{
 				nlohmann::json& js = json["Textures"];
-				for(auto& i : js)
+				for(const auto& i : js)
 				{
 					std::shared_ptr<TextureHolder> texture;
 					const std::filesystem::path path = i["TexturePath"];
-					AssetManager::GetInstance().LoadAsset<TextureHolder>(path,texture);
-
+					AssetManager::Get().LoadAsset<TextureHolder>(path,texture);
 					data.textures[(int)i["TextureType"]].first = path;
 					data.textures[(int)i["TextureType"]].second = texture;
 				}
 			}
 			catch(const std::exception&)
 			{
-				std::cout << "Unsuccessfull loading of material texture files at path: " << AssetPath << "\n";
+				std::cout << "Unsuccessfull loading of material texture files at path: " << AssetPath << "\n"; 
 			}
 		}
+	}
+	else
+	{
+		isLoadedComplete = false;
 	}
 
 	data.materialData.Initialize();
 	isLoadedComplete = true;
 }
-//void Material::AddTexture(const std::filesystem::path& aFilePath)
-//{
-//	std::shared_ptr<TextureHolder> text = AssetManager::GetInstance().LoadAsset<TextureHolder>(aFilePath);
-//	if(!text)
-//	{
-//		return;
-//	}
-//	textures[(int)text->textureType] = text;
-//}
-//void Material::AddTexture(const std::shared_ptr<TextureHolder> text)
-//{
-//	if(!text)
-//	{
-//		return;
-//	}
-//	textures[(int)text->textureType] = text;
-//}
+
 MaterialData& Material::GetMaterialData()
 {
 	return data.materialData.Data;
 }
+
 void Material::Update()
 {
 	if(!isLoadedComplete)
@@ -153,17 +141,8 @@ void Material::Update()
 		//If default material is not loaded with forced or if it erronous we will end with a overflow here, guess it guarantees defaults works atleast 
 	}
 
-	//ComPtr<ID3D11VertexShader> convertedVS;
-	//vertexShader.lock()->GetShader().As(&convertedVS);
-	//RHI::SetVertexShader(convertedVS); 
-
-	//ComPtr<ID3D11PixelShader> convertedPS;
-	//pixelShader.lock()->GetShader().As(&convertedPS);
-	//RHI::SetPixelShader(convertedPS);
-
 	RHI::UpdateConstantBufferData(data.materialData);
 	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_DefaultMaterialBuffer,data.materialData);
-
 	SetAsResources();
 }
 
