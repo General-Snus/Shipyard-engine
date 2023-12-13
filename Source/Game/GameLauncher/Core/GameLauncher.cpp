@@ -156,10 +156,10 @@ void GameLauncher::Start()
 void GameLauncher::Update(float delta)
 {
 	delta;
-	OPTICK_EVENT()
+	OPTICK_EVENT();
 
-		//Movement1
-		AIEventManager::Instance().Update();
+	//Movement1
+	AIEventManager::Instance().Update();
 	if(InputHandler::GetInstance().IsKeyPressed((int)Keys::K))
 	{
 		GraphicsEngine::Get().GetSettings().DebugRenderer_Active = !GraphicsEngine::Get().GetSettings().DebugRenderer_Active;

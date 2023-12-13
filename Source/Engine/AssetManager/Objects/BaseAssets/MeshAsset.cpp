@@ -32,8 +32,8 @@ std::vector<std::string> GetTextureNames(const TGA::FBX::Material& material)
 }
 
 Mesh::Mesh(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)
-{ 
- 
+{
+
 }
 
 const std::unordered_map<unsigned int,std::shared_ptr<Material>>& Mesh::GetMaterialList()
@@ -308,10 +308,10 @@ void Mesh::Init()
 		{
 			materials[key] = GraphicsEngine::Get().GetDefaultMaterial();
 			continue;
-		} 
+		}
 		Material::CreateJson(dataMat,matPath);
 		AssetManager::Get().LoadAsset<Material>(matPath,materials[key]);
-	} 
+	}
 
 	MaxBox = Vector3f(scene->mMeshes[0]->mAABB.mMax.x,scene->mMeshes[0]->mAABB.mMax.y,scene->mMeshes[0]->mAABB.mMax.z);
 	MinBox = Vector3f(scene->mMeshes[0]->mAABB.mMin.x,scene->mMeshes[0]->mAABB.mMin.y,scene->mMeshes[0]->mAABB.mMin.z);
@@ -322,25 +322,28 @@ void Mesh::Init()
 
 	isLoadedComplete = true;
 
+	bufferSize = 0;
 	vertexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(Matrix) * myInstances.size());
 	vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	vertexBufferDesc.MiscFlags = 0;
-	vertexBufferDesc.StructureByteStride = 0;
+	vertexBufferDesc.StructureByteStride = 0; 
 
-
-	HRESULT result;
-	result = RHI::Device->CreateBuffer(
-		&vertexBufferDesc,
-		nullptr,
-		myInstanceBuffer.GetAddressOf()
-	);
-	bufferSize = 0;
-	if(FAILED(result))
+	if(myInstances.size())
 	{
-		AMLogger.Log("Failed to create Instance buffer");
-		return;
+		HRESULT result;
+		result = RHI::Device->CreateBuffer(
+			&vertexBufferDesc,
+			nullptr,
+			myInstanceBuffer.GetAddressOf()
+		);	
+		bufferSize = static_cast<int>(myInstances.size());
+		if(FAILED(result))
+		{
+			AMLogger.Log("Failed to create Instance buffer");
+			return;
+		}
 	}
 
 	return;
@@ -479,9 +482,8 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 void Mesh::ResizeBuffer()
 {
 	D3D11_SUBRESOURCE_DATA vertexSubResourceData{};
-	vertexSubResourceData.pSysMem = myInstances.data();
-	vertexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(Matrix) * myInstances.size());
-
+	vertexSubResourceData.pSysMem = myInstances.data(); 
+	vertexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(Matrix) * myInstances.size());  
 	HRESULT result;
 	result = RHI::Device->CreateBuffer(
 		&vertexBufferDesc,

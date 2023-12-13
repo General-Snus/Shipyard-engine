@@ -52,7 +52,7 @@
 
 #include <Engine/GraphicsEngine/InterOp/DDSTextureLoader11.h>
 #include <Tools/Optick/src/optick.h>
- 
+
 
 bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 {
@@ -76,20 +76,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 		{
 			GELogger.Err("Failed to initialize the RHI!");
 			return false;
-		}
-//#if (_WIN32_WINNT >= 0x0A00 /*_WIN32_WINNT_WIN10*/)
-//		Microsoft::WRL::Wrappers::RoInitializeWrapper initialize(RO_INIT_MULTITHREADED);
-//		if(FAILED(initialize))
-//		{
-//			GELogger.Err("Failed to initialize the WRL!");
-//			return false;
-//		}
-//#else
-//		HRESULT hr = CoInitializeEx(nullptr,COINIT_MULTITHREADED);
-//		if(FAILED(hr))
-//			// error
-//#endif
-
+		} 
 
 		SetupDefaultVariables();
 		SetupBRDF();
@@ -219,12 +206,19 @@ void GraphicsEngine::SetupDefaultVariables()
 	);
 
 	defaultTexture = std::make_shared<TextureHolder>("",eTextureType::ColorMap);
-	RHI::LoadTextureFromMemory(
+
+	if(!RHI::LoadTexture(
 		defaultTexture->GetRawTexture().get(),
-		L"Default Color texture",
-		BuiltIn_Default_C_ByteCode,
-		sizeof(BuiltIn_Default_C_ByteCode)
-	);
+		AssetManager::Get().AssetPath / "Textures/Default/DefaultTile.dds"))
+	{
+		RHI::LoadTextureFromMemory(
+			defaultTexture->GetRawTexture().get(),
+			L"Default Color texture",
+			BuiltIn_Default_C_ByteCode,
+			sizeof(BuiltIn_Default_C_ByteCode)
+		);
+	}
+
 
 	defaultNormalTexture = std::make_shared<TextureHolder>("",eTextureType::NormalMap);
 	RHI::LoadTextureFromMemory(
@@ -550,6 +544,7 @@ void GraphicsEngine::UpdateSettings()
 	myGraphicSettingsBuffer.Data.GSB_AO_bias = 0.5f;
 	myGraphicSettingsBuffer.Data.GSB_AO_radius = 0.002f;
 	myGraphicSettingsBuffer.Data.GSB_AO_offset = 0.707f;
+	RHI::SetConstantBuffer(PIPELINE_STAGE_PIXEL_SHADER,REG_GraphicSettingsBuffer,myGraphicSettingsBuffer);
 	RHI::UpdateConstantBufferData(myGraphicSettingsBuffer);
 }
 

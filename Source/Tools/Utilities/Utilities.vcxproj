@@ -172,6 +172,9 @@
     <ClInclude Include="DataStructures\Sort.hpp" />
     <ClInclude Include="DataStructures\Stack.hpp" />
     <ClInclude Include="DataStructures\VectorOnStack.hpp" />
+    <ClInclude Include="Files\Images\stb_image.h" />
+    <ClInclude Include="Files\Images\stb_image_resize2.h" />
+    <ClInclude Include="Files\Images\stb_image_write.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Game\Camera.h" />
     <ClInclude Include="Game\SolveSudoku.hpp" />

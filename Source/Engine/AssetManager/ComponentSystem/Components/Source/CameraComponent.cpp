@@ -123,11 +123,12 @@ void cCamera::Update()
 	{
 		myTransform.Rotate({0,rotationSpeed * aTimeDelta});
 	}
+#ifdef Flashlight
 	if(InputHandler::GetInstance().IsKeyPressed((int)Keys::F))
 	{
 		GetComponent<cLight>().BindDirectionToTransform(!GetComponent<cLight>().GetIsBound());
 	}
-
+#endif
 	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::Q))
 	{
 		myTransform.Rotate({0,-rotationSpeed * aTimeDelta});

@@ -129,13 +129,13 @@
     <ClInclude Include="System\SingletonTemplate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\MoodyCamel\Source\concurrentqueue.h">
+    <ClInclude Include="Files\Images\stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\MoodyCamel\blockingconcurrentqueue.h">
+    <ClInclude Include="Files\Images\stb_image_resize2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\MoodyCamel\concurrentqueue.h">
+    <ClInclude Include="Files\Images\stb_image_write.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -147,12 +147,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Game\Timer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="System\MoodyCamel\Source\blockingconcurrentqueue.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="System\MoodyCamel\Source\concurrentqueue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

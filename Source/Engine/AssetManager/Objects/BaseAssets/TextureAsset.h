@@ -23,7 +23,7 @@ public:
 	eTextureType GetTextureType() const { return textureType; }
 	void SetTextureType(eTextureType aTextureType) { textureType = aTextureType; }
 private:
-	bool LoadPngTexture(Texture* outTexture,const std::wstring& aFileName);
+	bool LoadPngTexture(Texture* outTexture,const std::filesystem::path& aFileName);
 	eTextureType textureType;
 	std::shared_ptr<Texture> RawTexture;
 };
