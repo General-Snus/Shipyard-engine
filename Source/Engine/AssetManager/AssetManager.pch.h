@@ -74,6 +74,7 @@
 #include "AssetManager.h"
 #include "ComponentSystem/UUID.h"
 
+#include <Editor/Editor/Defines.h>
 static inline Logger AMLogger;
 
 #define UseTGAImporter 0

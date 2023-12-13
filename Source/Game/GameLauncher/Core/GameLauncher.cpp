@@ -80,6 +80,8 @@ void GameLauncher::Start()
 		transform.SetScale(Vector3f(50.0f,1.0f,50.0f));
 		transform.SetGizmo(false);
 	}
+
+#if WorkingOnPngLoading
 	{
 		GameObject sponza = gom.CreateGameObject();
 		sponza.AddComponent<cMeshRenderer>("Models/Sponza.fbx");
@@ -88,6 +90,8 @@ void GameLauncher::Start()
 		transform.SetPosition(50,0,0);
 		transform.SetGizmo(false);
 	}
+#endif
+
 #pragma endregion
 
 	//Movement1  

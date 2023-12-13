@@ -53,13 +53,16 @@ public:
 	void SetScale(float scale);
 	void SetScale(Vector2f scale);
 	void SetScale(Vector3f scale);
-
+	//Meaning last frame
+	bool GetIsRecentlyUpdated() const;
 	bool GetIsDirty() const;
 
 	~Transform() = default;
 	void SetGizmo(bool enabled);
 	void InitPrimitive();
 private:
+	
+	bool IsRecentlyUpdated;
 	bool isDirty;
 	bool isDebugGizmoEnabled;
 	void MakeSaneRotation();

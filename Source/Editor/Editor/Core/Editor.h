@@ -5,7 +5,7 @@
 #include <Tools/Logging/Logging.h> 
 #include <Tools/Utilities/LinearAlgebra/Sphere.hpp>
 #include <Game/GameLauncher/Core/GameLauncher.h>
-
+#include <Editor/Editor/Defines.h>
 class GameLauncher;
 
 class Editor
@@ -26,8 +26,7 @@ private:
 	void Render();
 
 #pragma region IMGUI
-	void TopBar();
-
+	void TopBar(); 
 #pragma endregion
 
 
@@ -64,6 +63,16 @@ public:
 	const bool GetIsGUIActive() const { return IsGUIActive;	};
 	void SetIsGUIActive(bool set) { IsGUIActive = set; };
 private:
+#if WorkingOnMultiThread
+	std::thread myLogicThread;
+	std::mutex myMutex;
+	std::condition_variable myThreadSync;
+	std::atomic_bool myIsUpdating = false;
+	std::atomic_bool myIsRendering = false;
+	std::atomic_bool myIsRunning = false;
+#endif
+
+
 	Sphere<float> myWorldBounds;
 	GameLauncher myGameLauncher;
 	bool IsGUIActive = true;

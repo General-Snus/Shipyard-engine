@@ -23,6 +23,7 @@ void InstanceRenderer::Execute(bool isShadowPass)
 	{ 
 		if(i->myMesh->isLoadedComplete)
 		{
+			OPTICK_EVENT("Mesh");
 			ObjectBuffer& objectBuffer = GraphicsEngine::Get().myObjectBuffer; 
 			objectBuffer.Data.myTransform = Matrix();
 			objectBuffer.Data.MaxExtents = i->myMesh->MaxBox;
@@ -76,7 +77,7 @@ void InstanceRenderer::Execute(bool isShadowPass)
 					aElement.IndexBuffer,
 					vfBufferStrides,
 					Vertex::InputLayout);
-
+				OPTICK_EVENT("Element");
 				RHI::DrawIndexedInstanced(aElement.NumIndices,static_cast<unsigned>(i->myMesh->myInstances.size()));
 			}
 		}

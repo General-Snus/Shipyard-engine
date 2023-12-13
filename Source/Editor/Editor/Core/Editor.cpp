@@ -49,8 +49,7 @@ bool Editor::Initialize(HWND aHandle)
 	//io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch 
 	// Setup Platform/Renderer backends
 	ImGui_ImplWin32_Init(aHandle);
-	ImGui_ImplDX11_Init(RHI::Device.Get(),RHI::Context.Get());
-
+	ImGui_ImplDX11_Init(RHI::Device.Get(),RHI::Context.Get()); 
 
 	myGameLauncher.Init();
 	myGameLauncher.Start();

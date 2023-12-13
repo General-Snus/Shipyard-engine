@@ -21,8 +21,10 @@ Transform::Transform(const unsigned int anOwnerId,const Matrix& aMatrix) : Compo
 void Transform::Update()
 {
 	OPTICK_EVENT();
+	IsRecentlyUpdated = false;
 	if(isDirty)
 	{
+		IsRecentlyUpdated = true;
 		MakeSaneRotation();
 		myTransform =
 			Matrix::CreateScaleMatrix(myScale) *
@@ -159,6 +161,11 @@ void Transform::SetScale(Vector3f scale)
 	myScale = scale;
 	isDirty = true;
 	//ApplyTransformation(Matrix::CreateScaleMatrix(scale));
+}
+
+bool Transform::GetIsRecentlyUpdated() const
+{
+	return IsRecentlyUpdated;
 }
 
 bool Transform::GetIsDirty() const

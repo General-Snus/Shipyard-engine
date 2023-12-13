@@ -44,8 +44,19 @@ public:
 		return false;
 	}
 
+	FORCEINLINE bool IsStaticMesh()
+	{
+		return isStatic;
+	}
+
+	FORCEINLINE void SetIsStaticMesh(bool aBool)
+	{
+		isStatic = aBool;
+	}
+
 protected:
 	bool isInstanced = true;
+	bool isStatic = true;
 	std::shared_ptr<RenderData> myRenderData; 
 };
 

@@ -133,6 +133,7 @@ MaterialData& Material::GetMaterialData()
 
 void Material::Update()
 {
+	OPTICK_EVENT();
 	if(!isLoadedComplete)
 	{
 		GraphicsEngine::Get().GetDefaultMaterial()->Update();

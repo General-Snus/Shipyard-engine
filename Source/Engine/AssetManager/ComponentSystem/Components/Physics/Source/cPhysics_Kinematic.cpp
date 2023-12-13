@@ -48,6 +48,7 @@ void cPhysics_Kinematic::InitPrimitive()
 
 void cPhysics_Kinematic::Update()
 {
+	OPTICK_EVENT();
 	float delta = Timer::GetInstance().GetDeltaTime();
 	if(auto* transform = TryGetComponent<Transform>())
 	{

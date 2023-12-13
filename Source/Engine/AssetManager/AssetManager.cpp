@@ -17,6 +17,7 @@ AssetManager::AssetManager()
  
 void AssetManager::RecursiveNameSave()
 {
+	OPTICK_EVENT();
 	for(const auto& file : std::filesystem::recursive_directory_iterator(AssetPath))
 	{
 		if(file.path().has_extension())
@@ -30,6 +31,7 @@ void AssetManager::RecursiveNameSave()
 }
 bool AssetManager::AdaptPath(std::filesystem::path& path)
 {
+	OPTICK_EVENT();
 	if(nameToPathMap.contains(path))
 	{
 		path = nameToPathMap.at(path);
@@ -40,6 +42,7 @@ bool AssetManager::AdaptPath(std::filesystem::path& path)
  
 void AssetManager::ThreadedLoading()
 {
+	OPTICK_EVENT();
 	if(myAssetQueue.GetSize())
 	{
 		const double timeStart = Timer::GetInstance().GetTotalTime(); 

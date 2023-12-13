@@ -161,6 +161,7 @@ void AssetManager::LoadAsset(const std::filesystem::path& aFilePath, std::shared
 template<class T>
 void AssetManager::LoadAsset(const std::filesystem::path& aFilePath, bool useExact, std::shared_ptr<T>& outAsset)
 {
+	OPTICK_EVENT();
 	const std::type_info* typeInfo = &typeid(T);
 	std::shared_ptr<Library> library = GetLibraryOfType<T>();
 

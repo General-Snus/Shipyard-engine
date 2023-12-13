@@ -13,10 +13,10 @@ AIController::AIController(MultipleTargets_PollingStation* aPollingStation,Multi
 	}
 
 }
-
-#pragma optimize("",off)
+ 
 bool AIController::Update(GameObject input)
 {
+	OPTICK_EVENT();
 	auto& physicsComponent = input.GetComponent<cPhysics_Kinematic>();
 	auto& transform = input.GetComponent<Transform>(); // You can use Get directly if you are sure it will exist, its faster and force safe code
 	SteeringBehaviour::SeparationSettings settings;
@@ -51,8 +51,7 @@ bool AIController::Update(GameObject input)
 
 
 	return true;
-}
-#pragma optimize("",on)
+} 
 
 void AIController::Recieve(const AIEvent& aEvent)
 {

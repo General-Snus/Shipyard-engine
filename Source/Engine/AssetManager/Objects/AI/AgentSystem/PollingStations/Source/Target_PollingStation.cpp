@@ -22,6 +22,7 @@ MultipleTargets_PollingStation::MultipleTargets_PollingStation(const GameObject 
 
 std::vector<MultipleTargets_PollingStation::DataTuple> MultipleTargets_PollingStation::GetTargetPosition()
 {
+	OPTICK_EVENT();
 	std::vector<DataTuple> returnVector;
 	returnVector.reserve(targets.size());
 
@@ -34,6 +35,7 @@ std::vector<MultipleTargets_PollingStation::DataTuple> MultipleTargets_PollingSt
 
 Vector3f MultipleTargets_PollingStation::GetClosestTargetPosition(Vector3f myPosition)
 {
+	OPTICK_EVENT();
 	float closestDistance = FLT_MAX;
 	Vector3f closestPosition = myPosition;
 
@@ -51,6 +53,7 @@ Vector3f MultipleTargets_PollingStation::GetClosestTargetPosition(Vector3f myPos
 
 Vector3f MultipleTargets_PollingStation::GetAverageVelocity()
 {
+	OPTICK_EVENT();
 	auto totalVelocity = Vector3f();
 	for(auto& g : targets)
 	{ 
@@ -63,6 +66,7 @@ Vector3f MultipleTargets_PollingStation::GetAverageVelocity()
 
 Vector3f MultipleTargets_PollingStation::GetAverageVelocityWithinCircle(Vector3f position,float radius)
 {
+	OPTICK_EVENT();
 	if(targets.empty())
 	{
 		return Vector3f();
@@ -83,6 +87,7 @@ Vector3f MultipleTargets_PollingStation::GetAverageVelocityWithinCircle(Vector3f
 
 std::vector<MultipleTargets_PollingStation::DataTuple> MultipleTargets_PollingStation::GetTargetsWithinCircle(Vector3f position,float radius)
 {
+	OPTICK_EVENT();
 	std::vector<DataTuple> returnVector;
 	returnVector.reserve(targets.size()); //Better to over reserve?
 
@@ -101,6 +106,7 @@ std::vector<MultipleTargets_PollingStation::DataTuple> MultipleTargets_PollingSt
 
 Vector3f MultipleTargets_PollingStation::GetCoMWithinCircle(Vector3f position,float radius,int& EntitiesInCircle)
 {
+	OPTICK_EVENT();
 	std::vector<DataTuple> returnVector = GetTargetsWithinCircle(position,radius);
 	EntitiesInCircle = (int)returnVector.size();
 
@@ -121,6 +127,7 @@ Vector3f MultipleTargets_PollingStation::GetCoMWithinCircle(Vector3f position,fl
 
 Vector3f MultipleTargets_PollingStation::GetCoM()
 {
+	OPTICK_EVENT();
 	Vector3f totalPosition = Vector3f();
 	for(auto& g : targets)
 	{
@@ -131,5 +138,6 @@ Vector3f MultipleTargets_PollingStation::GetCoM()
 
 void MultipleTargets_PollingStation::AddToTargetList(const GameObject aTarget)
 {
+	OPTICK_EVENT();
 	targets.push_back(aTarget);
 }

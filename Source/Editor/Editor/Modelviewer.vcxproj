@@ -195,6 +195,7 @@
   <ItemGroup>
     <ClInclude Include="Core\Editor.h" />
     <ClInclude Include="Core\ApplicationState.h" />
+    <ClInclude Include="Defines.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Windows\Window.h" />
     <ClInclude Include="Windows\SplashWindow.h" />
