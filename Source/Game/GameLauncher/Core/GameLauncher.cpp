@@ -74,7 +74,7 @@ void GameLauncher::Start()
 	{
 		GameObject test3 = gom.CreateGameObject();
 		test3.AddComponent<cMeshRenderer>("Models/SteelFloor.fbx");
-		test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
+		//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
 		auto& transform = test3.AddComponent<Transform>();
 		transform.SetPosition(0,-1.5f,0);
 		transform.SetScale(Vector3f(50.0f,1.0f,50.0f));

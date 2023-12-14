@@ -36,6 +36,6 @@ private:
 	//-1 is no child
 	std::array<int,2> GetChildOf(int node); 
 	//Follow the binomial tree and rearage after each add.
-	std::vector<Node> myNodes;
+	std::unordered_map<int,Node> myNodes;
 
 };

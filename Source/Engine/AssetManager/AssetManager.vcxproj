@@ -172,6 +172,7 @@
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\EventController.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\PlayerController.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\PollingController.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\DecicionTree\DecicionTree.h" />
     <ClInclude Include="Objects\AI\AgentSystem\PollingStations\PollingStation.h" />
     <ClInclude Include="Objects\AI\NavMesh\NavMesh.h" />
     <ClInclude Include="Objects\BaseAssets\ParticleEmitter.h" />
@@ -209,6 +210,7 @@
     <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\cActor.cpp" />
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysics_Kinematic.cpp" />
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysics_Newtonian.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\DecicionTree\Source\DecicionTree.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Source\Actor.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Source\AIEventManager.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\Controller.cpp" />
