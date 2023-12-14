@@ -95,7 +95,7 @@ void GameLauncher::Start()
 #pragma endregion
 
 	//Movement1  
-	int actorAmount = 40;
+	int actorAmount = 2;
 	int collidersAmount = 4;
 
 
