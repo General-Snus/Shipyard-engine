@@ -166,6 +166,7 @@
     <ClInclude Include="ComponentSystem\Components\Physics\cPhysics_Kinematic.h" />
     <ClInclude Include="ComponentSystem\Components\Physics\cPhysics_Newtonian.h" />
     <ClInclude Include="ComponentSystem\UUID.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\DecicionTreeController.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Actor.h" />
     <ClInclude Include="Objects\AI\AgentSystem\AIEventManager.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\Controller.h" />
@@ -210,6 +211,7 @@
     <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\cActor.cpp" />
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysics_Kinematic.cpp" />
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysics_Newtonian.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\DecicionTreeController.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\DecicionTree\Source\DecicionTree.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Source\Actor.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Source\AIEventManager.cpp" />
