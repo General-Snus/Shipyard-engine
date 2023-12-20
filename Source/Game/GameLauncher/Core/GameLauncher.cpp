@@ -144,6 +144,9 @@ void GameLauncher::Start()
 
 		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/C64Seeker.fbx");
 		mesh.SetMaterialPath("Materials/C64Seeker.json");
+
+
+		obj.AddComponent<cCollider>();
 	}
 
 	auto* colliderPollingStation = new MultipleTargets_PollingStation(colliders);

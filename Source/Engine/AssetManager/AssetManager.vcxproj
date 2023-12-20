@@ -162,6 +162,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AssetManagerUtills.hpp" />
+    <ClInclude Include="Objects\BaseAssets\ColliderAsset.h" />
+    <ClInclude Include="ComponentSystem\Components\Collider.h" />
     <ClInclude Include="ComponentSystem\Components\ActorSystem\cActor.h" />
     <ClInclude Include="ComponentSystem\Components\Physics\cPhysics_Kinematic.h" />
     <ClInclude Include="ComponentSystem\Components\Physics\cPhysics_Newtonian.h" />
@@ -208,6 +210,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssetManagerUtills.cpp" />
+    <ClCompile Include="Objects\BaseAssets\Source\ColliderAsset.cpp" />
+    <ClCompile Include="ComponentSystem\Components\Source\Collider.cpp" />
     <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\cActor.cpp" />
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysics_Kinematic.cpp" />
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysics_Newtonian.cpp" />
@@ -220,17 +224,17 @@
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\PlayerController.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\Source\PollingController.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\PollingStations\Source\PollingStation.cpp" />
-    <ClCompile Include="Objects\AI\NavMesh\NavMesh.cpp" />
-    <ClCompile Include="Objects\BaseAssets\ParticleEmitter.cpp" />
+    <ClCompile Include="Objects\AI\NavMesh\Source\NavMesh.cpp" />
+    <ClCompile Include="Objects\BaseAssets\Source\ParticleEmitter.cpp" />
     <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\RenderMode.cpp" />
     <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\FrameStatistics.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\CameraComponent.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\LightComponent.cpp" />
-    <ClCompile Include="Objects\BaseAssets\LightDataBase.cpp" />
-    <ClCompile Include="Objects\BaseAssets\MaterialAsset.cpp" />
-    <ClCompile Include="Objects\BaseAssets\Animations.cpp" />
-    <ClCompile Include="Objects\BaseAssets\BaseAsset.cpp" />
-    <ClCompile Include="Objects\BaseAssets\MeshAsset.cpp" />
+    <ClCompile Include="Objects\BaseAssets\Source\LightDataBase.cpp" />
+    <ClCompile Include="Objects\BaseAssets\Source\MaterialAsset.cpp" />
+    <ClCompile Include="Objects\BaseAssets\Source\Animations.cpp" />
+    <ClCompile Include="Objects\BaseAssets\Source\BaseAsset.cpp" />
+    <ClCompile Include="Objects\BaseAssets\Source\MeshAsset.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\Animator.cpp" />
     <ClCompile Include="AssetManager.cpp" />
     <ClCompile Include="AssetManager.pch.cpp">
@@ -246,7 +250,7 @@
     <ClCompile Include="ComponentSystem\Source\GameObject.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\MeshRenderer.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\Transform.cpp" />
-    <ClCompile Include="Objects\BaseAssets\TextureAsset.cpp" />
+    <ClCompile Include="Objects\BaseAssets\Source\TextureAsset.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\Skybox.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\ParticleSystem.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\WanderController.cpp" />

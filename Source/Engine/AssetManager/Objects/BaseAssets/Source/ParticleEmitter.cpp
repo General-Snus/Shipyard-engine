@@ -1,5 +1,5 @@
 #include <AssetManager.pch.h>
-#include "ParticleEmitter.h"
+#include "../ParticleEmitter.h"
 #include <cassert>
 #include <cmath>
 #include <iostream>

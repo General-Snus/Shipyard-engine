@@ -25,7 +25,7 @@
 	AABB3D<T>::AABB3D()
 	{
 		MinPoint = Vector3<T>(0,0,0);
-		MaxPoint = Vector3<T>(0,0,0);
+		MaxPoint = Vector3<T>(1,1,1);
 	}
 
 	template<class T>

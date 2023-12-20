@@ -58,6 +58,7 @@
 #include "ComponentSystem/Components/CameraComponent.h"
 #include "ComponentSystem/Components/LightComponent.h"
 #include "ComponentSystem/Components/ParticleSystem.h"
+#include "ComponentSystem/Components/Collider.h"
 #include "ComponentSystem/Components/ActorSystem/cActor.h"
 #include "ComponentSystem/Components/Physics/cPhysics_Kinematic.h"
 #include "ComponentSystem/Components/Physics/cPhysics_Newtonian.h"

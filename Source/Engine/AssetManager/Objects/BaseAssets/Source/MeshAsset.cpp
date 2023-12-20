@@ -1,7 +1,7 @@
 #include "AssetManager.pch.h"
 #include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
 
-#include "MeshAsset.h" 
+#include "../MeshAsset.h" 
 #include <Editor/Editor/Core/Editor.h>
 #include <Tools/Utilities/Math.hpp>
 

@@ -1,4 +1,4 @@
-#include "NavMesh.h"
+#include "../NavMesh.h"
 #include <sstream>
 #include <fstream>
 #include <string> 

@@ -1,7 +1,7 @@
 #include "AssetManager.pch.h"
 #include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
 #include <Tools/ThirdParty/DirectXTK/WICTextureLoader.h>
-#include "TextureAsset.h"
+#include "../TextureAsset.h"
 
 #define STB_IMAGE_IMPLEMENTATION	
 #include <Tools/Utilities/Files/Images/stb_image.h>
