@@ -83,6 +83,13 @@ void SteeringBehaviour::Separation(const std::vector<MultipleTargets_PollingStat
 
 		Vector3f direction = (i.positionData - position);
 		float distance = direction.Length();
+
+		//Try closest AABB point
+		if(auto collider = GameObjectManager::Get().TryGetComponent<cCollider>(i.sourceObject))
+		{
+
+		}
+
 		if(distance < settings.threshold)
 		{
 			float strength = std::min(

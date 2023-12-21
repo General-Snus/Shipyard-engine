@@ -1,19 +1,19 @@
 #pragma once
 #include "ComponentSystem/ComponentManager.h"
 #include <iostream>
+#include <typeinfo>
 #include <unordered_map>
 #include <vector>
-#include <typeinfo>
+#include <Tools/Utilities/System/SingletonTemplate.h>
  
 class GameObject;
  
-class GameObjectManager
+class GameObjectManager : public Singleton<GameObjectManager>
 {
+	friend class Singleton<GameObjectManager>;
 public:
 	GameObjectManager() = default;
-	~GameObjectManager();
-
-	static GameObjectManager& GetInstance();
+	~GameObjectManager(); 
 
 	const GameObject CreateGameObject();
 	void DeleteGameObject(const SY::UUID aGameObjectID);

@@ -5,24 +5,26 @@
 #include "Editor.h"
 #include "Windows.h"
 
+#include "Windows/SplashWindow.h"  
+#include <filesystem>
 #include <string>
 #include <stringapiset.h>
 #include <filesystem>
-#include "Windows/SplashWindow.h"  
+#include <string>
+#include <stringapiset.h>
 
-#include <functional>
-#include <fstream>
-#include <streambuf>
 #include <assert.h>
+#include <fstream>
+#include <functional>
+#include <streambuf>
 
 #include <Tools/ImGUI/imgui.h>
-#include <Tools/ImGUI/imgui_impl_win32.h>
 #include <Tools/ImGUI/imgui_impl_dx11.h>
+#include <Tools/ImGUI/imgui_impl_win32.h>
 
-#include <Tools/Utilities/Math.hpp>
-#include <Tools/ThirdParty/nlohmann/json.hpp>  
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/Input/InputHandler.hpp>
+#include <Tools/Utilities/Math.hpp>
 
 #include "../Windows/Window.h" 
 #include <Engine/AssetManager/ComponentSystem/GameObject.h>
@@ -38,8 +40,8 @@ bool Editor::Initialize(HWND aHandle)
 
 	ThreadPool::Get().Init();
 
-	// TODO: Here we should init the Graphics Engine.
 	GraphicsEngine::Get().Initialize(aHandle,true);
+
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -54,8 +56,8 @@ bool Editor::Initialize(HWND aHandle)
 	myGameLauncher.Init();
 	myGameLauncher.Start();
 
-	GameObjectManager::GetInstance().SetUpdatePriority<Transform>(ComponentManagerBase::UpdatePriority::Transform);
-	GameObjectManager::GetInstance().SetUpdatePriority<cPhysics_Kinematic>(ComponentManagerBase::UpdatePriority::Physics);
+	GameObjectManager::Get().SetUpdatePriority<Transform>(ComponentManagerBase::UpdatePriority::Transform);
+	GameObjectManager::Get().SetUpdatePriority<cPhysics_Kinematic>(ComponentManagerBase::UpdatePriority::Physics);
 
 	HideSplashScreen();
 	return true;
@@ -107,14 +109,13 @@ void Editor::ShowSplashScreen()
 {
 	if(!mySplashWindow)
 	{
-		mySplashWindow = new SplashWindow();
+		mySplashWindow = std::make_unique<SplashWindow>();
 		mySplashWindow->Init(Window::moduleHandler);
 	}
 }
 void Editor::HideSplashScreen() const
 {
-	mySplashWindow->Close();
-	delete mySplashWindow;
+	mySplashWindow->Close(); 
 	ShowWindow(Window::windowHandler,SW_SHOW);
 	SetForegroundWindow(Window::windowHandler);
 }
@@ -130,7 +131,7 @@ void Editor::UpdateImGui()
 void Editor::Update()
 {
 	Timer::GetInstance().Update();
-	GameObjectManager::GetInstance().Update();
+	GameObjectManager::Get().Update();
 	myGameLauncher.Update(Timer::GetInstance().GetDeltaTime());
 }
 void Editor::Render()
@@ -166,7 +167,7 @@ void Editor::ExpandWorldBounds(Sphere<float> sphere)
 	if(myWorldBounds.ExpandSphere(sphere))
 	{
 		//MVLogger.Log("World bounds was expanded");
-		for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
+		for(auto& i : GameObjectManager::Get().GetAllComponents<cLight>())
 		{
 			i.SetIsDirty(true);
 			i.SetIsRendered(false);
@@ -174,7 +175,7 @@ void Editor::ExpandWorldBounds(Sphere<float> sphere)
 	} //REFACTOR if updated real time the world expansion will cause the light/shadow to lagg behind, use this to update camera position, 
 	//REFACTOR not called on object moving outside worldbound causing same error as above
 }
-const Sphere<float>& Editor::GetWorldBounds()
+const Sphere<float>& Editor::GetWorldBounds() const
 {
 	return myWorldBounds;
 }

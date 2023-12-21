@@ -1,6 +1,5 @@
 #pragma once
-#include <thread>
-
+#include <thread> 
 #include "Windows.h"
 
 LRESULT CALLBACK SplashWinProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam);

@@ -555,7 +555,7 @@ void GraphicsEngine::SetLoggingWindow(HANDLE aHandle)  const
 
 void GraphicsEngine::BeginFrame()
 {
-	myCamera = GameObjectManager::GetInstance().GetCamera().TryGetComponent<cCamera>();
+	myCamera = GameObjectManager::Get().GetCamera().TryGetComponent<cCamera>();
 	if(!myCamera)
 	{
 		GELogger.Err("No camera in scene. No render is possible");

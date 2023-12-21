@@ -1,21 +1,21 @@
 #pragma once
-#include <vector>
-#include "ApplicationState.h"
 #include "../Windows/SplashWindow.h" 
+#include "ApplicationState.h"
+#include <Editor/Editor/Defines.h>
+#include <Game/GameLauncher/Core/GameLauncher.h>
 #include <Tools/Logging/Logging.h> 
 #include <Tools/Utilities/LinearAlgebra/Sphere.hpp>
-#include <Game/GameLauncher/Core/GameLauncher.h>
-#include <Editor/Editor/Defines.h>
+#include <Tools/Utilities/System/SingletonTemplate.h>
 class GameLauncher;
 
-class Editor
+class Editor : public Singleton<Editor>
 {
 	enum eMenuLayers
 	{
 		count
 	};
 private:
-	SplashWindow* mySplashWindow = nullptr;
+	std::unique_ptr<SplashWindow> mySplashWindow = nullptr;
 	ApplicationState myApplicationState;
 	Logger MVLogger;
 	void ShowSplashScreen();
@@ -43,12 +43,7 @@ public:
 		static ApplicationState myApplicationState;
 		return myApplicationState;
 	}
-
-	static Editor& GetEditor() // HATE
-	{
-		static Editor aEditorInstance;
-		return aEditorInstance;
-	}
+	 
 	FORCEINLINE Logger& GetLogger()
 	{
 		return MVLogger;
@@ -58,9 +53,9 @@ public:
 	static Vector2<int> GetViewportResolution();
 
 	void ExpandWorldBounds(Sphere<float> sphere);
-	const Sphere<float>& GetWorldBounds();
+	const Sphere<float>& GetWorldBounds() const;
 
-	const bool GetIsGUIActive() const { return IsGUIActive;	};
+	bool GetIsGUIActive() const { return IsGUIActive;	};
 	void SetIsGUIActive(bool set) { IsGUIActive = set; };
 private:
 #if WorkingOnMultiThread

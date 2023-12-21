@@ -220,6 +220,14 @@ Vector3f Transform::VectorToEulerAngles(Vector3f input) const
 	//Fuck euler angles remove this pos
 	return Vector3f();
 }
+void Transform::SetScale(float X,float Y, float Z)
+{
+	myScale.x = X;
+	myScale.y = Y;
+	myScale.z = Z;
+	isDirty = true;
+}
+
 void Transform::SetScale(Vector2f scale)
 {
 	myScale.x = scale.x;

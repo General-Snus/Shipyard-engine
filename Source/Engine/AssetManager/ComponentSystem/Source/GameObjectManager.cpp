@@ -149,10 +149,4 @@ void GameObjectManager::DeleteObjects()
 	}
 
 	myObjectsToDelete.clear();
-}
-
-GameObjectManager& GameObjectManager::GetInstance()
-{
-	static GameObjectManager sd;
-	return sd;
-}
+} 

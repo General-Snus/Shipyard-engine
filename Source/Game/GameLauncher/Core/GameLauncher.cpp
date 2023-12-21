@@ -32,7 +32,7 @@ void GameLauncher::Init()
 
 void GameLauncher::Start()
 {
-	GameObjectManager& gom = GameObjectManager::GetInstance();
+	GameObjectManager& gom = GameObjectManager::Get();
 
 #pragma region BaseSetup
 	myCustomHandler = gom.CreateGameObject();
@@ -96,7 +96,7 @@ void GameLauncher::Start()
 
 	//Movement1  
 	int actorAmount = 2;
-	int collidersAmount = 4;
+	int collidersAmount = 2;
 
 
 	SY::UUID player;
@@ -104,12 +104,10 @@ void GameLauncher::Start()
 	colliders.resize(collidersAmount);
 	std::vector<Vector2f> colliderPositions =
 	{
-		Vector2f(1,1),
-		Vector2f(1,-1),
-		Vector2f(-1,-1),
-		Vector2f(-1,1)
+		Vector2f(1,0),
+		Vector2f(-1,0)
 	};
-	for(size_t i = 0; i < colliders.size(); i++)
+	for(size_t i = 0; i < collidersAmount; i++)
 	{
 		float position = 15.0f;
 		float x = position * colliderPositions[i].x;
@@ -119,8 +117,12 @@ void GameLauncher::Start()
 		colliders[i] = gom.CreateGameObject();
 		auto& transform = colliders[i].AddComponent<Transform>();
 		transform.SetPosition(x,0,z);
+		transform.SetScale(1.f,1.f,5.f);
+
 		auto& mesh = colliders[i].AddComponent<cMeshRenderer>("Models/Cube.fbx");
 		mesh.SetMaterialPath("Materials/C64Separatist.json");
+
+		 colliders[i].AddComponent<cCollider>();  
 	}
 
 	std::vector<GameObject> entities;
@@ -174,7 +176,7 @@ void GameLauncher::Update(float delta)
 
 	//Other
 	{
-		for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>()) // TODO optimize this once you have a lot of lights and lightobjects
+		for(auto& i : GameObjectManager::Get().GetAllComponents<cLight>()) // TODO optimize this once you have a lot of lights and lightobjects
 		{
 			i.SetIsDirty(true);
 			i.SetIsRendered(false);

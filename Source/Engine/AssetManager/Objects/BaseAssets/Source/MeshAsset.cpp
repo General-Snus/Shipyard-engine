@@ -210,7 +210,7 @@ void Mesh::Init()
 		AMLogger.LogException(failedMeshLoad,2);
 		return;
 	}
-	Editor::GetEditor().ExpandWorldBounds(boxSphereBounds); // TODO Make a scene contain the boxSphereBounds!! 
+	Editor::Get().ExpandWorldBounds(boxSphereBounds); // TODO Make a scene contain the boxSphereBounds!! 
 
 	for(size_t i = 0; i < scene->mNumMeshes; i++)
 	{

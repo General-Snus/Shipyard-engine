@@ -50,6 +50,8 @@ public:
 	//Not mathematicly sound
 	Vector3f VectorToEulerAngles(Vector3f input) const;
 
+	void SetScale(float X,float Y,float Z);
+
 	void SetScale(float scale);
 	void SetScale(Vector2f scale);
 	void SetScale(Vector3f scale);

@@ -16,6 +16,11 @@ void cCollider::Update()
 
 }
 
+void cCollider::CreateAABB(const AABB3D<float>& rf)
+{
+	myCollider = std::make_shared<ColliderAssetAABB>(rf);
+}
+
 void cCollider::Render()
 {
 #ifdef _DEBUGDRAW  

@@ -24,7 +24,7 @@ public:
 	bool HasComponent() const;
 
 	inline SY::UUID GetOwner() { return myOwnerID; }
-	inline GameObject GetGameObject() { return GameObjectManager::GetInstance().GetGameObject(myOwnerID); }
+	inline GameObject GetGameObject() { return GameObjectManager::Get().GetGameObject(myOwnerID); }
 
 	template <class T>
 	T& GetComponent();
@@ -41,7 +41,7 @@ public:
 	const T* TryGetAddComponent() const;
 
 
-	inline bool IsActive() { return myIsActive && GameObjectManager::GetInstance().GetActive(myOwnerID); }
+	inline bool IsActive() { return myIsActive && GameObjectManager::Get().GetActive(myOwnerID); }
 	inline void SetActive(const bool aState) { myIsActive = aState; }
 
 	virtual void CollidedWith(const SY::UUID /*aGameObjectID*/) {}
@@ -73,51 +73,51 @@ private:
 template <class T>
 bool Component::HasComponent() const
 {
-	return GameObjectManager::GetInstance().HasComponent<T>(myOwnerID);
+	return GameObjectManager::Get().HasComponent<T>(myOwnerID);
 }
 
 template<class T>
 inline T& Component::GetComponent()
 {
-	return GameObjectManager::GetInstance().GetComponent<T>(myOwnerID);
+	return GameObjectManager::Get().GetComponent<T>(myOwnerID);
 }
 
 template<class T>
 inline T* Component::TryGetComponent()
 {
-	return GameObjectManager::GetInstance().TryGetComponent<T>(myOwnerID);
+	return GameObjectManager::Get().TryGetComponent<T>(myOwnerID);
 }
 
 template<class T>
 inline T* Component::TryGetAddComponent()
 {
-	if(auto* returnComponent = GameObjectManager::GetInstance().TryGetComponent<T>(myOwnerID))
+	if(auto* returnComponent = GameObjectManager::Get().TryGetComponent<T>(myOwnerID))
 	{
 		return returnComponent;
 	}
-	return &GameObjectManager::GetInstance().AddComponent<T>(myOwnerID);
+	return &GameObjectManager::Get().AddComponent<T>(myOwnerID);
 }
 
 
 template<class T>
 inline const T& Component::GetComponent() const 
 {
-	return GameObjectManager::GetInstance().GetComponent<T>(myOwnerID);
+	return GameObjectManager::Get().GetComponent<T>(myOwnerID);
 }
 
 template<class T>
 inline const T* Component::TryGetComponent() const 
 {
-	return GameObjectManager::GetInstance().TryGetComponent<T>(myOwnerID);
+	return GameObjectManager::Get().TryGetComponent<T>(myOwnerID);
 }
 
 template<class T>
 inline const T* Component::TryGetAddComponent() const 
 {
-	if(auto* returnComponent = GameObjectManager::GetInstance().TryGetComponent<T>(myOwnerID))
+	if(auto* returnComponent = GameObjectManager::Get().TryGetComponent<T>(myOwnerID))
 	{
 		return returnComponent;
 	}
-	return GameObjectManager::GetInstance().AddComponent<T>(myOwnerID);
+	return GameObjectManager::Get().AddComponent<T>(myOwnerID);
 }
 

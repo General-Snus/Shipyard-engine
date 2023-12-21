@@ -17,7 +17,7 @@ void ShadowRenderer::Execute()
 	RHI::SetVertexShader(myVertexShader);
 	RHI::SetPixelShader(nullptr) ;
 	std::shared_ptr<Texture> shadowMap;
-	for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
+	for(auto& i : GameObjectManager::Get().GetAllComponents<cLight>())
 	{
 		if(i.GetIsShadowCaster() && i.GetIsDirty())
 		{
