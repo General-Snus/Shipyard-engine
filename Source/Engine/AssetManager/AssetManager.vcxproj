@@ -161,6 +161,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ComponentSystem\Components\ActorSystem\CombatComponent.h" />
     <ClInclude Include="Objects\AI\AgentSystem\AICommands.h" />
     <ClInclude Include="Objects\AI\AgentSystem\AIPollingManager.h" />
     <ClInclude Include="AssetManagerUtills.hpp" />
@@ -211,6 +212,7 @@
     <ClInclude Include="Objects\AI\AgentSystem\SteeringBehaviour.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\CombatComponent.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Source\AICommands.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Source\AIPollingManager.cpp" />
     <ClCompile Include="AssetManagerUtills.cpp" />

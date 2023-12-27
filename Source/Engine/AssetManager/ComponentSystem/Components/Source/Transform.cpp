@@ -1,6 +1,6 @@
 #include "AssetManager.pch.h"
-#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
 #include "../Transform.h"
+#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
 #include <Tools/Utilities/Math.hpp>
 
 Transform::Transform(const unsigned int anOwnerId) : Component(anOwnerId),isDirty(true)
@@ -52,17 +52,17 @@ const Matrix& Transform::GetTransform() const
 	return myTransform;
 }
 
-Vector3f Transform::GetForward()
+Vector3f Transform::GetForward() const
 {
 	return Vector3f(myTransform(3,1),myTransform(3,2),myTransform(3,3)).GetNormalized();
 }
 
-Vector3f Transform::GetRight()
+Vector3f Transform::GetRight() const
 {
 	return Vector3f(myTransform(1,1),myTransform(1,2),myTransform(1,3)).GetNormalized();
 }
 
-Vector3f Transform::GetUp()
+Vector3f Transform::GetUp() const
 {
 	return Vector3f(myTransform(2,1),myTransform(2,2),myTransform(2,3)).GetNormalized();
 }
@@ -220,7 +220,7 @@ Vector3f Transform::VectorToEulerAngles(Vector3f input) const
 	//Fuck euler angles remove this pos
 	return Vector3f();
 }
-void Transform::SetScale(float X,float Y, float Z)
+void Transform::SetScale(float X,float Y,float Z)
 {
 	myScale.x = X;
 	myScale.y = Y;

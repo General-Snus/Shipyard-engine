@@ -1,6 +1,6 @@
 #pragma once 
-#include <Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h>
 #include <Engine/AssetManager/ComponentSystem/Component.h>
+#include <Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h>
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
 
 
@@ -22,9 +22,9 @@ public:
 
 	// TODO
 	//SET A UNIVERSAL METER
-	Vector3f GetForward();
-	Vector3f GetRight();
-	Vector3f GetUp();
+	Vector3f GetForward() const;
+	Vector3f GetRight() const;
+	Vector3f GetUp() const;
 
 	void Move(Vector2f translation);
 	void Move(Vector3f translation);
@@ -35,7 +35,7 @@ public:
 	void SetPosition(float X,float Y,float Z);
 	Vector3f GetPosition() const;
 
-	
+
 	void Rotate(float X,float Y,float Z);
 	void Rotate(Vector2f angularRotation);
 	void Rotate(Vector3f angularRotation);
@@ -46,7 +46,7 @@ public:
 
 	//"You will eventually regret any use of Euler angles."
 	//John Carmack
-	Vector3f GetRotation() const; 
+	Vector3f GetRotation() const;
 	//Not mathematicly sound
 	Vector3f VectorToEulerAngles(Vector3f input) const;
 
@@ -63,7 +63,7 @@ public:
 	void SetGizmo(bool enabled);
 	void InitPrimitive();
 private:
-	
+
 	bool IsRecentlyUpdated;
 	bool isDirty;
 	bool isDebugGizmoEnabled;

@@ -38,8 +38,7 @@ void DecisionTree::AddNodeAt(int at,std::function<bool(GameObject)> func)
 	myNodes.try_emplace(at,Node(func));
 }
 
-template<typename F>
-void DecisionTree::AddChildNodeAt(int at,bool atPositiveAnswer,F&& f)
+int DecisionTree::AddChildNodeAt(int at,bool atPositiveAnswer,std::function<bool(GameObject)> func)
 {
 	int TargetNode = -1;
 	if(atPositiveAnswer)
@@ -50,7 +49,8 @@ void DecisionTree::AddChildNodeAt(int at,bool atPositiveAnswer,F&& f)
 	{
 		TargetNode = this->GetChildOf(at)[1];
 	}
-	myNodes.try_emplace(TargetNode,Node(std::move(f())));
+	myNodes.try_emplace(TargetNode,Node(func));
+	return TargetNode;
 }
 
 bool DecisionTree::RunTree()
@@ -101,7 +101,7 @@ int DecisionTree::GetNumberOfLogicNodes()
 	return 0;
 }
 
-int DecisionTree::GetNumberOfDecicion()
+int DecisionTree::GetNumberOfDecision()
 {
 	return 0;
 }

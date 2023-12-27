@@ -8,10 +8,18 @@ DecisionTreeController::DecisionTreeController(DecisionTree decicionTree) : myTr
 DecisionTreeController::DecisionTreeController()
 {
 #if ActorDecicionTree
+	int node = 0;
 	myTree.AddNodeAt(0,GeneralizedAICommands::IsDead);
-	myTree.AddNodeAt(1,GeneralizedAICommands::IsHealthy);
 
+	node = myTree.AddChildNodeAt(0,false,GeneralizedAICommands::IsHealthy);
+	myTree.AddChildNodeAt(node,false,GeneralizedAICommands::Retreat);
+	node = myTree.AddChildNodeAt(node,true,GeneralizedAICommands::IsTargetInRange);
 
+	myTree.AddChildNodeAt(node,false,GeneralizedAICommands::MoveToward);
+	node = myTree.AddChildNodeAt(node,true,GeneralizedAICommands::IsTargetInSight);
+
+	myTree.AddChildNodeAt(node,false,GeneralizedAICommands::AlignToTarget);
+	myTree.AddChildNodeAt(node,true,GeneralizedAICommands::ShootAtTarget);
 #endif
 }
 

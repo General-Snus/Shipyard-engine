@@ -24,15 +24,14 @@ public:
 	~DecisionTree();
 
 	void AddNodeAt(int at,std::function<bool(GameObject)>);
-	template<typename F>
-	void AddChildNodeAt(int at,bool atPosetiveAnswer,F&& f);
+	int AddChildNodeAt(int at,bool atPosetiveAnswer,std::function<bool(GameObject)>);
 
 
 	bool RunTree(GameObject input);
 	bool RunTree();
 	int GetTreeSize();
 	int GetNumberOfLogicNodes();
-	int GetNumberOfDecicion();
+	int GetNumberOfDecision();
 private:
 	GameObject myContextObject;
 
@@ -40,7 +39,6 @@ private:
 	void ReorderTree();
 	//-1 is no child
 	std::array<int,2> GetChildOf(int node);
-	//Follow the binomial tree and rearage after each add.
 	std::unordered_map<int,Node> myNodes;
 
 };

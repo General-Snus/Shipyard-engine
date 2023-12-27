@@ -8,8 +8,15 @@ namespace GeneralizedAICommands {
 	{
 		//Is there other targets active?
 		const Transform& myTransform = input.GetComponent<Transform>();
+		const CombatComponent& myStats = input.GetComponent<CombatComponent>();
+
 		Vector3f closestTarget = AIPollingManager::Get().GetStation<MultipleTargets_PollingStation>("Targets")->GetClosestTargetPosition(myTransform.GetPosition(),input);
-		closestTarget;
+		Vector3f direction = (closestTarget - myTransform.GetPosition()).GetNormalized();
+
+		if(direction.Dot(myTransform.GetForward()) > cos(myStats.myAttackCone)) //45 degrees
+		{
+			return true;
+		}
 
 		return false;
 	}
@@ -17,6 +24,13 @@ namespace GeneralizedAICommands {
 	bool IsTargetInRange(GameObject input)
 	{
 		UNREFERENCED_PARAMETER(input);
+		const Transform& myTransform = input.GetComponent<Transform>();
+
+		Vector3f closestTarget = AIPollingManager::Get().GetStation<MultipleTargets_PollingStation>("Targets")->GetClosestTargetPosition(myTransform.GetPosition(),input);
+		if((closestTarget - myTransform.GetPosition()).Length() < 10.0f)
+		{
+			return true;
+		}
 		return false;
 	}
 

@@ -159,6 +159,9 @@
     <ClInclude Include="Objects\AI\AgentSystem\AICommands.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ComponentSystem\Components\ActorSystem\CombatComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssetManager.pch.cpp">
@@ -297,6 +300,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Objects\AI\AgentSystem\Source\AICommands.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\CombatComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

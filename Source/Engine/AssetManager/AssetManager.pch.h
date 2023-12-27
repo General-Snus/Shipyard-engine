@@ -53,6 +53,7 @@
 #include "ComponentSystem/Component.h" 
 #include "ComponentSystem/ComponentManager.h"
 #include "ComponentSystem/Components/ActorSystem/cActor.h"
+#include "ComponentSystem/Components/ActorSystem/CombatComponent.h"
 #include "ComponentSystem/Components/Animator.h"
 #include "ComponentSystem/Components/CameraComponent.h"
 #include "ComponentSystem/Components/Collider.h"
