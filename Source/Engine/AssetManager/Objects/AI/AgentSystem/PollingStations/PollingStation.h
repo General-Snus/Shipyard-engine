@@ -1,9 +1,19 @@
 #pragma once 
 
-
 class PollingStation
 {
 public:
-	PollingStation(); 
-private: 
+	PollingStation() = default;
+
+	inline std::string GetGivenName() const
+	{
+		return givenName;
+	};
+	inline void SetGivenName(const std::string& aGivenName)
+	{
+		givenName = aGivenName;
+	};
+
+protected:
+	std::string givenName;
 };

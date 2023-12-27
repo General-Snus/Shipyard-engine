@@ -85,6 +85,7 @@
     <LibraryPath>$(SolutionDir)..\Lib\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)</TargetName>
+    <CodeAnalysisRuleSet>MixedRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(SolutionDir);$(ProjectDir);$(SolutionDir)Engine\AssetManager\;$(SolutionDir)Engine\GraphicsEngine\;$(SolutionDir)Tools\Utilities\;$(SolutionDir)Tools\Assimp\include;$(IncludePath)</IncludePath>
@@ -92,6 +93,7 @@
     <LibraryPath>$(SolutionDir)..\Lib\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)</TargetName>
+    <CodeAnalysisRuleSet>MixedRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnabled>false</VcpkgEnabled>

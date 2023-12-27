@@ -161,6 +161,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Objects\AI\AgentSystem\AICommands.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\AIPollingManager.h" />
     <ClInclude Include="AssetManagerUtills.hpp" />
     <ClInclude Include="Objects\BaseAssets\ColliderAsset.h" />
     <ClInclude Include="ComponentSystem\Components\Collider.h" />
@@ -168,14 +170,14 @@
     <ClInclude Include="ComponentSystem\Components\Physics\cPhysics_Kinematic.h" />
     <ClInclude Include="ComponentSystem\Components\Physics\cPhysics_Newtonian.h" />
     <ClInclude Include="ComponentSystem\UUID.h" />
-    <ClInclude Include="Objects\AI\AgentSystem\Controllers\DecicionTreeController.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\DecisionTreeController.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Actor.h" />
     <ClInclude Include="Objects\AI\AgentSystem\AIEventManager.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\Controller.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\EventController.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\PlayerController.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\PollingController.h" />
-    <ClInclude Include="Objects\AI\AgentSystem\DecicionTree\DecicionTree.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\DecisionTree\DecisionTree.h" />
     <ClInclude Include="Objects\AI\AgentSystem\PollingStations\PollingStation.h" />
     <ClInclude Include="Objects\AI\NavMesh\NavMesh.h" />
     <ClInclude Include="Objects\BaseAssets\ParticleEmitter.h" />
@@ -209,14 +211,16 @@
     <ClInclude Include="Objects\AI\AgentSystem\SteeringBehaviour.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Objects\AI\AgentSystem\Source\AICommands.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\Source\AIPollingManager.cpp" />
     <ClCompile Include="AssetManagerUtills.cpp" />
     <ClCompile Include="Objects\BaseAssets\Source\ColliderAsset.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\Collider.cpp" />
     <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\cActor.cpp" />
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysics_Kinematic.cpp" />
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysics_Newtonian.cpp" />
-    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\DecicionTreeController.cpp" />
-    <ClCompile Include="Objects\AI\AgentSystem\DecicionTree\Source\DecicionTree.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\DecisionTreeController.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\DecisionTree\Source\DecisionTree.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Source\Actor.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Source\AIEventManager.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\Controller.cpp" />

@@ -1,6 +1,8 @@
 #pragma once
+#include "BaseAsset.h" 
+#include <Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h>
 #include <Tools/Utilities/LinearAlgebra/AABB3D.hpp>
-
+#include <Tools/Utilities/LinearAlgebra/Sphere.hpp>  
 
 enum class eColliderType
 {
@@ -15,6 +17,11 @@ enum class eColliderType
 	RAY,
 	CONVEX
 };
+
+class Transform;
+class DebugDrawer;
+struct PrimitiveHandle;
+
 
 class ColliderAsset : public AssetBase
 {

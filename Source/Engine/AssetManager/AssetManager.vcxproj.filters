@@ -141,16 +141,22 @@
     <ClInclude Include="AssetManagerUtills.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\AI\AgentSystem\DecicionTree\DecicionTree.h">
+    <ClInclude Include="Objects\AI\AgentSystem\DecisionTree\DecisionTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\AI\AgentSystem\Controllers\DecicionTreeController.h">
+    <ClInclude Include="Objects\AI\AgentSystem\Controllers\DecisionTreeController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ComponentSystem\Components\Collider.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Objects\BaseAssets\ColliderAsset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\AIPollingManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\AICommands.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -275,16 +281,22 @@
     <ClCompile Include="AssetManagerUtills.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\AI\AgentSystem\DecicionTree\Source\DecicionTree.cpp">
+    <ClCompile Include="Objects\AI\AgentSystem\DecisionTree\Source\DecisionTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\DecicionTreeController.cpp">
+    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\DecisionTreeController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ComponentSystem\Components\Source\Collider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Objects\BaseAssets\Source\ColliderAsset.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\Source\AIPollingManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\Source\AICommands.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -33,6 +33,24 @@ std::vector<MultipleTargets_PollingStation::DataTuple> MultipleTargets_PollingSt
 	return returnVector;
 }
 
+std::vector<MultipleTargets_PollingStation::DataTuple> MultipleTargets_PollingStation::GetTargetPosition(GameObject filter)
+{
+	OPTICK_EVENT();
+	std::vector<DataTuple> returnVector;
+	returnVector.reserve(targets.size());
+	SY::UUID filterID = filter.GetID();
+	for(auto& g : targets)
+	{
+		if(filterID == g.GetID())
+		{
+			continue;
+		}
+
+		returnVector.push_back(DataTuple(g.GetComponent<Transform>().GetPosition(),g.GetID()));
+	}
+	return returnVector;
+}
+
 Vector3f MultipleTargets_PollingStation::GetClosestTargetPosition(Vector3f myPosition)
 {
 	OPTICK_EVENT();
@@ -51,12 +69,35 @@ Vector3f MultipleTargets_PollingStation::GetClosestTargetPosition(Vector3f myPos
 	return closestPosition;
 }
 
+Vector3f MultipleTargets_PollingStation::GetClosestTargetPosition(Vector3f myPosition,GameObject filter)
+{
+	OPTICK_EVENT();
+	float closestDistance = FLT_MAX;
+	Vector3f closestPosition = myPosition;
+	SY::UUID filterID = filter.GetID();
+
+	for(auto& g : targets)
+	{
+		if(filterID == g.GetID())
+		{
+			continue;
+		}
+		const float dist = (g.GetComponent<Transform>().GetPosition() - myPosition).LengthSqr();
+		if(dist < closestDistance)
+		{
+			closestDistance = dist;
+			closestPosition = g.GetComponent<Transform>().GetPosition();
+		}
+	}
+	return closestPosition;
+}
+
 Vector3f MultipleTargets_PollingStation::GetAverageVelocity()
 {
 	OPTICK_EVENT();
 	auto totalVelocity = Vector3f();
 	for(auto& g : targets)
-	{ 
+	{
 		totalVelocity += g.GetComponent<cPhysics_Kinematic>().ph_velocity;
 	}
 
@@ -81,7 +122,7 @@ Vector3f MultipleTargets_PollingStation::GetAverageVelocityWithinCircle(Vector3f
 		}
 	}
 
-	totalVelocity /= (float)targets.size(); 
+	totalVelocity /= (float)targets.size();
 	return totalVelocity;
 }
 

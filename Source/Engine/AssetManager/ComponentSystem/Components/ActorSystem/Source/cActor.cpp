@@ -29,4 +29,5 @@ void cActor::Render()
 void cActor::SetController(Controller* aController)
 {
 	controller = aController;
+	controller->ComponentRequirement(GetGameObject());
 }

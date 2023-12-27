@@ -1,19 +1,10 @@
 #include "AssetManager.pch.h"
 #include "../AIController.h"
 
-AIController::AIController(MultipleTargets_PollingStation* aPollingStation,MultipleTargets_PollingStation* formationStation,GameObject componentCheck) : PollingController(aPollingStation),FormationStation(formationStation)
+AIController::AIController(MultipleTargets_PollingStation* aPollingStation,MultipleTargets_PollingStation* formationStation) : PollingController(aPollingStation),FormationStation(formationStation)
 {
-	//Check for required components
-	if(!componentCheck.TryGetComponent<cPhysics_Kinematic>())
-	{
-		auto& phy = componentCheck.AddComponent<cPhysics_Kinematic>();
-		phy.localVelocity = false;
-		phy.ph_maxSpeed = 4.5f;
-		phy.ph_maxAcceleration = 5.0f;
-	}
-
 }
- 
+
 bool AIController::Update(GameObject input)
 {
 	OPTICK_EVENT();
@@ -51,9 +42,21 @@ bool AIController::Update(GameObject input)
 
 
 	return true;
-} 
+}
 
 void AIController::Recieve(const AIEvent& aEvent)
 {
 	aEvent;
+}
+
+bool AIController::ComponentRequirement(GameObject input)
+{
+	if(!input.TryGetComponent<cPhysics_Kinematic>())
+	{
+		auto& phy = input.AddComponent<cPhysics_Kinematic>();
+		phy.localVelocity = false;
+		phy.ph_maxSpeed = 4.5f;
+		phy.ph_maxAcceleration = 5.0f;
+	}
+	return true;
 }
