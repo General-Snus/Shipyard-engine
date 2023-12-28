@@ -43,11 +43,11 @@ int DecisionTree::AddChildNodeAt(int at,bool atPositiveAnswer,std::function<bool
 	int TargetNode = -1;
 	if(atPositiveAnswer)
 	{
-		TargetNode = this->GetChildOf(at)[0];
+		TargetNode = (at * 2) + 1;
 	}
 	else
 	{
-		TargetNode = this->GetChildOf(at)[1];
+		TargetNode = (at + 1) * 2;
 	}
 	myNodes.try_emplace(TargetNode,Node(func));
 	return TargetNode;
@@ -119,14 +119,14 @@ void DecisionTree::ReorderTree()
 std::array<int,2> DecisionTree::GetChildOf(int node)
 {
 	std::array<int,2> returnArray = {-1,-1};
-	if(myNodes.contains(node * 2))
+	if(myNodes.contains((node * 2) + 1)) // true
 	{
-		returnArray[0] = node * 2;
+		returnArray[0] = (node * 2) + 1;
 	}
 
-	if(myNodes.contains(node * 2 + 1))
+	if(myNodes.contains((node + 1) * 2)) // false
 	{
-		returnArray[1] = node * 2 + 1;
+		returnArray[1] = (node + 1) * 2;
 	}
 
 	return returnArray;

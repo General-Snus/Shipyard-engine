@@ -38,8 +38,7 @@ bool AIController::Update(GameObject input)
 
 	SteeringBehaviour::Cohesion(&physicsComponent,position,std::bit_cast<MultipleTargets_PollingStation*>(FormationStation),influenceRadius,2.0f);
 	//physicsComponent.ph_velocity.Normalize();
-	//physicsComponent.ph_velocity *= 4.5f;
-
+	//physicsComponent.ph_velocity *= 4.5f; 
 
 	return true;
 }

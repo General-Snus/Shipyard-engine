@@ -34,12 +34,14 @@ public:
 	//Filters out the given object from the list
 	Vector3f GetClosestTargetPosition(Vector3f myPosition,GameObject filter);
 
+	GameObject GetClosestTarget(Vector3f myPosition);
+	GameObject GetClosestTarget(Vector3f myPosition,GameObject filter);
+
 	Vector3f GetAverageVelocity();
 	Vector3f GetAverageVelocityWithinCircle(Vector3f myPosition,float radius);
 
 	//Returns all agents in circle
 	std::vector<DataTuple> GetTargetsWithinCircle(Vector3f position,float radius);
-
 
 	//Gets all agents in circle and returns the center of mass of those agents
 	Vector3f GetCoMWithinCircle(Vector3f position,float radius,int& EntitiesInCircle);

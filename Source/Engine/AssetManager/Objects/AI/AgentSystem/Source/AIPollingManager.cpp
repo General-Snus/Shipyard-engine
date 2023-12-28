@@ -1,13 +1,13 @@
 #include "AssetManager.pch.h"
-#include "../AIPollingManager.h"
+#include "../AIPollingManager.h" 
 
 
-void AIPollingManager::AddStation(PollingStation aNewStation,const std::string& aGivenName)
+void AIPollingManager::AddStation(const std::string& aGivenName,std::shared_ptr<PollingStation> aNewStation)
 {
-	myPollingStations.try_emplace(aGivenName,new PollingStation(aNewStation));
+	myPollingStations.try_emplace(aGivenName,aNewStation);
 }
 
-PollingStation* AIPollingManager::GetStation(const std::string& aName)
+std::shared_ptr<PollingStation> AIPollingManager::GetStation(const std::string& aName)
 {
 	if(myPollingStations.contains(aName))
 	{
@@ -17,11 +17,11 @@ PollingStation* AIPollingManager::GetStation(const std::string& aName)
 }
 
 template<typename T>
-T* AIPollingManager::GetStation(const std::string& aName)
+std::shared_ptr<T> AIPollingManager::GetStation(const std::string& aName)
 {
 	if(myPollingStations.contains(aName))
 	{
-		return static_cast<T*>(myPollingStations.at(aName));
+		return std::static_pointer_cast<T>(myPollingStations.at(aName));
 	}
 	return nullptr;
 }

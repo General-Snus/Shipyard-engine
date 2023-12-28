@@ -38,6 +38,11 @@ bool DecisionTreeController::ComponentRequirement(GameObject input)
 		phy.ph_maxSpeed = 4.5f;
 		phy.ph_maxAcceleration = 5.0f;
 	}
+
+	if(!input.TryGetComponent<CombatComponent>())
+	{
+		input.AddComponent<CombatComponent>();
+	}
 	return true;
 }
 

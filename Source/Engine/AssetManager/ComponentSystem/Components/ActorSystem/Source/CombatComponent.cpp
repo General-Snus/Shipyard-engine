@@ -1,5 +1,5 @@
-#include "AssetManager.pch.h"
 #include "../CombatComponent.h"
+#include "AssetManager.pch.h"
 
 CombatComponent::CombatComponent(const SY::UUID anOwnerID) : Component(anOwnerID)
 {
@@ -26,5 +26,9 @@ void CombatComponent::Update()
 }
 
 void CombatComponent::Render()
+{
+}
+
+void CombatComponent::FireProjectile() const
 {
 }

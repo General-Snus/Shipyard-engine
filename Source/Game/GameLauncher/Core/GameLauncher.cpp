@@ -141,21 +141,25 @@ void GameLauncher::Start()
 		transform.SetPosition(x,0,z);
 		transform.SetRotation(0,RandomEngine::RandomInRange(0.f,360.f),0);
 
-
 		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/C64Seeker.fbx");
 		mesh.SetMaterialPath("Materials/C64Seeker.json");
-
 		obj.AddComponent<cCollider>();
 	}
 
 
-	auto* colliderPollingStation = new MultipleTargets_PollingStation(colliders);
-	auto* formationPollingStation = new MultipleTargets_PollingStation(entities);
+	auto colliderPollingStation = std::make_shared<MultipleTargets_PollingStation>(colliders);
+	auto formationPollingStation = std::make_shared<MultipleTargets_PollingStation>(entities);
+
+	AIPollingManager::Get().AddStation("Colliders",colliderPollingStation);
+	AIPollingManager::Get().AddStation("Targets",formationPollingStation);
 
 
 	{
 		auto& actor = entities[0].AddComponent<cActor>();
-		actor.SetController(new AIController(colliderPollingStation,formationPollingStation));
+		actor.SetController(new AIController(
+			AIPollingManager::Get().GetStation<MultipleTargets_PollingStation>("Colliders").get(),
+			AIPollingManager::Get().GetStation<MultipleTargets_PollingStation>("Targets").get())
+		);
 	}
 
 	{

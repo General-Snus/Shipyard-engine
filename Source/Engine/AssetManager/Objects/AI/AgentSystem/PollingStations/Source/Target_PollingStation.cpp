@@ -92,6 +92,45 @@ Vector3f MultipleTargets_PollingStation::GetClosestTargetPosition(Vector3f myPos
 	return closestPosition;
 }
 
+GameObject MultipleTargets_PollingStation::GetClosestTarget(Vector3f myPosition)
+{
+	float closestDistance = FLT_MAX;
+	GameObject closestObj;
+
+	for(auto& g : targets)
+	{
+		const float dist = (g.GetComponent<Transform>().GetPosition() - myPosition).LengthSqr();
+		if(dist < closestDistance)
+		{
+			closestDistance = dist;
+			closestObj = g;
+		}
+	}
+	return closestObj;
+}
+
+GameObject MultipleTargets_PollingStation::GetClosestTarget(Vector3f myPosition,GameObject filter)
+{
+	float closestDistance = FLT_MAX;
+	GameObject closestObj;
+	SY::UUID filterID = filter.GetID();
+
+	for(auto& g : targets)
+	{
+		if(filterID == g.GetID())
+		{
+			continue;
+		}
+		const float dist = (g.GetComponent<Transform>().GetPosition() - myPosition).LengthSqr();
+		if(dist < closestDistance)
+		{
+			closestDistance = dist;
+			closestObj = g;
+		}
+	}
+	return closestObj;
+}
+
 Vector3f MultipleTargets_PollingStation::GetAverageVelocity()
 {
 	OPTICK_EVENT();
