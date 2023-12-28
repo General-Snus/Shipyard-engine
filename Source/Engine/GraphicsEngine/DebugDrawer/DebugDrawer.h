@@ -1,4 +1,5 @@
 #pragma once
+#include <Engine/GraphicsEngine/Objects/Shader.h>
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 
@@ -37,24 +38,27 @@ public:
 	bool Initialize();
 	void SetDebugPrimitiveTransform(const PrimitiveHandle& aHandle,const Matrix& aTransform);
 	void RemoveDebugPrimitive(PrimitiveHandle& aHandle);
+
+	void Update(float aDeltaTime);
 	void Render();
 
-	PrimitiveHandle AddDebugLine(const Vector3f& aStart,const Vector3f& aFinish,const Vector3f& aColor = {1.f,0.f,0.f});
-	PrimitiveHandle AddDebugGizmo(const Vector3f& aCenter,const float aLength);
+	PrimitiveHandle AddDebugLine(const Vector3f& aStart,const Vector3f& aFinish,const Vector3f& aColor = {1.f,0.f,0.f},const float lifetime = 0.0f);
+	PrimitiveHandle AddDebugGizmo(const Vector3f& aCenter,const float aLength,const float lifetime = 0.0f);
 	//PrimitiveHandle AddDebugArrow(const Vector3f& aStart, const CU::Vector3f& aFinish, const float aHeadSize, const CU::Vector3f& aColor);
-	PrimitiveHandle AddDebugBox(const Vector3f& aMin,const Vector3f& aMax/*, Rotator*/,const Vector3f& aColor = {1.f,0.f,0.f});
+	PrimitiveHandle AddDebugBox(const Vector3f& aMin,const Vector3f& aMax/*, Rotator*/,const Vector3f& aColor = {1.f,0.f,0.f},const float lifetime = 0.0f);
 	//PrimitiveHandle AddDebugCircle(const CU::Vector3f& aCenter, const float aRadius/*, Rotator*/, const CU::Vector3f& aColor);
 	//PrimitiveHandle AddDebugSphere(const CU::Vector3f& aCenter, const float aRadius/*, Rotator*/, const CU::Vector3f& aColor);
 	//PrimitiveHandle AddDebugCylinder(const CU::Vector3f& aCenter, const float aHalfHeight, const float aRadius/*, Rotator*/, const CU::Vector3f& aColor);
 	//PrimitiveHandle AddDebugCapsule(const CU::Vector3f& aCenter, const float aHalfHeight, const float aRadius/*, Rotator*/, const CU::Vector3f& aColor);
 	//PrimitiveHandle AddDebugCone(const CU::Vector3f& aCenter, const float aHalfHeight, const float aStartRadius, float anEndRadius/*, Rotator*/, const CU::Vector3f& aColor);
-	PrimitiveHandle AddDebugGrid(const Vector3f& aCenter,const float anExtent,const unsigned int someNumCells/*, Rotator*/,const  Vector3f& aColor = {1.f,0.f,0.f});
+	PrimitiveHandle AddDebugGrid(const Vector3f& aCenter,const float anExtent,const unsigned int someNumCells/*, Rotator*/,const  Vector3f& aColor = {1.f,0.f,0.f},const float lifetime = 0.0f);
 	//PrimitiveHandle AddDebugGridEx(const CU::Vector3f& aCenter, const float anExtent, const unsigned int someNumGridLines/*, Rotator*/, const CU::Vector3f& aColor);
 
 private:
-	PrimitiveHandle CreatePrimitiveHandle(const Primitive& aPrimitive);
+	PrimitiveHandle CreatePrimitiveHandle(const Primitive& aPrimitive,float lifetime = 0.0f);
 
 	std::unordered_map<size_t,Primitive> myDebugPrimitives;
+	std::unordered_map<size_t,float> myDebugLifetime;
 	size_t myNextIndex = 0;
 
 	ComPtr<ID3D11Buffer> myLineVertexBuffer;

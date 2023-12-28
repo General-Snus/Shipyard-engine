@@ -46,6 +46,7 @@ public:
 	explicit ColliderAssetAABB();
 	explicit ColliderAssetAABB(const AABB3D<float>& rf);
 	void RenderDebugLines(const Transform& data) override;
+	inline const AABB3D<float>& GetAABB() const { return myAABB; }
 private:
 	AABB3D<float> myAABB;
 };

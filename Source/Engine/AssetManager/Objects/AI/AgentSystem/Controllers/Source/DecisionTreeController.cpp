@@ -1,7 +1,8 @@
 #include "AssetManager.pch.h"
 #include "../DecisionTreeController.h" 
+#include <Engine/PersistentSystems/ArtificialInteligence/AICommands/AICommands.h>
 
-DecisionTreeController::DecisionTreeController(DecisionTree decicionTree) : myTree(decicionTree)
+DecisionTreeController::DecisionTreeController(DecisionTree decisionTree) : myTree(decisionTree)
 {
 }
 

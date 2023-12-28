@@ -1,4 +1,5 @@
 #pragma once
+#include <Engine/AssetManager/ComponentSystem/Component.h>
 #include <Engine/AssetManager/Objects/BaseAssets/ColliderAsset.h>
 #include <filesystem>
 #include <memory>

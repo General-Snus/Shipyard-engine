@@ -1,19 +1,19 @@
 #pragma once
-#include "ComponentSystem/ComponentManager.h"
+#include "ComponentManager.h"
 #include <iostream>
+#include <Tools/Utilities/System/SingletonTemplate.h>
 #include <typeinfo>
 #include <unordered_map>
 #include <vector>
-#include <Tools/Utilities/System/SingletonTemplate.h>
- 
+
 class GameObject;
- 
+
 class GameObjectManager : public Singleton<GameObjectManager>
 {
 	friend class Singleton<GameObjectManager>;
 public:
 	GameObjectManager() = default;
-	~GameObjectManager(); 
+	~GameObjectManager();
 
 	const GameObject CreateGameObject();
 	void DeleteGameObject(const SY::UUID aGameObjectID);
@@ -44,14 +44,14 @@ public:
 
 	GameObject GetWorldRoot();
 	GameObject GetPlayer();
-	GameObject GetCamera(); 
+	GameObject GetCamera();
 	GameObject GetGameObject(SY::UUID anID);
 
 	void CollidedWith(const SY::UUID aFirstID,const SY::UUID aTargetID);
 	void SetActive(const SY::UUID aGameObjectID,const bool aState);
 
 	void SetLastGOAsPlayer();
-	void SetLastGOAsWorld(); 
+	void SetLastGOAsWorld();
 	void SetLastGOAsCamera();
 
 	template <class T>

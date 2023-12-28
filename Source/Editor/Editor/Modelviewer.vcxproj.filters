@@ -75,5 +75,8 @@
     <Image Include="TGPSplash.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="SplashScreen\E1eWWsIq.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

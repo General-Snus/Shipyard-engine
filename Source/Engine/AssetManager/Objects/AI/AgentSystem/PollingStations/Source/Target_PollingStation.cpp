@@ -1,6 +1,5 @@
 #include "AssetManager.pch.h"
 
-
 Target_PollingStation::Target_PollingStation(const GameObject aTarget) : target(aTarget),PollingStation()
 {
 }

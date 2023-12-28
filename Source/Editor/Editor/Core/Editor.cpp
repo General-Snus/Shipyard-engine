@@ -7,10 +7,10 @@
 
 #include "Windows/SplashWindow.h"  
 #include <filesystem>
-#include <string>
-#include <stringapiset.h>
 #include <filesystem>
 #include <string>
+#include <string>
+#include <stringapiset.h>
 #include <stringapiset.h>
 
 #include <assert.h>
@@ -51,7 +51,7 @@ bool Editor::Initialize(HWND aHandle)
 	//io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch 
 	// Setup Platform/Renderer backends
 	ImGui_ImplWin32_Init(aHandle);
-	ImGui_ImplDX11_Init(RHI::Device.Get(),RHI::Context.Get()); 
+	ImGui_ImplDX11_Init(RHI::Device.Get(),RHI::Context.Get());
 
 	myGameLauncher.Init();
 	myGameLauncher.Start();
@@ -115,7 +115,7 @@ void Editor::ShowSplashScreen()
 }
 void Editor::HideSplashScreen() const
 {
-	mySplashWindow->Close(); 
+	mySplashWindow->Close();
 	ShowWindow(Window::windowHandler,SW_SHOW);
 	SetForegroundWindow(Window::windowHandler);
 }
@@ -131,8 +131,11 @@ void Editor::UpdateImGui()
 void Editor::Update()
 {
 	Timer::GetInstance().Update();
+	const float delta = Timer::GetInstance().GetDeltaTime();
+
 	GameObjectManager::Get().Update();
-	myGameLauncher.Update(Timer::GetInstance().GetDeltaTime());
+	myGameLauncher.Update(delta);
+	DebugDrawer::Get().Update(delta);
 }
 void Editor::Render()
 {

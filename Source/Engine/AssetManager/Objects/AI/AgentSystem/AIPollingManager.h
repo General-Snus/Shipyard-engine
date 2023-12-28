@@ -1,4 +1,5 @@
-#pragma once
+#pragma once 
+#include "PollingStations/PollingStation.h"
 #include <Tools/Utilities/System/SingletonTemplate.h>
 
 class AIPollingManager : public Singleton<AIPollingManager>

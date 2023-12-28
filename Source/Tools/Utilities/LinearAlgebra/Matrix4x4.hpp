@@ -1,9 +1,9 @@
 #define dim4x4 4
 #pragma once 
+#include "assimp/matrix4x4.h"
 #include "Vectors.hpp" 
 #include <cmath> 
 #include <DirectXMath.h>
-#include <assimp/matrix4x4.h>
 
 template <class T>
 class Matrix4x4
@@ -412,6 +412,6 @@ inline Matrix4x4<T> Matrix4x4<T>::CreateOrthographicProjection(float aLeftPlane,
 
 
 	return result;
-} 
+}
 using Vector3f = Vector3<float>;
 using Matrix = Matrix4x4<float>;

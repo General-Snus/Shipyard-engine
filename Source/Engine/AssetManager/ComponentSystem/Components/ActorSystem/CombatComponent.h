@@ -10,7 +10,7 @@ public:
 	void Update() override;
 	void Render() override;
 
-	void FireProjectile() const;
+	void FireProjectile();
 
 	//Lazy town over here
 	int myHealth;
@@ -18,6 +18,8 @@ public:
 	float myProjectileSpeed;
 	float myAttackSpeed;
 	float myAttackRange;
+	float myVisionRange;
 	float myAttackCone; // Degrees
-
+private:
+	float myAttackTimer = 0;
 };

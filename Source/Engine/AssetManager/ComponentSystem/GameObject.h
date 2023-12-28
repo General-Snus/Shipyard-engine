@@ -27,7 +27,7 @@ public:
 	template <class T>
 	T& GetComponent();
 
-	bool GetActive(); 
+	bool GetActive();
 	void SetActive(const bool aState);
 
 	inline const SY::UUID GetID() const { return myID; }
@@ -39,7 +39,7 @@ private:
 	GameObject(const SY::UUID anID,GameObjectManager* aManager) : myID(anID),myManager(aManager) {}
 	SY::UUID myID = UINT_MAX;
 	GameObjectManager* myManager = nullptr;
-}; 
+};
 
 template<class T>
 inline T& GameObject::AddComponent()

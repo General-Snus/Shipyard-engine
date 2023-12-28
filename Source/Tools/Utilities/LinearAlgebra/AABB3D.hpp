@@ -1,6 +1,7 @@
+#pragma once
 #include "Vectors.hpp" 
 #include <algorithm>
-template<class T>
+template<class T = float>
 class AABB3D
 {
 public:

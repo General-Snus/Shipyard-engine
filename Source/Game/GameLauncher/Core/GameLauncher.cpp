@@ -4,22 +4,16 @@
 
 #include "GameLauncher.h"
 
-#define WIN32_LEAN_AND_MEAN 
-#include "Windows.h"
-
-#include <memory>
-#include <string>
-#include <stringapiset.h>  
-#include <fstream>
-#include <streambuf>
 #include <assert.h> 
+#include <fstream>
+#include <memory> 
 
-#include <Tools/Utilities/Math.hpp>
+#include <Tools/Logging/Logging.h>
+#include <Tools/Optick/src/optick.h>
 #include <Tools/ThirdParty/nlohmann/json.hpp>   
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/Input/InputHandler.hpp>
-#include <Tools/Logging/Logging.h>
-#include <Tools/Optick/src/optick.h>  
+#include <Tools/Utilities/Math.hpp>
 
 //#define ParticleSystemToggle
 
@@ -98,8 +92,6 @@ void GameLauncher::Start()
 	int actorAmount = 2;
 	int collidersAmount = 2;
 
-
-	SY::UUID player;
 	std::vector<GameObject> colliders;
 	colliders.resize(collidersAmount);
 	std::vector<Vector2f> colliderPositions =

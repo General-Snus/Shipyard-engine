@@ -25,3 +25,14 @@ std::shared_ptr<T> AIPollingManager::GetStation(const std::string& aName)
 	}
 	return nullptr;
 }
+
+//Why do i need you?
+template<>
+std::shared_ptr<MultipleTargets_PollingStation> AIPollingManager::GetStation(const std::string& aName)
+{
+	if(myPollingStations.contains(aName))
+	{
+		return std::static_pointer_cast<MultipleTargets_PollingStation>(myPollingStations.at(aName));
+	}
+	return nullptr;
+}
