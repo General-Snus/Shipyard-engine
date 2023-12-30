@@ -20,6 +20,6 @@ public:
 		float maxAcceleration = 100.0f;
 	};
 	static void Separation(const std::vector<MultipleTargets_PollingStation::DataTuple>& arg,cPhysics_Kinematic* physicsComponent,const Vector3f& position,const SY::UUID IgnoreID,SeparationSettings settings = {});
-
+	static void Separation(const Vector3f positionToSeparateFrom,cPhysics_Kinematic* physicsComponent,const Vector3f& position,SeparationSettings settings);
 };
 

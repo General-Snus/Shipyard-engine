@@ -209,6 +209,7 @@
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\SeparationController.h" />
     <ClInclude Include="Objects\AI\AgentSystem\PollingStations\Target_PollingStation.h" />
     <ClInclude Include="Objects\AI\AgentSystem\SteeringBehaviour.h" />
+    <ClInclude Include="ComponentSystem\Components\TaskSpecific\ProjectileComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\CombatComponent.cpp" />
@@ -262,6 +263,7 @@
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\SeparationController.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\PollingStations\Source\Target_PollingStation.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Source\SteeringBehaviour.cpp" />
+    <ClCompile Include="ComponentSystem\Components\TaskSpecific\Source\ProjectileComponent.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

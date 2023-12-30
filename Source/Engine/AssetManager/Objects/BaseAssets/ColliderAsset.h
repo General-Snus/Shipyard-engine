@@ -29,6 +29,7 @@ public:
 	ColliderAsset() = delete; // Always tell the type stupid
 	explicit ColliderAsset(eColliderType type);
 	explicit ColliderAsset(const std::filesystem::path& aFilePath);
+	~ColliderAsset();
 	void Init() override;
 
 

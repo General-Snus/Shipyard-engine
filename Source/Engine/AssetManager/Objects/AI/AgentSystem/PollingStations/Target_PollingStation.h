@@ -45,9 +45,10 @@ public:
 
 	//Gets all agents in circle and returns the center of mass of those agents
 	Vector3f GetCoMWithinCircle(Vector3f position,float radius,int& EntitiesInCircle);
-
 	//returns the center of mass of all agents
 	Vector3f GetCoM();
+
+	Vector3f GetClosestPositionAsCollider(Vector3f position);
 private:
 	std::vector<GameObject> targets;
 };

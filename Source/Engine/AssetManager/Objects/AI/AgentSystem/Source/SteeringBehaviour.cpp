@@ -1,7 +1,7 @@
 #include "AssetManager.pch.h"
-#include <Tools/Utilities/LinearAlgebra/Quaternions.hpp>
 #include "../SteeringBehaviour.h"
 #include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h>
+#include <Tools/Utilities/LinearAlgebra/Quaternions.hpp>
 
 
 void SteeringBehaviour::LookAt(cPhysics_Kinematic* kinematic,Vector3f TargetDirection,Vector3f forward,float strength)
@@ -45,7 +45,7 @@ void SteeringBehaviour::DampenAngularVelocity(cPhysics_Kinematic* kinematic,floa
 void SteeringBehaviour::VelocityMatching(cPhysics_Kinematic* kinematic,Vector3f targetVelocity,float timeToMatch)
 {
 	OPTICK_EVENT();
-	Vector3f acceleration = (targetVelocity - kinematic->ph_velocity) / timeToMatch; 
+	Vector3f acceleration = (targetVelocity - kinematic->ph_velocity) / timeToMatch;
 	kinematic->ph_acceleration += acceleration;
 }
 
@@ -99,5 +99,21 @@ void SteeringBehaviour::Separation(const std::vector<MultipleTargets_PollingStat
 			direction.Normalize();
 			physicsComponent->ph_acceleration += strength * -direction;
 		}
+	}
+}
+void SteeringBehaviour::Separation(const Vector3f positionToSeparateFrom,cPhysics_Kinematic* physicsComponent,const Vector3f& position,SeparationSettings settings)
+{
+	OPTICK_EVENT();
+	Vector3f direction = (positionToSeparateFrom - position);
+	float distance = direction.Length();
+
+	if(distance < settings.threshold)
+	{
+		float strength = std::min(
+			settings.decayCoefficient / (distance * distance),
+			settings.maxAcceleration);
+
+		direction.Normalize();
+		physicsComponent->ph_acceleration += strength * -direction;
 	}
 }

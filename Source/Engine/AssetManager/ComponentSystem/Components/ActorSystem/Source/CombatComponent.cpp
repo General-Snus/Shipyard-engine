@@ -1,5 +1,6 @@
-#include "../CombatComponent.h"
 #include "AssetManager.pch.h"
+#include "../CombatComponent.h"
+#include <Engine/AssetManager/ComponentSystem/Components/TaskSpecific/ProjectileComponent.h>
 
 CombatComponent::CombatComponent(const SY::UUID anOwnerID) : Component(anOwnerID)
 {
@@ -45,12 +46,15 @@ void CombatComponent::FireProjectile()
 		auto& kinematic = projectile.AddComponent <cPhysics_Kinematic>();
 		auto& mesh = projectile.AddComponent <cMeshRenderer>();
 		auto& collider = projectile.AddComponent <cCollider>();
-		collider;
+		auto& projComponent = projectile.AddComponent <ProjectileComponent>();
+		projComponent.InitWithValues(20.f,GetGameObject());
 
 		transform.SetPosition(GetGameObject().GetComponent<Transform>().GetPosition());
 		transform.SetRotation(GetGameObject().GetComponent<Transform>().GetRotation());
 		transform.Rotate(90,0,0);
 		kinematic.ph_velocity = GetGameObject().GetComponent<Transform>().GetForward() * myProjectileSpeed;
 		mesh.SetNewMesh("Models/Projectile.fbx");
+
+		collider;
 	}
 }

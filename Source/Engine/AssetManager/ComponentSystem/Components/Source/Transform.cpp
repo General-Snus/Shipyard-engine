@@ -163,6 +163,11 @@ void Transform::SetScale(Vector3f scale)
 	//ApplyTransformation(Matrix::CreateScaleMatrix(scale));
 }
 
+Vector3f Transform::GetScale() const
+{
+	return myScale;
+}
+
 bool Transform::GetIsRecentlyUpdated() const
 {
 	return IsRecentlyUpdated;

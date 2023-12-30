@@ -10,6 +10,18 @@ ColliderAsset::ColliderAsset(const std::filesystem::path& aFilePath) : AssetBase
 {
 }
 
+ColliderAsset::~ColliderAsset()
+{
+	for(DebugDrawer::PrimitiveHandle& handle : myHandles)
+	{
+		DebugDrawer::Get().RemoveDebugPrimitive(handle);
+	}
+
+	myHandles.clear();
+
+	AssetBase::~AssetBase();
+}
+
 void ColliderAsset::Init()
 {
 }
@@ -60,7 +72,7 @@ void ColliderAssetSphere::RenderDebugLines(const Transform& data)
 	DebugDrawer::PrimitiveHandle handle = DebugDrawer::Get().AddDebugBox(
 		mySphere.GetCenter() + data.GetPosition() + min * mySphere.GetRadius(),
 		mySphere.GetCenter() + data.GetPosition() + max * mySphere.GetRadius()
-		);
+	);
 	DebugDrawer::Get().SetDebugPrimitiveTransform(handle,data.GetTransform());
 	myHandles.push_back(handle);
 }

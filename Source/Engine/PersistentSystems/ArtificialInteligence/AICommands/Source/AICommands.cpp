@@ -16,17 +16,17 @@ namespace GeneralizedAICommands {
 	bool IsTargetInSight(GameObject input)
 	{
 		input;
-		////Is there other targets active?
-		//const Transform& myTransform = input.GetComponent<Transform>();
-		//const CombatComponent& myStats = input.GetComponent<CombatComponent>();
+		//Is there other targets active?
+		const Transform& myTransform = input.GetComponent<Transform>();
+		const CombatComponent& myStats = input.GetComponent<CombatComponent>();
 
-		//Vector3f closestTarget = AIPollingManager::Get().GetStation<MultipleTargets_PollingStation>("Targets")->GetClosestTargetPosition(myTransform.GetPosition(),input);
-		//Vector3f direction = (closestTarget - myTransform.GetPosition()).GetNormalized();
+		Vector3f closestTarget = AIPollingManager::Get().GetStation<MultipleTargets_PollingStation>("Targets")->GetClosestTargetPosition(myTransform.GetPosition(),input);
+		Vector3f direction = (closestTarget - myTransform.GetPosition()).GetNormalized();
 
-		//if(direction.Dot(myTransform.GetForward()) > cos(DEG_TO_RAD * myStats.myAttackCone)) //45 degrees
-		//{
-		//	return true;
-		//}
+		if(direction.Dot(myTransform.GetForward()) > cos(DEG_TO_RAD * myStats.myAttackCone)) //45 degrees
+		{
+			return true;
+		}
 
 		return false;
 	}
@@ -135,6 +135,15 @@ namespace GeneralizedAICommands {
 		SteeringBehaviour::LookAt(&physicsComponent,physicsComponent.ph_velocity,transform.GetForward(),5.0f);
 		SteeringBehaviour::Wander(&physicsComponent,transform.GetForward(),5.0f);
 
+
+		Vector3f ref = AIPollingManager::Get().GetStation<MultipleTargets_PollingStation>("Colliders")->GetClosestPositionAsCollider(transform.GetPosition());
+		DebugDrawer::Get().AddDebugLine(transform.GetPosition(),ref,Vector3f(0,1,0),0.05f);
+		SteeringBehaviour::SeparationSettings settings;
+		settings.decayCoefficient = 20.0f;
+		settings.threshold = 5.0f;
+		SteeringBehaviour::Separation(ref,&physicsComponent,transform.GetPosition(),settings);
+
+
 		return true;
 	}
 
@@ -147,7 +156,7 @@ namespace GeneralizedAICommands {
 
 		Vector3f closestTarget = AIPollingManager::Get().GetStation<MultipleTargets_PollingStation>("Targets")->GetClosestTargetPosition(transform.GetPosition(),input);
 		Vector3f direction = (closestTarget - transform.GetPosition()).GetNormalized();
-		SteeringBehaviour::DampenVelocity(&physicsComponent);
+		SteeringBehaviour::DampenVelocity(&physicsComponent,2);
 		SteeringBehaviour::LookAt(&physicsComponent,direction,transform.GetForward(),5.0f);
 
 		return true;

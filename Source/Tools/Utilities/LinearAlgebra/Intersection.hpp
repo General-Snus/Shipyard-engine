@@ -250,6 +250,21 @@ bool IntersectionAABBRay(const AABB3D<T>  aAABB,const Ray<T>& aRay,Vector3<T>& h
 }
 
 
+template<class T = float>
+bool IntersectionAABB(const AABB3D<T>  aAABB,const AABB3D<T>  aAABB2)
+{
+	const Vector3<T> c1 = aAABB.GetCenter();
+	const Vector3<T> r1 = aAABB.GetWidth();
+	const Vector3<T> c2 = aAABB2.GetCenter();
+	const Vector3<T> r2 = aAABB2.GetWidth();
+
+	bool x = std::abs(c1[0] - c2[0]) <= (r1[0] + r2[0]);
+	bool y = std::abs(c1[1] - c2[1]) <= (r1[1] + r2[1]);
+	bool z = std::abs(c1[2] - c2[2]) <= (r1[2] + r2[2]);
+
+	return x && y && z;
+}
+
 // If the ray intersects the sphere, true is returned, if not, false is returned.
 // A rat intersecting the surface of the sphere is considered as intersecting it.
 template<class T>

@@ -8,7 +8,7 @@ enum class eComponentType
 	base,
 	backgroundColor,
 };
-
+class cCollider;
 class Component : public std::enable_shared_from_this<Component>
 {
 public:
@@ -100,19 +100,19 @@ inline T* Component::TryGetAddComponent()
 
 
 template<class T>
-inline const T& Component::GetComponent() const 
+inline const T& Component::GetComponent() const
 {
 	return GameObjectManager::Get().GetComponent<T>(myOwnerID);
 }
 
 template<class T>
-inline const T* Component::TryGetComponent() const 
+inline const T* Component::TryGetComponent() const
 {
 	return GameObjectManager::Get().TryGetComponent<T>(myOwnerID);
 }
 
 template<class T>
-inline const T* Component::TryGetAddComponent() const 
+inline const T* Component::TryGetAddComponent() const
 {
 	if(auto* returnComponent = GameObjectManager::Get().TryGetComponent<T>(myOwnerID))
 	{

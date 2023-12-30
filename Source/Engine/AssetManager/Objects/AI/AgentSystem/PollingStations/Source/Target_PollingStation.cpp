@@ -220,3 +220,21 @@ void MultipleTargets_PollingStation::AddToTargetList(const GameObject aTarget)
 	OPTICK_EVENT();
 	targets.push_back(aTarget);
 }
+
+Vector3f MultipleTargets_PollingStation::GetClosestPositionAsCollider(Vector3f position)
+{
+	float closestDistance = FLT_MAX;
+	Vector3f closestPosition = position;
+	for(auto& g : targets)
+	{
+		const Vector3f coll = g.GetComponent<cCollider>().GetClosestPosition(position);
+		const float dist = (coll - position).LengthSqr();
+		if(dist < closestDistance)
+		{
+			closestDistance = dist;
+			closestPosition = coll;
+		}
+	}
+	std::cout << closestDistance << std::endl;
+	return closestPosition;
+}

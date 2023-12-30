@@ -12,6 +12,17 @@ cPhysics_Kinematic::cPhysics_Kinematic(const SY::UUID anOwnerID) : Component(anO
 	ph_maxAcceleration = 100.0f;
 }
 
+cPhysics_Kinematic::~cPhysics_Kinematic()
+{
+	for(DebugDrawer::PrimitiveHandle& handle : myHandles)
+	{
+		DebugDrawer::Get().RemoveDebugPrimitive(handle);
+	}
+
+	myHandles.clear();
+	Component::~Component();
+}
+
 void cPhysics_Kinematic::Init()
 {
 	//Check for required components
@@ -19,7 +30,7 @@ void cPhysics_Kinematic::Init()
 	{
 		this->GetGameObject().AddComponent<Transform>();
 		InitPrimitive();
-	} 
+	}
 }
 void cPhysics_Kinematic::InitPrimitive()
 {
@@ -54,7 +65,7 @@ void cPhysics_Kinematic::Update()
 	{
 		ph_velocity += ph_acceleration * delta;
 		ph_Angular_velocity += ph_Angular_acceleration * delta;
-		
+
 		if(ph_velocity.Length() > ph_maxSpeed)
 		{
 			ph_velocity.Normalize();
@@ -93,8 +104,8 @@ void cPhysics_Kinematic::Render()
 
 	if(auto* transform = TryGetComponent<Transform>())
 	{
-		 InitPrimitive();
+		InitPrimitive();
 	}
-	 
+
 #endif // _DEBUGDRAW 
 }

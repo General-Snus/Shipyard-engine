@@ -1,6 +1,6 @@
 #include "AssetManager.pch.h"
-#include "../GameObjectManager.h"
 #include "../GameObject.h"
+#include "../GameObjectManager.h"
 #include <algorithm>
 #include <string>
 
@@ -70,6 +70,7 @@ GameObject GameObjectManager::GetGameObject(SY::UUID anID)
 
 void GameObjectManager::CollidedWith(const SY::UUID aFirstID,const SY::UUID aTargetID)
 {
+	std::cout << aFirstID << " collided with " << aTargetID << std::endl;
 	for(auto& cm : myComponentManagers)
 	{
 		cm.second->CollidedWith(aFirstID,aTargetID);
@@ -149,4 +150,4 @@ void GameObjectManager::DeleteObjects()
 	}
 
 	myObjectsToDelete.clear();
-} 
+}

@@ -90,19 +90,21 @@ void GameLauncher::Start()
 
 	//Movement1  
 	int actorAmount = 2;
-	int collidersAmount = 2;
+	int collidersAmount = 4;
 
 	std::vector<GameObject> colliders;
 	colliders.resize(collidersAmount);
 	std::vector<Vector2f> colliderPositions =
 	{
 		Vector2f(1,0),
-		Vector2f(-1,0)
+		Vector2f(-1,0),
+		Vector2f(0,1),
+		Vector2f(0,-1)
 	};
 
 	for(size_t i = 0; i < collidersAmount; i++)
 	{
-		float position = 15.0f;
+		float position = 25.0f;
 		float x = position * colliderPositions[i].x;
 		float z = position * colliderPositions[i].y;
 
@@ -110,23 +112,24 @@ void GameLauncher::Start()
 		colliders[i] = gom.CreateGameObject();
 		auto& transform = colliders[i].AddComponent<Transform>();
 		transform.SetPosition(x,0,z);
-		transform.SetScale(1.f,1.f,5.f);
+		transform.SetScale(1.f,1.f,25.f);
+		transform.SetRotation(0,90 * colliderPositions[i].y,0);
 
 		auto& mesh = colliders[i].AddComponent<cMeshRenderer>("Models/Cube.fbx");
 		mesh.SetMaterialPath("Materials/C64Separatist.json");
-
 		colliders[i].AddComponent<cCollider>();
 	}
 
 	std::vector<GameObject> entities;
 	entities.resize(actorAmount); //Safety resize if we dont add more it wont realloc and span wont loose connection
 
-
+	int  i = 0;
 	for(auto& obj : entities)
 	{
-		float x = RandomEngine::RandomInRange<float>(-10.f,10.f);
-		float z = RandomEngine::RandomInRange<float>(-10.f,10.f);
-
+		float position = 15.0f;
+		float x = position * colliderPositions[i].x;
+		float z = position * colliderPositions[i].y;
+		i++;
 		//Drone
 		obj = gom.CreateGameObject();
 		auto& transform = obj.AddComponent<Transform>();
@@ -147,11 +150,15 @@ void GameLauncher::Start()
 
 
 	{
-		auto& actor = entities[0].AddComponent<cActor>();
+		/*auto& actor = entities[0].AddComponent<cActor>();
 		actor.SetController(new AIController(
 			AIPollingManager::Get().GetStation<MultipleTargets_PollingStation>("Colliders").get(),
 			AIPollingManager::Get().GetStation<MultipleTargets_PollingStation>("Targets").get())
-		);
+		);*/
+
+
+		auto& actor = entities[0].AddComponent<cActor>();
+		actor.SetController(new DecisionTreeController());
 	}
 
 	{
