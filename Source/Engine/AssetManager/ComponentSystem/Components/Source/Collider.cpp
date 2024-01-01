@@ -34,7 +34,7 @@ void cCollider::Update()
 	}
 }
 
-Vector3f cCollider::GetClosestPosition(Vector3f position)
+Vector3f cCollider::GetClosestPosition(Vector3f position) const
 {
 	const Transform& otherObj = GetComponent<Transform>();
 	const auto collider = GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB().UpdateWithTransform(otherObj.GetTransform());;
@@ -42,9 +42,20 @@ Vector3f cCollider::GetClosestPosition(Vector3f position)
 	return collider.ClosestPoint(position);
 }
 
-void cCollider::CreateAABB(const AABB3D<float>& rf)
+Vector3f roundToBasis(Vector3f input)
 {
-	myCollider = std::make_shared<ColliderAssetAABB>(rf);
+	Vector3f output;
+	output.x = round(input.x);
+	output.y = round(input.y);
+	output.z = round(input.z);
+	return output;
+}
+Vector3f cCollider::GetNormalToward(Vector3f position) const
+{
+	const Transform& otherObj = GetComponent<Transform>();
+	const auto collider = GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB().UpdateWithTransform(otherObj.GetTransform());
+	Vector3f norm = roundToBasis((collider.ClosestPoint(position) - otherObj.GetPosition()).GetNormalized());
+	return norm;
 }
 
 void cCollider::Render()

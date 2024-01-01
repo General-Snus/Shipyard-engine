@@ -23,8 +23,8 @@ public:
 	template <class T>
 	bool HasComponent() const;
 
-	inline SY::UUID GetOwner() { return myOwnerID; }
-	inline GameObject GetGameObject() { return GameObjectManager::Get().GetGameObject(myOwnerID); }
+	inline const SY::UUID GetOwner()  const { return myOwnerID; }
+	inline GameObject GetGameObject() const { return GameObjectManager::Get().GetGameObject(myOwnerID); }
 
 	template <class T>
 	T& GetComponent();
@@ -41,7 +41,7 @@ public:
 	const T* TryGetAddComponent() const;
 
 
-	inline bool IsActive() { return myIsActive && GameObjectManager::Get().GetActive(myOwnerID); }
+	inline bool IsActive() const { return myIsActive && GameObjectManager::Get().GetActive(myOwnerID); }
 	inline void SetActive(const bool aState) { myIsActive = aState; }
 
 	virtual void CollidedWith(const SY::UUID /*aGameObjectID*/) {}

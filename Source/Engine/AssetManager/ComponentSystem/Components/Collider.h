@@ -12,7 +12,8 @@ public:
 	cCollider(const unsigned int anOwnerId); // Create a generic cube 
 	cCollider(const unsigned int anOwnerId,const std::filesystem::path aPath);
 	void Update() override;
-	Vector3f GetClosestPosition(Vector3f position);
+	Vector3f GetClosestPosition(Vector3f position) const;
+	Vector3f GetNormalToward(Vector3f position) const;
 	void Render() override;
 
 
@@ -23,7 +24,7 @@ public:
 	//void Notify(std::weak_ptr<cCollider> notifier) { for(auto& i : myNotify) i.lock()->CollidedWith(notifier); }
 
 	template<typename T>
-	std::shared_ptr<T> GetColliderAssetOfType();
+	std::shared_ptr<T> GetColliderAssetOfType() const;
 
 private:
 	std::shared_ptr<ColliderAsset> myCollider;
@@ -31,7 +32,9 @@ private:
 };
 
 template<typename T>
-inline std::shared_ptr<T> cCollider::GetColliderAssetOfType()
+inline std::shared_ptr<T> cCollider::GetColliderAssetOfType() const
 {
 	return std::reinterpret_pointer_cast<T>(myCollider);
 }
+
+

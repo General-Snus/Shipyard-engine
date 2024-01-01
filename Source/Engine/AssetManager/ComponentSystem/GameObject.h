@@ -1,7 +1,8 @@
 #pragma once
 
 #include "GameObjectManager.h"
-#define AsUINT(v) static_cast<unsigned>(v)  
+#define AsUINT(v) static_cast<unsigned>(v)   
+
 
 class GameObject
 {
@@ -30,14 +31,21 @@ public:
 	bool GetActive();
 	void SetActive(const bool aState);
 
+	inline void SetLayer(const Layer aLayer) { myManager->SetLayer(myID,aLayer); };
+	inline Layer GetLayer() const { return myManager->GetLayer(myID); };
+
 	inline const SY::UUID GetID() const { return myID; }
 	const bool IsValid() const { return myID.IsValid(); }
 
 private:
 	friend class GameObjectManager; //Only the asset manager can create and destroy components
 
+
+
+	//DO NOT ADD VARIABLES HERE IT IS INCONSISTENT WITH PHILOSOPHY AND WILL NOT WORK
 	GameObject(const SY::UUID anID,GameObjectManager* aManager) : myID(anID),myManager(aManager) {}
 	SY::UUID myID = UINT_MAX;
+
 	GameObjectManager* myManager = nullptr;
 };
 

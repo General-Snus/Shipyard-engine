@@ -10,7 +10,9 @@ public:
 	void Update() override;
 	void Render() override;
 
+	void Respawn();
 	void FireProjectile();
+	void Healing();
 
 	//Lazy town over here
 	int myHealth;
@@ -20,6 +22,10 @@ public:
 	float myAttackRange;
 	float myVisionRange;
 	float myAttackCone; // Degrees
+	float respawnTime;
 private:
+	float decimalHPGeneration = 0;
+	Vector3f spawnPoint;
+	float myDeathTimer;
 	float myAttackTimer = 0;
 };

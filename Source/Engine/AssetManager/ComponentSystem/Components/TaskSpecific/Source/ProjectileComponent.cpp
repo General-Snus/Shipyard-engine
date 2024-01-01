@@ -1,5 +1,5 @@
-#include "AssetManager.pch.h"
 #include "../ProjectileComponent.h"
+#include "AssetManager.pch.h"
 
 ProjectileComponent::ProjectileComponent(const SY::UUID anOwnerID) : Component(anOwnerID)
 {
@@ -32,7 +32,12 @@ void ProjectileComponent::CollidedWith(const SY::UUID aGameObjectID)
 		if(auto* arg = GameObjectManager::Get().TryGetComponent<CombatComponent>(aGameObjectID))
 		{
 			arg->myHealth -= 10;
-			GameObjectManager::Get().DeleteGameObject(myOwnerID);
 		}
+		// doing this because have no nice tag system :((( 
+		if(auto* arg = GameObjectManager::Get().TryGetComponent<ProjectileComponent>(aGameObjectID))
+		{
+			return;
+		}
+		GameObjectManager::Get().DeleteGameObject(myOwnerID);
 	}
 }

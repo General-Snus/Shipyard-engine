@@ -1,9 +1,9 @@
 #pragma once
+#include "UUID.h"
+#include <cassert>  
+#include <Engine/AssetManager/AssetManagerUtills.hpp>
 #include <unordered_map>
 #include <vector>
-#include <cassert>  
-#include "UUID.h"
-#include <Engine/AssetManager/AssetManagerUtills.hpp>
 //Original creation by Simon
 
 class Component;
@@ -25,7 +25,7 @@ public:
 	virtual void Update() = 0;
 	virtual void Render() = 0;
 	virtual void DeleteGameObject(const SY::UUID aGameObjectID) = 0;
-	virtual void CollidedWith(const SY::UUID aFirstID,const SY::UUID aTargetID) = 0; 
+	virtual void CollidedWith(const SY::UUID aFirstID,const SY::UUID aTargetID) = 0;
 
 	void SetUpdatePriority(const UpdatePriority aPriority) { myUpdatePriority = aPriority; }
 	const UpdatePriority GetUpdatePriority() const { return myUpdatePriority; }
@@ -61,7 +61,7 @@ public:
 
 	void Update() override;
 	void Render() override;
-	void DeleteGameObject(const SY::UUID aGameObjectID) override; 
+	void DeleteGameObject(const SY::UUID aGameObjectID) override;
 	void CollidedWith(const SY::UUID aFirstID,const SY::UUID aTargetID) override;
 private:
 	std::unordered_map<SY::UUID,unsigned int> myGameObjectIDtoVectorIndex;
@@ -108,7 +108,7 @@ inline T& ComponentManager<T>::AddComponent(const SY::UUID aGameObjectID,Args...
 	static_cast<Component*>(&myComponents.back())->Init();
 	return myComponents.back();
 }
- 
+
 template<class T>
 inline const bool ComponentManager<T>::HasComponent(const SY::UUID aGameObjectID) const
 {

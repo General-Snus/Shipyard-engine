@@ -8,6 +8,7 @@
 #include <Engine/AssetManager/Objects/AI/AgentSystem/SteeringBehaviour.h>
 
 #include "../AICommands.h" 
+#include <Engine/PersistentSystems/Physics/Raycast.h>
 #include <Tools/Utilities/Math.hpp> 
 
 
@@ -23,7 +24,7 @@ namespace GeneralizedAICommands {
 		Vector3f closestTarget = AIPollingManager::Get().GetStation<MultipleTargets_PollingStation>("Targets")->GetClosestTargetPosition(myTransform.GetPosition(),input);
 		Vector3f direction = (closestTarget - myTransform.GetPosition()).GetNormalized();
 
-		if(direction.Dot(myTransform.GetForward()) > cos(DEG_TO_RAD * myStats.myAttackCone)) //45 degrees
+		if(direction.Dot(myTransform.GetForward()) > cos(DEG_TO_RAD * myStats.myAttackCone)) //10 degrees artificial spread
 		{
 			return true;
 		}
@@ -37,11 +38,28 @@ namespace GeneralizedAICommands {
 		const Transform& myTransform = input.GetComponent<Transform>();
 		const CombatComponent& myStats = input.GetComponent<CombatComponent>();
 
-		Vector3f closestTarget = AIPollingManager::Get().GetStation<MultipleTargets_PollingStation>("Targets")->GetClosestTargetPosition(myTransform.GetPosition(),input);
-		if((closestTarget - myTransform.GetPosition()).Length() < myStats.myVisionRange)
+		GameObject obj = AIPollingManager::Get().GetStation<MultipleTargets_PollingStation>("Targets")->GetClosestTarget(myTransform.GetPosition(),input);
+		Vector3f closestTarget = obj.GetComponent<Transform>().GetPosition();
+		const float distance = (closestTarget - myTransform.GetPosition()).Length();
+
+
+		if(distance < myStats.myVisionRange)
 		{
-			DebugDrawer::Get().AddDebugLine(myTransform.GetPosition(),closestTarget,{0,1,1},0.5f);
-			return true;
+			Physics::RaycastHit hit;
+			Vector3f color = {1,0,0};
+			const Vector3f direction = (closestTarget - myTransform.GetPosition()).GetNormalized();
+
+			if(Physics::Raycast(myTransform.GetPosition(),direction,hit,input,
+				(Layer)((int)Layer::Entities | (int)Layer::Default)))
+			{
+				if(hit.objectHit.GetID() == obj.GetID())
+				{
+					color = {0,1,0};
+					DebugDrawer::Get().AddDebugLine(myTransform.GetPosition(),closestTarget,color,0.01f);
+					return true;
+				}
+			}
+			DebugDrawer::Get().AddDebugLine(myTransform.GetPosition(),closestTarget,color,0.01f);
 		}
 		return false;
 	}
@@ -74,13 +92,34 @@ namespace GeneralizedAICommands {
 		return true;
 	}
 
+	bool DeathSpin(GameObject input)
+	{
+		(input);
+		auto& physicsComponent = input.GetComponent<cPhysics_Kinematic>();
+		physicsComponent.ph_Angular_velocity = {0,500,0};
+		physicsComponent.ph_velocity = {0,0,0};
+		return true;
+	}
+
+	bool IsFullyHealed(GameObject input)
+	{
+		(input);
+
+		if(const auto* stats = input.TryGetComponent<CombatComponent>())
+		{
+			return stats->myHealth >= 100;
+		}
+		assert(false && "No health component found");
+		return true;
+	}
+
 	bool IsHealthy(GameObject input)
 	{
 		(input);
 
 		if(const auto* stats = input.TryGetComponent<CombatComponent>())
 		{
-			return stats->myHealth > 75;
+			return stats->myHealth > 25;
 		}
 		assert(false && "No health component found");
 		return true;
@@ -102,7 +141,7 @@ namespace GeneralizedAICommands {
 	{
 		(input);
 		auto& physicsComponent = input.GetComponent<cPhysics_Kinematic>();
-		SteeringBehaviour::DampenVelocity(&physicsComponent);
+		SteeringBehaviour::DampenVelocity(&physicsComponent,10);
 		if(auto* stats = input.TryGetComponent<CombatComponent>())
 		{
 			stats->FireProjectile();
@@ -114,12 +153,29 @@ namespace GeneralizedAICommands {
 	{
 		(input);
 
-		//auto& physicsComponent = input.GetComponent<cPhysics_Kinematic>();
-		//auto& transform = input.GetComponent<Transform>(); // You can use Get directly if you are sure it will exist, its faster and force safe code
+		auto& physicsComponent = input.GetComponent<cPhysics_Kinematic>();
+		auto& transform = input.GetComponent<Transform>();
 
+		Vector3f closestWell = AIPollingManager::Get().GetStation<MultipleTargets_PollingStation>("Healing")->GetClosestTargetPosition(transform.GetPosition());
+		SteeringBehaviour::DampenVelocity(&physicsComponent);
+		SteeringBehaviour::LookAt(&physicsComponent,physicsComponent.ph_velocity,transform.GetForward(),5.0f);
+		if(SteeringBehaviour::Arrive(&physicsComponent,closestWell,transform.GetPosition(),1.0f,3.0f))
+		{
+			input.GetComponent<CombatComponent>().Healing();
+		}
 
+		return true;
+	}
+	bool MoveFreely(GameObject input)
+	{
+		auto& physicsComponent = input.GetComponent<cPhysics_Kinematic>();
+		auto& transform = input.GetComponent<Transform>();
 
-		return false;
+		SteeringBehaviour::DampenVelocity(&physicsComponent);
+		SteeringBehaviour::LookAt(&physicsComponent,physicsComponent.ph_velocity,transform.GetForward(),50.0f);
+		SteeringBehaviour::Wander(&physicsComponent,transform.GetForward(),25.0f);
+
+		return true;
 	}
 
 	bool MoveToward(GameObject input)
@@ -129,21 +185,12 @@ namespace GeneralizedAICommands {
 		auto& physicsComponent = input.GetComponent<cPhysics_Kinematic>();
 		auto& transform = input.GetComponent<Transform>();
 
-		Vector3f newPosition = SteeringBehaviour::SetPositionInBounds(transform.GetPosition(),50.0f);
-		transform.SetPosition(newPosition);
+
 		SteeringBehaviour::DampenVelocity(&physicsComponent);
 		SteeringBehaviour::LookAt(&physicsComponent,physicsComponent.ph_velocity,transform.GetForward(),5.0f);
-		SteeringBehaviour::Wander(&physicsComponent,transform.GetForward(),5.0f);
+		Vector3f position = AIPollingManager::Get().GetStation<MultipleTargets_PollingStation>("Targets")->GetClosestTargetPosition(transform.GetPosition(),input);
 
-
-		Vector3f ref = AIPollingManager::Get().GetStation<MultipleTargets_PollingStation>("Colliders")->GetClosestPositionAsCollider(transform.GetPosition());
-		DebugDrawer::Get().AddDebugLine(transform.GetPosition(),ref,Vector3f(0,1,0),0.05f);
-		SteeringBehaviour::SeparationSettings settings;
-		settings.decayCoefficient = 20.0f;
-		settings.threshold = 5.0f;
-		SteeringBehaviour::Separation(ref,&physicsComponent,transform.GetPosition(),settings);
-
-
+		SteeringBehaviour::Arrive(&physicsComponent,position,transform.GetPosition());
 		return true;
 	}
 
@@ -152,11 +199,11 @@ namespace GeneralizedAICommands {
 		(input);
 
 		auto& physicsComponent = input.GetComponent<cPhysics_Kinematic>();
-		auto& transform = input.GetComponent<Transform>(); // You can use Get directly if you are sure it will exist, its faster and force safe code
+		auto& transform = input.GetComponent<Transform>();
 
 		Vector3f closestTarget = AIPollingManager::Get().GetStation<MultipleTargets_PollingStation>("Targets")->GetClosestTargetPosition(transform.GetPosition(),input);
 		Vector3f direction = (closestTarget - transform.GetPosition()).GetNormalized();
-		SteeringBehaviour::DampenVelocity(&physicsComponent,2);
+		SteeringBehaviour::DampenVelocity(&physicsComponent,5);
 		SteeringBehaviour::LookAt(&physicsComponent,direction,transform.GetForward(),5.0f);
 
 		return true;

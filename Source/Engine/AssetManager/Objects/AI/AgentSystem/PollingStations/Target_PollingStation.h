@@ -48,7 +48,8 @@ public:
 	//returns the center of mass of all agents
 	Vector3f GetCoM();
 
-	Vector3f GetClosestPositionAsCollider(Vector3f position);
+	Vector3f GetClosestPositionOnCollider(Vector3f position);
+	Vector3f GetClosestPositionOnCollider(Vector3f position,Vector3f& normal);
 private:
 	std::vector<GameObject> targets;
 };

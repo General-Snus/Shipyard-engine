@@ -22,7 +22,10 @@ namespace GeneralizedAICommands
 	//Action functions
 	bool ShootAtTarget(GameObject input);
 	bool Retreat(GameObject input);
+	bool MoveFreely(GameObject input);
 	bool MoveToward(GameObject input);
 	bool AlignToTarget(GameObject input);
+	bool DeathSpin(GameObject input);
+	bool IsFullyHealed(GameObject input);
 }
 

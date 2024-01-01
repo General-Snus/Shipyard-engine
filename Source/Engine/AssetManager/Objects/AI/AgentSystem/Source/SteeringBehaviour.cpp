@@ -32,7 +32,7 @@ Vector3f SteeringBehaviour::SetPositionInBounds(Vector3f position,float mapsize)
 void SteeringBehaviour::DampenVelocity(cPhysics_Kinematic* kinematic,float strength)
 {
 	OPTICK_EVENT();
-	kinematic->ph_acceleration = -kinematic->ph_velocity.GetNormalized() * strength;
+	kinematic->ph_acceleration += -kinematic->ph_velocity.GetNormalized() * strength;
 }
 
 void SteeringBehaviour::DampenAngularVelocity(cPhysics_Kinematic* kinematic,float strength)
@@ -69,6 +69,36 @@ void SteeringBehaviour::Wander(cPhysics_Kinematic* kinematic,Vector3f forward,fl
 	//	std::powf(RandomEngine::RandomBinomial(),5)* strength,
 	//	0,
 	//	std::powf(RandomEngine::RandomBinomial(),5)* strength};
+}
+
+bool SteeringBehaviour::Arrive(cPhysics_Kinematic* kinematic,Vector3f targetPosition,Vector3f yourPosition,float targetRadius,float slowRadius,float timeToMaxSpeed)
+{
+	Vector3f targetVelocity;
+	Vector3f direction = (targetPosition - yourPosition);
+	const float distance = direction.Length();
+	direction.Normalize();
+
+
+	if(distance < targetRadius)
+	{
+		kinematic->ph_acceleration += -kinematic->ph_velocity.GetNormalized();
+		return true;
+	}
+
+	if(distance > slowRadius)
+	{
+		targetVelocity = direction * kinematic->ph_maxSpeed;
+	}
+	else
+	{
+		targetVelocity = kinematic->ph_maxSpeed * direction * (distance / slowRadius);
+	}
+
+	kinematic->ph_acceleration += (targetVelocity - kinematic->ph_velocity) / timeToMaxSpeed;
+
+	//Implement following moving target with overload of second kinematic of target
+	return false;
+
 }
 
 void SteeringBehaviour::Separation(const std::vector<MultipleTargets_PollingStation::DataTuple>& arg,cPhysics_Kinematic* physicsComponent,const Vector3f& position,const SY::UUID IgnoreID,SeparationSettings settings)
@@ -115,5 +145,23 @@ void SteeringBehaviour::Separation(const Vector3f positionToSeparateFrom,cPhysic
 
 		direction.Normalize();
 		physicsComponent->ph_acceleration += strength * -direction;
+	}
+}
+// no moving backward just move out from wall like a sane person
+void SteeringBehaviour::WallSeparation(const Vector3f positionToSeparateFrom,const Vector3f wallNormal,cPhysics_Kinematic* physicsComponent,const Vector3f& position,SeparationSettings settings)
+{
+	OPTICK_EVENT();
+	Vector3f AntiNormal = -wallNormal;
+
+	const Vector3f direction = (positionToSeparateFrom - position);
+	const float distance = direction.Length();
+	const Vector3f moveDirection = (-AntiNormal * direction.Dot(AntiNormal) - AntiNormal * 0.0001f).GetNormalized(); // GetMathed
+
+	if(distance < settings.threshold)
+	{
+		float strength = std::min(
+			settings.decayCoefficient / (distance * distance),
+			settings.maxAcceleration);
+		physicsComponent->ph_acceleration += strength * moveDirection;
 	}
 }

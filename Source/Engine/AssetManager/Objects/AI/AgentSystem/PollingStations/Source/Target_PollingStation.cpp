@@ -221,7 +221,7 @@ void MultipleTargets_PollingStation::AddToTargetList(const GameObject aTarget)
 	targets.push_back(aTarget);
 }
 
-Vector3f MultipleTargets_PollingStation::GetClosestPositionAsCollider(Vector3f position)
+Vector3f MultipleTargets_PollingStation::GetClosestPositionOnCollider(Vector3f position)
 {
 	float closestDistance = FLT_MAX;
 	Vector3f closestPosition = position;
@@ -235,6 +235,24 @@ Vector3f MultipleTargets_PollingStation::GetClosestPositionAsCollider(Vector3f p
 			closestPosition = coll;
 		}
 	}
-	std::cout << closestDistance << std::endl;
+	return closestPosition;
+}
+
+Vector3f MultipleTargets_PollingStation::GetClosestPositionOnCollider(Vector3f position,Vector3f& normal)
+{
+	float closestDistance = FLT_MAX;
+	Vector3f closestPosition = position;
+	for(auto& g : targets)
+	{
+		const auto& collider = g.GetComponent<cCollider>();
+		const Vector3f coll = collider.GetClosestPosition(position);
+		const float dist = (coll - position).LengthSqr();
+		if(dist < closestDistance)
+		{
+			closestDistance = dist;
+			closestPosition = coll;
+			normal = collider.GetNormalToward(position);
+		}
+	}
 	return closestPosition;
 }

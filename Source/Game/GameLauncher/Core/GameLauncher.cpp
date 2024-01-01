@@ -88,63 +88,86 @@ void GameLauncher::Start()
 
 #pragma endregion
 
-	//Movement1  
-	int actorAmount = 2;
-	int collidersAmount = 4;
 
+
+	//Decisiontree 1
+	int actorAmount = 2;
+	int wellAmount = 1;
+
+#pragma region Collider
 	std::vector<GameObject> colliders;
-	colliders.resize(collidersAmount);
-	std::vector<Vector2f> colliderPositions =
+	//colliders.resize(collidersAmount);
+	auto colliderPositions =
 	{
-		Vector2f(1,0),
-		Vector2f(-1,0),
-		Vector2f(0,1),
-		Vector2f(0,-1)
+		Vector3<Vector3f>(25.5f * Vector3f(1,0,0), Vector3f(0,0,0),Vector3f(1,1,25)),
+		Vector3<Vector3f>(25.5f * Vector3f(-1,0,0),Vector3f(0,0,0),Vector3f(1,1,25)),
+		Vector3<Vector3f>(25.5f * Vector3f(0,0,1), Vector3f(0,0,0),Vector3f(25,1,1)),
+		Vector3<Vector3f>(25.5f * Vector3f(0,0,-1),Vector3f(0,0,0),Vector3f(25,1,1)),
+		Vector3<Vector3f>(20.f * Vector3f(0,0,1),Vector3f(0,0,0),Vector3f(1,1,10)),
+		Vector3<Vector3f>(20.f * Vector3f(0,0,-1),Vector3f(0,0,0),Vector3f(1,1,10)),
 	};
 
-	for(size_t i = 0; i < collidersAmount; i++)
+	for(const auto& transformData : colliderPositions)
 	{
-		float position = 25.0f;
-		float x = position * colliderPositions[i].x;
-		float z = position * colliderPositions[i].y;
-
 		//Drone
-		colliders[i] = gom.CreateGameObject();
-		auto& transform = colliders[i].AddComponent<Transform>();
-		transform.SetPosition(x,0,z);
-		transform.SetScale(1.f,1.f,25.f);
-		transform.SetRotation(0,90 * colliderPositions[i].y,0);
+		auto object = gom.CreateGameObject();
+		auto& transform = object.AddComponent<Transform>();
 
-		auto& mesh = colliders[i].AddComponent<cMeshRenderer>("Models/Cube.fbx");
+		transform.SetPosition(transformData[0]);
+		transform.SetRotation(transformData[1]);
+		transform.SetScale(transformData[2]);
+
+		auto& mesh = object.AddComponent<cMeshRenderer>("Models/Cube.fbx");
 		mesh.SetMaterialPath("Materials/C64Separatist.json");
-		colliders[i].AddComponent<cCollider>();
+		object.AddComponent<cCollider>();
+		colliders.push_back(object);
 	}
+#pragma endregion
 
+
+#pragma region Entities
 	std::vector<GameObject> entities;
-	entities.resize(actorAmount); //Safety resize if we dont add more it wont realloc and span wont loose connection
-
-	int  i = 0;
+	entities.resize(actorAmount);
 	for(auto& obj : entities)
 	{
-		float position = 15.0f;
-		float x = position * colliderPositions[i].x;
-		float z = position * colliderPositions[i].y;
-		i++;
 		//Drone
 		obj = gom.CreateGameObject();
 		auto& transform = obj.AddComponent<Transform>();
-		transform.SetPosition(x,0,z);
+		transform.SetPosition(RandomEngine::RandomInRange<float>(-20,20),0,RandomEngine::RandomInRange<float>(-20,20));
 		transform.SetRotation(0,RandomEngine::RandomInRange(0.f,360.f),0);
 
 		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/C64Seeker.fbx");
 		mesh.SetMaterialPath("Materials/C64Seeker.json");
 		obj.AddComponent<cCollider>();
+		obj.SetLayer(Layer::Entities);
 	}
+#pragma endregion
 
+
+#pragma region Healtwell
+	std::vector<GameObject> well;
+	well.resize(wellAmount); //Safety resize if we dont add more it wont realloc and span wont loose connection  
+	for(auto& obj : well)
+	{
+		float x = RandomEngine::RandomInRange(-20.0f,20.0f);
+		float z = RandomEngine::RandomInRange(-20.0f,20.0f);
+
+		//Drone
+		obj = gom.CreateGameObject();
+		auto& transform = obj.AddComponent<Transform>();
+		transform.SetPosition(x,0,z);
+		transform.SetRotation(90,0,0);
+
+		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/Well.fbx");
+		mesh.SetMaterialPath("Materials/C64Player.json");
+	}
+#pragma endregion
 
 	auto colliderPollingStation = std::make_shared<MultipleTargets_PollingStation>(colliders);
 	auto formationPollingStation = std::make_shared<MultipleTargets_PollingStation>(entities);
+	auto wellPollingStation = std::make_shared<MultipleTargets_PollingStation>(well);
 
+	AIPollingManager::Get().AddStation("Healing",wellPollingStation);
 	AIPollingManager::Get().AddStation("Colliders",colliderPollingStation);
 	AIPollingManager::Get().AddStation("Targets",formationPollingStation);
 

@@ -1,5 +1,5 @@
-#include "AssetManager.pch.h"
 #include "../CombatComponent.h"
+#include "AssetManager.pch.h"
 #include <Engine/AssetManager/ComponentSystem/Components/TaskSpecific/ProjectileComponent.h>
 
 CombatComponent::CombatComponent(const SY::UUID anOwnerID) : Component(anOwnerID)
@@ -13,8 +13,12 @@ void CombatComponent::Init()
 	myProjectileSpeed = 10.f;
 	myAttackSpeed = 1.f;
 	myAttackRange = 10.f;
-	myAttackCone = 5.f;
+	myAttackCone = 10.f;
 	myVisionRange = 20.f;
+	respawnTime = 10.f;
+	myDeathTimer = 0.f;
+	spawnPoint = GetGameObject().GetComponent<Transform>().GetPosition();
+
 }
 
 void CombatComponent::Update()
@@ -24,13 +28,29 @@ void CombatComponent::Update()
 	if(myHealth <= 0)
 	{
 		//'John is kill'
-		//'No'
-		std::cout << "kia" << std::endl;
+		//'No' 
+		myDeathTimer += Timer::GetInstance().GetDeltaTime();
+		if(myDeathTimer > respawnTime)
+		{
+			myDeathTimer = 0.f;
+			Respawn();
+		}
 	}
 }
 
 void CombatComponent::Render()
 {
+}
+
+void CombatComponent::Respawn()
+{
+	auto& physicsComponent = GetGameObject().GetComponent<cPhysics_Kinematic>();
+	physicsComponent.ph_Angular_velocity = {0,0,0};
+
+	myHealth = 100;
+	GetGameObject().GetComponent<Transform>().SetPosition(
+		RandomEngine::RandomInRange<float>(-20,20),0,RandomEngine::RandomInRange<float>(-20,20)
+	);
 }
 
 void CombatComponent::FireProjectile()
@@ -54,7 +74,21 @@ void CombatComponent::FireProjectile()
 		transform.Rotate(90,0,0);
 		kinematic.ph_velocity = GetGameObject().GetComponent<Transform>().GetForward() * myProjectileSpeed;
 		mesh.SetNewMesh("Models/Projectile.fbx");
-
+		projectile.SetLayer(Layer::Projectile);
 		collider;
+	}
+}
+void CombatComponent::Healing()
+{
+	decimalHPGeneration += 2.f * Timer::GetInstance().GetDeltaTime();
+
+	//KEKW
+	const int hpAdd = static_cast<int>(std::roundf(decimalHPGeneration));
+	decimalHPGeneration -= hpAdd;
+	myHealth += hpAdd;
+
+	if(myHealth > 100)
+	{
+		myHealth = 100;
 	}
 }

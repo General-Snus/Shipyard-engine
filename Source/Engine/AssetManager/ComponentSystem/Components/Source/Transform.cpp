@@ -105,7 +105,7 @@ void Transform::SetPosition(float X,float Y,float Z)
 
 Vector3f Transform::GetPosition() const
 {
-	return {myTransform(4,1),myTransform(4,2),myTransform(4,3)};
+	return myPosition;
 };
 
 void Transform::Rotate(float X,float Y,float Z)

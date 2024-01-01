@@ -52,7 +52,7 @@ template<class T>
 inline void Ray<T>::InitWithOriginAndDirection(const Vector3<T>& aOrigin,const Vector3<T>& aDirection)
 {
 	Origin = aOrigin;
-	UnitVector = aDirection;
+	UnitVector = aDirection.GetNormalized();
 }
 template<class T>
 inline Vector3<T> Ray<T>::GetOrigin() const
