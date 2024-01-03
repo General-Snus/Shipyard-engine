@@ -1,7 +1,7 @@
 #include "GraphicsEngine.pch.h"
 #include "ShadowRenderer.h"
 #include "../../Shaders/Include/Default_VS.h"
-#include <Tools/ImGui/imgui.h>
+#include <Tools/ImGui/ImGui/imgui.h>
 
 void ShadowRenderer::Init()
 {

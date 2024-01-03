@@ -44,7 +44,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <EnableUnitySupport>true</EnableUnitySupport>
+    <EnableUnitySupport>false</EnableUnitySupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -52,7 +52,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <EnableUnitySupport>true</EnableUnitySupport>
+    <EnableUnitySupport>false</EnableUnitySupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -76,13 +76,13 @@
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(LibraryPath);</LibraryPath>
-    <IncludePath>$(ProjectDir);$(SolutionDir)\;$(IncludePath);$(SolutionDir)Tools\Assimp\include;</IncludePath>
+    <IncludePath>$(ProjectDir);$(SolutionDir)\;$(IncludePath);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)Tools\ImGui\MuninGraph\;$(SolutionDir)Tools\ImGui\ImGui\</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(LibraryPath);</LibraryPath>
-    <IncludePath>$(ProjectDir);$(SolutionDir)\;$(IncludePath);$(SolutionDir)Tools\Assimp\include;</IncludePath>
+    <IncludePath>$(ProjectDir);$(SolutionDir)\;$(IncludePath);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)Tools\ImGui\MuninGraph\;$(SolutionDir)Tools\ImGui\ImGui\</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -130,6 +130,8 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -151,6 +153,8 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -162,11 +166,23 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ArtificialInteligence\AICommands\AICommands.h" />
+    <ClInclude Include="ChainGraph\GraphEditorBase.h" />
+    <ClInclude Include="ChainGraph\ScriptGraphEditor\Event_Icon.h" />
+    <ClInclude Include="ChainGraph\ScriptGraphEditor\Function_Icon.h" />
+    <ClInclude Include="ChainGraph\ScriptGraphEditor\GetGradient.h" />
+    <ClInclude Include="ChainGraph\ScriptGraphEditor\Graph_Hazard.h" />
+    <ClInclude Include="ChainGraph\ScriptGraphEditor\RegisterExternalNodes.h" />
+    <ClInclude Include="ChainGraph\ScriptGraphEditor\RegisterExternalTypes.h" />
+    <ClInclude Include="ChainGraph\ScriptGraphEditor\ScriptGraphEditor.h" />
+    <ClInclude Include="ChainGraph\ScriptGraphEditor\ScriptGraphNodeGradient.h" />
     <ClInclude Include="PersistentSystems.pch.h" />
     <ClInclude Include="Physics\Raycast.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ArtificialInteligence\AICommands\Source\AICommands.cpp" />
+    <ClCompile Include="ChainGraph\GraphEditorBase.cpp" />
+    <ClCompile Include="ChainGraph\ScriptGraphEditor\RegisterExternalNodes.cpp" />
+    <ClCompile Include="ChainGraph\ScriptGraphEditor\ScriptGraphEditor.cpp" />
     <ClCompile Include="PersistentSystems.pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>

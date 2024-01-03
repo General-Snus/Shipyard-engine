@@ -141,7 +141,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d11.lib;dxguid.lib;GameLauncher.lib;TGAFbx.lib;GraphicsEngine.lib;PersistentSystems.lib;AssetManager.lib;Utilities.lib;Logging.lib;ImGUI.lib;OptickCore.lib;assimp-vc143-mt.lib;dbghelp.lib;dbgeng.lib;dpp.lib;DirectXTK.lib</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;dxguid.lib;GameLauncher.lib;TGAFbx.lib;GraphicsEngine.lib;PersistentSystems.lib;AssetManager.lib;Utilities.lib;Logging.lib;ImGUI.lib;OptickCore.lib;assimp-vc143-mt.lib;dbghelp.lib;dbgeng.lib;dpp.lib;DirectXTK.lib;MuninGraph.lib</AdditionalDependencies>
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
@@ -177,7 +177,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d11.lib;dxguid.lib;GameLauncher.lib;TGAFbx.lib;GraphicsEngine.lib;PersistentSystems.lib;AssetManager.lib;Utilities.lib;Logging.lib;ImGUI.lib;OptickCore.lib;assimp-vc143-mt.lib;dbghelp.lib;dbgeng.lib;dpp.lib;DirectXTK.lib</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;dxguid.lib;GameLauncher.lib;TGAFbx.lib;GraphicsEngine.lib;PersistentSystems.lib;AssetManager.lib;Utilities.lib;Logging.lib;ImGUI.lib;OptickCore.lib;assimp-vc143-mt.lib;dbghelp.lib;dbgeng.lib;dpp.lib;DirectXTK.lib;MuninGraph.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
@@ -217,6 +217,32 @@
     <Image Include="small.ico" />
     <Image Include="SplashScreen\E1eWWsIq.bmp" />
     <Image Include="TGPSplash.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Engine\AssetManager\AssetManager.vcxproj">
+      <Project>{eb78804e-5bf9-45d7-8e83-f03765bed7ab}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Engine\GraphicsEngine\GraphicsEngine.vcxproj">
+      <Project>{aa66e648-1c0f-41d6-b339-9058e5a85b4e}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Engine\PersistentSystems\PersistentSystems.vcxproj">
+      <Project>{79bd4629-e0fc-4d67-9977-8d581acd8861}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Game\GameLauncher\Modelviewer.vcxproj">
+      <Project>{22a9f47b-5ce9-470b-ae62-562504394512}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Tools\ImGui\ImGui\ImGui.vcxproj">
+      <Project>{68206c2f-a849-4e47-a524-b0d457d7a09f}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Tools\ImGui\MuninGraph\MuninGraph.vcxproj">
+      <Project>{1b302653-82cc-40db-920e-c979d3cfc23d}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Tools\Logging\Logging.vcxproj">
+      <Project>{6c8d37b4-41cf-42a1-a344-5f62fd042caf}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Tools\Utilities\Utilities.vcxproj">
+      <Project>{b7232c9e-466f-46a5-a0a4-ea832733a352}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

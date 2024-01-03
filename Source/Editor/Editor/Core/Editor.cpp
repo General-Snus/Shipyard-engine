@@ -18,9 +18,9 @@
 #include <functional>
 #include <streambuf>
 
-#include <Tools/ImGUI/imgui.h>
-#include <Tools/ImGUI/imgui_impl_dx11.h>
-#include <Tools/ImGUI/imgui_impl_win32.h>
+#include <Tools/ImGUI/ImGUI/imgui.h>
+#include <Tools/ImGUI/ImGUI/imgui_impl_dx11.h>
+#include <Tools/ImGUI/ImGUI/imgui_impl_win32.h>
 
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/Input/InputHandler.hpp>

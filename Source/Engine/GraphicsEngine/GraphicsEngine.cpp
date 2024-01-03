@@ -47,7 +47,7 @@
 #include "GraphicCommands/Commands/Headers/GfxCmd_SSAO.h" 
 
 #include "Shaders/Registers.h"
-#include <Tools/ImGui/imgui.h>
+#include <Tools/ImGui/ImGui/imgui.h>
 #include <stdexcept> 
 
 #include <Engine/GraphicsEngine/InterOp/DDSTextureLoader11.h>
