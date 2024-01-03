@@ -15,7 +15,6 @@
 #include <Tools/Utilities/Input/InputHandler.hpp>
 #include <Tools/Utilities/Math.hpp>
 
-//#define ParticleSystemToggle
 
 using json = nlohmann::json;
 
@@ -26,12 +25,13 @@ void GameLauncher::Init()
 
 void GameLauncher::Start()
 {
+
 	GameObjectManager& gom = GameObjectManager::Get();
 
 #pragma region BaseSetup
 	myCustomHandler = gom.CreateGameObject();
 	myMesh = gom.CreateGameObject();
-
+	
 
 	{
 		GameObject camera = gom.CreateGameObject();

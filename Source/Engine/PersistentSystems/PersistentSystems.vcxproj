@@ -166,23 +166,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ArtificialInteligence\AICommands\AICommands.h" />
-    <ClInclude Include="ChainGraph\GraphEditorBase.h" />
-    <ClInclude Include="ChainGraph\ScriptGraphEditor\Event_Icon.h" />
-    <ClInclude Include="ChainGraph\ScriptGraphEditor\Function_Icon.h" />
-    <ClInclude Include="ChainGraph\ScriptGraphEditor\GetGradient.h" />
-    <ClInclude Include="ChainGraph\ScriptGraphEditor\Graph_Hazard.h" />
-    <ClInclude Include="ChainGraph\ScriptGraphEditor\RegisterExternalNodes.h" />
-    <ClInclude Include="ChainGraph\ScriptGraphEditor\RegisterExternalTypes.h" />
-    <ClInclude Include="ChainGraph\ScriptGraphEditor\ScriptGraphEditor.h" />
-    <ClInclude Include="ChainGraph\ScriptGraphEditor\ScriptGraphNodeGradient.h" />
     <ClInclude Include="PersistentSystems.pch.h" />
     <ClInclude Include="Physics\Raycast.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ArtificialInteligence\AICommands\Source\AICommands.cpp" />
-    <ClCompile Include="ChainGraph\GraphEditorBase.cpp" />
-    <ClCompile Include="ChainGraph\ScriptGraphEditor\RegisterExternalNodes.cpp" />
-    <ClCompile Include="ChainGraph\ScriptGraphEditor\ScriptGraphEditor.cpp" />
     <ClCompile Include="PersistentSystems.pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>

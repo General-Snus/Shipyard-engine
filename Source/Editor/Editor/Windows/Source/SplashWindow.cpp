@@ -1,5 +1,5 @@
-#include "resource.h"
-#include "SplashWindow.h" 
+#include "../../resource.h"
+#include "../SplashWindow.h" 
 #include <thread> 
 
 LRESULT SplashWinProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)

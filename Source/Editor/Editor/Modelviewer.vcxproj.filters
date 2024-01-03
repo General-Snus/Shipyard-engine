@@ -39,12 +39,45 @@
     <ClInclude Include="Defines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Windows\EditorWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\Event_Icon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\Function_Icon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\GetGradient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\Graph_Hazard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\RegisterExternalNodes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\RegisterExternalTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\ScriptGraphEditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\ScriptGraphNodeGradient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\EditorWindows\ChainGraph\GraphEditorBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\EditorWindows\ChainGraph\GraphTool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Editor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Windows\SplashWindow.cpp">
+    <ClCompile Include="Windows\Source\SplashWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Main.cpp">
@@ -53,10 +86,25 @@
     <ClCompile Include="Core\ApplicationState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Windows\Window.cpp">
+    <ClCompile Include="Windows\Source\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TheHole\SaveLoad.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\Source\EditorWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\RegisterExternalNodes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\ScriptGraphEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\EditorWindows\ChainGraph\GraphEditorBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\EditorWindows\ChainGraph\GraphTool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -6,12 +6,13 @@
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
 #endif
-#include <imgui.h>
-#include <MuninGraph.h>
-#include <ScriptGraph/ScriptGraph.h>
+#include <Tools/ImGui/ImGui/imgui.h>
+#include <Tools/ImGui/MuninGraph/MuninGraph.h>
+#include <Tools/ImGui/MuninGraph/ScriptGraph/ScriptGraph.h> 
+#include <Tools/ImGui/MuninGraph/ScriptGraph/ScriptGraphSchema.h> 
 
 
-class Texture;
+class Texture; 
 
 class ScriptGraphEditor
 {

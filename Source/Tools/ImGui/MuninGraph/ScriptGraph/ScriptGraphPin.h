@@ -113,7 +113,6 @@ public:
 			std::string* localStrPtr = static_cast<std::string*>(myData.Ptr);
 			std::string* dataStrPtr = reinterpret_cast<std::string*>(&data);
 			(*localStrPtr) = *dataStrPtr;
-			int a = 1;
 		}
 		else
 #endif

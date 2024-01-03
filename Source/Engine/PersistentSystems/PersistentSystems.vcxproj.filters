@@ -24,33 +24,6 @@
     <ClInclude Include="ArtificialInteligence\AICommands\AICommands.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ChainGraph\GraphEditorBase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ChainGraph\ScriptGraphEditor\Event_Icon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ChainGraph\ScriptGraphEditor\Function_Icon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ChainGraph\ScriptGraphEditor\GetGradient.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ChainGraph\ScriptGraphEditor\Graph_Hazard.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ChainGraph\ScriptGraphEditor\RegisterExternalNodes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ChainGraph\ScriptGraphEditor\RegisterExternalTypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ChainGraph\ScriptGraphEditor\ScriptGraphEditor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ChainGraph\ScriptGraphEditor\ScriptGraphNodeGradient.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PersistentSystems.pch.cpp">
@@ -60,15 +33,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ArtificialInteligence\AICommands\Source\AICommands.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ChainGraph\GraphEditorBase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ChainGraph\ScriptGraphEditor\RegisterExternalNodes.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ChainGraph\ScriptGraphEditor\ScriptGraphEditor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

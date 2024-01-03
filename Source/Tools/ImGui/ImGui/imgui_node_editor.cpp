@@ -1123,7 +1123,7 @@ ed::EditorContext::~EditorContext()
     m_Splitter.ClearFreeMemory();
 }
 
-bool ed::EditorContext::Begin(const char* id, const ImVec2& size)
+void ed::EditorContext::Begin(const char* id, const ImVec2& size)
 {
     m_EditorActiveId = ImGui::GetID(id);
     ImGui::PushID(id);
@@ -1247,9 +1247,7 @@ bool ed::EditorContext::Begin(const char* id, const ImVec2& size)
     if (HasSelectionChanged())
         ++m_SelectionId;
 
-    m_LastSelectedObjects = m_SelectedObjects;
-
-    return m_IsCanvasVisible;
+    m_LastSelectedObjects = m_SelectedObjects; 
 }
 
 void ed::EditorContext::End()

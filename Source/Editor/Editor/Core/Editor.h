@@ -5,7 +5,10 @@
 #include <Game/GameLauncher/Core/GameLauncher.h>
 #include <Tools/Logging/Logging.h> 
 #include <Tools/Utilities/LinearAlgebra/Sphere.hpp>
-#include <Tools/Utilities/System/SingletonTemplate.h>
+#include <Tools/Utilities/System/SingletonTemplate.h> 
+
+#include <Editor/Editor/Windows/EditorWindows/ChainGraph/GraphTool.h>
+
 class GameLauncher;
 
 class Editor : public Singleton<Editor>
@@ -25,8 +28,9 @@ private:
 	void Update();
 	void Render();
 
+
 #pragma region IMGUI
-	void TopBar(); 
+	void TopBar();
 #pragma endregion
 
 
@@ -34,8 +38,7 @@ public:
 	Editor() = default;
 	bool Initialize(HWND aHandle);
 	void DoWinProc(const MSG& msg);
-	int Run();
-
+	int Run(); 
 
 	// Acceleration Getters for components.
 	static ApplicationState& GetApplicationState()
@@ -43,7 +46,7 @@ public:
 		static ApplicationState myApplicationState;
 		return myApplicationState;
 	}
-	 
+
 	FORCEINLINE Logger& GetLogger()
 	{
 		return MVLogger;
@@ -55,9 +58,13 @@ public:
 	void ExpandWorldBounds(Sphere<float> sphere);
 	const Sphere<float>& GetWorldBounds() const;
 
-	bool GetIsGUIActive() const { return IsGUIActive;	};
+	bool GetIsGUIActive() const { return IsGUIActive; };
 	void SetIsGUIActive(bool set) { IsGUIActive = set; };
 private:
+	std::shared_ptr<ScriptGraphEditor> ScriptEditor;
+
+
+
 #if WorkingOnMultiThread
 	std::thread myLogicThread;
 	std::mutex myMutex;
@@ -71,5 +78,5 @@ private:
 	Sphere<float> myWorldBounds;
 	GameLauncher myGameLauncher;
 	bool IsGUIActive = true;
-	std::array<bool,count> activeWindows = {false};
+	std::array<bool, count> activeWindows = { false };
 };

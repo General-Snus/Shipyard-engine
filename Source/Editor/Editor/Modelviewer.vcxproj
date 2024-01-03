@@ -45,7 +45,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <EnableUnitySupport>true</EnableUnitySupport>
+    <EnableUnitySupport>false</EnableUnitySupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -53,7 +53,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <EnableUnitySupport>true</EnableUnitySupport>
+    <EnableUnitySupport>false</EnableUnitySupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -132,7 +132,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>$(SolutionDir)Tools\Optick\src\;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Tools\Optick\src\;$(SolutionDir)Tools\ImGui\MuninGraph\;$(SolutionDir)Tools\ImGui\ImGui\</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -167,7 +167,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(SolutionDir)Tools\Optick\src\;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Tools\Optick\src\;$(SolutionDir)Tools\ImGui\MuninGraph\;$(SolutionDir)Tools\ImGui\ImGui\</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -196,18 +196,34 @@
     <ClInclude Include="Core\Editor.h" />
     <ClInclude Include="Core\ApplicationState.h" />
     <ClInclude Include="Defines.h" />
+    <ClInclude Include="Windows\EditorWindow.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="Windows\EditorWindows\ChainGraph\GraphEditorBase.h" />
+    <ClInclude Include="Windows\EditorWindows\ChainGraph\GraphTool.h" />
+    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\Event_Icon.h" />
+    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\Function_Icon.h" />
+    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\GetGradient.h" />
+    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\Graph_Hazard.h" />
+    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\RegisterExternalNodes.h" />
+    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\RegisterExternalTypes.h" />
+    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\ScriptGraphEditor.h" />
+    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\ScriptGraphNodeGradient.h" />
     <ClInclude Include="Windows\Window.h" />
     <ClInclude Include="Windows\SplashWindow.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\ApplicationState.cpp" />
+    <ClCompile Include="Windows\EditorWindows\ChainGraph\GraphEditorBase.cpp" />
+    <ClCompile Include="Windows\EditorWindows\ChainGraph\GraphTool.cpp" />
+    <ClCompile Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\RegisterExternalNodes.cpp" />
+    <ClCompile Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\ScriptGraphEditor.cpp" />
+    <ClCompile Include="Windows\Source\EditorWindow.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Core\Editor.cpp" />
     <ClCompile Include="TheHole\SaveLoad.cpp" />
-    <ClCompile Include="Windows\Window.cpp" />
-    <ClCompile Include="Windows\SplashWindow.cpp" />
+    <ClCompile Include="Windows\Source\Window.cpp" />
+    <ClCompile Include="Windows\Source\SplashWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Modelviewer.rc" />

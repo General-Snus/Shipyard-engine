@@ -1,5 +1,4 @@
 ﻿#include "PersistentSystems.pch.h"
-#define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include "ScriptGraphEditor.h"
 
@@ -668,7 +667,7 @@ void ScriptGraphEditor::RenderNode(const ScriptGraphNode* aNode)
 			ImVec2(0.1f, 0.2f), ImVec2(0.8f, 0.8f),
 			nodeHeaderColor.AsU32(),
 			ImNodeEd::GetStyle().NodeRounding,
-			1 | 2
+			ImDrawFlags_RoundCornersAll
 			);
 
 		const ImRect headerSeparatorRect = ImRect(nodeHeader.GetBL(), nodeHeader.GetBR());
@@ -693,8 +692,8 @@ void ScriptGraphEditor::RenderNode(const ScriptGraphNode* aNode)
 			ImVec2(0.1f, 0.2f), ImVec2(0.8f, 0.8f),
 			nodeHeaderColor.AsU32(),
 			ImNodeEd::GetStyle().NodeRounding,
-			1 | 2
-		);
+			ImDrawFlags_RoundCornersAll
+		); 
 	}
 
 	ImGui::PopID();
@@ -899,18 +898,19 @@ void ScriptGraphEditor::ClearErrorState()
 
 void ScriptGraphEditor::Init()
 {
-	// TODO: Comment this out if you don't want to use the node header image.
-	// Otherwise change it to be your own texture loader from memory.
+	//TODO: Comment this out if you don't want to use the node header image.
+	//Otherwise change it to be your own texture loader from memory.
+	myNodeHeaderTexture = std::make_shared<Texture>();
 	RHI::LoadTextureFromMemory(myNodeHeaderTexture.get(), L"NodeGradientHeader", BuiltIn_ScriptGraphNodeGradient_ByteCode, sizeof(BuiltIn_ScriptGraphNodeGradient_ByteCode));
-
-	std::shared_ptr<Texture> eventIconBase;
+	
+	std::shared_ptr<Texture> eventIconBase = std::make_shared<Texture>();;
 	RHI::LoadTextureFromMemory(eventIconBase.get(), L"NodeEventIcon", BuiltIn_Event_Icon_ByteCode, sizeof(BuiltIn_Event_Icon_ByteCode));
 	myNodeTypeIcons.emplace(ScriptGraphNodeType::Event, std::move(eventIconBase));
-
-	std::shared_ptr<Texture> nodeFunctionIcon;
+	
+	std::shared_ptr<Texture> nodeFunctionIcon = std::make_shared<Texture>();;
 	RHI::LoadTextureFromMemory(nodeFunctionIcon.get(), L"NodeFunctionIcon", BuiltIn_Function_Icon_ByteCode, sizeof(BuiltIn_Function_Icon_ByteCode));
 	myNodeTypeIcons.emplace(ScriptGraphNodeType::Undefined, std::move(nodeFunctionIcon));
-
+	myGetterGradient  = std::make_shared<Texture>();
 	RHI::LoadTextureFromMemory(myGetterGradient.get(), L"NodeGetterGradient", BuiltIn_GetGradient_ByteCode, sizeof(BuiltIn_GetGradient_ByteCode));
 
 	nodeEditorContext = ImNodeEd::CreateEditor(&nodeEditorCfg);
@@ -1051,8 +1051,9 @@ void ScriptGraphEditor::Render()
 			myState.initNavToContent = true;
 		}
 		
-		if(ImNodeEd::Begin("A Node Editor"))
+		if(true)
 		{
+			ImNodeEd::Begin("A Node Editor");
 			for (const auto& [nodeUID, node] : myGraph->GetNodes())
 			{
 				if (myState.errorIsErrorState && nodeUID == myState.errorNodeId)
