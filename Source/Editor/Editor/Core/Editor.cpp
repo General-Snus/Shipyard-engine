@@ -1,3 +1,4 @@
+ 
 
 // Exclude things we don't need from the Windows headers 
 #include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
@@ -32,6 +33,10 @@
 #include <Tools/Utilities/System/ThreadPool.hpp>
 #include <Windows/EditorWindows/ChainGraph/GraphTool.h>
 
+#if PHYSX
+	#include <Engine/PersistentSystems/Physics/PhysXInterpeter.h>
+#endif // PHYSX 0
+
 using json = nlohmann::json;
 
 bool Editor::Initialize(HWND aHandle)
@@ -53,6 +58,10 @@ bool Editor::Initialize(HWND aHandle)
 	// Setup Platform/Renderer backends
 	ImGui_ImplWin32_Init(aHandle);
 	ImGui_ImplDX11_Init(RHI::Device.Get(), RHI::Context.Get());
+
+#if PHYSX
+	Shipyard_PhysX::Get().InitializePhysx();
+#endif // PHYSX 0
 
 	myGameLauncher.Init();
 	myGameLauncher.Start();

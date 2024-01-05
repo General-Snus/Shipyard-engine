@@ -1,5 +1,4 @@
-﻿#include "PersistentSystems.pch.h"
-#define NOMINMAX
+﻿#define NOMINMAX
 #include "ScriptGraphEditor.h"
 
 #include <fstream>
@@ -13,7 +12,9 @@
 #include <misc/cpp/imgui_stdlib.h>
 #include <ScriptGraph/ScriptGraphTypes.h>
 #include <ScriptGraph/Nodes/SGNode_Variable.h>
-#include <ScriptGraph/Nodes/Math/SGNode_MathOps.h>
+#include <ScriptGraph/Nodes/SGNode_DebugText.h>
+#include <ScriptGraph/Nodes/SGNode_FloatToString.h>
+#include <ScriptGraph/Nodes/Math/SGNode_MathOps.h> 
 
 #include "RegisterExternalTypes.h"
 #include "ScriptGraphNodeGradient.h"
@@ -950,16 +951,6 @@ void ScriptGraphEditor::Init()
 		});
 
 	mySchema = myGraph->GetGraphSchema();
-	
-	mySchema->AddVariable<float>("En Float", 42);
-	mySchema->AddVariable<std::string>("Bloppa");
-	mySchema->AddVariable<bool>("Setting");
-
-	mySchema->AddNode<SGNode_MathAdd>();
-	mySchema->AddNode<SGNode_MathAdd>();
-
-	mySchema->AddGetVariableNode("En Float");
-	mySchema->AddSetVariableNode("En Float");
 	//~ End temp
 
 	UpdateVariableContextMenu();

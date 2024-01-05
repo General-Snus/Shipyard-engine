@@ -28,8 +28,10 @@ public:
 	template<typename Type>
 	static ScriptGraphDataObject Create(const Type& aValue)
 	{
-		ScriptGraphDataObject result; /*= Create<Type>();
-		result.SetData(aValue);*/
+		ScriptGraphDataObject result;  
+		CreateInternal(result, typeid(Type));
+		::new (result.Ptr) Type();
+		result.SetData(aValue);
 		return result;
 	}
 

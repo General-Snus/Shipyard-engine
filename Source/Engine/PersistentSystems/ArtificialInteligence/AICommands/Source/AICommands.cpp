@@ -171,9 +171,9 @@ namespace GeneralizedAICommands {
 		auto& physicsComponent = input.GetComponent<cPhysics_Kinematic>();
 		auto& transform = input.GetComponent<Transform>();
 
-		SteeringBehaviour::DampenVelocity(&physicsComponent);
 		SteeringBehaviour::LookAt(&physicsComponent,physicsComponent.ph_velocity,transform.GetForward(),50.0f);
-		SteeringBehaviour::Wander(&physicsComponent,transform.GetForward(),25.0f);
+		SteeringBehaviour::Wander(&physicsComponent,transform.GetForward(),5.f);
+		SteeringBehaviour::DampenVelocity(&physicsComponent);
 
 		return true;
 	}

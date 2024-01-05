@@ -24,6 +24,9 @@
     <ClInclude Include="ArtificialInteligence\AICommands\AICommands.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Physics\PhysXInterpeter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PersistentSystems.pch.cpp">
@@ -33,6 +36,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ArtificialInteligence\AICommands\Source\AICommands.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\Source\PhysXInterpeter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
