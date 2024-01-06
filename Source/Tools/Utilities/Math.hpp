@@ -1,11 +1,11 @@
 #pragma once
-#include <algorithm>
-#include <cmath>
+#include "Game/Timer.h"
 #include "LinearAlgebra/Vectors.hpp"
-#include <random>
-#include <numbers>
+#include <algorithm>
 #include <chrono> // For DefaultSeed generation
-#include <Tools/Utilities/Game/Timer.h>
+#include <cmath>
+#include <numbers>
+#include <random>
 
 constexpr float PI = std::numbers::pi_v<float>;
 constexpr float PI2 = PI * 2.0f;
@@ -68,7 +68,7 @@ inline std::mt19937_64& RandomEngine::engineInstance()
 		}
 	);*/
 
-	static std::mt19937_64 engine = std::mt19937_64( );
+	static std::mt19937_64 engine = std::mt19937_64();
 	return engine;
 }
 template<class T>

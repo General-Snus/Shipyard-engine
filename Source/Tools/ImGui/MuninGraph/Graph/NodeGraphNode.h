@@ -5,8 +5,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "NodeGraphPin.h"
 #include "NodeGraph.h"
+#include "NodeGraphPin.h"
 
 #ifndef FORCEINLINE
 #define FORCEINLINE __forceinline
@@ -16,35 +16,35 @@
 // which means that the StartPinUID is on the SOURCE node and the EndPinUID
 // is on the TARGET node.
 
-template<typename GraphPinType, typename GraphType, typename GraphSchemaType>
+template<typename GraphPinType,typename GraphType,typename GraphSchemaType>
 class NodeGraphNode
 {
 	friend GraphSchemaType;
 
 	// Acceleration map to find pins based on UID;
-	std::unordered_map<size_t, GraphPinType> myPins;
-	std::unordered_map<std::string, size_t> myPinLabelToUID;
+	std::unordered_map<size_t,GraphPinType> myPins;
+	std::unordered_map<std::string,size_t> myPinLabelToUID;
 
 	std::shared_ptr<GraphType> myOwner = nullptr;
 
-	float myPosition[3] = { 0, 0, 0 };
+	float myPosition[3] = {0, 0, 0};
 
 protected:
 
 	void AddPin(GraphPinType&& aPin)
 	{
-		myPinLabelToUID.insert({ aPin.GetLabel(), aPin.GetUID() });
-		myPins.insert({ aPin.GetUID(), std::move(aPin) });		
+		myPinLabelToUID.insert({aPin.GetLabel(), aPin.GetUID()});
+		myPins.insert({aPin.GetUID(), std::move(aPin)});
 	}
-	
+
 	template<typename T>
-	bool GetPinData(const std::string& aPinLabel, T& outData) const
+	bool GetPinData(const std::string& aPinLabel,T& outData) const
 	{
 		const GraphPinType& myPin = GetPin(aPinLabel);
 		if(myPin.IsPinConnected())
 		{
 			bool sourceErrored = false;
-			const GraphPinType& dataPin = myOwner->GetDataSourcePin(myPin.GetUID(), sourceErrored);
+			const GraphPinType& dataPin = myOwner->GetDataSourcePin(myPin.GetUID(),sourceErrored);
 			if(!sourceErrored)
 			{
 				return dataPin.GetData(outData);
@@ -55,12 +55,12 @@ protected:
 		return myPin.GetData(outData);
 	}
 
-	bool GetRawPinData(const std::string& aPinLabel, void* outData, size_t outDataSize) const;
+	bool GetRawPinData(const std::string& aPinLabel,void* outData,size_t outDataSize) const;
 
-	bool SetRawPinData(const std::string& aPinLabel, const void* inData, size_t aDataSize);
+	bool SetRawPinData(const std::string& aPinLabel,const void* inData,size_t aDataSize);
 
 	template<typename T>
-	void SetPinData(const std::string& aPinLabel, const T& aData)
+	void SetPinData(const std::string& aPinLabel,const T& aData)
 	{
 		const auto It = myPinLabelToUID.find(aPinLabel);
 		assert(It != myPinLabelToUID.end() && "That pin could not be found!");
@@ -68,10 +68,10 @@ protected:
 		pin.SetData(aData);
 	}
 
-	bool RenamePin(const std::string& aPinLabel, const std::string& aNewName);
-	bool RenamePin(size_t aPinUID, const std::string& aNewName);
+	bool RenamePin(const std::string& aPinLabel,const std::string& aNewName);
+	bool RenamePin(size_t aPinUID,const std::string& aNewName);
 
-	bool IsPinUIDLabel(size_t aPinUId, const std::string& aPinLabel) const;
+	bool IsPinUIDLabel(size_t aPinUId,const std::string& aPinLabel) const;
 
 public:
 
@@ -79,52 +79,52 @@ public:
 
 	virtual void Init() = 0;
 
-	const std::shared_ptr<GraphType> GetOwner() const { return myOwner;  }
+	const std::shared_ptr<GraphType> GetOwner() const { return myOwner; }
 
 	virtual ~NodeGraphNode();
 
 	virtual FORCEINLINE std::string GetNodeTitle() const { return "Graph Node"; }
 	virtual FORCEINLINE std::string GetNodeCategory() const { return "Default"; }
 
-	const FORCEINLINE std::unordered_map<size_t, GraphPinType>& GetPins() const { return myPins; }
+	const FORCEINLINE std::unordered_map<size_t,GraphPinType>& GetPins() const { return myPins; }
 	const GraphPinType& GetPin(size_t aPinUID) const;
 	const GraphPinType& GetPin(const std::string& aPinLabel) const;
 	size_t GetPinLabelUID(const std::string& aPinLabel) const;
 
 	// These are here because ImNodeEd has its own position property.
-	void UpdateNodePositionCache(float x, float y, float z);
+	void UpdateNodePositionCache(float x,float y,float z);
 	// These are here because ImNodeEd has its own position property.
-	void GetNodePositionCache(float& outX, float& outY, float& outZ) const;
+	void GetNodePositionCache(float& outX,float& outY,float& outZ) const;
 
 	/**
 	 * Called when this node is asked to perform whatever operation it's supposed to do.
 	 * @returns The Pin Index of the pin we want to exit on after performing our operation or 0 if we don't have a pin to exit on.
 	 */
-	//virtual size_t DoOperation() { return Exit(); }
+	 //virtual size_t DoOperation() { return Exit(); }
 };
 
-template<typename GraphPinType, typename GraphType, typename GraphSchemaType>
-bool NodeGraphNode<GraphPinType, GraphType, GraphSchemaType>::GetRawPinData(const std::string& aPinLabel,
-	void* outData, size_t outDataSize) const
+template<typename GraphPinType,typename GraphType,typename GraphSchemaType>
+bool NodeGraphNode<GraphPinType,GraphType,GraphSchemaType>::GetRawPinData(const std::string& aPinLabel,
+	void* outData,size_t outDataSize) const
 {
 	const GraphPinType& myPin = GetPin(aPinLabel);
-	if (myPin.IsPinConnected())
+	if(myPin.IsPinConnected())
 	{
 		bool sourceErrored = false;
-		const GraphPinType& dataPin = myOwner->GetDataSourcePin(myPin.GetUID(), sourceErrored);
-		return dataPin.GetRawData(outData, outDataSize);
+		const GraphPinType& dataPin = myOwner->GetDataSourcePin(myPin.GetUID(),sourceErrored);
+		return dataPin.GetRawData(outData,outDataSize);
 	}
-	return myPin.GetRawData(outData, outDataSize);
+	return myPin.GetRawData(outData,outDataSize);
 }
 
-template<typename GraphPinType, typename GraphType, typename GraphSchemaType>
-bool NodeGraphNode<GraphPinType, GraphType, GraphSchemaType>::SetRawPinData(const std::string& aPinLabel,
-	const void* inData, size_t aDataSize)
+template<typename GraphPinType,typename GraphType,typename GraphSchemaType>
+bool NodeGraphNode<GraphPinType,GraphType,GraphSchemaType>::SetRawPinData(const std::string& aPinLabel,
+	const void* inData,size_t aDataSize)
 {
 	const auto It = myPinLabelToUID.find(aPinLabel);
 	assert(It != myPinLabelToUID.end() && "That pin could not be found!");
 	GraphPinType& pin = myPins.find(It->second)->second;
-	pin.SetRawData(inData, aDataSize);
+	pin.SetRawData(inData,aDataSize);
 	return true;
 }
 
@@ -136,8 +136,8 @@ bool NodeGraphNode<GraphPinType, GraphType, GraphSchemaType>::SetRawPinData(cons
 //	return It->second;
 //}
 
-template<typename GraphPinType, typename GraphType, typename GraphSchemaType>
-bool NodeGraphNode<GraphPinType, GraphType, GraphSchemaType>::RenamePin(const std::string& aPinLabel,
+template<typename GraphPinType,typename GraphType,typename GraphSchemaType>
+bool NodeGraphNode<GraphPinType,GraphType,GraphSchemaType>::RenamePin(const std::string& aPinLabel,
 	const std::string& aNewName)
 {
 	if(const auto pinNameIt = myPinLabelToUID.find(aPinLabel); pinNameIt != myPinLabelToUID.end())
@@ -146,7 +146,7 @@ bool NodeGraphNode<GraphPinType, GraphType, GraphSchemaType>::RenamePin(const st
 		{
 			myPinLabelToUID.erase(pinIt->second.GetLabel());
 			pinIt->second.SetLabel(aNewName);
-			myPinLabelToUID.insert({ aNewName, pinIt->second.GetUID() });
+			myPinLabelToUID.insert({aNewName, pinIt->second.GetUID()});
 			return true;
 		}
 	}
@@ -154,22 +154,22 @@ bool NodeGraphNode<GraphPinType, GraphType, GraphSchemaType>::RenamePin(const st
 	return false;
 }
 
-template<typename GraphPinType, typename GraphType, typename GraphSchemaType>
-bool NodeGraphNode<GraphPinType, GraphType, GraphSchemaType>::RenamePin(size_t aPinUID, const std::string& aNewName)
+template<typename GraphPinType,typename GraphType,typename GraphSchemaType>
+bool NodeGraphNode<GraphPinType,GraphType,GraphSchemaType>::RenamePin(size_t aPinUID,const std::string& aNewName)
 {
-	if (auto pinIt = myPins.find(aPinUID); pinIt != myPins.end())
+	if(auto pinIt = myPins.find(aPinUID); pinIt != myPins.end())
 	{
 		myPinLabelToUID.erase(pinIt->second.GetLabel());
 		pinIt->second.SetLabel(aNewName);
-		myPinLabelToUID.insert({ aNewName, pinIt->second.GetUID() });
+		myPinLabelToUID.insert({aNewName, pinIt->second.GetUID()});
 		return true;
 	}
 
 	return false;
 }
 
-template <typename GraphPinType, typename GraphType, typename GraphSchemaType>
-bool NodeGraphNode<GraphPinType, GraphType, GraphSchemaType>::IsPinUIDLabel(size_t aPinUId,
+template <typename GraphPinType,typename GraphType,typename GraphSchemaType>
+bool NodeGraphNode<GraphPinType,GraphType,GraphSchemaType>::IsPinUIDLabel(size_t aPinUId,
 	const std::string& aPinLabel) const
 {
 	if(const auto pinId = myPinLabelToUID.find(aPinLabel); pinId != myPinLabelToUID.end())
@@ -180,51 +180,51 @@ bool NodeGraphNode<GraphPinType, GraphType, GraphSchemaType>::IsPinUIDLabel(size
 	return false;
 }
 
-template <typename GraphPinType, typename GraphType, typename GraphSchemaType>
-const typename GraphType::SupportedNodeClass& NodeGraphNode<GraphPinType, GraphType, GraphSchemaType>::GetClass()
+template <typename GraphPinType,typename GraphType,typename GraphSchemaType>
+const typename GraphType::SupportedNodeClass& NodeGraphNode<GraphPinType,GraphType,GraphSchemaType>::GetClass()
 {
 	return GraphType::GetSupportedNodeClass(typeid(*this));
 }
 
-template<typename GraphPinType, typename GraphType, typename GraphSchemaType>
-inline NodeGraphNode<GraphPinType, GraphType, GraphSchemaType>::~NodeGraphNode()
+template<typename GraphPinType,typename GraphType,typename GraphSchemaType>
+inline NodeGraphNode<GraphPinType,GraphType,GraphSchemaType>::~NodeGraphNode()
 {
 }
 
-template<typename GraphPinType, typename GraphType, typename GraphSchemaType>
-const GraphPinType& NodeGraphNode<GraphPinType, GraphType, GraphSchemaType>::GetPin(size_t aPinUID) const
+template<typename GraphPinType,typename GraphType,typename GraphSchemaType>
+const GraphPinType& NodeGraphNode<GraphPinType,GraphType,GraphSchemaType>::GetPin(size_t aPinUID) const
 {
 	auto It = myPins.find(aPinUID);
 	assert(It != myPins.end() && "That pin could not be found!");
 	return It->second;
 }
 
-template<typename GraphPinType, typename GraphType, typename GraphSchemaType>
-const GraphPinType& NodeGraphNode<GraphPinType, GraphType, GraphSchemaType>::GetPin(const std::string& aPinLabel) const
+template<typename GraphPinType,typename GraphType,typename GraphSchemaType>
+const GraphPinType& NodeGraphNode<GraphPinType,GraphType,GraphSchemaType>::GetPin(const std::string& aPinLabel) const
 {
 	const auto It = myPinLabelToUID.find(aPinLabel);
 	assert(It != myPinLabelToUID.end() && "That pin could not be found!");
 	return myPins.find(It->second)->second;
 }
 
-template <typename GraphPinType, typename GraphType, typename GraphSchemaType>
-size_t NodeGraphNode<GraphPinType, GraphType, GraphSchemaType>::GetPinLabelUID(const std::string& aPinLabel) const
+template <typename GraphPinType,typename GraphType,typename GraphSchemaType>
+size_t NodeGraphNode<GraphPinType,GraphType,GraphSchemaType>::GetPinLabelUID(const std::string& aPinLabel) const
 {
 	const auto It = myPinLabelToUID.find(aPinLabel);
 	assert(It != myPinLabelToUID.end() && "That pin could not be found!");
 	return It->second;
 }
 
-template <typename GraphPinType, typename GraphType, typename GraphSchemaType>
-void NodeGraphNode<GraphPinType, GraphType, GraphSchemaType>::UpdateNodePositionCache(float x, float y, float z)
+template <typename GraphPinType,typename GraphType,typename GraphSchemaType>
+void NodeGraphNode<GraphPinType,GraphType,GraphSchemaType>::UpdateNodePositionCache(float x,float y,float z)
 {
 	myPosition[0] = x;
 	myPosition[1] = y;
 	myPosition[2] = z;
 }
 
-template <typename GraphPinType, typename GraphType, typename GraphSchemaType>
-void NodeGraphNode<GraphPinType, GraphType, GraphSchemaType>::GetNodePositionCache(float& outX, float& outY,
+template <typename GraphPinType,typename GraphType,typename GraphSchemaType>
+void NodeGraphNode<GraphPinType,GraphType,GraphSchemaType>::GetNodePositionCache(float& outX,float& outY,
 	float& outZ) const
 {
 	outX = myPosition[0];
@@ -232,10 +232,10 @@ void NodeGraphNode<GraphPinType, GraphType, GraphSchemaType>::GetNodePositionCac
 	outZ = myPosition[2];
 }
 
-template<typename GraphType, typename NodeType, typename BaseType, unsigned NodeFlags, unsigned UserFlags>
+template<typename GraphType,typename NodeType,typename BaseType,unsigned NodeFlags,unsigned UserFlags>
 class zz_AutoRegisterGraphNode
 {
-	static inline bool IsRegistered = GraphType::template RegisterNodeTypeWithBase<NodeType, BaseType>(NodeFlags, UserFlags);
+	static inline bool IsRegistered = GraphType::template RegisterNodeTypeWithBase<NodeType,BaseType>(NodeFlags,UserFlags);
 };
 
 //~ Begin Munin macro shenanigans

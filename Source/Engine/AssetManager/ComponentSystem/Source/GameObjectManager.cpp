@@ -63,8 +63,8 @@ GameObject GameObjectManager::GetGameObject(SY::UUID anID)
 		return GameObject(anID,this);
 	}
 
-	assert(false && "GameObjectManager tried to get a GameObject that doesn't exist yet! Create your GameObject first before trying to get it.");
-	return GameObject(69420,this);
+	//assert(false && "GameObjectManager tried to get a GameObject that doesn't exist yet! Create your GameObject first before trying to get it.");
+	return GameObject();
 }
 
 void GameObjectManager::CollidedWith(const SY::UUID aFirstID,const SY::UUID aTargetID)

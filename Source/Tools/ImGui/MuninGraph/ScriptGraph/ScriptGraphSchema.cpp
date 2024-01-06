@@ -7,16 +7,16 @@
 #include "ScriptGraphNode.h"
 #include "ScriptGraphTypes.h"
 
-#include <nlohmann/json.hpp>
-#include "ScriptGraphVariable.h"
-#include "Nodes/SGNode_Variable.h"
 #include "Nodes/Events/SGNode_EventBeginPlay.h"
 #include "Nodes/Events/SGNode_EventTick.h"
+#include "Nodes/SGNode_Variable.h"
+#include "ScriptGraphVariable.h"
+#include <nlohmann/json.hpp>
 
 // Macro for easily registering node types with this Schema.
 #define RegisterNodeType(T) { ScriptGraphNodeType type = ScriptGraphNodeType::Create<T>(); nodeTypes.insert({ #T, std::move(type) });}
 
-void ScriptGraphNodeClass::SetupNodeType(ScriptGraphNodeClass& aNodeType, std::shared_ptr<ScriptGraphNode>&& aTempNode)
+void ScriptGraphNodeClass::SetupNodeType(ScriptGraphNodeClass& aNodeType,std::shared_ptr<ScriptGraphNode>&& aTempNode)
 {
 	// We can't create the CDO here since it might cause static init issues.
 	// Instead we just make a pointer and fetch data from that.
@@ -33,23 +33,23 @@ void ScriptGraphNodeClass::SetupNodeType(ScriptGraphNodeClass& aNodeType, std::s
 	aNodeType.InternalOnly = aTempNode->IsInternalOnly();
 }
 
-std::unordered_map<std::string, const ScriptGraphNodeClass> ScriptGraphSchema::RegisterNodeTypes()
+std::unordered_map<std::string,const ScriptGraphNodeClass> ScriptGraphSchema::RegisterNodeTypes()
 {
-	std::unordered_map<std::string, const ScriptGraphNodeClass> nodeTypes;
+	std::unordered_map<std::string,const ScriptGraphNodeClass> nodeTypes;
 	//#include "ScriptGraphNodes.inl"
 	return std::move(nodeTypes);
 }
 
-std::unordered_map<std::string, std::string> ScriptGraphSchema::GetNodeNames()
+std::unordered_map<std::string,std::string> ScriptGraphSchema::GetNodeNames()
 {
-	std::unordered_map<std::string, std::string> namesToTypes;
+	std::unordered_map<std::string,std::string> namesToTypes;
 
-	for(const auto& [ type, nodeType ] : MyNodeTypesMap())
+	for(const auto& [type,nodeType] : MyNodeTypesMap())
 	{
 		const std::shared_ptr<ScriptGraphNode> tempNode = nodeType.New();
 		if(!tempNode->IsInternalOnly())
 		{
-			namesToTypes.insert({ tempNode->GetNodeTitle(), type });
+			namesToTypes.insert({tempNode->GetNodeTitle(), type});
 		}
 	}
 
@@ -62,7 +62,7 @@ std::shared_ptr<ScriptGraph> ScriptGraphSchema::CreateScriptGraphInternal(bool c
 
 	std::shared_ptr<ScriptGraph> aGraph = std::make_shared<ScriptGraph>();
 
-	if (!createEmpty)
+	if(!createEmpty)
 	{
 		// This is intended to demonstrate an example script graph simulating an Object Blueprint
 		// in Unreal Engine. Objects in UE can Tick and have a Begin Play event which fires when
@@ -84,9 +84,9 @@ std::shared_ptr<ScriptGraph> ScriptGraphSchema::CreateScriptGraphInternal(bool c
 
 void ScriptGraphSchema::CreateNodeCDOs()
 {
-	for (auto& [type, nodeType] : MyNodeTypesMap())
+	for(auto& [type,nodeType] : MyNodeTypesMap())
 	{
-		if (!nodeType.DefaultObject)
+		if(!nodeType.DefaultObject)
 		{
 			nodeType.DefaultObject = nodeType.New();
 			nodeType.DefaultObject->Init();
@@ -103,15 +103,15 @@ std::shared_ptr<ScriptGraph> ScriptGraphSchema::CreateScriptGraph(const std::sha
 {
 	// Time to bake a graph!
 	std::string serializedGraph;
-	ScriptGraphSchema::SerializeScriptGraph(aGraph, serializedGraph);
+	ScriptGraphSchema::SerializeScriptGraph(aGraph,serializedGraph);
 
 	std::shared_ptr<ScriptGraph> result = ScriptGraphSchema::CreateScriptGraphInternal(true);
-	ScriptGraphSchema::DeserializeScriptGraph(result, serializedGraph);
+	ScriptGraphSchema::DeserializeScriptGraph(result,serializedGraph);
 
 	return result;
 }
 
-bool ScriptGraphSchema::SerializeScriptGraph(const std::shared_ptr<ScriptGraph>& aGraph, std::string& outResult)
+bool ScriptGraphSchema::SerializeScriptGraph(const std::shared_ptr<ScriptGraph>& aGraph,std::string& outResult)
 {
 	using namespace nlohmann;
 
@@ -120,7 +120,7 @@ bool ScriptGraphSchema::SerializeScriptGraph(const std::shared_ptr<ScriptGraph>&
 	graphJson["name"] = "ScriptGraph";
 
 	graphJson["variables"] = json::array();
-	for(auto& [varName, variable] : aGraph->myVariables)
+	for(auto& [varName,variable] : aGraph->myVariables)
 	{
 		json varJson;
 		varJson["name"] = varName;
@@ -129,7 +129,7 @@ bool ScriptGraphSchema::SerializeScriptGraph(const std::shared_ptr<ScriptGraph>&
 		const std::type_index varTypeId = variable->GetTypeData()->GetType();
 
 		std::vector<uint8_t> varData;
-		ScriptGraphDataTypeRegistry::Serialize(varTypeId, variable->DefaultData.Ptr, varData);
+		ScriptGraphDataTypeRegistry::Serialize(varTypeId,variable->DefaultData.Ptr,varData);
 		varJson["value"] = varData;
 
 		graphJson["variables"].push_back(varJson);
@@ -137,7 +137,7 @@ bool ScriptGraphSchema::SerializeScriptGraph(const std::shared_ptr<ScriptGraph>&
 
 	graphJson["nodes"] = json::array();
 
-	for(const auto& [nodeUID, node] : aGraph->myNodes)
+	for(const auto& [nodeUID,node] : aGraph->myNodes)
 	{
 		// GlobalUID keeps track of the type, which is handy.
 		const auto uuidAwareBase = AsGUIDAwarePtr(node.get());
@@ -163,7 +163,7 @@ bool ScriptGraphSchema::SerializeScriptGraph(const std::shared_ptr<ScriptGraph>&
 
 		// We only store Data pins since we only need to keep track of data values
 		// on them at present.
-		for (auto& [pinUID, pin] : node->GetPins())
+		for(auto& [pinUID,pin] : node->GetPins())
 		{
 			if(pin.GetType() == ScriptGraphPinType::Data || pin.GetType() == ScriptGraphPinType::Variable)
 			{
@@ -172,11 +172,11 @@ bool ScriptGraphSchema::SerializeScriptGraph(const std::shared_ptr<ScriptGraph>&
 
 				std::vector<uint8_t> pinData;
 				pinData.resize(pin.myData.TypeData->GetTypeSize());
-				ScriptGraphDataTypeRegistry::Serialize(pin.GetDataType(), pin.myData.Ptr, pinData);
+				ScriptGraphDataTypeRegistry::Serialize(pin.GetDataType(),pin.myData.Ptr,pinData);
 				pinJson["value"] = pinData;
 
 				nodeJson["pins"].push_back(pinJson);
-			}		
+			}
 		}
 
 		graphJson["nodes"].push_back(nodeJson);
@@ -187,7 +187,7 @@ bool ScriptGraphSchema::SerializeScriptGraph(const std::shared_ptr<ScriptGraph>&
 	// For edges we need to know the UID of the involved nodes, same UID we saved
 	// in the nodes section above, and we also need to know which pin. Pins are
 	// stored using labels on that node making them easy to find.
-	for (auto& [edgeUID, edge] : aGraph->myEdges)
+	for(auto& [edgeUID,edge] : aGraph->myEdges)
 	{
 		const ScriptGraphPin& sourcePin = aGraph->GetPinFromUID(edge.FromUID);
 		const auto sourceNodeUUID = AsGUIDAwareSharedPtr(sourcePin.GetOwner());
@@ -210,7 +210,7 @@ bool ScriptGraphSchema::SerializeScriptGraph(const std::shared_ptr<ScriptGraph>&
 	return true;
 }
 
-bool ScriptGraphSchema::DeserializeScriptGraph(std::shared_ptr<ScriptGraph>& outGraph, const std::string& inData)
+bool ScriptGraphSchema::DeserializeScriptGraph(std::shared_ptr<ScriptGraph>& outGraph,const std::string& inData)
 {
 	outGraph = CreateScriptGraphInternal(true);
 	std::unique_ptr<ScriptGraphSchema> outGraphSchema = outGraph->GetGraphSchema();
@@ -226,7 +226,7 @@ bool ScriptGraphSchema::DeserializeScriptGraph(std::shared_ptr<ScriptGraph>& out
 	outGraph->myVariables.clear();
 
 	// Load all the variables
-	for (const auto& it : graphJson["variables"])
+	for(const auto& it : graphJson["variables"])
 	{
 		const std::string varName = it.at("name");
 		const std::string varType = it.at("type");
@@ -239,45 +239,45 @@ bool ScriptGraphSchema::DeserializeScriptGraph(std::shared_ptr<ScriptGraph>& out
 		newVariable->Name = varName;
 		newVariable->DefaultData = ScriptGraphDataTypeRegistry::GetDataObjectOfType(varTypeId);
 
-		ScriptGraphDataTypeRegistry::Deserialize(varTypeId, newVariable->DefaultData.Ptr, varData);
+		ScriptGraphDataTypeRegistry::Deserialize(varTypeId,newVariable->DefaultData.Ptr,varData);
 		newVariable->ResetVariable();
 
-		outGraph->myVariables.insert({ varName, newVariable });
+		outGraph->myVariables.insert({varName, newVariable});
 	}
 
-	std::unordered_map<size_t, std::shared_ptr<ScriptGraphNode>> fileUIDToNode;
+	std::unordered_map<size_t,std::shared_ptr<ScriptGraphNode>> fileUIDToNode;
 
 	// Create all the nodes.
-	for (const auto& it : graphJson["nodes"])
+	for(const auto& it : graphJson["nodes"])
 	{
 		const std::string nodeType = it.at("type");
 		const auto typeData = MyNodeTypesMap().find(nodeType);
 		std::shared_ptr<ScriptGraphNode> newNode = typeData->second.New();
 
-		if (std::shared_ptr<VariableNodeBase> varNode = std::dynamic_pointer_cast<VariableNodeBase>(newNode))
+		if(std::shared_ptr<VariableNodeBase> varNode = std::dynamic_pointer_cast<VariableNodeBase>(newNode))
 		{
 			const std::string nodeVarName = it.at("variable");
 			std::shared_ptr<ScriptGraphVariable> nodeVar = outGraph->myVariables.find(nodeVarName)->second;
 			varNode->SetNodeVariable(nodeVar);
 
-			for (auto& [pinUID, pin] : newNode->myPins)
+			for(auto& [pinUID,pin] : newNode->myPins)
 			{
-				if (pin.GetType() == ScriptGraphPinType::Variable)
+				if(pin.GetType() == ScriptGraphPinType::Variable)
 				{
 					pin.InitVariableBlock(nodeVar->Data.TypeData->GetType());
 				}
 			}
 		}
 
-		for (const auto& pinIt : it.at("pins"))
+		for(const auto& pinIt : it.at("pins"))
 		{
 			const std::string pinName = pinIt.at("name");
 			const std::vector<uint8_t> varData = pinIt.at("value");
-			if (auto pinLbl = newNode->myPinLabelToUID.find(pinName); pinLbl != newNode->myPinLabelToUID.end())
+			if(auto pinLbl = newNode->myPinLabelToUID.find(pinName); pinLbl != newNode->myPinLabelToUID.end())
 			{
-				if (auto pinObj = newNode->myPins.find(pinLbl->second); pinObj != newNode->myPins.end())
+				if(auto pinObj = newNode->myPins.find(pinLbl->second); pinObj != newNode->myPins.end())
 				{
-					ScriptGraphDataTypeRegistry::Deserialize(pinObj->second.GetDataType(), pinObj->second.myData.Ptr, varData);
+					ScriptGraphDataTypeRegistry::Deserialize(pinObj->second.GetDataType(),pinObj->second.myData.Ptr,varData);
 					//memcpy_s(pinObj->second.myData.Ptr, pinObj->second.myData.TypeData->GetTypeSize(), varData.data(), varData.size());
 				}
 			}
@@ -297,21 +297,21 @@ bool ScriptGraphSchema::DeserializeScriptGraph(std::shared_ptr<ScriptGraph>& out
 		// TODO: read constant pin data. Needs to be saved too. Won't work for pointers of course
 		// since they're just an integer.
 
-		if (!outGraphSchema->RegisterNode(newNode))
+		if(!outGraphSchema->RegisterNode(newNode))
 		{
 			assert(false && "The graph has invalid numbers of a node!");
 		}
 
-		if (newNode->IsEntryNode())
+		if(newNode->IsEntryNode())
 		{
-			outGraphSchema->RegisterEntryPointNode(newNode, it.at("entryHandle"));
+			outGraphSchema->RegisterEntryPointNode(newNode,it.at("entryHandle"));
 		}
 
-		fileUIDToNode.insert({ it.at("UID"), newNode });
+		fileUIDToNode.insert({it.at("UID"), newNode});
 	}
 
 	// And all the edges
-	for (const auto& it : graphJson["edges"])
+	for(const auto& it : graphJson["edges"])
 	{
 		const size_t sourceUID = it.at("sourceUID");
 		const std::string sourcePinLabel = it.at("sourcePin");
@@ -319,10 +319,10 @@ bool ScriptGraphSchema::DeserializeScriptGraph(std::shared_ptr<ScriptGraph>& out
 		const std::string targetPinLabel = it.at("targetPin");
 
 		// Find the source node owning the source pin.
-		if (auto srcIt = fileUIDToNode.find(sourceUID); srcIt != fileUIDToNode.end())
+		if(auto srcIt = fileUIDToNode.find(sourceUID); srcIt != fileUIDToNode.end())
 		{
 			// And find the target node owning the target pin.
-			if (auto tgtIt = fileUIDToNode.find(targetUID); srcIt != fileUIDToNode.end())
+			if(auto tgtIt = fileUIDToNode.find(targetUID); srcIt != fileUIDToNode.end())
 			{
 				const std::shared_ptr<ScriptGraphNode> sourceNode = srcIt->second;
 				const std::shared_ptr<ScriptGraphNode> targetNode = tgtIt->second;
@@ -332,7 +332,7 @@ bool ScriptGraphSchema::DeserializeScriptGraph(std::shared_ptr<ScriptGraph>& out
 				const ScriptGraphPin& tgtPin = targetNode->GetPin(targetPinLabel);
 
 				// And create a link.
-				outGraphSchema->CreateEdge(srcPin.GetUID(), tgtPin.GetUID());
+				outGraphSchema->CreateEdge(srcPin.GetUID(),tgtPin.GetUID());
 			}
 		}
 	}
@@ -357,9 +357,9 @@ bool ScriptGraphSchema::RegisterNode(std::shared_ptr<ScriptGraphNode> aNode)
 	const unsigned maxInstances = aNode->MaxInstancesPerGraph();
 	if(maxInstances > 0)
 	{
-		if (auto countIt = myNodeTypeCounts.find(uidAwareNode->GetTypeName()); countIt != myNodeTypeCounts.end())
+		if(auto countIt = myNodeTypeCounts.find(uidAwareNode->GetTypeName()); countIt != myNodeTypeCounts.end())
 		{
-			if (maxInstances < countIt->second + 1)
+			if(maxInstances < countIt->second + 1)
 			{
 				return false; // No making more copies of this node!
 			}
@@ -368,30 +368,30 @@ bool ScriptGraphSchema::RegisterNode(std::shared_ptr<ScriptGraphNode> aNode)
 		}
 		else
 		{
-			myNodeTypeCounts.insert({ uidAwareNode->GetTypeName(), 1 });
+			myNodeTypeCounts.insert({uidAwareNode->GetTypeName(), 1});
 		}
 	}
 
 	aNode->myOwner = myGraph;
-	
+
 	myGraph->myNodes.insert({uidAwareNode->GetUID(), aNode});
-	for (auto& [key, value] : aNode->myPins)
+	for(auto& [key,value] : aNode->myPins)
 	{
-		myGraph->myPins.insert({ key, &value });
+		myGraph->myPins.insert({key, &value});
 	}
 
 	return true;
 }
 
-void ScriptGraphSchema::RegisterEntryPointNode(std::shared_ptr<ScriptGraphNode> aNode, const std::string& aEntryHandle)
+void ScriptGraphSchema::RegisterEntryPointNode(std::shared_ptr<ScriptGraphNode> aNode,const std::string& aEntryHandle)
 {
-	myGraph->myEntryPoints.insert({ aEntryHandle, aNode });
+	myGraph->myEntryPoints.insert({aEntryHandle, aNode});
 	const auto uuidAwareBase = AsGUIDAwarePtr(aNode.get());
-	myGraph->myNodeUIDToEntryHandle.insert({ uuidAwareBase->GetUID(), aEntryHandle });
+	myGraph->myNodeUIDToEntryHandle.insert({uuidAwareBase->GetUID(), aEntryHandle});
 	myGraphEntryPoints.push_back(aEntryHandle);
 }
 
-void ScriptGraphSchema::CreateEdgeInternal(ScriptGraphPin& aSourcePin, ScriptGraphPin& aTargetPin) const
+void ScriptGraphSchema::CreateEdgeInternal(ScriptGraphPin& aSourcePin,ScriptGraphPin& aTargetPin) const
 {
 	const size_t newEdgeUID = myGraph->myNextEdgeId++;
 	const float edgeThickness = aSourcePin.GetType() == ScriptGraphPinType::Exec ? 3.0f : 1.0f;
@@ -418,14 +418,14 @@ void ScriptGraphSchema::CreateEdgeInternal(ScriptGraphPin& aSourcePin, ScriptGra
 void ScriptGraphSchema::RegenerateEntryPointList()
 {
 	myGraphEntryPoints.clear();
-	for(const auto& [handle, node] : myGraph->myEntryPoints)
+	for(const auto& [handle,node] : myGraph->myEntryPoints)
 	{
 		myGraphEntryPoints.push_back(handle);
 	}
 }
 
 void ScriptGraphSchema::CheckCyclicLink(const std::shared_ptr<ScriptGraphNode>& aNode,
-	const std::shared_ptr<ScriptGraphNode>& aBaseNode, bool& outResult) const
+	const std::shared_ptr<ScriptGraphNode>& aBaseNode,bool& outResult) const
 {
 	// TODO: This just checks for cyclic nodes but will prevent functionality similar
 	// to UEs ForEachWithBreak nodes because you wouldn't be allowed to connect to the
@@ -439,7 +439,7 @@ void ScriptGraphSchema::CheckCyclicLink(const std::shared_ptr<ScriptGraphNode>& 
 
 	const auto& baseNodeUID = AsGUIDAwareSharedPtr(aBaseNode)->GetUID();
 	const auto& pins = aNode->GetPins();
-	for(const auto& [pinUID, pin] : pins)
+	for(const auto& [pinUID,pin] : pins)
 	{
 		if(pin.GetPinDirection() == PinDirection::Output)
 		{
@@ -454,7 +454,7 @@ void ScriptGraphSchema::CheckCyclicLink(const std::shared_ptr<ScriptGraphNode>& 
 					outResult |= true;
 					return;
 				}
-				CheckCyclicLink(targetPin.GetOwner(), aBaseNode, outResult);
+				CheckCyclicLink(targetPin.GetOwner(),aBaseNode,outResult);
 			}
 		}
 	}
@@ -465,7 +465,7 @@ ScriptGraphSchema::ScriptGraphSchema(const std::shared_ptr<void>& aGraph)
 	CreateNodeCDOs();
 
 	myGraph = std::static_pointer_cast<ScriptGraph>(aGraph);
-	for(const auto& [nodeUID, node] : myGraph->myNodes)
+	for(const auto& [nodeUID,node] : myGraph->myNodes)
 	{
 		const auto uidAwareBase = AsGUIDAwarePtr(node.get());
 		if(auto countIt = myNodeTypeCounts.find(uidAwareBase->GetTypeName()); countIt != myNodeTypeCounts.end())
@@ -474,7 +474,7 @@ ScriptGraphSchema::ScriptGraphSchema(const std::shared_ptr<void>& aGraph)
 		}
 		else
 		{
-			myNodeTypeCounts.insert({ uidAwareBase->GetTypeName(), 1 });
+			myNodeTypeCounts.insert({uidAwareBase->GetTypeName(), 1});
 		}
 	}
 
@@ -494,7 +494,7 @@ std::shared_ptr<ScriptGraphNode> ScriptGraphSchema::AddNode(const std::string& a
 std::shared_ptr<ScriptGraphNode> ScriptGraphSchema::AddNode(const ScriptGraphNodeClass& aType)
 {
 	std::shared_ptr<ScriptGraphNode> newNode = aType.New();
-	if (RegisterNode(newNode))
+	if(RegisterNode(newNode))
 	{
 		return newNode;
 	}
@@ -505,9 +505,9 @@ std::shared_ptr<ScriptGraphNode> ScriptGraphSchema::AddNode(const ScriptGraphNod
 std::shared_ptr<ScriptGraphNode> ScriptGraphSchema::AddEntryNode(const std::string& aType,
 	const std::string& aEntryHandle)
 {
-	if (const auto typeData = MyNodeTypesMap().find(aType); typeData != MyNodeTypesMap().end())
+	if(const auto typeData = MyNodeTypesMap().find(aType); typeData != MyNodeTypesMap().end())
 	{
-		return AddEntryNode(typeData->second, aEntryHandle);
+		return AddEntryNode(typeData->second,aEntryHandle);
 	}
 
 	return nullptr;
@@ -516,11 +516,11 @@ std::shared_ptr<ScriptGraphNode> ScriptGraphSchema::AddEntryNode(const std::stri
 std::shared_ptr<ScriptGraphNode> ScriptGraphSchema::AddEntryNode(const ScriptGraphNodeClass& aType,
 	const std::string& aEntryHandle)
 {
-	if (aType.DefaultObject->IsEntryNode())
+	if(aType.DefaultObject->IsEntryNode())
 	{
 		if(std::shared_ptr<ScriptGraphNode> result = AddNode(aType))
 		{
-			RegisterEntryPointNode(result, aEntryHandle);
+			RegisterEntryPointNode(result,aEntryHandle);
 			return result;
 		}
 	}
@@ -532,7 +532,7 @@ void ScriptGraphSchema::RemoveNode(size_t aNodeUID)
 {
 	if(const auto nodeIt = myGraph->myNodes.find(aNodeUID); nodeIt != myGraph->myNodes.end())
 	{
-		for(auto& [ pinUID, pin ] : nodeIt->second->myPins)
+		for(auto& [pinUID,pin] : nodeIt->second->myPins)
 		{
 			// Copy edges since that list will change.
 			const std::vector<size_t> pinEdges = pin.myEdges;
@@ -547,7 +547,7 @@ void ScriptGraphSchema::RemoveNode(size_t aNodeUID)
 		if(nodeIt->second->IsEntryNode())
 		{
 			const auto uuidAwareNode = AsGUIDAwareSharedPtr(nodeIt->second);
-			for (auto entryIt = myGraph->myEntryPoints.begin(); entryIt != myGraph->myEntryPoints.end(); ++entryIt)
+			for(auto entryIt = myGraph->myEntryPoints.begin(); entryIt != myGraph->myEntryPoints.end(); ++entryIt)
 			{
 				const auto uuidAwarePtr = AsGUIDAwareSharedPtr(entryIt->second);
 				if(uuidAwarePtr->GetUUID() == uuidAwareNode->GetUUID())
@@ -562,7 +562,7 @@ void ScriptGraphSchema::RemoveNode(size_t aNodeUID)
 		}
 
 		const auto uidAwareNode = AsGUIDAwareSharedPtr(nodeIt->second);
-		if (const auto countIt = myNodeTypeCounts.find(uidAwareNode->GetTypeName()); countIt != myNodeTypeCounts.end())
+		if(const auto countIt = myNodeTypeCounts.find(uidAwareNode->GetTypeName()); countIt != myNodeTypeCounts.end())
 		{
 			countIt->second--;
 			if(countIt->second <= 0)
@@ -579,7 +579,7 @@ void ScriptGraphSchema::RemoveVariable(const std::string& aVariableName)
 {
 	// Need to plow through all nodes that use this variable and eat them.
 	std::vector<size_t> nodeUIDsToDelete;
-	for(const auto& [nodeUID, node] : myGraph->myNodes)
+	for(const auto& [nodeUID,node] : myGraph->myNodes)
 	{
 		if(std::shared_ptr<VariableNodeBase> varNode = std::dynamic_pointer_cast<VariableNodeBase>(node))
 		{
@@ -605,7 +605,7 @@ std::shared_ptr<SGNode_GetVariable> ScriptGraphSchema::AddGetVariableNode(const 
 	node->Init();
 	node->SetNodeVariable(varIt->second);
 
-	for(auto& [pinUID, pin] : node->myPins)
+	for(auto& [pinUID,pin] : node->myPins)
 	{
 		if(pin.GetType() == ScriptGraphPinType::Variable)
 		{
@@ -627,9 +627,9 @@ std::shared_ptr<SGNode_SetVariable> ScriptGraphSchema::AddSetVariableNode(const 
 	node->Init();
 	node->SetNodeVariable(varIt->second);
 
-	for (auto& [pinUID, pin] : node->myPins)
+	for(auto& [pinUID,pin] : node->myPins)
 	{
-		if (pin.GetType() == ScriptGraphPinType::Variable)
+		if(pin.GetType() == ScriptGraphPinType::Variable)
 		{
 			pin.InitVariableBlock(varIt->second->Data.TypeData->GetType());
 		}
@@ -640,7 +640,7 @@ std::shared_ptr<SGNode_SetVariable> ScriptGraphSchema::AddSetVariableNode(const 
 	return node;
 }
 
-bool ScriptGraphSchema::CanCreateEdge(size_t aSourcePinUID, size_t aTargetPinUID, std::string& outMesssage) const
+bool ScriptGraphSchema::CanCreateEdge(size_t aSourcePinUID,size_t aTargetPinUID,std::string& outMesssage) const
 {
 	if(aSourcePinUID == aTargetPinUID)
 	{
@@ -674,7 +674,7 @@ bool ScriptGraphSchema::CanCreateEdge(size_t aSourcePinUID, size_t aTargetPinUID
 	}
 
 	bool isCyclic = false;
-	CheckCyclicLink(targetPin.GetOwner(), sourcePin.GetOwner(), isCyclic);
+	CheckCyclicLink(targetPin.GetOwner(),sourcePin.GetOwner(),isCyclic);
 	if(isCyclic)
 	{
 		outMesssage = "This connection would result in a cyclic graph loop!";
@@ -686,7 +686,7 @@ bool ScriptGraphSchema::CanCreateEdge(size_t aSourcePinUID, size_t aTargetPinUID
 		return true;
 	}
 
-	if (sourcePin.GetType() != ScriptGraphPinType::Exec && targetPin.GetType() != ScriptGraphPinType::Exec)
+	if(sourcePin.GetType() != ScriptGraphPinType::Exec && targetPin.GetType() != ScriptGraphPinType::Exec)
 	{
 		if(sourcePin.GetDataType() != targetPin.GetDataType())
 		{
@@ -700,14 +700,14 @@ bool ScriptGraphSchema::CanCreateEdge(size_t aSourcePinUID, size_t aTargetPinUID
 	return false;
 }
 
-bool ScriptGraphSchema::CreateEdge(size_t aSourcePinUID, size_t aTargetPinUID)
+bool ScriptGraphSchema::CreateEdge(size_t aSourcePinUID,size_t aTargetPinUID)
 {
 	std::string outMessage;
-	if(CanCreateEdge(aSourcePinUID, aTargetPinUID, outMessage))
+	if(CanCreateEdge(aSourcePinUID,aTargetPinUID,outMessage))
 	{
 		ScriptGraphPin& pinA = GetMutablePin(aSourcePinUID);
 		ScriptGraphPin& pinB = GetMutablePin(aTargetPinUID);
-		
+
 		ScriptGraphPin& sourcePin = pinA.GetPinDirection() == PinDirection::Output ? pinA : pinB;
 		ScriptGraphPin& targetPin = pinB.GetPinDirection() == PinDirection::Input ? pinB : pinA;
 
@@ -722,7 +722,7 @@ bool ScriptGraphSchema::CreateEdge(size_t aSourcePinUID, size_t aTargetPinUID)
 			DisconnectPin(targetPin.GetUID());
 		}
 
-		CreateEdgeInternal(sourcePin, targetPin);
+		CreateEdgeInternal(sourcePin,targetPin);
 
 		return true;
 	}
@@ -744,10 +744,10 @@ bool ScriptGraphSchema::DisconnectPin(size_t aPinUID)
 }
 
 bool ScriptGraphSchema::RemoveEdge(size_t aEdgeUID)
-{	
+{
 	auto it = myGraph->myEdges.find(aEdgeUID);
 	assert(it != myGraph->myEdges.end());
-		
+
 	ScriptGraphPin& fromPin = GetMutablePin(it->second.FromUID);
 	ScriptGraphPin& toPin = GetMutablePin(it->second.ToUID);
 
@@ -759,14 +759,14 @@ bool ScriptGraphSchema::RemoveEdge(size_t aEdgeUID)
 	return true;
 }
 
-void ScriptGraphSchema::UpdateNodePositionCache(const std::shared_ptr<ScriptGraphNode>& aNode, float x, float y, float z)
+void ScriptGraphSchema::UpdateNodePositionCache(const std::shared_ptr<ScriptGraphNode>& aNode,float x,float y,float z)
 {
 	aNode->myPosition[0] = x;
 	aNode->myPosition[1] = y;
 	aNode->myPosition[2] = z;
 }
 
-void ScriptGraphSchema::GetNodePositionCache(const std::shared_ptr<ScriptGraphNode>& aNode, float& outX, float& outY,
+void ScriptGraphSchema::GetNodePositionCache(const std::shared_ptr<ScriptGraphNode>& aNode,float& outX,float& outY,
 	float& outZ)
 {
 	outX = aNode->myPosition[0];

@@ -1,9 +1,9 @@
 ﻿#pragma once
 #include <array>
 
-#include "ScriptGraphPin.h"
 #include "../Graph/NodeGraphNode.h"
 #include "ScriptGraph.h"
+#include "ScriptGraphPin.h"
 #include "ScriptGraphSchema.h"
 
 class ScriptGraph;
@@ -14,12 +14,12 @@ struct ScriptGraphNodePayload
 
 private:
 
-	std::unordered_map<std::string, ScriptGraphDataObject> Data;
+	std::unordered_map<std::string,ScriptGraphDataObject> Data;
 
 public:
 
 	template<typename T>
-	void SetVariable(const std::string& aString, const T& aValue)
+	void SetVariable(const std::string& aString,const T& aValue)
 	{
 		if(const auto it = Data.find(aString); it != Data.end())
 		{
@@ -31,14 +31,14 @@ public:
 		}
 		else
 		{
-			Data.insert({ aString, ScriptGraphDataObject::Create(aValue) });
+			Data.insert({aString, ScriptGraphDataObject::Create(aValue)});
 		}
 	}
 
 	template<typename T>
-	bool TryGetVariable(const std::string& aString, T& outValue) const
+	bool TryGetVariable(const std::string& aString,T& outValue) const
 	{
-		if (const auto it = Data.find(aString); it != Data.end())
+		if(const auto it = Data.find(aString); it != Data.end())
 		{
 			if(it->second.TypeData->GetType() == typeid(T))
 			{
@@ -51,9 +51,9 @@ public:
 	}
 };
 
-class ScriptGraphNode : public NodeGraphNode<ScriptGraphPin, ScriptGraph, ScriptGraphSchema>, public std::enable_shared_from_this<ScriptGraphNode>
+class ScriptGraphNode : public NodeGraphNode<ScriptGraphPin,ScriptGraph,ScriptGraphSchema>,public std::enable_shared_from_this<ScriptGraphNode>
 {
-	typedef NodeGraphNode<ScriptGraphPin, ScriptGraph, ScriptGraphSchema> ParentClass;
+	typedef NodeGraphNode<ScriptGraphPin,ScriptGraph,ScriptGraphSchema> ParentClass;
 
 	bool isExecNode = false;
 
@@ -63,19 +63,19 @@ class ScriptGraphNode : public NodeGraphNode<ScriptGraphPin, ScriptGraph, Script
 protected:
 
 	template<typename DataType>
-	void CreateDataPin(const std::string& aLabel, PinDirection aDirection, bool hideLabelOnNode = false)
+	void CreateDataPin(const std::string& aLabel,PinDirection aDirection,bool hideLabelOnNode = false)
 	{
-		AddPin(ScriptGraphPin::CreateDataPin<DataType>(AsSharedPtr(), aLabel, ScriptGraphPinType::Data, PinIcon::Circle, aDirection, hideLabelOnNode));
+		AddPin(ScriptGraphPin::CreateDataPin<DataType>(AsSharedPtr(),aLabel,ScriptGraphPinType::Data,PinIcon::Circle,aDirection,hideLabelOnNode));
 	}
 
-	void CreateVariablePin(const std::string& aLabel, PinDirection aDirection, bool hideLabelOnNode = false)
+	void CreateVariablePin(const std::string& aLabel,PinDirection aDirection,bool hideLabelOnNode = false)
 	{
-		AddPin(ScriptGraphPin::CreatePin(AsSharedPtr(), aLabel, ScriptGraphPinType::Variable, PinIcon::Circle, aDirection, hideLabelOnNode));
+		AddPin(ScriptGraphPin::CreatePin(AsSharedPtr(),aLabel,ScriptGraphPinType::Variable,PinIcon::Circle,aDirection,hideLabelOnNode));
 	}
 
-	void CreateExecPin(const std::string& aLabel, PinDirection aDirection, bool hideLabelOnNode = false)
+	void CreateExecPin(const std::string& aLabel,PinDirection aDirection,bool hideLabelOnNode = false)
 	{
-		AddPin(ScriptGraphPin::CreatePin(AsSharedPtr(), aLabel, ScriptGraphPinType::Exec, PinIcon::Exec, aDirection, hideLabelOnNode));
+		AddPin(ScriptGraphPin::CreatePin(AsSharedPtr(),aLabel,ScriptGraphPinType::Exec,PinIcon::Exec,aDirection,hideLabelOnNode));
 		isExecNode = true;
 	}
 
@@ -112,7 +112,7 @@ public:
 
 	FORCEINLINE virtual std::string GetDescription() const { return "A ScriptGraph Node."; }
 
-	virtual FORCEINLINE GraphColor GetNodeHeaderColor() const { return GraphColor(80, 124, 153, 255); };
+	virtual FORCEINLINE GraphColor GetNodeHeaderColor() const { return GraphColor(80,124,153,255); };
 
 	// Controls how many instances of this node may coexist in the same graph.
 	// If > 0 this will be enforced.
@@ -130,10 +130,10 @@ struct RegisterScriptNode
 	static inline bool IsRegistered = ScriptGraphSchema::RegisterNodeType<N>();
 };
 
-template<typename N, typename B>
+template<typename N,typename B>
 struct RegisterScriptNodeWithBase
 {
-	static inline bool IsRegistered = ScriptGraphSchema::RegisterNodeTypeWithBase<N, B>();
+	static inline bool IsRegistered = ScriptGraphSchema::RegisterNodeTypeWithBase<N,B>();
 };
 
 // Declare a run of the mill Script Graph Node

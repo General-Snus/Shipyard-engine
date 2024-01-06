@@ -2,10 +2,10 @@
 // Place your includes for registered types here.
 #include <cinttypes>
 
-#include <ScriptGraph/ScriptGraphTypes.h> 
+#include <Engine/AssetManager/ComponentSystem/GameObject.h>
 #include <format>
+#include <ScriptGraph/ScriptGraphTypes.h> 
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
-
 /********************************************************************************************************************************
  *
  * Here you should declare all types that the ScriptGraph should be aware of. I.e. all
@@ -44,13 +44,24 @@
  *
  *******************************************************************************************************************************/
 
-BeginDataTypeHandler(Vector, Vector3f, GraphColor(255, 200, 0, 255), false)
+BeginDataTypeHandler(Vector,Vector3f,GraphColor(255,200,0,255),false)
 
-std::string ToString(const void* aDataPtr, const ScriptGraphType& aTypeInfo) const override
+std::string ToString(const void* aDataPtr,const ScriptGraphType& aTypeInfo) const override
 {
 	aTypeInfo;
 	const Vector3f vector = *static_cast<const Vector3f*>(aDataPtr);
-	std::string result = std::format("X: {}, Y: {}, Z: {}", vector.x, vector.y, vector.z);
+	std::string result = std::format("X: {}, Y: {}, Z: {}",vector.x,vector.y,vector.z);
+	return result;
+}
+EndDataTypeHandler
+
+BeginDataTypeHandler(GameObjects,GameObject,GraphColor(150,255,0,255),false)
+
+std::string ToString(const void* aDataPtr,const ScriptGraphType& aTypeInfo) const override
+{
+	aTypeInfo;
+	const GameObject go = *static_cast<const GameObject*>(aDataPtr);
+	std::string result = std::format("ID: {}",go.GetID().operator unsigned int());
 	return result;
 }
 EndDataTypeHandler

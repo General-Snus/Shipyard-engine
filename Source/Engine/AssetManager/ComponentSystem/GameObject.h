@@ -76,7 +76,7 @@ inline const bool GameObject::HasComponent()
 template<class T>
 inline T* GameObject::TryGetComponent()
 {
-	return myManager->TryGetComponent<T>(myID);
+	return myManager ? myManager->TryGetComponent<T>(myID) : nullptr;
 }
 
 template<class T>

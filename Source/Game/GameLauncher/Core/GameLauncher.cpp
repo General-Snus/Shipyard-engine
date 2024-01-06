@@ -31,7 +31,7 @@ void GameLauncher::Start()
 #pragma region BaseSetup
 	myCustomHandler = gom.CreateGameObject();
 	myMesh = gom.CreateGameObject();
-	
+
 
 	{
 		GameObject camera = gom.CreateGameObject();

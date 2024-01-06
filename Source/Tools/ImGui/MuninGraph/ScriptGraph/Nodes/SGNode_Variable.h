@@ -18,7 +18,7 @@ public:
 	virtual void SetNodeVariable(const std::shared_ptr<ScriptGraphVariable>& aVariable) = 0;
 };
 
-BeginScriptGraphNode(SGNode_SetVariable), public VariableNodeBase
+BeginScriptGraphNode(SGNode_SetVariable),public VariableNodeBase
 {
 
 public:
@@ -34,7 +34,7 @@ public:
 	bool IsInternalOnly() const override { return true; }
 };
 
-BeginScriptGraphNode(SGNode_GetVariable), public VariableNodeBase
+BeginScriptGraphNode(SGNode_GetVariable),public VariableNodeBase
 {
 public:
 

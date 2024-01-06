@@ -1,14 +1,14 @@
 ﻿#include "MuninGraph.pch.h"
 #include "ScriptGraphTypes.h"
 
-const GraphColor GraphColor::White = { 255, 255, 255, 255 };
-const GraphColor  GraphColor::Black = { 0, 0, 0, 255 };
+const GraphColor GraphColor::White = {255, 255, 255, 255};
+const GraphColor  GraphColor::Black = {0, 0, 0, 255};
 
 const ScriptGraphType ScriptGraphType::NullType;
 
 std::shared_ptr<const ScriptGraphType> ScriptGraphDataTypeRegistry::GetType(const std::type_index& aType)
 {
-	if (const auto typeIt = MyTypesMap().find(aType); typeIt != MyTypesMap().end())
+	if(const auto typeIt = MyTypesMap().find(aType); typeIt != MyTypesMap().end())
 	{
 		return typeIt->second;
 	}
@@ -18,7 +18,7 @@ std::shared_ptr<const ScriptGraphType> ScriptGraphDataTypeRegistry::GetType(cons
 
 std::shared_ptr<const ScriptGraphType> ScriptGraphDataTypeRegistry::GetType(const std::string& aType)
 {
-	if (const auto typeIt = myStringToType.find(aType); typeIt != myStringToType.end())
+	if(const auto typeIt = myStringToType.find(aType); typeIt != myStringToType.end())
 	{
 		return GetType(typeIt->second);
 	}
@@ -37,40 +37,40 @@ std::shared_ptr<const ScriptGraphType> ScriptGraphDataTypeRegistry::GetTypeFromF
 	return nullptr;
 }
 
-void ScriptGraphDataTypeRegistry::RenderEditInPlaceWidget(const std::type_index& aType, const std::string& aContainerUUID, void* const aDataPtr)
+void ScriptGraphDataTypeRegistry::RenderEditInPlaceWidget(const std::type_index& aType,const std::string& aContainerUUID,void* const aDataPtr)
 {
-	if (const auto typeIt = MyTypesMap().find(aType); typeIt != MyTypesMap().end())
+	if(const auto typeIt = MyTypesMap().find(aType); typeIt != MyTypesMap().end())
 	{
 		const std::shared_ptr<ScriptGraphType> type = typeIt->second;
-		if (type->CanConstructInPlace)
+		if(type->CanConstructInPlace)
 		{
-			type->RenderConstructWidget(aContainerUUID, aDataPtr, *type);
+			type->RenderConstructWidget(aContainerUUID,aDataPtr,*type);
 		}
 	}
 }
 
-std::string ScriptGraphDataTypeRegistry::GetString(const std::type_index& aType, void* aDataPtr)
+std::string ScriptGraphDataTypeRegistry::GetString(const std::type_index& aType,void* aDataPtr)
 {
 	if(auto type = GetType(aType))
 	{
-		return type->ToString(aDataPtr, *type);
+		return type->ToString(aDataPtr,*type);
 	}
 
 	return "";
 }
 
-void ScriptGraphDataTypeRegistry::Serialize(const std::type_index& aType, const void* aDataPtr,
+void ScriptGraphDataTypeRegistry::Serialize(const std::type_index& aType,const void* aDataPtr,
 	std::vector<uint8_t>& outData)
 {
 	const auto type = GetType(aType);
-	type->SerializeData(aDataPtr, *type, outData);
+	type->SerializeData(aDataPtr,*type,outData);
 }
 
-void ScriptGraphDataTypeRegistry::Deserialize(const std::type_index& aType, void* outDataPtr,
+void ScriptGraphDataTypeRegistry::Deserialize(const std::type_index& aType,void* outDataPtr,
 	const std::vector<uint8_t>& inData)
 {
 	const auto type = GetType(aType);
-	type->DeserializeData(inData, *type, outDataPtr);
+	type->DeserializeData(inData,*type,outDataPtr);
 }
 
 std::string ScriptGraphDataTypeRegistry::GetFriendlyName(const std::type_index& aType)
@@ -85,7 +85,7 @@ std::string ScriptGraphDataTypeRegistry::GetFriendlyName(const std::type_index& 
 
 std::type_index ScriptGraphDataTypeRegistry::GetTypeFromString(const std::string& aType)
 {
-	if (const auto typeIt = myStringToType.find(aType); typeIt != myStringToType.end())
+	if(const auto typeIt = myStringToType.find(aType); typeIt != myStringToType.end())
 	{
 		return typeIt->second;
 	}
@@ -95,7 +95,7 @@ std::type_index ScriptGraphDataTypeRegistry::GetTypeFromString(const std::string
 
 ScriptGraphDataObject ScriptGraphDataTypeRegistry::GetDataObjectOfType(const std::type_index& aType)
 {
-	if (const auto typeIt = MyTypesMap().find(aType); typeIt != MyTypesMap().end())
+	if(const auto typeIt = MyTypesMap().find(aType); typeIt != MyTypesMap().end())
 	{
 		ScriptGraphDataObject obj;
 		typeIt->second->MakeDataObject(obj);
@@ -108,7 +108,7 @@ ScriptGraphDataObject ScriptGraphDataTypeRegistry::GetDataObjectOfType(const std
 
 ScriptGraphDataObject ScriptGraphDataTypeRegistry::GetDataObjectOfType(const std::string& aType)
 {
-	if (const auto typeIt = myStringToType.find(aType); typeIt != myStringToType.end())
+	if(const auto typeIt = myStringToType.find(aType); typeIt != myStringToType.end())
 	{
 		return GetDataObjectOfType(typeIt->second);
 	}
@@ -147,8 +147,8 @@ std::string ScriptGraphType::FetchTypeName(const std::type_index& aType) const
 	const std::string MSVCTypeName = aType.name();
 	const size_t fromPos = MSVCTypeName.find_first_of(' ');
 
-	size_t toPos = MSVCTypeName.find_first_of(' ', fromPos);
-	if (toPos == std::string::npos)
+	size_t toPos = MSVCTypeName.find_first_of(' ',fromPos);
+	if(toPos == std::string::npos)
 	{
 		toPos = MSVCTypeName.size() - fromPos;
 	}
@@ -157,9 +157,9 @@ std::string ScriptGraphType::FetchTypeName(const std::type_index& aType) const
 		toPos = MSVCTypeName.size() - toPos;
 	}
 
-	std::string result = MSVCTypeName.substr(fromPos + 1, toPos);
+	std::string result = MSVCTypeName.substr(fromPos + 1,toPos);
 
-	result = std::regex_replace(result, std::regex(R"(((\bclass\b)|(\bstruct\b))\s*)"), "");
+	result = std::regex_replace(result,std::regex(R"(((\bclass\b)|(\bstruct\b))\s*)"),"");
 
 	return result;
 }
@@ -167,28 +167,28 @@ std::string ScriptGraphType::FetchTypeName(const std::type_index& aType) const
 std::string ScriptGraphType::FetchSimpleTypeName(const std::string& aFullName) const
 {
 	const size_t toPos = aFullName.find_first_of('<');
-	if (toPos != std::string::npos)
+	if(toPos != std::string::npos)
 	{
-		std::string result = aFullName.substr(0, toPos);
+		std::string result = aFullName.substr(0,toPos);
 		return result;
 	}
 
 	return aFullName;
 }
 
-void ScriptGraphType::SerializeData(const void* aDataPtr, const ScriptGraphType& aTypeInfo,
-                                    std::vector<uint8_t>& outData) const
+void ScriptGraphType::SerializeData(const void* aDataPtr,const ScriptGraphType& aTypeInfo,
+	std::vector<uint8_t>& outData) const
 {
 	// By default we just serialize the data to a vector.
 	outData.resize(aTypeInfo.GetTypeSize());
-	memcpy_s(outData.data(), outData.capacity(), aDataPtr, aTypeInfo.GetTypeSize());
+	memcpy_s(outData.data(),outData.capacity(),aDataPtr,aTypeInfo.GetTypeSize());
 }
 
-void ScriptGraphType::DeserializeData(const std::vector<uint8_t>& inData, const ScriptGraphType& aTypeInfo,
+void ScriptGraphType::DeserializeData(const std::vector<uint8_t>& inData,const ScriptGraphType& aTypeInfo,
 	void* outDataPtr) const
 {
 	// And by default we just copy data back to the pointer with nothing fancy.
-	memcpy_s(outDataPtr, aTypeInfo.GetTypeSize(), inData.data(), inData.size());
+	memcpy_s(outDataPtr,aTypeInfo.GetTypeSize(),inData.data(),inData.size());
 }
 
 void ScriptGraphType::DestroyTypeObject(ScriptGraphDataObject& aObject) const
@@ -196,5 +196,5 @@ void ScriptGraphType::DestroyTypeObject(ScriptGraphDataObject& aObject) const
 	if(aObject.TypeData)
 	{
 		DestroyDataObject(aObject);
-	}	
+	}
 }

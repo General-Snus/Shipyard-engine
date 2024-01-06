@@ -7,31 +7,31 @@
 // in an EXE project then it'll work as intended on its own.
 
 // NOTE THE INCLUDE!
-
-BeginScriptGraphNode(MVNode_TestNode)
-{
-public:
-	void Init() override;
-	std::string GetNodeTitle() const override { return "Model Viewer Test Node"; }
-	size_t DoOperation() override;
-};
-
-BeginScriptGraphNode(MVNode_TestExecless)
-{
-public:
-	void Init() override;
-	std::string GetNodeTitle() const override { return "Test Execless Node"; }
-	size_t DoOperation() override;
-};
-
-BeginScriptGraphNode(MVNode_TestMultiInput)
-{
-public:
-	void Init() override;
-	std::string GetNodeTitle() const override { return "Test Multi Input"; }
-	size_t DoOperation() override;
-	bool IsSimpleNode() const override;
-};
+//
+//BeginScriptGraphNode(MVNode_TestNode)
+//{
+//public:
+//	void Init() override;
+//	std::string GetNodeTitle() const override { return "Model Viewer Test Node"; }
+//	size_t DoOperation() override;
+//};
+//
+//BeginScriptGraphNode(MVNode_TestExecless)
+//{
+//public:
+//	void Init() override;
+//	std::string GetNodeTitle() const override { return "Test Execless Node"; }
+//	size_t DoOperation() override;
+//};
+//
+//BeginScriptGraphNode(MVNode_TestMultiInput)
+//{
+//public:
+//	void Init() override;
+//	std::string GetNodeTitle() const override { return "Test Multi Input"; }
+//	size_t DoOperation() override;
+//	bool IsSimpleNode() const override;
+//};
 
 BeginScriptGraphNode(MVNode_MakeVector)
 {
@@ -51,6 +51,9 @@ public:
 	bool IsSimpleNode() const override { return false; }
 };
 
+
+
+
 BeginScriptGraphNode(MVNode_Branch)
 {
 public:
@@ -65,4 +68,30 @@ public:
 	void Init() override;
 	std::string GetNodeTitle() const override { return "For"; }
 	size_t DoOperation() override;
+};
+
+BeginScriptGraphNode(MVNode_GetGameObject)
+{
+public:
+	void Init() override;
+	std::string GetNodeTitle() const override { return "Get GameObject"; }
+	size_t DoOperation() override;
+	bool IsSimpleNode() const override { return false; }
+};
+BeginScriptGraphNode(MVNode_GetTransformPosition)
+{
+public:
+	void Init() override;
+	std::string GetNodeTitle() const override { return "Get Transform Position"; }
+	size_t DoOperation() override;
+	bool IsSimpleNode() const override { return false; }
+};
+
+BeginScriptGraphNode(MVNode_SetTransformPosition)
+{
+public:
+	void Init() override;
+	std::string GetNodeTitle() const override { return "Set Transform Position"; }
+	size_t DoOperation() override;
+	bool IsSimpleNode() const override { return false; }
 };
