@@ -7,6 +7,7 @@ class GameLauncher
 public:
 	GameLauncher() = default;
 	void Init();
+	void GenerateNewRandomCubes();
 	void Start();
 	void Update(float delta);
 	Logger GLLogger;
@@ -14,4 +15,6 @@ private:
 	GameObject myMesh;
 	GameObject myCustomHandler;
 	Matrix myModelMatrix;
+	std::vector<GameObject> vectorOfGameObjects;
+
 };

@@ -38,6 +38,7 @@ public:
 	GameObjectManager() = default;
 	~GameObjectManager();
 	const GameObject CreateGameObject();
+	const GameObject CreateGameObjectAt(const SY::UUID aGameObjectID);
 	void DeleteGameObject(const SY::UUID aGameObjectID);
 	void DeleteGameObject(const GameObject aGameObject);
 

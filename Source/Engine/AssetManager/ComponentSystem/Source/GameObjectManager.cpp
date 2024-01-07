@@ -21,6 +21,18 @@ const GameObject GameObjectManager::CreateGameObject()
 	return GameObject(myLastID++,this);
 }
 
+//ILLEGAL
+const GameObject GameObjectManager::CreateGameObjectAt(const SY::UUID aGameObjectID)
+{
+	if(aGameObjectID > myLastID)
+	{
+		myLastID = aGameObjectID;
+		myLastID++;
+	}
+	myGameObjects.emplace(aGameObjectID,true);
+	return GameObject(aGameObjectID,this);
+}
+
 void GameObjectManager::DeleteGameObject(const SY::UUID aGameObjectID)
 {
 	myObjectsToDelete.push_back(aGameObjectID);

@@ -9,10 +9,10 @@ cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId) : Component(anOwnerId
 	AssetManager::Get().LoadAsset<Mesh>("default.fbx",myRenderData->myMesh);
 }
 
-inline cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath) : Component(anOwnerId)
+inline cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath,bool useExact) : Component(anOwnerId)
 {
 	myRenderData = std::make_shared<RenderData>();
-	AssetManager::Get().LoadAsset<Mesh>(aFilePath,myRenderData->myMesh);
+	AssetManager::Get().LoadAsset<Mesh>(aFilePath,useExact,myRenderData->myMesh);
 	//ThreadPool::Get().SubmitWork(std::bind(&waitForLoad,myRenderData->myMesh,myOwnerID));
 }
 

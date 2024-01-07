@@ -11,14 +11,14 @@ struct RenderData
 	}
 	std::shared_ptr<Mesh> myMesh;
 	std::vector<std::shared_ptr<Material>> overrideMaterial; //if this exist it will override the material on the mesh
-}; 
+};
 
 class cMeshRenderer : public Component
 {
 public:
 	cMeshRenderer() = delete; // Create a generic cube
 	cMeshRenderer(const unsigned int anOwnerId); // Create a generic cube  
-	cMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath); 
+	cMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath,bool useExact = false);
 	void Render() override;
 
 	void SetNewMesh(const std::filesystem::path& aFilePath);
@@ -57,7 +57,7 @@ public:
 protected:
 	bool isInstanced = true;
 	bool isStatic = true;
-	std::shared_ptr<RenderData> myRenderData; 
+	std::shared_ptr<RenderData> myRenderData;
 };
 
 

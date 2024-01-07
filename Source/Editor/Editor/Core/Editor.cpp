@@ -46,7 +46,6 @@ bool Editor::Initialize(HWND aHandle)
 	GELogger = Logger::Create("GraphicsEngine");
 
 	ShowSplashScreen();
-
 	ThreadPool::Get().Init();
 
 #ifdef _DEBUG
