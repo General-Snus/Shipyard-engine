@@ -1,15 +1,15 @@
 ﻿
-#include "resource.h"
 #include "Core/Editor.h" 
+#include "resource.h"
 #include "Windows/Window.h" 
-#include <Windows.h> // Mean and lean is in compiler defines
 #include <Tools/ThirdParty/dpp/dpp.h>
+#include <Windows.h> // Mean and lean is in compiler defines
 
 #include <dbghelp.h>
 #include <shellapi.h>
 #include <shlobj.h>
-#include <Strsafe.h>
 #include <stdio.h>
+#include <Strsafe.h>
 #include <wchar.h>
 
 
@@ -35,7 +35,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	UNREFERENCED_PARAMETER(nCmdShow);
 
-	
+
 
 	if(IsDebuggerPresent())
 	{
