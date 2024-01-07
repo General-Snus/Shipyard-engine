@@ -99,6 +99,7 @@ void Editor::DoWinProc(const MSG& aMessage)
 		ImGui::DestroyContext();
 		return;
 	}
+
 	InputHandler::GetInstance().UpdateEvents(aMessage.message,aMessage.wParam,aMessage.lParam);
 	InputHandler::GetInstance().UpdateMouseInput(aMessage.message);
 }

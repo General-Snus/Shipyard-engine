@@ -35,8 +35,8 @@ void GameLauncher::Start()
 
 
 		auto& transform = camera.AddComponent<Transform>();
-		transform.SetPosition(0,25,0);
-		transform.SetRotation(90,0,0);
+		transform.SetPosition(0,25,-25);
+		transform.SetRotation(45,0,0);
 
 	}
 	{
@@ -85,98 +85,10 @@ void GameLauncher::Start()
 
 #pragma endregion
 
-
-	//Decisiontree 1
-	int actorAmount = 2;
-	int wellAmount = 2;
-
-#pragma region Collider
-	std::vector<GameObject> colliders;
-	//colliders.resize(collidersAmount);
-	auto colliderPositions =
 	{
-		Vector3<Vector3f>(25.5f * Vector3f(1,0,0), Vector3f(0,0,0),Vector3f(1,1,25)),
-		Vector3<Vector3f>(25.5f * Vector3f(-1,0,0),Vector3f(0,0,0),Vector3f(1,1,25)),
-		Vector3<Vector3f>(25.5f * Vector3f(0,0,1), Vector3f(0,0,0),Vector3f(25,1,1)),
-		Vector3<Vector3f>(25.5f * Vector3f(0,0,-1),Vector3f(0,0,0),Vector3f(25,1,1)),
-		Vector3<Vector3f>(20.f * Vector3f(0,0,1),Vector3f(0,0,0),Vector3f(1,1,10)),
-		Vector3<Vector3f>(20.f * Vector3f(0,0,-1),Vector3f(0,0,0),Vector3f(1,1,10)),
-	};
-
-	for(const auto& transformData : colliderPositions)
-	{
-		//Drone
-		auto object = gom.CreateGameObject();
-		auto& transform = object.AddComponent<Transform>();
-
-		transform.SetPosition(transformData[0]);
-		transform.SetRotation(transformData[1]);
-		transform.SetScale(transformData[2]);
-
-		auto& mesh = object.AddComponent<cMeshRenderer>("Models/Cube.fbx");
-		mesh.SetMaterialPath("Materials/C64Separatist.json");
-		object.AddComponent<cCollider>();
-		colliders.push_back(object);
-	}
-#pragma endregion
-
-#pragma region Entities
-	std::vector<GameObject> entities;
-	entities.resize(actorAmount);
-	for(auto& obj : entities)
-	{
-		//Drone
-		obj = gom.CreateGameObject();
-		auto& transform = obj.AddComponent<Transform>();
-		transform.SetPosition(RandomEngine::RandomInRange<float>(-20,20),0,RandomEngine::RandomInRange<float>(-20,20));
-		transform.SetRotation(0,RandomEngine::RandomInRange(0.f,360.f),0);
-		obj.AddComponent<cCollider>();
-		obj.SetLayer(Layer::Entities);
-	}
-#pragma endregion
-
-#pragma region Healtwell
-	std::vector<GameObject> well;
-	well.resize(wellAmount); //Safety resize if we dont add more it wont realloc and span wont loose connection  
-	for(auto& obj : well)
-	{
-		float x = RandomEngine::RandomInRange(-20.0f,20.0f);
-		float z = RandomEngine::RandomInRange(-20.0f,20.0f);
-
-		//Drone
-		obj = gom.CreateGameObject();
-		auto& transform = obj.AddComponent<Transform>();
-		transform.SetPosition(x,0,z);
-		transform.SetRotation(90,0,0);
-
-		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/Well.fbx");
-		mesh.SetMaterialPath("Materials/C64Separatist.json");
-	}
-#pragma endregion
-
-
-
-	auto colliderPollingStation = std::make_shared<MultipleTargets_PollingStation>(colliders);
-	auto formationPollingStation = std::make_shared<MultipleTargets_PollingStation>(entities);
-	auto wellPollingStation = std::make_shared<MultipleTargets_PollingStation>(well);
-
-	AIPollingManager::Get().AddStation("Healing",wellPollingStation);
-	AIPollingManager::Get().AddStation("Colliders",colliderPollingStation);
-	AIPollingManager::Get().AddStation("Targets",formationPollingStation);
-
-
-	{ //DecisionTree
-		auto& actor = entities[0].AddComponent<cActor>();
-		actor.SetController(new DecisionTreeController());
-		auto& mesh = entities[0].AddComponent<cMeshRenderer>("Models/C64Wanderer.fbx");
-		mesh.SetMaterialPath("Materials/C64Wanderer.json");
-	}
-
-	{ //StateMachine
-		auto& actor = entities[1].AddComponent<cActor>();
-		actor.SetController(new StateMachineController());
-		auto& mesh = entities[1].AddComponent<cMeshRenderer>("Models/C64Seeker.fbx");
-		mesh.SetMaterialPath("Materials/C64Seeker.json");
+		auto& transform = myCustomHandler.AddComponent<Transform>();
+		myCustomHandler.AddComponent<cMeshRenderer>("Models/Cube.fbx");
+		transform.SetScale(5.f);
 	}
 
 	GLLogger.Log("GameLauncher start");
@@ -192,6 +104,10 @@ void GameLauncher::Update(float delta)
 	{
 		GraphicsEngine::Get().GetSettings().DebugRenderer_Active = !GraphicsEngine::Get().GetSettings().DebugRenderer_Active;
 	}
+	static float angle;
+	angle += delta;
+	constexpr float radius = 5.f;
+	myCustomHandler.GetComponent<Transform>().SetPosition(radius * cos(angle),5,radius * sin(angle));
 
 	//Other
 	{
