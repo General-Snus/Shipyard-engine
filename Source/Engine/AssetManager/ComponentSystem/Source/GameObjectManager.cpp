@@ -143,7 +143,6 @@ void GameObjectManager::DeleteObjects()
 			for(auto& cm : myComponentManagers)
 			{
 				cm.second->DeleteGameObject(myObjectsToDelete[i]);
-				std::cout << "Deleting: " << cm.first << std::endl;
 			}
 		}
 		else

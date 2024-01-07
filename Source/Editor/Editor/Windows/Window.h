@@ -6,7 +6,7 @@ struct WinInitSettings
 {
 	LPCWSTR windowTitle;
 	SIZE windowSize;
-	HINSTANCE hInstance; 
+	HINSTANCE hInstance;
 };
 
 

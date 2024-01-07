@@ -1,5 +1,6 @@
-#include "AssetManager.pch.h"
 #include "../DecisionTreeController.h" 
+#include <Editor/Editor/Defines.h>
+#include <Engine/AssetManager/AssetManager.pch.h>
 #include <Engine/PersistentSystems/ArtificialInteligence/AICommands/AICommands.h>
 
 DecisionTreeController::DecisionTreeController(DecisionTree decisionTree) : myTree(decisionTree)
@@ -9,31 +10,29 @@ DecisionTreeController::DecisionTreeController(DecisionTree decisionTree) : myTr
 DecisionTreeController::DecisionTreeController()
 {
 #if ActorDecicionTree
-	int node = 0;	 //switching variables
-	int node1 = 0;
-	myTree.AddNodeAt(0,GeneralizedAICommands::IsDead); // nodes follow a triangle pyramid pattern of i++
-	myTree.AddChildNodeAt(0,true,GeneralizedAICommands::DeathSpin);
 
 
-	node = myTree.AddChildNodeAt(0,false,GeneralizedAICommands::IsHealthy); // or healing
-	myTree.AddChildNodeAt(node,false,GeneralizedAICommands::Retreat); // go and heal
-	node = myTree.AddChildNodeAt(node,true,GeneralizedAICommands::IsTargetAlive);
+	//Tack för bra kommentarer Simon, mycket klarare med ordentliga variabelnamn
 
-	node1 = myTree.AddChildNodeAt(node,false,GeneralizedAICommands::IsFullyHealed);
-	myTree.AddChildNodeAt(node1,true,GeneralizedAICommands::MoveFreely);
-	myTree.AddChildNodeAt(node1,false,GeneralizedAICommands::Retreat); // go and heal
-
-	node = myTree.AddChildNodeAt(node,true,GeneralizedAICommands::IsTargetInRange);
-	myTree.AddChildNodeAt(node,false,GeneralizedAICommands::MoveFreely);
-	node = myTree.AddChildNodeAt(node,true,GeneralizedAICommands::IsTargetInSight);
-
-	myTree.AddChildNodeAt(node,false,GeneralizedAICommands::AlignToTarget);
-	myTree.AddChildNodeAt(node,true,GeneralizedAICommands::ShootAtTarget);
-
-	//myTree.AddChildNodeAt(node,false,GeneralizedAICommands::MoveToward);
+	const int EntryNode = 0;
+	myTree.AddNodeAt(EntryNode,GeneralizedAICommands::IsDead); // nodes follow a triangle pyramid pattern of i++
+	myTree.AddChildNodeAt(EntryNode,true,GeneralizedAICommands::DeathSpin);
 
 
+	const int isHealthy = myTree.AddChildNodeAt(EntryNode,false,GeneralizedAICommands::IsHealthy); // or healing
+	myTree.AddChildNodeAt(isHealthy,false,GeneralizedAICommands::Retreat); // go and heal
+	const int isTargetAlive = myTree.AddChildNodeAt(isHealthy,true,GeneralizedAICommands::IsTargetAlive);
 
+	const int isFullyHealed = myTree.AddChildNodeAt(isTargetAlive,false,GeneralizedAICommands::IsFullyHealed);
+	myTree.AddChildNodeAt(isFullyHealed,true,GeneralizedAICommands::MoveFreely);
+	myTree.AddChildNodeAt(isFullyHealed,false,GeneralizedAICommands::Retreat); // go and heal
+
+	const int isTargetInRange = myTree.AddChildNodeAt(isTargetAlive,true,GeneralizedAICommands::IsTargetInRange);
+	myTree.AddChildNodeAt(isTargetInRange,false,GeneralizedAICommands::MoveFreely);
+	const int isTargetInSight = myTree.AddChildNodeAt(isTargetInRange,true,GeneralizedAICommands::IsTargetInSight);
+
+	myTree.AddChildNodeAt(isTargetInSight,false,GeneralizedAICommands::AlignToTarget);
+	myTree.AddChildNodeAt(isTargetInSight,true,GeneralizedAICommands::ShootAtTarget);
 #endif
 }
 

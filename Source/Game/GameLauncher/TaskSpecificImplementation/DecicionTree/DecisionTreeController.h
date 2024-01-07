@@ -1,6 +1,6 @@
 #pragma once
-#include "../DecisionTree/DecisionTree.h"
-#include "Controller.h"
+#include <Engine/AssetManager/Objects/AI/AgentSystem/Controllers/Controller.h>
+#include <Engine/AssetManager/Objects/AI/AgentSystem/DecisionTree/DecisionTree.h>
 
 class DecisionTreeController : public Controller
 {

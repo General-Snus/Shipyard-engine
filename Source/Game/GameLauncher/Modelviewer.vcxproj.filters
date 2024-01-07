@@ -21,9 +21,27 @@
     <ClInclude Include="Core\GameLauncher.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TaskSpecificImplementation\DecicionTree\DecisionTreeController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskSpecificImplementation\StateMachine\Decicion1States.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskSpecificImplementation\StateMachine\StateMachineController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\GameLauncher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskSpecificImplementation\DecicionTree\Source\DecisionTreeController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskSpecificImplementation\StateMachine\Source\Decicion1States.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskSpecificImplementation\StateMachine\Source\StateMachineController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

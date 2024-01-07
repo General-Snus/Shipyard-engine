@@ -4,16 +4,15 @@
 
 #include "GameLauncher.h"
 
-#include <assert.h> 
-#include <fstream>
-#include <memory> 
-
 #include <Tools/Logging/Logging.h>
 #include <Tools/Optick/src/optick.h>
 #include <Tools/ThirdParty/nlohmann/json.hpp>   
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/Input/InputHandler.hpp>
 #include <Tools/Utilities/Math.hpp>
+
+#include <Game/GameLauncher/TaskSpecificImplementation/DecicionTree/DecisionTreeController.h>
+#include <Game/GameLauncher/TaskSpecificImplementation/StateMachine/StateMachineController.h>
 
 
 using json = nlohmann::json;
@@ -92,7 +91,7 @@ void GameLauncher::Start()
 
 	//Decisiontree 1
 	int actorAmount = 2;
-	int wellAmount = 1;
+	int wellAmount = 2;
 
 #pragma region Collider
 	std::vector<GameObject> colliders;
@@ -159,7 +158,7 @@ void GameLauncher::Start()
 		transform.SetRotation(90,0,0);
 
 		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/Well.fbx");
-		mesh.SetMaterialPath("Materials/C64Player.json");
+		mesh.SetMaterialPath("Materials/C64Separatist.json");
 	}
 #pragma endregion
 
@@ -182,11 +181,14 @@ void GameLauncher::Start()
 
 		auto& actor = entities[0].AddComponent<cActor>();
 		actor.SetController(new DecisionTreeController());
+
+		auto& mesh = entities[0].GetComponent<cMeshRenderer>();
+		mesh.SetMaterialPath("Materials/C64Wanderer.json");
 	}
 
 	{
 		auto& actor = entities[1].AddComponent<cActor>();
-		actor.SetController(new DecisionTreeController());
+		actor.SetController(new StateMachineController());
 	}
 
 	GLLogger.Log("GameLauncher start");

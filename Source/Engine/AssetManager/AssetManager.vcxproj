@@ -170,7 +170,6 @@
     <ClInclude Include="ComponentSystem\Components\Physics\cPhysics_Kinematic.h" />
     <ClInclude Include="ComponentSystem\Components\Physics\cPhysics_Newtonian.h" />
     <ClInclude Include="ComponentSystem\UUID.h" />
-    <ClInclude Include="Objects\AI\AgentSystem\Controllers\DecisionTreeController.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Actor.h" />
     <ClInclude Include="Objects\AI\AgentSystem\AIEventManager.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\Controller.h" />
@@ -210,6 +209,7 @@
     <ClInclude Include="Objects\AI\AgentSystem\PollingStations\Target_PollingStation.h" />
     <ClInclude Include="Objects\AI\AgentSystem\SteeringBehaviour.h" />
     <ClInclude Include="ComponentSystem\Components\TaskSpecific\ProjectileComponent.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\StateMachine\StateMachineBase.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\CombatComponent.cpp" />
@@ -220,7 +220,6 @@
     <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\cActor.cpp" />
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysics_Kinematic.cpp" />
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysics_Newtonian.cpp" />
-    <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\DecisionTreeController.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\DecisionTree\Source\DecisionTree.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Source\Actor.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Source\AIEventManager.cpp" />
@@ -264,6 +263,7 @@
     <ClCompile Include="Objects\AI\AgentSystem\PollingStations\Source\Target_PollingStation.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Source\SteeringBehaviour.cpp" />
     <ClCompile Include="ComponentSystem\Components\TaskSpecific\Source\ProjectileComponent.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\StateMachine\Source\StateMachineBase.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

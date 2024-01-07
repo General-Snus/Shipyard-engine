@@ -178,9 +178,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Core\GameLauncher.h" />
+    <ClInclude Include="TaskSpecificImplementation\StateMachine\StateMachineController.h" />
+    <ClInclude Include="TaskSpecificImplementation\StateMachine\Decicion1States.h" />
+    <ClInclude Include="TaskSpecificImplementation\DecicionTree\DecisionTreeController.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\GameLauncher.cpp" />
+    <ClCompile Include="TaskSpecificImplementation\StateMachine\Source\StateMachineController.cpp" />
+    <ClCompile Include="TaskSpecificImplementation\StateMachine\Source\Decicion1States.cpp" />
+    <ClCompile Include="TaskSpecificImplementation\DecicionTree\Source\DecisionTreeController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="GameIcon.ico" />
