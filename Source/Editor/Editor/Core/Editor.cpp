@@ -105,8 +105,8 @@ void Editor::DoWinProc(const MSG& aMessage)
 }
 int	 Editor::Run()
 {
-	OPTICK_FRAME("MainThread")
-		InputHandler::GetInstance().Update();
+	OPTICK_FRAME("MainThread");
+	InputHandler::GetInstance().Update();
 
 	if(IsGUIActive)
 	{

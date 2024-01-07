@@ -1022,7 +1022,7 @@ void ScriptGraphEditor::Render()
 			file.close();
 		}
 		ImGui::SameLine();
-		if(ImGui::Button("Load"))
+		if(ImGui::Button("Load") && std::filesystem::exists("file.txt"))
 		{
 			myGraph->UnbindErrorHandler();
 			myGraph = nullptr;
