@@ -1,0 +1,78 @@
+#include "AssetManager.pch.h"
+#include "../ColliderAsset.h"
+
+
+ColliderAsset::ColliderAsset(eColliderType type) : type(type),AssetBase(L"")
+{
+}
+
+ColliderAsset::ColliderAsset(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)
+{
+}
+
+ColliderAsset::~ColliderAsset()
+{
+	for(DebugDrawer::PrimitiveHandle& handle : myHandles)
+	{
+		DebugDrawer::Get().RemoveDebugPrimitive(handle);
+	}
+
+	myHandles.clear();
+
+	AssetBase::~AssetBase();
+}
+
+void ColliderAsset::Init()
+{
+}
+
+ColliderAssetAABB::ColliderAssetAABB() : myAABB(AABB3D<float>()),ColliderAsset(eColliderType::AABB)
+{
+}
+
+ColliderAssetAABB::ColliderAssetAABB(const AABB3D<float>& rf) : myAABB(rf),ColliderAsset(eColliderType::AABB)
+{
+}
+
+void ColliderAssetAABB::RenderDebugLines(const Transform& data)
+{
+	for(DebugDrawer::PrimitiveHandle& handle : myHandles)
+	{
+		DebugDrawer::Get().RemoveDebugPrimitive(handle);
+	}
+
+	myHandles.clear();
+	//Velocity  
+	DebugDrawer::PrimitiveHandle handle = DebugDrawer::Get().AddDebugBox(myAABB.GetMin(),myAABB.GetMax());
+	DebugDrawer::Get().SetDebugPrimitiveTransform(handle,data.GetTransform());
+	myHandles.push_back(handle);
+}
+
+ColliderAssetSphere::ColliderAssetSphere() : mySphere(Sphere<float>()),ColliderAsset(eColliderType::SPHERE)
+{
+}
+
+ColliderAssetSphere::ColliderAssetSphere(const Sphere<float>& rf) : mySphere(rf),ColliderAsset(eColliderType::SPHERE)
+{
+}
+
+void ColliderAssetSphere::RenderDebugLines(const Transform& data)
+{
+	for(DebugDrawer::PrimitiveHandle& handle : myHandles)
+	{
+		DebugDrawer::Get().RemoveDebugPrimitive(handle);
+	}
+
+	myHandles.clear();
+
+	const Vector3f min = Vector3f(-1.0f,-1.0f,-1.0f).GetNormalized();
+	const Vector3f max = Vector3f(1.0f,1.0f,1.0f).GetNormalized();
+
+	//Velocity  
+	DebugDrawer::PrimitiveHandle handle = DebugDrawer::Get().AddDebugBox(
+		mySphere.GetCenter() + data.GetPosition() + min * mySphere.GetRadius(),
+		mySphere.GetCenter() + data.GetPosition() + max * mySphere.GetRadius()
+	);
+	DebugDrawer::Get().SetDebugPrimitiveTransform(handle,data.GetTransform());
+	myHandles.push_back(handle);
+}

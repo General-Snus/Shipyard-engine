@@ -50,8 +50,23 @@ public:
 };
 
 #pragma region Operators
+template <class T> inline Vector3<T> MinVector(const Vector3<T>& a,const Vector3<T>& b)
+{
+	return Vector3<T>(
+		(a.x < b.x) ? a.x : b.x,
+		(a.y < b.y) ? a.y : b.y,
+		(a.z < b.z) ? a.z : b.z
+	);
+}
 
-
+template <class T> inline Vector3<T> MaxVector(const Vector3<T>& a,const Vector3<T>& b)
+{
+	return Vector3<T>(
+		(a.x > b.x) ? a.x : b.x,
+		(a.y > b.y) ? a.y : b.y,
+		(a.z > b.z) ? a.z : b.z
+	);
+}
 
 //Returns the vector sum of aVector0 and aVector1
 template <class T>
@@ -83,6 +98,17 @@ Vector3<T> operator*(const Vector3<T>& aVector,const T& aScalar)
 		aVector.x * aScalar,
 		aVector.y * aScalar,
 		aVector.z * aScalar
+	);
+}
+
+//Returns the vector aVector multiplied by the scalar aScalar
+template <class T>
+Vector3<T> operator*(const Vector3<T>& aVector,const Vector3<T>& aVector2)
+{
+	return Vector3<T>(
+		aVector.x * aVector2.x,
+		aVector.y * aVector2.y,
+		aVector.z * aVector2.z
 	);
 }
 
@@ -207,7 +233,7 @@ inline void Vector3<T>::Normalize()
 	x = x * len;
 	y = y * len;
 	z = z * len;
-} 
+}
 
 template<class T>
 inline T Vector3<T>::Dot(const Vector3<T>& aVector) const

@@ -1,7 +1,7 @@
 #pragma once
-#include <wrl.h>
 #include <d3d11.h>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
+#include <wrl.h>
 using namespace Microsoft::WRL;
 // We'll be writing this a lot so easier
 // to just typedef it here.
@@ -24,20 +24,20 @@ struct Vertex
 			if(myBoneWeights[i] == 0.0f)
 			{
 				myBoneWeights[i] = newWeight;
-				myBoneIds[i] = aId; 
+				myBoneIds[i] = aId;
 				return;
 			}
 		}
-	} 
-	 
-	Vertex(	Vector3f aPosition,
-			Vector4f aColor,
-			Vector2f aUV,
-			Vector3f aNormal,
-			Vector3f aTangent,
-			Vector4<unsigned int> aBoneIds,
-			Vector4f aBoneWeights
-		)
+	}
+
+	Vertex(Vector3f aPosition,
+		Vector4f aColor,
+		Vector2f aUV,
+		Vector3f aNormal,
+		Vector3f aTangent,
+		Vector4<unsigned int> aBoneIds,
+		Vector4f aBoneWeights
+	)
 	{
 		myPosition.x = aPosition.x;
 		myPosition.y = aPosition.y;
@@ -48,8 +48,8 @@ struct Vertex
 		myUV = aUV;
 		myNormal = aNormal;
 		myTangent = aTangent;
-		myBoneIds = aBoneIds; 
-		myBoneWeights = aBoneWeights; 
+		myBoneIds = aBoneIds;
+		myBoneWeights = aBoneWeights;
 	}
 	static const InputElementList InputLayoutDefinition;
 	//static const InputElementList InstancedInputLayoutDefinition;

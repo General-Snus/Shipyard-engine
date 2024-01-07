@@ -12,6 +12,16 @@ cPhysics_Kinematic::cPhysics_Kinematic(const SY::UUID anOwnerID) : Component(anO
 	ph_maxAcceleration = 100.0f;
 }
 
+cPhysics_Kinematic::~cPhysics_Kinematic()
+{
+	for(DebugDrawer::PrimitiveHandle& handle : myHandles)
+	{
+		DebugDrawer::Get().RemoveDebugPrimitive(handle);
+	}
+
+	myHandles.clear();
+}
+
 void cPhysics_Kinematic::Init()
 {
 	//Check for required components
@@ -19,70 +29,56 @@ void cPhysics_Kinematic::Init()
 	{
 		this->GetGameObject().AddComponent<Transform>();
 		InitPrimitive();
-	} 
+	}
 }
+
 void cPhysics_Kinematic::InitPrimitive()
 {
-
 	for(DebugDrawer::PrimitiveHandle& handle : myHandles)
 	{
 		DebugDrawer::Get().RemoveDebugPrimitive(handle);
 	}
 
-	Matrix rf = GetComponent<Transform>().GetTransform();
-	if(!localVelocity)
-	{
-		rf = Matrix::CreateTranslationMatrix(GetComponent<Transform>().GetPosition());
-	}
-
-	myHandles.clear();
+	const Vector3f position = GetComponent<Transform>().GetPosition();
 	//Velocity  
-	DebugDrawer::PrimitiveHandle handle = DebugDrawer::Get().AddDebugLine({0,0,0},ph_velocity,Vector3f(1.0f,0.0f,0.0f));
-	DebugDrawer::Get().SetDebugPrimitiveTransform(handle,rf);
-	myHandles.push_back(handle);
+	DebugDrawer::Get().AddDebugLine(position,position + ph_velocity,Vector3f(1.0f,0.0f,0.0f),.01f);
+
 	//Acceleration
-	handle = DebugDrawer::Get().AddDebugLine({0,0,0},ph_acceleration,Vector3f(0.0f,0.0f,1.0f));
-	DebugDrawer::Get().SetDebugPrimitiveTransform(handle,rf);
-	myHandles.push_back(handle);
+	DebugDrawer::Get().AddDebugLine(position,position + ph_acceleration,Vector3f(0.0f,0.0f,1.0f),.01f);
+
 }
 
 void cPhysics_Kinematic::Update()
 {
+	OPTICK_EVENT();
 	float delta = Timer::GetInstance().GetDeltaTime();
-	if(auto* transform = TryGetComponent<Transform>())
+	auto& transform = GetComponent<Transform>();
+	ph_velocity += ph_acceleration * delta;
+	ph_Angular_velocity += ph_Angular_acceleration * delta;
+
+	if(ph_velocity.Length() > ph_maxSpeed)
 	{
-		ph_velocity += ph_acceleration * delta;
-		ph_Angular_velocity += ph_Angular_acceleration * delta;
-		
-		if(ph_velocity.Length() > ph_maxSpeed)
-		{
-			ph_velocity.Normalize();
-			ph_velocity *= ph_maxSpeed;
-		}
-
-
-		if(ph_acceleration.Length() > ph_maxAcceleration)
-		{
-			ph_acceleration.Normalize();
-			ph_acceleration *= ph_maxAcceleration;
-		}
-
-
-		if(localVelocity)
-		{
-			transform->Rotate(ph_Angular_velocity * delta);
-			const Vector4f globalVelocity = Vector4f(ph_velocity,0);
-			const Vector4f localVel = globalVelocity * transform->GetTransform();
-			transform->Move(Vector3f(localVel.x,localVel.y,localVel.z) * delta);
-			return;
-		}
-		transform->Rotate(ph_Angular_velocity * delta);
-		transform->Move(ph_velocity * delta);
-		//Todo
-	/*
-	if bound convert velocity to angle and set rotation
-	*/
+		ph_velocity.Normalize();
+		ph_velocity *= ph_maxSpeed;
 	}
+
+	if(ph_acceleration.Length() > ph_maxAcceleration)
+	{
+		ph_acceleration.Normalize();
+		ph_acceleration *= ph_maxAcceleration;
+	}
+
+	if(localVelocity)
+	{
+		transform.Rotate(ph_Angular_velocity * delta);
+		const Vector4f globalVelocity = Vector4f(ph_velocity,0);
+		const Vector4f localVel = globalVelocity * transform.GetTransform();
+		transform.Move(Vector3f(localVel.x,localVel.y,localVel.z) * delta);
+		return;
+	}
+
+	transform.Rotate(ph_Angular_velocity * delta);
+	transform.Move(ph_velocity * delta);
 }
 
 void cPhysics_Kinematic::Render()
@@ -92,8 +88,8 @@ void cPhysics_Kinematic::Render()
 
 	if(auto* transform = TryGetComponent<Transform>())
 	{
-		 InitPrimitive();
+		InitPrimitive();
 	}
-	 
+
 #endif // _DEBUGDRAW 
 }

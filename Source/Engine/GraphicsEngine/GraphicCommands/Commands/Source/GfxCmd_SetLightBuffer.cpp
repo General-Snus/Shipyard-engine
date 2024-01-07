@@ -4,7 +4,7 @@
 
 GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 {
-	for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
+	for(auto& i : GameObjectManager::Get().GetAllComponents<cLight>())
 	{
 		switch(i.GetType())
 		{

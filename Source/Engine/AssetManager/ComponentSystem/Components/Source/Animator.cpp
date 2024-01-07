@@ -21,7 +21,7 @@ cAnimator::cAnimator(const unsigned int anOwnerId,const std::filesystem::path& a
 		std::cout << "cSkeletalMeshRenderer component does not have a skeleton" << std::endl;
 	}
 	std::shared_ptr<Animation> animation;
-	AssetManager::GetInstance().LoadAsset<Animation>(aFilePath,animation);
+	AssetManager::Get().LoadAsset<Animation>(aFilePath,animation);
 	myAnimations.push_back(animation);
 }
 
@@ -67,7 +67,7 @@ void cAnimator::AddAnimation(Animation aAnimation)
 void cAnimator::AddAnimation(const std::filesystem::path& aFilePath)
 {
 	std::shared_ptr<Animation> animation;
-	AssetManager::GetInstance().LoadAsset<Animation>(aFilePath,animation);
+	AssetManager::Get().LoadAsset<Animation>(aFilePath,animation);
 	myAnimations.push_back(animation);
 }
 

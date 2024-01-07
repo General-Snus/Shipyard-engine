@@ -138,6 +138,30 @@
     <ClInclude Include="Objects\AI\AgentSystem\SteeringBehaviour.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AssetManagerUtills.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\DecisionTree\DecisionTree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ComponentSystem\Components\Collider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\BaseAssets\ColliderAsset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\AIPollingManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ComponentSystem\Components\ActorSystem\CombatComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ComponentSystem\Components\TaskSpecific\ProjectileComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\StateMachine\StateMachineBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssetManager.pch.cpp">
@@ -170,19 +194,19 @@
     <ClCompile Include="ComponentSystem\Components\Source\Transform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\BaseAssets\MeshAsset.cpp">
+    <ClCompile Include="Objects\BaseAssets\Source\MeshAsset.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\BaseAssets\BaseAsset.cpp">
+    <ClCompile Include="Objects\BaseAssets\Source\BaseAsset.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\BaseAssets\Animations.cpp">
+    <ClCompile Include="Objects\BaseAssets\Source\Animations.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\BaseAssets\MaterialAsset.cpp">
+    <ClCompile Include="Objects\BaseAssets\Source\MaterialAsset.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\BaseAssets\TextureAsset.cpp">
+    <ClCompile Include="Objects\BaseAssets\Source\TextureAsset.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ComponentSystem\Components\Source\Skybox.cpp">
@@ -191,7 +215,7 @@
     <ClCompile Include="ComponentSystem\Components\Source\LightComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\BaseAssets\LightDataBase.cpp">
+    <ClCompile Include="Objects\BaseAssets\Source\LightDataBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ComponentSystem\Components\Source\CameraComponent.cpp">
@@ -203,7 +227,7 @@
     <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\RenderMode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\BaseAssets\ParticleEmitter.cpp">
+    <ClCompile Include="Objects\BaseAssets\Source\ParticleEmitter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ComponentSystem\Components\Source\ParticleSystem.cpp">
@@ -233,7 +257,7 @@
     <ClCompile Include="Objects\AI\AgentSystem\PollingStations\Source\PollingStation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\AI\NavMesh\NavMesh.cpp">
+    <ClCompile Include="Objects\AI\NavMesh\Source\NavMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysics_Kinematic.cpp">
@@ -255,6 +279,30 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Objects\AI\AgentSystem\Source\SteeringBehaviour.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetManagerUtills.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\DecisionTree\Source\DecisionTree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ComponentSystem\Components\Source\Collider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\BaseAssets\Source\ColliderAsset.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\Source\AIPollingManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\CombatComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ComponentSystem\Components\TaskSpecific\Source\ProjectileComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\StateMachine\Source\StateMachineBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

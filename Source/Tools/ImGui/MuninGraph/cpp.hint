@@ -1,0 +1,11 @@
+// Hint files help the Visual Studio IDE interpret Visual C++ identifiers
+// such as names of functions and macros.
+// For more information see https://go.microsoft.com/fwlink/?linkid=865984
+#define WITH_EDITOR
+#define PP_OVERLOAD_MACRO(MFunc, __VA_ARGS__) PP_SELECT_FUNC(MFunc, PP_COUNT_ARGS(, __VA_ARGS__))(__VA_ARGS__)
+#define PP_OVERLOAD_MACRO(MFunc, __VA_ARGS__) PP_SELECT_FUNC(MFunc, PP_VA_ARG_SIZE(__VA_ARGS__))(__VA_ARGS__)
+#define PP_SELECT_FUNC(MFunc, NumArgs) PP_SELECT_FUNC_EXPAND(MFunc, NumArgs)
+#define PP_SELECT_FUNC(MFunc, NumArgs) PP_SELECT_FUNC_EXPAND( MFunc##_, NumArgs)
+#define PP_SELECT_FUNC_EXPAND(MFunc, NumArgs)
+#define zz_GraphNodeReg_3(GraphType, NodeType, NodeBaseType)
+#define AutoRegisterGraphNode(__VA_ARGS__) PP_OVERLOAD_MACRO(zz_GraphNodeReg, __VA_ARGS__)

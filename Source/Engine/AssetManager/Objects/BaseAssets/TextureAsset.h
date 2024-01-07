@@ -2,7 +2,7 @@
 #include "BaseAsset.h"
 #include <Engine/GraphicsEngine/Rendering/Texture.h>
 
-enum class eTextureType
+enum class eTextureType  
 {
 	ColorMap = 0,
 	NormalMap = 1,
@@ -23,6 +23,7 @@ public:
 	eTextureType GetTextureType() const { return textureType; }
 	void SetTextureType(eTextureType aTextureType) { textureType = aTextureType; }
 private:
+	bool LoadPngTexture(Texture* outTexture,const std::filesystem::path& aFileName);
 	eTextureType textureType;
 	std::shared_ptr<Texture> RawTexture;
 };

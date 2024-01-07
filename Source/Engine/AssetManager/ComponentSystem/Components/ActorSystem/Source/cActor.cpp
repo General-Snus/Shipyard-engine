@@ -12,6 +12,7 @@ void cActor::Init()
 
 void cActor::Update()
 {
+	OPTICK_EVENT();
 	if(auto* transform = TryGetComponent<Transform>()) //Actors will was accepted, do checks around here if allowed to move external forces such as transform lock
 	{
 		if(controller)
@@ -28,4 +29,5 @@ void cActor::Render()
 void cActor::SetController(Controller* aController)
 {
 	controller = aController;
+	controller->ComponentRequirement(GetGameObject());
 }

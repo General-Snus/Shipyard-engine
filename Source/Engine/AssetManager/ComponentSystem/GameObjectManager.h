@@ -1,20 +1,42 @@
 #pragma once
-#include "ComponentSystem/ComponentManager.h"
+#include "ComponentManager.h"
 #include <iostream>
+#include <Tools/Utilities/System/SingletonTemplate.h>
+#include <typeinfo>
 #include <unordered_map>
 #include <vector>
-#include <typeinfo>
- 
-class GameObject;
- 
-class GameObjectManager
+
+
+enum class Layer
 {
+	None = 0,
+	Default = 1,
+	Enemy = 1 << 2,
+	Player = 1 << 3,
+	Entities = Enemy | Player,
+	Projectile = 1 << 4,
+	Environment = 1 << 5,
+	Count = 1 << 6,
+	AllLayers = INT32_MAX
+};
+
+template<class T> inline Layer operator~ (Layer a) { return (Layer)~(int)a; }
+template<class T> inline Layer operator| (Layer a,Layer b) { return (Layer)((int)a | (int)b); }
+template<class T> inline Layer operator& (Layer a,Layer b) { return (Layer)((int)a & (int)b); }
+template<class T> inline Layer operator^ (Layer a,Layer b) { return (Layer)((int)a ^ (int)b); }
+template<class T> inline Layer& operator|= (Layer a,Layer b) { return (Layer&)((int&)a |= (int)b); }
+template<class T> inline Layer& operator&= (Layer a,Layer b) { return (Layer&)((int&)a &= (int)b); }
+template<class T> inline Layer& operator^= (Layer a,Layer b) { return (Layer&)((int&)a ^= (int)b); }
+
+
+class GameObject;
+
+class GameObjectManager : public Singleton<GameObjectManager>
+{
+	friend class Singleton<GameObjectManager>;
 public:
 	GameObjectManager() = default;
 	~GameObjectManager();
-
-	static GameObjectManager& GetInstance();
-
 	const GameObject CreateGameObject();
 	void DeleteGameObject(const SY::UUID aGameObjectID);
 	void DeleteGameObject(const GameObject aGameObject);
@@ -41,17 +63,19 @@ public:
 	T& GetComponent(const SY::UUID aGameObjectID);
 
 	bool GetActive(const SY::UUID aGameObjectID);
+	Layer GetLayer(const SY::UUID aGameObjectID);
 
 	GameObject GetWorldRoot();
 	GameObject GetPlayer();
-	GameObject GetCamera(); 
+	GameObject GetCamera();
 	GameObject GetGameObject(SY::UUID anID);
 
 	void CollidedWith(const SY::UUID aFirstID,const SY::UUID aTargetID);
 	void SetActive(const SY::UUID aGameObjectID,const bool aState);
+	void SetLayer(const SY::UUID aGameObjectID,const Layer alayer);
 
 	void SetLastGOAsPlayer();
-	void SetLastGOAsWorld(); 
+	void SetLastGOAsWorld();
 	void SetLastGOAsCamera();
 
 	template <class T>
@@ -61,13 +85,18 @@ public:
 
 
 private:
+	struct GameObjectData
+	{
+		bool IsActive = true;
+		Layer onLayer = Layer::Default;
+	};
 	template <class T>
 	void AddManager();
 	void SortUpdateOrder();
 	void DeleteObjects();
 
 	std::unordered_map<const std::type_info*,ComponentManagerBase*> myComponentManagers = { };
-	std::unordered_map<SY::UUID,bool> myGameObjects = { };
+	std::unordered_map<SY::UUID,GameObjectData> myGameObjects = { };
 	std::vector<std::pair<const std::type_info*,ComponentManagerBase*>> myUpdateOrder = { };
 	std::vector<unsigned int> myObjectsToDelete = { };
 	unsigned int myLastID = 0;

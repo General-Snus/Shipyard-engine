@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -75,13 +75,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(ProjectDir);$(SolutionDir)ThirdParty\FBXImporter\Include\;$(SolutionDir)\;$(SolutionDir)\Mine;$(SolutionDir)Tools\Assimp\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(SolutionDir)ThirdParty\FBXImporter\Include\;$(SolutionDir)\;$(SolutionDir)Tools\Assimp\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)ThirdParty\FBXImporter\Lib\$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
-    <IncludePath>$(ProjectDir);$(SolutionDir)ThirdParty\FBXImporter\Include\;$(SolutionDir)\;$(SolutionDir)\Mine;$(SolutionDir)Tools\Assimp\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(SolutionDir)ThirdParty\FBXImporter\Include\;$(SolutionDir)\;$(SolutionDir)Tools\Assimp\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)ThirdParty\FBXImporter\Lib\$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -126,9 +126,10 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>AssetManager.pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -146,9 +147,10 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>AssetManager.pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -159,6 +161,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ComponentSystem\Components\ActorSystem\CombatComponent.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\AIPollingManager.h" />
+    <ClInclude Include="AssetManagerUtills.hpp" />
+    <ClInclude Include="Objects\BaseAssets\ColliderAsset.h" />
+    <ClInclude Include="ComponentSystem\Components\Collider.h" />
     <ClInclude Include="ComponentSystem\Components\ActorSystem\cActor.h" />
     <ClInclude Include="ComponentSystem\Components\Physics\cPhysics_Kinematic.h" />
     <ClInclude Include="ComponentSystem\Components\Physics\cPhysics_Newtonian.h" />
@@ -169,6 +176,7 @@
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\EventController.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\PlayerController.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\PollingController.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\DecisionTree\DecisionTree.h" />
     <ClInclude Include="Objects\AI\AgentSystem\PollingStations\PollingStation.h" />
     <ClInclude Include="Objects\AI\NavMesh\NavMesh.h" />
     <ClInclude Include="Objects\BaseAssets\ParticleEmitter.h" />
@@ -200,11 +208,19 @@
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\SeparationController.h" />
     <ClInclude Include="Objects\AI\AgentSystem\PollingStations\Target_PollingStation.h" />
     <ClInclude Include="Objects\AI\AgentSystem\SteeringBehaviour.h" />
+    <ClInclude Include="ComponentSystem\Components\TaskSpecific\ProjectileComponent.h" />
+    <ClInclude Include="Objects\AI\AgentSystem\StateMachine\StateMachineBase.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\CombatComponent.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\Source\AIPollingManager.cpp" />
+    <ClCompile Include="AssetManagerUtills.cpp" />
+    <ClCompile Include="Objects\BaseAssets\Source\ColliderAsset.cpp" />
+    <ClCompile Include="ComponentSystem\Components\Source\Collider.cpp" />
     <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\cActor.cpp" />
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysics_Kinematic.cpp" />
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysics_Newtonian.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\DecisionTree\Source\DecisionTree.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Source\Actor.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Source\AIEventManager.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\Controller.cpp" />
@@ -212,17 +228,17 @@
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\PlayerController.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\Source\PollingController.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\PollingStations\Source\PollingStation.cpp" />
-    <ClCompile Include="Objects\AI\NavMesh\NavMesh.cpp" />
-    <ClCompile Include="Objects\BaseAssets\ParticleEmitter.cpp" />
+    <ClCompile Include="Objects\AI\NavMesh\Source\NavMesh.cpp" />
+    <ClCompile Include="Objects\BaseAssets\Source\ParticleEmitter.cpp" />
     <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\RenderMode.cpp" />
     <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\FrameStatistics.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\CameraComponent.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\LightComponent.cpp" />
-    <ClCompile Include="Objects\BaseAssets\LightDataBase.cpp" />
-    <ClCompile Include="Objects\BaseAssets\MaterialAsset.cpp" />
-    <ClCompile Include="Objects\BaseAssets\Animations.cpp" />
-    <ClCompile Include="Objects\BaseAssets\BaseAsset.cpp" />
-    <ClCompile Include="Objects\BaseAssets\MeshAsset.cpp" />
+    <ClCompile Include="Objects\BaseAssets\Source\LightDataBase.cpp" />
+    <ClCompile Include="Objects\BaseAssets\Source\MaterialAsset.cpp" />
+    <ClCompile Include="Objects\BaseAssets\Source\Animations.cpp" />
+    <ClCompile Include="Objects\BaseAssets\Source\BaseAsset.cpp" />
+    <ClCompile Include="Objects\BaseAssets\Source\MeshAsset.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\Animator.cpp" />
     <ClCompile Include="AssetManager.cpp" />
     <ClCompile Include="AssetManager.pch.cpp">
@@ -238,7 +254,7 @@
     <ClCompile Include="ComponentSystem\Source\GameObject.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\MeshRenderer.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\Transform.cpp" />
-    <ClCompile Include="Objects\BaseAssets\TextureAsset.cpp" />
+    <ClCompile Include="Objects\BaseAssets\Source\TextureAsset.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\Skybox.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\ParticleSystem.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\WanderController.cpp" />
@@ -246,6 +262,8 @@
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\SeparationController.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\PollingStations\Source\Target_PollingStation.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Source\SteeringBehaviour.cpp" />
+    <ClCompile Include="ComponentSystem\Components\TaskSpecific\Source\ProjectileComponent.cpp" />
+    <ClCompile Include="Objects\AI\AgentSystem\StateMachine\Source\StateMachineBase.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

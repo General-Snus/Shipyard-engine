@@ -11,33 +11,56 @@
 AssetManager::AssetManager()
 {
 	AMLogger = Logger::Create("AssetManager");
-	AMLogger.SetPrintToVSOutput(false);
+	AMLogger.SetPrintToVSOutput(false); 
+	RecursiveNameSave();
 }
-
-AssetManager& AssetManager::GetInstance()
+ 
+void AssetManager::RecursiveNameSave()
 {
-	static AssetManager singleton;
-	return singleton;
+	OPTICK_EVENT();
+	for(const auto& file : std::filesystem::recursive_directory_iterator(AssetPath))
+	{
+		if(file.path().has_extension())
+		{
+			std::filesystem::path filePath = file.path();
+			std::filesystem::path fileExt = file.path().extension();
+			nameToPathMap.try_emplace(AssetPath/filePath.filename(),filePath);
+		}	 
+	}
+
 }
+bool AssetManager::AdaptPath(std::filesystem::path& path)
+{
+	OPTICK_EVENT();
+	if(nameToPathMap.contains(path))
+	{
+		path = nameToPathMap.at(path);
+		return true;
+	} 
+	return false;
+}
+ 
 void AssetManager::ThreadedLoading()
 {
+	OPTICK_EVENT();
 	if(myAssetQueue.GetSize())
 	{
-		const double timeStart = Timer::GetInstance().GetTotalTime();	
-		std::scoped_lock<std::mutex> lock(lockForSet);
-
-		std::shared_ptr<AssetBase> working = myAssetQueue.Dequeue();
-		working->Init();
-		if(working->isLoadedComplete)
+		const double timeStart = Timer::GetInstance().GetTotalTime(); 
 		{
-			const double timeEnd = Timer::GetInstance().GetTotalTime();
-			const double diff = (timeEnd - timeStart)*1000.0;
-			std::string str = "Loaded: " + working->AssetPath.string() + " in " + std::to_string(diff) + "ms \n";
-			AMLogger.Log(str);
-			return;
+			std::shared_ptr<AssetBase> working = myAssetQueue.Dequeue();
+			working->Init(); 
+			if(working->isLoadedComplete)
+			{
+				//this->assetCallbackMaster.UpdateStatusOf<T>(working->GetAssetPath(),AssetCallbackMaster::created); 
+				const double timeEnd = Timer::GetInstance().GetTotalTime();
+				const double diff = (timeEnd - timeStart) * 1000.0;
+				std::string str = "Loaded: " + working->GetAssetPath().string() + " in " + std::to_string(diff) + "ms \n";
+				AMLogger.Log(str); 
+				return;
+			}
+			std::string str = "Failed to load " + working->GetAssetPath().string();
+			AMLogger.Warn(str);
 		}
-		std::string str = "Failed to load " + working->AssetPath.string();
-		AMLogger.Warn(str);
 	}
 }
 

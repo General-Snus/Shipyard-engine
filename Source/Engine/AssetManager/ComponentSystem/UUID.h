@@ -1,12 +1,12 @@
 #pragma once  
-#include <xhash>
 #include <Tools/ThirdParty/nlohmann/json.hpp> 
+#include <xhash>
 namespace SY {//I fucking hate windows internals
 
 	class UUID
 	{
 	public:
-		UUID() {};
+		UUID() = default;
 		UUID(uint32_t aUUID) : myUUID(aUUID) {};
 		UUID(const UUID& aUUID) = default;
 
@@ -37,7 +37,7 @@ namespace SY {//I fucking hate windows internals
 	inline bool operator!=(UUID anUUID0,int anID)
 	{
 		return (static_cast<uint32_t>(anUUID0) != static_cast<uint32_t>(anID));
-	}	
+	}
 }
 
 template <typename T> struct hash;

@@ -23,6 +23,7 @@ void InstanceRenderer::Execute(bool isShadowPass)
 	{ 
 		if(i->myMesh->isLoadedComplete)
 		{
+			OPTICK_EVENT("Mesh");
 			ObjectBuffer& objectBuffer = GraphicsEngine::Get().myObjectBuffer; 
 			objectBuffer.Data.myTransform = Matrix();
 			objectBuffer.Data.MaxExtents = i->myMesh->MaxBox;
@@ -36,9 +37,26 @@ void InstanceRenderer::Execute(bool isShadowPass)
 			}
 			for(const auto& aElement : i->myMesh->Elements)
 			{
-				if(!isShadowPass && i->myMaterials.size())
+				if(!isShadowPass)
 				{
-					i->myMaterials[0].lock()->Update();
+					if(!i->overrideMaterial.empty())
+					{
+						for(const auto& mat : i->overrideMaterial)
+						{
+							mat->Update();
+						}
+					}
+					else
+					{
+						if(auto materialPtr = i->myMesh->GetMaterialList().at(aElement.MaterialIndex))
+						{
+							 i->myMesh->GetMaterialList().at(aElement.MaterialIndex)->Update();
+						}
+						else
+						{
+							GraphicsEngine::Get().defaultMaterial->Update();
+						}
+					} 
 				}
 
 				const std::vector<ComPtr<ID3D11Buffer>> vxBuffers
@@ -59,7 +77,7 @@ void InstanceRenderer::Execute(bool isShadowPass)
 					aElement.IndexBuffer,
 					vfBufferStrides,
 					Vertex::InputLayout);
-
+				OPTICK_EVENT("Element");
 				RHI::DrawIndexedInstanced(aElement.NumIndices,static_cast<unsigned>(i->myMesh->myInstances.size()));
 			}
 		}

@@ -1,6 +1,6 @@
 #include "AssetManager.pch.h"
-#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
 #include "../Transform.h"
+#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
 #include <Tools/Utilities/Math.hpp>
 
 Transform::Transform(const unsigned int anOwnerId) : Component(anOwnerId),isDirty(true)
@@ -21,8 +21,10 @@ Transform::Transform(const unsigned int anOwnerId,const Matrix& aMatrix) : Compo
 void Transform::Update()
 {
 	OPTICK_EVENT();
+	IsRecentlyUpdated = false;
 	if(isDirty)
 	{
+		IsRecentlyUpdated = true;
 		MakeSaneRotation();
 		myTransform =
 			Matrix::CreateScaleMatrix(myScale) *
@@ -50,17 +52,17 @@ const Matrix& Transform::GetTransform() const
 	return myTransform;
 }
 
-Vector3f Transform::GetForward()
+Vector3f Transform::GetForward() const
 {
 	return Vector3f(myTransform(3,1),myTransform(3,2),myTransform(3,3)).GetNormalized();
 }
 
-Vector3f Transform::GetRight()
+Vector3f Transform::GetRight() const
 {
 	return Vector3f(myTransform(1,1),myTransform(1,2),myTransform(1,3)).GetNormalized();
 }
 
-Vector3f Transform::GetUp()
+Vector3f Transform::GetUp() const
 {
 	return Vector3f(myTransform(2,1),myTransform(2,2),myTransform(2,3)).GetNormalized();
 }
@@ -103,7 +105,7 @@ void Transform::SetPosition(float X,float Y,float Z)
 
 Vector3f Transform::GetPosition() const
 {
-	return {myTransform(4,1),myTransform(4,2),myTransform(4,3)};
+	return myPosition;
 };
 
 void Transform::Rotate(float X,float Y,float Z)
@@ -161,6 +163,16 @@ void Transform::SetScale(Vector3f scale)
 	//ApplyTransformation(Matrix::CreateScaleMatrix(scale));
 }
 
+Vector3f Transform::GetScale() const
+{
+	return myScale;
+}
+
+bool Transform::GetIsRecentlyUpdated() const
+{
+	return IsRecentlyUpdated;
+}
+
 bool Transform::GetIsDirty() const
 {
 	return isDirty;
@@ -213,6 +225,14 @@ Vector3f Transform::VectorToEulerAngles(Vector3f input) const
 	//Fuck euler angles remove this pos
 	return Vector3f();
 }
+void Transform::SetScale(float X,float Y,float Z)
+{
+	myScale.x = X;
+	myScale.y = Y;
+	myScale.z = Z;
+	isDirty = true;
+}
+
 void Transform::SetScale(Vector2f scale)
 {
 	myScale.x = scale.x;

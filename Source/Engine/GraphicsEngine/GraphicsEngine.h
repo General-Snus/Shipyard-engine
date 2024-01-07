@@ -5,19 +5,19 @@
 #include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
 #include <Engine/GraphicsEngine/Shaders/Registers.h>
 
+#include "Rendering/Buffers/ConstantBuffer.h" 
 #include "Rendering/Buffers/FrameBuffer.h"
-#include "Rendering/Buffers/ObjectBuffer.h"
-#include "Rendering/Buffers/LineBuffer.h"
 #include "Rendering/Buffers/G_Buffer.h"
 #include "Rendering/Buffers/GraphicSettingsBuffer.h"
-#include "Rendering/Buffers/ConstantBuffer.h" 
+#include "Rendering/Buffers/LineBuffer.h"
+#include "Rendering/Buffers/ObjectBuffer.h"
 
 #include "InterOp/RHI.h"
-#include "Rendering/ShadowRenderer/ShadowRenderer.h"
 #include "Rendering/ParticleRenderer/ParticleRenderer.h"
+#include "Rendering/ShadowRenderer/ShadowRenderer.h"
 
-#include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
 #include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
+#include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
 
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp> 
 #define _DEBUGDRAW
@@ -25,7 +25,7 @@
 struct GraphicsSettings
 {
 	int Tonemaptype = 0;
-	bool DebugRenderer_Active = true	;
+	bool DebugRenderer_Active = false;
 };
 
 enum class eRenderTargets

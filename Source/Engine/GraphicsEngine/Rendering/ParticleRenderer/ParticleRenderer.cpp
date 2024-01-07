@@ -14,7 +14,7 @@ void ParticleRenderer::Execute()
 	RHI::SetGeometryShader(geometryShader.Get());
 	RHI::SetPixelShader(pixelShader.Get()); 
 
-	for(auto& i : GameObjectManager::GetInstance().GetAllComponents<ParticleSystem>())
+	for(auto& i : GameObjectManager::Get().GetAllComponents<ParticleSystem>())
 	{
 		i.Draw();
 	}

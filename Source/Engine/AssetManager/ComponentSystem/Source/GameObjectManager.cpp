@@ -1,6 +1,6 @@
 #include "AssetManager.pch.h"
-#include "../GameObjectManager.h"
 #include "../GameObject.h"
+#include "../GameObjectManager.h"
 #include <algorithm>
 #include <string>
 
@@ -33,13 +33,12 @@ void GameObjectManager::DeleteGameObject(const GameObject aGameObject)
 
 bool GameObjectManager::GetActive(const SY::UUID aGameObjectID)
 {
-	if(myGameObjects.find(aGameObjectID) != myGameObjects.end())
-	{
-		return myGameObjects[aGameObjectID];
-	}
-	assert(false && "GameObjectManager: Tried to get active on a missing GameObject. ID: " + aGameObjectID);
-	//ERROR_PRINT("GameObjectManager: Tried to get active on a missing GameObject. ID: " + aGameObjectID);
-	return false;
+	return myGameObjects.at(aGameObjectID).IsActive;
+}
+
+Layer GameObjectManager::GetLayer(const SY::UUID aGameObjectID)
+{
+	return myGameObjects.at(aGameObjectID).onLayer;
 }
 
 GameObject GameObjectManager::GetPlayer()
@@ -64,8 +63,8 @@ GameObject GameObjectManager::GetGameObject(SY::UUID anID)
 		return GameObject(anID,this);
 	}
 
-	assert(false && "GameObjectManager tried to get a GameObject that doesn't exist yet! Create your GameObject first before trying to get it.");
-	return GameObject(69420,this);
+	//assert(false && "GameObjectManager tried to get a GameObject that doesn't exist yet! Create your GameObject first before trying to get it.");
+	return GameObject();
 }
 
 void GameObjectManager::CollidedWith(const SY::UUID aFirstID,const SY::UUID aTargetID)
@@ -80,12 +79,18 @@ void GameObjectManager::SetActive(const SY::UUID aGameObjectID,const bool aState
 {
 	if(myGameObjects.find(aGameObjectID) != myGameObjects.end())
 	{
-		myGameObjects[aGameObjectID] = aState;
+		myGameObjects[aGameObjectID].IsActive = aState;
 		return;
 	}
 	assert(false && "GameObjectManager: Tried to set active on a missing GameObject. ID: " + aGameObjectID);
 	//ERROR_PRINT("GameObjectManager: Tried to set active on a missing GameObject. ID: " + aGameObjectID);
 }
+
+void GameObjectManager::SetLayer(const SY::UUID aGameObjectID,const Layer aLayer)
+{
+	myGameObjects.at(aGameObjectID).onLayer = aLayer;
+}
+
 
 void GameObjectManager::SetLastGOAsPlayer()
 {
@@ -130,6 +135,7 @@ void GameObjectManager::SortUpdateOrder()
 
 void GameObjectManager::DeleteObjects()
 {
+	OPTICK_EVENT();
 	for(size_t i = 0; i < myObjectsToDelete.size(); i++)
 	{
 		if(myGameObjects.find(myObjectsToDelete[i]) != myGameObjects.end())
@@ -137,21 +143,14 @@ void GameObjectManager::DeleteObjects()
 			for(auto& cm : myComponentManagers)
 			{
 				cm.second->DeleteGameObject(myObjectsToDelete[i]);
-				std::cout << "Deleting: " << cm.first << std::endl;
 			}
 		}
 		else
 		{
 			std::string err = "GameObjectManager::DeleteGameObject(): Tried to get delete a missing GameObject. ID: " + std::to_string(myObjectsToDelete[i]);
-			assert(false && err.c_str()); 
+			assert(false && err.c_str());
 		}
 	}
 
 	myObjectsToDelete.clear();
-}
-
-GameObjectManager& GameObjectManager::GetInstance()
-{
-	static GameObjectManager sd;
-	return sd;
 }

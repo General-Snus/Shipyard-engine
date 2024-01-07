@@ -1,6 +1,6 @@
 #include "GraphicsEngine.pch.h"
 #include "../Headers/GfxCmd_LuminancePass.h"
-#include <Tools/ImGui/imgui.h>
+#include <Tools/ImGui/ImGui/imgui.h>
 
 GfxCmd_LuminancePass::GfxCmd_LuminancePass()
 {

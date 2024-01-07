@@ -4,24 +4,24 @@
 #include <filesystem>
 #include <utility>
 
+#include <Shaders/Include/Bloom_PS.h> 
+#include <Shaders/Include/CopyPixels_PS.h> 
 #include <Shaders/Include/Default_PS.h>
 #include <Shaders/Include/Default_VS.h>
-#include <Shaders/Include/LuminancePass_PS.h>
-#include <Shaders/Include/ToneMapping_PS.h>
-#include <Shaders/Include/CopyPixels_PS.h> 
-#include <Shaders/Include/GaussianBlur_PS.h> 
-#include <Shaders/Include/Bloom_PS.h> 
-#include <Shaders/Include/SSAO_PS.h> 
 #include <Shaders/Include/EdgeBlur.h> 
+#include <Shaders/Include/GaussianBlur_PS.h> 
+#include <Shaders/Include/LuminancePass_PS.h>
+#include <Shaders/Include/SSAO_PS.h> 
+#include <Shaders/Include/ToneMapping_PS.h>
 
-#include <Shaders/Include/ParticleShader_VS.h> 
 #include <Shaders/Include/ParticleShader_GS.h> 
 #include <Shaders/Include/ParticleShader_PS.h> 
+#include <Shaders/Include/ParticleShader_VS.h> 
 
 #include <Objects/DataObjects/Default_C.h>
-#include <Objects/DataObjects/Default_N.h>
-#include <Objects/DataObjects/Default_M.h>
 #include <Objects/DataObjects/Default_FX.h>
+#include <Objects/DataObjects/Default_M.h>
+#include <Objects/DataObjects/Default_N.h>
 
 #include <Shaders/Include/LineDrawer_PS.h>
 #include <Shaders/Include/LineDrawer_VS.h>
@@ -32,26 +32,27 @@
 
 #include "Objects/Shader.h"
 
-#include "Rendering/Vertex.h" 
-#include "Rendering/ParticleRenderer/ParticleVertex.h" 
 #include "GraphicCommands/GraphicCommands.h"
-#include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
-#include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>
+#include "Rendering/ParticleRenderer/ParticleVertex.h" 
+#include "Rendering/Vertex.h" 
 #include <Engine/AssetManager/ComponentSystem/Components/CameraComponent.h>
+#include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>
+#include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
 
-#include "GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_SetRenderTarget.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_DebugLayer.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_SetLightBuffer.h" 
 #include "GraphicCommands/Commands/Headers/GfxCmd_GaussianBlur.h" 
+#include "GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h"
+#include "GraphicCommands/Commands/Headers/GfxCmd_SetLightBuffer.h" 
+#include "GraphicCommands/Commands/Headers/GfxCmd_SetRenderTarget.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_SSAO.h" 
 
 #include "Shaders/Registers.h"
-#include <Tools/ImGui/imgui.h>
 #include <stdexcept> 
+#include <Tools/ImGui/ImGui/imgui.h>
 
 #include <Engine/GraphicsEngine/InterOp/DDSTextureLoader11.h>
 #include <Tools/Optick/src/optick.h>
+
 
 bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 {
@@ -76,6 +77,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 			GELogger.Err("Failed to initialize the RHI!");
 			return false;
 		}
+
 		SetupDefaultVariables();
 		SetupBRDF();
 		SetupParticleShaders();
@@ -204,12 +206,19 @@ void GraphicsEngine::SetupDefaultVariables()
 	);
 
 	defaultTexture = std::make_shared<TextureHolder>("",eTextureType::ColorMap);
-	RHI::LoadTextureFromMemory(
+
+	if(!RHI::LoadTexture(
 		defaultTexture->GetRawTexture().get(),
-		L"Default Color texture",
-		BuiltIn_Default_C_ByteCode,
-		sizeof(BuiltIn_Default_C_ByteCode)
-	);
+		AssetManager::Get().AssetPath / "Textures/Default/DefaultTile.dds"))
+	{
+		RHI::LoadTextureFromMemory(
+			defaultTexture->GetRawTexture().get(),
+			L"Default Color texture",
+			BuiltIn_Default_C_ByteCode,
+			sizeof(BuiltIn_Default_C_ByteCode)
+		);
+	}
+
 
 	defaultNormalTexture = std::make_shared<TextureHolder>("",eTextureType::NormalMap);
 	RHI::LoadTextureFromMemory(
@@ -236,7 +245,7 @@ void GraphicsEngine::SetupDefaultVariables()
 	);
 
 	//Particle
-	AssetManager::GetInstance().ForceLoadAsset<TextureHolder>(L"Textures/Default/DefaultParticle_P.dds",defaultParticleTexture);
+	AssetManager::Get().ForceLoadAsset<TextureHolder>(L"Textures/Default/DefaultParticle_P.dds",defaultParticleTexture);
 	defaultParticleTexture->SetTextureType(eTextureType::ParticleMap);
 
 
@@ -257,7 +266,7 @@ void GraphicsEngine::SetupDefaultVariables()
 	RHI::SetSamplerState(myPointSampleState,REG_PointSampler);
 
 
-	AssetManager::GetInstance().ForceLoadAsset<TextureHolder>(L"Textures/Default/NoiseTable.dds",NoiseTable);
+	AssetManager::Get().ForceLoadAsset<TextureHolder>(L"Textures/Default/NoiseTable.dds",NoiseTable);
 	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_Noise_Texture,NoiseTable->GetRawTexture().get()); //Is there guarantee that this holds?
 
 	defaultVS = std::make_shared<Shader>();
@@ -268,14 +277,14 @@ void GraphicsEngine::SetupDefaultVariables()
 	defaultPS->SetShader(myPixelShader);
 	defaultPS->myName = L"Default Pixel Shader";
 
-	AssetManager::GetInstance().ForceLoadAsset<Material>("Materials/Default.json",defaultMaterial);
+	AssetManager::Get().ForceLoadAsset<Material>("Materials/Default.json",defaultMaterial);
 	defaultMaterial->SetShader(defaultVS,defaultPS);
 
-	AssetManager::GetInstance().ForceLoadAsset<TextureHolder>("Textures/skansen_cubemap.dds",defaultCubeMap);
+	AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/skansen_cubemap.dds",defaultCubeMap);
 	defaultCubeMap->SetTextureType(eTextureType::CubeMap);
 	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_enviromentCube,defaultCubeMap->GetRawTexture().get());
 
-	AssetManager::GetInstance().ForceLoadAsset<Mesh>("default.fbx",defaultMesh);
+	AssetManager::Get().ForceLoadAsset<Mesh>("default.fbx",defaultMesh);
 }
 
 void GraphicsEngine::SetupBlendStates()
@@ -535,6 +544,7 @@ void GraphicsEngine::UpdateSettings()
 	myGraphicSettingsBuffer.Data.GSB_AO_bias = 0.5f;
 	myGraphicSettingsBuffer.Data.GSB_AO_radius = 0.002f;
 	myGraphicSettingsBuffer.Data.GSB_AO_offset = 0.707f;
+	RHI::SetConstantBuffer(PIPELINE_STAGE_PIXEL_SHADER,REG_GraphicSettingsBuffer,myGraphicSettingsBuffer);
 	RHI::UpdateConstantBufferData(myGraphicSettingsBuffer);
 }
 
@@ -545,7 +555,7 @@ void GraphicsEngine::SetLoggingWindow(HANDLE aHandle)  const
 
 void GraphicsEngine::BeginFrame()
 {
-	myCamera = GameObjectManager::GetInstance().GetCamera().TryGetComponent<cCamera>();
+	myCamera = GameObjectManager::Get().GetCamera().TryGetComponent<cCamera>();
 	if(!myCamera)
 	{
 		GELogger.Err("No camera in scene. No render is possible");
@@ -568,18 +578,18 @@ void GraphicsEngine::BeginFrame()
 
 void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 {
-	OPTICK_EVENT()
-		aDeltaTime; aTotalTime;
+	OPTICK_EVENT();
+	aDeltaTime; aTotalTime;
 	RHI::SetVertexShader(myVertexShader);
 
-	OPTICK_EVENT("Gbuffer")
-		RHI::BeginEvent(L"Start writing to gbuffer");
+	OPTICK_EVENT("Gbuffer");
+	RHI::BeginEvent(L"Start writing to gbuffer");
 	myCamera->SetCameraToFrameBuffer();
 	myG_Buffer.SetWriteTargetToBuffer(); //Let all write to textures
-	OPTICK_EVENT("Deferred")
-		DeferredCommandList.Execute();
-	OPTICK_EVENT("Instanced Deferred")
-		myInstanceRenderer.Execute(false);
+	OPTICK_EVENT("Deferred");
+	DeferredCommandList.Execute();
+	OPTICK_EVENT("Instanced Deferred");
+	myInstanceRenderer.Execute(false);
 	RHI::SetRenderTarget(nullptr,nullptr);
 	myG_Buffer.UnsetResources();
 	RHI::EndEvent();
@@ -589,8 +599,8 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	//SSAO
 	//Do ambience pass? Clarit
 	//Render all lights
-	OPTICK_EVENT("SSAO")
-		RHI::BeginEvent(L"SSAO");
+	OPTICK_EVENT("SSAO");
+	RHI::BeginEvent(L"SSAO");
 	myCamera->SetCameraToFrameBuffer();
 	GfxCmd_SSAO().ExecuteAndDestroy();
 	RHI::EndEvent();

@@ -4,7 +4,7 @@
 #include <Engine/GraphicsEngine/Rendering/Buffers/ConstantBuffer.h>
 #include <Tools/Thirdparty/nlohmann/json.hpp>
 
-class TextureHolder;
+class TextureHolder; 
 
 struct MaterialData
 {
@@ -21,9 +21,18 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(MaterialData,
 class Material : public AssetBase
 {
 public:
+	struct DataMaterial
+	{
+		std::weak_ptr<Shader> vertexShader;
+		std::weak_ptr<Shader> pixelShader;
+		ConstantBuffer<MaterialData> materialData;
+		std::vector<std::pair<std::filesystem::path,std::shared_ptr<TextureHolder>>> textures; 
+	}; 
+	static bool CreateJson(const DataMaterial& data,const std::filesystem::path& pth);
+
+
 	Material(const std::filesystem::path& aFilePath); // Json path
 	void Init() override;
-
 	//void AddTexture(const std::filesystem::path& aFilePath);
 	//void AddTexture(const std::shared_ptr<TextureHolder> text);
 	MaterialData& GetMaterialData();
@@ -31,8 +40,5 @@ public:
 	void SetShader(std::shared_ptr<Shader> aVertexShader,std::shared_ptr<Shader> aPixelShader);
 	void SetAsResources();
 private:
-	std::weak_ptr<Shader> vertexShader;
-	std::weak_ptr<Shader> pixelShader;
-	ConstantBuffer<MaterialData> materialData;
-	std::vector <std::shared_ptr<TextureHolder>> textures;
+	DataMaterial data;
 };

@@ -732,7 +732,6 @@ bool RHI::LoadTexture(Texture* outTexture, const std::wstring& aFileName)
 	outTexture->myBindFlags = D3D11_BIND_SHADER_RESOURCE;
 	outTexture->myUsageFlags = D3D11_USAGE_DEFAULT;
 	outTexture->myAccessFlags = 0;
-
 	HRESULT result = DirectX::CreateDDSTextureFromFile(
 		Device.Get(),
 		aFileName.c_str(),

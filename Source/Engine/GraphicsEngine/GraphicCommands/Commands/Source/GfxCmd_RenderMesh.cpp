@@ -28,9 +28,9 @@ void GfxCmd_RenderMesh::ExecuteAndDestroy()
 
 	for(const auto& aElement : myRenderData->myMesh->Elements)
 	{
-		if(myRenderData->myMaterials.size())
+		if(myRenderData->overrideMaterial.size())
 		{
-			myRenderData->myMaterials[0].lock()->Update();
+			myRenderData->overrideMaterial[0]->Update();
 		} 
 		RHI::ConfigureInputAssembler(
 			aElement.PrimitiveTopology,

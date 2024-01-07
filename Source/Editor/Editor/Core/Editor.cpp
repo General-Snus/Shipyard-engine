@@ -1,62 +1,87 @@
 
+
 // Exclude things we don't need from the Windows headers 
 #include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
 
 #include "Editor.h"
 #include "Windows.h"
 
+#include "Windows/SplashWindow.h"  
+#include <filesystem>
+#include <filesystem>
+#include <string>
 #include <string>
 #include <stringapiset.h>
-#include <filesystem>
-#include "Windows/SplashWindow.h"  
+#include <stringapiset.h>
 
-#include <functional>
-#include <fstream>
-#include <streambuf>
 #include <assert.h>
+#include <fstream>
+#include <functional>
+#include <streambuf>
 
-#include <Tools/ImGUI/imgui.h>
-#include <Tools/ImGUI/imgui_impl_win32.h>
-#include <Tools/ImGUI/imgui_impl_dx11.h>
+#include <Tools/ImGUI/ImGUI/imgui.h>
+#include <Tools/ImGUI/ImGUI/imgui_impl_dx11.h>
+#include <Tools/ImGUI/ImGUI/imgui_impl_win32.h>
 
-#include <Tools/Utilities/Math.hpp>
-#include <Tools/ThirdParty/nlohmann/json.hpp>  
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/Input/InputHandler.hpp>
+#include <Tools/Utilities/Math.hpp>
 
 #include "../Windows/Window.h" 
 #include <Engine/AssetManager/ComponentSystem/GameObject.h>
 #include <Tools/Optick/src/optick.h>
+#include <Tools/Utilities/System/ThreadPool.hpp>
+#include <Windows/EditorWindows/ChainGraph/GraphTool.h>
+
+#if PHYSX
+#include <Engine/PersistentSystems/Physics/PhysXInterpeter.h>
+#endif // PHYSX 0
 
 using json = nlohmann::json;
 
 bool Editor::Initialize(HWND aHandle)
 {
 	MVLogger = Logger::Create("ModelViewer");
+	AMLogger = Logger::Create("AssetManager");
+	GELogger = Logger::Create("GraphicsEngine");
+
 	ShowSplashScreen();
 
-	// TODO: Here we should init the Graphics Engine.
+	ThreadPool::Get().Init();
+
+#ifdef _DEBUG
 	GraphicsEngine::Get().Initialize(aHandle,true);
+#else
+	GraphicsEngine::Get().Initialize(aHandle,false);
+#endif // Release
+
+
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-	//io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
-
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch 
 	// Setup Platform/Renderer backends
 	ImGui_ImplWin32_Init(aHandle);
 	ImGui_ImplDX11_Init(RHI::Device.Get(),RHI::Context.Get());
 
+#if PHYSX
+	Shipyard_PhysX::Get().InitializePhysx();
+#endif // PHYSX 0
 
 	myGameLauncher.Init();
 	myGameLauncher.Start();
 
-	GameObjectManager::GetInstance().SetUpdatePriority<Transform>(ComponentManagerBase::UpdatePriority::Transform);
-	GameObjectManager::GetInstance().SetUpdatePriority<cPhysics_Kinematic>(ComponentManagerBase::UpdatePriority::Physics);
+	GameObjectManager::Get().SetUpdatePriority<Transform>(ComponentManagerBase::UpdatePriority::Transform);
+	GameObjectManager::Get().SetUpdatePriority<cPhysics_Kinematic>(ComponentManagerBase::UpdatePriority::Physics);
 
 	HideSplashScreen();
+#if UseScriptGraph
+	ScriptEditor = Graph::GraphTool::Get().GetScriptingEditor();
+	ScriptEditor->Init();
+#endif
 	return true;
 }
 void Editor::DoWinProc(const MSG& aMessage)
@@ -69,7 +94,6 @@ void Editor::DoWinProc(const MSG& aMessage)
 
 	if(aMessage.message == WM_QUIT)
 	{
-		SaveDataToJson();
 		ImGui_ImplDX11_Shutdown();
 		ImGui_ImplWin32_Shutdown();
 		ImGui::DestroyContext();
@@ -80,28 +104,43 @@ void Editor::DoWinProc(const MSG& aMessage)
 }
 int	 Editor::Run()
 {
-	OPTICK_FRAME("MainThread");
-	InputHandler::GetInstance().Update();
-	UpdateImGui();
-	Update();
-	Render();
+	OPTICK_FRAME("MainThread")
+		InputHandler::GetInstance().Update();
+
+	if(IsGUIActive)
+	{
+		UpdateImGui();
+		Update();
+		Render();
+	}
+	else
+	{
+		Update();
+		Render();
+	}
 	return 0;
 }
+
+
+
+
+
+
+
 void Editor::ShowSplashScreen()
 {
 	if(!mySplashWindow)
 	{
-		mySplashWindow = new SplashWindow();
+		mySplashWindow = std::make_unique<SplashWindow>();
 		mySplashWindow->Init(Window::moduleHandler);
 	}
 }
 void Editor::HideSplashScreen() const
 {
 	mySplashWindow->Close();
-	delete mySplashWindow;
 	ShowWindow(Window::windowHandler,SW_SHOW);
 	SetForegroundWindow(Window::windowHandler);
-} 
+}
 void Editor::UpdateImGui()
 {
 	ImGui_ImplDX11_NewFrame();
@@ -110,15 +149,25 @@ void Editor::UpdateImGui()
 	OPTICK_CATEGORY("ImGui_ImplWin32_NewFrame",Optick::Category::UI);
 	ImGui::NewFrame();
 	OPTICK_CATEGORY("ImGui::NewFrame",Optick::Category::UI);
+
+#if UseScriptGraph
+	const float delta = Timer::GetInstance().GetDeltaTime();
+	ScriptEditor->Update(delta);
+	ScriptEditor->Render();
+#endif
 }
+
 void Editor::Update()
 {
 	Timer::GetInstance().Update();
-	GameObjectManager::GetInstance().Update();
-	myGameLauncher.Update(Timer::GetInstance().GetDeltaTime());
+	const float delta = Timer::GetInstance().GetDeltaTime();
+
+	GameObjectManager::Get().Update();
+	myGameLauncher.Update(delta);
+	DebugDrawer::Get().Update(delta);
 }
 void Editor::Render()
-{ 
+{
 	GraphicsEngine::Get().BeginFrame();
 	GraphicsEngine::Get().RenderFrame(0,0);
 	ImGui::Render();
@@ -126,134 +175,8 @@ void Editor::Render()
 	GraphicsEngine::Get().EndFrame();
 }
 
-bool Editor::SaveDataToJson() const
+void Editor::TopBar()
 {
-	std::string path = "myJson.json";
-	std::ofstream o(path);
-
-	nlohmann::json j;
-	for(auto& i : GameObjectManager::GetInstance().GetAllComponents<BackgroundColor>())
-	{
-		j.push_back((json)i);
-	}
-
-	o << std::setw(4) << j << std::endl;
-
-	return true;
-}
-bool Editor::JsonToSaveData() const
-{
-	std::string path = "myJson.json";
-	if(!std::filesystem::exists(path))
-	{
-		return false;
-	}
-	std::ifstream i(path);
-	assert(i.is_open());
-	nlohmann::json json = nlohmann::json::parse(i);
-	i.close();
-	GameObjectManager& gom = GameObjectManager::GetInstance();
-	GameObject newG = gom.CreateGameObject();
-
-	for(nlohmann::json& components : json)
-	{
-		if(components["myComponentType"] == eComponentType::backgroundColor)
-		{
-			newG.AddComponent < BackgroundColor>();
-			newG.GetComponent<BackgroundColor>().SetColor(
-				{
-				components["myColor.x"],
-				components["myColor.y"],
-				components["myColor.z"],
-				components["myColor.w"]
-				});
-		}
-	}
-	return true;
-}
-bool Editor::ContainData(SaveData<float>& data)
-{
-	for(SaveData<float>& i : mySaveData)
-	{
-		if(i.fnc == data.fnc && i.identifier == data.identifier)
-		{
-			i.arg = data.arg;
-			return true;
-		}
-	}
-	return false;
-}
-bool Editor::SaveToMemory(eSaveToJsonArgument fnc,const std::string& identifier,void* arg)
-{
-	switch(fnc)
-	{
-	case eSaveToJsonArgument::InputFloat3:
-	{
-		const auto* x = (float*)arg;
-		arg = (float*)arg + 1;
-		const auto* y = (float*)arg;
-		arg = (float*)arg + 1;
-		const auto* z = (float*)arg;
-
-		for(SaveData<float>& i : mySaveData)
-		{
-			if(i.fnc == (int)fnc && i.identifier == identifier)
-			{
-				i.arg[0] = *x;
-				i.arg[1] = *y;
-				i.arg[2] = *z;
-				return true;
-			}
-		}
-
-		SaveData<float> data;
-		data.fnc = (int)fnc;
-		data.identifier = identifier;
-		data.arg = new float[3];
-		data.arg[0] = (*x);
-		data.arg[1] = (*y);
-		data.arg[2] = (*z);
-		mySaveData.push_back(data);
-		return true;
-	}
-	case eSaveToJsonArgument::SaveBool:
-	{
-		auto* x = (bool*)arg;
-		for(SaveData<float>& i : mySaveData)
-		{
-			if(i.fnc == (int)fnc && i.identifier == identifier)
-			{
-				i.arg[0] = *x;
-				return true;
-			}
-		}
-
-		SaveData<float> data;
-		data.fnc = (int)fnc;
-		data.identifier = identifier;
-		data.arg = new float[1];
-		data.arg[0] = (*x);
-		mySaveData.push_back(data);
-		return true;
-	}
-	default:
-		std::cout << "SaveFunction can not handle this argument";
-		return false;
-		break;
-	}
-}
-bool Editor::SaveToMemory(SaveData<float>& arg)
-{
-	for(SaveData<float>& i : mySaveData)
-	{
-		if(i.fnc == arg.fnc && i.identifier == arg.identifier)
-		{
-			i.arg = arg.arg;
-			return true;
-		}
-	}
-	mySaveData.push_back(arg);
-	return true;
 }
 
 RECT Editor::GetViewportRECT()
@@ -276,7 +199,7 @@ void Editor::ExpandWorldBounds(Sphere<float> sphere)
 	if(myWorldBounds.ExpandSphere(sphere))
 	{
 		//MVLogger.Log("World bounds was expanded");
-		for(auto& i : GameObjectManager::GetInstance().GetAllComponents<cLight>())
+		for(auto& i : GameObjectManager::Get().GetAllComponents<cLight>())
 		{
 			i.SetIsDirty(true);
 			i.SetIsRendered(false);
@@ -284,7 +207,7 @@ void Editor::ExpandWorldBounds(Sphere<float> sphere)
 	} //REFACTOR if updated real time the world expansion will cause the light/shadow to lagg behind, use this to update camera position, 
 	//REFACTOR not called on object moving outside worldbound causing same error as above
 }
-const Sphere<float>& Editor::GetWorldBounds()
+const Sphere<float>& Editor::GetWorldBounds() const
 {
 	return myWorldBounds;
 }

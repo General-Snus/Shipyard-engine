@@ -1,11 +1,11 @@
 #include "AssetManager.pch.h"
-#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
 #include "../CameraComponent.h"
-#include <Editor/Editor/Core/Editor.h>
-#include <Engine/GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h>
-#include <Tools/Utilities/Input/InputHandler.hpp> 
 #include <algorithm> 
 #include <DirectXMath.h>
+#include <Editor/Editor/Core/Editor.h>
+#include <Engine/GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h>
+#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
+#include <Tools/Utilities/Input/InputHandler.hpp> 
 
 cCamera::cCamera(const unsigned int anOwnerId) : Component(anOwnerId)
 {
@@ -123,11 +123,12 @@ void cCamera::Update()
 	{
 		myTransform.Rotate({0,rotationSpeed * aTimeDelta});
 	}
+#ifdef Flashlight
 	if(InputHandler::GetInstance().IsKeyPressed((int)Keys::F))
 	{
 		GetComponent<cLight>().BindDirectionToTransform(!GetComponent<cLight>().GetIsBound());
 	}
-
+#endif
 	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::Q))
 	{
 		myTransform.Rotate({0,-rotationSpeed * aTimeDelta});

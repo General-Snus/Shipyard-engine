@@ -14,6 +14,7 @@
 #include "InterOp/Helpers.h"
 #include "InterOp/RHI.h"
 #include "Tools/Logging/Logging.h"
+#include <Tools/ThirdParty/DirectXTK/WICTextureLoader.h>
 #include "GraphicsEngine.h" 
 
 #include "Rendering/Buffers/FrameBuffer.h"
@@ -21,7 +22,6 @@
 #include "Rendering/Buffers/LightBuffer.h"
 #include "Rendering/Buffers/LineBuffer.h"
 #include "Rendering/Buffers/G_buffer.h"
-
 #include "GraphicCommands/Commands/Headers/GfxCmd_DebugLayer.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_DrawDebugPrimitive.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_RenderMesh.h"

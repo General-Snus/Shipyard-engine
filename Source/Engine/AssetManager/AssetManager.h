@@ -1,12 +1,11 @@
-#pragma once
-
+#pragma once 
 #define AsUINT(v) static_cast<unsigned>(v) 
 
-#include <Tools/Utilities/DataStructures/Queue.hpp>
-#include <thread>
-#include <future>
+#include <Tools/Utilities/DataStructures/Queue.hpp> 
+#include <Tools/Utilities/System/ThreadPool.hpp>
+#include <Tools/Utilities/System/SingletonTemplate.h>
 #include <unordered_map>
-
+#include "AssetManagerUtills.hpp"
 
 struct Frame;
 struct Element;
@@ -33,9 +32,9 @@ struct LoadTask
 
 class Library
 {
+	friend class AssetManager;
 public:
 	Library() = default;
-
 	template<class T>
 	std::shared_ptr<T> Add(const std::pair<std::filesystem::path, std::shared_ptr<T>>& pair);
 
@@ -48,42 +47,56 @@ private:
 	std::unordered_map <std::filesystem::path, std::shared_ptr<AssetBase>> content;
 };
 
-class AssetManager
+class AssetManager : public Singleton<AssetManager>
 {
+	friend class Singleton<AssetManager>;
 public:
 	AssetManager();
-	~AssetManager() = default;
-	static AssetManager& GetInstance();
+	~AssetManager() = default; 
 
+	template<class T>
+	void LoadAsset(const std::filesystem::path& aFilePath);
 	template<class T>
 	void LoadAsset(const std::filesystem::path& aFilePath, std::shared_ptr<T>& outAsset);
 	template<class T>
-	void LoadAsset(const std::filesystem::path& aFilePath, bool useExact, std::shared_ptr<T>& outAsset);
+	void LoadAsset(const std::filesystem::path& aFilePath, bool useExact, std::shared_ptr<T>& outAsset); 
+
 	template<class T>
 	void HasAsset(const std::filesystem::path& aFilePath, bool useExact) const; 
 	template<class T>
 	void ForceLoadAsset(const std::filesystem::path& aFilePath, std::shared_ptr<T>& outAsset);
 	template<class T>
 	void ForceLoadAsset(const std::filesystem::path& aFilePath, bool useExact, std::shared_ptr<T>& outAsset);
+	 
+	void SubscribeToChanges( const std::filesystem::path& aFilePath,const SY::UUID gameobjectID); 
 
+	bool AdaptPath(std::filesystem::path& path);
+
+	const std::filesystem::path AssetPath = L"../../Content/"; 
 private:
-	void ThreadedLoading();
-	std::mutex lockForSet;
-	std::vector<std::future<void>> myThreads;
 
+	//thread 
+	void ThreadedLoading(); 
 	Queue<std::shared_ptr<AssetBase>> myAssetQueue;
 
+	//NameToPath
+	void RecursiveNameSave();
+	std::unordered_map<std::filesystem::path,std::filesystem::path> nameToPathMap;
+	//AssetCallbackMaster assetCallbackMaster;
+
+	//Libraries
 	template<class T>
 	std::shared_ptr<Library> GetLibraryOfType();
-
 	std::unordered_map<const std::type_info*, std::shared_ptr<Library>> myLibraries;
-	const std::filesystem::path AssetPath = L"../../Content/";
 };
+ 
+
 template<class T>
 void AssetManager::ForceLoadAsset(const std::filesystem::path& aFilePath, std::shared_ptr<T>& outAsset)
 {
 	ForceLoadAsset<T>(aFilePath, false, outAsset);
 }
+
 template<class T>
 void AssetManager::ForceLoadAsset(const std::filesystem::path& aFilePath, bool useExact, std::shared_ptr<T>& outAsset)
 {
@@ -116,6 +129,23 @@ void AssetManager::ForceLoadAsset(const std::filesystem::path& aFilePath, bool u
 	outAsset = ptr;
 }
 
+//Runs function F, get asset send function f asset 
+inline void AssetManager::SubscribeToChanges(const std::filesystem::path& aFilePath,const SY::UUID gameobjectID)
+{ 
+	aFilePath; gameobjectID;
+	//AssetCallbackMaster::dataStruct arg; 
+	//arg.subscribed = gameobjectID;
+	//
+	//assetCallbackMaster.callbacks.try_emplace(aFilePath,arg);
+}
+
+template<class T>
+void AssetManager::LoadAsset(const std::filesystem::path& aFilePath)
+{
+	std::shared_ptr<T> ptr;
+	LoadAsset<T>(aFilePath,false,ptr);
+}
+
 /// <summary>
 /// Holds the current thread until the asset is loaded
 /// </summary> 
@@ -131,6 +161,7 @@ void AssetManager::LoadAsset(const std::filesystem::path& aFilePath, std::shared
 template<class T>
 void AssetManager::LoadAsset(const std::filesystem::path& aFilePath, bool useExact, std::shared_ptr<T>& outAsset)
 {
+	OPTICK_EVENT();
 	const std::type_info* typeInfo = &typeid(T);
 	std::shared_ptr<Library> library = GetLibraryOfType<T>();
 
@@ -149,19 +180,19 @@ void AssetManager::LoadAsset(const std::filesystem::path& aFilePath, bool useExa
 			std::pair<std::filesystem::path, std::shared_ptr<T>> newObject(aFilePath, std::make_shared<T>(aFilePath));
 			ptr = library->Add(newObject);
 			myAssetQueue.EnqueueUnique(newObject.second);
-			myThreads.push_back(std::async([this]() { this->ThreadedLoading(); }));
+			ThreadPool::Get().SubmitWork(std::bind(&AssetManager::ThreadedLoading,this));
 		}
 		else
 		{
 			std::pair<std::filesystem::path, std::shared_ptr<T>> newObject(aFilePath, std::make_shared<T>(AssetPath / aFilePath));
 			ptr = library->Add<T>(newObject);
 			myAssetQueue.EnqueueUnique(newObject.second);
-			myThreads.push_back(std::async([this]() { this->ThreadedLoading(); }));
+			ThreadPool::Get().SubmitWork(std::bind(&AssetManager::ThreadedLoading,this));
 		}
 	}
 	outAsset = ptr;
 }
-
+ 
 template<class T>
 inline void AssetManager::HasAsset(const std::filesystem::path& aFilePath, bool useExact) const
 {

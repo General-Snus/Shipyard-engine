@@ -1,34 +1,42 @@
 #include "AssetManager.pch.h"
-#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>  
 #include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
+#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>  
+#include <Tools/Utilities/System/ThreadPool.hpp> 
 
 cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId) : Component(anOwnerId)
 {
 	myRenderData = std::make_shared<RenderData>();
-	myRenderData->myMaterials.resize(1);
-	AssetManager::GetInstance().LoadAsset<Mesh>("default.fbx",myRenderData->myMesh);
-
-	myRenderData->myMaterials[0] = GraphicsEngine::Get().GetDefaultMaterial();
+	AssetManager::Get().LoadAsset<Mesh>("default.fbx",myRenderData->myMesh);
 }
 
 inline cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath) : Component(anOwnerId)
 {
 	myRenderData = std::make_shared<RenderData>();
-	myRenderData->myMaterials.resize(1);
-	AssetManager::GetInstance().LoadAsset<Mesh>(aFilePath,myRenderData->myMesh);
-	myRenderData->myMaterials[0] = GraphicsEngine::Get().GetDefaultMaterial();
+	AssetManager::Get().LoadAsset<Mesh>(aFilePath,myRenderData->myMesh);
+	//ThreadPool::Get().SubmitWork(std::bind(&waitForLoad,myRenderData->myMesh,myOwnerID));
 }
 
 void cMeshRenderer::SetNewMesh(const std::filesystem::path& aFilePath)
 {
-	AssetManager::GetInstance().LoadAsset<Mesh>(aFilePath,myRenderData->myMesh);
+	AssetManager::Get().LoadAsset<Mesh>(aFilePath,myRenderData->myMesh);
 }
+
 void cMeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath)
 {
-	std::shared_ptr<Material> mat;
-	AssetManager::GetInstance().LoadAsset<Material>(aFilePath,mat);
-	myRenderData->myMaterials[0] = mat; // REFACTOR : 0 is the wanted element,   
+	SetMaterialPath(aFilePath,0);
 }
+
+void cMeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath,int elementIndex)
+{
+	std::shared_ptr<Material> mat;
+	AssetManager::Get().LoadAsset<Material>(aFilePath,mat);
+	if(myRenderData->overrideMaterial.size() <= elementIndex)
+	{
+		myRenderData->overrideMaterial.resize(elementIndex + 1);
+	}
+	myRenderData->overrideMaterial[elementIndex] = mat;
+}
+
 void cMeshRenderer::Render()
 {
 	OPTICK_EVENT();
@@ -39,7 +47,7 @@ void cMeshRenderer::Render()
 			GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),isInstanced);
 			GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform(),isInstanced);
 			return;
-		} 
+		}
 		myRenderData->myMesh->myInstances.emplace_back(myTransform->GetTransform());
 		GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),isInstanced);
 		return;
@@ -60,20 +68,20 @@ cSkeletalMeshRenderer::cSkeletalMeshRenderer(const unsigned int anOwnerId) : cMe
 
 cSkeletalMeshRenderer::cSkeletalMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath) : cMeshRenderer(anOwnerId,aFilePath)
 {
-	AssetManager::GetInstance().LoadAsset<Skeleton>(aFilePath,mySkeleton);
+	AssetManager::Get().LoadAsset<Skeleton>(aFilePath,mySkeleton);
 }
 
 void cSkeletalMeshRenderer::SetNewMesh(const std::filesystem::path& aFilePath)
 {
-	AssetManager::GetInstance().LoadAsset<Mesh>(aFilePath,myRenderData->myMesh);
-	AssetManager::GetInstance().LoadAsset<Skeleton>(aFilePath,mySkeleton);
+	AssetManager::Get().LoadAsset<Mesh>(aFilePath,myRenderData->myMesh);
+	AssetManager::Get().LoadAsset<Skeleton>(aFilePath,mySkeleton);
 }
 
 void cSkeletalMeshRenderer::Render()
 {
 	OPTICK_EVENT();
 	if(const auto* myTransform = this->TryGetComponent<Transform>())
-	{ 
+	{
 		if(const auto* myAnimation = this->TryGetComponent<cAnimator>())
 		{
 			myAnimation->RenderAnimation(myRenderData,myTransform->GetTransform());
@@ -82,7 +90,7 @@ void cSkeletalMeshRenderer::Render()
 		GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform(),false);
 		GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),false);
 		return;
-	} 
+	}
 	GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,Matrix(),false);
 	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),false);
 }

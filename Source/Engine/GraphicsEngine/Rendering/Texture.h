@@ -19,6 +19,7 @@ struct D3D11_VIEWPORT;
 class Texture
 {
 	friend class RHI;
+	friend class TextureHolder;
 
 protected:
 

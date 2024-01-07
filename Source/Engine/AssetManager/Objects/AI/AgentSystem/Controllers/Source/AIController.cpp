@@ -1,22 +1,13 @@
 #include "AssetManager.pch.h"
 #include "../AIController.h"
 
-AIController::AIController(MultipleTargets_PollingStation* aPollingStation,MultipleTargets_PollingStation* formationStation,GameObject componentCheck) : PollingController(aPollingStation),FormationStation(formationStation)
+AIController::AIController(MultipleTargets_PollingStation* aPollingStation,MultipleTargets_PollingStation* formationStation) : PollingController(aPollingStation),FormationStation(formationStation)
 {
-	//Check for required components
-	if(!componentCheck.TryGetComponent<cPhysics_Kinematic>())
-	{
-		auto& phy = componentCheck.AddComponent<cPhysics_Kinematic>();
-		phy.localVelocity = false;
-		phy.ph_maxSpeed = 4.5f;
-		phy.ph_maxAcceleration = 5.0f;
-	}
-
 }
 
-#pragma optimize("",off)
 bool AIController::Update(GameObject input)
 {
+	OPTICK_EVENT();
 	auto& physicsComponent = input.GetComponent<cPhysics_Kinematic>();
 	auto& transform = input.GetComponent<Transform>(); // You can use Get directly if you are sure it will exist, its faster and force safe code
 	SteeringBehaviour::SeparationSettings settings;
@@ -47,14 +38,24 @@ bool AIController::Update(GameObject input)
 
 	SteeringBehaviour::Cohesion(&physicsComponent,position,std::bit_cast<MultipleTargets_PollingStation*>(FormationStation),influenceRadius,2.0f);
 	//physicsComponent.ph_velocity.Normalize();
-	//physicsComponent.ph_velocity *= 4.5f;
-
+	//physicsComponent.ph_velocity *= 4.5f; 
 
 	return true;
 }
-#pragma optimize("",on)
 
 void AIController::Recieve(const AIEvent& aEvent)
 {
 	aEvent;
+}
+
+bool AIController::ComponentRequirement(GameObject input)
+{
+	if(!input.TryGetComponent<cPhysics_Kinematic>())
+	{
+		auto& phy = input.AddComponent<cPhysics_Kinematic>();
+		phy.localVelocity = false;
+		phy.ph_maxSpeed = 4.5f;
+		phy.ph_maxAcceleration = 5.0f;
+	}
+	return true;
 }

@@ -1,27 +1,29 @@
-#pragma once 
+#pragma once
 #include <Engine/GraphicsEngine/Rendering/Vertex.h>
-#include <Tools/Utilities/LinearAlgebra//Sphere.hpp> 
 #include <filesystem>
+#include <functional>
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp> 
 class Material;
-
-
 class AssetBase
 {
 public:
 	AssetBase(const std::filesystem::path& aFilePath);
 	virtual ~AssetBase() = default;
 	virtual void Init() = 0;
-	bool isLoadedComplete;
-	const std::filesystem::path AssetPath;
+	bool isLoadedComplete = false;
+	inline const std::filesystem::path& GetAssetPath() const { return AssetPath; };
+	std::vector<std::function<void()>> callBackOnFinished;
+protected:
+	std::filesystem::path AssetPath;
 };
- 
+
 struct Bone
 {
 	Matrix BindPoseInverse;
 	int ParentIdx = -1;
 	std::string Name;
 	std::vector<unsigned> Children;
-}; 
+};
 
 
 struct Frame
@@ -37,4 +39,5 @@ struct Element
 	UINT NumIndices = 0;
 	UINT PrimitiveTopology = 0;
 	UINT Stride = 0;
+	unsigned int MaterialIndex = 0;
 };
