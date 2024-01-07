@@ -1,18 +1,18 @@
 #include "AssetManager.pch.h"
-#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>  
 #include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
+#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>  
 #include <Tools/Utilities/System/ThreadPool.hpp> 
- 
+
 cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId) : Component(anOwnerId)
 {
-	myRenderData = std::make_shared<RenderData>(); 
-	AssetManager::Get().LoadAsset<Mesh>("default.fbx",myRenderData->myMesh); 
+	myRenderData = std::make_shared<RenderData>();
+	AssetManager::Get().LoadAsset<Mesh>("default.fbx",myRenderData->myMesh);
 }
 
 inline cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath) : Component(anOwnerId)
 {
-	myRenderData = std::make_shared<RenderData>();  
-	AssetManager::Get().LoadAsset<Mesh>(aFilePath,myRenderData->myMesh); 
+	myRenderData = std::make_shared<RenderData>();
+	AssetManager::Get().LoadAsset<Mesh>(aFilePath,myRenderData->myMesh);
 	//ThreadPool::Get().SubmitWork(std::bind(&waitForLoad,myRenderData->myMesh,myOwnerID));
 }
 
@@ -26,13 +26,13 @@ void cMeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath)
 	SetMaterialPath(aFilePath,0);
 }
 
-void cMeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath, int elementIndex)
+void cMeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath,int elementIndex)
 {
 	std::shared_ptr<Material> mat;
 	AssetManager::Get().LoadAsset<Material>(aFilePath,mat);
 	if(myRenderData->overrideMaterial.size() <= elementIndex)
 	{
-		myRenderData->overrideMaterial.resize(elementIndex+1);
+		myRenderData->overrideMaterial.resize(elementIndex + 1);
 	}
 	myRenderData->overrideMaterial[elementIndex] = mat;
 }

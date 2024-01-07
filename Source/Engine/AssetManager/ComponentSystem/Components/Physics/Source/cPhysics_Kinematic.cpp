@@ -14,7 +14,6 @@ cPhysics_Kinematic::cPhysics_Kinematic(const SY::UUID anOwnerID) : Component(anO
 
 cPhysics_Kinematic::~cPhysics_Kinematic()
 {
-	Component::~Component();
 	for(DebugDrawer::PrimitiveHandle& handle : myHandles)
 	{
 		DebugDrawer::Get().RemoveDebugPrimitive(handle);
@@ -32,6 +31,7 @@ void cPhysics_Kinematic::Init()
 		InitPrimitive();
 	}
 }
+
 void cPhysics_Kinematic::InitPrimitive()
 {
 	for(DebugDrawer::PrimitiveHandle& handle : myHandles)
@@ -39,21 +39,13 @@ void cPhysics_Kinematic::InitPrimitive()
 		DebugDrawer::Get().RemoveDebugPrimitive(handle);
 	}
 
-	Matrix rf = GetComponent<Transform>().GetTransform();
-	if(!localVelocity)
-	{
-		rf = Matrix::CreateTranslationMatrix(GetComponent<Transform>().GetPosition());
-	}
-
-	myHandles.clear();
+	const Vector3f position = GetComponent<Transform>().GetPosition();
 	//Velocity  
-	DebugDrawer::PrimitiveHandle handle = DebugDrawer::Get().AddDebugLine({0,0,0},ph_velocity,Vector3f(1.0f,0.0f,0.0f));
-	DebugDrawer::Get().SetDebugPrimitiveTransform(handle,rf);
-	myHandles.push_back(handle);
+	DebugDrawer::Get().AddDebugLine(position,position + ph_velocity,Vector3f(1.0f,0.0f,0.0f),.01f);
+
 	//Acceleration
-	handle = DebugDrawer::Get().AddDebugLine({0,0,0},ph_acceleration,Vector3f(0.0f,0.0f,1.0f));
-	DebugDrawer::Get().SetDebugPrimitiveTransform(handle,rf);
-	myHandles.push_back(handle);
+	DebugDrawer::Get().AddDebugLine(position,position + ph_acceleration,Vector3f(0.0f,0.0f,1.0f),.01f);
+
 }
 
 void cPhysics_Kinematic::Update()
@@ -70,13 +62,11 @@ void cPhysics_Kinematic::Update()
 		ph_velocity *= ph_maxSpeed;
 	}
 
-
 	if(ph_acceleration.Length() > ph_maxAcceleration)
 	{
 		ph_acceleration.Normalize();
 		ph_acceleration *= ph_maxAcceleration;
 	}
-
 
 	if(localVelocity)
 	{
@@ -86,6 +76,7 @@ void cPhysics_Kinematic::Update()
 		transform.Move(Vector3f(localVel.x,localVel.y,localVel.z) * delta);
 		return;
 	}
+
 	transform.Rotate(ph_Angular_velocity * delta);
 	transform.Move(ph_velocity * delta);
 }

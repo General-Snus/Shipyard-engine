@@ -24,14 +24,10 @@ void GameLauncher::Init()
 
 void GameLauncher::Start()
 {
-
 	GameObjectManager& gom = GameObjectManager::Get();
-
 #pragma region BaseSetup
 	myCustomHandler = gom.CreateGameObject();
 	myMesh = gom.CreateGameObject();
-
-
 	{
 		GameObject camera = gom.CreateGameObject();
 		camera.AddComponent<cCamera>();
@@ -48,20 +44,22 @@ void GameLauncher::Start()
 		gom.SetLastGOAsWorld();
 
 		worldRoot.AddComponent<FrameStatistics>();
-		worldRoot.AddComponent<RenderMode>();
+		//worldRoot.AddComponent<RenderMode>();
 		worldRoot.AddComponent<Skybox>();
 		worldRoot.AddComponent<cLight>(eLightType::Directional);
+
 		Transform& transform = worldRoot.AddComponent<Transform>();
 		transform.SetRotation(0,45,-45);
+
 		cLight& pLight = worldRoot.GetComponent<cLight>();
 		pLight.SetColor(Vector3f(1,1,1));
 		pLight.SetPower(1.0f);
 		pLight.BindDirectionToTransform(true);
 
-		if(gom.GetAllComponents<BackgroundColor>().empty())
-		{
-			worldRoot.AddComponent<BackgroundColor>(Vector4f(1.0f,1.0f,1.0f,1.0f));
-		}
+		//if(gom.GetAllComponents<BackgroundColor>().empty())
+		//{
+		//	worldRoot.AddComponent<BackgroundColor>(Vector4f(1.0f,1.0f,1.0f,1.0f));
+		//}
 	}
 
 	{
@@ -86,7 +84,6 @@ void GameLauncher::Start()
 #endif
 
 #pragma endregion
-
 
 
 	//Decisiontree 1
@@ -123,7 +120,6 @@ void GameLauncher::Start()
 	}
 #pragma endregion
 
-
 #pragma region Entities
 	std::vector<GameObject> entities;
 	entities.resize(actorAmount);
@@ -134,14 +130,10 @@ void GameLauncher::Start()
 		auto& transform = obj.AddComponent<Transform>();
 		transform.SetPosition(RandomEngine::RandomInRange<float>(-20,20),0,RandomEngine::RandomInRange<float>(-20,20));
 		transform.SetRotation(0,RandomEngine::RandomInRange(0.f,360.f),0);
-
-		auto& mesh = obj.AddComponent<cMeshRenderer>("Models/C64Seeker.fbx");
-		mesh.SetMaterialPath("Materials/C64Seeker.json");
 		obj.AddComponent<cCollider>();
 		obj.SetLayer(Layer::Entities);
 	}
 #pragma endregion
-
 
 #pragma region Healtwell
 	std::vector<GameObject> well;
@@ -162,6 +154,8 @@ void GameLauncher::Start()
 	}
 #pragma endregion
 
+
+
 	auto colliderPollingStation = std::make_shared<MultipleTargets_PollingStation>(colliders);
 	auto formationPollingStation = std::make_shared<MultipleTargets_PollingStation>(entities);
 	auto wellPollingStation = std::make_shared<MultipleTargets_PollingStation>(well);
@@ -171,24 +165,18 @@ void GameLauncher::Start()
 	AIPollingManager::Get().AddStation("Targets",formationPollingStation);
 
 
-	{
-		/*auto& actor = entities[0].AddComponent<cActor>();
-		actor.SetController(new AIController(
-			AIPollingManager::Get().GetStation<MultipleTargets_PollingStation>("Colliders").get(),
-			AIPollingManager::Get().GetStation<MultipleTargets_PollingStation>("Targets").get())
-		);*/
-
-
+	{ //DecisionTree
 		auto& actor = entities[0].AddComponent<cActor>();
 		actor.SetController(new DecisionTreeController());
-
-		auto& mesh = entities[0].GetComponent<cMeshRenderer>();
+		auto& mesh = entities[0].AddComponent<cMeshRenderer>("Models/C64Wanderer.fbx");
 		mesh.SetMaterialPath("Materials/C64Wanderer.json");
 	}
 
-	{
+	{ //StateMachine
 		auto& actor = entities[1].AddComponent<cActor>();
 		actor.SetController(new StateMachineController());
+		auto& mesh = entities[1].AddComponent<cMeshRenderer>("Models/C64Seeker.fbx");
+		mesh.SetMaterialPath("Materials/C64Seeker.json");
 	}
 
 	GLLogger.Log("GameLauncher start");
@@ -199,7 +187,6 @@ void GameLauncher::Update(float delta)
 	delta;
 	OPTICK_EVENT();
 
-	//Movement1
 	AIEventManager::Instance().Update();
 	if(InputHandler::GetInstance().IsKeyPressed((int)Keys::K))
 	{

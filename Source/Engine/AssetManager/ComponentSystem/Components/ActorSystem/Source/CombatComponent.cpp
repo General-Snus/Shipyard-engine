@@ -1,5 +1,5 @@
-#include "../CombatComponent.h"
 #include "AssetManager.pch.h"
+#include "../CombatComponent.h"
 #include <Engine/AssetManager/ComponentSystem/Components/TaskSpecific/ProjectileComponent.h>
 
 CombatComponent::CombatComponent(const SY::UUID anOwnerID) : Component(anOwnerID)

@@ -4,24 +4,24 @@
 #include <filesystem>
 #include <utility>
 
+#include <Shaders/Include/Bloom_PS.h> 
+#include <Shaders/Include/CopyPixels_PS.h> 
 #include <Shaders/Include/Default_PS.h>
 #include <Shaders/Include/Default_VS.h>
-#include <Shaders/Include/LuminancePass_PS.h>
-#include <Shaders/Include/ToneMapping_PS.h>
-#include <Shaders/Include/CopyPixels_PS.h> 
-#include <Shaders/Include/GaussianBlur_PS.h> 
-#include <Shaders/Include/Bloom_PS.h> 
-#include <Shaders/Include/SSAO_PS.h> 
 #include <Shaders/Include/EdgeBlur.h> 
+#include <Shaders/Include/GaussianBlur_PS.h> 
+#include <Shaders/Include/LuminancePass_PS.h>
+#include <Shaders/Include/SSAO_PS.h> 
+#include <Shaders/Include/ToneMapping_PS.h>
 
-#include <Shaders/Include/ParticleShader_VS.h> 
 #include <Shaders/Include/ParticleShader_GS.h> 
 #include <Shaders/Include/ParticleShader_PS.h> 
+#include <Shaders/Include/ParticleShader_VS.h> 
 
 #include <Objects/DataObjects/Default_C.h>
-#include <Objects/DataObjects/Default_N.h>
-#include <Objects/DataObjects/Default_M.h>
 #include <Objects/DataObjects/Default_FX.h>
+#include <Objects/DataObjects/Default_M.h>
+#include <Objects/DataObjects/Default_N.h>
 
 #include <Shaders/Include/LineDrawer_PS.h>
 #include <Shaders/Include/LineDrawer_VS.h>
@@ -32,23 +32,23 @@
 
 #include "Objects/Shader.h"
 
-#include "Rendering/Vertex.h" 
-#include "Rendering/ParticleRenderer/ParticleVertex.h" 
 #include "GraphicCommands/GraphicCommands.h"
-#include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
-#include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>
+#include "Rendering/ParticleRenderer/ParticleVertex.h" 
+#include "Rendering/Vertex.h" 
 #include <Engine/AssetManager/ComponentSystem/Components/CameraComponent.h>
+#include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>
+#include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
 
-#include "GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_SetRenderTarget.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_DebugLayer.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_SetLightBuffer.h" 
 #include "GraphicCommands/Commands/Headers/GfxCmd_GaussianBlur.h" 
+#include "GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h"
+#include "GraphicCommands/Commands/Headers/GfxCmd_SetLightBuffer.h" 
+#include "GraphicCommands/Commands/Headers/GfxCmd_SetRenderTarget.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_SSAO.h" 
 
 #include "Shaders/Registers.h"
-#include <Tools/ImGui/ImGui/imgui.h>
 #include <stdexcept> 
+#include <Tools/ImGui/ImGui/imgui.h>
 
 #include <Engine/GraphicsEngine/InterOp/DDSTextureLoader11.h>
 #include <Tools/Optick/src/optick.h>
@@ -76,7 +76,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 		{
 			GELogger.Err("Failed to initialize the RHI!");
 			return false;
-		} 
+		}
 
 		SetupDefaultVariables();
 		SetupBRDF();
@@ -599,8 +599,8 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	//SSAO
 	//Do ambience pass? Clarit
 	//Render all lights
-	OPTICK_EVENT("SSAO")
-		RHI::BeginEvent(L"SSAO");
+	OPTICK_EVENT("SSAO");
+	RHI::BeginEvent(L"SSAO");
 	myCamera->SetCameraToFrameBuffer();
 	GfxCmd_SSAO().ExecuteAndDestroy();
 	RHI::EndEvent();

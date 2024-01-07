@@ -158,7 +158,6 @@ void DebugDrawer::Render()
 DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugLine(const Vector3f& aStart,const Vector3f& aFinish,const Vector3f& aColor,const float lifetime)
 {
 	Primitive primitive{};
-
 	primitive.Vertices.push_back(DebugVertex(aStart,aColor));
 	primitive.Vertices.push_back(DebugVertex(aFinish,aColor));
 	primitive.Indices.push_back(0);

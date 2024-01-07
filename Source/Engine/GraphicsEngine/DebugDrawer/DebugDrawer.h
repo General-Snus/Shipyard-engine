@@ -36,7 +36,7 @@ public:
 	static DebugDrawer& Get();
 
 	bool Initialize();
-	void SetDebugPrimitiveTransform(const PrimitiveHandle& aHandle,const Matrix& aTransform);
+	void SetDebugPrimitiveTransform(const PrimitiveHandle& aHandle,const Matrix& aTransform); 
 	void RemoveDebugPrimitive(PrimitiveHandle& aHandle);
 
 	void Update(float aDeltaTime);
