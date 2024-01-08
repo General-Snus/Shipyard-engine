@@ -2,9 +2,8 @@
 
 #include <iomanip>
 #include <iostream>
-#include <ostream>
+#include <ostream> 
 #include <sstream>
-
 Logger::Logger(const std::string& aNamespace)
 {
 	myNamespace = "[ " + aNamespace + " ]";
@@ -34,6 +33,7 @@ std::string Logger::Timestamp() const
 
 Logger Logger::Create(const std::string& aNamespace)
 {
+	//spdlog::register_logger(std::make_shared<spdlog::logger>("test"));
 	Logger aLogger(aNamespace);
 	aLogger.SetConsoleHandle(GetConsoleWindow());
 	aLogger.Succ("Logging started for " + aNamespace);
@@ -54,8 +54,7 @@ void Logger::Log(const std::string& aString) const
 {
 	if(isInitialized)
 	{
-
-		if (shouldPrintToOutput)
+		if(shouldPrintToOutput)
 		{
 			const std::string message = "[" + Timestamp() + "]" + myNamespace + " [   LOG   ] " + aString;
 			OutputDebugStringA(message.c_str());
@@ -63,22 +62,33 @@ void Logger::Log(const std::string& aString) const
 		else
 		{
 			std::cout << "[" << Timestamp() << "] ";
-			SetConsoleTextAttribute(myHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+			SetConsoleTextAttribute(myHandle,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 			std::cout << myNamespace << " ";
-			SetConsoleTextAttribute(myHandle, BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE);
+			SetConsoleTextAttribute(myHandle,BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE);
 			std::cout << "[   LOG   ]";
-			SetConsoleTextAttribute(myHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+			SetConsoleTextAttribute(myHandle,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
 			std::cout << " " << aString << std::endl;
-			SetConsoleTextAttribute(myHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+			SetConsoleTextAttribute(myHandle,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+		}
+	}
+	{
+		if(shouldPrintToOutput)
+		{
+			const std::string message = "[" + Timestamp() + "]" + myNamespace + " [   LOG   ] " + aString;
+			OutputDebugStringA(message.c_str());
+		}
+		else
+		{
+			std::cout << aString << std::endl;
 		}
 	}
 }
 
 void Logger::Warn(const std::string& aString) const
 {
-	if (isInitialized)
+	if(isInitialized)
 	{
-		if (shouldPrintToOutput)
+		if(shouldPrintToOutput)
 		{
 			const std::string message = "[" + Timestamp() + "]" + myNamespace + " [ WARNING ] " + aString;
 			OutputDebugStringA(message.c_str());
@@ -86,22 +96,22 @@ void Logger::Warn(const std::string& aString) const
 		else
 		{
 			std::cout << "[" << Timestamp() << "] ";
-			SetConsoleTextAttribute(myHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+			SetConsoleTextAttribute(myHandle,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 			std::cout << myNamespace << " ";
-			SetConsoleTextAttribute(myHandle, BACKGROUND_RED | BACKGROUND_GREEN);
+			SetConsoleTextAttribute(myHandle,BACKGROUND_RED | BACKGROUND_GREEN);
 			std::cout << "[ WARNING ]";
-			SetConsoleTextAttribute(myHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+			SetConsoleTextAttribute(myHandle,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 			std::cout << " " << aString << std::endl;
-			SetConsoleTextAttribute(myHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+			SetConsoleTextAttribute(myHandle,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 		}
 	}
 }
 
-void Logger::Err(const std::string& aString, const std::source_location location) const
+void Logger::Err(const std::string& aString,const std::source_location location) const
 {
-	if (isInitialized)
+	if(isInitialized)
 	{
-		if (shouldPrintToOutput)
+		if(shouldPrintToOutput)
 		{
 			const std::string message = "[" + Timestamp() + "]" + myNamespace + " [  ERROR  ] " + aString;
 			OutputDebugStringA(message.c_str());
@@ -109,13 +119,13 @@ void Logger::Err(const std::string& aString, const std::source_location location
 		else
 		{
 			std::cout << "[" << Timestamp() << "] ";
-			SetConsoleTextAttribute(myHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+			SetConsoleTextAttribute(myHandle,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 			std::cout << myNamespace << " ";
-			SetConsoleTextAttribute(myHandle, BACKGROUND_RED);
+			SetConsoleTextAttribute(myHandle,BACKGROUND_RED);
 			std::cout << "[  ERROR  ]";
-			SetConsoleTextAttribute(myHandle, FOREGROUND_RED | FOREGROUND_INTENSITY);
+			SetConsoleTextAttribute(myHandle,FOREGROUND_RED | FOREGROUND_INTENSITY);
 			std::cout << " " << aString << "\n";
-			SetConsoleTextAttribute(myHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+			SetConsoleTextAttribute(myHandle,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 		}
 
 		std::wcout << "file: "
@@ -128,9 +138,9 @@ void Logger::Err(const std::string& aString, const std::source_location location
 
 void Logger::Succ(const std::string& aString) const
 {
-	if (isInitialized)
+	if(isInitialized)
 	{
-		if (shouldPrintToOutput)
+		if(shouldPrintToOutput)
 		{
 			const std::string message = "[" + Timestamp() + "]" + "[ SUCCESS ] " + aString;
 			OutputDebugStringA(message.c_str());
@@ -138,37 +148,37 @@ void Logger::Succ(const std::string& aString) const
 		else
 		{
 			std::cout << "[" << Timestamp() << "] ";
-			SetConsoleTextAttribute(myHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+			SetConsoleTextAttribute(myHandle,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 			std::cout << myNamespace << " ";
-			SetConsoleTextAttribute(myHandle, BACKGROUND_GREEN);
+			SetConsoleTextAttribute(myHandle,BACKGROUND_GREEN);
 			std::cout << "[ SUCCESS ]";
-			SetConsoleTextAttribute(myHandle, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+			SetConsoleTextAttribute(myHandle,FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 			std::cout << " " << aString << std::endl;
-			SetConsoleTextAttribute(myHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+			SetConsoleTextAttribute(myHandle,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 		}
 	}
 }
 
-void Logger::LogException(const std::exception& anException, unsigned aLevel, const std::source_location location) const
+void Logger::LogException(const std::exception& anException,unsigned aLevel,const std::source_location location) const
 {
-	if (isInitialized)
+	if(isInitialized)
 	{
-		if (shouldPrintToOutput)
+		if(shouldPrintToOutput)
 		{
-			const std::string message = "[" + Timestamp() + "]" + std::string(aLevel, ' ') + "[  FATAL  ] " + anException.what();
+			const std::string message = "[" + Timestamp() + "]" + std::string(aLevel,' ') + "[  FATAL  ] " + anException.what();
 			OutputDebugStringA(message.c_str());
 		}
 		else
 		{
 			std::cout << "[" << Timestamp() << "] ";
-			SetConsoleTextAttribute(myHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+			SetConsoleTextAttribute(myHandle,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 			std::cout << myNamespace << " ";
-			SetConsoleTextAttribute(myHandle, BACKGROUND_RED);
+			SetConsoleTextAttribute(myHandle,BACKGROUND_RED);
 			std::wcout << "[  FATAL  ]";
-			std::wcout << std::string(aLevel, ' ').c_str();
-			SetConsoleTextAttribute(myHandle, FOREGROUND_RED | FOREGROUND_INTENSITY);
+			std::wcout << std::string(aLevel,' ').c_str();
+			SetConsoleTextAttribute(myHandle,FOREGROUND_RED | FOREGROUND_INTENSITY);
 			std::wcout << " " << anException.what() << "\n";
-			SetConsoleTextAttribute(myHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+			SetConsoleTextAttribute(myHandle,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 		}
 
 		std::wcout << "file: "
@@ -181,11 +191,11 @@ void Logger::LogException(const std::exception& anException, unsigned aLevel, co
 		{
 			std::rethrow_if_nested(anException);
 		}
-		catch (const std::exception& nestedException)
+		catch(const std::exception& nestedException)
 		{
-			LogException(nestedException, aLevel + 1);
+			LogException(nestedException,aLevel + 1);
 		}
-		catch (...) {} // Catch all other cases.
+		catch(...) {} // Catch all other cases.
 	}
 }
 

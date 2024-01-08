@@ -29,6 +29,7 @@ void GameLauncher::Init()
 
 bool SaveTest(std::vector<GameObject> gameObjectsToSave,const std::filesystem::path& path)
 {
+	AMLogger.Log("\n\nSaving Gameobjects");
 	std::ofstream file(path.string(),std::ios_base::binary);
 	if(!file.is_open())
 	{
@@ -49,7 +50,7 @@ bool SaveTest(std::vector<GameObject> gameObjectsToSave,const std::filesystem::p
 		file.write((char*)&strLength,sizeof(strLength));
 		file.write(&meshPath[0],strLength);
 
-		AMLogger.Log("Saved: " + id);
+		AMLogger.Log("Saved: " + std::to_string(id));
 	}
 	file.close();
 	return true;
@@ -69,6 +70,7 @@ std::vector<GameObject> LoadTest(const std::filesystem::path& path)
 	int size = 0;
 	file.read((char*)&size,sizeof(int));
 	gameObjectsToSave.resize(size);
+	AMLogger.Log("\n\nLoading Gameobjects");
 
 	for(auto& i : gameObjectsToSave)
 	{
@@ -91,7 +93,7 @@ std::vector<GameObject> LoadTest(const std::filesystem::path& path)
 		transform.SetPosition(position);
 		i.AddComponent<cMeshRenderer>(meshPath,true);
 
-		AMLogger.Log("Loaded: " + uuid);
+		AMLogger.Log("Loaded: " + std::to_string(uuid));
 	}
 	file.close();
 	return gameObjectsToSave;
@@ -109,6 +111,8 @@ void GameLauncher::GenerateNewRandomCubes()
 		Vector3f position = {RandomEngine::RandomInRange(-20.f,20.f),RandomEngine::RandomInRange(0.f,20.f),RandomEngine::RandomInRange(-20.f,20.f)};
 		transform.SetPosition(position);
 		transform.SetScale(1.f);
+
+		AMLogger.Log("Created: " + std::to_string(vectorObject.GetID()));
 	}
 }
 
@@ -215,6 +219,12 @@ void GameLauncher::Update(float delta)
 	{
 		if(std::filesystem::exists("GameObjectSaveFile.SaveFiles"))
 		{
+			for(auto& i : vectorOfGameObjects)
+			{
+				GameObjectManager::Get().DeleteGameObject(i);
+			}
+			vectorOfGameObjects.clear();
+
 			vectorOfGameObjects = LoadTest("GameObjectSaveFile.SaveFiles");
 		}
 	}
