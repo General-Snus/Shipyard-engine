@@ -2,6 +2,7 @@
 #include "UUID.h"
 #include <cassert>  
 #include <Engine/AssetManager/AssetManagerUtills.hpp>
+#include <iostream>
 #include <unordered_map>
 #include <vector>
 //Original creation by Simon
@@ -170,20 +171,24 @@ template<class T>
 void ComponentManager<T>::DeleteGameObject(const SY::UUID aGameObjectID)
 {
 	auto it = myGameObjectIDtoVectorIndex.find(aGameObjectID);		// Find the game object
-	if(it == myGameObjectIDtoVectorIndex.end()) return;			// If it doesn't exist, don't do anything
-
+	if(it == myGameObjectIDtoVectorIndex.end())
+	{
+		return;			// If it doesn't exist, don't do anything
+	}
 	unsigned int index = it->second;								// Get the component index of the game object
 	unsigned int id = myVectorIndexToGameObjectID[static_cast<unsigned int>(myComponents.size() - 1)]; // Get the id of the game object with the last component
 
 	myComponents[index] = myComponents[myComponents.size() - 1]; // Swap the last component with the component to remove (cyclic remove)
 	//std::swap(myComponents[index],myComponents[myComponents.size() - 1]); // Swap the last component with the component to remove (cyclic remove)
+
+	std::cout << "Removed " << typeid(T).name() << " at id: " << std::to_string(id) + "\n";
 	myComponents.pop_back();										// Remove the newly last component (the component to remove)
 
 	myGameObjectIDtoVectorIndex[id] = index;						// Change the previously last game object to refer to the new component index
 	myVectorIndexToGameObjectID[index] = id;						// Change the index to refer to the game object
 
 	// TODO: vvv THESE
-	myVectorIndexToGameObjectID.erase(myVectorIndexToGameObjectID.find(static_cast<unsigned int>(myComponents.size())));// Remove the removed component from the game object id list
+	myVectorIndexToGameObjectID.erase(myVectorIndexToGameObjectID.at(static_cast<unsigned int>(myComponents.size())));// Remove the removed component from the game object id list
 	myGameObjectIDtoVectorIndex.erase(it->first);					// Remove the removed game object id from the component list
 }
 
