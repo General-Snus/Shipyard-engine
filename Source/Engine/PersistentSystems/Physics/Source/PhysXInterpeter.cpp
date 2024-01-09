@@ -1,6 +1,12 @@
 #include "PersistentSystems.pch.h"
 #include "../PhysXInterpeter.h" 
-
+#include <PxPhysicsAPI.h>
+#include <extensions/PxExtensionsAPI.h>
+#include <extensions/PxDefaultSimulationFilterShader.h>
+#include <extensions/PxDefaultCpuDispatcher.h>
+#include <extensions/PxShapeExt.h>
+#include <foundation/PxMat33.h> 
+#include <extensions/PxSimpleFactory.h>
 
 int Shipyard_PhysX::InitializePhysx()
 {
@@ -40,4 +46,11 @@ void Shipyard_PhysX::ShutdownPhysx()
 	mPhysics->release();
 	mPvd->release();
 	mFoundation->release();
+}
+
+
+void Shipyard_UserErrorCallback::reportError(physx::PxErrorCode::Enum code, const char* message, const char* file, int line)
+{
+    std::cout << "PhysX Error : (" << (int)code << ") " << message << " in " << file << " at line " << line << std::endl;
+    // error processing implementation 
 }
