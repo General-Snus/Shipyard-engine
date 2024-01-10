@@ -1,13 +1,5 @@
 #include "PersistentSystems.pch.h"
 #include "../PhysXInterpeter.h" 
-#include <PxPhysicsAPI.h>
-#include <extensions/PxExtensionsAPI.h>
-#include <extensions/PxDefaultSimulationFilterShader.h>
-#include <extensions/PxDefaultCpuDispatcher.h>
-#include <extensions/PxShapeExt.h>
-#include <foundation/PxMat33.h> 
-#include <extensions/PxSimpleFactory.h>
-
 int Shipyard_PhysX::InitializePhysx()
 {
     using namespace physx;

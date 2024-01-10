@@ -80,14 +80,14 @@
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir);$(ProjectDir);$(SolutionDir)Engine\AssetManager\;$(SolutionDir)Engine\GraphicsEngine\;$(SolutionDir)Engine\PersistentSystems\;$(SolutionDir)Tools\Utilities\;$(SolutionDir)Tools\Assimp\include;$(SolutionDir)Tools\ThirdParty\;$(SolutionDir)Tools\ThirdParty\dpp\;$(SolutionDir)Tools\ThirdParty\DirectXTK\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir);$(ProjectDir);$(SolutionDir)Engine\AssetManager\;$(SolutionDir)Engine\GraphicsEngine\;$(SolutionDir)Tools\Utilities\;$(SolutionDir)Tools\Assimp\include;$(SolutionDir)Tools\ThirdParty\;$(SolutionDir)Tools\ThirdParty\dpp\;$(SolutionDir)Tools\ThirdParty\DirectXTK\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include\;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)../Bin\$(Configuration)\</OutDir>
     <LibraryPath>$(SolutionDir)..\Lib\$(Configuration)\;$(SolutionDir)..\Dependencies\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <TargetName>Shipyard_$(ProjectName)_$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir);$(ProjectDir);$(SolutionDir)Engine\AssetManager\;$(SolutionDir)Engine\GraphicsEngine\;$(SolutionDir)Engine\PersistentSystems\;$(SolutionDir)Tools\Utilities\;$(SolutionDir)Tools\Assimp\include;$(SolutionDir)Tools\ThirdParty\;$(SolutionDir)Tools\ThirdParty\dpp\;$(SolutionDir)Tools\ThirdParty\DirectXTK\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir);$(ProjectDir);$(SolutionDir)Engine\AssetManager\;$(SolutionDir)Engine\GraphicsEngine\;$(SolutionDir)Tools\Utilities\;$(SolutionDir)Tools\Assimp\include;$(SolutionDir)Tools\ThirdParty\;$(SolutionDir)Tools\ThirdParty\dpp\;$(SolutionDir)Tools\ThirdParty\DirectXTK\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include\;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)../Bin\$(Configuration)\</OutDir>
     <LibraryPath>$(SolutionDir)..\Lib\$(Configuration)\;$(SolutionDir)..\Dependencies\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
@@ -128,23 +128,26 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions);WIN32_LEAN_AND_MEAN;WITH_EDITOR</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions);WIN32_LEAN_AND_MEAN;WITH_EDITOR;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>$(SolutionDir)Tools\Optick\src\;$(SolutionDir)Tools\ImGui\MuninGraph\;$(SolutionDir)Tools\ImGui\ImGui\;$(SolutionDir)Tools\ThirdParty\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Tools\Optick\src\;$(SolutionDir)Tools\ImGui\MuninGraph\;$(SolutionDir)Tools\ImGui\ImGui\;$(SolutionDir)Tools\ThirdParty\;$(SolutionDir)Engine\PersistentSystems\</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d11.lib;dxguid.lib;GameLauncher.lib;TGAFbx.lib;GraphicsEngine.lib;PersistentSystems.lib;AssetManager.lib;Utilities.lib;Logging.lib;ImGUI.lib;OptickCore.lib;assimp-vc143-mt.lib;dbghelp.lib;dbgeng.lib;dpp.lib;DirectXTK.lib;MuninGraph.lib</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;dxguid.lib;GameLauncher.lib;GraphicsEngine.lib;PersistentSystems.lib;AssetManager.lib;Utilities.lib;Logging.lib;ImGUI.lib;OptickCore.lib;assimp-vc143-mt.lib;dbghelp.lib;dbgeng.lib;dpp.lib;DirectXTK.lib;MuninGraph.lib;PhysX_static_64.lib;PhysXCommon_static_64.lib;PhysXCooking_static_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_static_64.lib;PhysXCharacterKinematic_static_64.lib;PhysXPvdSDK_static_64.lib;PhysXVehicle_static_64.lib;PhysXVehicle2_static_64.lib;PVDRuntime_64.lib;SnippetRender_static_64.lib;SnippetUtils_static_64.lib</AdditionalDependencies>
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);$(SolutionDir)..\Dependencies\$(Configuration)\PhysXLibs\;</AdditionalLibraryDirectories>
+      <TreatLinkerWarningAsErrors>false</TreatLinkerWarningAsErrors>
+      <ShowProgress>LinkVerbose</ShowProgress>
     </Link>
     <FxCompile>
       <ObjectFileOutput>$(SolutionDir)Bin\$(Configuration)\Content\Shaders\%(Filename).cso</ObjectFileOutput>
@@ -163,23 +166,25 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions);WIN32_LEAN_AND_MEAN;WITH_EDITOR</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions);WIN32_LEAN_AND_MEAN;WITH_EDITOR;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(SolutionDir)Tools\Optick\src\;$(SolutionDir)Tools\ImGui\MuninGraph\;$(SolutionDir)Tools\ImGui\ImGui\;$(SolutionDir)Tools\ThirdParty\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Tools\Optick\src\;$(SolutionDir)Tools\ImGui\MuninGraph\;$(SolutionDir)Tools\ImGui\ImGui\;$(SolutionDir)Tools\ThirdParty\;$(SolutionDir)Engine\PersistentSystems\</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <Optimization>MaxSpeed</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d11.lib;dxguid.lib;GameLauncher.lib;TGAFbx.lib;GraphicsEngine.lib;PersistentSystems.lib;AssetManager.lib;Utilities.lib;Logging.lib;ImGUI.lib;OptickCore.lib;assimp-vc143-mt.lib;dbghelp.lib;dbgeng.lib;dpp.lib;DirectXTK.lib;MuninGraph.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
+      <AdditionalDependencies>d3d11.lib;dxguid.lib;GameLauncher.lib;GraphicsEngine.lib;PersistentSystems.lib;AssetManager.lib;Utilities.lib;Logging.lib;ImGUI.lib;OptickCore.lib;assimp-vc143-mt.lib;dbghelp.lib;dbgeng.lib;dpp.lib;DirectXTK.lib;MuninGraph.lib;PhysX_static_64.lib;PhysXCommon_static_64.lib;PhysXCooking_static_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_static_64.lib;PhysXCharacterKinematic_static_64.lib;PhysXPvdSDK_static_64.lib;PhysXVehicle_static_64.lib;PhysXVehicle2_static_64.lib;PVDRuntime_64.lib;SnippetRender_static_64.lib;SnippetUtils_static_64.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);$(SolutionDir)..\Dependencies\$(Configuration)\PhysXLibs\;</AdditionalLibraryDirectories>
+      <TreatLinkerWarningAsErrors>false</TreatLinkerWarningAsErrors>
     </Link>
     <FxCompile>
       <ObjectFileOutput>$(SolutionDir)Bin\$(Configuration)\Content\Shaders\%(Filename).cso</ObjectFileOutput>

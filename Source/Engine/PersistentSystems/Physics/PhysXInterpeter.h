@@ -1,6 +1,7 @@
-#pragma once  
-#include <Tools/ThirdParty/PhysX/physx/include/extensions/PxDefaultAllocator.h>
-#include <Tools/ThirdParty/PhysX/physx/include/extensions/PxDefaultErrorCallback.h> 
+#pragma once 
+#include <PxConfig.h>
+#include "PxPhysicsAPI.h"
+#include <Tools/Utilities/System/SingletonTemplate.h>
 
 namespace physx
 {
@@ -27,14 +28,14 @@ private:
 	static physx::PxPvd* mPvd;
 };
 
-class Shipyard_PhysXAllocatorCallback : public physx::PxDefaultAllocator
-{
-public:
-	virtual ~Shipyard_PhysXAllocatorCallback() {}
-	virtual void* allocate(size_t size, const char* typeName, const char* filename,
-		int line) = 0;
-	virtual void deallocate(void* ptr) = 0;
-};
+//class Shipyard_PhysXAllocatorCallback : public physx::PxDefaultAllocator
+//{
+//public:
+//	virtual ~Shipyard_PhysXAllocatorCallback() {}
+//	virtual void* allocate(size_t size, const char* typeName, const char* filename,
+//		int line) = 0;
+//	virtual void deallocate(void* ptr) = 0;
+//};
 
 class Shipyard_UserErrorCallback : public physx::PxDefaultErrorCallback
 {
