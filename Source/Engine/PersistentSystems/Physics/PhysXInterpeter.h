@@ -13,6 +13,7 @@ namespace physx
 	class PxActor;
 	class PxRigidDynamic;
 	class PxRenderBuffer;
+	class PxConvexMesh;
 }
 
 class Shipyard_PhysX : public Singleton<Shipyard_PhysX>
@@ -25,6 +26,8 @@ public:
 	const physx::PxRenderBuffer& getRenderBuffer() const;
 
 	void ShutdownPhysx();
+	static physx::PxConvexMesh* CookMesh(std::shared_ptr<Mesh> myToBeCookedMesh);
+
 	physx::PxScene* GetScene();
 	physx::PxPhysics* GetPhysicsWorld();
 

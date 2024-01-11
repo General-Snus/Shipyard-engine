@@ -27,6 +27,10 @@ public:
 
 	Vector3<T> GetCenter() const { return (MinPoint + MaxPoint) * 0.5f; }
 	Vector3<T> GetWidth() const { return (MaxPoint - MinPoint) * 0.5f; }
+	Vector3<T> GetXSize() const { return (MaxPoint.x - MinPoint.x) * 0.5f; }
+	Vector3<T> GetYSize() const { return (MaxPoint.y - MinPoint.y) * 0.5f; }
+	Vector3<T> GetZSize() const { return (MaxPoint.z - MinPoint.z) * 0.5f; }
+
 	Vector3<T> GetMin() const;
 	Vector3<T> GetMax() const;
 private:

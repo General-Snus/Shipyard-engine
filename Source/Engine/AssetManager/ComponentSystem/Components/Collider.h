@@ -16,14 +16,16 @@ public:
 	Vector3f GetNormalToward(Vector3f position) const;
 	void Render() override;
 
-
+	eColliderType GetColliderType() const { return myCollider->GetColliderType(); }
 
 	void CreateAABB(const AABB3D<float>& rf);
 
 	//void AddToNotify(std::weak_ptr<Component> aComponent) { myNotify.push_back(aComponent); }
 	//void Notify(std::weak_ptr<cCollider> notifier) { for(auto& i : myNotify) i.lock()->CollidedWith(notifier); }
 
-	template<typename T>
+
+
+	template<typename T> // add inheritance check here when not lazy stupid
 	std::shared_ptr<T> GetColliderAssetOfType() const;
 
 private:
@@ -36,5 +38,4 @@ inline std::shared_ptr<T> cCollider::GetColliderAssetOfType() const
 {
 	return std::reinterpret_pointer_cast<T>(myCollider);
 }
-
 

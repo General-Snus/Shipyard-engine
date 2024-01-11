@@ -4,6 +4,7 @@
 #include "PxConfig.h"
 #include "PxPhysics.h"
 #include "PxPhysicsAPI.h" 
+#include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
 #include <Tools/Utilities/Math.hpp>
 #include <vector>
 
@@ -130,6 +131,17 @@ PxScene* Shipyard_PhysX::GetScene()
 	return gScene;
 }
 
+physx::PxConvexMesh* Shipyard_PhysX::CookMesh(std::shared_ptr<Mesh> myToBeCookedMesh)
+{
+	//WAS WORKING HERE
+
+	PxConvexMeshDesc convexDesc;
+	convexDesc.points.count = 5;
+	convexDesc.points.stride = sizeof(PxVec3);
+	convexDesc.points.data = convexVerts;
+	convexDesc.flags = PxConvexFlag::eCOMPUTE_CONVEX;
+	return nullptr;
+}
 //void Shipyard_UserErrorCallback::reportError(physx::PxErrorCode::Enum code,const char* message,const char* file,int line)
 //{
 //	std::cout << "PhysX Error : (" << (int)code << ") " << message << " in " << file << " at line " << line << std::endl;

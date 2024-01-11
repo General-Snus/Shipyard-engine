@@ -76,3 +76,23 @@ void ColliderAssetSphere::RenderDebugLines(const Transform& data)
 	DebugDrawer::Get().SetDebugPrimitiveTransform(handle,data.GetTransform());
 	myHandles.push_back(handle);
 }
+
+ColliderAssetConvex::ColliderAssetConvex()
+{
+	assert(false && "Not implemented");
+}
+
+ColliderAssetConvex::ColliderAssetConvex(const std::shared_ptr<Mesh>& rf)
+{
+	assert(false && "Not implemented");
+}
+
+ColliderAssetConvex::ColliderAssetConvex(const std::filesystem::path& path)
+{
+	assert(false && "Not implemented");
+}
+
+void ColliderAssetConvex::RenderDebugLines(const Transform& data)
+{
+	assert(false && "Not implemented");
+}

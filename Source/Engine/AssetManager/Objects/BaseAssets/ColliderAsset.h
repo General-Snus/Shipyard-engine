@@ -20,6 +20,7 @@ enum class eColliderType
 
 class Transform;
 class DebugDrawer;
+class Mesh;
 struct PrimitiveHandle;
 
 
@@ -60,4 +61,18 @@ public:
 	void RenderDebugLines(const Transform& data) override;
 private:
 	Sphere<float> mySphere;
+};
+
+
+class ColliderAssetConvex : public ColliderAsset
+{
+public:
+	explicit ColliderAssetConvex();
+	explicit ColliderAssetConvex(const std::shared_ptr<Mesh>& rf);
+	explicit ColliderAssetConvex(const std::filesystem::path& path);
+	void RenderDebugLines(const Transform& data) override;
+	inline std::shared_ptr<Mesh> GetColliderMesh() { return aColliderMesh; }
+
+private:
+	std::shared_ptr<Mesh> aColliderMesh;
 };

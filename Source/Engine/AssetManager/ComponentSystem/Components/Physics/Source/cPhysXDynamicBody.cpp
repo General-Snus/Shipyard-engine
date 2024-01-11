@@ -1,5 +1,5 @@
-#include "AssetManager.pch.h"
 #include "../cPhysXDynamicBody.h"
+#include "AssetManager.pch.h"
 #include <Tools/ThirdParty/PhysX/physx/include/PxPhysicsAPI.h> 
 
 
@@ -23,7 +23,91 @@ void cPhysXDynamicBody::Init()
 		assert(false && "Material creation failed!");
 	}
 	data->setLinearVelocity(PxVec3(0.f,10.f,0.f));
-	PxRigidActorExt::createExclusiveShape(*data,PxBoxGeometry(1.f,1.0f,1.0f),*mMaterial);
+
+
+	if(auto* collider = TryGetAddComponent<cCollider>())
+	{
+		auto type = collider->GetColliderType();
+
+
+		switch(type)
+		{
+		case eColliderType::AABB:
+		{
+			auto aabb = collider->GetColliderAssetOfType<ColliderAssetAABB>();
+			const auto& aabbData = aabb->GetAABB();
+			PxRigidActorExt::createExclusiveShape(*data,PxBoxGeometry(aabbData.GetXSize(),aabbData.GetYSize(),aabbData.GetZSize()),*mMaterial);
+			break;
+		}
+		//case eColliderType::SPHERE:
+		//{
+		//	auto* sphere = collider->TryGetAddComponent<ColliderAssetSphere>();
+		//	const auto& sphereData = sphere->GetSphere();
+		//	PxRigidActorExt::createExclusiveShape(*data,PxSphereGeometry(sphereData.GetRadius()),*mMaterial);
+		//	break;
+		//}
+		//case eColliderType::CIRCLE:
+		//{
+		//	auto* circle = collider->TryGetAddComponent<ColliderAssetCircle>();
+		//	const auto& circleData = circle->GetCircle();
+		//	PxRigidActorExt::createExclusiveShape(*data,PxSphereGeometry(circleData.GetRadius()),*mMaterial);
+		//	break;
+		//}
+		//case eColliderType::PLANE:
+		//{
+		//	auto* plane = collider->TryGetAddComponent<ColliderAssetPlane>();
+		//	const auto& planeData = plane->GetPlane();
+		//	PxRigidActorExt::createExclusiveShape(*data,PxPlaneGeometry(),*mMaterial);
+		//	break;
+		//}
+		//case eColliderType::CONE:
+		//{
+		//	auto* cone = collider->TryGetAddComponent<ColliderAssetCone>();
+		//	const auto& coneData = cone->GetCone();
+		//	PxRigidActorExt::createExclusiveShape(*data,PxCapsuleGeometry(coneData.GetRadius(),coneData.GetHeight()),*mMaterial);
+		//	break;
+		//}
+		//case eColliderType::FRUSTRUM:
+		//{
+		//	auto* frustrum = collider->TryGetAddComponent<ColliderAssetFrustrum>();
+		//	const auto& frustrumData = frustrum->GetFrustrum();
+		//	PxRigidActorExt::createExclusiveShape(*data,PxBoxGeometry(frustrumData.GetWidth(),frustrumData.GetHeight(),frustrumData.GetDepth()),*mMaterial);
+		//	break;
+		//}
+		//case eColliderType::TRIANGLE:
+		//{
+		//	auto* triangle = collider->TryGetAddComponent<ColliderAssetTriangle>();
+		//	const auto& triangleData = triangle->GetTriangle();
+		//	PxRigidActorExt::createExclusiveShape(*data,PxTriangleMeshGeometry(triangleData.GetMesh()),*mMaterial);
+		//	break;
+		//}
+		//case eColliderType::RAY:
+		//{
+		//	auto* ray = collider->TryGetAddComponent<ColliderAssetRay>();
+		//	const auto& rayData = ray->GetRay();
+		//	PxRigidActorExt::createExclusiveShape(*data,PxBoxGeometry(rayData.GetWidth(),rayData.GetHeight(),rayData.GetDepth()),*mMaterial);
+		//	break;
+		//}
+		case eColliderType::CONVEX:
+		{
+			auto* convex = collider->TryGetAddComponent<ColliderAssetConvex>();
+			const auto& convexData = convex->GetColliderMesh();
+			PxRigidActorExt::createExclusiveShape(*data,PxConvexMeshGeometry(convexData.GetMesh()),*mMaterial);
+			break;
+		}
+
+
+
+
+		default:
+			PxRigidActorExt::createExclusiveShape(*data,PxBoxGeometry(1.f,1.0f,1.0f),*mMaterial);
+			break;
+		}
+	}
+	else
+	{
+		assert(false && "failed to add collider for some reason, sim will not be as it should plz fix")
+	}
 }
 
 void cPhysXDynamicBody::Update()
