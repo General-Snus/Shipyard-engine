@@ -33,7 +33,7 @@
 #include <Tools/Utilities/System/ThreadPool.hpp>
 #include <Windows/EditorWindows/ChainGraph/GraphTool.h>
 
-#if PHYSX
+#if PHYSX 
 #include <Engine/PersistentSystems/Physics/PhysXInterpeter.h>
 #endif // PHYSX 0
 
@@ -161,6 +161,7 @@ void Editor::Update()
 {
 	Timer::GetInstance().Update();
 	const float delta = Timer::GetInstance().GetDeltaTime();
+	Shipyard_PhysX::Get().Update();
 
 	GameObjectManager::Get().Update();
 	myGameLauncher.Update(delta);
@@ -168,6 +169,7 @@ void Editor::Update()
 }
 void Editor::Render()
 {
+	Shipyard_PhysX::Get().Render();
 	GraphicsEngine::Get().BeginFrame();
 	GraphicsEngine::Get().RenderFrame(0,0);
 	ImGui::Render();

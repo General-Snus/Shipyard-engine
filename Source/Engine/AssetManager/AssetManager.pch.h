@@ -64,6 +64,7 @@
 #include "ComponentSystem/Components/ParticleSystem.h"
 #include "ComponentSystem/Components/Physics/cPhysics_Kinematic.h"
 #include "ComponentSystem/Components/Physics/cPhysics_Newtonian.h"
+#include "ComponentSystem/Components/Physics/cPhysXDynamicBody.h"
 #include "ComponentSystem/Components/Skybox.h"
 #include "ComponentSystem/Components/Transform.h"
 #include "ComponentSystem/GameObject.h"

@@ -10,5 +10,6 @@
 
 // add headers that you want to pre-compile here
 #include "ArtificialInteligence/AICommands/AICommands.h" 
+#include "Physics/PhysXInterpeter.h"
 #include "Physics/Raycast.h"
 #endif //PERSISTENT_PCH_H

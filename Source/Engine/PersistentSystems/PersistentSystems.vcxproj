@@ -75,14 +75,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(LibraryPath);</LibraryPath>
-    <IncludePath>$(ProjectDir);$(SolutionDir);$(IncludePath);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)Tools\ImGui\MuninGraph\;$(SolutionDir)Tools\ImGui\ImGui\</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(LibraryPath);$(SolutionDir)..\Dependencies\$(Configuration)\PhysXLibs\</LibraryPath>
+    <IncludePath>$(ProjectDir);$(SolutionDir);$(IncludePath);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)Tools\ImGui\MuninGraph\;$(SolutionDir)Tools\ImGui\ImGui\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(LibraryPath);</LibraryPath>
-    <IncludePath>$(ProjectDir);$(SolutionDir);$(IncludePath);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)Tools\ImGui\MuninGraph\;$(SolutionDir)Tools\ImGui\ImGui\</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(LibraryPath);$(SolutionDir)..\Dependencies\$(Configuration)\PhysXLibs\</LibraryPath>
+    <IncludePath>$(ProjectDir);$(SolutionDir);$(IncludePath);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)Tools\ImGui\MuninGraph\;$(SolutionDir)Tools\ImGui\ImGui\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -130,8 +130,9 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>$(SolutionDir)Tools\ThirdParty\PhysX\physx\include\</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(SolutionDir)Tools\ThirdParty\PhysX\physx\include\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\snippets\;</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <TranslateIncludes>false</TranslateIncludes>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -139,9 +140,17 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\Dependencies\$(Configuration)\PhysXLibs\;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>PhysX_static_64.lib;PhysXCommon_static_64.lib;PhysXCooking_static_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_static_64.lib;PhysXCharacterKinematic_static_64.lib;PhysXPvdSDK_static_64.lib;PhysXVehicle_static_64.lib;PhysXVehicle2_static_64.lib;PVDRuntime_64.lib;SnippetRender_static_64.lib;SnippetUtils_static_64.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+      <TreatLibWarningAsErrors>
+      </TreatLibWarningAsErrors>
     </Lib>
+    <ProjectReference>
+      <LinkLibraryDependencies>
+      </LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -157,8 +166,9 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>$(SolutionDir)Tools\ThirdParty\PhysX\physx\include\</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(SolutionDir)Tools\ThirdParty\PhysX\physx\include\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\snippets\;</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <TranslateIncludes>false</TranslateIncludes>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -168,9 +178,17 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\Dependencies\$(Configuration)\PhysXLibs\;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>PhysX_static_64.lib;PhysXCommon_static_64.lib;PhysXCooking_static_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_static_64.lib;PhysXCharacterKinematic_static_64.lib;PhysXPvdSDK_static_64.lib;PhysXVehicle_static_64.lib;PhysXVehicle2_static_64.lib;PVDRuntime_64.lib;SnippetRender_static_64.lib;SnippetUtils_static_64.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+      <TreatLibWarningAsErrors>
+      </TreatLibWarningAsErrors>
     </Lib>
+    <ProjectReference>
+      <LinkLibraryDependencies>
+      </LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ArtificialInteligence\AICommands\AICommands.h" />

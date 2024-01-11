@@ -14,6 +14,7 @@
 #include <Game/GameLauncher/TaskSpecificImplementation/DecicionTree/DecisionTreeController.h>
 #include <Game/GameLauncher/TaskSpecificImplementation/StateMachine/StateMachineController.h>
 
+#include <Engine/PersistentSystems/Physics/PhysXInterpeter.h>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -111,6 +112,9 @@ void GameLauncher::GenerateNewRandomCubes()
 		Vector3f position = {RandomEngine::RandomInRange(-20.f,20.f),RandomEngine::RandomInRange(0.f,20.f),RandomEngine::RandomInRange(-20.f,20.f)};
 		transform.SetPosition(position);
 		transform.SetScale(1.f);
+
+		auto& body = vectorObject.AddComponent<cPhysXDynamicBody>();
+		Shipyard_PhysX::Get().AssignActor(body.GetId());
 
 		AMLogger.Log("Created: " + std::to_string(vectorObject.GetID()));
 	}
