@@ -113,8 +113,7 @@ void GameLauncher::GenerateNewRandomCubes()
 		transform.SetPosition(position);
 		transform.SetScale(1.f);
 
-		auto& body = vectorObject.AddComponent<cPhysXDynamicBody>();
-		Shipyard_PhysX::Get().AssignActor(body.GetId());
+		vectorObject.AddComponent<cPhysXDynamicBody>(); 
 
 		AMLogger.Log("Created: " + std::to_string(vectorObject.GetID()));
 	}

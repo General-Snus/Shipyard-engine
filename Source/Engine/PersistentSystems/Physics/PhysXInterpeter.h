@@ -1,8 +1,7 @@
 #pragma once  
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
-#include <Tools/Utilities/System/SingletonTemplate.h> 
-
-
+#include <Tools/Utilities/System/SingletonTemplate.h>
+  
 namespace physx
 {
 	class PxPhysics;
@@ -12,14 +11,8 @@ namespace physx
 	class PxPvd;
 	class PxScene;
 	class PxActor;
-}
-
-
-struct TransformData
-{
-	Vector3f position;
-	Vector3f rotation;
-};
+	class PxRigidDynamic;
+} 
 
 class Shipyard_PhysX : public Singleton<Shipyard_PhysX>
 {
@@ -30,19 +23,10 @@ public:
 	void Render();
 
 	void ShutdownPhysx();
-
-	bool  AssignActor(TransformData* dataPtr);
-	physx::PxActor* GetActor(int aActorID);
-	TransformData* GetActorData(int aActorID);
-
 	physx::PxScene* GetScene();
+	physx::PxPhysics* GetPhysicsWorld();
 
-private:
-	/*static physx::PxPhysics* mPhysics;
-	static physx::PxDefaultErrorCallback* gDefaultErrorCallback;
-	static physx::PxDefaultAllocator* gDefaultAllocatorCallback;
-	static physx::PxFoundation* mFoundation;
-	static physx::PxPvd* mPvd;*/
+private: 
 };
 
 //class Shipyard_PhysXAllocatorCallback : public physx::PxDefaultAllocator

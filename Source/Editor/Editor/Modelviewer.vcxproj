@@ -90,7 +90,7 @@
     <IgnoreImportLibrary>true</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir);$(ProjectDir);$(SolutionDir)Engine\AssetManager\;$(SolutionDir)Engine\GraphicsEngine\;$(SolutionDir)Tools\Utilities\;$(SolutionDir)Tools\Assimp\include;$(SolutionDir)Tools\ThirdParty\;$(SolutionDir)Tools\ThirdParty\dpp\;$(SolutionDir)Tools\ThirdParty\DirectXTK\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir);$(ProjectDir);$(SolutionDir)Engine\AssetManager\;$(SolutionDir)Engine\GraphicsEngine\;$(SolutionDir)Tools\Utilities\;$(SolutionDir)Tools\Assimp\include;$(SolutionDir)Tools\ThirdParty\;$(SolutionDir)Tools\ThirdParty\dpp\;$(SolutionDir)Tools\ThirdParty\DirectXTK\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)../Bin\$(Configuration)\</OutDir>
     <LibraryPath>$(SolutionDir)..\Lib\$(Configuration)\;$(SolutionDir)..\Dependencies\$(Configuration)\;$(SolutionDir)..\Dependencies\$(Configuration)\PhysXLibs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>

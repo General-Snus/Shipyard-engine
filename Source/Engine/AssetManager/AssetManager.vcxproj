@@ -75,13 +75,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(ProjectDir);$(SolutionDir)ThirdParty\FBXImporter\Include\;$(SolutionDir)\;$(SolutionDir)Tools\Assimp\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(SolutionDir)ThirdParty\FBXImporter\Include\;$(SolutionDir)\;$(SolutionDir)Tools\Assimp\include;$(IncludePath);$(SolutionDir)Tools\ThirdParty\PhysX\physx\include</IncludePath>
     <LibraryPath>$(SolutionDir)ThirdParty\FBXImporter\Lib\$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
-    <IncludePath>$(ProjectDir);$(SolutionDir)ThirdParty\FBXImporter\Include\;$(SolutionDir)\;$(SolutionDir)Tools\Assimp\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(SolutionDir)ThirdParty\FBXImporter\Include\;$(SolutionDir)\;$(SolutionDir)Tools\Assimp\include;$(IncludePath);$(SolutionDir)Tools\ThirdParty\PhysX\physx\include</IncludePath>
     <LibraryPath>$(SolutionDir)ThirdParty\FBXImporter\Lib\$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
