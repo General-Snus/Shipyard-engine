@@ -161,7 +161,7 @@ void Editor::Update()
 {
 	Timer::GetInstance().Update();
 	const float delta = Timer::GetInstance().GetDeltaTime();
-	Shipyard_PhysX::Get().Update();
+	Shipyard_PhysX::Get().Update(delta);
 
 	GameObjectManager::Get().Update();
 	myGameLauncher.Update(delta);

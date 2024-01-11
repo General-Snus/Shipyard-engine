@@ -124,3 +124,20 @@ inline float Lerp(float start_value,float end_value,float t)
 	return start_value + (end_value - start_value) * t;
 }
 //TODO FIX THIS SHIT; ADD TO CU
+
+inline void threeaxisrot(const float r11,const float r12,const float r21,const float r31,const float r32,Vector3f& res)
+{
+	res[0] = atan2(r31,r32);
+	res[1] = asin(r21);
+	res[2] = atan2(r11,r12);
+}
+
+inline void quaternion2Euler(const Vector4f& q,Vector3f& res)
+{
+	threeaxisrot(-2 * (q.y * q.z - q.w * q.x),
+		q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
+		2 * (q.x * q.z + q.w * q.y),
+		-2 * (q.x * q.y - q.w * q.z),
+		q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z,
+		res);
+}

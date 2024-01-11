@@ -1,7 +1,7 @@
 #pragma once  
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 #include <Tools/Utilities/System/SingletonTemplate.h>
-  
+
 namespace physx
 {
 	class PxPhysics;
@@ -12,21 +12,23 @@ namespace physx
 	class PxScene;
 	class PxActor;
 	class PxRigidDynamic;
-} 
+	class PxRenderBuffer;
+}
 
 class Shipyard_PhysX : public Singleton<Shipyard_PhysX>
 {
 public:
 	friend class Singleton<Shipyard_PhysX>;
 	int InitializePhysx();
-	void Update();
+	void Update(float deltaTime);
 	void Render();
+	const physx::PxRenderBuffer& getRenderBuffer() const;
 
 	void ShutdownPhysx();
 	physx::PxScene* GetScene();
 	physx::PxPhysics* GetPhysicsWorld();
 
-private: 
+private:
 };
 
 //class Shipyard_PhysXAllocatorCallback : public physx::PxDefaultAllocator
