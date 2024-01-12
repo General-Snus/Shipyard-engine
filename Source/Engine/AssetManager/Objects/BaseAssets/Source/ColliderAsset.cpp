@@ -77,22 +77,25 @@ void ColliderAssetSphere::RenderDebugLines(const Transform& data)
 	myHandles.push_back(handle);
 }
 
-ColliderAssetConvex::ColliderAssetConvex()
+ColliderAssetConvex::ColliderAssetConvex() : ColliderAsset(eColliderType::CONVEX) 
 {
 	assert(false && "Not implemented");
 }
 
-ColliderAssetConvex::ColliderAssetConvex(const std::shared_ptr<Mesh>& rf)
+ColliderAssetConvex::ColliderAssetConvex(const std::shared_ptr<Mesh>& rf) : ColliderAsset(eColliderType::CONVEX)
 {
+	rf;
 	assert(false && "Not implemented");
 }
 
-ColliderAssetConvex::ColliderAssetConvex(const std::filesystem::path& path)
+ColliderAssetConvex::ColliderAssetConvex(const std::filesystem::path& aFilePath) : ColliderAsset(eColliderType::CONVEX)
 {
+	aFilePath;
 	assert(false && "Not implemented");
 }
 
 void ColliderAssetConvex::RenderDebugLines(const Transform& data)
 {
+	data;
 	assert(false && "Not implemented");
 }

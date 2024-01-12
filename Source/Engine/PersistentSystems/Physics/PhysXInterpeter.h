@@ -15,6 +15,7 @@ namespace physx
 	class PxRenderBuffer;
 	class PxConvexMesh;
 }
+class Mesh;
 
 class Shipyard_PhysX : public Singleton<Shipyard_PhysX>
 {

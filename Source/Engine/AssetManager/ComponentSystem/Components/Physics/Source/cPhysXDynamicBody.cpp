@@ -90,15 +90,11 @@ void cPhysXDynamicBody::Init()
 		//}
 		case eColliderType::CONVEX:
 		{
-			auto* convex = collider->TryGetAddComponent<ColliderAssetConvex>();
-			const auto& convexData = convex->GetColliderMesh();
-			PxRigidActorExt::createExclusiveShape(*data,PxConvexMeshGeometry(convexData.GetMesh()),*mMaterial);
+			const auto convex = collider->GetColliderAssetOfType<ColliderAssetConvex>(); 
+			const auto convexData = convex->GetColliderMesh();
+			PxRigidActorExt::createExclusiveShape(*data,PxConvexMeshGeometry(Shipyard_PhysX::CookMesh(convexData)),*mMaterial);
 			break;
 		}
-
-
-
-
 		default:
 			PxRigidActorExt::createExclusiveShape(*data,PxBoxGeometry(1.f,1.0f,1.0f),*mMaterial);
 			break;
@@ -106,7 +102,7 @@ void cPhysXDynamicBody::Init()
 	}
 	else
 	{
-		assert(false && "failed to add collider for some reason, sim will not be as it should plz fix")
+		assert(false && "failed to add collider for some reason, sim will not be as it should plz fix");
 	}
 }
 

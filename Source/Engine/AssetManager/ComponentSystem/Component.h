@@ -90,7 +90,7 @@ inline T* Component::TryGetComponent()
 
 template<class T>
 inline T* Component::TryGetAddComponent()
-{
+{ 
 	if(auto* returnComponent = GameObjectManager::Get().TryGetComponent<T>(myOwnerID))
 	{
 		return returnComponent;
