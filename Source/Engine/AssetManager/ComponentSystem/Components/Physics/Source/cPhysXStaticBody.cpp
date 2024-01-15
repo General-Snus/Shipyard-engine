@@ -1,42 +1,51 @@
 #include "AssetManager.pch.h"
-#include <Tools/ThirdParty/PhysX/physx/include/PxPhysicsAPI.h> 
-#include "../cPhysXDynamicBody.h"
+#include <Tools/ThirdParty/PhysX/physx/include/foundation/PxMat33.h>
+#include <Tools/ThirdParty/PhysX/physx/include/PxPhysicsAPI.h>
+#include "../cPhysXStaticBody.h"
 
 
-using namespace physx;
-cPhysXDynamicBody::cPhysXDynamicBody(const SY::UUID anOwnerID) : Component(anOwnerID)
+physx::PxMat33 ConvertMatrix(const Matrix& myMatrix)
+{
+	physx::PxMat33 returnMatrix;
+	returnMatrix.column0 = PxVec3(myMatrix(1,1),myMatrix(1,2),myMatrix(1,3));
+	returnMatrix.column1 = PxVec3(myMatrix(2,1),myMatrix(2,2),myMatrix(2,3));
+	returnMatrix.column2 = PxVec3(myMatrix(3,1),myMatrix(3,2),myMatrix(3,3));
+	return returnMatrix;
+};
+
+cPhysXStaticBody::cPhysXStaticBody(const SY::UUID anOwnerID) : Component(anOwnerID)
 {
 }
 
-void cPhysXDynamicBody::Init()
+using namespace physx;
+void cPhysXStaticBody::Init()
 {
 	const auto& transform = GetComponent<Transform>();
 
 	auto* world = Shipyard_PhysX::Get().GetPhysicsWorld();
-	data = world->createRigidDynamic(PxTransform(transform.GetPosition()));
+	data = world->createRigidStatic(
+		PxTransform(
+			transform.GetPosition(),
+			PxQuat(ConvertMatrix(transform.GetTransform())))
+	);
+
 	Shipyard_PhysX::Get().GetScene()->addActor(*data);
 
-	PxMaterial* mMaterial;
-	mMaterial = world->createMaterial(0.5f,0.5f,0.1f);
-	if (!mMaterial)
-	{
-		assert(false && "Material creation failed!");
-	}
-	data->setLinearVelocity(PxVec3(0.f,10.f,0.f));
+	UpdateFromCollider();
+}
 
-
+void cPhysXStaticBody::UpdateFromCollider()
+{
 	if (auto* collider = TryGetAddComponent<cCollider>())
 	{
 		auto type = collider->GetColliderType();
-
-
 		switch (type)
 		{
 		case eColliderType::AABB:
 		{
 			auto aabb = collider->GetColliderAssetOfType<ColliderAssetAABB>();
 			const auto& aabbData = aabb->GetAABB();
-			PxRigidActorExt::createExclusiveShape(*data,PxBoxGeometry(aabbData.GetXSize(),aabbData.GetYSize(),aabbData.GetZSize()),*mMaterial);
+			PxRigidActorExt::createExclusiveShape(*data,PxBoxGeometry(aabbData.GetXSize() / 2,aabbData.GetYSize() / 2,aabbData.GetZSize() / 2),*Shipyard_PhysX::Get().GetDefaultMaterial());
 			break;
 		}
 		//case eColliderType::SPHERE:
@@ -92,11 +101,11 @@ void cPhysXDynamicBody::Init()
 		{
 			const auto convex = collider->GetColliderAssetOfType<ColliderAssetConvex>();
 			const auto convexData = convex->GetColliderMesh();
-			PxRigidActorExt::createExclusiveShape(*data,PxConvexMeshGeometry(Shipyard_PhysX::CookMesh(convexData)),*mMaterial);
+			PxRigidActorExt::createExclusiveShape(*data,PxConvexMeshGeometry(Shipyard_PhysX::CookMesh(convexData)),*Shipyard_PhysX::Get().GetDefaultMaterial());
 			break;
 		}
 		default:
-			PxRigidActorExt::createExclusiveShape(*data,PxBoxGeometry(1.f,1.0f,1.0f),*mMaterial);
+			PxRigidActorExt::createExclusiveShape(*data,PxBoxGeometry(1.f,1.0f,1.0f),*Shipyard_PhysX::Get().GetDefaultMaterial());
 			break;
 		}
 	}
@@ -106,26 +115,15 @@ void cPhysXDynamicBody::Init()
 	}
 }
 
-void cPhysXDynamicBody::Update()
-{
-	const auto& pxTransform = data->getGlobalPose();
-
-	Vector3f rotation;
-	const Vector4f quat = { pxTransform.q.x,pxTransform.q.y,pxTransform.q.z,pxTransform.q.w };
-	quaternion2Euler(quat,rotation);
-	rotation *= RAD_TO_DEG;
-	auto& transform = GetComponent<Transform>();
-
-	const Vector3f position = { pxTransform.p.x,pxTransform.p.y,pxTransform.p.z };
-	transform.SetPosition(position);
-	transform.SetRotation(rotation);
-}
-
-void cPhysXDynamicBody::Render()
+void cPhysXStaticBody::Update()
 {
 }
 
-void cPhysXDynamicBody::Destroy()
+void cPhysXStaticBody::Render()
+{
+}
+
+void cPhysXStaticBody::Destroy()
 {
 	if (data)
 	{
@@ -133,10 +131,10 @@ void cPhysXDynamicBody::Destroy()
 	}
 }
 
-void cPhysXDynamicBody::OnSiblingChanged(const std::type_info* SourceClass)
+void cPhysXStaticBody::OnSiblingChanged(const std::type_info* SourceClass)
 {
 	if (SourceClass == &typeid(cCollider))
 	{
-		///UpdateFromCollider();
+		UpdateFromCollider();
 	}
 }

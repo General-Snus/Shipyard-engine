@@ -17,8 +17,9 @@ public:
 	void Render() override;
 
 	eColliderType GetColliderType() const { return myCollider->GetColliderType(); }
-
 	void CreateAABB(const AABB3D<float>& rf);
+
+	void OnSiblingChanged(const std::type_info* SourceClass = nullptr) override;
 
 	//void AddToNotify(std::weak_ptr<Component> aComponent) { myNotify.push_back(aComponent); }
 	//void Notify(std::weak_ptr<cCollider> notifier) { for(auto& i : myNotify) i.lock()->CollidedWith(notifier); }

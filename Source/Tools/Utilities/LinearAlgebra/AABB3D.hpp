@@ -1,7 +1,7 @@
 #pragma once
 #define NOMINMAX
-#include "Vectors.hpp" 
 #include <algorithm>
+#include "Vectors.hpp" 
 
 class Transform;
 template<class T = float>
@@ -23,7 +23,6 @@ public:
 
 	float DistanceTo(const Vector3<T>& aPosition) const;
 	Vector3<T> ClosestPoint(const Vector3<T>& aPosition) const;
-	AABB3D<T> UpdateWithTransform(const Matrix& matrix) const;
 
 	Vector3<T> GetCenter() const { return (MinPoint + MaxPoint) * 0.5f; }
 	Vector3<T> GetWidth() const { return (MaxPoint - MinPoint) * 0.5f; }
@@ -69,11 +68,11 @@ inline void AABB3D<T>::InitWithMinAndMax(const Vector3<T>& aMin,const Vector3<T>
 template<class T>
 inline bool AABB3D<T>::IsInside(const Vector3<T>& aPosition) const
 {
-	if(aPosition.x >= MinPoint.x && aPosition.x <= MaxPoint.x)
+	if (aPosition.x >= MinPoint.x && aPosition.x <= MaxPoint.x)
 	{
-		if(aPosition.y >= MinPoint.y && aPosition.y <= MaxPoint.y)
+		if (aPosition.y >= MinPoint.y && aPosition.y <= MaxPoint.y)
 		{
-			if(aPosition.z >= MinPoint.z && aPosition.z <= MaxPoint.z)
+			if (aPosition.z >= MinPoint.z && aPosition.z <= MaxPoint.z)
 			{
 				return true;
 			}
@@ -100,18 +99,7 @@ inline Vector3<T> AABB3D<T>::ClosestPoint(const Vector3<T>& aPosition) const
 	return pointOnBounds;
 }
 
-template<class T>
-inline AABB3D<T> AABB3D<T>::UpdateWithTransform(const Matrix& matrix) const
-{
-	Vector4<T> minPoint = Vector4f(MinPoint,1) * matrix;
-	Vector4<T> maxPoint = Vector4f(MaxPoint,1) * matrix;
 
-	const Vector3<T> minV3 = Vector3<T>(minPoint.x,minPoint.y,minPoint.z);
-	const Vector3<T> maxV3 = Vector3<T>(maxPoint.x,maxPoint.y,maxPoint.z);
-
-#define NOMINMAX
-	return AABB3D<T>(MinVector(minV3,maxV3),MaxVector(minV3,maxV3));
-}
 
 
 template<class T>

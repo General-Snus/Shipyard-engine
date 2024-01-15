@@ -32,14 +32,14 @@ bool SaveTest(std::vector<GameObject> gameObjectsToSave,const std::filesystem::p
 {
 	AMLogger.Log("\n\nSaving Gameobjects");
 	std::ofstream file(path.string(),std::ios_base::binary);
-	if(!file.is_open())
+	if (!file.is_open())
 	{
 		return false;
 	}
 	int a = static_cast<int>(gameObjectsToSave.size());
 	file.write((char*)&a,sizeof(a));
 
-	for(auto& i : gameObjectsToSave)
+	for (auto& i : gameObjectsToSave)
 	{
 		const Vector3f& position = i.GetComponent<Transform>().GetPosition();
 		std::string meshPath = i.GetComponent<cMeshRenderer>().GetRawMesh()->GetAssetPath().string();
@@ -63,7 +63,7 @@ std::vector<GameObject> LoadTest(const std::filesystem::path& path)
 	path;
 
 	std::ifstream file(path.string(),std::ios_base::binary);
-	if(!file.is_open())
+	if (!file.is_open())
 	{
 		return gameObjectsToSave;
 	}
@@ -73,7 +73,7 @@ std::vector<GameObject> LoadTest(const std::filesystem::path& path)
 	gameObjectsToSave.resize(size);
 	AMLogger.Log("\n\nLoading Gameobjects");
 
-	for(auto& i : gameObjectsToSave)
+	for (auto& i : gameObjectsToSave)
 	{
 		SY::UUID uuid;
 		Vector3f position;
@@ -102,18 +102,18 @@ std::vector<GameObject> LoadTest(const std::filesystem::path& path)
 
 void GameLauncher::GenerateNewRandomCubes()
 {
-	for(size_t i = 0; i < 10; i++)
+	for (size_t i = 0; i < 10; i++)
 	{
 		vectorOfGameObjects.push_back(GameObjectManager::Get().CreateGameObject());
 		GameObject vectorObject = vectorOfGameObjects.back();
 		vectorObject.AddComponent<cMeshRenderer>("Models/Cube.fbx");
 		auto& transform = vectorObject.AddComponent<Transform>();
 
-		Vector3f position = {RandomEngine::RandomInRange(-20.f,20.f),RandomEngine::RandomInRange(0.f,20.f),RandomEngine::RandomInRange(-20.f,20.f)};
+		Vector3f position = { RandomEngine::RandomInRange(-20.f,20.f),RandomEngine::RandomInRange(0.f,20.f),RandomEngine::RandomInRange(-20.f,20.f) };
 		transform.SetPosition(position);
 		transform.SetScale(1.f);
 
-		vectorObject.AddComponent<cPhysXDynamicBody>(); 
+		vectorObject.AddComponent<cPhysXDynamicBody>();
 
 		AMLogger.Log("Created: " + std::to_string(vectorObject.GetID()));
 	}
@@ -160,13 +160,16 @@ void GameLauncher::Start()
 	}
 
 	{
-		GameObject test3 = gom.CreateGameObject();
-		test3.AddComponent<cMeshRenderer>("Models/SteelFloor.fbx");
+		GameObject floor = gom.CreateGameObject();
+		floor.AddComponent<cMeshRenderer>("Models/SteelFloor.fbx");
 		//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
-		auto& transform = test3.AddComponent<Transform>();
+		auto& transform = floor.AddComponent<Transform>();
 		transform.SetPosition(0,-1.5f,0);
 		transform.SetScale(Vector3f(50.0f,1.0f,50.0f));
 		transform.SetGizmo(false);
+
+		floor.AddComponent<cPhysXStaticBody>();
+
 	}
 
 #if WorkingOnPngLoading
@@ -181,7 +184,7 @@ void GameLauncher::Start()
 #endif 
 #pragma endregion
 
-	if(std::filesystem::exists("GameObjectSaveFile.SaveFiles"))
+	if (std::filesystem::exists("GameObjectSaveFile.SaveFiles"))
 	{
 		vectorOfGameObjects = LoadTest("GameObjectSaveFile.SaveFiles");
 	}
@@ -199,30 +202,30 @@ void GameLauncher::Update(float delta)
 	OPTICK_EVENT();
 
 	AIEventManager::Instance().Update();
-	if(InputHandler::GetInstance().IsKeyPressed((int)Keys::K))
+	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::K))
 	{
 		GraphicsEngine::Get().GetSettings().DebugRenderer_Active = !GraphicsEngine::Get().GetSettings().DebugRenderer_Active;
 	}
 
-	if(InputHandler::GetInstance().IsKeyPressed((int)Keys::F4))
+	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::F4))
 	{
-		for(auto& i : vectorOfGameObjects)
+		for (auto& i : vectorOfGameObjects)
 		{
 			GameObjectManager::Get().DeleteGameObject(i);
 		}
 		vectorOfGameObjects.clear();
 	}
 
-	if(InputHandler::GetInstance().IsKeyPressed((int)Keys::F5))
+	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::F5))
 	{
 		SaveTest(vectorOfGameObjects,"GameObjectSaveFile.SaveFiles");
 	}
 
-	if(InputHandler::GetInstance().IsKeyPressed((int)Keys::F6))
+	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::F6))
 	{
-		if(std::filesystem::exists("GameObjectSaveFile.SaveFiles"))
+		if (std::filesystem::exists("GameObjectSaveFile.SaveFiles"))
 		{
-			for(auto& i : vectorOfGameObjects)
+			for (auto& i : vectorOfGameObjects)
 			{
 				GameObjectManager::Get().DeleteGameObject(i);
 			}
@@ -232,14 +235,14 @@ void GameLauncher::Update(float delta)
 		}
 	}
 
-	if(InputHandler::GetInstance().IsKeyPressed((int)Keys::R))
+	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::R))
 	{
 		GenerateNewRandomCubes();
 	}
 
 	//Other
 	{
-		for(auto& i : GameObjectManager::Get().GetAllComponents<cLight>()) // TODO optimize this once you have a lot of lights and lightobjects
+		for (auto& i : GameObjectManager::Get().GetAllComponents<cLight>()) // TODO optimize this once you have a lot of lights and lightobjects
 		{
 			i.SetIsDirty(true);
 			i.SetIsRendered(false);

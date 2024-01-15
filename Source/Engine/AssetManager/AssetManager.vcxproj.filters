@@ -165,7 +165,7 @@
     <ClInclude Include="ComponentSystem\Components\Physics\cPhysXDynamicBody.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="cPhysXStaticBody.h">
+    <ClInclude Include="ComponentSystem\Components\Physics\cPhysXStaticBody.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -314,7 +314,7 @@
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysXDynamicBody.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cPhysXStaticBody.cpp">
+    <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysXStaticBody.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

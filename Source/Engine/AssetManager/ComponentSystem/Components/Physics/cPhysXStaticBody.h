@@ -3,18 +3,17 @@
 #include <Engine/PersistentSystems/Physics/PhysXInterpeter.h>
 
 
-class cPhysXDynamicBody : public Component
+class cPhysXStaticBody : public Component
 {
 public:
-	cPhysXDynamicBody(const SY::UUID anOwnerID);
-
+	cPhysXStaticBody(const SY::UUID anOwnerID);
 
 	void Init() override;
+	void UpdateFromCollider();
 	void Update() override;
 	void Render() override;
 	void Destroy() override;
 	void OnSiblingChanged(const std::type_info* SourceClass) override;
 private:
-	physx::PxRigidDynamic* data;
+	physx::PxRigidStatic* data;
 };
-

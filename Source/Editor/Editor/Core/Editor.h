@@ -38,7 +38,7 @@ public:
 	Editor() = default;
 	bool Initialize(HWND aHandle);
 	void DoWinProc(const MSG& msg);
-	int Run(); 
+	int Run();
 
 	// Acceleration Getters for components.
 	static ApplicationState& GetApplicationState()
@@ -78,5 +78,5 @@ private:
 	Sphere<float> myWorldBounds;
 	GameLauncher myGameLauncher;
 	bool IsGUIActive = true;
-	std::array<bool, count> activeWindows = { false };
+	std::array<bool,count> activeWindows = {false};
 };

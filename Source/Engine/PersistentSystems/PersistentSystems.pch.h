@@ -12,4 +12,5 @@
 #include "ArtificialInteligence/AICommands/AICommands.h" 
 #include "Physics/PhysXInterpeter.h"
 #include "Physics/Raycast.h"
+#include <vector>
 #endif //PERSISTENT_PCH_H

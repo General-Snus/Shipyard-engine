@@ -75,6 +75,8 @@ bool Editor::Initialize(HWND aHandle)
 
 	GameObjectManager::Get().SetUpdatePriority<Transform>(ComponentManagerBase::UpdatePriority::Transform);
 	GameObjectManager::Get().SetUpdatePriority<cPhysics_Kinematic>(ComponentManagerBase::UpdatePriority::Physics);
+	GameObjectManager::Get().SetUpdatePriority<cPhysXDynamicBody>(ComponentManagerBase::UpdatePriority::Physics);
+	//Force no write to thread after this?
 
 	HideSplashScreen();
 #if UseScriptGraph
@@ -102,6 +104,7 @@ void Editor::DoWinProc(const MSG& aMessage)
 	InputHandler::GetInstance().UpdateEvents(aMessage.message,aMessage.wParam,aMessage.lParam);
 	InputHandler::GetInstance().UpdateMouseInput(aMessage.message);
 }
+
 int	 Editor::Run()
 {
 	OPTICK_FRAME("MainThread");
@@ -121,12 +124,6 @@ int	 Editor::Run()
 	return 0;
 }
 
-
-
-
-
-
-
 void Editor::ShowSplashScreen()
 {
 	if(!mySplashWindow)
@@ -135,6 +132,7 @@ void Editor::ShowSplashScreen()
 		mySplashWindow->Init(Window::moduleHandler);
 	}
 }
+
 void Editor::HideSplashScreen() const
 {
 	mySplashWindow->Close();
@@ -161,15 +159,17 @@ void Editor::Update()
 {
 	Timer::GetInstance().Update();
 	const float delta = Timer::GetInstance().GetDeltaTime();
-	Shipyard_PhysX::Get().Update(delta);
 
+
+	Shipyard_PhysX::Get().StartRead();
 	GameObjectManager::Get().Update();
 	myGameLauncher.Update(delta);
 	DebugDrawer::Get().Update(delta);
+	Shipyard_PhysX::Get().EndRead(delta);
 }
 void Editor::Render()
 {
-	Shipyard_PhysX::Get().Render();
+	//Shipyard_PhysX::Get().Render();
 	GraphicsEngine::Get().BeginFrame();
 	GraphicsEngine::Get().RenderFrame(0,0);
 	ImGui::Render();

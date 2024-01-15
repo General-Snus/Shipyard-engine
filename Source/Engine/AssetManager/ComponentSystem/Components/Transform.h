@@ -13,11 +13,11 @@ public:
 	Transform(const unsigned int anOwnerId); // Create a generic cube 
 	//Transform(const unsigned int anOwnerId,const Matrix& aMatrix);
 
+	void Init() override;
 	void Update() override;
 	void Render() override;
 	// Matrix& GetTransform();
 	const Matrix& GetTransform() const;
-
 
 
 	// TODO
@@ -56,6 +56,7 @@ public:
 	void SetScale(Vector2f scale);
 	void SetScale(Vector3f scale);
 	Vector3f GetScale() const;
+
 	//Meaning last frame
 	bool GetIsRecentlyUpdated() const;
 	bool GetIsDirty() const;
@@ -68,6 +69,7 @@ private:
 	bool IsRecentlyUpdated;
 	bool isDirty;
 	bool isDebugGizmoEnabled;
+	void MakeClean();
 	void MakeSaneRotation();
 	Vector3<float> myPosition;
 	Vector3<float> myRotation;

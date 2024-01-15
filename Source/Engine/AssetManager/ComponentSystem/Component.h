@@ -1,14 +1,16 @@
 #pragma once
+#include <memory>
 #include "GameObject.h"
 #include "GameObjectManager.h"
-#include <memory>
 
 enum class eComponentType
 {
 	base,
 	backgroundColor,
 };
-class cCollider;
+
+
+
 class Component : public std::enable_shared_from_this<Component>
 {
 public:
@@ -19,6 +21,8 @@ public:
 	virtual void Init() {}
 	virtual void Update() {}
 	virtual void Render() {}
+	virtual void Destroy() {}
+	virtual void OnSiblingChanged(const std::type_info* SourceClass = nullptr) { SourceClass; };
 
 	template <class T>
 	bool HasComponent() const;
@@ -90,8 +94,8 @@ inline T* Component::TryGetComponent()
 
 template<class T>
 inline T* Component::TryGetAddComponent()
-{ 
-	if(auto* returnComponent = GameObjectManager::Get().TryGetComponent<T>(myOwnerID))
+{
+	if (auto* returnComponent = GameObjectManager::Get().TryGetComponent<T>(myOwnerID))
 	{
 		return returnComponent;
 	}
@@ -114,7 +118,7 @@ inline const T* Component::TryGetComponent() const
 template<class T>
 inline const T* Component::TryGetAddComponent() const
 {
-	if(auto* returnComponent = GameObjectManager::Get().TryGetComponent<T>(myOwnerID))
+	if (auto* returnComponent = GameObjectManager::Get().TryGetComponent<T>(myOwnerID))
 	{
 		return returnComponent;
 	}

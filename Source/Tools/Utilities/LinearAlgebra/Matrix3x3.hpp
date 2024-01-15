@@ -1,6 +1,5 @@
 #define dim3x3 3
 #pragma once
-
 #include "Matrix4x4.hpp"
 #include "Vector3.hpp" 
 template <class T>
@@ -34,11 +33,11 @@ private:
 template<class T>
 inline Matrix3x3<T>::Matrix3x3()
 {
-	for(short i = 1; i <= dim3x3; i++)
+	for (short i = 1; i <= dim3x3; i++)
 	{
-		for(short j = 1; j <= dim3x3; j++)
+		for (short j = 1; j <= dim3x3; j++)
 		{
-			if(i == j)
+			if (i == j)
 			{
 				arr[i - 1][j - 1] = 1;
 			}
@@ -53,9 +52,9 @@ inline Matrix3x3<T>::Matrix3x3()
 template<class T>
 inline Matrix3x3<T>::Matrix3x3(const Matrix3x3<T>& aMatrix)
 {
-	for(short i = 1; i <= dim3x3; i++)
+	for (short i = 1; i <= dim3x3; i++)
 	{
-		for(short j = 1; j <= dim3x3; j++)
+		for (short j = 1; j <= dim3x3; j++)
 		{
 			arr[i - 1][j - 1] = aMatrix(i,j);
 		}
@@ -65,9 +64,9 @@ inline Matrix3x3<T>::Matrix3x3(const Matrix3x3<T>& aMatrix)
 template<class T>
 inline Matrix3x3<T>::Matrix3x3(const Matrix4x4<T>& aMatrix)
 {
-	for(short i = 1; i <= dim3x3; i++)
+	for (short i = 1; i <= dim3x3; i++)
 	{
-		for(short j = 1; j <= dim3x3; j++)
+		for (short j = 1; j <= dim3x3; j++)
 		{
 			arr[i - 1][j - 1] = aMatrix(i,j);
 		}
@@ -88,9 +87,9 @@ inline const T& Matrix3x3<T>::operator()(const int aRow,const int aColumn) const
 template <class T> Matrix3x3<T> operator-(const Matrix3x3<T>& aMat1,const Matrix3x3<T>& aMat2)
 {
 	Matrix3x3<T> output;
-	for(short row = 1; row <= dim3x3; row++)
+	for (short row = 1; row <= dim3x3; row++)
 	{
-		for(short collumn = 1; collumn <= dim3x3; collumn++)
+		for (short collumn = 1; collumn <= dim3x3; collumn++)
 		{
 			output(row,collumn) = aMat1(row,collumn) - aMat2(row,collumn);
 		}
@@ -100,9 +99,9 @@ template <class T> Matrix3x3<T> operator-(const Matrix3x3<T>& aMat1,const Matrix
 template <class T> Matrix3x3<T> operator+(const Matrix3x3<T>& aMat1,const Matrix3x3<T>& aMat2)
 {
 	Matrix3x3<T> output;
-	for(short row = 1; row <= dim3x3; row++)
+	for (short row = 1; row <= dim3x3; row++)
 	{
-		for(short collumn = 1; collumn <= dim3x3; collumn++)
+		for (short collumn = 1; collumn <= dim3x3; collumn++)
 		{
 			output(row,collumn) = aMat1(row,collumn) + aMat2(row,collumn);
 		}
@@ -112,13 +111,13 @@ template <class T> Matrix3x3<T> operator+(const Matrix3x3<T>& aMat1,const Matrix
 template <class T> Matrix3x3<T> operator*(const Matrix3x3<T>& aMat1,const Matrix3x3<T>& aMat2)
 {
 	Matrix3x3<T> output;
-	for(short i = 1; i <= dim3x3; i++)
+	for (short i = 1; i <= dim3x3; i++)
 	{
-		for(short j = 1; j <= dim3x3; j++)
+		for (short j = 1; j <= dim3x3; j++)
 		{
 			Vector3<T> RowMat1;
 			Vector3<T> CollumnMat2;
-			for(short k = 1; k <= dim3x3; k++)
+			for (short k = 1; k <= dim3x3; k++)
 			{
 				RowMat1[k - 1] = aMat1(i,k);
 				CollumnMat2[k - 1] = aMat2(k,j);
@@ -131,10 +130,10 @@ template <class T> Matrix3x3<T> operator*(const Matrix3x3<T>& aMat1,const Matrix
 template <class T> Vector3<T>   operator*(const Vector3<T>& aVector,const Matrix3x3<T>& aMat2)
 {
 	Vector3<T> output;
-	for(short j = 1; j <= dim3x3; j++)
+	for (short j = 1; j <= dim3x3; j++)
 	{
 		T RowMat1 = 0;
-		for(int k = 1; k <= dim3x3; k++)
+		for (int k = 1; k <= dim3x3; k++)
 		{
 			T var = aMat2(k,j) * aVector[k - 1];
 			RowMat1 += var;
@@ -145,9 +144,9 @@ template <class T> Vector3<T>   operator*(const Vector3<T>& aVector,const Matrix
 }
 template <class T> void operator+=(Matrix3x3<T>& aMat1,const Matrix3x3<T>& aMat2)
 {
-	for(short row = 1; row <= dim3x3; row++)
+	for (short row = 1; row <= dim3x3; row++)
 	{
-		for(short collumn = 1; collumn <= dim3x3; collumn++)
+		for (short collumn = 1; collumn <= dim3x3; collumn++)
 		{
 			aMat1(row,collumn) = aMat1(row,collumn) + aMat2(row,collumn);
 		}
@@ -155,9 +154,9 @@ template <class T> void operator+=(Matrix3x3<T>& aMat1,const Matrix3x3<T>& aMat2
 }
 template <class T> void operator-=(Matrix3x3<T>& aMat1,const Matrix3x3<T>& aMat2)
 {
-	for(short row = 1; row <= dim3x3; row++)
+	for (short row = 1; row <= dim3x3; row++)
 	{
-		for(short collumn = 1; collumn <= dim3x3; collumn++)
+		for (short collumn = 1; collumn <= dim3x3; collumn++)
 		{
 			aMat1(row,collumn) = aMat1(row,collumn) - aMat2(row,collumn);
 		}
@@ -166,13 +165,13 @@ template <class T> void operator-=(Matrix3x3<T>& aMat1,const Matrix3x3<T>& aMat2
 template <class T> void operator*=(Matrix3x3<T>& aMat1,const Matrix3x3<T>& aMat2)
 {
 	Matrix3x3<T> output;
-	for(short i = 1; i <= dim3x3; i++)
+	for (short i = 1; i <= dim3x3; i++)
 	{
-		for(short j = 1; j <= dim3x3; j++)
+		for (short j = 1; j <= dim3x3; j++)
 		{
 			Vector4<T> RowMat1;
 			Vector4<T> CollumnMat2;
-			for(short k = 1; k <= dim3x3; k++)
+			for (short k = 1; k <= dim3x3; k++)
 			{
 				RowMat1[k - 1] = aMat1(i,k);
 				CollumnMat2[k - 1] = aMat2(k,j);
@@ -184,11 +183,11 @@ template <class T> void operator*=(Matrix3x3<T>& aMat1,const Matrix3x3<T>& aMat2
 }
 template <class T> bool operator==(const Matrix3x3<T>& aMat1,const Matrix3x3<T>& aMat2)
 {
-	for(short i = 1; i <= dim3x3; i++)
+	for (short i = 1; i <= dim3x3; i++)
 	{
-		for(short j = 1; j <= dim3x3; j++)
+		for (short j = 1; j <= dim3x3; j++)
 		{
-			if(aMat1(i,j) != aMat2(i,j))
+			if (aMat1(i,j) != aMat2(i,j))
 			{
 				return false;
 			}
@@ -242,9 +241,9 @@ inline Matrix3x3<T> Matrix3x3<T>::Transpose(const Matrix3x3<T>& aMatrixToTranspo
 {
 	Matrix3x3<T> output;
 
-	for(short i = 1; i <= dim3x3; i++)
+	for (short i = 1; i <= dim3x3; i++)
 	{
-		for(short j = 1; j <= dim3x3; j++)
+		for (short j = 1; j <= dim3x3; j++)
 		{
 			output(j,i) = aMatrixToTranspose(i,j);
 		}

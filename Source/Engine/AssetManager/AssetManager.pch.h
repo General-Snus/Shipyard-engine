@@ -20,12 +20,12 @@
 #include <assimp/postprocess.h>     // Post processing flags
 #include <assimp/scene.h>           // Output data structure
 
-#include "Tools/Logging/Logging.h"
 #include <Tools/Optick/src/optick.h> 
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 #include <Tools/Utilities/Math.hpp>
+#include "Tools/Logging/Logging.h"
 
 #include "Objects/AI/AgentSystem/AIEventManager.h"
 #include "Objects/AI/AgentSystem/Controllers/AIController.h"  
@@ -65,19 +65,20 @@
 #include "ComponentSystem/Components/Physics/cPhysics_Kinematic.h"
 #include "ComponentSystem/Components/Physics/cPhysics_Newtonian.h"
 #include "ComponentSystem/Components/Physics/cPhysXDynamicBody.h"
+#include "ComponentSystem/Components/Physics/cPhysXStaticBody.h"
 #include "ComponentSystem/Components/Skybox.h"
 #include "ComponentSystem/Components/Transform.h"
 #include "ComponentSystem/GameObject.h"
 #include "ComponentSystem/GameObjectManager.h"
 
-#include "AssetManager.h"
-#include "ComponentSystem/UUID.h"
 #include <Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h>
 #include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
 #include <Engine/GraphicsEngine/GraphicsEngine.h>
 #include <Engine/GraphicsEngine/InterOp/RHI.h>
 #include <Engine/GraphicsEngine/Rendering/Vertex.h> 
 #include <Tools/FBX/TGAFbx.h>
+#include "AssetManager.h"
+#include "ComponentSystem/UUID.h"
 
 #include <Editor/Editor/Defines.h>
 static inline Logger AMLogger;

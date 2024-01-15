@@ -1,8 +1,8 @@
 #pragma once
-#include "BaseAsset.h" 
 #include <Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h>
 #include <Tools/Utilities/LinearAlgebra/AABB3D.hpp>
 #include <Tools/Utilities/LinearAlgebra/Sphere.hpp>  
+#include "BaseAsset.h" 
 
 enum class eColliderType
 {
@@ -42,15 +42,19 @@ protected:
 	std::vector<DebugDrawer::PrimitiveHandle> myHandles;
 };
 
+
+//Have thomas look at this
 class ColliderAssetAABB : public ColliderAsset
 {
 public:
 	explicit ColliderAssetAABB();
 	explicit ColliderAssetAABB(const AABB3D<float>& rf);
 	void RenderDebugLines(const Transform& data) override;
+	void UpdateWithTransform(const Matrix& matrix);
 	inline const AABB3D<float>& GetAABB() const { return myAABB; }
 private:
 	AABB3D<float> myAABB;
+	AABB3D<float> myOriginalAABB;
 };
 
 class ColliderAssetSphere : public ColliderAsset

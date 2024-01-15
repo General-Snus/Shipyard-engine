@@ -1,4 +1,4 @@
-#pragma once  
+#pragma once   
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 #include <Tools/Utilities/System/SingletonTemplate.h>
 
@@ -14,6 +14,8 @@ namespace physx
 	class PxRigidDynamic;
 	class PxRenderBuffer;
 	class PxConvexMesh;
+	class PxRigidStatic;
+	class PxMaterial;
 }
 class Mesh;
 
@@ -22,7 +24,8 @@ class Shipyard_PhysX : public Singleton<Shipyard_PhysX>
 public:
 	friend class Singleton<Shipyard_PhysX>;
 	int InitializePhysx();
-	void Update(float deltaTime);
+	void StartRead() const;
+	void EndRead(float deltaTime);
 	void Render();
 	const physx::PxRenderBuffer& getRenderBuffer() const;
 
@@ -31,7 +34,7 @@ public:
 
 	physx::PxScene* GetScene();
 	physx::PxPhysics* GetPhysicsWorld();
-
+	physx::PxMaterial* GetDefaultMaterial();
 private:
 };
 
