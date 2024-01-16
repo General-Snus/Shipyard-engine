@@ -22,8 +22,6 @@ void cPhysXDynamicBody::Init()
 	{
 		assert(false && "Material creation failed!");
 	}
-	data->setLinearVelocity(PxVec3(0.f,10.f,0.f));
-
 
 	if (auto* collider = TryGetAddComponent<cCollider>())
 	{

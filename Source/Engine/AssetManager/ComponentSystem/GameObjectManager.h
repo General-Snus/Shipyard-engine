@@ -99,11 +99,13 @@ private:
 	void AddManager();
 	void SortUpdateOrder();
 	void DeleteObjects();
+	void AddObjects();
 
 	std::unordered_map<const std::type_info*,ComponentManagerBase*> myComponentManagers = { };
 	std::unordered_map<SY::UUID,GameObjectData> myGameObjects = { };
 	std::vector<std::pair<const std::type_info*,ComponentManagerBase*>> myUpdateOrder = { };
-	std::vector<unsigned int> myObjectsToDelete = { };
+	std::vector<SY::UUID> myObjectsToDelete = { };
+	std::vector<SY::UUID> myObjectsToAdd = { };
 	unsigned int myLastID = 0;
 	unsigned int myWorldRoot;
 	unsigned int myPlayer;

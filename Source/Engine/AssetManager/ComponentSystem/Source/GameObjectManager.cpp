@@ -29,7 +29,7 @@ const GameObject GameObjectManager::CreateGameObjectAt(const SY::UUID aGameObjec
 		myLastID = aGameObjectID;
 		myLastID++;
 	}
-	myGameObjects.emplace(aGameObjectID,true);
+	myObjectsToAdd.push_back(aGameObjectID);
 	return GameObject(aGameObjectID,this);
 }
 
@@ -45,6 +45,11 @@ void GameObjectManager::DeleteGameObject(const GameObject aGameObject)
 
 bool GameObjectManager::GetActive(const SY::UUID aGameObjectID)
 {
+	if (myGameObjects.find(aGameObjectID) == myGameObjects.end())
+	{
+		return false;
+	}
+
 	return myGameObjects.at(aGameObjectID).IsActive;
 }
 
@@ -119,6 +124,8 @@ void GameObjectManager::SetLastGOAsCamera()
 
 void GameObjectManager::Update()
 {
+	DeleteObjects();
+	AddObjects();
 	OPTICK_EVENT();
 	for (size_t i = 0; i < myUpdateOrder.size(); i++)
 	{
@@ -128,7 +135,6 @@ void GameObjectManager::Update()
 	{
 		myUpdateOrder[i].second->Render();
 	}
-	DeleteObjects();
 }
 
 void GameObjectManager::SortUpdateOrder()
@@ -167,6 +173,17 @@ void GameObjectManager::DeleteObjects()
 	}
 
 	myObjectsToDelete.clear();
+}
+
+void GameObjectManager::AddObjects()
+{
+	for (auto& i : myObjectsToAdd)
+	{
+
+		myGameObjects.emplace(i,true);
+
+	}
+	myObjectsToAdd.clear();
 }
 
 void GameObjectManager::OnSiblingChanged(SY::UUID anID,const std::type_info* SourceClass)

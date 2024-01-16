@@ -60,8 +60,6 @@ bool SaveTest(std::vector<GameObject> gameObjectsToSave,const std::filesystem::p
 std::vector<GameObject> LoadTest(const std::filesystem::path& path)
 {
 	std::vector<GameObject> gameObjectsToSave;
-	path;
-
 	std::ifstream file(path.string(),std::ios_base::binary);
 	if (!file.is_open())
 	{
@@ -71,7 +69,7 @@ std::vector<GameObject> LoadTest(const std::filesystem::path& path)
 	int size = 0;
 	file.read((char*)&size,sizeof(int));
 	gameObjectsToSave.resize(size);
-	AMLogger.Log("\n\nLoading Gameobjects");
+	AMLogger.Log("\n\nLoading Gameobjects " + std::to_string(size));
 
 	for (auto& i : gameObjectsToSave)
 	{
@@ -93,7 +91,7 @@ std::vector<GameObject> LoadTest(const std::filesystem::path& path)
 		auto& transform = i.AddComponent<Transform>();
 		transform.SetPosition(position);
 		i.AddComponent<cMeshRenderer>(meshPath,true);
-
+		i.AddComponent<cPhysXDynamicBody>();
 		AMLogger.Log("Loaded: " + std::to_string(uuid));
 	}
 	file.close();
@@ -194,7 +192,7 @@ void GameLauncher::Start()
 	}
 
 	GLLogger.Log("GameLauncher start");
-}
+	}
 
 void GameLauncher::Update(float delta)
 {
@@ -209,11 +207,12 @@ void GameLauncher::Update(float delta)
 
 	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::F4))
 	{
-		for (auto& i : vectorOfGameObjects)
+		while (vectorOfGameObjects.size())
 		{
-			GameObjectManager::Get().DeleteGameObject(i);
+			GameObjectManager::Get().DeleteGameObject(vectorOfGameObjects.back());
+			vectorOfGameObjects.pop_back();
 		}
-		vectorOfGameObjects.clear();
+
 	}
 
 	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::F5))
@@ -225,11 +224,11 @@ void GameLauncher::Update(float delta)
 	{
 		if (std::filesystem::exists("GameObjectSaveFile.SaveFiles"))
 		{
-			for (auto& i : vectorOfGameObjects)
+			while (vectorOfGameObjects.size())
 			{
-				GameObjectManager::Get().DeleteGameObject(i);
+				GameObjectManager::Get().DeleteGameObject(vectorOfGameObjects.back());
+				vectorOfGameObjects.pop_back();
 			}
-			vectorOfGameObjects.clear();
 
 			vectorOfGameObjects = LoadTest("GameObjectSaveFile.SaveFiles");
 		}
