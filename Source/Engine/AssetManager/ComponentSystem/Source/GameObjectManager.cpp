@@ -122,6 +122,11 @@ void GameObjectManager::SetLastGOAsCamera()
 	myCamera = myLastID - 1;
 }
 
+void GameObjectManager::CustomOrderUpdate()
+{
+	DeleteObjects();
+}
+
 void GameObjectManager::Update()
 {
 	DeleteObjects();

@@ -86,7 +86,7 @@ std::vector<GameObject> LoadTest(const std::filesystem::path& path)
 		file.read(&meshPath[0],strLength);
 
 
-
+		GameObjectManager::Get().CustomOrderUpdate();
 		i = GameObjectManager::Get().CreateGameObjectAt(uuid);
 		auto& transform = i.AddComponent<Transform>();
 		transform.SetPosition(position);
@@ -192,7 +192,7 @@ void GameLauncher::Start()
 	}
 
 	GLLogger.Log("GameLauncher start");
-	}
+}
 
 void GameLauncher::Update(float delta)
 {
@@ -212,7 +212,7 @@ void GameLauncher::Update(float delta)
 			GameObjectManager::Get().DeleteGameObject(vectorOfGameObjects.back());
 			vectorOfGameObjects.pop_back();
 		}
-
+		GameObjectManager::Get().CustomOrderUpdate();
 	}
 
 	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::F5))
@@ -229,7 +229,7 @@ void GameLauncher::Update(float delta)
 				GameObjectManager::Get().DeleteGameObject(vectorOfGameObjects.back());
 				vectorOfGameObjects.pop_back();
 			}
-
+			GameObjectManager::Get().CustomOrderUpdate();
 			vectorOfGameObjects = LoadTest("GameObjectSaveFile.SaveFiles");
 		}
 	}

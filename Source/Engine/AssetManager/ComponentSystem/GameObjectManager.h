@@ -79,6 +79,9 @@ public:
 	void SetLastGOAsWorld();
 	void SetLastGOAsCamera();
 
+	//hack used to add and remove same id in same frame
+	void CustomOrderUpdate();
+
 	template <class T>
 	void SetUpdatePriority(const ComponentManagerBase::UpdatePriority aPriority);
 	void Update();
