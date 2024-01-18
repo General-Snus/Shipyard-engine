@@ -100,11 +100,12 @@ std::vector<GameObject> LoadTest(const std::filesystem::path& path)
 
 void GameLauncher::GenerateNewRandomCubes()
 {
+	std::string arr[3] = { "Models/Cube.fbx","Models/CubeHoled.fbx","Models/SteelFloor.fbx" };
 	for (size_t i = 0; i < 10; i++)
 	{
 		vectorOfGameObjects.push_back(GameObjectManager::Get().CreateGameObject());
 		GameObject vectorObject = vectorOfGameObjects.back();
-		vectorObject.AddComponent<cMeshRenderer>("Models/Cube.fbx");
+		vectorObject.AddComponent<cMeshRenderer>(arr[rand() % 3]);
 		auto& transform = vectorObject.AddComponent<Transform>();
 
 		Vector3f position = { RandomEngine::RandomInRange(-20.f,20.f),RandomEngine::RandomInRange(0.f,20.f),RandomEngine::RandomInRange(-20.f,20.f) };
@@ -149,8 +150,7 @@ void GameLauncher::Start()
 		cLight& pLight = worldRoot.GetComponent<cLight>();
 		pLight.SetColor(Vector3f(1,1,1));
 		pLight.SetPower(1.0f);
-		pLight.BindDirectionToTransform(true);
-
+		pLight.BindDirectionToTransform(true); 
 		//if(gom.GetAllComponents<BackgroundColor>().empty())
 		//{
 		//	worldRoot.AddComponent<BackgroundColor>(Vector4f(1.0f,1.0f,1.0f,1.0f));
@@ -159,7 +159,7 @@ void GameLauncher::Start()
 
 	{
 		GameObject floor = gom.CreateGameObject();
-		floor.AddComponent<cMeshRenderer>("Models/SteelFloor.fbx");
+		floor.AddComponent<cMeshRenderer>("Models/Cube.fbx");
 		//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
 		auto& transform = floor.AddComponent<Transform>();
 		transform.SetPosition(0,-1.5f,0);
