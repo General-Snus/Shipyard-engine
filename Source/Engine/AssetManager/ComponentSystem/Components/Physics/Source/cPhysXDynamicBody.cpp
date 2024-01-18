@@ -34,7 +34,7 @@ void cPhysXDynamicBody::Init()
 		{
 			auto aabb = collider->GetColliderAssetOfType<ColliderAssetAABB>();
 			const auto& aabbData = aabb->GetAABB();
-			PxRigidActorExt::createExclusiveShape(*data,PxBoxGeometry(aabbData.GetXSize(),aabbData.GetYSize(),aabbData.GetZSize()),*mMaterial);
+			PxRigidActorExt::createExclusiveShape(*data,PxBoxGeometry(aabbData.GetXSize() / 2,aabbData.GetYSize() / 2,aabbData.GetZSize() / 2),*mMaterial);
 			break;
 		}
 		//case eColliderType::SPHERE:
