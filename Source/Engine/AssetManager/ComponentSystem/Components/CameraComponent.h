@@ -4,10 +4,10 @@
 
 struct CameraSettings
 {
-	float fow = PI * (90.0f / 180.0f);; 
+	float fow = PI * (90.0f / 180.0f);;
 	float APRatio = 16.0f / 9.0f;;
 	float farfield = 1000000.0f;
-	float nearField = 1.0f;
+	float nearField = 0.01f;
 	bool isOrtho = false;
 };
 

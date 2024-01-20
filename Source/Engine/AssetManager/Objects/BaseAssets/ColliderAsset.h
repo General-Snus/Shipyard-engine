@@ -15,7 +15,8 @@ enum class eColliderType
 	FRUSTRUM,
 	TRIANGLE,
 	RAY,
-	CONVEX
+	CONVEX,
+	PLANAR
 };
 
 class Transform;
@@ -35,7 +36,7 @@ public:
 
 
 	eColliderType GetColliderType() const { return type; };
-	virtual void RenderDebugLines(const Transform& data) = 0;
+	virtual void RenderDebugLines(Transform& data) = 0;
 protected:
 	eColliderType type;
 	Sphere<float> boundingBox;
@@ -49,7 +50,7 @@ class ColliderAssetAABB : public ColliderAsset
 public:
 	explicit ColliderAssetAABB();
 	explicit ColliderAssetAABB(const AABB3D<float>& rf);
-	void RenderDebugLines(const Transform& data) override;
+	void RenderDebugLines(Transform& data) override;
 	void UpdateWithTransform(const Matrix& matrix);
 	inline const AABB3D<float>& GetAABB() const { return myAABB; }
 private:
@@ -62,7 +63,7 @@ class ColliderAssetSphere : public ColliderAsset
 public:
 	explicit ColliderAssetSphere();
 	explicit ColliderAssetSphere(const Sphere<float>& rf);
-	void RenderDebugLines(const Transform& data) override;
+	void RenderDebugLines(Transform& data) override;
 private:
 	Sphere<float> mySphere;
 };
@@ -74,7 +75,22 @@ public:
 	explicit ColliderAssetConvex();
 	explicit ColliderAssetConvex(const std::shared_ptr<Mesh>& rf);
 	explicit ColliderAssetConvex(const std::filesystem::path& path);
-	void RenderDebugLines(const Transform& data) override;
+	void RenderDebugLines(Transform& data) override;
+	inline std::shared_ptr<Mesh> GetColliderMesh() { return aColliderMesh; }
+
+private:
+	std::shared_ptr<Mesh> aColliderMesh;
+};
+
+
+
+class ColliderAssetPlanar : public ColliderAsset
+{
+public:
+	explicit ColliderAssetPlanar();
+	explicit ColliderAssetPlanar(const std::shared_ptr<Mesh>& rf);
+	explicit ColliderAssetPlanar(const std::filesystem::path& path);
+	void RenderDebugLines(Transform& data) override;
 	inline std::shared_ptr<Mesh> GetColliderMesh() { return aColliderMesh; }
 
 private:

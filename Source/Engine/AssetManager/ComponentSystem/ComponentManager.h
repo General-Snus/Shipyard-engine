@@ -13,9 +13,9 @@ class ComponentManagerBase
 public:
 	enum class UpdatePriority
 	{
+		Transform,
 		Normal = 100,
 		Physics,
-		Transform,
 		Collision,
 		Render
 	};

@@ -2,6 +2,7 @@
 #include <Tools/ThirdParty/PhysX/physx/include/PxPhysicsAPI.h> 
 #include "../cPhysXDynamicBody.h"
 
+#include <Tools/ThirdParty/PhysX/physx/include/foundation/PxMat33.h> 
 
 using namespace physx;
 cPhysXDynamicBody::cPhysXDynamicBody(const SY::UUID anOwnerID) : Component(anOwnerID)
@@ -25,10 +26,7 @@ void cPhysXDynamicBody::Init()
 
 	if (auto* collider = TryGetAddComponent<cCollider>())
 	{
-		auto type = collider->GetColliderType();
-
-
-		switch (type)
+		switch (collider->GetColliderType())
 		{
 		case eColliderType::AABB:
 		{
@@ -90,7 +88,7 @@ void cPhysXDynamicBody::Init()
 		{
 			const auto convex = collider->GetColliderAssetOfType<ColliderAssetConvex>();
 			const auto convexData = convex->GetColliderMesh();
-			PxRigidActorExt::createExclusiveShape(*data,PxConvexMeshGeometry(Shipyard_PhysX::CookMesh(convexData)),*mMaterial);
+			//PxRigidActorExt::createExclusiveShape(*data,PxConvexMeshGeometry(Shipyard_PhysX::CookMesh(convexData)),*mMaterial);
 			break;
 		}
 		default:

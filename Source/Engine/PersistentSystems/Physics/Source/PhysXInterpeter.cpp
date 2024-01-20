@@ -4,6 +4,7 @@
 #include <Tools/Utilities/Math.hpp>
 #include "../PhysXInterpeter.h"
 #include "cooking/PxCooking.h"  
+#include "geometry\PxTriangleMeshGeometry.h"
 #include "PxPhysics.h"
 #include "PxPhysicsAPI.h" 
 
@@ -42,7 +43,7 @@ int Shipyard_PhysX::InitializePhysx()
 	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION,gAllocator,gErrorCallback);
 
 	gPvd = PxCreatePvd(*gFoundation);
-	PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate("127.0.0.1",5425,10);
+	PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate("127.0.0.1",5425,100);
 	gPvd->connect(*transport,PxPvdInstrumentationFlag::eALL);
 
 
@@ -62,16 +63,22 @@ int Shipyard_PhysX::InitializePhysx()
 	gMaterial = gPhysics->createMaterial(0.5f,0.5f,0.6f);
 	//PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics,PxPlane(0,1,0,0),*gMaterial);
 	//gScene->addActor(*groundPlane);
+
+	gScene->simulate(.1f);
+
+	gScene->fetchResults(true);
 	return 0;
 }
 
 void Shipyard_PhysX::StartRead() const
 {
+	OPTICK_EVENT();
 	gScene->fetchResults(true);
 }
 
 void Shipyard_PhysX::EndRead(float deltaTime)
 {
+	OPTICK_EVENT();
 	gScene->simulate(deltaTime);
 }
 
@@ -84,7 +91,7 @@ void Shipyard_PhysX::Render()
 		const Vector3f Vpos1 = { line.pos0.x,line.pos0.y,line.pos0.z };
 		const Vector3f Vpos2 = { line.pos1.x,line.pos1.y,line.pos1.z };
 
-		DebugDrawer::Get().AddDebugLine(Vpos1,Vpos2,Vector3f(),Timer::GetInstance().GetDeltaTime());
+		DebugDrawer::Get().AddDebugLine(Vpos1,Vpos2,Vector3f(0,1,0),Timer::GetInstance().GetDeltaTime());
 	}
 }
 
@@ -118,25 +125,51 @@ PxScene* Shipyard_PhysX::GetScene()
 
 
 //Walter white component
-physx::PxConvexMesh* Shipyard_PhysX::CookMesh(std::shared_ptr<Mesh> myToBeCookedMesh)
+template<>
+physx::PxTriangleMesh* Shipyard_PhysX::CookMesh<physx::PxTriangleMesh>(std::shared_ptr<Mesh> myToBeCookedMesh)
 {
-	const int vertCount = myToBeCookedMesh->Elements[0].NumVertices;
-	PxVec3* convexVerts = new PxVec3[vertCount];
+	while (!myToBeCookedMesh->isLoadedComplete)
+	{
+		// Shit shit shit
+	}
 
-	PxConvexMeshDesc convexDesc;
-	convexDesc.points.count = vertCount;
-	convexDesc.points.stride = sizeof(PxVec3);
-	convexDesc.points.data = convexVerts;
-	convexDesc.flags = PxConvexFlag::eCOMPUTE_CONVEX | PxConvexFlag::eDISABLE_MESH_VALIDATION | PxConvexFlag::eFAST_INERTIA_COMPUTATION;
-	//PxDefaultMemoryOutputStream buf;
-	//physx::PxConvexMesh* tst;
-	//if(!PxCookConvexMesh(PxTolerancesScale(),convexDesc,buf))
-	//{
-	//	return NULL;
-	//}
-	//PxDefaultMemoryInputData* inpStream = new PxDefaultMemoryInputData(buf.getData(),buf.getSize());
-	//tst = gPhysics->createConvexMesh(*inpStream);
-	return NULL;
+	Element& element = myToBeCookedMesh->Elements[0];
+	const int vertCount = element.NumVertices;
+	const int indexCount = element.NumIndices;
+
+	PxVec3* convexVerts = new PxVec3[vertCount];
+	for (int i = 0; i < vertCount; i++)
+	{
+		Vector3f position = { element.Vertices[i].myPosition.x,element.Vertices[i].myPosition.y,element.Vertices[i].myPosition.z };
+		convexVerts[i] = PxVec3(position.x,position.y,position.z);
+	}
+
+	PxU32* convexTris = new PxU32[indexCount];
+	for (int i = 0; i < indexCount; i++)
+	{
+		convexTris[i] = element.Indicies[i];
+	}
+
+	PxTriangleMeshDesc meshDesc;
+	meshDesc.points.count = vertCount;
+	meshDesc.points.stride = sizeof(PxVec3);
+	meshDesc.points.data = convexVerts;
+
+	meshDesc.triangles.count = indexCount / 3;
+	meshDesc.triangles.stride = 3 * sizeof(PxU32);
+	meshDesc.triangles.data = convexTris;
+
+	//convexDesc.flags = PxConvexFlag::eCOMPUTE_CONVEX | PxConvexFlag::eDISABLE_MESH_VALIDATION | PxConvexFlag::eFAST_INERTIA_COMPUTATION;
+	PxDefaultMemoryOutputStream buf;
+	physx::PxTriangleMesh* tst;
+	physx::PxTriangleMeshCookingResult::Enum rst;
+	if (!PxCookTriangleMesh(PxTolerancesScale(),meshDesc,buf,&rst))
+	{
+		return NULL;
+	}
+	PxDefaultMemoryInputData* inpStream = new PxDefaultMemoryInputData(buf.getData(),buf.getSize());
+	tst = gPhysics->createTriangleMesh(*inpStream);
+	return tst;
 }
 //void Shipyard_UserErrorCallback::reportError(physx::PxErrorCode::Enum code,const char* message,const char* file,int line)
 //{

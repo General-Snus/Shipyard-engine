@@ -6,13 +6,13 @@
 #include "Editor.h"
 #include "Windows.h"
 
+#include <filesystem>
+#include <filesystem>
+#include <string>
+#include <string>
+#include <stringapiset.h>
+#include <stringapiset.h>
 #include "Windows/SplashWindow.h"  
-#include <filesystem>
-#include <filesystem>
-#include <string>
-#include <string>
-#include <stringapiset.h>
-#include <stringapiset.h>
 
 #include <assert.h>
 #include <fstream>
@@ -27,11 +27,11 @@
 #include <Tools/Utilities/Input/InputHandler.hpp>
 #include <Tools/Utilities/Math.hpp>
 
-#include "../Windows/Window.h" 
 #include <Engine/AssetManager/ComponentSystem/GameObject.h>
 #include <Tools/Optick/src/optick.h>
 #include <Tools/Utilities/System/ThreadPool.hpp>
 #include <Windows/EditorWindows/ChainGraph/GraphTool.h>
+#include "../Windows/Window.h" 
 
 #if PHYSX 
 #include <Engine/PersistentSystems/Physics/PhysXInterpeter.h>
@@ -88,12 +88,12 @@ bool Editor::Initialize(HWND aHandle)
 void Editor::DoWinProc(const MSG& aMessage)
 {
 	extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);
-	if(ImGui_ImplWin32_WndProcHandler(aMessage.hwnd,aMessage.message,aMessage.wParam,aMessage.lParam))
+	if (ImGui_ImplWin32_WndProcHandler(aMessage.hwnd,aMessage.message,aMessage.wParam,aMessage.lParam))
 	{
 		return;
 	}
 
-	if(aMessage.message == WM_QUIT)
+	if (aMessage.message == WM_QUIT)
 	{
 		ImGui_ImplDX11_Shutdown();
 		ImGui_ImplWin32_Shutdown();
@@ -110,7 +110,7 @@ int	 Editor::Run()
 	OPTICK_FRAME("MainThread");
 	InputHandler::GetInstance().Update();
 
-	if(IsGUIActive)
+	if (IsGUIActive)
 	{
 		UpdateImGui();
 		Update();
@@ -126,7 +126,7 @@ int	 Editor::Run()
 
 void Editor::ShowSplashScreen()
 {
-	if(!mySplashWindow)
+	if (!mySplashWindow)
 	{
 		mySplashWindow = std::make_unique<SplashWindow>();
 		mySplashWindow->Init(Window::moduleHandler);
@@ -157,6 +157,7 @@ void Editor::UpdateImGui()
 
 void Editor::Update()
 {
+	OPTICK_EVENT();
 	Timer::GetInstance().Update();
 	const float delta = Timer::GetInstance().GetDeltaTime();
 
@@ -165,11 +166,12 @@ void Editor::Update()
 	GameObjectManager::Get().Update();
 	myGameLauncher.Update(delta);
 	DebugDrawer::Get().Update(delta);
+
+	//Shipyard_PhysX::Get().Render();
 	Shipyard_PhysX::Get().EndRead(delta);
 }
 void Editor::Render()
 {
-	//Shipyard_PhysX::Get().Render();
 	GraphicsEngine::Get().BeginFrame();
 	GraphicsEngine::Get().RenderFrame(0,0);
 	ImGui::Render();
@@ -198,10 +200,10 @@ Vector2<int> Editor::GetViewportResolution()
 
 void Editor::ExpandWorldBounds(Sphere<float> sphere)
 {
-	if(myWorldBounds.ExpandSphere(sphere))
+	if (myWorldBounds.ExpandSphere(sphere))
 	{
 		//MVLogger.Log("World bounds was expanded");
-		for(auto& i : GameObjectManager::Get().GetAllComponents<cLight>())
+		for (auto& i : GameObjectManager::Get().GetAllComponents<cLight>())
 		{
 			i.SetIsDirty(true);
 			i.SetIsRendered(false);

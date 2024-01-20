@@ -133,8 +133,8 @@ void GameLauncher::Start()
 		auto& transform = camera.AddComponent<Transform>();
 		transform.SetPosition(0,25,-25);
 		transform.SetRotation(45,0,0);
-
 	}
+
 	{
 		GameObject worldRoot = gom.CreateGameObject();
 		gom.SetLastGOAsWorld();
@@ -150,7 +150,7 @@ void GameLauncher::Start()
 		cLight& pLight = worldRoot.GetComponent<cLight>();
 		pLight.SetColor(Vector3f(1,1,1));
 		pLight.SetPower(1.0f);
-		pLight.BindDirectionToTransform(true); 
+		pLight.BindDirectionToTransform(true);
 		//if(gom.GetAllComponents<BackgroundColor>().empty())
 		//{
 		//	worldRoot.AddComponent<BackgroundColor>(Vector4f(1.0f,1.0f,1.0f,1.0f));
@@ -159,15 +159,21 @@ void GameLauncher::Start()
 
 	{
 		GameObject floor = gom.CreateGameObject();
-		floor.AddComponent<cMeshRenderer>("Models/Cube.fbx");
-		//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
 		auto& transform = floor.AddComponent<Transform>();
-		transform.SetPosition(0,-1.5f,0);
-		transform.SetScale(Vector3f(50.0f,1.0f,50.0f));
+		transform.SetPosition(0,-20.0f,0);
+		transform.SetRotation(90,0.f,0.f);
+		transform.SetScale(50.f);
 		transform.SetGizmo(false);
 
-		floor.AddComponent<cPhysXStaticBody>();
+		floor.AddComponent<cMeshRenderer>("Models/MeshCanyon.fbx");
+		//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
 
+		auto& collider = floor.AddComponent<cCollider>();
+		collider.SetColliderType<ColliderAssetPlanar>("Models/MeshCanyon.fbx");
+
+
+
+		floor.AddComponent<cPhysXStaticBody>();
 	}
 
 #if WorkingOnPngLoading
@@ -180,8 +186,7 @@ void GameLauncher::Start()
 		transform.SetGizmo(false);
 	}
 #endif 
-#pragma endregion
-
+#pragma endregion 
 	if (std::filesystem::exists("GameObjectSaveFile.SaveFiles"))
 	{
 		vectorOfGameObjects = LoadTest("GameObjectSaveFile.SaveFiles");
@@ -198,7 +203,6 @@ void GameLauncher::Update(float delta)
 {
 	delta;
 	OPTICK_EVENT();
-
 	AIEventManager::Instance().Update();
 	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::K))
 	{

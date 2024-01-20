@@ -1,5 +1,6 @@
-#include "AssetManager.pch.h"
-#include <Tools/ThirdParty/PhysX/physx/include/foundation/PxMat33.h>
+#include "AssetManager.pch.h" 
+#include <extensions\PxRigidActorExt.h>
+#include <Tools/ThirdParty/PhysX/physx/include/foundation/PxMat33.h> 
 #include <Tools/ThirdParty/PhysX/physx/include/PxPhysicsAPI.h>
 #include "../cPhysXStaticBody.h"
 
@@ -20,26 +21,31 @@ cPhysXStaticBody::cPhysXStaticBody(const SY::UUID anOwnerID) : Component(anOwner
 using namespace physx;
 void cPhysXStaticBody::Init()
 {
-	const auto& transform = GetComponent<Transform>();
-
+	auto& transform = GetComponent<Transform>();
+	auto& quat = transform.GetQuatF();
 	auto* world = Shipyard_PhysX::Get().GetPhysicsWorld();
 	data = world->createRigidStatic(
 		PxTransform(
 			transform.GetPosition(),
-			PxQuat(ConvertMatrix(transform.GetTransform())))
+			PxQuat(quat.x,quat.y,quat.z,quat.w)
+		)
 	);
-
 	Shipyard_PhysX::Get().GetScene()->addActor(*data);
-
 	UpdateFromCollider();
 }
 
 void cPhysXStaticBody::UpdateFromCollider()
 {
+
+	auto& transform = GetComponent<Transform>();
+	if (!data)
+	{
+		return;
+	}
+
 	if (auto* collider = TryGetAddComponent<cCollider>())
 	{
-		auto type = collider->GetColliderType();
-		switch (type)
+		switch (collider->GetColliderType())
 		{
 		case eColliderType::AABB:
 		{
@@ -101,7 +107,18 @@ void cPhysXStaticBody::UpdateFromCollider()
 		{
 			const auto convex = collider->GetColliderAssetOfType<ColliderAssetConvex>();
 			const auto convexData = convex->GetColliderMesh();
-			PxRigidActorExt::createExclusiveShape(*data,PxConvexMeshGeometry(Shipyard_PhysX::CookMesh(convexData)),*Shipyard_PhysX::Get().GetDefaultMaterial());
+			//PxRigidActorExt::createExclusiveShape(*data,PxConvexMeshGeometry(Shipyard_PhysX::CookMesh(convexData)),*Shipyard_PhysX::Get().GetDefaultMaterial());
+			break;
+		}
+		case eColliderType::PLANAR:
+		{
+			const auto convex = collider->GetColliderAssetOfType<ColliderAssetPlanar>();
+			const auto convexData = convex->GetColliderMesh();
+			const Vector3f scaleV = transform.GetScale();
+			PxVec3 scale = { scaleV.x,scaleV.y,scaleV.z };
+			PxRigidActorExt::createExclusiveShape(*data,
+				PxTriangleMeshGeometry(Shipyard_PhysX::CookMesh<physx::PxTriangleMesh>(convexData),scale),
+				*Shipyard_PhysX::Get().GetDefaultMaterial());
 			break;
 		}
 		default:

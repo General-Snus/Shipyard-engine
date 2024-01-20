@@ -16,6 +16,7 @@ namespace physx
 	class PxConvexMesh;
 	class PxRigidStatic;
 	class PxMaterial;
+	class PxTriangleMesh;
 }
 class Mesh;
 
@@ -30,7 +31,9 @@ public:
 	const physx::PxRenderBuffer& getRenderBuffer() const;
 
 	void ShutdownPhysx();
-	static physx::PxConvexMesh* CookMesh(std::shared_ptr<Mesh> myToBeCookedMesh);
+
+	template<typename T>
+	static T* CookMesh(std::shared_ptr<Mesh> myToBeCookedMesh);
 
 	physx::PxScene* GetScene();
 	physx::PxPhysics* GetPhysicsWorld();

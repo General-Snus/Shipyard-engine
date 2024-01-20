@@ -1,9 +1,9 @@
 #include "AssetManager.pch.h"
 #include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
 
-#include "../MeshAsset.h" 
 #include <Editor/Editor/Core/Editor.h>
 #include <Tools/Utilities/Math.hpp>
+#include "../MeshAsset.h" 
 
 
 
@@ -11,20 +11,20 @@ std::vector<std::string> GetTextureNames(const TGA::FBX::Material& material)
 {
 	std::vector<std::string> textureNames;
 
-	if(material.Diffuse.Name != "")
+	if (material.Diffuse.Name != "")
 	{
 		textureNames.push_back(((std::filesystem::path)material.Diffuse.Name).replace_extension(".dds").string());
 	}
-	if(material.NormalMap.Name != "")
+	if (material.NormalMap.Name != "")
 	{
 		textureNames.push_back(((std::filesystem::path)material.NormalMap.Name).replace_extension(".dds").string());
 	}
-	if(material.Bump.Name != "")
+	if (material.Bump.Name != "")
 	{
 		textureNames.push_back(((std::filesystem::path)material.Bump.Name).replace_extension(".dds").string());
 	}
 
-	if(material.Specular.Name != "")
+	if (material.Specular.Name != "")
 	{
 		textureNames.push_back(((std::filesystem::path)material.Specular.Name).replace_extension(".dds").string());
 	}
@@ -43,7 +43,7 @@ const std::unordered_map<unsigned int,std::shared_ptr<Material>>& Mesh::GetMater
 
 void Mesh::Init()
 {
-	if(!std::filesystem::exists(AssetPath))
+	if (!std::filesystem::exists(AssetPath))
 	{
 		assert(false && "Mesh file does not exist");
 	}
@@ -52,7 +52,7 @@ void Mesh::Init()
 	TGA::FBX::Importer::InitImporter();
 	TGA::FBX::Mesh inMesh;
 
-	if(TGA::FBX::Importer::LoadMeshW(AssetPath,inMesh))
+	if (TGA::FBX::Importer::LoadMeshW(AssetPath,inMesh))
 	{
 		float scalar = 0.01f;//TODO Scaling
 		Vector3f greatestExtent = {
@@ -62,9 +62,9 @@ void Mesh::Init()
 		};
 
 		float radius = 0;
-		for(int i = 0; i < 3; ++i)
+		for (int i = 0; i < 3; ++i)
 		{
-			if(radius < greatestExtent[i])
+			if (radius < greatestExtent[i])
 			{
 				radius = greatestExtent[i];
 			}
@@ -83,9 +83,9 @@ void Mesh::Init()
 		std::vector<Vertex> mdlVertices;
 		std::vector<unsigned int> mdlIndicies;
 
-		for(const auto& element : inMesh.Elements)
+		for (const auto& element : inMesh.Elements)
 		{
-			for(const auto& vert : element.Vertices)
+			for (const auto& vert : element.Vertices)
 			{
 				auto position = Vector3f(
 					vert.Position[0] * scalar,
@@ -142,13 +142,13 @@ void Mesh::Init()
 			}
 			mdlIndicies = element.Indices;
 			ComPtr<ID3D11Buffer> vertexBuffer;
-			if(!RHI::CreateVertexBuffer<Vertex>(vertexBuffer,mdlVertices))
+			if (!RHI::CreateVertexBuffer<Vertex>(vertexBuffer,mdlVertices))
 			{
 				std::cout << "Failed to create vertex buffer" << std::endl;
 				return;
 			}
 			ComPtr<ID3D11Buffer> indexBuffer;
-			if(!RHI::CreateIndexBuffer(indexBuffer,mdlIndicies))
+			if (!RHI::CreateIndexBuffer(indexBuffer,mdlIndicies))
 			{
 				std::cout << "Failed to create vertex buffer" << std::endl;
 				return;
@@ -186,7 +186,7 @@ void Mesh::Init()
 		myInstanceBuffer.GetAddressOf()
 	);
 	bufferSize = 0;
-	if(FAILED(result))
+	if (FAILED(result))
 	{
 		AMLogger.Log("Failed to create Instance buffer");
 		return;
@@ -203,7 +203,7 @@ void Mesh::Init()
 		aiProcess_ConvertToLeftHanded);
 
 	// If the import failed, report it
-	if(nullptr == scene)
+	if (nullptr == scene)
 	{
 		std::string message = "Failed to load mesh " + AssetPath.string();
 		std::exception failedMeshLoad(message.c_str());
@@ -212,12 +212,12 @@ void Mesh::Init()
 	}
 	Editor::Get().ExpandWorldBounds(boxSphereBounds); // TODO Make a scene contain the boxSphereBounds!! 
 
-	for(size_t i = 0; i < scene->mNumMeshes; i++)
+	for (size_t i = 0; i < scene->mNumMeshes; i++)
 	{
 		processMesh(scene->mMeshes[i],scene);
 	}
 	//FillMatPath   
-	for(auto& [key,matPath] : idToMaterial)
+	for (auto& [key,matPath] : idToMaterial)
 	{
 		std::filesystem::path texturePath;
 		int textureLoaded = 0;
@@ -236,10 +236,10 @@ void Mesh::Init()
 
 		std::wstring mdf = matPath.wstring();
 		std::wstring illegalChars = L":?\"<>|";
-		for(auto& i : mdf)
+		for (auto& i : mdf)
 		{
 			bool found = illegalChars.find(i) != std::string::npos;
-			if(found)
+			if (found)
 			{
 				i = '_';
 			}
@@ -248,7 +248,7 @@ void Mesh::Init()
 		matPath.replace_extension("json");
 
 		std::pair<std::filesystem::path,std::shared_ptr<TextureHolder>> holder;
-		if(material->GetTextureCount(aiTextureType_BASE_COLOR))
+		if (material->GetTextureCount(aiTextureType_BASE_COLOR))
 		{
 			material->GetTexture(aiTextureType_BASE_COLOR,0,&str);
 			holder.first = str.C_Str();
@@ -256,7 +256,7 @@ void Mesh::Init()
 			textureLoaded++;
 		}
 
-		if(material->GetTextureCount(aiTextureType_DIFFUSE) && !str.length)
+		if (material->GetTextureCount(aiTextureType_DIFFUSE) && !str.length)
 		{
 			material->GetTexture(aiTextureType_DIFFUSE,0,&str);
 			holder.first = str.C_Str();
@@ -264,7 +264,7 @@ void Mesh::Init()
 			textureLoaded++;
 		}
 
-		if(material->GetTextureCount(aiTextureType_NORMALS))
+		if (material->GetTextureCount(aiTextureType_NORMALS))
 		{
 			material->GetTexture(aiTextureType_NORMALS,0,&str);
 			holder.first = str.C_Str();
@@ -272,7 +272,7 @@ void Mesh::Init()
 			textureLoaded++;
 		}
 
-		if(material->GetTextureCount(aiTextureType_DIFFUSE_ROUGHNESS))
+		if (material->GetTextureCount(aiTextureType_DIFFUSE_ROUGHNESS))
 		{
 			material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS,0,&str);
 			holder.first = str.C_Str();
@@ -280,7 +280,7 @@ void Mesh::Init()
 			textureLoaded++;
 		}
 
-		if(material->GetTextureCount(aiTextureType_AMBIENT_OCCLUSION))
+		if (material->GetTextureCount(aiTextureType_AMBIENT_OCCLUSION))
 		{
 			material->GetTexture(aiTextureType_AMBIENT_OCCLUSION,0,&str);
 			holder.first = str.C_Str();
@@ -288,7 +288,7 @@ void Mesh::Init()
 			textureLoaded++;
 		}
 
-		if(material->GetTextureCount(aiTextureType_METALNESS))
+		if (material->GetTextureCount(aiTextureType_METALNESS))
 		{
 			material->GetTexture(aiTextureType_METALNESS,0,&str);
 			holder.first = str.C_Str();
@@ -296,7 +296,7 @@ void Mesh::Init()
 			textureLoaded++;
 		}
 
-		if(material->GetTextureCount(aiTextureType_EMISSIVE))
+		if (material->GetTextureCount(aiTextureType_EMISSIVE))
 		{
 			material->GetTexture(aiTextureType_EMISSIVE,0,&str);
 			holder.first = str.C_Str();
@@ -304,7 +304,7 @@ void Mesh::Init()
 			textureLoaded++;
 		}
 
-		if(!textureLoaded)
+		if (!textureLoaded)
 		{
 			materials[key] = GraphicsEngine::Get().GetDefaultMaterial();
 			continue;
@@ -330,7 +330,7 @@ void Mesh::Init()
 	vertexBufferDesc.MiscFlags = 0;
 	vertexBufferDesc.StructureByteStride = 0;
 
-	if(myInstances.size())
+	if (myInstances.size())
 	{
 		HRESULT result;
 		result = RHI::Device->CreateBuffer(
@@ -339,7 +339,7 @@ void Mesh::Init()
 			myInstanceBuffer.GetAddressOf()
 		);
 		bufferSize = static_cast<int>(myInstances.size());
-		if(FAILED(result))
+		if (FAILED(result))
 		{
 			AMLogger.Log("Failed to create Instance buffer");
 			return;
@@ -356,7 +356,7 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 	std::vector<Vertex> mdlVertices;
 	mdlVertices.reserve(mesh->mNumVertices);
 	std::vector<unsigned int> mdlIndicies;
-	for(unsigned int i = 0; i < mesh->mNumVertices; i++)
+	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 	{
 		auto position = Vector3f(
 			mesh->mVertices[i].x,
@@ -404,7 +404,7 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 		);
 
 		auto normal = Vector3f();
-		if(mesh->HasNormals())
+		if (mesh->HasNormals())
 		{
 			normal = Vector3f(
 				mesh->mNormals[i].x,
@@ -430,18 +430,18 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 		);
 	}
 
-	for(unsigned int i = 0; i < mesh->mNumFaces; i++)
+	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 	{
 		aiFace face = mesh->mFaces[i];
-		for(unsigned int j = 0; j < face.mNumIndices; j++)
+		for (unsigned int j = 0; j < face.mNumIndices; j++)
 		{
 			mdlIndicies.push_back(face.mIndices[j]);
 		}
 	}
 
-	for(unsigned int i = 0; i < mesh->mNumBones; i++)
+	for (unsigned int i = 0; i < mesh->mNumBones; i++)
 	{
-		for(unsigned int j = 0; j < mesh->mBones[i]->mNumWeights; j++)
+		for (unsigned int j = 0; j < mesh->mBones[i]->mNumWeights; j++)
 		{
 			const auto& vertBoneData = mesh->mBones[i]->mWeights[j];
 			mdlVertices[vertBoneData.mVertexId].AddBoneWeightAndID(vertBoneData.mWeight,i);
@@ -449,13 +449,13 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 	}
 
 	ComPtr<ID3D11Buffer> vertexBuffer;
-	if(!RHI::CreateVertexBuffer<Vertex>(vertexBuffer,mdlVertices))
+	if (!RHI::CreateVertexBuffer<Vertex>(vertexBuffer,mdlVertices))
 	{
 		std::cout << "Failed to create vertex buffer" << std::endl;
 		return;
 	}
 	ComPtr<ID3D11Buffer> indexBuffer;
-	if(!RHI::CreateIndexBuffer(indexBuffer,mdlIndicies))
+	if (!RHI::CreateIndexBuffer(indexBuffer,mdlIndicies))
 	{
 		std::cout << "Failed to create vertex buffer" << std::endl;
 		return;
@@ -463,6 +463,8 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 	Element toAdd = {
 		vertexBuffer,
 		indexBuffer,
+		mdlVertices,
+		mdlIndicies,
 		AsUINT(mdlVertices.size()),
 		AsUINT(mdlIndicies.size()),
 		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
@@ -491,7 +493,7 @@ void Mesh::ResizeBuffer()
 		myInstanceBuffer.GetAddressOf()
 	);
 
-	if(FAILED(result))
+	if (FAILED(result))
 	{
 		AMLogger.Log("Failed to create Instance buffer");
 		return;
@@ -503,7 +505,7 @@ void Mesh::ResizeBuffer()
 void Mesh::UpdateInstanceBuffer()
 {
 	OPTICK_EVENT();
-	if(myInstances.size() > bufferSize)
+	if (myInstances.size() > bufferSize)
 	{
 		ResizeBuffer();
 	}

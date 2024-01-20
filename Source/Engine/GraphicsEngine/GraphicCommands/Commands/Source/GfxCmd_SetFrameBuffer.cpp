@@ -1,11 +1,11 @@
-#include <GraphicsEngine.pch.h>
-#include <Tools/Utilities/Game/Timer.h>
 #include <Engine/AssetManager/ComponentSystem/Components/Transform.h>
-#include "../Headers/GfxCmd_SetFrameBuffer.h"
+#include <GraphicsEngine.pch.h>
 #include <Shaders/Registers.h>
-GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,const Transform& ref,int aRenderMode,const cCamera& camera) : 
-	myViewMatrix(Matrix::GetFastInverse(ref.GetTransform())), 
-	myProjectionMatrix(ProjectionMatrix), 
+#include <Tools/Utilities/Game/Timer.h>
+#include "../Headers/GfxCmd_SetFrameBuffer.h"
+GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,Transform& ref,int aRenderMode,const cCamera& camera) :
+	myViewMatrix(Matrix::GetFastInverse(ref.GetTransform())),
+	myProjectionMatrix(ProjectionMatrix),
 	myPosition(ref.GetPosition()),
 	RenderMode(aRenderMode)
 {
@@ -16,9 +16,9 @@ GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,cons
 GfxCmd_SetFrameBuffer::GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,const Matrix& ref,int aRenderMode) :
 	myViewMatrix(ref),
 	myProjectionMatrix(ProjectionMatrix),
-	myPosition({ref(4,1),ref(4,2),ref(4,3)}),
+	myPosition({ ref(4,1),ref(4,2),ref(4,3) }),
 	RenderMode(aRenderMode)
-{ 
+{
 }
 
 void GfxCmd_SetFrameBuffer::ExecuteAndDestroy()

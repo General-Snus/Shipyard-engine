@@ -57,9 +57,19 @@ void Transform::Render()
 
 #endif // _DEBUGDRAW 
 }
-const Matrix& Transform::GetTransform() const
+const Matrix& Transform::GetTransform()
 {
+	if (isDirty)
+	{
+		MakeClean();
+		this->GetGameObject().OnSiblingChanged(&typeid(Transform));
+	}
 	return myTransform;
+}
+
+const Quaternionf& Transform::GetQuatF()
+{
+	return myQuaternion;
 }
 
 Vector3f Transform::GetForward() const
@@ -202,6 +212,8 @@ void Transform::SetGizmo(bool enabled)
 void Transform::SetRotation(float X,float Y,float Z)
 {
 	myRotation = { X,Y,Z };
+
+	myQuaternion.SetEulerAngles(myRotation);
 	isDirty = true;
 }
 
@@ -209,29 +221,35 @@ void Transform::SetRotation(Vector2f angularRotation)
 {
 	myRotation.x = angularRotation.x;
 	myRotation.y = angularRotation.y;
+	myQuaternion.SetEulerAngles(myRotation);
 	isDirty = true;
 }
 
 void Transform::SetRotation(Vector3f angularRotation)
 {
 	myRotation = angularRotation;
+	myQuaternion.SetEulerAngles(myRotation);
 	isDirty = true;
 }
+
 void Transform::LookAt(Vector3f target)
 {
 	target;
 	throw std::exception("Not implemented");
 }
+
 Vector3f Transform::GetRotation() const
 {
-	return myRotation;
+	return myQuaternion.GetEulerAngles();
 }
+
 Vector3f Transform::VectorToEulerAngles(Vector3f input) const
 {
 	input;
 	//Fuck euler angles remove this pos
 	return Vector3f();
 }
+
 void Transform::SetScale(float X,float Y,float Z)
 {
 	myScale.x = X;

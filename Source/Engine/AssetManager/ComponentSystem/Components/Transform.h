@@ -2,6 +2,7 @@
 #include <Engine/AssetManager/ComponentSystem/Component.h>
 #include <Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h>
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
+#include <Tools/Utilities/LinearAlgebra/Quaternions.hpp>
 
 
 
@@ -17,7 +18,8 @@ public:
 	void Update() override;
 	void Render() override;
 	// Matrix& GetTransform();
-	const Matrix& GetTransform() const;
+	const Matrix& GetTransform();
+	const Quaternionf& GetQuatF();
 
 
 	// TODO
@@ -73,6 +75,7 @@ private:
 	void MakeSaneRotation();
 	Vector3<float> myPosition;
 	Vector3<float> myRotation;
+	Quaternionf myQuaternion;
 	Vector3<float> myScale;
 
 	Matrix4x4<float> myTransform;

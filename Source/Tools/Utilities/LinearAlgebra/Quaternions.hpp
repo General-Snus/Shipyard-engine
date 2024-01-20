@@ -1,16 +1,18 @@
 #pragma once 
-#include "Vectors.hpp"
-#include "Matrix4x4.hpp"
-#include "Matrix3x3.hpp"
 #include <iostream>
 #include "../Math.hpp"
+#include "Matrix3x3.hpp"
+#include "Matrix4x4.hpp"
+#include "Vectors.hpp"
 
 template <typename T = float>
 class Quaternion
 {
 public:
-	Quaternion<T>(Vector3f rotation);
-	Quaternion<T>(Vector4f rotation);
+	Quaternion<T>(Vector3<T> aPitchYawRoll);
+	Quaternion<T>(Vector4<T> rotation);
+	Quaternion<T>(Matrix4x4<T>& rotMatrix);
+	Quaternion<T>(Matrix3x3<T>& rotMatrix);
 	Quaternion<T>();
 	~Quaternion<T>();
 
@@ -41,6 +43,9 @@ public:
 	void SetRotation(const Matrix4x4<T>& aRotation);
 	static Quaternion RotationFromTo(const Vector3f& aFrom,const Vector3f& aTo);
 
+	Vector3<T> GetForward();
+	Vector3<T> GetUp();
+	Vector3<T> GetRight();
 
 	/*
 	T Magnitude();
@@ -54,18 +59,95 @@ public:
 	T z;
 	T w;
 };
+
 template<typename T>
-inline Quaternion<T>::Quaternion(Vector3f rotation) : x(rotation.x),y(rotation.y),z(rotation.z),w(1)
+inline Quaternion<T>::Quaternion(Vector3<T> aPitchYawRoll)
+{
+	SetEulerAngles(aPitchYawRoll);
+}
+
+template<typename T>
+inline Quaternion<T>::Quaternion(Vector4<T> rotation) : x(rotation.x),y(rotation.y),z(rotation.z),w(rotation.w)
 {
 }
-template<typename T>
-inline Quaternion<T>::Quaternion(Vector4f rotation) : x(rotation.x),y(rotation.y),z(rotation.z),w(rotation.w)
-{
-}
+
 template<typename T>
 inline Quaternion<T>::Quaternion() : x(0),y(0),z(0),w(1)
 {
 }
+
+template<typename T>
+inline Quaternion<T>::Quaternion(Matrix4x4<T>& rotMatrix) : Quaternion<T>(Matrix3x3<T>(rotMatrix))
+{
+}
+
+template<typename T>
+inline Quaternion<T>::Quaternion(Matrix3x3<T>& aRotationMatrix)
+{
+	const float fourWSquaredMinus1 = aRotationMatrix(1,1) + aRotationMatrix(2,2) + aRotationMatrix(3,3);
+	const float fourXSquaredMinus1 = aRotationMatrix(1,1) - aRotationMatrix(2,2) - aRotationMatrix(3,3);
+	const float fourYSquaredMinus1 = aRotationMatrix(2,2) - aRotationMatrix(1,1) - aRotationMatrix(3,3);
+	const float fourZSquaredMinus1 = aRotationMatrix(3,3) - aRotationMatrix(1,1) - aRotationMatrix(2,2);
+
+	int biggestDickestIndexest = 0;
+	float fourBiggestSquaredMinus1 = fourWSquaredMinus1;
+
+	if (fourXSquaredMinus1 > fourBiggestSquaredMinus1)
+	{
+		fourBiggestSquaredMinus1 = fourXSquaredMinus1;
+		biggestDickestIndexest = 1;
+	}
+
+	if (fourYSquaredMinus1 > fourBiggestSquaredMinus1)
+	{
+		fourBiggestSquaredMinus1 = fourYSquaredMinus1;
+		biggestDickestIndexest = 2;
+	}
+
+	if (fourZSquaredMinus1 > fourBiggestSquaredMinus1)
+	{
+		fourBiggestSquaredMinus1 = fourZSquaredMinus1;
+		biggestDickestIndexest = 3;
+	}
+
+	const float biggestVal = sqrt(fourBiggestSquaredMinus1 + 1.0f) * 0.5f;
+	const float mult = 0.25f / biggestVal;
+
+	switch (biggestDickestIndexest)
+	{
+	case 0:
+		w = biggestVal;
+		x = (aRotationMatrix(2,3) - aRotationMatrix(3,2)) * mult;
+		y = (aRotationMatrix(3,1) - aRotationMatrix(1,3)) * mult;
+		z = (aRotationMatrix(1,2) - aRotationMatrix(2,1)) * mult;
+		break;
+	case 1:
+		x = biggestVal;
+		w = (aRotationMatrix(2,3) - aRotationMatrix(3,2)) * mult;
+		y = (aRotationMatrix(1,2) + aRotationMatrix(2,1)) * mult;
+		z = (aRotationMatrix(3,1) + aRotationMatrix(1,3)) * mult;
+		break;
+	case 2:
+		y = biggestVal;
+		w = (aRotationMatrix(3,1) - aRotationMatrix(1,3)) * mult;
+		x = (aRotationMatrix(1,2) + aRotationMatrix(2,1)) * mult;
+		z = (aRotationMatrix(2,3) + aRotationMatrix(3,2)) * mult;
+		break;
+	case 3:
+		z = biggestVal;
+		w = (aRotationMatrix(1,2) - aRotationMatrix(2,1)) * mult;
+		x = (aRotationMatrix(3,1) + aRotationMatrix(1,3)) * mult;
+		y = (aRotationMatrix(2,3) + aRotationMatrix(3,2)) * mult;
+		break;
+	default:
+		w = T(1);
+		x = T(0);
+		y = T(0);
+		z = T(0);
+		break;
+	}
+}
+
 template<typename T>
 inline Quaternion<T>::~Quaternion()
 {
@@ -89,7 +171,7 @@ inline Vector3f Quaternion<T>::GetEulerAngles() const
 	const float sqz = z * z;
 	const float test = 2.0f * (y * w - x * z);
 	Vector3f euler;
-	if(test == 1.0)
+	if (test > .9999f)
 	{
 		// heading = rotation about z-axis
 		euler.z = (-2.0f * std::atan2f(x,w));
@@ -98,7 +180,7 @@ inline Vector3f Quaternion<T>::GetEulerAngles() const
 		// attitude = rotation about y-axis
 		euler.y = PIHALF;
 	}
-	else if(test == -1.0)
+	else if (test == -1.0)
 	{
 		// heading = rotation about z-axis
 		euler.z = (2.0f * std::atan2f(x,w));
@@ -118,6 +200,29 @@ inline Vector3f Quaternion<T>::GetEulerAngles() const
 	}
 	return euler;
 }
+
+template<typename T>
+inline void Quaternion<T>::SetEulerAngles(const Vector3<T>& aRotationInDegrees)
+{
+	const Vector3<T> aPitchYawRoll = aRotationInDegrees * DEG_TO_RAD;
+	const T c0 = std::cos(aPitchYawRoll[0] / 2);
+	const T s0 = std::sin(aPitchYawRoll[0] / 2);
+	const T c1 = std::cos(aPitchYawRoll[1] / 2);
+	const T s1 = std::sin(aPitchYawRoll[1] / 2);
+	const T c2 = std::cos(aPitchYawRoll[2] / 2);
+	const T s2 = std::sin(aPitchYawRoll[2] / 2);
+
+	const T c0c1 = c0 * c1;
+	const T s0s1 = s0 * s1;
+	const T s0c1 = s0 * c1;
+	const T c0s1 = c0 * s1;
+
+	w = c0c1 * c2 + s0s1 * s2;
+	x = s0c1 * c2 - c0c1 * s2;
+	y = c0s1 * c2 + s0c1 * s2;
+	z = c0c1 * s2 - s0s1 * c2;
+};
+
 template<typename T>
 inline Quaternion<T>& Quaternion<T>::operator=(const Quaternion<T>& Q)
 {
@@ -127,6 +232,7 @@ inline Quaternion<T>& Quaternion<T>::operator=(const Quaternion<T>& Q)
 	w = Q.w;
 	return *this;
 }
+
 template<typename T>
 inline Matrix3x3<T> Quaternion<T>::GetRotationAs3x3() const
 {
@@ -191,17 +297,17 @@ inline void Quaternion<T>::SetRotation(const Matrix3x3<T>& m)
 
 	int biggestIndex = 0;
 	float fourBiggestSquaredMinus1 = fourWSquaredMinus1;
-	if(fourXSquaredMinus1 > fourBiggestSquaredMinus1)
+	if (fourXSquaredMinus1 > fourBiggestSquaredMinus1)
 	{
 		fourBiggestSquaredMinus1 = fourXSquaredMinus1;
 		biggestIndex = 1;
 	}
-	if(fourYSquaredMinus1 > fourBiggestSquaredMinus1)
+	if (fourYSquaredMinus1 > fourBiggestSquaredMinus1)
 	{
 		fourBiggestSquaredMinus1 = fourYSquaredMinus1;
 		biggestIndex = 2;
 	}
-	if(fourZSquaredMinus1 > fourBiggestSquaredMinus1)
+	if (fourZSquaredMinus1 > fourBiggestSquaredMinus1)
 	{
 		fourBiggestSquaredMinus1 = fourZSquaredMinus1;
 		biggestIndex = 3;
@@ -210,7 +316,7 @@ inline void Quaternion<T>::SetRotation(const Matrix3x3<T>& m)
 	float biggestVal = std::sqrt(fourBiggestSquaredMinus1 + 1.0f) * 0.5f;
 	float mult = 0.25f / biggestVal;
 
-	switch(biggestIndex)
+	switch (biggestIndex)
 	{
 	case 0:
 		w = biggestVal;
@@ -252,15 +358,15 @@ inline Quaternion<T> Quaternion<T>::RotationFromTo(const Vector3f& aFrom,const V
 	v1.Normalize();
 
 	const T d = v0.Dot(v1);
-	if(d >= 1.0f) // If dot == 1, vectors are the same
+	if (d >= 1.0f) // If dot == 1, vectors are the same
 	{
 		return Quaternion<T>();
 	}
-	else if(d <= -1.0f) // exactly opposite
+	else if (d <= -1.0f) // exactly opposite
 	{
 		Vector3f axis(1.0f,0.f,0.f);
 		axis = axis.Cross(v0);
-		if(axis.Length() == 0)
+		if (axis.Length() == 0)
 		{
 			axis = Vector3f(0.f,1.f,0.f);
 			axis = axis.Cross(v0);
@@ -286,11 +392,38 @@ inline T Quaternion<T>::GetNormalizedSquared()
 }
 
 template<typename T>
+inline Vector3<T> Quaternion<T>::GetForward()
+{
+	return Vector3<T>(
+		2 * (x * z + w * y),
+		2 * (y * z - w * x),
+		1 - 2 * (x * x + y * y)
+	).GetNormalized();
+}
+template<typename T>
+inline Vector3<T> Quaternion<T>::GetUp()
+{
+	return Vector3<T>(
+		2 * (x * y - w * z),
+		1 - 2 * (x * x + z * z),
+		2 * (y * z + w * x)
+	).GetNormalized();
+}
+template<typename T>
+inline Vector3<T> Quaternion<T>::GetRight()
+{
+	return -Vector3<T>(
+		1 - 2 * (y * y + z * z),
+		2 * (x * y + w * z),
+		2 * (x * z - w * y)
+	).GetNormalized();
+}
+template<typename T>
 inline void Quaternion<T>::Normalize()
 {
 	const float n = x * x + y * y + z * z + w * w;
 
-	if(n == 1)
+	if (n == 1)
 	{
 		return;
 	}

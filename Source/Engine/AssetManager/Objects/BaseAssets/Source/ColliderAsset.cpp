@@ -1,5 +1,5 @@
-#include "../ColliderAsset.h"
 #include "AssetManager.pch.h"
+#include "../ColliderAsset.h"
 
 
 ColliderAsset::ColliderAsset(eColliderType type) : type(type),AssetBase(L"")
@@ -34,7 +34,7 @@ ColliderAssetAABB::ColliderAssetAABB(const AABB3D<float>& rf) : myAABB(rf),Colli
 {
 }
 
-void ColliderAssetAABB::RenderDebugLines(const Transform& data)
+void ColliderAssetAABB::RenderDebugLines(Transform& data)
 {
 	for (DebugDrawer::PrimitiveHandle& handle : myHandles)
 	{
@@ -67,7 +67,7 @@ ColliderAssetSphere::ColliderAssetSphere(const Sphere<float>& rf) : mySphere(rf)
 {
 }
 
-void ColliderAssetSphere::RenderDebugLines(const Transform& data)
+void ColliderAssetSphere::RenderDebugLines(Transform& data)
 {
 	for (DebugDrawer::PrimitiveHandle& handle : myHandles)
 	{
@@ -105,7 +105,27 @@ ColliderAssetConvex::ColliderAssetConvex(const std::filesystem::path& aFilePath)
 	assert(false && "Not implemented");
 }
 
-void ColliderAssetConvex::RenderDebugLines(const Transform& data)
+void ColliderAssetConvex::RenderDebugLines(Transform& data)
+{
+	data;
+	assert(false && "Not implemented");
+}
+
+ColliderAssetPlanar::ColliderAssetPlanar() : ColliderAsset(eColliderType::PLANAR)
+{
+}
+ColliderAssetPlanar::ColliderAssetPlanar(const std::shared_ptr<Mesh>& rf) : ColliderAsset(eColliderType::PLANAR)
+{
+	aColliderMesh = rf;
+}
+ColliderAssetPlanar::ColliderAssetPlanar(const std::filesystem::path& path) : ColliderAsset(eColliderType::PLANAR)
+{
+	AssetManager::Get().ForceLoadAsset<Mesh>(path,aColliderMesh);
+	path;
+	//assert(false && "Not implemented");
+}
+
+void ColliderAssetPlanar::RenderDebugLines(Transform& data)
 {
 	data;
 	assert(false && "Not implemented");

@@ -17,7 +17,9 @@ public:
 	void Render() override;
 
 	eColliderType GetColliderType() const { return myCollider->GetColliderType(); }
-	void CreateAABB(const AABB3D<float>& rf);
+
+	template<typename T,typename... Args>
+	void SetColliderType(Args... someParameters);
 
 	void OnSiblingChanged(const std::type_info* SourceClass = nullptr) override;
 
@@ -33,6 +35,12 @@ private:
 	std::shared_ptr<ColliderAsset> myCollider;
 	//std::vector<std::weak_ptr<Component>> myNotify;
 };
+
+template<typename T,typename... Args>
+inline void cCollider::SetColliderType(Args... someParameters)
+{
+	myCollider = std::make_shared<T>(someParameters ...);
+}
 
 template<typename T>
 inline std::shared_ptr<T> cCollider::GetColliderAssetOfType() const
