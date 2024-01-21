@@ -193,6 +193,7 @@
     <ClInclude Include="DebugDrawer\DebugDrawer.h" />
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_GaussianBlur.h" />
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_LuminancePass.h" />
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetDepthState.h" />
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_ToneMapPass.h" />
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_Bloom.h" />
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_DebugLayer.h" />
@@ -238,6 +239,7 @@
     <ClInclude Include="Rendering\Buffers\ConstantBuffer.h" />
     <ClInclude Include="Rendering\Texture.h" />
     <ClInclude Include="Rendering\Vertex.h" />
+    <ClInclude Include="Shaders\Include\EdgeBlur.h" />
     <ClInclude Include="Shaders\Include\EnvironmentLight_PS.h" />
     <ClInclude Include="Shaders\Include\GaussianBlur_PS.h" />
     <ClInclude Include="Shaders\Include\GBufferPS.h" />
@@ -264,6 +266,7 @@
     <ClCompile Include="DebugDrawer\DebugDrawer.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_GaussianBlur.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_LuminancePass.cpp" />
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetDepthState.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_ToneMapPass.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_Bloom.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_DebugLayer.cpp" />

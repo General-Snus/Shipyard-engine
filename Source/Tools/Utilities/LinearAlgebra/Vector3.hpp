@@ -12,6 +12,7 @@ public:
 	Vector3<T>();
 	//Creates a vector (aX, aY, aZ)
 	Vector3<T>(const T& aX,const T& aY,const T& aZ);
+	Vector3<T>(const T& aValue);
 
 	//Copy constructor (compiler generated)
 	Vector3<T>(const Vector3<T>& aVector) = default;
@@ -204,7 +205,7 @@ inline Vector3<T> Vector3<T>::GetNormalized() const
 {
 	const T len = 1 / Length();
 
-	if(len != len || isinf(len)) //IEEE FLOAT NAN
+	if (len != len || isinf(len)) //IEEE FLOAT NAN
 	{
 		return Vector3<T>(0,0,0);
 	}
@@ -222,7 +223,7 @@ inline void Vector3<T>::Normalize()
 {
 	const T len = 1 / Length();
 
-	if(len != len || isinf(len)) //IEEE FLOAT NAN
+	if (len != len || isinf(len)) //IEEE FLOAT NAN
 	{
 		x = 0;
 		y = 0;
@@ -268,17 +269,25 @@ inline Vector3<T>::Vector3(const T& aX,const T& aY,const T& aZ)
 }
 
 template<class T>
+inline Vector3<T>::Vector3(const T& aValue)
+{
+	x = aValue;
+	y = aValue;
+	z = aValue;
+}
+
+template<class T>
 template<class U>
 inline Vector3<T>::operator U() const
 {
-	return  {x,y,z};
+	return  { x,y,z };
 }
 
 template<class T>
 inline T& Vector3<T>::operator [](int value)
 {
 	assert(value >= 0 && value <= 3);
-	switch(value)
+	switch (value)
 	{
 	case 0:
 	{
@@ -303,7 +312,7 @@ template<class T>
 inline const T& Vector3<T>::operator[](int value) const
 {
 	assert(value >= 0 && value <= 3);
-	switch(value)
+	switch (value)
 	{
 	case 0:
 	{

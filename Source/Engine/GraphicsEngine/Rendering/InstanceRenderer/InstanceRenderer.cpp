@@ -1,7 +1,10 @@
 #include <GraphicsEngine.pch.h>
-#include "InstanceRenderer.h"
-#
 #include <Engine/GraphicsEngine/InterOp/RHI.h>
+#include "InstanceRenderer.h"
+
+#include <Engine\AssetManager\Objects\BaseAssets\MaterialAsset.h>
+#include <Tools\Optick\include\optick.h>
+
 void InstanceRenderer::Init()
 {
 }
@@ -9,7 +12,7 @@ void InstanceRenderer::Init()
 void InstanceRenderer::Execute(bool isShadowPass)
 {
 	OPTICK_EVENT();
-	if(isShadowPass)
+	if (isShadowPass)
 	{
 		RHI::Context->PSSetShader(nullptr,nullptr,0);
 	}
@@ -19,44 +22,44 @@ void InstanceRenderer::Execute(bool isShadowPass)
 		gBuffer.UseGBufferShader();
 	}
 
-	for(const auto& [key,i] : instanceRenderData)
-	{ 
-		if(i->myMesh->isLoadedComplete)
+	for (const auto& [key,i] : instanceRenderData)
+	{
+		if (i->myMesh->isLoadedComplete)
 		{
 			OPTICK_EVENT("Mesh");
-			ObjectBuffer& objectBuffer = GraphicsEngine::Get().myObjectBuffer; 
+			ObjectBuffer& objectBuffer = GraphicsEngine::Get().myObjectBuffer;
 			objectBuffer.Data.myTransform = Matrix();
 			objectBuffer.Data.MaxExtents = i->myMesh->MaxBox;
 			objectBuffer.Data.MinExtents = i->myMesh->MinBox;
 			objectBuffer.Data.hasBone = false;
 			objectBuffer.Data.isInstanced = true;
 			RHI::UpdateConstantBufferData(GraphicsEngine::Get().myObjectBuffer);
-			if(!isShadowPass)
+			if (!isShadowPass)
 			{
 				i->myMesh->UpdateInstanceBuffer();
 			}
-			for(const auto& aElement : i->myMesh->Elements)
+			for (const auto& aElement : i->myMesh->Elements)
 			{
-				if(!isShadowPass)
+				if (!isShadowPass)
 				{
-					if(!i->overrideMaterial.empty())
+					if (!i->overrideMaterial.empty())
 					{
-						for(const auto& mat : i->overrideMaterial)
+						for (const auto& mat : i->overrideMaterial)
 						{
 							mat->Update();
 						}
 					}
 					else
 					{
-						if(auto materialPtr = i->myMesh->GetMaterialList().at(aElement.MaterialIndex))
+						if (auto materialPtr = i->myMesh->GetMaterialList().at(aElement.MaterialIndex))
 						{
-							 i->myMesh->GetMaterialList().at(aElement.MaterialIndex)->Update();
+							i->myMesh->GetMaterialList().at(aElement.MaterialIndex)->Update();
 						}
 						else
 						{
 							GraphicsEngine::Get().defaultMaterial->Update();
 						}
-					} 
+					}
 				}
 
 				const std::vector<ComPtr<ID3D11Buffer>> vxBuffers
@@ -91,7 +94,7 @@ void InstanceRenderer::AddInstance(const std::shared_ptr<RenderData>& aRenderDat
 
 void InstanceRenderer::Clear()
 {
-	for(const auto& [key,value] : instanceRenderData)
+	for (const auto& [key,value] : instanceRenderData)
 	{
 		value->myMesh->myInstances.clear();
 	}

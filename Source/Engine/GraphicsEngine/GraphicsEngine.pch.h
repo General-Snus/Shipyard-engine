@@ -26,6 +26,7 @@
 #include "GraphicCommands/Commands/Headers/GfxCmd_RenderSkeletalMesh.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_RenderSkeletalMeshShadow.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_RenderSkybox.h"
+#include "GraphicCommands/Commands/Headers/GfxCmd_SetDepthState.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_SetLightBuffer.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_SetRenderTarget.h"

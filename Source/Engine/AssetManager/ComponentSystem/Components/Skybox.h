@@ -1,4 +1,5 @@
 #pragma once
+#include <Engine/AssetManager/ComponentSystem/Component.h>
 class Skybox : public Component
 {
 public:
@@ -11,5 +12,7 @@ public:
 
 private:
 	std::shared_ptr<TextureHolder> myCubeMap;
-
+	std::shared_ptr<Material> mySkyboxMaterial;
+	std::shared_ptr<Mesh> mySkyboxSphere;
+	float m_Radius;
 };

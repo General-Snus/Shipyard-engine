@@ -2,17 +2,15 @@
 // Exclude things we don't need from the Windows headers
 #include <Engine/AssetManager/AssetManager.pch.h> 
 
-#include "GameLauncher.h"
-
+#include <Game/GameLauncher/TaskSpecificImplementation/DecicionTree/DecisionTreeController.h>
+#include <Game/GameLauncher/TaskSpecificImplementation/StateMachine/StateMachineController.h>
 #include <Tools/Logging/Logging.h>
 #include <Tools/Optick/src/optick.h>
 #include <Tools/ThirdParty/nlohmann/json.hpp>   
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/Input/InputHandler.hpp>
 #include <Tools/Utilities/Math.hpp>
-
-#include <Game/GameLauncher/TaskSpecificImplementation/DecicionTree/DecisionTreeController.h>
-#include <Game/GameLauncher/TaskSpecificImplementation/StateMachine/StateMachineController.h>
+#include "GameLauncher.h"
 
 #include <Engine/PersistentSystems/Physics/PhysXInterpeter.h>
 #include <fstream>

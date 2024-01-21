@@ -37,6 +37,25 @@ void cMeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath,int e
 	myRenderData->overrideMaterial[elementIndex] = mat;
 }
 
+bool cMeshRenderer::IsDefaultMesh() const
+{
+	if (myRenderData->myMesh->AssetPath == L"../../Content/default.fbx") // What am i doing with my life
+	{
+		return true;
+	}
+	return false;
+}
+
+const std::vector<Element>& cMeshRenderer::GetElements() const
+{
+	return myRenderData->myMesh->Elements;
+}
+
+std::shared_ptr<Mesh> cMeshRenderer::GetRawMesh() const
+{
+	return myRenderData->myMesh;
+}
+
 void cMeshRenderer::Render()
 {
 	OPTICK_EVENT();

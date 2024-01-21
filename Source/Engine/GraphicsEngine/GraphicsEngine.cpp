@@ -1,57 +1,46 @@
 #include "GraphicsEngine.pch.h"
-#include "GraphicsEngine.h"
-
-#include <filesystem>
-#include <utility>
-
+#include <Engine/AssetManager/AssetManager.h>
+#include <Engine/AssetManager/ComponentSystem/Components/CameraComponent.h>
+#include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>
+#include <Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h>
+#include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
+#include <Engine/GraphicsEngine/InterOp/DDSTextureLoader11.h>
+#include <Objects/DataObjects/Default_C.h>
+#include <Objects/DataObjects/Default_FX.h>
+#include <Objects/DataObjects/Default_M.h>
+#include <Objects/DataObjects/Default_N.h>
 #include <Shaders/Include/Bloom_PS.h> 
+#include <Shaders/Include/brdfLUT_PS.h>
 #include <Shaders/Include/CopyPixels_PS.h> 
 #include <Shaders/Include/Default_PS.h>
 #include <Shaders/Include/Default_VS.h>
 #include <Shaders/Include/EdgeBlur.h> 
 #include <Shaders/Include/GaussianBlur_PS.h> 
+#include <Shaders/Include/LineDrawer_PS.h>
+#include <Shaders/Include/LineDrawer_VS.h>
 #include <Shaders/Include/LuminancePass_PS.h>
-#include <Shaders/Include/SSAO_PS.h> 
-#include <Shaders/Include/ToneMapping_PS.h>
-
 #include <Shaders/Include/ParticleShader_GS.h> 
 #include <Shaders/Include/ParticleShader_PS.h> 
 #include <Shaders/Include/ParticleShader_VS.h> 
-
-#include <Objects/DataObjects/Default_C.h>
-#include <Objects/DataObjects/Default_FX.h>
-#include <Objects/DataObjects/Default_M.h>
-#include <Objects/DataObjects/Default_N.h>
-
-#include <Shaders/Include/LineDrawer_PS.h>
-#include <Shaders/Include/LineDrawer_VS.h>
-
-#include <Shaders/Include/brdfLUT_PS.h>
 #include <Shaders/Include/ScreenspaceQuad_VS.h>
+#include <Shaders/Include/SSAO_PS.h> 
+#include <Shaders/Include/ToneMapping_PS.h>
 #include <Shaders/Registers.h>
-
-#include "Objects/Shader.h"
-
-#include <Engine/AssetManager/ComponentSystem/Components/CameraComponent.h>
-#include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>
-#include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
-#include "GraphicCommands/GraphicCommands.h"
-#include "Rendering/ParticleRenderer/ParticleVertex.h" 
-#include "Rendering/Vertex.h" 
-
+#include <stdexcept> 
+#include <Tools/ImGui/ImGui/imgui.h>
+#include <Tools/Optick/include/optick.h> 
 #include "GraphicCommands/Commands/Headers/GfxCmd_DebugLayer.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_GaussianBlur.h" 
 #include "GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_SetLightBuffer.h" 
 #include "GraphicCommands/Commands/Headers/GfxCmd_SetRenderTarget.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_SSAO.h" 
-
-#include <stdexcept> 
-#include <Tools/ImGui/ImGui/imgui.h>
-#include "Shaders/Registers.h"
-
-#include <Engine/GraphicsEngine/InterOp/DDSTextureLoader11.h>
-#include <Tools/Optick/src/optick.h>
+#include "GraphicCommands/GraphicCommands.h"
+#include "GraphicsEngine.h"     
+#include "Objects/Shader.h" 
+#include "Rendering/ParticleRenderer/ParticleVertex.h" 
+#include "Rendering/Vertex.h" 
+#include "Shaders/Registers.h" 
 
 
 bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)

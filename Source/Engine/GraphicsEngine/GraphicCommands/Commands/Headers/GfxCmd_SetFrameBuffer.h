@@ -10,8 +10,7 @@ private:
 	std::array<Vector4f,4> FB_FrustrumCorners = { Vector4f(1,0,0,0),Vector4f(-1,0,0,0),Vector4f(0,1,0,0),Vector4f(0,-1,0,0) };
 	int RenderMode;
 public:
-	GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,Transform& ref,int aRenderMode,const cCamera& camera);
-	GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,const Matrix& ref,int aRenderMode);
+	GfxCmd_SetFrameBuffer(const Matrix& ProjectionMatrix,const Matrix& ref,int aRenderMode,const std::array<Vector4f,4>& FrustrumCorners = {});
 	void Destroy() override {};
 	void ExecuteAndDestroy() override;
 };

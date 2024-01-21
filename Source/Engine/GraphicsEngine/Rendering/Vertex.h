@@ -1,6 +1,7 @@
 #pragma once
 #include <d3d11.h>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
+#include <vector>
 #include <wrl.h>
 using namespace Microsoft::WRL;
 // We'll be writing this a lot so easier
@@ -19,9 +20,9 @@ struct Vertex
 
 	void AddBoneWeightAndID(float newWeight,unsigned int aId)
 	{
-		for(int i = 0; i < 4; i++)
+		for (int i = 0; i < 4; i++)
 		{
-			if(myBoneWeights[i] == 0.0f)
+			if (myBoneWeights[i] == 0.0f)
 			{
 				myBoneWeights[i] = newWeight;
 				myBoneIds[i] = aId;

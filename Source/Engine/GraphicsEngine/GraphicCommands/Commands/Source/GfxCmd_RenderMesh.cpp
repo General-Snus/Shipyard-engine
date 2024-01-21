@@ -1,6 +1,7 @@
 #include <GraphicsEngine.pch.h>
-#include "../Headers/GfxCmd_RenderMesh.h" 
 #include <Engine/GraphicsEngine/Rendering/Buffers/ObjectBuffer.h>
+#include <Engine\AssetManager\Objects\BaseAssets\MaterialAsset.h>
+#include "../Headers/GfxCmd_RenderMesh.h" 
 
 GfxCmd_RenderMesh::GfxCmd_RenderMesh(const std::shared_ptr<RenderData> aData,const Matrix& aTransform,bool instanced) : myRenderData(aData),myTransform(aTransform),instanced(instanced)
 {
@@ -9,7 +10,7 @@ GfxCmd_RenderMesh::GfxCmd_RenderMesh(const std::shared_ptr<RenderData> aData,con
 }
 void GfxCmd_RenderMesh::ExecuteAndDestroy()
 {
-	if(instanced)
+	if (instanced)
 	{
 		GetInstanceRenderer().AddInstance(myRenderData);
 		return;
@@ -20,18 +21,18 @@ void GfxCmd_RenderMesh::ExecuteAndDestroy()
 	objectBuffer.Data.MaxExtents = MaxExtents;
 	objectBuffer.Data.MinExtents = MinExtents;
 	objectBuffer.Data.hasBone = false;
-	objectBuffer.Data.isInstanced = instanced; 
+	objectBuffer.Data.isInstanced = instanced;
 	RHI::UpdateConstantBufferData(objectBuffer);
 
 	G_Buffer& gBuffer = GetGBuffer();
 	gBuffer.UseGBufferShader();
 
-	for(const auto& aElement : myRenderData->myMesh->Elements)
+	for (const auto& aElement : myRenderData->myMesh->Elements)
 	{
-		if(myRenderData->overrideMaterial.size())
+		if (myRenderData->overrideMaterial.size())
 		{
 			myRenderData->overrideMaterial[0]->Update();
-		} 
+		}
 		RHI::ConfigureInputAssembler(
 			aElement.PrimitiveTopology,
 			aElement.VertexBuffer,

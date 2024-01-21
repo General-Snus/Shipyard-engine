@@ -1,6 +1,11 @@
 #pragma once
-#include <Engine/AssetManager/AssetManager.pch.h>
+#include <Engine/AssetManager/Objects/BaseAssets/BaseAsset.h>
+#include "Engine/AssetManager/ComponentSystem/Component.h"
 #define AsUINT(v) static_cast<unsigned>(v)
+
+class Mesh;
+class Material;
+class Skeleton;
 
 struct RenderData
 {
@@ -26,23 +31,10 @@ public:
 	void SetMaterialPath(const std::filesystem::path& aFilePath,int elementIndex);
 	~cMeshRenderer() override = default;
 
-	FORCEINLINE const std::vector<Element>& GetElements() const
-	{
-		return myRenderData->myMesh->Elements;
-	}
-	FORCEINLINE std::shared_ptr<Mesh> GetRawMesh() const
-	{
-		return myRenderData->myMesh;
-	}
+	const std::vector<Element>& GetElements() const;
+	std::shared_ptr<Mesh> GetRawMesh() const;
 
-	FORCEINLINE bool IsDefaultMesh()
-	{
-		if(myRenderData->myMesh->AssetPath == L"../../Content/default.fbx") // What am i doing with my life
-		{
-			return true;
-		}
-		return false;
-	}
+	bool IsDefaultMesh() const;
 
 	FORCEINLINE bool IsStaticMesh()
 	{

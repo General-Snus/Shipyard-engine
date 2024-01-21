@@ -1,11 +1,12 @@
 #pragma once
-#include "SingletonTemplate.h" 
-#include <thread> 
-#include <queue>
-#include <mutex>
-#include <future>
 #include <condition_variable>
 #include <functional>
+#include <future>
+#include <mutex>
+#include <queue>
+#include <thread> 
+#include "SingletonTemplate.h"
+#pragma message("Compiling ThreadPool.h")
 
 class ThreadPool : public Singleton<ThreadPool>
 {
@@ -13,12 +14,12 @@ class ThreadPool : public Singleton<ThreadPool>
 	friend class Singleton<ThreadPool>;
 public:
 	void Init(unsigned int pool_size = std::thread::hardware_concurrency() - 1)
-	{ 
+	{
 		static const unsigned int max_threads = std::thread::hardware_concurrency();
 		unsigned int const num_threads = pool_size == 0 ? max_threads - 1 : std::min(max_threads - 1,pool_size);
 
 		threads.reserve(num_threads);
-		for(unsigned int i = 0; i < num_threads; ++i)
+		for (unsigned int i = 0; i < num_threads; ++i)
 		{
 			threads.emplace_back(std::bind(ThreadWorker(this)));
 		}
@@ -32,9 +33,9 @@ public:
 			conditional_var.notify_all();
 		}
 
-		for(auto& thread : threads)
+		for (auto& thread : threads)
 		{
-			if(thread.joinable())
+			if (thread.joinable())
 			{
 				thread.join();
 			}
@@ -53,7 +54,7 @@ public:
 		std::packaged_task<decltype(f(args...))()> task(std::forward<F>(f),std::forward<Args>(args)...);
 
 		auto future = task.get_future();
-		auto wrap = 
+		auto wrap =
 			[task = std::move(task)]() mutable
 			{
 				task();
@@ -77,7 +78,7 @@ public:
 
 	bool ShouldClose{};
 private:
-	std::vector<std::thread> threads; 
+	std::vector<std::thread> threads;
 	ThreadPool() = default;
 	std::queue<std::move_only_function<void()>> workerQueue;
 	std::condition_variable conditional_var;
@@ -94,7 +95,7 @@ private:
 		void operator()()
 		{
 			std::unique_lock<std::mutex> lock(pool->conditional_mutex);
-			while(!pool->ShouldClose || (!pool->workerQueue.empty() && pool->ShouldClose))
+			while (!pool->ShouldClose || (!pool->workerQueue.empty() && pool->ShouldClose))
 			{
 				pool->activeThreads--;
 				pool->conditional_var.wait(lock,[this]
@@ -103,7 +104,7 @@ private:
 					});
 				pool->activeThreads++;
 
-				if(!pool->workerQueue.empty())
+				if (!pool->workerQueue.empty())
 				{
 					auto func = std::move(pool->workerQueue.front());
 					pool->workerQueue.pop();

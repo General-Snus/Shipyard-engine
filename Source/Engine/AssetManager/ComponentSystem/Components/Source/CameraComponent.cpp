@@ -1,11 +1,11 @@
 #include "AssetManager.pch.h"
-#include "../CameraComponent.h"
 #include <algorithm> 
 #include <DirectXMath.h>
 #include <Editor/Editor/Core/Editor.h>
 #include <Engine/GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h>
 #include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
 #include <Tools/Utilities/Input/InputHandler.hpp> 
+#include "../CameraComponent.h"
 
 cCamera::cCamera(const unsigned int anOwnerId) : Component(anOwnerId)
 {
@@ -13,7 +13,7 @@ cCamera::cCamera(const unsigned int anOwnerId) : Component(anOwnerId)
 	GetGameObject().GetComponent<Transform>().SetGizmo(false);
 
 
-	if(!mySettings.isOrtho)
+	if (!mySettings.isOrtho)
 	{
 		myClipMatrix = DirectX::XMMatrixPerspectiveFovLH(mySettings.fow,mySettings.APRatio,mySettings.farfield,mySettings.nearField);
 	}
@@ -29,7 +29,7 @@ cCamera::cCamera(const unsigned int anOwnerId) : Component(anOwnerId)
 	pLight.lock()->Color = Vector3f(1,1,1);
 	pLight.lock()->Power = 2000.0f * Kilo;
 	pLight.lock()->Range = 1000;
-	pLight.lock()->Direction = {0,-1,0};
+	pLight.lock()->Direction = { 0,-1,0 };
 	pLight.lock()->InnerConeAngle = 10 * DEG_TO_RAD;
 	pLight.lock()->OuterConeAngle = 45 * DEG_TO_RAD;
 	GetComponent<cLight>().BindDirectionToTransform(true);
@@ -42,7 +42,7 @@ cCamera::cCamera(const unsigned int anOwnerId,CameraSettings settings) : Compone
 	GetGameObject().GetComponent<Transform>().SetGizmo(false);
 	mySettings = settings;
 
-	if(!mySettings.isOrtho)
+	if (!mySettings.isOrtho)
 	{
 		myClipMatrix = DirectX::XMMatrixPerspectiveFovLH(mySettings.fow,mySettings.APRatio,mySettings.farfield,mySettings.nearField);
 	}
@@ -58,7 +58,7 @@ cCamera::cCamera(const unsigned int anOwnerId,CameraSettings settings) : Compone
 	pLight.lock()->Color = Vector3f(1,1,1);
 	pLight.lock()->Power = 2000.0f * Kilo;
 	pLight.lock()->Range = 1000;
-	pLight.lock()->Direction = {0,-1,0};
+	pLight.lock()->Direction = { 0,-1,0 };
 	pLight.lock()->InnerConeAngle = 10 * DEG_TO_RAD;
 	pLight.lock()->OuterConeAngle = 45 * DEG_TO_RAD;
 	GetComponent<cLight>().BindDirectionToTransform(true);
@@ -80,16 +80,16 @@ void cCamera::Update()
 	const float rotationSpeed = 100;
 	myScreenSize = Vector2<int>(RHI::GetDeviceSize().Width,RHI::GetDeviceSize().Height);
 
-	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::UP))
+	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::UP))
 	{
 		cameraSpeed = cameraSpeed * 1.01f;
 	}
-	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::DOWN))
+	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::DOWN))
 	{
 		cameraSpeed = std::clamp(cameraSpeed * 0.99f,.5f,(float)INT_MAX);
 	}
 
-	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::MOUSERBUTTON))
+	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::MOUSERBUTTON))
 	{
 		const Vector3f mouseDeltaVector =
 		{
@@ -100,46 +100,46 @@ void cCamera::Update()
 		myTransform.Rotate(mouseDeltaVector * rotationSpeed * 0.1f * Timer::GetInstance().GetDeltaTime());
 	}
 
-	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::W))
+	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::W))
 	{
 		myTransform.Move(myTransform.GetForward() * aTimeDelta * mdf);
 	}
 
-	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::S))
+	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::S))
 	{
 		myTransform.Move(-myTransform.GetForward() * aTimeDelta * mdf);
 	}
 
-	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::D))
+	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::D))
 	{
 		myTransform.Move(myTransform.GetRight() * aTimeDelta * mdf);
 	}
 
-	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::A))
+	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::A))
 	{
 		myTransform.Move(-myTransform.GetRight() * aTimeDelta * mdf);
 	}
-	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::E))
+	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::E))
 	{
-		myTransform.Rotate({0,rotationSpeed * aTimeDelta});
+		myTransform.Rotate({ 0,rotationSpeed * aTimeDelta });
 	}
 #ifdef Flashlight
-	if(InputHandler::GetInstance().IsKeyPressed((int)Keys::F))
+	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::F))
 	{
 		GetComponent<cLight>().BindDirectionToTransform(!GetComponent<cLight>().GetIsBound());
 	}
 #endif
-	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::Q))
+	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::Q))
 	{
-		myTransform.Rotate({0,-rotationSpeed * aTimeDelta});
+		myTransform.Rotate({ 0,-rotationSpeed * aTimeDelta });
 	}
 
-	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::SPACE))
+	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::SPACE))
 	{
 		myTransform.Move(myTransform.GetUp() * aTimeDelta * mdf);
 	}
 
-	if(InputHandler::GetInstance().IsKeyHeld((int)Keys::SHIFT))
+	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::SHIFT))
 	{
 		myTransform.Move(-myTransform.GetUp() * aTimeDelta * mdf);
 	}
@@ -156,12 +156,12 @@ std::array<Vector4f,4> cCamera::GetFrustrumCorners() const
 	const float halfHeight = farplane * tanf(0.25f * mySettings.fow);
 	const float halfWidth = aspectRatio * halfHeight;
 	std::array<Vector4f,4> corners;
-	corners[0] = {-halfWidth, -halfHeight, farplane, 0.0f};
-	corners[1] = {-halfWidth,	halfHeight, farplane, 0.0f};
-	corners[2] = {halfWidth, +halfHeight, farplane, 0.0f};
-	corners[3] = {+halfWidth, -halfHeight, farplane, 0.0f};
+	corners[0] = { -halfWidth, -halfHeight, farplane, 0.0f };
+	corners[1] = { -halfWidth,	halfHeight, farplane, 0.0f };
+	corners[2] = { halfWidth, +halfHeight, farplane, 0.0f };
+	corners[3] = { +halfWidth, -halfHeight, farplane, 0.0f };
 
-	for(auto& i : corners)
+	for (auto& i : corners)
 	{
 		i.Normalize();
 	}
@@ -201,9 +201,9 @@ void cCamera::SetCameraToFrameBuffer()
 	OPTICK_EVENT();
 	GfxCmd_SetFrameBuffer(
 		myClipMatrix,
-		this->GetGameObject().GetComponent<Transform>(),
+		GetGameObject().GetComponent<Transform>().GetTransform(),
 		(int)Editor::GetApplicationState().filter, //TODO scene again
-		*this
+		GetFrustrumCorners()
 	).ExecuteAndDestroy();
 }
 
@@ -212,7 +212,7 @@ Vector4f cCamera::WoldSpaceToPostProjectionSpace(Vector3f aEntity)
 	Transform& myTransform = this->GetGameObject().GetComponent<Transform>();
 
 	//Get actuall world space coordinate
-	Vector4f outPosition = {aEntity.x,aEntity.y,aEntity.z,1};
+	Vector4f outPosition = { aEntity.x,aEntity.y,aEntity.z,1 };
 
 	//Punkt -> CameraSpace
 	outPosition = outPosition * Matrix::GetFastInverse(myTransform.GetTransform());

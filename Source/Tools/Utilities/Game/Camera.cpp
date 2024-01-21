@@ -1,4 +1,5 @@
 #define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <cmath>
 #include <Windows.h> 
 #include "Camera.h"

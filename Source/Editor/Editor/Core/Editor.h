@@ -1,13 +1,12 @@
 #pragma once
-#include "../Windows/SplashWindow.h" 
-#include "ApplicationState.h"
 #include <Editor/Editor/Defines.h>
+#include <Editor/Editor/Windows/EditorWindows/ChainGraph/GraphTool.h>
 #include <Game/GameLauncher/Core/GameLauncher.h>
 #include <Tools/Logging/Logging.h> 
 #include <Tools/Utilities/LinearAlgebra/Sphere.hpp>
 #include <Tools/Utilities/System/SingletonTemplate.h> 
-
-#include <Editor/Editor/Windows/EditorWindows/ChainGraph/GraphTool.h>
+#include "../Windows/SplashWindow.h" 
+#include "ApplicationState.h" 
 
 class GameLauncher;
 
@@ -78,5 +77,5 @@ private:
 	Sphere<float> myWorldBounds;
 	GameLauncher myGameLauncher;
 	bool IsGUIActive = true;
-	std::array<bool,count> activeWindows = {false};
+	std::array<bool,count> activeWindows = { false };
 };

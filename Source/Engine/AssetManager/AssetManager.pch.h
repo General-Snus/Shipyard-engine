@@ -7,6 +7,7 @@
 #ifndef ASSETMANAGER_PCH_H
 #define ASSETMANAGER_PCH_H
 
+#define NOMINMAX
 // add headers that you want to pre-compile here
 #include <filesystem> 
 #include <functional>

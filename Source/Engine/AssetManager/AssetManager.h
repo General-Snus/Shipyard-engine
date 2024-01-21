@@ -1,12 +1,11 @@
 #pragma once 
 #define AsUINT(v) static_cast<unsigned>(v) 
 
-#include "AssetManagerUtills.hpp"
 #include <Tools/Utilities/DataStructures/Queue.hpp> 
 #include <Tools/Utilities/System/SingletonTemplate.h>
 #include <Tools/Utilities/System/ThreadPool.hpp>
 #include <unordered_map>
-
+#include "AssetManagerUtills.hpp"
 struct Frame;
 struct Element;
 struct MaterialData;
@@ -103,7 +102,7 @@ void AssetManager::ForceLoadAsset(const std::filesystem::path& aFilePath,bool us
 	const std::type_info* typeInfo = &typeid(T);
 	std::shared_ptr<Library> library = GetLibraryOfType<T>();
 
-	if(!library)
+	if (!library)
 	{
 		library = std::make_shared<Library>();
 		myLibraries[typeInfo] = library;
@@ -111,9 +110,9 @@ void AssetManager::ForceLoadAsset(const std::filesystem::path& aFilePath,bool us
 
 	std::shared_ptr<T> ptr = library->Get<T>(aFilePath);
 
-	if(!ptr)
+	if (!ptr)
 	{
-		if(useExact)
+		if (useExact)
 		{
 			std::pair<std::filesystem::path,std::shared_ptr<T>> newObject(aFilePath,std::make_shared<T>(aFilePath));
 			ptr = library->Add(newObject);
@@ -161,11 +160,10 @@ void AssetManager::LoadAsset(const std::filesystem::path& aFilePath,std::shared_
 template<class T>
 void AssetManager::LoadAsset(const std::filesystem::path& aFilePath,bool useExact,std::shared_ptr<T>& outAsset)
 {
-	OPTICK_EVENT();
 	const std::type_info* typeInfo = &typeid(T);
 	std::shared_ptr<Library> library = GetLibraryOfType<T>();
 
-	if(!library)
+	if (!library)
 	{
 		library = std::make_shared<Library>();
 		myLibraries[typeInfo] = library;
@@ -173,9 +171,9 @@ void AssetManager::LoadAsset(const std::filesystem::path& aFilePath,bool useExac
 
 	std::shared_ptr<T> ptr = library->Get<T>(aFilePath);
 
-	if(!ptr)
+	if (!ptr)
 	{
-		if(useExact)
+		if (useExact)
 		{
 			std::pair<std::filesystem::path,std::shared_ptr<T>> newObject(aFilePath,std::make_shared<T>(aFilePath));
 			ptr = library->Add(newObject);
@@ -218,7 +216,7 @@ template<class T>
 inline std::unordered_map<std::filesystem::path,std::shared_ptr<T>> Library::GetContentCatalogue()
 {
 	std::unordered_map<std::filesystem::path,std::shared_ptr<T>> newOutMap;
-	for(auto& i : content)
+	for (auto& i : content)
 	{
 		newOutMap.emplace(i.first,std::dynamic_pointer_cast<T>(i.second));
 	}
@@ -230,7 +228,7 @@ std::shared_ptr<Library> AssetManager::GetLibraryOfType()
 {
 	const std::type_info* typeInfo = &typeid(T);
 	auto it = myLibraries.find(typeInfo);
-	if(it != myLibraries.end())
+	if (it != myLibraries.end())
 	{
 		return it->second;
 	}

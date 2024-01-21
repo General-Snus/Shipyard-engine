@@ -1,37 +1,30 @@
-
-
-// Exclude things we don't need from the Windows headers 
-#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
-
-#include "Editor.h"
-#include "Windows.h"
-
-#include <filesystem>
-#include <filesystem>
-#include <string>
-#include <string>
-#include <stringapiset.h>
-#include <stringapiset.h>
-#include "Windows/SplashWindow.h"  
-
+#define NOMINMAX
 #include <assert.h>
+#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h> 
+#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXDynamicBody.h> 
+#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXStaticBody.h> 
+#include <Engine/AssetManager/ComponentSystem/Components/Transform.h> 
+#include <Engine/AssetManager/ComponentSystem/GameObject.h>
+#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
+#include <filesystem>
 #include <fstream>
 #include <functional>
-#include <streambuf>
-
+#include <streambuf> 
+#include <string>
+#include <stringapiset.h>
 #include <Tools/ImGUI/ImGUI/imgui.h>
 #include <Tools/ImGUI/ImGUI/imgui_impl_dx11.h>
 #include <Tools/ImGUI/ImGUI/imgui_impl_win32.h>
-
+#include <Tools/Optick/src/optick.h>
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/Input/InputHandler.hpp>
 #include <Tools/Utilities/Math.hpp>
-
-#include <Engine/AssetManager/ComponentSystem/GameObject.h>
-#include <Tools/Optick/src/optick.h>
 #include <Tools/Utilities/System/ThreadPool.hpp>
 #include <Windows/EditorWindows/ChainGraph/GraphTool.h>
 #include "../Windows/Window.h" 
+#include "Editor.h" 
+#include "Windows.h"
+#include "Windows/SplashWindow.h"
 
 #if PHYSX 
 #include <Engine/PersistentSystems/Physics/PhysXInterpeter.h>
@@ -42,7 +35,6 @@ using json = nlohmann::json;
 bool Editor::Initialize(HWND aHandle)
 {
 	MVLogger = Logger::Create("ModelViewer");
-	AMLogger = Logger::Create("AssetManager");
 	GELogger = Logger::Create("GraphicsEngine");
 
 	ShowSplashScreen();
