@@ -9,10 +9,10 @@ cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId) : Component(anOwnerId
 	AssetManager::Get().LoadAsset<Mesh>("default.fbx",myRenderData->myMesh);
 }
 
-inline cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath) : Component(anOwnerId)
+inline cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath,bool useExact) : Component(anOwnerId)
 {
 	myRenderData = std::make_shared<RenderData>();
-	AssetManager::Get().LoadAsset<Mesh>(aFilePath,myRenderData->myMesh);
+	AssetManager::Get().LoadAsset<Mesh>(aFilePath,useExact,myRenderData->myMesh);
 	//ThreadPool::Get().SubmitWork(std::bind(&waitForLoad,myRenderData->myMesh,myOwnerID));
 }
 
@@ -30,19 +30,38 @@ void cMeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath,int e
 {
 	std::shared_ptr<Material> mat;
 	AssetManager::Get().LoadAsset<Material>(aFilePath,mat);
-	if(myRenderData->overrideMaterial.size() <= elementIndex)
+	if (myRenderData->overrideMaterial.size() <= elementIndex)
 	{
 		myRenderData->overrideMaterial.resize(elementIndex + 1);
 	}
 	myRenderData->overrideMaterial[elementIndex] = mat;
 }
 
+bool cMeshRenderer::IsDefaultMesh() const
+{
+	if (myRenderData->myMesh->AssetPath == L"../../Content/default.fbx") // What am i doing with my life
+	{
+		return true;
+	}
+	return false;
+}
+
+const std::vector<Element>& cMeshRenderer::GetElements() const
+{
+	return myRenderData->myMesh->Elements;
+}
+
+std::shared_ptr<Mesh> cMeshRenderer::GetRawMesh() const
+{
+	return myRenderData->myMesh;
+}
+
 void cMeshRenderer::Render()
 {
 	OPTICK_EVENT();
-	if(const auto* myTransform = this->TryGetComponent<Transform>())
+	if (auto* myTransform = this->TryGetComponent<Transform>())
 	{
-		if(!isInstanced)
+		if (!isInstanced)
 		{
 			GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),isInstanced);
 			GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform(),isInstanced);
@@ -52,7 +71,7 @@ void cMeshRenderer::Render()
 		GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),isInstanced);
 		return;
 	}
-	if(!isInstanced)
+	if (!isInstanced)
 	{
 		GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),isInstanced);
 		GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,Matrix(),isInstanced);
@@ -80,9 +99,9 @@ void cSkeletalMeshRenderer::SetNewMesh(const std::filesystem::path& aFilePath)
 void cSkeletalMeshRenderer::Render()
 {
 	OPTICK_EVENT();
-	if(const auto* myTransform = this->TryGetComponent<Transform>())
+	if (auto* myTransform = this->TryGetComponent<Transform>())
 	{
-		if(const auto* myAnimation = this->TryGetComponent<cAnimator>())
+		if (const auto* myAnimation = this->TryGetComponent<cAnimator>())
 		{
 			myAnimation->RenderAnimation(myRenderData,myTransform->GetTransform());
 			return;

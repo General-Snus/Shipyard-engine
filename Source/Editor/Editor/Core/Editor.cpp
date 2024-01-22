@@ -1,39 +1,32 @@
-
-
-// Exclude things we don't need from the Windows headers 
-#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
-
-#include "Editor.h"
-#include "Windows.h"
-
-#include "Windows/SplashWindow.h"  
-#include <filesystem>
-#include <filesystem>
-#include <string>
-#include <string>
-#include <stringapiset.h>
-#include <stringapiset.h>
-
+#define NOMINMAX
 #include <assert.h>
+#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h> 
+#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXDynamicBody.h> 
+#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXStaticBody.h> 
+#include <Engine/AssetManager/ComponentSystem/Components/Transform.h> 
+#include <Engine/AssetManager/ComponentSystem/GameObject.h>
+#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
+#include <filesystem>
 #include <fstream>
 #include <functional>
-#include <streambuf>
-
+#include <streambuf> 
+#include <string>
+#include <stringapiset.h>
 #include <Tools/ImGUI/ImGUI/imgui.h>
 #include <Tools/ImGUI/ImGUI/imgui_impl_dx11.h>
 #include <Tools/ImGUI/ImGUI/imgui_impl_win32.h>
-
+#include <Tools/Optick/src/optick.h>
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/Input/InputHandler.hpp>
 #include <Tools/Utilities/Math.hpp>
-
-#include "../Windows/Window.h" 
-#include <Engine/AssetManager/ComponentSystem/GameObject.h>
-#include <Tools/Optick/src/optick.h>
 #include <Tools/Utilities/System/ThreadPool.hpp>
 #include <Windows/EditorWindows/ChainGraph/GraphTool.h>
+#include "../Windows/Window.h" 
+#include "Editor.h" 
+#include "Windows.h"
+#include "Windows/SplashWindow.h"
 
-#if PHYSX
+#if PHYSX 
 #include <Engine/PersistentSystems/Physics/PhysXInterpeter.h>
 #endif // PHYSX 0
 
@@ -42,11 +35,9 @@ using json = nlohmann::json;
 bool Editor::Initialize(HWND aHandle)
 {
 	MVLogger = Logger::Create("ModelViewer");
-	AMLogger = Logger::Create("AssetManager");
 	GELogger = Logger::Create("GraphicsEngine");
 
 	ShowSplashScreen();
-
 	ThreadPool::Get().Init();
 
 #ifdef _DEBUG
@@ -76,6 +67,8 @@ bool Editor::Initialize(HWND aHandle)
 
 	GameObjectManager::Get().SetUpdatePriority<Transform>(ComponentManagerBase::UpdatePriority::Transform);
 	GameObjectManager::Get().SetUpdatePriority<cPhysics_Kinematic>(ComponentManagerBase::UpdatePriority::Physics);
+	GameObjectManager::Get().SetUpdatePriority<cPhysXDynamicBody>(ComponentManagerBase::UpdatePriority::Physics);
+	//Force no write to thread after this?
 
 	HideSplashScreen();
 #if UseScriptGraph
@@ -87,12 +80,12 @@ bool Editor::Initialize(HWND aHandle)
 void Editor::DoWinProc(const MSG& aMessage)
 {
 	extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);
-	if(ImGui_ImplWin32_WndProcHandler(aMessage.hwnd,aMessage.message,aMessage.wParam,aMessage.lParam))
+	if (ImGui_ImplWin32_WndProcHandler(aMessage.hwnd,aMessage.message,aMessage.wParam,aMessage.lParam))
 	{
 		return;
 	}
 
-	if(aMessage.message == WM_QUIT)
+	if (aMessage.message == WM_QUIT)
 	{
 		ImGui_ImplDX11_Shutdown();
 		ImGui_ImplWin32_Shutdown();
@@ -103,12 +96,13 @@ void Editor::DoWinProc(const MSG& aMessage)
 	InputHandler::GetInstance().UpdateEvents(aMessage.message,aMessage.wParam,aMessage.lParam);
 	InputHandler::GetInstance().UpdateMouseInput(aMessage.message);
 }
+
 int	 Editor::Run()
 {
 	OPTICK_FRAME("MainThread");
 	InputHandler::GetInstance().Update();
 
-	if(IsGUIActive)
+	if (IsGUIActive)
 	{
 		UpdateImGui();
 		Update();
@@ -122,20 +116,15 @@ int	 Editor::Run()
 	return 0;
 }
 
-
-
-
-
-
-
 void Editor::ShowSplashScreen()
 {
-	if(!mySplashWindow)
+	if (!mySplashWindow)
 	{
 		mySplashWindow = std::make_unique<SplashWindow>();
 		mySplashWindow->Init(Window::moduleHandler);
 	}
 }
+
 void Editor::HideSplashScreen() const
 {
 	mySplashWindow->Close();
@@ -160,12 +149,18 @@ void Editor::UpdateImGui()
 
 void Editor::Update()
 {
+	OPTICK_EVENT();
 	Timer::GetInstance().Update();
 	const float delta = Timer::GetInstance().GetDeltaTime();
 
+
+	Shipyard_PhysX::Get().StartRead();
 	GameObjectManager::Get().Update();
 	myGameLauncher.Update(delta);
 	DebugDrawer::Get().Update(delta);
+
+	//Shipyard_PhysX::Get().Render();
+	Shipyard_PhysX::Get().EndRead(delta);
 }
 void Editor::Render()
 {
@@ -197,10 +192,10 @@ Vector2<int> Editor::GetViewportResolution()
 
 void Editor::ExpandWorldBounds(Sphere<float> sphere)
 {
-	if(myWorldBounds.ExpandSphere(sphere))
+	if (myWorldBounds.ExpandSphere(sphere))
 	{
 		//MVLogger.Log("World bounds was expanded");
-		for(auto& i : GameObjectManager::Get().GetAllComponents<cLight>())
+		for (auto& i : GameObjectManager::Get().GetAllComponents<cLight>())
 		{
 			i.SetIsDirty(true);
 			i.SetIsRendered(false);

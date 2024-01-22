@@ -7,6 +7,7 @@
 #ifndef ASSETMANAGER_PCH_H
 #define ASSETMANAGER_PCH_H
 
+#define NOMINMAX
 // add headers that you want to pre-compile here
 #include <filesystem> 
 #include <functional>
@@ -15,17 +16,17 @@
 #include <ranges>
 #include <unordered_map>
 #include <vector>
-
+#include <algorithm> 
 #include <assimp/Importer.hpp>      // C++ importer interface 
 #include <assimp/postprocess.h>     // Post processing flags
 #include <assimp/scene.h>           // Output data structure
 
-#include "Tools/Logging/Logging.h"
 #include <Tools/Optick/src/optick.h> 
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 #include <Tools/Utilities/Math.hpp>
+#include "Tools/Logging/Logging.h"
 
 #include "Objects/AI/AgentSystem/AIEventManager.h"
 #include "Objects/AI/AgentSystem/Controllers/AIController.h"  
@@ -64,19 +65,21 @@
 #include "ComponentSystem/Components/ParticleSystem.h"
 #include "ComponentSystem/Components/Physics/cPhysics_Kinematic.h"
 #include "ComponentSystem/Components/Physics/cPhysics_Newtonian.h"
+#include "ComponentSystem/Components/Physics/cPhysXDynamicBody.h"
+#include "ComponentSystem/Components/Physics/cPhysXStaticBody.h"
 #include "ComponentSystem/Components/Skybox.h"
 #include "ComponentSystem/Components/Transform.h"
 #include "ComponentSystem/GameObject.h"
 #include "ComponentSystem/GameObjectManager.h"
 
-#include "AssetManager.h"
-#include "ComponentSystem/UUID.h"
 #include <Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h>
 #include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
 #include <Engine/GraphicsEngine/GraphicsEngine.h>
 #include <Engine/GraphicsEngine/InterOp/RHI.h>
 #include <Engine/GraphicsEngine/Rendering/Vertex.h> 
 #include <Tools/FBX/TGAFbx.h>
+#include "AssetManager.h"
+#include "ComponentSystem/UUID.h"
 
 #include <Editor/Editor/Defines.h>
 static inline Logger AMLogger;

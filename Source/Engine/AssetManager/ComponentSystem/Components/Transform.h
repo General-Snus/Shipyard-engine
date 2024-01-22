@@ -2,6 +2,7 @@
 #include <Engine/AssetManager/ComponentSystem/Component.h>
 #include <Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h>
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
+#include <Tools/Utilities/LinearAlgebra/Quaternions.hpp>
 
 
 
@@ -13,11 +14,12 @@ public:
 	Transform(const unsigned int anOwnerId); // Create a generic cube 
 	//Transform(const unsigned int anOwnerId,const Matrix& aMatrix);
 
+	void Init() override;
 	void Update() override;
 	void Render() override;
 	// Matrix& GetTransform();
-	const Matrix& GetTransform() const;
-
+	const Matrix& GetTransform();
+	const Quaternionf& GetQuatF();
 
 
 	// TODO
@@ -56,6 +58,7 @@ public:
 	void SetScale(Vector2f scale);
 	void SetScale(Vector3f scale);
 	Vector3f GetScale() const;
+
 	//Meaning last frame
 	bool GetIsRecentlyUpdated() const;
 	bool GetIsDirty() const;
@@ -68,9 +71,11 @@ private:
 	bool IsRecentlyUpdated;
 	bool isDirty;
 	bool isDebugGizmoEnabled;
+	void MakeClean();
 	void MakeSaneRotation();
 	Vector3<float> myPosition;
 	Vector3<float> myRotation;
+	Quaternionf myQuaternion;
 	Vector3<float> myScale;
 
 	Matrix4x4<float> myTransform;

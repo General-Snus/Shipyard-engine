@@ -9,32 +9,34 @@
 #define NOMINMAX 
 
 // add headers that you want to pre-compile here
-#include <Windows.h>
 #include <d3d11.h>
+#include <Tools/ThirdParty/DirectXTK/WICTextureLoader.h>
+#include <Windows.h>
+#include "GraphicsEngine.h" 
 #include "InterOp/Helpers.h"
 #include "InterOp/RHI.h"
 #include "Tools/Logging/Logging.h"
-#include <Tools/ThirdParty/DirectXTK/WICTextureLoader.h>
-#include "GraphicsEngine.h" 
 
-#include "Rendering/Buffers/FrameBuffer.h"
-#include "Rendering/Buffers/ObjectBuffer.h"
-#include "Rendering/Buffers/LightBuffer.h"
-#include "Rendering/Buffers/LineBuffer.h"
-#include "Rendering/Buffers/G_buffer.h"
+#include "GraphicCommands/Commands/Headers/GfxCmd_Bloom.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_DebugLayer.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_DrawDebugPrimitive.h"
+#include "GraphicCommands/Commands/Headers/GfxCmd_LuminancePass.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_RenderMesh.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_RenderMeshShadow.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_RenderSkeletalMesh.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_RenderSkeletalMeshShadow.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_RenderSkybox.h"
+#include "GraphicCommands/Commands/Headers/GfxCmd_SetDepthState.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_SetLightBuffer.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_SetRenderTarget.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_LuminancePass.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_Bloom.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_ToneMapPass.h" 
+#include "GraphicCommands/Commands/Headers/GfxCmd_ToneMapPass.h"
+#include "Rendering/Buffers/FrameBuffer.h"
+#include "Rendering/Buffers/G_buffer.h"
+#include "Rendering/Buffers/LightBuffer.h"
+#include "Rendering/Buffers/LineBuffer.h"
+#include "Rendering/Buffers/ObjectBuffer.h"
+#include "wrl/client.h"
 
 static inline Logger GELogger;
 #endif //GRAPHICSENGINE_PCH

@@ -228,6 +228,12 @@
     <ClInclude Include="Rendering\Buffers\GraphicSettingsBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetDepthState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Include\EdgeBlur.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsEngine.pch.cpp">
@@ -321,6 +327,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SSAO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetDepthState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

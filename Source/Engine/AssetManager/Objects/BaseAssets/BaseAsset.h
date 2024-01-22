@@ -11,7 +11,8 @@ public:
 	virtual ~AssetBase() = default;
 	virtual void Init() = 0;
 	bool isLoadedComplete = false;
-	inline const std::filesystem::path& GetAssetPath() const { return AssetPath; };
+	bool isBeingLoaded = false;
+	inline const std::filesystem::path& GetAssetPath()	const { return AssetPath; };
 	std::vector<std::function<void()>> callBackOnFinished;
 protected:
 	std::filesystem::path AssetPath;
@@ -35,6 +36,8 @@ struct Element
 {
 	ComPtr<ID3D11Buffer> VertexBuffer;
 	ComPtr<ID3D11Buffer> IndexBuffer;
+	std::vector<Vertex> Vertices;
+	std::vector<unsigned int>Indicies;
 	UINT NumVertices = 0;
 	UINT NumIndices = 0;
 	UINT PrimitiveTopology = 0;

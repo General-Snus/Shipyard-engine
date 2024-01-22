@@ -1,6 +1,7 @@
 #include "AssetManager.pch.h"
-#include "../Collider.h"
+#include <Editor/Editor/Core/Editor.h>
 #include <Tools/Utilities/LinearAlgebra/Intersection.hpp>
+#include "../Collider.h"
 
 cCollider::cCollider(const unsigned int anOwnerId) : Component(anOwnerId)
 {
@@ -12,34 +13,31 @@ cCollider::cCollider(const unsigned int anOwnerId,const std::filesystem::path aP
 	myCollider = std::make_shared<ColliderAssetAABB>();
 }
 
+
+
 void cCollider::Update()
 {
-	const Transform& transform = GetComponent<Transform>();
-	const AABB3D<float>& thisCollider = GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB().UpdateWithTransform(transform.GetTransform());
-
-	for(auto& i : GameObjectManager::Get().GetAllComponents<cCollider>())
-	{
-		if(i.GetOwner() == myOwnerID)
-		{
-			continue;
-		}
-
-		const Transform& otherObj = i.GetComponent<Transform>();
-		auto collider = i.GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB().UpdateWithTransform(otherObj.GetTransform());;
-		if(IntersectionAABB(thisCollider,collider))
-		{
-			GameObjectManager::Get().CollidedWith(myOwnerID,i.GetOwner());
-			return;
-		}
-	}
+	OPTICK_EVENT();
+	//const AABB3D<float>& thisCollider = GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB();
+	//for (const auto& otherColliders : GameObjectManager::Get().GetAllComponents<cCollider>())
+	//{
+	//	if (otherColliders.GetOwner() == myOwnerID)
+	//	{
+	//		continue;
+	//	}
+	//
+	//	const auto& collider = otherColliders.GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB();
+	//	if (IntersectionAABB(thisCollider,collider))
+	//	{
+	//		GameObjectManager::Get().CollidedWith(myOwnerID,otherColliders.GetOwner());
+	//		return;
+	//	}
+	//}
 }
 
 Vector3f cCollider::GetClosestPosition(Vector3f position) const
 {
-	const Transform& otherObj = GetComponent<Transform>();
-	const auto collider = GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB().UpdateWithTransform(otherObj.GetTransform());;
-
-	return collider.ClosestPoint(position);
+	return GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB().ClosestPoint(position);
 }
 
 Vector3f roundToBasis(Vector3f input)
@@ -50,20 +48,50 @@ Vector3f roundToBasis(Vector3f input)
 	output.z = round(input.z);
 	return output;
 }
+
 Vector3f cCollider::GetNormalToward(Vector3f position) const
 {
 	const Transform& otherObj = GetComponent<Transform>();
-	const auto collider = GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB().UpdateWithTransform(otherObj.GetTransform());
+	const auto collider = GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB();
 	Vector3f norm = roundToBasis((collider.ClosestPoint(position) - otherObj.GetPosition()).GetNormalized());
 	return norm;
 }
 
 void cCollider::Render()
 {
-#ifdef _DEBUGDRAW  
-	if(const auto* transform = TryGetComponent<Transform>())
+	OPTICK_EVENT();
+	if (Editor::Get().GetApplicationState().drawDebugLines == false)
+	{
+		return;
+	}
+
+	if (auto* transform = TryGetComponent<Transform>())
 	{
 		myCollider->RenderDebugLines(*transform);
 	}
-#endif // _DEBUGDRAW 
+}
+
+void cCollider::OnSiblingChanged(const std::type_info* SourceClass)
+{
+	OPTICK_EVENT();
+	if (SourceClass == &typeid(Transform)) // Transform dirty
+	{
+		Transform& transform = GetComponent<Transform>();
+		const auto colliderType = myCollider->GetColliderType();
+		switch (colliderType)
+		{
+		case eColliderType::AABB:
+			GetColliderAssetOfType<ColliderAssetAABB>()->UpdateWithTransform(transform.GetTransform());
+			break;
+		case eColliderType::SPHERE:
+			break;
+		case eColliderType::CONVEX:
+			break;
+		case eColliderType::PLANAR:
+			break;
+		default:
+			break;
+		}
+		GetGameObject().OnSiblingChanged(&typeid(cCollider));
+	}
 }

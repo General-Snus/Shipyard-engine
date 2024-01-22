@@ -31,6 +31,9 @@ public:
 	bool GetActive();
 	void SetActive(const bool aState);
 
+
+	void OnSiblingChanged(const std::type_info* SourceClass = nullptr);
+
 	inline void SetLayer(const Layer aLayer) { myManager->SetLayer(myID,aLayer); };
 	inline Layer GetLayer() const { return myManager->GetLayer(myID); };
 
@@ -93,5 +96,10 @@ inline bool GameObject::GetActive()
 inline void GameObject::SetActive(const bool aState)
 {
 	myManager->SetActive(myID,aState);
+}
+
+inline void GameObject::OnSiblingChanged(const std::type_info* SourceClass)
+{
+	myManager->OnSiblingChanged(myID,SourceClass);
 }
 

@@ -48,9 +48,11 @@ void AssetManager::ThreadedLoading()
 		const double timeStart = Timer::GetInstance().GetTotalTime(); 
 		{
 			std::shared_ptr<AssetBase> working = myAssetQueue.Dequeue();
+			working->isBeingLoaded = true;
 			working->Init(); 
 			if(working->isLoadedComplete)
 			{
+				working->isBeingLoaded = false;
 				//this->assetCallbackMaster.UpdateStatusOf<T>(working->GetAssetPath(),AssetCallbackMaster::created); 
 				const double timeEnd = Timer::GetInstance().GetTotalTime();
 				const double diff = (timeEnd - timeStart) * 1000.0;

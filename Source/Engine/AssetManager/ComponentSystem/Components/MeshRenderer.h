@@ -1,6 +1,11 @@
 #pragma once
-#include <Engine/AssetManager/AssetManager.pch.h>
+#include <Engine/AssetManager/Objects/BaseAssets/BaseAsset.h>
+#include "Engine/AssetManager/ComponentSystem/Component.h"
 #define AsUINT(v) static_cast<unsigned>(v)
+
+class Mesh;
+class Material;
+class Skeleton;
 
 struct RenderData
 {
@@ -11,14 +16,14 @@ struct RenderData
 	}
 	std::shared_ptr<Mesh> myMesh;
 	std::vector<std::shared_ptr<Material>> overrideMaterial; //if this exist it will override the material on the mesh
-}; 
+};
 
 class cMeshRenderer : public Component
 {
 public:
 	cMeshRenderer() = delete; // Create a generic cube
 	cMeshRenderer(const unsigned int anOwnerId); // Create a generic cube  
-	cMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath); 
+	cMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath,bool useExact = false);
 	void Render() override;
 
 	void SetNewMesh(const std::filesystem::path& aFilePath);
@@ -26,23 +31,10 @@ public:
 	void SetMaterialPath(const std::filesystem::path& aFilePath,int elementIndex);
 	~cMeshRenderer() override = default;
 
-	FORCEINLINE const std::vector<Element>& GetElements() const
-	{
-		return myRenderData->myMesh->Elements;
-	}
-	FORCEINLINE std::shared_ptr<Mesh> GetRawMesh() const
-	{
-		return myRenderData->myMesh;
-	}
+	const std::vector<Element>& GetElements() const;
+	std::shared_ptr<Mesh> GetRawMesh() const;
 
-	FORCEINLINE bool IsDefaultMesh()
-	{
-		if(myRenderData->myMesh->AssetPath == L"../../Content/default.fbx") // What am i doing with my life
-		{
-			return true;
-		}
-		return false;
-	}
+	bool IsDefaultMesh() const;
 
 	FORCEINLINE bool IsStaticMesh()
 	{
@@ -57,7 +49,7 @@ public:
 protected:
 	bool isInstanced = true;
 	bool isStatic = true;
-	std::shared_ptr<RenderData> myRenderData; 
+	std::shared_ptr<RenderData> myRenderData;
 };
 
 

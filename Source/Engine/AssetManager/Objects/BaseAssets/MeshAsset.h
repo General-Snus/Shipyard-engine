@@ -1,6 +1,6 @@
 #pragma once
-#include "BaseAsset.h"
 #include <Tools/Utilities/LinearAlgebra/Sphere.hpp> 
+#include "BaseAsset.h"
 
 struct aiMesh;
 struct aiScene;
@@ -11,12 +11,12 @@ public:
 	friend class InstanceRenderer;
 	Mesh() = default;
 	Mesh(const std::filesystem::path& aFilePath);
-	void Init() override; 
+	void Init() override;
 
 	Vector3f MaxBox;
 	Vector3f MinBox;
 	Sphere<float> boxSphereBounds;
-	std::vector<Element> Elements; 
+	std::vector<Element> Elements;
 	const std::unordered_map<unsigned int,std::shared_ptr<Material>>& GetMaterialList();
 private:
 	std::unordered_map<unsigned int,std::shared_ptr<Material>> materials;
@@ -25,8 +25,8 @@ private:
 	D3D11_BUFFER_DESC vertexBufferDesc{};
 	std::vector<Matrix> myInstances;
 	int bufferSize;
-	void processMesh(aiMesh* mesh,const aiScene* scene); 
-	void ResizeBuffer(); 
+	void processMesh(aiMesh* mesh,const aiScene* scene);
+	void ResizeBuffer();
 	void UpdateInstanceBuffer();
 };
 

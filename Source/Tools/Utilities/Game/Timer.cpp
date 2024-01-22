@@ -1,4 +1,5 @@
-#include "Timer.h" 
+#include "Timer.h"
+#include <assert.h>
 
 Timer::Timer() 
 {
@@ -24,8 +25,20 @@ float Timer::GetDeltaTime() const
 	return myDeltaTime;
 }
 
+float Timer::GetUnscaledDeltaTime() const
+{
+	assert(false && "Not implemented");
+	return 0.0f;
+}
+
 //Nano seconds
 double Timer::GetTotalTime() const
 {
 	return std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - myStartTime).count();
+}
+
+double Timer::GetUnscaledTotalTime() const
+{
+	assert(false && "Not implemented");
+	return 0.0;
 }

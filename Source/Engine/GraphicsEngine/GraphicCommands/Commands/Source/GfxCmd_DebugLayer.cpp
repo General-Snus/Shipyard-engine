@@ -1,6 +1,6 @@
 #include <GraphicsEngine.pch.h>
-#include "../Headers/GfxCmd_DebugLayer.h"
 #include <Editor/Editor/Core/Editor.h>
+#include "../Headers/GfxCmd_DebugLayer.h"
 //#include <Game/Modelviewer/Core/Modelviewer.h>
 
 GfxCmd_DebugLayer::GfxCmd_DebugLayer()
@@ -12,8 +12,8 @@ void GfxCmd_DebugLayer::ExecuteAndDestroy()
 {
 	//TODO fix this
 	//if(ModelViewer::GetApplicationState().filter != DebugFilter::NoFilter)
-	if(Editor::GetApplicationState().filter != DebugFilter::NoFilter)
-	{ 
+	if (Editor::GetApplicationState().filter != DebugFilter::NoFilter)
+	{
 		RHI::SetBlendState(nullptr);
 		G_Buffer& gBuffer = GetGBuffer();
 		gBuffer.UseDebugShader();
@@ -21,7 +21,7 @@ void GfxCmd_DebugLayer::ExecuteAndDestroy()
 		//gBuffer.SetTexture(eGbufferTex::Depth);
 		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_DepthMap,GraphicsEngine::Get().GetTargetTextures(eRenderTargets::DepthBuffer).get());
 
-		RHI::SetRenderTarget(GraphicsEngine::Get().GetTargetTextures(eRenderTargets::BackBuffer).get(), nullptr);
+		RHI::SetRenderTarget(GraphicsEngine::Get().GetTargetTextures(eRenderTargets::BackBuffer).get(),nullptr);
 		RHI::ConfigureInputAssembler(
 			D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
 			nullptr,

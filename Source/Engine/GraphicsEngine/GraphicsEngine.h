@@ -1,25 +1,18 @@
-#pragma once
-#include <memory> 
-#include <wrl.h>
-
+#pragma once 
+#include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
+#include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
 #include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
-#include <Engine/GraphicsEngine/Shaders/Registers.h>
-
+#include <Engine/GraphicsEngine/Shaders/Registers.h> 
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp> 
+#include "InterOp/RHI.h"
 #include "Rendering/Buffers/ConstantBuffer.h" 
 #include "Rendering/Buffers/FrameBuffer.h"
 #include "Rendering/Buffers/G_Buffer.h"
 #include "Rendering/Buffers/GraphicSettingsBuffer.h"
 #include "Rendering/Buffers/LineBuffer.h"
-#include "Rendering/Buffers/ObjectBuffer.h"
-
-#include "InterOp/RHI.h"
+#include "Rendering/Buffers/ObjectBuffer.h" 
 #include "Rendering/ParticleRenderer/ParticleRenderer.h"
-#include "Rendering/ShadowRenderer/ShadowRenderer.h"
-
-#include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
-#include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
-
-#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp> 
+#include "Rendering/ShadowRenderer/ShadowRenderer.h"  
 #define _DEBUGDRAW
 
 struct GraphicsSettings
@@ -69,6 +62,13 @@ class GraphicsEngine
 	friend class ShadowRenderer;
 	friend class ParticleSystem;
 	friend class InstanceRenderer;
+public:
+	enum class eDepthStencilStates : unsigned int
+	{
+		DSS_ReadWrite,
+		DSS_ReadOnly,
+		DSS_COUNT,
+	};
 private:
 	FrameBuffer myFrameBuffer;
 	ObjectBuffer myObjectBuffer;
@@ -80,7 +80,7 @@ private:
 	GraphicsCommandList DeferredCommandList;
 	GraphicsCommandList OverlayCommandList;
 
-	SIZE myWindowSize{0,0};
+	SIZE myWindowSize{ 0,0 };
 	HWND myWindowHandle{};
 	cCamera* myCamera;
 	Vector4f myBackgroundColor;
@@ -147,12 +147,7 @@ private:
 	ComPtr<ID3D11SamplerState> myBRDFSampleState;
 	ComPtr<ID3D11SamplerState> myNormalDepthSampleState;
 
-	enum class eDepthStencilStates : unsigned int
-	{
-		DSS_ReadWrite,
-		DSS_ReadOnly,
-		DSS_COUNT,
-	};
+
 
 	std::array<ComPtr<ID3D11DepthStencilState>,(int)eDepthStencilStates::DSS_COUNT> myDepthStencilStates;
 
@@ -309,7 +304,7 @@ public:
 
 	FORCEINLINE std::shared_ptr<Texture> GetTargetTextures(eRenderTargets type) const
 	{
-		switch(type)
+		switch (type)
 		{
 		case::eRenderTargets::BackBuffer:
 			return myBackBuffer;
@@ -347,7 +342,7 @@ public:
 	FORCEINLINE std::shared_ptr<Material> GetDefaultMaterial() const { return defaultMaterial; }
 	FORCEINLINE std::shared_ptr<TextureHolder> GetDefaultTexture(eTextureType type) const
 	{
-		switch(type)
+		switch (type)
 		{
 		case eTextureType::ColorMap:
 			return defaultTexture;

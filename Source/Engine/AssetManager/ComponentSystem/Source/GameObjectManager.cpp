@@ -1,14 +1,14 @@
 #include "AssetManager.pch.h"
-#include "../GameObject.h"
-#include "../GameObjectManager.h"
 #include <algorithm>
 #include <string>
+#include "../GameObject.h"
+#include "../GameObjectManager.h"
 
 #include <Tools/Optick/src/optick.h>
 
 GameObjectManager::~GameObjectManager()
 {
-	for(auto& cm : myComponentManagers)
+	for (auto& cm : myComponentManagers)
 	{
 		cm.second->Destroy();
 		delete cm.second;
@@ -19,6 +19,18 @@ const GameObject GameObjectManager::CreateGameObject()
 {
 	myGameObjects.emplace(myLastID,true);
 	return GameObject(myLastID++,this);
+}
+
+//ILLEGAL
+const GameObject GameObjectManager::CreateGameObjectAt(const SY::UUID aGameObjectID)
+{
+	if (aGameObjectID > myLastID)
+	{
+		myLastID = aGameObjectID;
+		myLastID++;
+	}
+	myObjectsToAdd.push_back(aGameObjectID);
+	return GameObject(aGameObjectID,this);
 }
 
 void GameObjectManager::DeleteGameObject(const SY::UUID aGameObjectID)
@@ -33,6 +45,11 @@ void GameObjectManager::DeleteGameObject(const GameObject aGameObject)
 
 bool GameObjectManager::GetActive(const SY::UUID aGameObjectID)
 {
+	if (myGameObjects.find(aGameObjectID) == myGameObjects.end())
+	{
+		return false;
+	}
+
 	return myGameObjects.at(aGameObjectID).IsActive;
 }
 
@@ -58,7 +75,7 @@ GameObject GameObjectManager::GetCamera()
 
 GameObject GameObjectManager::GetGameObject(SY::UUID anID)
 {
-	if(myGameObjects.find(anID) != myGameObjects.end())
+	if (myGameObjects.find(anID) != myGameObjects.end())
 	{
 		return GameObject(anID,this);
 	}
@@ -69,7 +86,7 @@ GameObject GameObjectManager::GetGameObject(SY::UUID anID)
 
 void GameObjectManager::CollidedWith(const SY::UUID aFirstID,const SY::UUID aTargetID)
 {
-	for(auto& cm : myComponentManagers)
+	for (auto& cm : myComponentManagers)
 	{
 		cm.second->CollidedWith(aFirstID,aTargetID);
 	}
@@ -77,7 +94,7 @@ void GameObjectManager::CollidedWith(const SY::UUID aFirstID,const SY::UUID aTar
 
 void GameObjectManager::SetActive(const SY::UUID aGameObjectID,const bool aState)
 {
-	if(myGameObjects.find(aGameObjectID) != myGameObjects.end())
+	if (myGameObjects.find(aGameObjectID) != myGameObjects.end())
 	{
 		myGameObjects[aGameObjectID].IsActive = aState;
 		return;
@@ -105,24 +122,30 @@ void GameObjectManager::SetLastGOAsCamera()
 	myCamera = myLastID - 1;
 }
 
+void GameObjectManager::CustomOrderUpdate()
+{
+	DeleteObjects();
+}
+
 void GameObjectManager::Update()
 {
+	DeleteObjects();
+	AddObjects();
 	OPTICK_EVENT();
-	for(size_t i = 0; i < myUpdateOrder.size(); i++)
+	for (size_t i = 0; i < myUpdateOrder.size(); i++)
 	{
 		myUpdateOrder[i].second->Update();
 	}
-	for(size_t i = 0; i < myUpdateOrder.size(); i++)
+	for (size_t i = 0; i < myUpdateOrder.size(); i++)
 	{
 		myUpdateOrder[i].second->Render();
 	}
-	DeleteObjects();
 }
 
 void GameObjectManager::SortUpdateOrder()
 {
 	myUpdateOrder.clear();
-	for(auto& cm : myComponentManagers)
+	for (auto& cm : myComponentManagers)
 	{
 		myUpdateOrder.push_back(cm);
 	}
@@ -133,14 +156,16 @@ void GameObjectManager::SortUpdateOrder()
 		});
 }
 
+
+
 void GameObjectManager::DeleteObjects()
 {
 	OPTICK_EVENT();
-	for(size_t i = 0; i < myObjectsToDelete.size(); i++)
+	for (size_t i = 0; i < myObjectsToDelete.size(); i++)
 	{
-		if(myGameObjects.find(myObjectsToDelete[i]) != myGameObjects.end())
+		if (myGameObjects.find(myObjectsToDelete[i]) != myGameObjects.end())
 		{
-			for(auto& cm : myComponentManagers)
+			for (auto& cm : myComponentManagers)
 			{
 				cm.second->DeleteGameObject(myObjectsToDelete[i]);
 			}
@@ -153,4 +178,23 @@ void GameObjectManager::DeleteObjects()
 	}
 
 	myObjectsToDelete.clear();
+}
+
+void GameObjectManager::AddObjects()
+{
+	for (auto& i : myObjectsToAdd)
+	{
+
+		myGameObjects.emplace(i,true);
+
+	}
+	myObjectsToAdd.clear();
+}
+
+void GameObjectManager::OnSiblingChanged(SY::UUID anID,const std::type_info* SourceClass)
+{
+	for (auto& cm : myComponentManagers)
+	{
+		cm.second->OnSiblingChanged(anID,SourceClass);
+	}
 }

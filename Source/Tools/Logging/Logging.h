@@ -3,8 +3,7 @@
 #include <string>
 
 #include "Windows.h"
-#include <source_location>
-
+#include <source_location> 
 class Logger
 {
 	HANDLE myHandle = 0;

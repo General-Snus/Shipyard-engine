@@ -1,7 +1,8 @@
 #define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <cmath>
 #include <Windows.h> 
 #include "Camera.h"
-#include <cmath>
 
 MainCamera::MainCamera()
 {
@@ -28,10 +29,10 @@ inline MainCamera::MainCamera(Vector3f aPosition,Vector3f aRotation)
 {
 	aPosition; aRotation;
 
-	Vector3f RightAxis = {1,0,0};
-	Vector3f DownAxis = {0,-1,0};;
-	Vector3f ForwardAxis = {0,0,1};;
-	for(int i = 0; i < 3; i++)
+	Vector3f RightAxis = { 1,0,0 };
+	Vector3f DownAxis = { 0,-1,0 };;
+	Vector3f ForwardAxis = { 0,0,1 };;
+	for (int i = 0; i < 3; i++)
 	{
 		myTransform(1,i + 1) = RightAxis[i];
 		myTransform(2,i + 1) = DownAxis[i];
@@ -65,9 +66,9 @@ MainCamera::~MainCamera()
 
 void MainCamera::UpdatePositionVectors()
 {
-	for(int i = 1; i <= 3; i++)
+	for (int i = 1; i <= 3; i++)
 	{
-		myDirections[i - 1] = {myTransform(i,1),myTransform(i,2),myTransform(i,3)};
+		myDirections[i - 1] = { myTransform(i,1),myTransform(i,2),myTransform(i,3) };
 	}
 }
 
@@ -75,46 +76,46 @@ void MainCamera::Update(float aTimeDelta)
 {
 	UpdatePositionVectors();
 	float mdf = 5;
-	if(GetAsyncKeyState('W'))
+	if (GetAsyncKeyState('W'))
 	{
-		for(int i = 1; i <= 3; i++)
+		for (int i = 1; i <= 3; i++)
 		{
 			myTransform(4,i) += mdf * aTimeDelta * myDirections.z[i - 1];
 		}
 
 	}
 
-	if(GetAsyncKeyState('S'))
+	if (GetAsyncKeyState('S'))
 	{
-		for(int i = 1; i <= 3; i++)
+		for (int i = 1; i <= 3; i++)
 		{
 			myTransform(4,i) += mdf * -aTimeDelta * myDirections.z[i - 1];
 		}
 	}
 
-	if(GetAsyncKeyState('D'))
+	if (GetAsyncKeyState('D'))
 	{
-		for(int i = 1; i <= 3; i++)
+		for (int i = 1; i <= 3; i++)
 		{
 			myTransform(4,i) += mdf * aTimeDelta * myDirections.x[i - 1];
 		}
 	}
 
-	if(GetAsyncKeyState('A'))
+	if (GetAsyncKeyState('A'))
 	{
 
-		for(int i = 1; i <= 3; i++)
+		for (int i = 1; i <= 3; i++)
 		{
 			myTransform(4,i) += mdf * -aTimeDelta * myDirections.x[i - 1];
 		}
 	}
 
-	if(GetAsyncKeyState('E'))
+	if (GetAsyncKeyState('E'))
 	{
 		myTransform = myTransform.CreateRotationAroundY(2.0f * aTimeDelta) * myTransform;
 	}
 
-	if(GetAsyncKeyState('Q'))
+	if (GetAsyncKeyState('Q'))
 	{
 		myTransform = myTransform.CreateRotationAroundY(-2.0f * aTimeDelta) * myTransform;
 	}
@@ -123,7 +124,7 @@ void MainCamera::Update(float aTimeDelta)
 Vector4f MainCamera::WoldSpaceToPostProjectionSpace(Vector3f aEntity)
 {
 	//Get actuall world space coordinate
-	Vector4f outPosition = {aEntity.x,aEntity.y,aEntity.z,1};
+	Vector4f outPosition = { aEntity.x,aEntity.y,aEntity.z,1 };
 
 	//Punkt -> CameraSpace
 	outPosition = outPosition * myTransform.GetFastInverse(myTransform);

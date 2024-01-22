@@ -162,6 +162,12 @@
     <ClInclude Include="Objects\AI\AgentSystem\StateMachine\StateMachineBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ComponentSystem\Components\Physics\cPhysXDynamicBody.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ComponentSystem\Components\Physics\cPhysXStaticBody.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssetManager.pch.cpp">
@@ -303,6 +309,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Objects\AI\AgentSystem\StateMachine\Source\StateMachineBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysXDynamicBody.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysXStaticBody.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

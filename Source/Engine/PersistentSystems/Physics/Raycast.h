@@ -28,29 +28,28 @@ namespace Physics {
 
 		float distance = maxDistance;
 		Vector3f hitPoint;
-		for(const auto& i : GameObjectManager::Get().GetAllComponents<cCollider>()) //Observe crabLiftingBar.jpeg
+		for (auto& i : GameObjectManager::Get().GetAllComponents<cCollider>()) //Observe crabLiftingBar.jpeg
 		{
 			Layer a = layerMask;
 			Layer b = i.GetGameObject().GetLayer();
 
 			bool f = ((int)a & (int)b);
-			if(
-				!f			// plz fix u stupid bastard
+			if (!f			// plz fix u stupid bastard
 				|| !i.IsActive()
 				|| i.GetOwner() == filter.GetID())
 			{
 				continue;
 			}
 
-			const auto collider = i.GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB().UpdateWithTransform(i.GetComponent<Transform>().GetTransform());
+			const auto collider = i.GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB();
 
 			Ray ray;
 			ray.InitWithOriginAndDirection(origin,direction);
 
-			if(IntersectionAABBRay(collider,ray,hitPoint))
+			if (IntersectionAABBRay(collider,ray,hitPoint))
 			{
 				const float newDistance = (hitPoint - origin).Length();
-				if(newDistance < distance)
+				if (newDistance < distance)
 				{
 					distance = newDistance;
 					outHitInfo.point = hitPoint;
@@ -73,17 +72,17 @@ namespace Physics {
 
 		float distance = maxDistance;
 		Vector3f hitPoint;
-		for(auto& i : GameObjectManager::Get().GetAllComponents<cCollider>())
+		for (auto& i : GameObjectManager::Get().GetAllComponents<cCollider>())
 		{
-			auto collider = i.GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB().UpdateWithTransform(i.GetComponent<Transform>().GetTransform());
+			auto collider = i.GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB();
 
 			Ray ray;
 			ray.InitWithOriginAndDirection(origin,direction);
 
-			if(IntersectionAABBRay(collider,ray,hitPoint))
+			if (IntersectionAABBRay(collider,ray,hitPoint))
 			{
 				const float newDistance = (hitPoint - origin).Length();
-				if(newDistance < distance)
+				if (newDistance < distance)
 				{
 					distance = newDistance;
 					outHitInfo.point = hitPoint;
@@ -106,14 +105,14 @@ namespace Physics {
 		float distance = 0;
 		distance;
 		//Observe crabLiftingBar.jpeg
-		for(auto& i : GameObjectManager::Get().GetAllComponents<cCollider>())
+		for (auto& i : GameObjectManager::Get().GetAllComponents<cCollider>())
 		{
-			auto collider = i.GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB().UpdateWithTransform(i.GetComponent<Transform>().GetTransform());
+			auto collider = i.GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB();
 
 			Ray ray;
 			ray.InitWithOriginAndDirection(origin,direction);
 
-			if(IntersectionAABBRay(collider,ray))
+			if (IntersectionAABBRay(collider,ray))
 			{
 				return true;
 			}

@@ -44,20 +44,20 @@ Foundation& physx::getFoundation()
 	return *gInstance;
 }
 
-Foundation::Foundation(PxErrorCallback& errc, PxAllocatorCallback& alloc) :
-	mAllocatorCallback		(alloc),
-	mErrorCallback			(errc),
-	mBroadcastingAllocator	(alloc, errc),
-	mBroadcastingError		(errc),
+Foundation::Foundation(PxErrorCallback& errc,PxAllocatorCallback& alloc) :
+	mAllocatorCallback(alloc),
+	mErrorCallback(errc),
+	mBroadcastingAllocator(alloc,errc),
+	mBroadcastingError(errc),
 #if PX_CHECKED
-    mReportAllocationNames	(true),
+	mReportAllocationNames(true),
 #else
-    mReportAllocationNames	(false),
+	mReportAllocationNames(false),
 #endif
-    mErrorMask				(PxErrorCode::Enum(~0)),
-	mErrorMutex				("Foundation::mErrorMutex"),
-	mTempAllocMutex			("Foundation::mTempAllocMutex"),
-	mRefCount				(0)
+	mErrorMask(PxErrorCode::Enum(~0)),
+	mErrorMutex("Foundation::mErrorMutex"),
+	mTempAllocMutex("Foundation::mTempAllocMutex"),
+	mRefCount(0)
 {
 }
 
@@ -88,16 +88,16 @@ PxU32 Foundation::getWarnOnceTimestamp()
 	return mWarnOnceTimestap;
 }
 
-bool Foundation::error(PxErrorCode::Enum c, const char* file, int line, const char* messageFmt, ...)
+bool Foundation::error(PxErrorCode::Enum c,const char* file,int line,const char* messageFmt,...)
 {
 	va_list va;
-	va_start(va, messageFmt);
-	error(c, file, line, messageFmt, va);
+	va_start(va,messageFmt);
+	error(c,file,line,messageFmt,va);
 	va_end(va);
 	return false;
 }
 
-bool Foundation::error(PxErrorCode::Enum e, const char* file, int line, const char* messageFmt, va_list va)
+bool Foundation::error(PxErrorCode::Enum e,const char* file,int line,const char* messageFmt,va_list va)
 {
 	PX_ASSERT(messageFmt);
 	if(e & mErrorMask)
@@ -113,21 +113,21 @@ bool Foundation::error(PxErrorCode::Enum e, const char* file, int line, const ch
 
 		static const size_t bufSize = 1024;
 		char stringBuffer[bufSize];
-		Pxvsnprintf(stringBuffer, bufSize, messageFmt, va);
+		Pxvsnprintf(stringBuffer,bufSize,messageFmt,va);
 
-		mBroadcastingError.reportError(e, stringBuffer, file, line);
+		mBroadcastingError.reportError(e,stringBuffer,file,line);
 	}
 	return false;
 }
 
-Foundation* Foundation::createInstance(PxU32 version, PxErrorCallback& errc, PxAllocatorCallback& alloc)
+Foundation* Foundation::createInstance(PxU32 version,PxErrorCallback& errc,PxAllocatorCallback& alloc)
 {
 	if(version != PX_PHYSICS_VERSION)
 	{
 		char* buffer = new char[256];
-		Pxsnprintf(buffer, 256, "Wrong version: physics version is 0x%08x, tried to create 0x%08x",
-			PX_PHYSICS_VERSION, version);
-		errc.reportError(PxErrorCode::eINVALID_PARAMETER, buffer, PX_FL);
+		Pxsnprintf(buffer,256,"Wrong version: physics version is 0x%08x, tried to create 0x%08x",
+			PX_PHYSICS_VERSION,version);
+		errc.reportError(PxErrorCode::eINVALID_PARAMETER,buffer,PX_FL);
 		return 0;
 	}
 
@@ -136,11 +136,11 @@ Foundation* Foundation::createInstance(PxU32 version, PxErrorCallback& errc, PxA
 		// if we don't assign this here, the Foundation object can't create member
 		// subobjects which require the allocator
 
-		gInstance = reinterpret_cast<Foundation*>(alloc.allocate(sizeof(Foundation), "Foundation", PX_FL));
+		gInstance = reinterpret_cast<Foundation*>(alloc.allocate(sizeof(Foundation),"Foundation",PX_FL));
 
 		if(gInstance)
 		{
-			PX_PLACEMENT_NEW(gInstance, Foundation)(errc, alloc);
+			PX_PLACEMENT_NEW(gInstance,Foundation)(errc,alloc);
 
 			PX_ASSERT(gInstance->mRefCount == 0);
 			gInstance->mRefCount = 1;
@@ -152,12 +152,12 @@ Foundation* Foundation::createInstance(PxU32 version, PxErrorCallback& errc, PxA
 		}
 		else
 		{
-			errc.reportError(PxErrorCode::eINTERNAL_ERROR, "Memory allocation for foundation object failed.", PX_FL);
+			errc.reportError(PxErrorCode::eINTERNAL_ERROR,"Memory allocation for foundation object failed.",PX_FL);
 		}
 	}
 	else
 	{
-		errc.reportError(PxErrorCode::eINVALID_OPERATION, "Foundation object exists already. Only one instance per process can be created.", PX_FL);
+		errc.reportError(PxErrorCode::eINVALID_OPERATION,"Foundation object exists already. Only one instance per process can be created.",PX_FL);
 	}
 
 	return 0;
@@ -172,12 +172,12 @@ void Foundation::destroyInstance()
 		PxAllocatorCallback& alloc = gInstance->getAllocatorCallback();
 		gInstance->~Foundation();
 		alloc.deallocate(gInstance);
-        gInstance = NULL;
+		gInstance = NULL;
 	}
 	else
 	{
-		gInstance->error(PxErrorCode::eINVALID_OPERATION, PX_FL,
-		                 "Foundation destruction failed due to pending module references. Close/release all depending modules first.");
+		gInstance->error(PxErrorCode::eINVALID_OPERATION,PX_FL,
+			"Foundation destruction failed due to pending module references. Close/release all depending modules first.");
 	}
 }
 
@@ -186,9 +186,9 @@ void Foundation::incRefCount()
 	PX_ASSERT(gInstance);
 
 	if(gInstance->mRefCount > 0)
-        gInstance->mRefCount++;
+		gInstance->mRefCount++;
 	else
-		gInstance->error(PxErrorCode::eINVALID_OPERATION, PX_FL, "Foundation: Invalid registration detected.");
+		gInstance->error(PxErrorCode::eINVALID_OPERATION,PX_FL,"Foundation: Invalid registration detected.");
 }
 
 void Foundation::decRefCount()
@@ -196,9 +196,9 @@ void Foundation::decRefCount()
 	PX_ASSERT(gInstance);
 
 	if(gInstance->mRefCount > 0)
-        gInstance->mRefCount--;
+		gInstance->mRefCount--;
 	else
-		gInstance->error(PxErrorCode::eINVALID_OPERATION, PX_FL, "Foundation: Invalid deregistration detected.");
+		gInstance->error(PxErrorCode::eINVALID_OPERATION,PX_FL,"Foundation: Invalid deregistration detected.");
 }
 
 void Foundation::release()
@@ -237,9 +237,9 @@ void Foundation::deregisterErrorCallback(PxErrorCallback& callback)
 	mBroadcastingError.deregisterListener(callback);
 }
 
-PxFoundation* PxCreateFoundation(PxU32 version, PxAllocatorCallback& allocator, PxErrorCallback& errorCallback)
+PxFoundation* PxCreateFoundation(PxU32 version,PxAllocatorCallback& allocator,PxErrorCallback& errorCallback)
 {
-	return Foundation::createInstance(version, errorCallback, allocator);
+	return Foundation::createInstance(version,errorCallback,allocator);
 }
 
 void PxSetFoundationInstance(PxFoundation& foundation)

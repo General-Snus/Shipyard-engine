@@ -1,27 +1,28 @@
 #include "GraphicsEngine.pch.h"
-#include "ShadowRenderer.h"
-#include "../../Shaders/Include/Default_VS.h"
 #include <Tools/ImGui/ImGui/imgui.h>
+#include <Tools/Optick/src/optick.h>
+#include "../../Shaders/Include/Default_VS.h"
+#include "ShadowRenderer.h" 
 
 void ShadowRenderer::Init()
 {
-	ShadowCommandList.Initialize((size_t) 10 * MegaByte); 
+	ShadowCommandList.Initialize((size_t)10 * MegaByte);
 	myVertexShader = GraphicsEngine::Get().myVertexShader;
 }
 
 void ShadowRenderer::Execute()
 {
 	OPTICK_EVENT();
-	LightBuffer& buffer = GraphicsEngine::Get().myLightBuffer;  
+	LightBuffer& buffer = GraphicsEngine::Get().myLightBuffer;
 
 	RHI::SetVertexShader(myVertexShader);
-	RHI::SetPixelShader(nullptr) ;
+	RHI::SetPixelShader(nullptr);
 	std::shared_ptr<Texture> shadowMap;
-	for(auto& i : GameObjectManager::Get().GetAllComponents<cLight>())
+	for (auto& i : GameObjectManager::Get().GetAllComponents<cLight>())
 	{
-		if(i.GetIsShadowCaster() && i.GetIsDirty())
+		if (i.GetIsShadowCaster() && i.GetIsDirty())
 		{
-			if(i.GetType() == eLightType::Directional && !i.GetIsRendered())
+			if (i.GetType() == eLightType::Directional && !i.GetIsRendered())
 			{
 				RHI::BeginEvent(L"DirectionalLight Shadow Pass");
 				buffer.Data.myDirectionalLight = *i.GetData<DirectionalLight>().get();
@@ -34,14 +35,14 @@ void ShadowRenderer::Execute()
 				GfxCmd_SetFrameBuffer(buffer.Data.myDirectionalLight.projection,buffer.Data.myDirectionalLight.lightView,0).ExecuteAndDestroy();
 
 				ShadowCommandList.StartOver();
-				ShadowCommandList.Execute(); 
+				ShadowCommandList.Execute();
 				GraphicsEngine::Get().myInstanceRenderer.Execute(true);
 				RHI::SetRenderTarget(nullptr,nullptr);
 				i.SetIsRendered(true);
 				RHI::EndEvent();
 			}
 
-			if(i.GetType() == eLightType::Spot && !i.GetIsRendered())
+			if (i.GetType() == eLightType::Spot && !i.GetIsRendered())
 			{
 				RHI::BeginEvent(L"SpotLight Shadow Pass");
 				buffer.Data.mySpotLight = *i.GetData<SpotLight>().get();
@@ -58,16 +59,16 @@ void ShadowRenderer::Execute()
 				ShadowCommandList.Execute();
 				GraphicsEngine::Get().myInstanceRenderer.Execute(true);
 				RHI::SetRenderTarget(nullptr,nullptr);
-				i.SetIsRendered(true);     
+				i.SetIsRendered(true);
 				RHI::EndEvent();
 			}
 
-			if(i.GetType() == eLightType::Point && !i.GetIsRendered())
+			if (i.GetType() == eLightType::Point && !i.GetIsRendered())
 			{
 				RHI::BeginEvent(L"PointLight Shadow Pass");
-				for(int j = 0; j < 6; j++)
+				for (int j = 0; j < 6; j++)
 				{
-					buffer.Data.myPointLight = *i.GetData<PointLight>().get(); 
+					buffer.Data.myPointLight = *i.GetData<PointLight>().get();
 					RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER,REG_LightBuffer,buffer);
 					RHI::UpdateConstantBufferData(buffer);
 
@@ -81,7 +82,7 @@ void ShadowRenderer::Execute()
 					ShadowCommandList.Execute();
 					GraphicsEngine::Get().myInstanceRenderer.Execute(true);
 					RHI::SetRenderTarget(nullptr,nullptr);
-					i.SetIsRendered(true); 
+					i.SetIsRendered(true);
 				}
 				RHI::EndEvent();
 			}
@@ -91,7 +92,7 @@ void ShadowRenderer::Execute()
 }
 
 void ShadowRenderer::ResetShadowList()
-{ 
+{
 	ShadowCommandList.ForceSetDone();
 	ShadowCommandList.Reset();
 }

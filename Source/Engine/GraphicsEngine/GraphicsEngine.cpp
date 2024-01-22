@@ -1,57 +1,46 @@
 #include "GraphicsEngine.pch.h"
-#include "GraphicsEngine.h"
-
-#include <filesystem>
-#include <utility>
-
+#include <Engine/AssetManager/AssetManager.h>
+#include <Engine/AssetManager/ComponentSystem/Components/CameraComponent.h>
+#include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>
+#include <Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h>
+#include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
+#include <Engine/GraphicsEngine/InterOp/DDSTextureLoader11.h>
+#include <Objects/DataObjects/Default_C.h>
+#include <Objects/DataObjects/Default_FX.h>
+#include <Objects/DataObjects/Default_M.h>
+#include <Objects/DataObjects/Default_N.h>
 #include <Shaders/Include/Bloom_PS.h> 
+#include <Shaders/Include/brdfLUT_PS.h>
 #include <Shaders/Include/CopyPixels_PS.h> 
 #include <Shaders/Include/Default_PS.h>
 #include <Shaders/Include/Default_VS.h>
 #include <Shaders/Include/EdgeBlur.h> 
 #include <Shaders/Include/GaussianBlur_PS.h> 
+#include <Shaders/Include/LineDrawer_PS.h>
+#include <Shaders/Include/LineDrawer_VS.h>
 #include <Shaders/Include/LuminancePass_PS.h>
-#include <Shaders/Include/SSAO_PS.h> 
-#include <Shaders/Include/ToneMapping_PS.h>
-
 #include <Shaders/Include/ParticleShader_GS.h> 
 #include <Shaders/Include/ParticleShader_PS.h> 
 #include <Shaders/Include/ParticleShader_VS.h> 
-
-#include <Objects/DataObjects/Default_C.h>
-#include <Objects/DataObjects/Default_FX.h>
-#include <Objects/DataObjects/Default_M.h>
-#include <Objects/DataObjects/Default_N.h>
-
-#include <Shaders/Include/LineDrawer_PS.h>
-#include <Shaders/Include/LineDrawer_VS.h>
-
-#include <Shaders/Include/brdfLUT_PS.h>
 #include <Shaders/Include/ScreenspaceQuad_VS.h>
+#include <Shaders/Include/SSAO_PS.h> 
+#include <Shaders/Include/ToneMapping_PS.h>
 #include <Shaders/Registers.h>
-
-#include "Objects/Shader.h"
-
-#include "GraphicCommands/GraphicCommands.h"
-#include "Rendering/ParticleRenderer/ParticleVertex.h" 
-#include "Rendering/Vertex.h" 
-#include <Engine/AssetManager/ComponentSystem/Components/CameraComponent.h>
-#include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>
-#include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
-
+#include <stdexcept> 
+#include <Tools/ImGui/ImGui/imgui.h>
+#include <Tools/Optick/include/optick.h> 
 #include "GraphicCommands/Commands/Headers/GfxCmd_DebugLayer.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_GaussianBlur.h" 
 #include "GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_SetLightBuffer.h" 
 #include "GraphicCommands/Commands/Headers/GfxCmd_SetRenderTarget.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_SSAO.h" 
-
-#include "Shaders/Registers.h"
-#include <stdexcept> 
-#include <Tools/ImGui/ImGui/imgui.h>
-
-#include <Engine/GraphicsEngine/InterOp/DDSTextureLoader11.h>
-#include <Tools/Optick/src/optick.h>
+#include "GraphicCommands/GraphicCommands.h"
+#include "GraphicsEngine.h"     
+#include "Objects/Shader.h" 
+#include "Rendering/ParticleRenderer/ParticleVertex.h" 
+#include "Rendering/Vertex.h" 
+#include "Shaders/Registers.h" 
 
 
 bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
@@ -69,7 +58,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 		myBackBuffer = std::make_unique<Texture>();
 		myDepthBuffer = std::make_unique<Texture>();
 
-		if(!RHI::Initialize(myWindowHandle,
+		if (!RHI::Initialize(myWindowHandle,
 			enableDeviceDebug,
 			myBackBuffer.get(),
 			myDepthBuffer.get()))
@@ -107,7 +96,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 
 #ifdef _DEBUG
 	}
-	catch(const std::exception& e)
+	catch (const std::exception& e)
 	{
 		GELogger.LogException(e);
 		exit(-1);
@@ -119,7 +108,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 bool GraphicsEngine::SetupDebugDrawline()
 {
 	DebugDrawer::Get().Initialize();
-	DebugDrawer::Get().AddDebugGrid({0.f, 0.0f, 0.f},1000,10,{1.0f, 1.0f, 1.0f});
+	DebugDrawer::Get().AddDebugGrid({ 0.f, 0.0f, 0.f },1000,10,{ 1.0f, 1.0f, 1.0f });
 	return true;
 }
 
@@ -140,7 +129,7 @@ void GraphicsEngine::SetupDefaultVariables()
 	samplerDesc.MinLOD = -D3D11_FLOAT32_MAX;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-	if(!RHI::CreateSamplerState(myDefaultSampleState,samplerDesc))
+	if (!RHI::CreateSamplerState(myDefaultSampleState,samplerDesc))
 	{
 		GELogger.Log("Sampler state created");
 		assert(false);
@@ -162,7 +151,7 @@ void GraphicsEngine::SetupDefaultVariables()
 	shadowSamplerDesc.MipLODBias = 0.f;
 	shadowSamplerDesc.MaxAnisotropy = 1;*/
 
-	if(!RHI::CreateSamplerState(myShadowSampleState,shadowSamplerDesc))
+	if (!RHI::CreateSamplerState(myShadowSampleState,shadowSamplerDesc))
 	{
 		GELogger.Log("Sampler state created");
 		assert(false);
@@ -179,7 +168,7 @@ void GraphicsEngine::SetupDefaultVariables()
 		&depthStencilDesc,
 		&myDepthStencilStates[(int)eDepthStencilStates::DSS_ReadOnly]
 	);
-	if(FAILED(result))
+	if (FAILED(result))
 	{
 		GELogger.Log("Failed to create depth stencil read only state");
 		assert(false);
@@ -207,7 +196,7 @@ void GraphicsEngine::SetupDefaultVariables()
 
 	defaultTexture = std::make_shared<TextureHolder>("",eTextureType::ColorMap);
 
-	if(!RHI::LoadTexture(
+	if (!RHI::LoadTexture(
 		defaultTexture->GetRawTexture().get(),
 		AssetManager::Get().AssetPath / "Textures/Default/DefaultTile.dds"))
 	{
@@ -258,7 +247,7 @@ void GraphicsEngine::SetupDefaultVariables()
 	pointSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	pointSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 
-	if(!RHI::CreateSamplerState(myPointSampleState,pointSamplerDesc))
+	if (!RHI::CreateSamplerState(myPointSampleState,pointSamplerDesc))
 	{
 		GELogger.Log("Sampler state created");
 		assert(false);
@@ -300,7 +289,7 @@ void GraphicsEngine::SetupBlendStates()
 	rtBlendDesc.BlendOpAlpha = D3D11_BLEND_OP_ADD;
 	rtBlendDesc.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
-	if(!RHI::CreateBlendState(AlphaBlendState,blendDesc))
+	if (!RHI::CreateBlendState(AlphaBlendState,blendDesc))
 	{
 		assert(false);
 	}
@@ -312,7 +301,7 @@ void GraphicsEngine::SetupBlendStates()
 	rtBlendDesc.BlendOpAlpha = D3D11_BLEND_OP_ADD;
 	rtBlendDesc.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
-	if(!RHI::CreateBlendState(AdditiveBlendState,blendDesc))
+	if (!RHI::CreateBlendState(AdditiveBlendState,blendDesc))
 	{
 		assert(false);
 	}
@@ -370,7 +359,7 @@ void GraphicsEngine::SetupBRDF()
 	lutsamplerDesc.MinLOD = 0;
 	lutsamplerDesc.MaxLOD = 0;
 
-	if(!RHI::CreateSamplerState(myBRDFSampleState,lutsamplerDesc))
+	if (!RHI::CreateSamplerState(myBRDFSampleState,lutsamplerDesc))
 	{
 		GELogger.Log("Sampler state created");
 		assert(false);
@@ -388,7 +377,7 @@ void GraphicsEngine::SetupPostProcessing()
 	normalDepthSampler.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
 	normalDepthSampler.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
 
-	if(!RHI::CreateSamplerState(myNormalDepthSampleState,normalDepthSampler))
+	if (!RHI::CreateSamplerState(myNormalDepthSampleState,normalDepthSampler))
 	{
 		GELogger.Log("Sampler state created");
 		assert(false);
@@ -556,7 +545,7 @@ void GraphicsEngine::SetLoggingWindow(HANDLE aHandle)  const
 void GraphicsEngine::BeginFrame()
 {
 	myCamera = GameObjectManager::Get().GetCamera().TryGetComponent<cCamera>();
-	if(!myCamera)
+	if (!myCamera)
 	{
 		GELogger.Err("No camera in scene. No render is possible");
 	}
@@ -566,12 +555,12 @@ void GraphicsEngine::BeginFrame()
 	RHI::ClearRenderTarget(myBackBuffer.get(),myBackgroundColor);
 	RHI::ClearDepthStencil(myDepthBuffer.get());
 
-	RHI::ClearRenderTarget(SceneBuffer.get(),{0.0f,0.0f,0.0f,0.0f});
-	RHI::ClearRenderTarget(halfSceneBuffer.get(),{0.0f,0.0f,0.0f,0.0f});
-	RHI::ClearRenderTarget(quaterSceneBuffer1.get(),{0.0f,0.0f,0.0f,0.0f});
-	RHI::ClearRenderTarget(quaterSceneBuffer2.get(),{0.0f,0.0f,0.0f,0.0f});
-	RHI::ClearRenderTarget(IntermediateA.get(),{0.0f,0.0f,0.0f,0.0f});
-	RHI::ClearRenderTarget(IntermediateB.get(),{0.0f,0.0f,0.0f,0.0f});
+	RHI::ClearRenderTarget(SceneBuffer.get(),{ 0.0f,0.0f,0.0f,0.0f });
+	RHI::ClearRenderTarget(halfSceneBuffer.get(),{ 0.0f,0.0f,0.0f,0.0f });
+	RHI::ClearRenderTarget(quaterSceneBuffer1.get(),{ 0.0f,0.0f,0.0f,0.0f });
+	RHI::ClearRenderTarget(quaterSceneBuffer2.get(),{ 0.0f,0.0f,0.0f,0.0f });
+	RHI::ClearRenderTarget(IntermediateA.get(),{ 0.0f,0.0f,0.0f,0.0f });
+	RHI::ClearRenderTarget(IntermediateB.get(),{ 0.0f,0.0f,0.0f,0.0f });
 	myG_Buffer.ClearTargets();
 	RHI::SetBlendState(nullptr);
 }
@@ -645,8 +634,9 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	myCamera->SetCameraToFrameBuffer();
 	GfxCmd_DebugLayer().ExecuteAndDestroy();
 #ifdef  _DEBUGDRAW
-	if(myGraphicSettings.DebugRenderer_Active)
+	if (myGraphicSettings.DebugRenderer_Active)
 	{
+		RHI::SetRenderTarget(GraphicsEngine::Get().GetTargetTextures(eRenderTargets::BackBuffer).get(),GraphicsEngine::Get().GetTargetTextures(eRenderTargets::DepthBuffer).get());
 		DebugDrawer::Get().Render();
 	}
 	OverlayCommandList.Execute();

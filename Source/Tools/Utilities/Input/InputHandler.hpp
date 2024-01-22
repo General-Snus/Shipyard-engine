@@ -1,9 +1,11 @@
 #pragma once
-#include "../LinearAlgebra/Vector2.hpp"
-#include "EnumKeys.h"
+#define NOMINMAX
+
 #include <bitset>
 #include <Windows.h>
 #include <WinUser.h>
+#include "../LinearAlgebra/Vector2.hpp"
+#include "EnumKeys.h"
 
 class InputHandler
 {
@@ -70,7 +72,7 @@ inline Vector2<int> InputHandler::GetMousePositionDelta() const
 
 inline bool InputHandler::UpdateMouseInput(UINT message)
 {
-	switch(message)
+	switch (message)
 	{
 	case WM_LBUTTONDOWN:
 		lastPressedKey = 0x01;
@@ -97,10 +99,10 @@ inline bool InputHandler::UpdateMouseInput(UINT message)
 		return true;
 
 	case WM_MOUSEMOVE:
-		POINT pt = {0, 0};
+		POINT pt = { 0, 0 };
 		GetCursorPos(&pt);
 		myLastMousePosition = myMousePosition;
-		myMousePosition = {pt.x,pt.y};
+		myMousePosition = { pt.x,pt.y };
 		return true;
 	}
 
@@ -115,7 +117,7 @@ inline unsigned int InputHandler::GetLastPressedKey() const
 inline bool InputHandler::UpdateEvents(UINT message,WPARAM wParam,LPARAM lParam)
 {
 	lParam;
-	switch(message)
+	switch (message)
 	{
 	case WM_KEYDOWN:
 		liveKeyUpdate[wParam] = true;

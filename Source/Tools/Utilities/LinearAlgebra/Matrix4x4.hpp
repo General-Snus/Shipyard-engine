@@ -1,9 +1,9 @@
 #define dim4x4 4
 #pragma once 
-#include "assimp/matrix4x4.h"
-#include "Vectors.hpp" 
 #include <cmath> 
 #include <DirectXMath.h>
+#include "assimp/matrix4x4.h"
+#include "Vectors.hpp" 
 
 template <class T>
 class Matrix4x4
@@ -42,7 +42,7 @@ private:
 template<class T>
 void Matrix4x4<T>::SetFromRaw(const T input[16])
 {
-	for(int i = 0; i < 16; i++)
+	for (int i = 0; i < 16; i++)
 	{
 		arr[static_cast<int>(std::floor(i / 4))][i % 4] = input[i];
 	}
@@ -51,9 +51,9 @@ void Matrix4x4<T>::SetFromRaw(const T input[16])
 template<class T>
 inline Matrix4x4<T>::Matrix4x4(const Vector4<Vector4<T>> aVector)
 {
-	for(int i = 0; i < 4; i++)
+	for (int i = 0; i < 4; i++)
 	{
-		for(int j = 0; j < 4; j++)
+		for (int j = 0; j < 4; j++)
 		{
 			arr[i][j] = aVector[i][j];
 		}
@@ -63,15 +63,14 @@ inline Matrix4x4<T>::Matrix4x4(const Vector4<Vector4<T>> aVector)
 template<>
 inline Matrix4x4<float>::Matrix4x4(const DirectX::XMMATRIX& aMatrix)
 {
-	for(int i = 0; i < 4; i++)
+	for (int i = 0; i < 4; i++)
 	{
-		for(int j = 0; j < 4; j++)
+		for (int j = 0; j < 4; j++)
 		{
 			arr[i][j] = aMatrix.r[i].m128_f32[j];
 		}
 	}
 }
-
 
 template<>
 inline Matrix4x4<float>::Matrix4x4(const aiMatrix4x4& aMatrix)
@@ -118,11 +117,11 @@ Matrix4x4<T> Matrix4x4<T>::CreateScaleMatrix(const Vector3<T>& aScale)
 template<class T>
 inline Matrix4x4<T>::Matrix4x4()
 {
-	for(short i = 1; i <= dim4x4; i++)
+	for (short i = 1; i <= dim4x4; i++)
 	{
-		for(short j = 1; j <= dim4x4; j++)
+		for (short j = 1; j <= dim4x4; j++)
 		{
-			if(i == j)
+			if (i == j)
 			{
 				arr[i - 1][j - 1] = 1;
 			}
@@ -136,9 +135,9 @@ inline Matrix4x4<T>::Matrix4x4()
 template<class T>
 inline Matrix4x4<T>::Matrix4x4(const Matrix4x4<T>& aMatrix)
 {
-	for(short i = 1; i <= dim4x4; i++)
+	for (short i = 1; i <= dim4x4; i++)
 	{
-		for(short j = 1; j <= dim4x4; j++)
+		for (short j = 1; j <= dim4x4; j++)
 		{
 			arr[i - 1][j - 1] = aMatrix(i,j);
 		}
@@ -159,9 +158,9 @@ inline const T& Matrix4x4<T>::operator()(const int aRow,const int aColumn) const
 template <class T>	Matrix4x4<T> operator-(const Matrix4x4<T>& aMat1,const Matrix4x4<T>& aMat2)
 {
 	Matrix4x4<T> output;
-	for(short i = 1; i <= dim4x4; i++)
+	for (short i = 1; i <= dim4x4; i++)
 	{
-		for(short j = 1; j <= dim4x4; j++)
+		for (short j = 1; j <= dim4x4; j++)
 		{
 			output(i,j) = aMat1(i,j) - aMat2(i,j);
 		}
@@ -171,9 +170,9 @@ template <class T>	Matrix4x4<T> operator-(const Matrix4x4<T>& aMat1,const Matrix
 template <class T>	Matrix4x4<T> operator+(const Matrix4x4<T>& aMat1,const Matrix4x4<T>& aMat2)
 {
 	Matrix4x4<T> output;
-	for(short i = 1; i <= dim4x4; i++)
+	for (short i = 1; i <= dim4x4; i++)
 	{
-		for(short j = 1; j <= dim4x4; j++)
+		for (short j = 1; j <= dim4x4; j++)
 		{
 			output(i,j) = aMat1(i,j) + aMat2(i,j);
 		}
@@ -183,13 +182,13 @@ template <class T>	Matrix4x4<T> operator+(const Matrix4x4<T>& aMat1,const Matrix
 template <class T>	Matrix4x4<T> operator*(const Matrix4x4<T>& aMat1,const Matrix4x4<T>& aMat2)
 {
 	Matrix4x4<T> output;
-	for(short i = 1; i <= dim4x4; i++)
+	for (short i = 1; i <= dim4x4; i++)
 	{
-		for(short j = 1; j <= dim4x4; j++)
+		for (short j = 1; j <= dim4x4; j++)
 		{
 			Vector4<T> RowMat1;
 			Vector4<T> CollumnMat2;
-			for(short k = 1; k <= dim4x4; k++)
+			for (short k = 1; k <= dim4x4; k++)
 			{
 				RowMat1[k - 1] = aMat1(i,k);
 				CollumnMat2[k - 1] = aMat2(k,j);
@@ -202,10 +201,10 @@ template <class T>	Matrix4x4<T> operator*(const Matrix4x4<T>& aMat1,const Matrix
 template <class T>	Vector4<T>   operator*(const Vector4<T>& aVector,const Matrix4x4<T>& aMat2)
 {
 	Vector4<T> output;
-	for(short j = 1; j <= dim4x4; j++)
+	for (short j = 1; j <= dim4x4; j++)
 	{
 		T RowMat1 = 0;
-		for(int k = 1; k <= dim4x4; k++)
+		for (int k = 1; k <= dim4x4; k++)
 		{
 			T var = aMat2(k,j) * aVector[k - 1];
 			RowMat1 += var;
@@ -216,9 +215,9 @@ template <class T>	Vector4<T>   operator*(const Vector4<T>& aVector,const Matrix
 }
 template <class T>	void operator+=(Matrix4x4<T>& aMat1,const Matrix4x4<T>& aMat2)
 {
-	for(short row = 1; row <= dim4x4; row++)
+	for (short row = 1; row <= dim4x4; row++)
 	{
-		for(short collumn = 1; collumn <= dim4x4; collumn++)
+		for (short collumn = 1; collumn <= dim4x4; collumn++)
 		{
 			aMat1(row,collumn) = aMat1(row,collumn) + aMat2(row,collumn);
 		}
@@ -226,9 +225,9 @@ template <class T>	void operator+=(Matrix4x4<T>& aMat1,const Matrix4x4<T>& aMat2
 }
 template <class T>	void operator-=(Matrix4x4<T>& aMat1,const Matrix4x4<T>& aMat2)
 {
-	for(short row = 1; row <= dim4x4; row++)
+	for (short row = 1; row <= dim4x4; row++)
 	{
-		for(short collumn = 1; collumn <= dim4x4; collumn++)
+		for (short collumn = 1; collumn <= dim4x4; collumn++)
 		{
 			aMat1(row,collumn) = aMat1(row,collumn) - aMat2(row,collumn);
 		}
@@ -237,13 +236,13 @@ template <class T>	void operator-=(Matrix4x4<T>& aMat1,const Matrix4x4<T>& aMat2
 template <class T>	void operator*=(Matrix4x4<T>& aMat1,const Matrix4x4<T>& aMat2)
 {
 	Matrix4x4<T> output;
-	for(short i = 1; i <= dim4x4; i++)
+	for (short i = 1; i <= dim4x4; i++)
 	{
-		for(short j = 1; j <= dim4x4; j++)
+		for (short j = 1; j <= dim4x4; j++)
 		{
 			Vector4<T> RowMat1;
 			Vector4<T> CollumnMat2;
-			for(short k = 1; k <= dim4x4; k++)
+			for (short k = 1; k <= dim4x4; k++)
 			{
 				RowMat1[k - 1] = aMat1(i,k);
 				CollumnMat2[k - 1] = aMat2(k,j);
@@ -255,11 +254,11 @@ template <class T>	void operator*=(Matrix4x4<T>& aMat1,const Matrix4x4<T>& aMat2
 }
 template <class T>	bool operator==(const Matrix4x4<T>& aMat1,const Matrix4x4<T>& aMat2)
 {
-	for(short i = 1; i <= dim4x4; i++)
+	for (short i = 1; i <= dim4x4; i++)
 	{
-		for(short j = 1; j <= dim4x4; j++)
+		for (short j = 1; j <= dim4x4; j++)
 		{
-			if(aMat1(i,j) != aMat2(i,j))
+			if (aMat1(i,j) != aMat2(i,j))
 			{
 				return false;
 			}
@@ -324,9 +323,9 @@ inline Matrix4x4<T> Matrix4x4<T>::Transpose(const Matrix4x4<T>& aMatrixToTranspo
 {
 	Matrix4x4<T> output;
 
-	for(short i = 1; i <= dim4x4; i++)
+	for (short i = 1; i <= dim4x4; i++)
 	{
-		for(short j = 1; j <= dim4x4; j++)
+		for (short j = 1; j <= dim4x4; j++)
 		{
 			output(j,i) = aMatrixToTranspose(i,j);
 		}
@@ -339,7 +338,7 @@ inline Matrix4x4<T> Matrix4x4<T>::GetFastInverse(const Matrix4x4<T>& aTransform)
 {
 	Matrix4x4<T> Rotation = aTransform;
 	Matrix4x4<T> Transform;
-	for(short i = 1; i <= 3; i++)
+	for (short i = 1; i <= 3; i++)
 	{
 		Rotation(4,i) = 0;
 		Transform(4,i) = -aTransform(4,i);
@@ -413,5 +412,9 @@ inline Matrix4x4<T> Matrix4x4<T>::CreateOrthographicProjection(float aLeftPlane,
 
 	return result;
 }
+
+
+
+
 using Vector3f = Vector3<float>;
 using Matrix = Matrix4x4<float>;
