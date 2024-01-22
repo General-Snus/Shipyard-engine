@@ -3,10 +3,12 @@
 #include <pvd/PxPvdTransport.h>
 #include <Tools/Utilities/Math.hpp>
 #include "../PhysXInterpeter.h"
+
 #include "cooking/PxCooking.h"  
 #include "geometry\PxTriangleMeshGeometry.h"
 #include "PxPhysics.h"
 #include "PxPhysicsAPI.h" 
+#include "Engine/AssetManager/AssetManager.h"
 
 using namespace physx;
 
@@ -128,10 +130,16 @@ PxScene* Shipyard_PhysX::GetScene()
 template<>
 physx::PxTriangleMesh* Shipyard_PhysX::CookMesh<physx::PxTriangleMesh>(std::shared_ptr<Mesh> myToBeCookedMesh)
 {
-	while (!myToBeCookedMesh->isLoadedComplete)
+	if (myToBeCookedMesh->isLoadedComplete == false)
 	{
-		// Shit shit shit
-	}
+		if (myToBeCookedMesh->isBeingLoaded == false)
+		{
+			AssetManager::Get().ForceLoadAsset<Mesh>(myToBeCookedMesh->GetAssetPath(),myToBeCookedMesh);
+		}
+		while (myToBeCookedMesh->isLoadedComplete == false)
+		{
+		}
+	} 
 
 	Element& element = myToBeCookedMesh->Elements[0];
 	const int vertCount = element.NumVertices;

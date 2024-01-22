@@ -104,6 +104,7 @@ void cPhysXDynamicBody::Init()
 
 void cPhysXDynamicBody::Update()
 {
+	OPTICK_EVENT();
 	const auto& pxTransform = data->getGlobalPose();
 
 	Vector3f rotation;
@@ -131,6 +132,7 @@ void cPhysXDynamicBody::Destroy()
 
 void cPhysXDynamicBody::OnSiblingChanged(const std::type_info* SourceClass)
 {
+	OPTICK_EVENT();
 	if (SourceClass == &typeid(cCollider))
 	{
 		///UpdateFromCollider();

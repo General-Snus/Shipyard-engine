@@ -110,7 +110,7 @@ void AssetManager::ForceLoadAsset(const std::filesystem::path& aFilePath,bool us
 
 	std::shared_ptr<T> ptr = library->Get<T>(aFilePath);
 
-	if (!ptr)
+	if (!ptr || !ptr->isLoadedComplete)
 	{
 		if (useExact)
 		{
@@ -125,6 +125,7 @@ void AssetManager::ForceLoadAsset(const std::filesystem::path& aFilePath,bool us
 			newObject.second->Init();
 		}
 	}
+	 
 	outAsset = ptr;
 }
 

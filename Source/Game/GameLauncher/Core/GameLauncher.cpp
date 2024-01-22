@@ -139,7 +139,7 @@ void GameLauncher::Start()
 
 		worldRoot.AddComponent<FrameStatistics>();
 		//worldRoot.AddComponent<RenderMode>();
-		worldRoot.AddComponent<Skybox>();
+		//worldRoot.AddComponent<Skybox>();
 		worldRoot.AddComponent<cLight>(eLightType::Directional);
 
 		Transform& transform = worldRoot.AddComponent<Transform>();
@@ -167,7 +167,7 @@ void GameLauncher::Start()
 		//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
 
 		auto& collider = floor.AddComponent<cCollider>();
-		collider.SetColliderType<ColliderAssetPlanar>("Models/MeshCanyon.fbx");
+		collider.SetColliderType<ColliderAssetPlanar>("Models/ColliderMesh.fbx");
 
 
 

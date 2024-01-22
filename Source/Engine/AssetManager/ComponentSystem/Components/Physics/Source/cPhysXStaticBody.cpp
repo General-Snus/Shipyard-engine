@@ -8,9 +8,9 @@
 physx::PxMat33 ConvertMatrix(const Matrix& myMatrix)
 {
 	physx::PxMat33 returnMatrix;
-	returnMatrix.column0 = PxVec3(myMatrix(1,1),myMatrix(1,2),myMatrix(1,3));
-	returnMatrix.column1 = PxVec3(myMatrix(2,1),myMatrix(2,2),myMatrix(2,3));
-	returnMatrix.column2 = PxVec3(myMatrix(3,1),myMatrix(3,2),myMatrix(3,3));
+	returnMatrix.column0 = physx::PxVec3(myMatrix(1,1),myMatrix(1,2),myMatrix(1,3));
+	returnMatrix.column1 = physx::PxVec3(myMatrix(2,1),myMatrix(2,2),myMatrix(2,3));
+	returnMatrix.column2 = physx::PxVec3(myMatrix(3,1),myMatrix(3,2),myMatrix(3,3));
 	return returnMatrix;
 };
 
@@ -36,7 +36,7 @@ void cPhysXStaticBody::Init()
 
 void cPhysXStaticBody::UpdateFromCollider()
 {
-
+	OPTICK_EVENT();
 	auto& transform = GetComponent<Transform>();
 	if (!data)
 	{
@@ -150,6 +150,7 @@ void cPhysXStaticBody::Destroy()
 
 void cPhysXStaticBody::OnSiblingChanged(const std::type_info* SourceClass)
 {
+	OPTICK_EVENT();
 	if (SourceClass == &typeid(cCollider))
 	{
 		UpdateFromCollider();

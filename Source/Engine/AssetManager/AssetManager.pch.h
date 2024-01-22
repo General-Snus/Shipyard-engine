@@ -16,7 +16,7 @@
 #include <ranges>
 #include <unordered_map>
 #include <vector>
-
+#include <algorithm> 
 #include <assimp/Importer.hpp>      // C++ importer interface 
 #include <assimp/postprocess.h>     // Post processing flags
 #include <assimp/scene.h>           // Output data structure

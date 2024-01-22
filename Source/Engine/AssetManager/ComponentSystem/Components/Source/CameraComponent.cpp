@@ -1,9 +1,8 @@
 #include "AssetManager.pch.h"
-#include <algorithm> 
+
 #include <DirectXMath.h>
 #include <Editor/Editor/Core/Editor.h>
-#include <Engine/GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h>
-#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
+#include <Engine/GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h> 
 #include <Tools/Utilities/Input/InputHandler.hpp> 
 #include "../CameraComponent.h"
 
@@ -201,7 +200,7 @@ void cCamera::SetCameraToFrameBuffer()
 	OPTICK_EVENT();
 	GfxCmd_SetFrameBuffer(
 		myClipMatrix,
-		GetGameObject().GetComponent<Transform>().GetTransform(),
+		Matrix::GetFastInverse(GetComponent<Transform>().GetTransform()),
 		(int)Editor::GetApplicationState().filter, //TODO scene again
 		GetFrustrumCorners()
 	).ExecuteAndDestroy();

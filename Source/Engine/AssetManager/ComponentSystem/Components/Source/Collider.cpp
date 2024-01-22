@@ -13,6 +13,8 @@ cCollider::cCollider(const unsigned int anOwnerId,const std::filesystem::path aP
 	myCollider = std::make_shared<ColliderAssetAABB>();
 }
 
+
+
 void cCollider::Update()
 {
 	OPTICK_EVENT();
