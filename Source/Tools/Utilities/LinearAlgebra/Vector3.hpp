@@ -1,6 +1,8 @@
 #pragma once
 #include <assert.h> 
 #include <cmath>
+#include <ostream>
+
 template <class T>
 class Vector3
 {
@@ -306,6 +308,13 @@ inline T& Vector3<T>::operator [](int value)
 		return x;
 	}
 	}
+}
+
+template <class T>
+std::ostream& operator<<(std::ostream& anOstream,const Vector3<T>& aVector)
+{
+	anOstream << "{x: " << aVector.x << ", y: " << aVector.y << ", z: " << aVector.z << "}";
+	return anOstream;
 }
 
 template<class T>

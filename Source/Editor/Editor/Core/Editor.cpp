@@ -36,6 +36,9 @@ bool Editor::Initialize(HWND aHandle)
 {
 	MVLogger = Logger::Create("ModelViewer");
 	GELogger = Logger::Create("GraphicsEngine");
+	GetWindowRect(Window::windowHandler,&ViewportRect);
+
+
 
 	ShowSplashScreen();
 	ThreadPool::Get().Init();
@@ -177,16 +180,15 @@ void Editor::TopBar()
 
 RECT Editor::GetViewportRECT()
 {
-	static RECT ViewportRect;
 	return ViewportRect;
 }
 
 Vector2<int> Editor::GetViewportResolution()
 {
-	RECT ViewportRect = GetViewportRECT();
+	const RECT rect = GetViewportRECT();
 	return Vector2<int>(
-		ViewportRect.right - ViewportRect.left,
-		ViewportRect.top - ViewportRect.bottom
+		rect.right - rect.left,
+		rect.bottom - rect.top
 	);
 }
 

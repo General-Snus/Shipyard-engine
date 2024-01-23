@@ -60,6 +60,7 @@ public:
 	bool GetIsGUIActive() const { return IsGUIActive; };
 	void SetIsGUIActive(bool set) { IsGUIActive = set; };
 private:
+	inline static RECT ViewportRect;
 	std::shared_ptr<ScriptGraphEditor> ScriptEditor;
 
 

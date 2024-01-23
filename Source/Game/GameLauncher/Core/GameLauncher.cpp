@@ -17,7 +17,7 @@
 #include <iostream>
 #include <sstream>
 
-
+#include "Input/EnumKeys.h"
 
 using json = nlohmann::json;
 
@@ -125,12 +125,11 @@ void GameLauncher::Start()
 	{
 		GameObject camera = gom.CreateGameObject();
 		camera.AddComponent<cCamera>();
-		gom.SetLastGOAsCamera();
-
+		gom.SetLastGOAsCamera(); 
 
 		auto& transform = camera.AddComponent<Transform>();
-		transform.SetPosition(0,25,-25);
-		transform.SetRotation(45,0,0);
+		transform.SetPosition(0,0,-5);
+		transform.SetRotation(0,0,0);
 	}
 
 	{
@@ -158,22 +157,19 @@ void GameLauncher::Start()
 	{
 		GameObject floor = gom.CreateGameObject();
 		auto& transform = floor.AddComponent<Transform>();
-		transform.SetPosition(0,-20.0f,0);
+		transform.SetPosition(0,-0.0f,0);
 		transform.SetRotation(90,0.f,0.f);
-		transform.SetScale(50.f);
+		//transform.SetScale(50.f);
 		transform.SetGizmo(false);
 
-		floor.AddComponent<cMeshRenderer>("Models/MeshCanyon.fbx");
-		//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
-
+		floor.AddComponent<cMeshRenderer>("Models/Cube.fbx");
+		//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json"); 
+#if PHYSX
 		auto& collider = floor.AddComponent<cCollider>();
-		collider.SetColliderType<ColliderAssetPlanar>("Models/ColliderMesh.fbx");
-
-
-
+		collider.SetColliderType<ColliderAssetPlanar>("Models/ColliderMesh.fbx");  
 		floor.AddComponent<cPhysXStaticBody>();
-	}
-
+#endif 
+	} 
 #if WorkingOnPngLoading
 	{
 		GameObject sponza = gom.CreateGameObject();
@@ -184,7 +180,9 @@ void GameLauncher::Start()
 		transform.SetGizmo(false);
 	}
 #endif 
-#pragma endregion 
+#pragma endregion
+
+#if PHYSX 
 	if (std::filesystem::exists("GameObjectSaveFile.SaveFiles"))
 	{
 		vectorOfGameObjects = LoadTest("GameObjectSaveFile.SaveFiles");
@@ -193,6 +191,7 @@ void GameLauncher::Start()
 	{
 		GenerateNewRandomCubes();
 	}
+#endif 
 
 	GLLogger.Log("GameLauncher start");
 }
@@ -207,6 +206,7 @@ void GameLauncher::Update(float delta)
 		GraphicsEngine::Get().GetSettings().DebugRenderer_Active = !GraphicsEngine::Get().GetSettings().DebugRenderer_Active;
 	}
 
+#if PHYSX
 	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::F4))
 	{
 		while (vectorOfGameObjects.size())
@@ -240,6 +240,7 @@ void GameLauncher::Update(float delta)
 	{
 		GenerateNewRandomCubes();
 	}
+#endif
 
 	//Other
 	{

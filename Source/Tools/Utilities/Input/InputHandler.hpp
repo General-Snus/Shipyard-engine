@@ -5,7 +5,7 @@
 #include <Windows.h>
 #include <WinUser.h>
 #include "../LinearAlgebra/Vector2.hpp"
-#include "EnumKeys.h"
+#include "Editor/Editor/Core/Editor.h"
 
 class InputHandler
 {
@@ -21,8 +21,8 @@ public:
 	bool IsKeyHeld(const int aKeyCode) const;
 	bool IsKeyPressed(const int aKeyCode) const;
 	bool IsKeyReleased(const int aKeyCode) const;
-	Vector2<int> GetMousePosition() const;
-	Vector2<int> GetMousePositionDelta() const;
+	Vector2<float> GetMousePosition() const;
+	Vector2<float> GetMousePositionDelta() const;
 	bool UpdateMouseInput(UINT message);
 	unsigned int GetLastPressedKey() const;
 
@@ -40,8 +40,8 @@ private:
 
 
 	unsigned int lastPressedKey;
-	Vector2<int> myMousePosition;
-	Vector2<int> myLastMousePosition;
+	Vector2<float> myMousePosition;
+	Vector2<float> myLastMousePosition;
 
 };
 
@@ -60,18 +60,26 @@ inline bool InputHandler::IsKeyReleased(const int aKeyCode) const
 	return (!currentFrameUpdate[aKeyCode] && lastFrameUpdate[aKeyCode]);
 }
 
-inline Vector2<int> InputHandler::GetMousePosition() const
+inline Vector2<float> InputHandler::GetMousePosition() const
 {
 	return myMousePosition;
 }
 
-inline Vector2<int> InputHandler::GetMousePositionDelta() const
+inline Vector2<float> InputHandler::GetMousePositionDelta() const
 {
 	return  (myMousePosition - myLastMousePosition);
 }
 
 inline bool InputHandler::UpdateMouseInput(UINT message)
 {
+	myLastMousePosition = myMousePosition;
+	POINT pt = { 0, 0 };
+	GetCursorPos(&pt);
+	const auto res = Editor::Get().GetViewportResolution();
+	myMousePosition.x = 1.f - 2.f * (static_cast<float>(pt.x) / static_cast<float>(res.x));
+	myMousePosition.y = 1.0f - 2.f * (static_cast<float>(pt.y) / static_cast<float>(res.y));
+	myMousePosition.x *= -1.f;
+
 	switch (message)
 	{
 	case WM_LBUTTONDOWN:
@@ -99,13 +107,10 @@ inline bool InputHandler::UpdateMouseInput(UINT message)
 		return true;
 
 	case WM_MOUSEMOVE:
-		POINT pt = { 0, 0 };
-		GetCursorPos(&pt);
-		myLastMousePosition = myMousePosition;
-		myMousePosition = { pt.x,pt.y };
 		return true;
-	}
+	} 
 
+	
 	return false;
 }
 
