@@ -1,6 +1,11 @@
 ﻿#include "PersistentSystems.pch.h"
 #include "RegisterExternalNodes.h"
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
+#include <Tools/Utilities/Input/EnumKeys.h>
+#include <Tools/Utilities/Input/InputHandler.hpp>
+
+#include "GraphicsEngine.h"
+#include "ComponentSystem/Components/CameraComponent.h"
 //
 //void MVNode_TestNode::Init()
 //{
@@ -57,7 +62,7 @@ void MVNode_MakeVector::Init()
 size_t MVNode_MakeVector::DoOperation()
 {
 	float X = 0,Y = 0,Z = 0;
-	if(GetPinData("X",X) && GetPinData("Y",Y) && GetPinData("Z",Z))
+	if (GetPinData("X",X) && GetPinData("Y",Y) && GetPinData("Z",Z))
 	{
 		Vector3f result(X,Y,Z);
 		SetPinData("Result",result);
@@ -78,7 +83,7 @@ void MVNode_BreakVector::Init()
 size_t MVNode_BreakVector::DoOperation()
 {
 	Vector3f vector;
-	if(GetPinData("Vector",vector))
+	if (GetPinData("Vector",vector))
 	{
 		SetPinData("X",vector.x);
 		SetPinData("Y",vector.y);
@@ -101,7 +106,7 @@ void MVNode_Branch::Init()
 size_t MVNode_Branch::DoOperation()
 {
 	bool condition = false;
-	if(GetPinData("Condition",condition))
+	if (GetPinData("Condition",condition))
 	{
 		return ExitViaPin(condition ? "True" : "False");
 	}
@@ -124,9 +129,9 @@ size_t MVNode_ForLoop::DoOperation()
 {
 	int start = 0;
 	int end = 0;
-	if(GetPinData("Start",start) && GetPinData("End",end))
+	if (GetPinData("Start",start) && GetPinData("End",end))
 	{
-		for(int i = start; i < end; i++)
+		for (int i = start; i < end; i++)
 		{
 			SetPinData("Index",i);
 			ExitViaPin("Loop");
@@ -149,10 +154,10 @@ void MVNode_GetGameObject::Init()
 size_t MVNode_GetGameObject::DoOperation()
 {
 	unsigned int ID;
-	if(GetPinData("ID",ID))
+	if (GetPinData("ID",ID))
 	{
 		auto arg = GameObjectManager::Get().GetGameObject(ID);
-		if(arg.IsValid())
+		if (arg.IsValid())
 		{
 			SetPinData("GameObject",arg);
 			return ExitViaPin("Out");
@@ -176,9 +181,9 @@ size_t MVNode_GetTransformPosition::DoOperation()
 {
 	GameObject object;
 	Vector3f position;
-	if(GetPinData("GameObject",object) && object.IsValid())
+	if (GetPinData("GameObject",object) && object.IsValid())
 	{
-		if(auto* arg = object.TryGetComponent<Transform>())
+		if (auto* arg = object.TryGetComponent<Transform>())
 		{
 			SetPinData("OutPosition",arg->GetPosition());
 			return ExitViaPin("Out");
@@ -203,9 +208,9 @@ size_t MVNode_SetTransformPosition::DoOperation()
 {
 	GameObject object;
 	Vector3f position;
-	if(GetPinData("GameObject",object) && GetPinData("Position",position))
+	if (GetPinData("GameObject",object) && GetPinData("Position",position))
 	{
-		if(auto* arg = object.TryGetComponent<Transform>())
+		if (auto* arg = object.TryGetComponent<Transform>())
 		{
 			arg->SetPosition(position);
 			SetPinData("OutPosition",arg->GetPosition());
@@ -217,3 +222,140 @@ size_t MVNode_SetTransformPosition::DoOperation()
 	return 0;
 }
 
+
+
+void MVNode_SetTransformScale::Init()
+{
+	CreateExecPin("In",PinDirection::Input);
+	CreateExecPin("Out",PinDirection::Output);
+
+	CreateDataPin<GameObject>("GameObject",PinDirection::Input);
+	CreateDataPin<Vector3f>("Scale",PinDirection::Input);
+	CreateDataPin<Vector3f>("New scale",PinDirection::Output);
+}
+
+size_t MVNode_SetTransformScale::DoOperation()
+{
+	GameObject object;
+	Vector3f scale;
+	if (GetPinData("GameObject",object) && GetPinData("Scale",scale))
+	{
+		if (auto* arg = object.TryGetComponent<Transform>())
+		{
+			arg->SetScale(scale);
+			SetPinData("New scale",arg->GetScale());
+			return ExitViaPin("Out");
+		}
+		return ExitWithError("Could not find transform component");
+	}
+
+	return 0;
+}
+
+
+void MVNode_SetTransformRotation::Init()
+{
+	CreateExecPin("In",PinDirection::Input);
+	CreateExecPin("Out",PinDirection::Output);
+
+	CreateDataPin<GameObject>("GameObject",PinDirection::Input);
+	CreateDataPin<Vector3f>("Rotation",PinDirection::Input);
+	CreateDataPin<Vector3f>("New Rotation",PinDirection::Output);
+}
+
+size_t MVNode_SetTransformRotation::DoOperation()
+{
+	GameObject object;
+	Vector3f rotation;
+	if (GetPinData("GameObject",object) && GetPinData("Rotation",rotation))
+	{
+		if (auto* arg = object.TryGetComponent<Transform>())
+		{
+			arg->SetRotation(rotation);
+			SetPinData("New Rotation",arg->GetPosition());
+			return ExitViaPin("Out");
+		}
+		return ExitWithError("Could not find transform component");
+	}
+	return 0;
+}
+
+
+void MVNode_GetCursorPosition::Init()
+{
+	CreateExecPin("In",PinDirection::Input);
+	CreateExecPin("Out",PinDirection::Output);
+
+	CreateDataPin<Vector3f>("CursorPosition",PinDirection::Output);
+}
+
+size_t MVNode_GetCursorPosition::DoOperation()
+{
+	const auto position = InputHandler::GetInstance().GetMousePosition();
+	SetPinData("CursorPosition",Vector3f((float)position.x,(float)position.y,0));
+	return ExitViaPin("Out");
+}
+
+void MVNode_Distance::Init()
+{
+	CreateExecPin("In",PinDirection::Input);
+	CreateExecPin("Out",PinDirection::Output);
+
+	CreateDataPin<Vector3f>("Vector",PinDirection::Input);
+	CreateDataPin<float>("Distance",PinDirection::Output);
+}
+
+size_t MVNode_Distance::DoOperation()
+{
+	  Vector3f vector;
+	if (GetPinData("Vector",vector))
+	{ 
+		SetPinData("Distance",vector.Length());
+		return ExitViaPin("Out");
+	}
+	return ExitWithError("Could not find Vector");
+}
+
+void MVNode_VectorMinus::Init()
+{
+	CreateExecPin("In",PinDirection::Input);
+	CreateExecPin("Out",PinDirection::Output);
+
+	CreateDataPin<Vector3f>("VectorA",PinDirection::Input);
+	CreateDataPin<Vector3f>("VectorB",PinDirection::Input);
+	CreateDataPin<Vector3f>("Difference",PinDirection::Output);
+}
+
+size_t MVNode_VectorMinus::DoOperation()
+{
+	Vector3f vectorA;
+	Vector3f vectorB;
+	if (GetPinData("VectorA",vectorA) && GetPinData("VectorB",vectorB))
+	{
+		SetPinData("Difference",vectorA-vectorB);
+		return ExitViaPin("Out");
+	}
+	return ExitWithError("Could not find Vector");
+}
+
+void MVNode_ScreenSpacePosition::Init()
+{
+	CreateExecPin("In",PinDirection::Input);
+	CreateExecPin("Out",PinDirection::Output);
+
+	CreateDataPin<Vector3f>("World position",PinDirection::Input);
+	CreateDataPin<Vector3f>("Screen position",PinDirection::Output);
+}
+
+size_t MVNode_ScreenSpacePosition::DoOperation()
+{
+	Vector3f vector;
+	if (GetPinData("World position",vector))
+	{
+		auto& camera = GameObjectManager::Get().GetCamera().GetComponent<cCamera>();
+		Vector4f screenspacePos = camera.WoldSpaceToPostProjectionSpace(vector); 
+		SetPinData("Screen position",Vector3f(screenspacePos.x,screenspacePos.y,screenspacePos.z));
+		return ExitViaPin("Out");
+	}
+	return ExitWithError("Could not find Vector");
+}
