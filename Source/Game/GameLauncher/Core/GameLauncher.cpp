@@ -124,9 +124,9 @@ void GameLauncher::Start()
 	myMesh = gom.CreateGameObject();
 	{
 		GameObject camera = gom.CreateGameObject();
-		camera.AddComponent<cCamera>();
-		gom.SetLastGOAsCamera(); 
-
+		auto& cameraComponent = camera.AddComponent<cCamera>();
+		gom.SetLastGOAsCamera();
+		cameraComponent.SetActive(false);
 		auto& transform = camera.AddComponent<Transform>();
 		transform.SetPosition(0,0,-5);
 		transform.SetRotation(0,0,0);
@@ -166,10 +166,10 @@ void GameLauncher::Start()
 		//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json"); 
 #if PHYSX
 		auto& collider = floor.AddComponent<cCollider>();
-		collider.SetColliderType<ColliderAssetPlanar>("Models/ColliderMesh.fbx");  
+		collider.SetColliderType<ColliderAssetPlanar>("Models/ColliderMesh.fbx");
 		floor.AddComponent<cPhysXStaticBody>();
 #endif 
-	} 
+	}
 #if WorkingOnPngLoading
 	{
 		GameObject sponza = gom.CreateGameObject();
