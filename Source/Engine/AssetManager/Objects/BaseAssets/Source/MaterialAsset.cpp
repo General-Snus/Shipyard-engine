@@ -1,10 +1,10 @@
 #include "AssetManager.pch.h"
 
-#include <fstream>
-#include "../MaterialAsset.h"
-#include <Tools/ThirdParty/nlohmann/json.hpp>
-#include <Engine/GraphicsEngine/Shaders/Registers.h>
 #include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
+#include <Engine/GraphicsEngine/Shaders/Registers.h>
+#include <fstream>
+#include <Tools/ThirdParty/nlohmann/json.hpp>
+#include "../MaterialAsset.h"
 
 bool Material::CreateJson(const DataMaterial& data,const std::filesystem::path& writePath)
 {
@@ -25,7 +25,7 @@ bool Material::CreateJson(const DataMaterial& data,const std::filesystem::path& 
 
 	{
 		int i = 0;
-		for(auto& [path,ptr] : data.textures)
+		for (auto& [path,ptr] : data.textures)
 		{
 			nlohmann::json arr;
 			arr["TextureName"] = path.filename();
@@ -56,7 +56,7 @@ void Material::Init()
 	data.textures[(int)eTextureType::MaterialMap].second = GraphicsEngine::Get().GetDefaultTexture(eTextureType::MaterialMap);
 	data.textures[(int)eTextureType::EffectMap].second = GraphicsEngine::Get().GetDefaultTexture(eTextureType::EffectMap);
 
-	if(GraphicsEngine::Get().GetDefaultMaterial() != nullptr)
+	if (GraphicsEngine::Get().GetDefaultMaterial() != nullptr)
 	{
 		data.materialData.Data = GraphicsEngine::Get().GetDefaultMaterial()->data.materialData.Data; //yo dawg i put some data in your data so you can data while you data
 	}
@@ -70,7 +70,7 @@ void Material::Init()
 	//std::shared_ptr<TextureHolder> text = AssetManager::GetInstance().LoadAsset<TextureHolder>("",true);
 	//textures[(int)text->textureType] = text;
 
-	if(std::filesystem::exists(AssetPath) && AssetPath.extension() == ".json")
+	if (std::filesystem::exists(AssetPath) && AssetPath.extension() == ".json")
 	{
 		std::ifstream file(AssetPath);
 		assert(file.is_open());
@@ -93,16 +93,16 @@ void Material::Init()
 				data.materialData.Data.NormalStrength = js["NormalStrength"];
 				data.materialData.Data.Shine = js["Shine"];
 			}
-			catch(const std::exception& e)
+			catch (const std::exception& e)
 			{
-				std::cout << "Unsuccessfull loading of material data file at path: " << AssetPath << " " << e.what() << "\n"; 
+				std::cout << "Unsuccessfull loading of material data file at path: " << AssetPath << " " << e.what() << "\n";
 			}
 		}
 		{
 			try
 			{
 				nlohmann::json& js = json["Textures"];
-				for(const auto& i : js)
+				for (const auto& i : js)
 				{
 					std::shared_ptr<TextureHolder> texture;
 					const std::filesystem::path path = i["TexturePath"];
@@ -111,9 +111,9 @@ void Material::Init()
 					data.textures[(int)i["TextureType"]].second = texture;
 				}
 			}
-			catch(const std::exception&)
+			catch (const std::exception&)
 			{
-				std::cout << "Unsuccessfull loading of material texture files at path: " << AssetPath << "\n"; 
+				std::cout << "Unsuccessfull loading of material texture files at path: " << AssetPath << "\n";
 			}
 		}
 	}
@@ -134,7 +134,7 @@ MaterialData& Material::GetMaterialData()
 void Material::Update()
 {
 	OPTICK_EVENT();
-	if(!isLoadedComplete)
+	if (!isLoadedComplete)
 	{
 		GraphicsEngine::Get().GetDefaultMaterial()->Update();
 		return;
@@ -154,19 +154,19 @@ void Material::SetShader(std::shared_ptr<Shader> aVertexShader,std::shared_ptr<S
 }
 
 void Material::SetAsResources()
-{ /*
+{
 	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)eTextureType::ColorMap,nullptr);
 	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)eTextureType::NormalMap,nullptr);
 	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)eTextureType::MaterialMap,nullptr);
-	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)eTextureType::EffectMap,nullptr); */
-	for(const auto& [path,i] : data.textures)
+	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)eTextureType::EffectMap,nullptr);
+	for (const auto& [path,i] : data.textures)
 	{
-		if(!i)
+		if (!i)
 		{
 			continue;
 		}
 
-		if(i->isLoadedComplete)
+		if (i->isLoadedComplete)
 		{
 			RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)i->textureType,i->GetRawTexture().get());
 		}

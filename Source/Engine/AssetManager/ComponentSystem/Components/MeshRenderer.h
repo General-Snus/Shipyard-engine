@@ -47,8 +47,8 @@ public:
 	}
 
 protected:
-	bool isInstanced = true;
-	bool isStatic = true;
+	bool isInstanced = false;
+	bool isStatic = false;
 	std::shared_ptr<RenderData> myRenderData;
 };
 

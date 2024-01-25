@@ -158,7 +158,7 @@ public:
 	 * @param aBlendFactor How we should blend RGBA pixels, depends on the Blend State settings.
 	 * @param aSamplerMask A mask controlling how a multisample render target should be written.
 	 */
-	static void SetBlendState(const ComPtr<ID3D11BlendState>& aBlendState,const std::array<float,4>& aBlendFactor = {0, 0, 0, 0},unsigned aSamplerMask = 0xffffffff);
+	static void SetBlendState(const ComPtr<ID3D11BlendState>& aBlendState,const std::array<float,4>& aBlendFactor = { 0, 0, 0, 0 },unsigned aSamplerMask = 0xffffffff);
 
 	/**
 	 * Attempts to load a Vertex Shader from the specified file name, then create a Vertex Shader object and an Input Layout object on the Graphics Card.
@@ -310,7 +310,7 @@ public:
 	 */
 	static void SetConstantBuffer(UINT aPipelineStages,unsigned aSlot,const ConstantBufferBase& aBuffer);
 
-	static void DrawIndexedInstanced(unsigned aIndexCount, unsigned anInstanceCount);
+	static void DrawIndexedInstanced(unsigned aIndexCount,unsigned anInstanceCount);
 	/**
 	 * Instructs the Graphics Card to execute a Draw call using the data loaded in the pipeline with the states that are currently set.
 	 * @param aCount The number of Vertices to draw.
@@ -373,7 +373,7 @@ public:
 	 */
 	static void RemoveTarget();
 
-	static void ClearRenderTarget(const Texture* aTexture,std::array<float,4> aClearColor = {0, 0, 0, 0});
+	static void ClearRenderTarget(const Texture* aTexture,std::array<float,4> aClearColor = { 0, 0, 0, 0 });
 
 	static void ClearDepthStencil(const Texture* aTexture);
 

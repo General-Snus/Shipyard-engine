@@ -1,7 +1,7 @@
 #include <GraphicsEngine.pch.h>
-#include "../Headers/GfxCmd_RenderMeshShadow.h"
 #include <Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h>
 #include <Engine/GraphicsEngine/Rendering/Buffers/ObjectBuffer.h> 
+#include "../Headers/GfxCmd_RenderMeshShadow.h"
 
 GfxCmd_RenderMeshShadow::GfxCmd_RenderMeshShadow(const std::shared_ptr<RenderData> aMesh,const Matrix& aTransform,bool instanced) : GfxCmd_RenderMesh(aMesh,aTransform,instanced)
 {
@@ -18,14 +18,14 @@ void GfxCmd_RenderMeshShadow::ExecuteAndDestroy()
 
 	RHI::UpdateConstantBufferData(objectBuffer);
 	RHI::Context->PSSetShader(nullptr,nullptr,0);
-	
-	if(instanced)
+
+	if (instanced)
 	{
 		GetInstanceRenderer().AddInstance(myRenderData);
 		return;
 	}
-	for(const auto& aElement : myRenderData->myMesh->Elements)
-	{ 
+	for (const auto& aElement : myRenderData->myMesh->Elements)
+	{
 		RHI::ConfigureInputAssembler(
 			aElement.PrimitiveTopology,
 			aElement.VertexBuffer,

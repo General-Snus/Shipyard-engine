@@ -132,6 +132,7 @@
     </None>
     <None Include="misc\debuggers\imgui.gdb" />
     <None Include="misc\debuggers\imgui.natstepfilter" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="misc\cpp\README.txt" />

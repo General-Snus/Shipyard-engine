@@ -234,6 +234,12 @@
     <ClInclude Include="Shaders\Include\EdgeBlur.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="InterOp\GPU.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InterOp\PSO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsEngine.pch.cpp">
@@ -332,6 +338,12 @@
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetDepthState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="InterOp\GPU.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InterOp\PSO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Headers\ObjectBuffer.hlsli" />
@@ -343,6 +355,7 @@
     <None Include="Shaders\Passes\LineDrawer\LineDrawerStructs.hlsli" />
     <None Include="Shaders\Headers\ParticleStruct.hlsli" />
     <None Include="Shaders\Headers\Tonemaps.hlsli" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\DefaultShaders\Default_VS.hlsl" />

@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.props" Condition="Exists('..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -191,6 +192,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DebugDrawer\DebugDrawer.h" />
+    <ClInclude Include="InterOp\GPU.h" />
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_GaussianBlur.h" />
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_LuminancePass.h" />
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetDepthState.h" />
@@ -208,6 +210,7 @@
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetRenderTarget.h" />
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SSAO.h" />
     <ClInclude Include="InterOp\ShaderInfo.h" />
+    <ClInclude Include="InterOp\PSO.h" />
     <ClInclude Include="Rendering\Buffers\GraphicSettingsBuffer.h" />
     <ClInclude Include="Rendering\InstanceRenderer\InstanceRenderer.h" />
     <ClInclude Include="Rendering\ParticleRenderer\ParticleRenderer.h" />
@@ -264,6 +267,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DebugDrawer\DebugDrawer.cpp" />
+    <ClCompile Include="InterOp\GPU.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_GaussianBlur.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_LuminancePass.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetDepthState.cpp" />
@@ -280,6 +284,7 @@
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetLightBuffer.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetRenderTarget.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SSAO.cpp" />
+    <ClCompile Include="InterOp\PSO.cpp" />
     <ClCompile Include="Rendering\InstanceRenderer\InstanceRenderer.cpp" />
     <ClCompile Include="Rendering\ParticleRenderer\ParticleRenderer.cpp" />
     <ClCompile Include="Rendering\ParticleRenderer\ParticleVertex.cpp" />
@@ -309,6 +314,7 @@
     <ClCompile Include="Rendering\ShadowRenderer\ShadowRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="Shaders\Headers\ParticleStruct.hlsli" />
     <None Include="Shaders\Headers\ShaderStructs.hlsli" />
     <None Include="Shaders\Headers\Common.hlsli" />
@@ -462,5 +468,13 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.targets" Condition="Exists('..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.props'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.targets'))" />
+  </Target>
 </Project>

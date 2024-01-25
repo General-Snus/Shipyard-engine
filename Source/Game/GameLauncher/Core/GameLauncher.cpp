@@ -248,8 +248,8 @@ void GameLauncher::Update(float delta)
 			i.SetIsDirty(true);
 			i.SetIsRendered(false);
 		}
-	}
+		}
 
 	//Transform& pLight = GameObjectManager::GetInstance().GetWorldRoot().GetComponent<Transform>();
 	//pLight.Rotate(0,delta,0);
-}
+	}

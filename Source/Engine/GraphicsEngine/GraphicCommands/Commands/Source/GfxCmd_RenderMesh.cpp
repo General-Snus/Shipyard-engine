@@ -33,6 +33,11 @@ void GfxCmd_RenderMesh::ExecuteAndDestroy()
 		{
 			myRenderData->overrideMaterial[0]->Update();
 		}
+		else
+		{
+			GraphicsEngine::Get().GetDefaultMaterial()->Update();
+		}
+
 		RHI::ConfigureInputAssembler(
 			aElement.PrimitiveTopology,
 			aElement.VertexBuffer,
