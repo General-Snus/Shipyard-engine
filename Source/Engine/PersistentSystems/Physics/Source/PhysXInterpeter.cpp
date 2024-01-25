@@ -74,14 +74,19 @@ int Shipyard_PhysX::InitializePhysx()
 
 void Shipyard_PhysX::StartRead() const
 {
+#if  PHYSX
 	OPTICK_EVENT();
 	gScene->fetchResults(true);
+#endif
 }
 
 void Shipyard_PhysX::EndRead(float deltaTime)
 {
+	deltaTime;
+#if  PHYSX
 	OPTICK_EVENT();
 	gScene->simulate(deltaTime);
+#endif
 }
 
 void Shipyard_PhysX::Render()

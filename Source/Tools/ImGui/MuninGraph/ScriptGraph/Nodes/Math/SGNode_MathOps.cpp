@@ -226,7 +226,7 @@ size_t SGNode_MathClamp::DoOperation()
 	float inC = 0;
 	if(GetPinData("Value",inA) && GetPinData("Upper",inB) && GetPinData("Lower",inC))
 	{
-		if(inC < inB) // avoid std clamp throwing a tantrum
+		if(inC > inB) // avoid std clamp throwing a tantrum
 		{
 			SetPinData("Result",0.f);
 			return ExitWithError("The lower value is greater than the upper value");

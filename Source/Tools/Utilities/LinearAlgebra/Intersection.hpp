@@ -22,23 +22,23 @@ bool IntersectionPlaneRay(const Plane<T>& aPlane,const Ray<T>& aRay,Vector3<T>& 
 	T b = RayDirection.Dot(NormalOfPlane);
 	T a = NormalOfPlane.Dot(OriginOfPlane - RayOrigin);
 
-	if(b != static_cast<T>(0))
+	if (b != static_cast<T>(0))
 	{
-		if(a == static_cast<T>(0))
+		if (a == static_cast<T>(0))
 		{
 			aOutIntersectionPoint = RayOrigin;
 			return true;
 		}
 
 		T t = a / b;
-		if(t > 0)
+		if (t > 0)
 		{
 			aOutIntersectionPoint = RayDirection * t + RayOrigin;
 			return true;
 		}
 		return false;
 	}
-	if(a == 0)
+	if (a == 0)
 	{
 		return true;
 	}
@@ -51,9 +51,9 @@ template<class T>
 bool IntersectionAABBRay(const AABB3D<T>  aAABB,const Ray<T>& aRay)
 {
 	{
-#define LEFT	0
-#define MIDDLE	1
-#define RIGHT	2
+		constexpr int LEFT = 0;
+		constexpr int MIDDLE = 1;
+		constexpr int RIGHT = 2;
 
 		Vector3<T>  minPoint = aAABB.GetMin();
 		Vector3<T>  maxPoint = aAABB.GetMax();
@@ -72,15 +72,15 @@ bool IntersectionAABBRay(const AABB3D<T>  aAABB,const Ray<T>& aRay)
 
 			//i = x,y,z for less code
 			//decides if in the area between min and max
-			for(int i = 0; i < 3; i++)
+			for (int i = 0; i < 3; i++)
 			{
-				if(rayOrigin[i] < minPoint[i])
+				if (rayOrigin[i] < minPoint[i])
 				{
 					quadrant[i] = LEFT;
 					candidatePlane[i] = minPoint[i];
 					inside = false;
 				}
-				else if(rayOrigin[i] > maxPoint[i])
+				else if (rayOrigin[i] > maxPoint[i])
 				{
 					quadrant[i] = RIGHT;
 					candidatePlane[i] = maxPoint[i];
@@ -93,17 +93,17 @@ bool IntersectionAABBRay(const AABB3D<T>  aAABB,const Ray<T>& aRay)
 			}
 
 			// all Quadrants are intersected
-			if(inside)
+			if (inside)
 			{
 				hitPoint = rayOrigin;
 				return true;
 			}
 
 
-			for(int i = 0; i < 3; i++)
+			for (int i = 0; i < 3; i++)
 			{
 				//If i am not in the volume that extrudes from the normal of the face1. and my direction toward that origin is not 0 
-				if(quadrant[i] != MIDDLE && rayDirection[i] != 0.)
+				if (quadrant[i] != MIDDLE && rayDirection[i] != 0.)
 				{
 					tAtIntersectionOfPlane[i] = (candidatePlane[i] - rayOrigin[i]) / rayDirection[i];
 				}
@@ -115,25 +115,25 @@ bool IntersectionAABBRay(const AABB3D<T>  aAABB,const Ray<T>& aRay)
 
 			//The largest t value is the intersected plane. Check what axis it corresponds to.
 			whichPlane = 0;
-			for(int i = 1; i < 3; i++)
+			for (int i = 1; i < 3; i++)
 			{
-				if(tAtIntersectionOfPlane[whichPlane] < tAtIntersectionOfPlane[i])
+				if (tAtIntersectionOfPlane[whichPlane] < tAtIntersectionOfPlane[i])
 				{
 					whichPlane = i;
 				}
 			}
 
-			if(tAtIntersectionOfPlane[whichPlane] < 0)
+			if (tAtIntersectionOfPlane[whichPlane] < 0)
 			{
 				return  false;
 			}
-			for(int i = 0; i < 3; i++)
+			for (int i = 0; i < 3; i++)
 			{
-				if(whichPlane != i)
+				if (whichPlane != i)
 				{
 					//Set the coordinates in the plane of intersection
 					hitPoint[i] = rayOrigin[i] + tAtIntersectionOfPlane[whichPlane] * rayDirection[i];
-					if(hitPoint[i] < minPoint[i] || hitPoint[i] > maxPoint[i])
+					if (hitPoint[i] < minPoint[i] || hitPoint[i] > maxPoint[i])
 					{
 						return false;
 					}
@@ -152,9 +152,9 @@ template<class T>
 bool IntersectionAABBRay(const AABB3D<T>  aAABB,const Ray<T>& aRay,Vector3<T>& hitPoint)
 {
 	{
-#define LEFT	0
-#define MIDDLE	1
-#define RIGHT	2
+		constexpr int LEFT = 0;
+		constexpr int MIDDLE = 1;
+		constexpr int RIGHT = 2;
 
 		Vector3<T>  minPoint = aAABB.GetMin();
 		Vector3<T>  maxPoint = aAABB.GetMax();
@@ -173,15 +173,15 @@ bool IntersectionAABBRay(const AABB3D<T>  aAABB,const Ray<T>& aRay,Vector3<T>& h
 
 			//i = x,y,z for less code
 			//decides if in the area between min and max
-			for(int i = 0; i < 3; i++)
+			for (int i = 0; i < 3; i++)
 			{
-				if(rayOrigin[i] < minPoint[i])
+				if (rayOrigin[i] < minPoint[i])
 				{
 					quadrant[i] = LEFT;
 					candidatePlane[i] = minPoint[i];
 					inside = false;
 				}
-				else if(rayOrigin[i] > maxPoint[i])
+				else if (rayOrigin[i] > maxPoint[i])
 				{
 					quadrant[i] = RIGHT;
 					candidatePlane[i] = maxPoint[i];
@@ -194,17 +194,17 @@ bool IntersectionAABBRay(const AABB3D<T>  aAABB,const Ray<T>& aRay,Vector3<T>& h
 			}
 
 			// all Quadrants are intersected
-			if(inside)
+			if (inside)
 			{
 				hitPoint = rayOrigin;
 				return true;
 			}
 
 
-			for(int i = 0; i < 3; i++)
+			for (int i = 0; i < 3; i++)
 			{
 				//If i am not in the volume that extrudes from the normal of the face1. and my direction toward that origin is not 0 
-				if(quadrant[i] != MIDDLE && rayDirection[i] != 0.)
+				if (quadrant[i] != MIDDLE && rayDirection[i] != 0.)
 				{
 					tAtIntersectionOfPlane[i] = (candidatePlane[i] - rayOrigin[i]) / rayDirection[i];
 				}
@@ -216,25 +216,25 @@ bool IntersectionAABBRay(const AABB3D<T>  aAABB,const Ray<T>& aRay,Vector3<T>& h
 
 			//The largest t value is the intersected plane. Check what axis it corresponds to.
 			whichPlane = 0;
-			for(int i = 1; i < 3; i++)
+			for (int i = 1; i < 3; i++)
 			{
-				if(tAtIntersectionOfPlane[whichPlane] < tAtIntersectionOfPlane[i])
+				if (tAtIntersectionOfPlane[whichPlane] < tAtIntersectionOfPlane[i])
 				{
 					whichPlane = i;
 				}
 			}
 
-			if(tAtIntersectionOfPlane[whichPlane] < 0)
+			if (tAtIntersectionOfPlane[whichPlane] < 0)
 			{
 				return  false;
 			}
-			for(int i = 0; i < 3; i++)
+			for (int i = 0; i < 3; i++)
 			{
-				if(whichPlane != i)
+				if (whichPlane != i)
 				{
 					//Set the coordinates in the plane of intersection
 					hitPoint[i] = rayOrigin[i] + tAtIntersectionOfPlane[whichPlane] * rayDirection[i];
-					if(hitPoint[i] < minPoint[i] || hitPoint[i] > maxPoint[i])
+					if (hitPoint[i] < minPoint[i] || hitPoint[i] > maxPoint[i])
 					{
 						return false;
 					}
@@ -275,7 +275,7 @@ bool IntersectionSphereRay(const Sphere<T>& aSphere,const Ray<T>& aRay)
 	Vector3<T> ClosestPoint = aRay.GetOrigin() + aRay.GetUnitVector() * Scalar;
 	Vector3<T> fromCenterToPoint = ClosestPoint - aSphere.GetCenter();
 
-	if(fromCenterToPoint.Length() <= aSphere.GetRadius())
+	if (fromCenterToPoint.Length() <= aSphere.GetRadius())
 	{
 		return true;
 	}
@@ -291,7 +291,7 @@ bool IntersectionCircleRay(const Circle<T>& aCircle,const Ray2d<T>& aRay)
 	const Vector2<T> ClosestPoint = aRay.GetOrigin() + aRay.GetUnitVector() * Scalar;
 	Vector2<T> fromCenterToPoint = ClosestPoint - aCircle.GetCenter();
 
-	if(fromCenterToPoint.Length() <= aCircle.GetRadius())
+	if (fromCenterToPoint.Length() <= aCircle.GetRadius())
 	{
 		return true;
 	}

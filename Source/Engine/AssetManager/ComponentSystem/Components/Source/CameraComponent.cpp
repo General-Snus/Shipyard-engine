@@ -6,6 +6,8 @@
 #include <Tools/Utilities/Input/InputHandler.hpp> 
 #include "../CameraComponent.h"
 
+#include "Tools/Utilities/Input/EnumKeys.h"
+
 cCamera::cCamera(const unsigned int anOwnerId) : Component(anOwnerId)
 {
 	GetGameObject().AddComponent<Transform>();
@@ -76,7 +78,7 @@ void cCamera::Update()
 
 	//UpdatePositionVectors();
 	const float mdf = cameraSpeed;
-	const float rotationSpeed = 100;
+	const float rotationSpeed = 20000;
 	myScreenSize = Vector2<int>(RHI::GetDeviceSize().Width,RHI::GetDeviceSize().Height);
 
 	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::UP))
@@ -92,11 +94,11 @@ void cCamera::Update()
 	{
 		const Vector3f mouseDeltaVector =
 		{
-			-static_cast<float>(InputHandler::GetInstance().GetMousePositionDelta().y),
+			static_cast<float>(InputHandler::GetInstance().GetMousePositionDelta().y),
 			-static_cast<float>(InputHandler::GetInstance().GetMousePositionDelta().x),
 			0.0f
-		};
-		myTransform.Rotate(mouseDeltaVector * rotationSpeed * 0.1f * Timer::GetInstance().GetDeltaTime());
+		}; 
+		myTransform.Rotate(mouseDeltaVector * rotationSpeed  * Timer::GetInstance().GetDeltaTime());
 	}
 
 	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::W))
@@ -120,7 +122,7 @@ void cCamera::Update()
 	}
 	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::E))
 	{
-		myTransform.Rotate({ 0,rotationSpeed * aTimeDelta });
+		myTransform.Rotate({ 0,200.f * aTimeDelta });
 	}
 #ifdef Flashlight
 	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::F))
@@ -130,7 +132,7 @@ void cCamera::Update()
 #endif
 	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::Q))
 	{
-		myTransform.Rotate({ 0,-rotationSpeed * aTimeDelta });
+		myTransform.Rotate({ 0,-200.f * aTimeDelta });
 	}
 
 	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::SPACE))

@@ -4,34 +4,7 @@
 // To get all the nodes inside MuninGraph in your project to auto-register you need to link
 // with /WHOLEARCHIVE:MuninGraph.lib or VS will optimize the auto reg away. Similarly if you
 // have this file in a lib of your own you need to /WHOLEARCHIVE that file too. If this lives
-// in an EXE project then it'll work as intended on its own.
-
-// NOTE THE INCLUDE!
-//
-//BeginScriptGraphNode(MVNode_TestNode)
-//{
-//public:
-//	void Init() override;
-//	std::string GetNodeTitle() const override { return "Model Viewer Test Node"; }
-//	size_t DoOperation() override;
-//};
-//
-//BeginScriptGraphNode(MVNode_TestExecless)
-//{
-//public:
-//	void Init() override;
-//	std::string GetNodeTitle() const override { return "Test Execless Node"; }
-//	size_t DoOperation() override;
-//};
-//
-//BeginScriptGraphNode(MVNode_TestMultiInput)
-//{
-//public:
-//	void Init() override;
-//	std::string GetNodeTitle() const override { return "Test Multi Input"; }
-//	size_t DoOperation() override;
-//	bool IsSimpleNode() const override;
-//};
+// in an EXE project then it'll work as intended on its own. 
 
 BeginScriptGraphNode(MVNode_MakeVector)
 {
@@ -92,6 +65,58 @@ BeginScriptGraphNode(MVNode_SetTransformPosition)
 public:
 	void Init() override;
 	std::string GetNodeTitle() const override { return "Set Transform Position"; }
+	size_t DoOperation() override;
+	bool IsSimpleNode() const override { return false; }
+};
+
+BeginScriptGraphNode(MVNode_SetTransformScale)
+{
+public:
+	void Init() override;
+	std::string GetNodeTitle() const override { return "Set Transform Scale"; }
+	size_t DoOperation() override;
+	bool IsSimpleNode() const override { return false; }
+};
+
+BeginScriptGraphNode(MVNode_SetTransformRotation)
+{
+public:
+	void Init() override;
+	std::string GetNodeTitle() const override { return "Set Transform Rotation"; }
+	size_t DoOperation() override;
+	bool IsSimpleNode() const override { return false; }
+};
+
+BeginScriptGraphNode(MVNode_GetCursorPosition)
+{
+public:
+	void Init() override;
+	std::string GetNodeTitle() const override { return "Get Mouse cursor position"; }
+	size_t DoOperation() override;
+	bool IsSimpleNode() const override { return false; }
+};
+
+BeginScriptGraphNode(MVNode_Distance)
+{
+public:
+	void Init() override;
+	std::string GetNodeTitle() const override { return "Distance of a vector"; }
+	size_t DoOperation() override;
+	bool IsSimpleNode() const override { return false; }
+};
+BeginScriptGraphNode(MVNode_VectorMinus)
+{
+public:
+	void Init() override;
+	std::string GetNodeTitle() const override { return "Difference between two vectors"; }
+	size_t DoOperation() override;
+	bool IsSimpleNode() const override { return false; }
+};
+BeginScriptGraphNode(MVNode_ScreenSpacePosition)
+{
+public:
+	void Init() override;
+	std::string GetNodeTitle() const override { return "Distance between two vectors"; }
 	size_t DoOperation() override;
 	bool IsSimpleNode() const override { return false; }
 };
