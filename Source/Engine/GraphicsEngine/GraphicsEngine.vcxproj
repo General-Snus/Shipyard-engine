@@ -139,7 +139,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\CU\;</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -267,7 +267,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DebugDrawer\DebugDrawer.cpp" />
-    <ClCompile Include="InterOp\GPU.cpp" />
+    <ClCompile Include="InterOp\GPU.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_GaussianBlur.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_LuminancePass.cpp" />
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetDepthState.cpp" />

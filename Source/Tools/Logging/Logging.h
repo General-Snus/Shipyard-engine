@@ -1,50 +1,44 @@
 #pragma once
 #define NOMINMAX
-#include <string>
-
-#include "Windows.h"
 #include <source_location> 
+#include <string>
+#include "Windows.h"
 class Logger
 {
-	HANDLE myHandle = 0;
-	bool shouldPrintToOutput = false;
-	bool isInitialized = false;
-	std::string myNamespace;
-
-	Logger(const std::string& aNamespace);
-	[[nodiscard]] std::string Timestamp() const;
-
-public:
-
+	static inline HANDLE myHandle = 0;
+	static inline bool shouldPrintToOutput = false;
+	static inline bool isInitialized = false;
+	static inline std::string myNamespace;
+	static [[nodiscard]] std::string Timestamp();
 	Logger() = default;
 
-	static Logger Create(const std::string& aNamespace);
-
-	void SetConsoleHandle(HANDLE aHandle);
+public:
+	static bool Create();
+	static void SetConsoleHandle(HANDLE aHandle);
 
 	// Tells the logger to output to the Visual Studio output window instead
 	// of a console.
-	void SetPrintToVSOutput(bool bNewValue);
+	static void SetPrintToVSOutput(bool bNewValue);
 
 	// Log a message.
-	void Log(const std::string& aString) const;
+	static void Log(const std::string& aString);
 
 	// Log a warning message.
-	void Warn(const std::string& aString) const;
+	static void Warn(const std::string& aString);
 
 	// Log an error.
-	void Err(const std::string& aString,const std::source_location location =
-		std::source_location::current()) const;
+	static void Err(const std::string& aString,const std::source_location location =
+		std::source_location::current());
 
 	// Log a success message.
-	void Succ(const std::string& aString) const;
+	static void Succ(const std::string& aString);
 
 	// Log an exception. Will step through nested exceptions if there are any.
-	void LogException(const std::exception& anException,unsigned aLevel = 0,const std::source_location location =
-		std::source_location::current()) const;
+	static void LogException(const std::exception& anException,unsigned aLevel = 0,const std::source_location location =
+		std::source_location::current());
 
 	// Just force the log to go to next line.
-	void NewLine() const;
+	static void NewLine();
 
 	FORCEINLINE HANDLE GetHandle() const { return myHandle; }
 };

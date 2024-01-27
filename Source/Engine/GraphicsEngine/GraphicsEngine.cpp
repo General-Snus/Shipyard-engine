@@ -25,35 +25,23 @@
 #include <Shaders/Include/ScreenspaceQuad_VS.h>
 #include <Shaders/Include/SSAO_PS.h> 
 #include <Shaders/Include/ToneMapping_PS.h>
-#include <Shaders/Registers.h>
 #include <stdexcept> 
 #include <Tools/ImGui/ImGui/imgui.h>
 #include <Tools/Optick/include/optick.h> 
-#include "GraphicCommands/Commands/Headers/GfxCmd_DebugLayer.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_GaussianBlur.h" 
-#include "GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_SetLightBuffer.h" 
-#include "GraphicCommands/Commands/Headers/GfxCmd_SetRenderTarget.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_SSAO.h" 
-#include "GraphicCommands/GraphicCommands.h"
 #include "GraphicsEngine.h"     
-#include "Objects/Shader.h" 
-#include "Rendering/ParticleRenderer/ParticleVertex.h" 
-#include "Rendering/Vertex.h" 
-#include "Shaders/Registers.h" 
+
+#include "InterOp/GPU.h"
 
 
 bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 {
-	GELogger = Logger::Create("GraphicsEngine");
 	DeferredCommandList.Initialize();
 	OverlayCommandList.Initialize();
 
 #ifdef _DEBUG
 	try
 	{
-#endif
-		GELogger.SetPrintToVSOutput(false);
+#endif 
 		myWindowHandle = windowHandle;
 		myBackBuffer = std::make_unique<Texture>();
 		myDepthBuffer = std::make_unique<Texture>();
@@ -63,7 +51,16 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 			myBackBuffer.get(),
 			myDepthBuffer.get()))
 		{
-			GELogger.Err("Failed to initialize the RHI!");
+			Logger::Err("Failed to initialize the RHI!");
+			return false;
+		}
+
+		if (!GPU::Initialize(myWindowHandle,
+			enableDeviceDebug,
+			myBackBuffer.get(),
+			myDepthBuffer.get()))
+		{
+			Logger::Err("Failed to initialize the DX12 GPU!");
 			return false;
 		}
 
@@ -98,7 +95,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 	}
 	catch (const std::exception& e)
 	{
-		GELogger.LogException(e);
+		Logger::LogException(e);
 		exit(-1);
 	}
 #endif 
@@ -131,7 +128,7 @@ void GraphicsEngine::SetupDefaultVariables()
 
 	if (!RHI::CreateSamplerState(myDefaultSampleState,samplerDesc))
 	{
-		GELogger.Log("Sampler state created");
+		Logger::Log("Sampler state created");
 		assert(false);
 	}
 	RHI::SetSamplerState(myDefaultSampleState,REG_DefaultSampler);
@@ -153,7 +150,7 @@ void GraphicsEngine::SetupDefaultVariables()
 
 	if (!RHI::CreateSamplerState(myShadowSampleState,shadowSamplerDesc))
 	{
-		GELogger.Log("Sampler state created");
+		Logger::Log("Sampler state created");
 		assert(false);
 	}
 	RHI::SetSamplerState(myShadowSampleState,REG_shadowCmpSampler);
@@ -170,7 +167,7 @@ void GraphicsEngine::SetupDefaultVariables()
 	);
 	if (FAILED(result))
 	{
-		GELogger.Log("Failed to create depth stencil read only state");
+		Logger::Log("Failed to create depth stencil read only state");
 		assert(false);
 	}
 	myDepthStencilStates[(int)eDepthStencilStates::DSS_ReadWrite] = nullptr;
@@ -249,7 +246,7 @@ void GraphicsEngine::SetupDefaultVariables()
 
 	if (!RHI::CreateSamplerState(myPointSampleState,pointSamplerDesc))
 	{
-		GELogger.Log("Sampler state created");
+		Logger::Log("Sampler state created");
 		assert(false);
 	}
 	RHI::SetSamplerState(myPointSampleState,REG_PointSampler);
@@ -361,7 +358,7 @@ void GraphicsEngine::SetupBRDF()
 
 	if (!RHI::CreateSamplerState(myBRDFSampleState,lutsamplerDesc))
 	{
-		GELogger.Log("Sampler state created");
+		Logger::Log("Sampler state created");
 		assert(false);
 	}
 
@@ -379,7 +376,7 @@ void GraphicsEngine::SetupPostProcessing()
 
 	if (!RHI::CreateSamplerState(myNormalDepthSampleState,normalDepthSampler))
 	{
-		GELogger.Log("Sampler state created");
+		Logger::Log("Sampler state created");
 		assert(false);
 	}
 
@@ -536,25 +533,18 @@ void GraphicsEngine::UpdateSettings()
 	RHI::SetConstantBuffer(PIPELINE_STAGE_PIXEL_SHADER,REG_GraphicSettingsBuffer,myGraphicSettingsBuffer);
 	RHI::UpdateConstantBufferData(myGraphicSettingsBuffer);
 }
-
-void GraphicsEngine::SetLoggingWindow(HANDLE aHandle)  const
-{
-	GELogger.SetConsoleHandle(aHandle);
-}
-
 void GraphicsEngine::BeginFrame()
 {
 	myCamera = GameObjectManager::Get().GetCamera().TryGetComponent<cCamera>();
 	if (!myCamera)
 	{
-		GELogger.Err("No camera in scene. No render is possible");
+		Logger::Err("No camera in scene. No render is possible");
 	}
 	UpdateSettings();
 
 	// Here we should initialize our frame and clean up from the last one.  
 	RHI::ClearRenderTarget(myBackBuffer.get(),myBackgroundColor);
 	RHI::ClearDepthStencil(myDepthBuffer.get());
-
 	RHI::ClearRenderTarget(SceneBuffer.get(),{ 0.0f,0.0f,0.0f,0.0f });
 	RHI::ClearRenderTarget(halfSceneBuffer.get(),{ 0.0f,0.0f,0.0f,0.0f });
 	RHI::ClearRenderTarget(quaterSceneBuffer1.get(),{ 0.0f,0.0f,0.0f,0.0f });

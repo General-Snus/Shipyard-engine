@@ -1,11 +1,11 @@
 #include <AssetManager.pch.h>
-#include "../ParticleEmitter.h"
 #include <cassert>
 #include <cmath>
-#include <iostream>
-#include <Tools/Utilities/Math.hpp>
 #include <d3d11.h>
+#include <iostream>
 #include <random>
+#include <Tools/Utilities/Math.hpp>
+#include "../ParticleEmitter.h"
 
 #include <Tools/ImGui/ImGui/imgui.h>
 
@@ -25,13 +25,13 @@ void ParticleEmitter::InitParticle(Particlevertex& vertex) const
 
 ParticleEmitter::ParticleEmitter(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)
 {
-	AMLogger.Err("NotImplementedException");
+	Logger::Err("NotImplementedException");
 	assert(false);
 }
 
 ParticleEmitter::ParticleEmitter(const ParticleEmitterTemplate& aTemplate) : AssetBase(aTemplate.Path)
 {
-	if(aTemplate.EmmiterSettings.ParticleTexture.empty())
+	if (aTemplate.EmmiterSettings.ParticleTexture.empty())
 	{
 		texture = GraphicsEngine::Get().GetDefaultTexture(eTextureType::ParticleMap);
 	}
@@ -42,20 +42,20 @@ ParticleEmitter::ParticleEmitter(const ParticleEmitterTemplate& aTemplate) : Ass
 
 	settings = aTemplate.EmmiterSettings;
 	primitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
-	if(settings.MaxParticles == 0 || (int)std::ceil(settings.SpawnRate * settings.LifeTime) < settings.MaxParticles)
+	if (settings.MaxParticles == 0 || (int)std::ceil(settings.SpawnRate * settings.LifeTime) < settings.MaxParticles)
 	{
 		settings.MaxParticles = (int)std::ceil(settings.SpawnRate * settings.LifeTime);
 	}
 
 	particles.resize(settings.MaxParticles);
 
-	for(auto& part : particles)
+	for (auto& part : particles)
 	{
 		InitParticle(part);
 		part.Lifetime = settings.LifeTime + 1;
 	}
 
-	if(!RHI::CreateDynamicVertexBuffer(vertexBuffer,particles.size(),sizeof(Particlevertex)))
+	if (!RHI::CreateDynamicVertexBuffer(vertexBuffer,particles.size(),sizeof(Particlevertex)))
 	{
 		std::cout << "Failed to create vertex buffer" << std::endl;
 		return;
@@ -77,10 +77,10 @@ void ParticleEmitter::Update(float aDeltaTime)
 	spawnedThisFrame = std::floor(secondCounter) + 0.1f;//point exactness
 	secondCounter -= spawnedThisFrame;
 
-	for(auto& aParticle : particles)
+	for (auto& aParticle : particles)
 	{
 		aParticle.Lifetime += aDeltaTime;
-		if(aParticle.Lifetime >= this->settings.LifeTime && spawnedThisFrame > 1)
+		if (aParticle.Lifetime >= this->settings.LifeTime && spawnedThisFrame > 1)
 		{
 			spawnedThisFrame--;
 			InitParticle(aParticle);
@@ -94,7 +94,7 @@ void ParticleEmitter::Update(float aDeltaTime)
 
 		aParticle.Color = Lerp(settings.StartColor,settings.EndColor,aParticle.Lifetime / settings.LifeTime);
 		float scaleAllAxis = Lerp(settings.StartSize,settings.EndSize,aParticle.Lifetime / settings.LifeTime);
-		aParticle.Scale = {scaleAllAxis,scaleAllAxis,scaleAllAxis};
+		aParticle.Scale = { scaleAllAxis,scaleAllAxis,scaleAllAxis };
 	}
 }
 
@@ -118,9 +118,9 @@ void ParticleEmitter::SetAsResource() const
 		0,
 		&bufferData);
 
-	if(FAILED(result))
+	if (FAILED(result))
 	{
-		AMLogger.Log("Failed to create vertex buffer for particle emitter");
+		Logger::Log("Failed to create vertex buffer for particle emitter");
 		assert(false);
 	}
 
@@ -142,7 +142,7 @@ void ParticleEmitter::SetAsResource() const
 		Particlevertex::InputLayout
 	);
 
-	if(texture->isLoadedComplete)
+	if (texture->isLoadedComplete)
 	{
 		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_colorMap,texture->GetRawTexture().get());
 	}

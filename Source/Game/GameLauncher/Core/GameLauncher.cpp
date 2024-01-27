@@ -23,12 +23,11 @@ using json = nlohmann::json;
 
 void GameLauncher::Init()
 {
-	GLLogger.Log("GameLauncher Init");
 }
 
 bool SaveTest(std::vector<GameObject> gameObjectsToSave,const std::filesystem::path& path)
 {
-	AMLogger.Log("\n\nSaving Gameobjects");
+	Logger::Log("\n\nSaving Gameobjects");
 	std::ofstream file(path.string(),std::ios_base::binary);
 	if (!file.is_open())
 	{
@@ -49,7 +48,7 @@ bool SaveTest(std::vector<GameObject> gameObjectsToSave,const std::filesystem::p
 		file.write((char*)&strLength,sizeof(strLength));
 		file.write(&meshPath[0],strLength);
 
-		AMLogger.Log("Saved: " + std::to_string(id));
+		Logger::Log("Saved: " + std::to_string(id));
 	}
 	file.close();
 	return true;
@@ -67,7 +66,7 @@ std::vector<GameObject> LoadTest(const std::filesystem::path& path)
 	int size = 0;
 	file.read((char*)&size,sizeof(int));
 	gameObjectsToSave.resize(size);
-	AMLogger.Log("\n\nLoading Gameobjects " + std::to_string(size));
+	Logger::Log("\n\nLoading Gameobjects " + std::to_string(size));
 
 	for (auto& i : gameObjectsToSave)
 	{
@@ -90,7 +89,7 @@ std::vector<GameObject> LoadTest(const std::filesystem::path& path)
 		transform.SetPosition(position);
 		i.AddComponent<cMeshRenderer>(meshPath,true);
 		i.AddComponent<cPhysXDynamicBody>();
-		AMLogger.Log("Loaded: " + std::to_string(uuid));
+		Logger::Log("Loaded: " + std::to_string(uuid));
 	}
 	file.close();
 	return gameObjectsToSave;
@@ -112,7 +111,7 @@ void GameLauncher::GenerateNewRandomCubes()
 
 		vectorObject.AddComponent<cPhysXDynamicBody>();
 
-		AMLogger.Log("Created: " + std::to_string(vectorObject.GetID()));
+		Logger::Log("Created: " + std::to_string(vectorObject.GetID()));
 	}
 }
 
@@ -191,9 +190,8 @@ void GameLauncher::Start()
 	{
 		GenerateNewRandomCubes();
 	}
-#endif 
-
-	GLLogger.Log("GameLauncher start");
+#endif
+	Logger::Log("GameLauncher start");
 }
 
 void GameLauncher::Update(float delta)
@@ -249,8 +247,8 @@ void GameLauncher::Update(float delta)
 			i.SetIsDirty(true);
 			i.SetIsRendered(false);
 		}
-		}
+	}
 
 	//Transform& pLight = GameObjectManager::GetInstance().GetWorldRoot().GetComponent<Transform>();
 	//pLight.Rotate(0,delta,0);
-	}
+}

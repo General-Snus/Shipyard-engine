@@ -10,7 +10,6 @@ public:
 	void GenerateNewRandomCubes();
 	void Start();
 	void Update(float delta);
-	Logger GLLogger;
 private:
 	GameObject myMesh;
 	GameObject myCustomHandler;

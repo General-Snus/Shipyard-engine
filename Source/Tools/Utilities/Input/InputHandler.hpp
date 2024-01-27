@@ -108,9 +108,9 @@ inline bool InputHandler::UpdateMouseInput(UINT message)
 
 	case WM_MOUSEMOVE:
 		return true;
-	} 
+	}
 
-	
+
 	return false;
 }
 

@@ -4,13 +4,8 @@
 #include <iostream>
 #include <ostream> 
 #include <sstream>
-Logger::Logger(const std::string& aNamespace)
-{
-	myNamespace = "[ " + aNamespace + " ]";
-	isInitialized = true;
-}
 
-std::string Logger::Timestamp() const
+std::string Logger::Timestamp()
 {
 	SYSTEMTIME st;
 	GetLocalTime(&st);
@@ -31,13 +26,12 @@ std::string Logger::Timestamp() const
 	return result.str();
 }
 
-Logger Logger::Create(const std::string& aNamespace)
+bool Logger::Create()
 {
-	//spdlog::register_logger(std::make_shared<spdlog::logger>("test"));
-	Logger aLogger(aNamespace);
-	aLogger.SetConsoleHandle(GetConsoleWindow());
-	aLogger.Succ("Logging started for " + aNamespace);
-	return aLogger;
+	isInitialized = true;
+	SetConsoleHandle(GetConsoleWindow());
+	Succ("Logging started");
+	return true;
 }
 
 void Logger::SetConsoleHandle(HANDLE aHandle)
@@ -50,11 +44,11 @@ void Logger::SetPrintToVSOutput(bool bNewValue)
 	shouldPrintToOutput = bNewValue;
 }
 
-void Logger::Log(const std::string& aString) const
+void Logger::Log(const std::string& aString)
 {
-	if(isInitialized)
+	if (isInitialized)
 	{
-		if(shouldPrintToOutput)
+		if (shouldPrintToOutput)
 		{
 			const std::string message = "[" + Timestamp() + "]" + myNamespace + " [   LOG   ] " + aString;
 			OutputDebugStringA(message.c_str());
@@ -72,7 +66,7 @@ void Logger::Log(const std::string& aString) const
 		}
 	}
 	{
-		if(shouldPrintToOutput)
+		if (shouldPrintToOutput)
 		{
 			const std::string message = "[" + Timestamp() + "]" + myNamespace + " [   LOG   ] " + aString;
 			OutputDebugStringA(message.c_str());
@@ -84,11 +78,11 @@ void Logger::Log(const std::string& aString) const
 	}
 }
 
-void Logger::Warn(const std::string& aString) const
+void Logger::Warn(const std::string& aString)
 {
-	if(isInitialized)
+	if (isInitialized)
 	{
-		if(shouldPrintToOutput)
+		if (shouldPrintToOutput)
 		{
 			const std::string message = "[" + Timestamp() + "]" + myNamespace + " [ WARNING ] " + aString;
 			OutputDebugStringA(message.c_str());
@@ -107,11 +101,11 @@ void Logger::Warn(const std::string& aString) const
 	}
 }
 
-void Logger::Err(const std::string& aString,const std::source_location location) const
+void Logger::Err(const std::string& aString,const std::source_location location)
 {
-	if(isInitialized)
+	if (isInitialized)
 	{
-		if(shouldPrintToOutput)
+		if (shouldPrintToOutput)
 		{
 			const std::string message = "[" + Timestamp() + "]" + myNamespace + " [  ERROR  ] " + aString;
 			OutputDebugStringA(message.c_str());
@@ -136,11 +130,11 @@ void Logger::Err(const std::string& aString,const std::source_location location)
 	}
 }
 
-void Logger::Succ(const std::string& aString) const
+void Logger::Succ(const std::string& aString)
 {
-	if(isInitialized)
+	if (isInitialized)
 	{
-		if(shouldPrintToOutput)
+		if (shouldPrintToOutput)
 		{
 			const std::string message = "[" + Timestamp() + "]" + "[ SUCCESS ] " + aString;
 			OutputDebugStringA(message.c_str());
@@ -159,11 +153,11 @@ void Logger::Succ(const std::string& aString) const
 	}
 }
 
-void Logger::LogException(const std::exception& anException,unsigned aLevel,const std::source_location location) const
+void Logger::LogException(const std::exception& anException,unsigned aLevel,const std::source_location location)
 {
-	if(isInitialized)
+	if (isInitialized)
 	{
-		if(shouldPrintToOutput)
+		if (shouldPrintToOutput)
 		{
 			const std::string message = "[" + Timestamp() + "]" + std::string(aLevel,' ') + "[  FATAL  ] " + anException.what();
 			OutputDebugStringA(message.c_str());
@@ -191,15 +185,15 @@ void Logger::LogException(const std::exception& anException,unsigned aLevel,cons
 		{
 			std::rethrow_if_nested(anException);
 		}
-		catch(const std::exception& nestedException)
+		catch (const std::exception& nestedException)
 		{
 			LogException(nestedException,aLevel + 1);
 		}
-		catch(...) {} // Catch all other cases.
+		catch (...) {} // Catch all other cases.
 	}
 }
 
-void Logger::NewLine() const
+void Logger::NewLine()
 {
 	std::cout << std::endl;
 }

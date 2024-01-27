@@ -12,6 +12,7 @@ class GameLauncher;
 
 class Editor : public Singleton<Editor>
 {
+	friend class Singleton<Editor>;
 	enum eMenuLayers
 	{
 		count
@@ -19,7 +20,6 @@ class Editor : public Singleton<Editor>
 private:
 	std::unique_ptr<SplashWindow> mySplashWindow = nullptr;
 	ApplicationState myApplicationState;
-	Logger MVLogger;
 	void ShowSplashScreen();
 	void HideSplashScreen() const;
 
@@ -45,12 +45,6 @@ public:
 		static ApplicationState myApplicationState;
 		return myApplicationState;
 	}
-
-	FORCEINLINE Logger& GetLogger()
-	{
-		return MVLogger;
-	}
-
 	static RECT GetViewportRECT();
 	static Vector2<int> GetViewportResolution();
 

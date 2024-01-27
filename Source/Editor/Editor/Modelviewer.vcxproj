@@ -229,6 +229,7 @@
     <ClInclude Include="Core\Editor.h" />
     <ClInclude Include="Core\ApplicationState.h" />
     <ClInclude Include="Defines.h" />
+    <ClInclude Include="Core\Paths.h" />
     <ClInclude Include="Windows\EditorWindow.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Windows\EditorWindows\ChainGraph\GraphEditorBase.h" />
@@ -246,14 +247,15 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Core\ApplicationState.cpp" />
+    <ClCompile Include="Core\Source\ApplicationState.cpp" />
+    <ClCompile Include="Core\Source\Paths.cpp" />
     <ClCompile Include="Windows\EditorWindows\ChainGraph\GraphEditorBase.cpp" />
     <ClCompile Include="Windows\EditorWindows\ChainGraph\GraphTool.cpp" />
     <ClCompile Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\RegisterExternalNodes.cpp" />
     <ClCompile Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\ScriptGraphEditor.cpp" />
     <ClCompile Include="Windows\Source\EditorWindow.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Core\Editor.cpp" />
+    <ClCompile Include="Core\Source\Editor.cpp" />
     <ClCompile Include="TheHole\SaveLoad.cpp" />
     <ClCompile Include="Windows\Source\Window.cpp" />
     <ClCompile Include="Windows\Source\SplashWindow.cpp" />

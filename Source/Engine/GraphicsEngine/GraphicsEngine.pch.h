@@ -9,17 +9,13 @@
 #define NOMINMAX 
 
 // add headers that you want to pre-compile here
-#include <d3d11.h>
+#include <d3d11.h> 
 #include <Tools/ThirdParty/DirectXTK/WICTextureLoader.h>
 #include <Windows.h>
-#include "GraphicsEngine.h" 
-#include "InterOp/Helpers.h"
-#include "InterOp/RHI.h"
-#include "Tools/Logging/Logging.h"
-
 #include "GraphicCommands/Commands/Headers/GfxCmd_Bloom.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_DebugLayer.h"
+#include "GraphicCommands/Commands/Headers/GfxCmd_DebugLayer.h" 
 #include "GraphicCommands/Commands/Headers/GfxCmd_DrawDebugPrimitive.h"
+#include "GraphicCommands/Commands/Headers/GfxCmd_GaussianBlur.h" 
 #include "GraphicCommands/Commands/Headers/GfxCmd_LuminancePass.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_RenderMesh.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_RenderMeshShadow.h"
@@ -27,16 +23,24 @@
 #include "GraphicCommands/Commands/Headers/GfxCmd_RenderSkeletalMeshShadow.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_RenderSkybox.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_SetDepthState.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_SetLightBuffer.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_SetRenderTarget.h"
+#include "GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h" 
+#include "GraphicCommands/Commands/Headers/GfxCmd_SetLightBuffer.h" 
+#include "GraphicCommands/Commands/Headers/GfxCmd_SetRenderTarget.h" 
+#include "GraphicCommands/Commands/Headers/GfxCmd_SSAO.h" 
 #include "GraphicCommands/Commands/Headers/GfxCmd_ToneMapPass.h"
+#include "GraphicCommands/GraphicCommands.h"
+#include "GraphicsEngine.h" 
+#include "InterOp/Helpers.h"
+#include "InterOp/RHI.h"
+#include "Objects/Shader.h" 
 #include "Rendering/Buffers/FrameBuffer.h"
 #include "Rendering/Buffers/G_buffer.h"
 #include "Rendering/Buffers/LightBuffer.h"
 #include "Rendering/Buffers/LineBuffer.h"
 #include "Rendering/Buffers/ObjectBuffer.h"
-#include "wrl/client.h"
-
-static inline Logger GELogger;
+#include "Rendering/ParticleRenderer/ParticleVertex.h" 
+#include "Rendering/Vertex.h" 
+#include "Shaders/Registers.h" 
+#include "Tools/Logging/Logging.h"
+#include "wrl/client.h" 
 #endif //GRAPHICSENGINE_PCH

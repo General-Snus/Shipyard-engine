@@ -207,7 +207,7 @@ void Mesh::Init()
 	{
 		std::string message = "Failed to load mesh " + AssetPath.string();
 		std::exception failedMeshLoad(message.c_str());
-		AMLogger.LogException(failedMeshLoad,2);
+		Logger::LogException(failedMeshLoad,2);
 		return;
 	}
 	Editor::Get().ExpandWorldBounds(boxSphereBounds); // TODO Make a scene contain the boxSphereBounds!! 
@@ -341,7 +341,7 @@ void Mesh::Init()
 		bufferSize = static_cast<int>(myInstances.size());
 		if (FAILED(result))
 		{
-			AMLogger.Log("Failed to create Instance buffer");
+			Logger::Log("Failed to create Instance buffer");
 			return;
 		}
 	}
@@ -495,7 +495,7 @@ void Mesh::ResizeBuffer()
 
 	if (FAILED(result))
 	{
-		AMLogger.Log("Failed to create Instance buffer");
+		Logger::Log("Failed to create Instance buffer");
 		return;
 	}
 	bufferSize = static_cast<int>(myInstances.size());

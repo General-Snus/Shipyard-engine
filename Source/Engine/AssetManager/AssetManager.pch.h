@@ -9,6 +9,10 @@
 
 #define NOMINMAX
 // add headers that you want to pre-compile here
+#include <algorithm> 
+#include <assimp/Importer.hpp>      // C++ importer interface 
+#include <assimp/postprocess.h>     // Post processing flags
+#include <assimp/scene.h>           // Output data structure
 #include <filesystem> 
 #include <functional>
 #include <iostream> 
@@ -16,10 +20,6 @@
 #include <ranges>
 #include <unordered_map>
 #include <vector>
-#include <algorithm> 
-#include <assimp/Importer.hpp>      // C++ importer interface 
-#include <assimp/postprocess.h>     // Post processing flags
-#include <assimp/scene.h>           // Output data structure
 
 #include <Tools/Optick/src/optick.h> 
 #include <Tools/Utilities/Game/Timer.h>
@@ -81,8 +81,7 @@
 #include "AssetManager.h"
 #include "ComponentSystem/UUID.h"
 
-#include <Editor/Editor/Defines.h>
-static inline Logger AMLogger;
+#include <Editor/Editor/Defines.h> 
 
 #define UseTGAImporter 0
 #endif //ASSETMANAGER_PCH_H 

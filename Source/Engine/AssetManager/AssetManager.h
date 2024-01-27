@@ -1,11 +1,13 @@
 #pragma once 
 #define AsUINT(v) static_cast<unsigned>(v) 
 
+#include <Engine/AssetManager/Objects/BaseAssets/BaseAsset.h>
 #include <Tools/Utilities/DataStructures/Queue.hpp> 
 #include <Tools/Utilities/System/SingletonTemplate.h>
 #include <Tools/Utilities/System/ThreadPool.hpp>
 #include <unordered_map>
 #include "AssetManagerUtills.hpp"
+
 struct Frame;
 struct Element;
 struct MaterialData;
@@ -125,7 +127,7 @@ void AssetManager::ForceLoadAsset(const std::filesystem::path& aFilePath,bool us
 			newObject.second->Init();
 		}
 	}
-	 
+
 	outAsset = ptr;
 }
 

@@ -1,5 +1,6 @@
 #define NOMINMAX
 #include <assert.h>
+#include <Editor/Editor/Windows/Window.h>
 #include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h> 
 #include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXDynamicBody.h> 
 #include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXStaticBody.h> 
@@ -21,8 +22,7 @@
 #include <Tools/Utilities/Math.hpp>
 #include <Tools/Utilities/System/ThreadPool.hpp>
 #include <Windows/EditorWindows/ChainGraph/GraphTool.h>
-#include "../Windows/Window.h" 
-#include "Editor.h" 
+#include "../Editor.h" 
 #include "Windows.h"
 #include "Windows/SplashWindow.h"
 
@@ -34,12 +34,8 @@ using json = nlohmann::json;
 
 bool Editor::Initialize(HWND aHandle)
 {
-	MVLogger = Logger::Create("ModelViewer");
-	GELogger = Logger::Create("GraphicsEngine");
+	Logger::Create();
 	GetWindowRect(Window::windowHandler,&ViewportRect);
-
-
-
 	ShowSplashScreen();
 	ThreadPool::Get().Init();
 

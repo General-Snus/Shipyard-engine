@@ -185,8 +185,6 @@ public:
 
 	void UpdateSettings();
 
-	void SetLoggingWindow(HANDLE aHandle) const;
-
 	void SetupBRDF();
 
 	void SetupPostProcessing();

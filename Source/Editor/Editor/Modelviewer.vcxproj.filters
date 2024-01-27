@@ -72,9 +72,12 @@
     <ClInclude Include="Windows\EditorWindows\ChainGraph\GraphTool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Paths.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Core\Editor.cpp">
+    <ClCompile Include="Core\Source\Editor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Windows\Source\SplashWindow.cpp">
@@ -83,7 +86,7 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Core\ApplicationState.cpp">
+    <ClCompile Include="Core\Source\ApplicationState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Windows\Source\Window.cpp">
@@ -105,6 +108,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Windows\EditorWindows\ChainGraph\GraphTool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Source\Paths.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
