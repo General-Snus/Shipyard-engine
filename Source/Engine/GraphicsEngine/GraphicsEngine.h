@@ -4,7 +4,10 @@
 #include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
 #include <Engine/GraphicsEngine/Shaders/Registers.h> 
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp> 
-#include "InterOp/RHI.h"
+//#include "InterOp/RHI.h"
+#include "InterOp/GPU.h"
+#include "InterOp/PSO.h"
+
 #include "Rendering/Buffers/ConstantBuffer.h" 
 #include "Rendering/Buffers/FrameBuffer.h"
 #include "Rendering/Buffers/G_Buffer.h"
@@ -70,6 +73,10 @@ public:
 		DSS_COUNT,
 	};
 private:
+
+	std::unique_ptr<PSOCache> m_StateCache;
+
+
 	FrameBuffer myFrameBuffer;
 	ObjectBuffer myObjectBuffer;
 	LineBuffer myLineBuffer;
@@ -209,7 +216,8 @@ public:
 
 	void SetDepthState(eDepthStencilStates state)
 	{
-		RHI::Context->OMSetDepthStencilState(myDepthStencilStates[(int)state].Get(),0);
+		state;
+		//RHI::Context->OMSetDepthStencilState(myDepthStencilStates[(int)state].Get(),0);
 	}
 
 	Vector4f& GetBackgroundColor() { return myBackgroundColor; }

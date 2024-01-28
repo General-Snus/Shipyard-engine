@@ -1,7 +1,6 @@
 #pragma once
-#include "Windows.h" 
 #include <functional>
-#include <WinUser.h>
+#include "Windows.h" 
 struct WinInitSettings
 {
 	LPCWSTR windowTitle;
@@ -21,8 +20,11 @@ public:
 
 	static void SetCallbackFunction(std::function<void(MSG const& msg)> aCallback);
 	static void Destroy();
-
 	static void MoveConsoleToOtherMonitor();
+
+	static unsigned int Width();
+	static unsigned int Height();
+
 
 	inline static HINSTANCE moduleHandler;
 	inline static HWND windowHandler;

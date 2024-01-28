@@ -4,7 +4,7 @@
 #include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>
 #include <Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h>
 #include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
-#include <Engine/GraphicsEngine/InterOp/DDSTextureLoader11.h>
+#include <Engine/GraphicsEngine/InterOp/XTK/DDSTextureLoader.h>
 #include <Objects/DataObjects/Default_C.h>
 #include <Objects/DataObjects/Default_FX.h>
 #include <Objects/DataObjects/Default_M.h>
@@ -31,6 +31,7 @@
 #include "GraphicsEngine.h"     
 
 #include "InterOp/GPU.h"
+#include "InterOp/PSO.h"
 
 
 bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
@@ -46,15 +47,6 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 		myBackBuffer = std::make_unique<Texture>();
 		myDepthBuffer = std::make_unique<Texture>();
 
-		if (!RHI::Initialize(myWindowHandle,
-			enableDeviceDebug,
-			myBackBuffer.get(),
-			myDepthBuffer.get()))
-		{
-			Logger::Err("Failed to initialize the RHI!");
-			return false;
-		}
-
 		if (!GPU::Initialize(myWindowHandle,
 			enableDeviceDebug,
 			myBackBuffer.get(),
@@ -63,6 +55,17 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 			Logger::Err("Failed to initialize the DX12 GPU!");
 			return false;
 		}
+
+		if (!RHI::Initialize(myWindowHandle,
+			enableDeviceDebug,
+			myBackBuffer.get(),
+			myDepthBuffer.get()))
+		{
+			Logger::Err("Failed to initialize the RHI!");
+			return false;
+		}
+		m_StateCache = std::make_unique<PSOCache>();
+		m_StateCache->InitAllStates();
 
 		SetupDefaultVariables();
 		SetupBRDF();
@@ -111,14 +114,14 @@ bool GraphicsEngine::SetupDebugDrawline()
 
 void GraphicsEngine::SetupDefaultVariables()
 {
-	D3D11_SAMPLER_DESC samplerDesc = {};
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	D3D12_SAMPLER_DESC samplerDesc = {};
+	samplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	samplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	samplerDesc.MipLODBias = 0.f;
 	samplerDesc.MaxAnisotropy = 1;
-	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
 	samplerDesc.BorderColor[0] = 1.f;
 	samplerDesc.BorderColor[1] = 1.f;
 	samplerDesc.BorderColor[2] = 1.f;
@@ -155,17 +158,21 @@ void GraphicsEngine::SetupDefaultVariables()
 	}
 	RHI::SetSamplerState(myShadowSampleState,REG_shadowCmpSampler);
 
-	D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc = {};
 	depthStencilDesc.DepthEnable = true;
-	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-	depthStencilDesc.DepthFunc = D3D11_COMPARISON_GREATER;
+	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_GREATER;
 	depthStencilDesc.StencilEnable = false;
+	depthStencilDesc.StencilReadMask = D3D12_DEFAULT_STENCIL_READ_MASK;
+	depthStencilDesc.StencilWriteMask = D3D12_DEFAULT_STENCIL_WRITE_MASK;
 
-	auto result = RHI::Device->CreateDepthStencilState(
-		&depthStencilDesc,
-		&myDepthStencilStates[(int)eDepthStencilStates::DSS_ReadOnly]
-	);
-	if (FAILED(result))
+
+
+	//auto result = RHI::Device->CreateDepthStencilState(
+	//	&depthStencilDesc,
+	//	&myDepthStencilStates[(int)eDepthStencilStates::DSS_ReadOnly]
+	//);
+	if (GPU::CreateDepthStencil(depthStencilDesc))
 	{
 		Logger::Log("Failed to create depth stencil read only state");
 		assert(false);
@@ -533,6 +540,8 @@ void GraphicsEngine::UpdateSettings()
 	RHI::SetConstantBuffer(PIPELINE_STAGE_PIXEL_SHADER,REG_GraphicSettingsBuffer,myGraphicSettingsBuffer);
 	RHI::UpdateConstantBufferData(myGraphicSettingsBuffer);
 }
+
+
 void GraphicsEngine::BeginFrame()
 {
 	myCamera = GameObjectManager::Get().GetCamera().TryGetComponent<cCamera>();
@@ -553,6 +562,26 @@ void GraphicsEngine::BeginFrame()
 	RHI::ClearRenderTarget(IntermediateB.get(),{ 0.0f,0.0f,0.0f,0.0f });
 	myG_Buffer.ClearTargets();
 	RHI::SetBlendState(nullptr);
+
+
+	auto commandAllocator = GPU::m_Allocator[GPU::m_FrameIndex];
+	auto backBuffer = GPU::m_renderTargets[GPU::m_FrameIndex];
+
+	commandAllocator->Reset();
+	GPU::m_CommandList->Reset(commandAllocator.Get(),nullptr);
+
+
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		backBuffer.Get(),
+		D3D12_RESOURCE_STATE_PRESENT,D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+	GPU::m_CommandList->ResourceBarrier(1,&barrier);
+
+	FLOAT clearColor[] = { 0.4f, 0.6f, 0.9f, 1.0f };
+	CD3DX12_CPU_DESCRIPTOR_HANDLE rtv(GPU::m_rtvHeap->GetCPUDescriptorHandleForHeapStart(),GPU::m_FrameIndex,GPU::m_RtvDescriptorSize);
+	GPU::m_CommandList->ClearRenderTargetView(rtv,clearColor,0,nullptr);
+
+
 }
 
 void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
@@ -585,13 +614,13 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	RHI::EndEvent();
 
 	////Render shadowmaps
-	OPTICK_EVENT("ShadowMaps")
-		RHI::BeginEvent(L"ShadowMaps");
+	OPTICK_EVENT("ShadowMaps");
+	RHI::BeginEvent(L"ShadowMaps");
 	myShadowRenderer.Execute();
 	RHI::EndEvent();
 
-	OPTICK_EVENT("Lightning")
-		RHI::BeginEvent(L"Lightning");
+	OPTICK_EVENT("Lightning");
+	RHI::BeginEvent(L"Lightning");
 	myCamera->SetCameraToFrameBuffer();
 	GfxCmd_SetRenderTarget(SceneBuffer.get(),nullptr).ExecuteAndDestroy();
 	GfxCmd_SetLightBuffer().ExecuteAndDestroy(); //REFACTOR Change name to fit purpose

@@ -69,6 +69,9 @@
     <ClInclude Include="misc\single_file\imgui_single_file.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="backends\imgui_impl_dx12.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imgui.cpp">
@@ -117,6 +120,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="misc\fonts\binary_to_compressed_c.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="backends\imgui_impl_dx12.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

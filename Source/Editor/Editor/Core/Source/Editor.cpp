@@ -13,6 +13,7 @@
 #include <streambuf> 
 #include <string>
 #include <stringapiset.h>
+#include  <Tools/ImGui/ImGui/backends/imgui_impl_dx12.h>
 #include <Tools/ImGUI/ImGUI/imgui.h>
 #include <Tools/ImGUI/ImGUI/imgui_impl_dx11.h>
 #include <Tools/ImGUI/ImGUI/imgui_impl_win32.h>
@@ -23,6 +24,7 @@
 #include <Tools/Utilities/System/ThreadPool.hpp>
 #include <Windows/EditorWindows/ChainGraph/GraphTool.h>
 #include "../Editor.h" 
+#include "InterOp/GPU.h"
 #include "Windows.h"
 #include "Windows/SplashWindow.h"
 
@@ -49,14 +51,19 @@ bool Editor::Initialize(HWND aHandle)
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
+	ImGui::StyleColorsDark();
+
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch 
 	// Setup Platform/Renderer backends
-	ImGui_ImplWin32_Init(aHandle);
-	ImGui_ImplDX11_Init(RHI::Device.Get(),RHI::Context.Get());
 
+	ImGui_ImplWin32_Init(aHandle);
+	//ImGui_ImplDX11_Init(RHI::Device.Get(),RHI::Context.Get());+
+	D3D12_GPU_DESCRIPTOR_HANDLE handle = GPU::m_rtvHeap->GetGPUDescriptorHandleForHeapStart();
+	D3D12_CPU_DESCRIPTOR_HANDLE handle2 = GPU::m_rtvHeap->GetCPUDescriptorHandleForHeapStart();
+	ImGui_ImplDX12_Init(GPU::m_Device.Get(),GPU::m_FrameCount,DXGI_FORMAT_R8G8B8A8_UNORM,GPU::m_rtvHeap.Get(),handle2,handle);
 #if PHYSX
 	Shipyard_PhysX::Get().InitializePhysx();
 #endif // PHYSX 0
@@ -132,7 +139,7 @@ void Editor::HideSplashScreen() const
 }
 void Editor::UpdateImGui()
 {
-	ImGui_ImplDX11_NewFrame();
+	ImGui_ImplDX12_NewFrame();
 	OPTICK_CATEGORY("ImGui_ImplDX11_NewFrame",Optick::Category::UI);
 	ImGui_ImplWin32_NewFrame();
 	OPTICK_CATEGORY("ImGui_ImplWin32_NewFrame",Optick::Category::UI);
@@ -152,7 +159,6 @@ void Editor::Update()
 	Timer::GetInstance().Update();
 	const float delta = Timer::GetInstance().GetDeltaTime();
 
-
 	Shipyard_PhysX::Get().StartRead();
 	GameObjectManager::Get().Update();
 	myGameLauncher.Update(delta);
@@ -161,12 +167,13 @@ void Editor::Update()
 	//Shipyard_PhysX::Get().Render();
 	Shipyard_PhysX::Get().EndRead(delta);
 }
+
 void Editor::Render()
 {
 	GraphicsEngine::Get().BeginFrame();
 	GraphicsEngine::Get().RenderFrame(0,0);
 	ImGui::Render();
-	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+	//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(),list);
 	GraphicsEngine::Get().EndFrame();
 }
 

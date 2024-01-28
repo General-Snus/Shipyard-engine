@@ -1,12 +1,11 @@
-#pragma once
-#include <d3d11.h>
+#pragma once 
+#include <d3d12.h>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 #include <vector>
 #include <wrl.h>
 using namespace Microsoft::WRL;
 // We'll be writing this a lot so easier
-// to just typedef it here.
-typedef std::vector<D3D11_INPUT_ELEMENT_DESC> InputElementList;
+// to just typedef it here. 
 
 struct Vertex
 {
@@ -52,9 +51,23 @@ struct Vertex
 		myBoneIds = aBoneIds;
 		myBoneWeights = aBoneWeights;
 	}
-	static const InputElementList InputLayoutDefinition;
 	//static const InputElementList InstancedInputLayoutDefinition;
 	static ComPtr<ID3D11InputLayout> InputLayout;
 	//static ComPtr<ID3D11InputLayout> InstancedInputLayout;
+	static inline const D3D12_INPUT_ELEMENT_DESC InputLayoutDefinition[] =
+	{
+		{ "POSITION",		0,    DXGI_FORMAT_R32G32B32A32_FLOAT,	0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "COLOR",			0,    DXGI_FORMAT_R32G32B32A32_FLOAT,	0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "UV",				0,    DXGI_FORMAT_R32G32_FLOAT,			0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "NORMAL",			0,    DXGI_FORMAT_R32G32B32_FLOAT,		0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "TANGENT",		0,    DXGI_FORMAT_R32G32B32_FLOAT,		0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "BONEIDS",		0,    DXGI_FORMAT_R32G32B32A32_UINT,    0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "BONEWEIGHTS",	0,    DXGI_FORMAT_R32G32B32A32_FLOAT,   0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "WORLD",			0,    DXGI_FORMAT_R32G32B32A32_FLOAT,   1, 0, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 },
+		{ "WORLD",			1,    DXGI_FORMAT_R32G32B32A32_FLOAT,   1, 0, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 },
+		{ "WORLD",			2,    DXGI_FORMAT_R32G32B32A32_FLOAT,   1, 0, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 },
+		{ "WORLD",			3,    DXGI_FORMAT_R32G32B32A32_FLOAT,   1, 0, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 },
+		//{ "ANIMATIONFRAME",	0,    DXGI_FORMAT_R32G32B32A32_UINT,				0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 0 }
+	};
 };
 

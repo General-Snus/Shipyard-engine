@@ -1,10 +1,9 @@
 #pragma once
+#include <array> 
+#include <memory>
 #include <stdexcept>
 #include <string>
-#include <array>
-#include <memory>
 #include <wrl.h>
-#include <d3d11.h>
 
 using namespace Microsoft::WRL;
 
@@ -13,45 +12,43 @@ struct ID3D11ShaderResourceView;
 struct ID3D11RenderTargetView;
 struct D3D11_VIEWPORT;
 
+#include "GpuResource.h"
 /**
  * \brief Represents raw texture data in some format.
  */
-class Texture
+class Texture : public GpuResource
 {
-	friend class RHI;
+	friend class GPU;
 	friend class TextureHolder;
-
-protected:
-
-	// The name of this texture, for easy ID.
-	std::wstring myName;
-
-	// The actual data container for this texture.
-	ComPtr<ID3D11Resource> myTexture = nullptr;
-
-	// Different views. Which are valid and usable
-	// depends on the Flags used when this texture
-	// was created.
-	ComPtr<ID3D11ShaderResourceView> mySRV = nullptr;
-
-	// We can be either a Render Target or a Depth Stencil.
-	ComPtr<ID3D11RenderTargetView> myRTV = nullptr;
-	ComPtr<ID3D11DepthStencilView> myDSV = nullptr;
-
-	D3D11_VIEWPORT myViewport{};
-
-	UINT myBindFlags{};
-	UINT myUsageFlags{};
-	UINT myAccessFlags{};
 
 public:
 	Texture() = default;
 	~Texture() = default;
 
 	FORCEINLINE const std::wstring& GetName() const { return myName; }
-	FORCEINLINE UINT GetBindFlags() const { return myBindFlags; }
-	FORCEINLINE UINT GetUsageFlags() const { return myUsageFlags; }
-	FORCEINLINE UINT GetAccessFlags() const { return myAccessFlags; }
-	FORCEINLINE bool IsValid() const { return myTexture != nullptr; }
-	FORCEINLINE ID3D11ShaderResourceView* GetSRV() const { return mySRV.Get(); }
+	FORCEINLINE bool IsValid() const { return m_pResource != nullptr; }
+
+	// The name of this texture, for easy ID.
+	std::wstring myName;
+
+	virtual void Destroy() override
+	{
+		GpuResource::Destroy();
+		m_hCpuDescriptorHandle.ptr = D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN;
+	}
+
+	bool CreateDDSFromMemory(const void* filePtr,size_t fileSize,bool sRGB);
+	const D3D12_CPU_DESCRIPTOR_HANDLE& GetSRV() const { return m_hCpuDescriptorHandle; }
+
+	uint32_t GetWidth() const { return m_Width; }
+	uint32_t GetHeight() const { return m_Height; }
+	uint32_t GetDepth() const { return m_Depth; }
+
+protected:
+
+	uint32_t m_Width;
+	uint32_t m_Height;
+	uint32_t m_Depth;
+
+	D3D12_CPU_DESCRIPTOR_HANDLE m_hCpuDescriptorHandle;
 };

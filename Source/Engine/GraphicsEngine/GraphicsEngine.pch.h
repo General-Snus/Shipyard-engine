@@ -8,9 +8,9 @@
 #define GRAPHICSENGINE_PCH
 #define NOMINMAX 
 
-// add headers that you want to pre-compile here
-#include <d3d11.h> 
-#include <Tools/ThirdParty/DirectXTK/WICTextureLoader.h>
+// add headers that you want to pre-compile here 
+#include <DirectX/directx/d3d12.h >  
+#include <DirectX/directx/d3dx12.h >  
 #include <Windows.h>
 #include "GraphicCommands/Commands/Headers/GfxCmd_Bloom.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_DebugLayer.h" 

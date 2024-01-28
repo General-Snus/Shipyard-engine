@@ -20,6 +20,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="backends\imgui_impl_dx12.h" />
     <ClInclude Include="crude_json.h" />
     <ClInclude Include="imconfig.h" />
     <ClInclude Include="imgui.h" />
@@ -40,6 +41,7 @@
     <ClInclude Include="misc\single_file\imgui_single_file.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="backends\imgui_impl_dx12.cpp" />
     <ClCompile Include="crude_json.cpp" />
     <ClCompile Include="imgui.cpp" />
     <ClCompile Include="imgui_canvas.cpp" />
