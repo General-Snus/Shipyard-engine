@@ -145,7 +145,6 @@ public:
 	static inline std::unique_ptr<GPUCommandQueue> m_CommandQueue;
 	static inline std::unique_ptr<GPUSwapchain> m_Swapchain;
 	static inline ComPtr<ID3D12Resource> m_renderTargets[m_FrameCount];
-	static inline ComPtr<ID3D12GraphicsCommandList> m_CommandList;
 	static inline ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
 	static inline UINT m_RtvDescriptorSize;
 
@@ -153,7 +152,8 @@ public:
 
 	static inline ComPtr<ID3D12RootSignature> m_RootSignature;
 	static inline GPUSupport m_DeviceSupport;
-
+	D3D12_VIEWPORT m_Viewport;
+	D3D12_RECT m_ScissorRect;
 
 private:
 };

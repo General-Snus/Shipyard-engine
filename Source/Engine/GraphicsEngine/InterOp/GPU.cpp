@@ -64,8 +64,6 @@ bool GPUCommandQueue::Create(ComPtr<ID3D12Device> device,D3D12_COMMAND_LIST_TYPE
 	return true;
 }
 
-
-
 uint64_t GPUCommandQueue::Signal()
 {
 	uint64_t fenceValueForSignal = ++m_FenceValue;
@@ -132,7 +130,6 @@ ComPtr<ID3D12CommandQueue> GPUCommandQueue::GetCommandQueue()
 	return m_CommandQueue;
 }
 
-
 uint64_t GPUCommandQueue::ExecuteCommandList(ComPtr<ID3D12GraphicsCommandList> commandList)
 {
 	commandList->Close();
@@ -163,11 +160,6 @@ void GPUCommandQueue::Flush()
 
 	WaitForFenceValue(fenceValueForSignal);
 }
-
-
-
-
-
 
 
 bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,Texture* outBackBuffer,Texture* outDepthBuffer)
@@ -320,8 +312,6 @@ void GPU::Present(unsigned aSyncInterval)
 
 }
 
-
-
 bool GPU::CreatePixelShader(ComPtr<ID3DBlob>& outPxShader,const BYTE* someShaderData,size_t aShaderDataSize,UINT CompileFLags)
 {
 	const HRESULT result = D3DCompile(someShaderData,aShaderDataSize,NULL,NULL,D3D_COMPILE_STANDARD_FILE_INCLUDE,NULL,"ps_5_0",CompileFLags,0,&outPxShader,NULL);
@@ -408,12 +398,6 @@ bool GPU::LoadTextureFromMemory(Texture* outTexture,const std::filesystem::path&
 	return false;
 }
 
-
-
-
-
-
-
 ComPtr<ID3D12DescriptorHeap>  GPU::CreateDescriptorHeap(ComPtr<ID3D12Device> device,D3D12_DESCRIPTOR_HEAP_TYPE type,uint32_t numDescriptors)
 {
 	ComPtr<ID3D12DescriptorHeap> descriptorHeap;
@@ -426,7 +410,6 @@ ComPtr<ID3D12DescriptorHeap>  GPU::CreateDescriptorHeap(ComPtr<ID3D12Device> dev
 
 	return descriptorHeap;
 }
-
 
 ComPtr<ID3D12Fence> GPU::CreateFence(ComPtr<ID3D12Device> device)
 {
@@ -446,7 +429,6 @@ HANDLE GPU::CreateEventHandle()
 
 	return fenceEvent;
 }
-
 
 void GPU::UpdateRenderTargetViews(ComPtr<ID3D12Device> device,ComPtr<IDXGISwapChain4> swapChain,ComPtr<ID3D12DescriptorHeap> descriptorHeap)
 {
@@ -536,7 +518,6 @@ void GPU::GetHardwareAdapter(IDXGIFactory1* pFactory,IDXGIAdapter1** ppAdapter,b
 
 	*ppAdapter = adapter.Detach();
 }
-
 
 void GPUSwapchain::Create(HWND hwnd,ComPtr<ID3D12CommandQueue>,UINT Width,UINT Height,UINT bufferCount)
 {

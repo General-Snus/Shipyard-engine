@@ -1,4 +1,5 @@
 #pragma once
+#include <d3d11.h>
 #include <Engine/GraphicsEngine/Rendering/Vertex.h>
 #include <filesystem>
 #include <functional>
@@ -34,10 +35,12 @@ struct Frame
 
 struct Element
 {
-	ComPtr<ID3D11Buffer> VertexBuffer;
-	ComPtr<ID3D11Buffer> IndexBuffer;
+	ComPtr<ID3D12Resource> VertexBuffer;
+	ComPtr<ID3D12Resource> IndexBuffer;
 	std::vector<Vertex> Vertices;
 	std::vector<unsigned int>Indicies;
+	D3D12_VERTEX_BUFFER_VIEW m_VertexBufferView;
+	D3D12_INDEX_BUFFER_VIEW m_IndexBufferView;
 	UINT NumVertices = 0;
 	UINT NumIndices = 0;
 	UINT PrimitiveTopology = 0;

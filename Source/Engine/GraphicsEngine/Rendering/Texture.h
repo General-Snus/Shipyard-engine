@@ -45,7 +45,7 @@ public:
 	uint32_t GetDepth() const { return m_Depth; }
 
 protected:
-
+	ComPtr<ID3D12DescriptorHeap> m_DSVHeap;
 	uint32_t m_Width;
 	uint32_t m_Height;
 	uint32_t m_Depth;
