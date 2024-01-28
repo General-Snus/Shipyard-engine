@@ -312,6 +312,39 @@ void GPU::Present(unsigned aSyncInterval)
 
 }
 
+void GPU::UpdateBufferResource(ComPtr<ID3D12GraphicsCommandList2> commandList,ID3D12Resource** pDestinationResource,ID3D12Resource** pIntermediateResource,size_t numElements,size_t elementSize,const void* bufferData,D3D12_RESOURCE_FLAGS flags)
+{
+
+	const size_t bufferSize = numElements * elementSize;
+
+	ThrowIfFailed(m_Device->CreateCommittedResource(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+		D3D12_HEAP_FLAG_NONE,
+		&CD3DX12_RESOURCE_DESC::Buffer(bufferSize,flags),
+		D3D12_RESOURCE_STATE_COPY_DEST,
+		nullptr,
+		IID_PPV_ARGS(pDestinationResource)));
+
+	// Create an committed resource for the upload.
+	if (bufferData)
+	{
+		ThrowIfFailed(m_Device->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+			D3D12_HEAP_FLAG_NONE,
+			&CD3DX12_RESOURCE_DESC::Buffer(bufferSize),
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			nullptr,
+			IID_PPV_ARGS(pIntermediateResource)));
+
+		D3D12_SUBRESOURCE_DATA subResourceData = {};
+		subResourceData.pData = bufferData;
+		subResourceData.RowPitch = bufferSize;
+		subResourceData.SlicePitch = subResourceData.RowPitch;
+
+		UpdateSubresources(commandList.Get(),*pDestinationResource,*pIntermediateResource,0,0,1,&subResourceData);
+	}
+}
+
 bool GPU::CreatePixelShader(ComPtr<ID3DBlob>& outPxShader,const BYTE* someShaderData,size_t aShaderDataSize,UINT CompileFLags)
 {
 	const HRESULT result = D3DCompile(someShaderData,aShaderDataSize,NULL,NULL,D3D_COMPILE_STANDARD_FILE_INCLUDE,NULL,"ps_5_0",CompileFLags,0,&outPxShader,NULL);

@@ -102,7 +102,12 @@ public:
 
 
 
-
+	static void UpdateBufferResource(
+		ComPtr<ID3D12GraphicsCommandList2> commandList,
+		ID3D12Resource** pDestinationResource,
+		ID3D12Resource** pIntermediateResource,
+		size_t numElements,size_t elementSize,const void* bufferData,
+		D3D12_RESOURCE_FLAGS flags);
 
 
 
