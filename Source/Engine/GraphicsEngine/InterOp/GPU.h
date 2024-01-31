@@ -7,9 +7,9 @@
 #define D3D12MA_D3D12_HEADERS_ALREADY_INCLUDED
 #include <DirectX\directx\d3d12.h> 
 #include <dxgi1_6.h> 
+#include <Engine/GraphicsEngine/Rendering/Texture.h>
 #include <filesystem>
 #include <queue>
-#include <Rendering/Texture.h>
 
 using namespace DirectX;
 using namespace Microsoft::WRL;
