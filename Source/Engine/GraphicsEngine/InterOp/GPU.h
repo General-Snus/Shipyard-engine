@@ -102,14 +102,23 @@ public:
 
 
 
+
+
+
+
+
+
+
 	static void UpdateBufferResource(
-		ComPtr<ID3D12GraphicsCommandList2> commandList,
+		ComPtr<ID3D12GraphicsCommandList> commandList,
 		ID3D12Resource** pDestinationResource,
 		ID3D12Resource** pIntermediateResource,
 		size_t numElements,size_t elementSize,const void* bufferData,
-		D3D12_RESOURCE_FLAGS flags);
+		D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
 
-
+	template <typename vertexType>
+	static void CreateVertexBuffer(ComPtr<ID3D12Resource>& outVxBuffer,const std::vector<vertexType>& aVertexList);
+	static void CreateIndexBuffer(ComPtr<ID3D12Resource>& outVxBuffer,const std::vector<unsigned>& aIndexList);
 
 	static bool CreatePixelShader(ComPtr<ID3DBlob>& outPxShader,const BYTE* someShaderData,size_t aShaderDataSize,UINT CompileFLags = 0);
 
@@ -156,6 +165,10 @@ public:
 	static inline uint64_t m_FenceValues[m_FrameCount] = {};
 
 	static inline ComPtr<ID3D12RootSignature> m_RootSignature;
+	static inline ComPtr<ID3D12PipelineState> m_PipeLineState;
+
+
+
 	static inline GPUSupport m_DeviceSupport;
 	D3D12_VIEWPORT m_Viewport;
 	D3D12_RECT m_ScissorRect;
@@ -163,3 +176,15 @@ public:
 private:
 };
 
+template<typename vertexType>
+inline void GPU::CreateVertexBuffer(ComPtr<ID3D12Resource>& outVxBuffer,const std::vector<vertexType>& aVertexList)
+{
+	ComPtr<ID3D12Resource> intermediateVertexBuffer;
+	const size_t vxSize = sizeof(vertexType);
+	const size_t numVx = aVertexList.size();
+	return UpdateBufferResource(
+		m_CommandQueue->GetCommandList(),
+		&outVxBuffer,&intermediateVertexBuffer
+		,numVx,vxSize,aVertexList.data()
+	);
+}

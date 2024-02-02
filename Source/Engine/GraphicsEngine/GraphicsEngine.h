@@ -110,8 +110,8 @@ private:
 	ComPtr<ID3D11PixelShader> EdgeBlur;
 
 	//Defualtl
-	ComPtr<ID3D11VertexShader> myVertexShader;
-	ComPtr<ID3D11PixelShader> myPixelShader;
+	ComPtr<ID3DBlob> myVertexShader;
+	ComPtr<ID3DBlob> myPixelShader;
 	std::shared_ptr<Shader> defaultVS;
 	std::shared_ptr<Shader> defaultPS;
 

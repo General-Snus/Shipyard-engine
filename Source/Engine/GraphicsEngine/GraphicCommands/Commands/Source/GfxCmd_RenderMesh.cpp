@@ -37,13 +37,21 @@ void GfxCmd_RenderMesh::ExecuteAndDestroy()
 		{
 			GraphicsEngine::Get().GetDefaultMaterial()->Update();
 		}
+		auto device = GPU::m_Device;
+		auto commandQueue = GPU::m_CommandQueue->GetCommandQueue();
+		auto commandList = GPU::m_CommandQueue->GetCommandList();
+		ComPtr<ID3D12Resource> intermediateVertexBuffer;
+		GPU::UpdateBufferResource(commandList.Get(),
+			&aElement.VertexBuffer,&intermediateVertexBuffer,
+			_countof(g_Vertices),aElement.Stride,g_Vertices);
 
-		RHI::ConfigureInputAssembler(
+
+		/*RHI::ConfigureInputAssembler(
 			aElement.PrimitiveTopology,
 			aElement.VertexBuffer,
 			aElement.IndexBuffer,
 			aElement.Stride,
 			Vertex::InputLayout);
-		RHI::DrawIndexed(aElement.NumIndices);
+		RHI::DrawIndexed(aElement.NumIndices);*/
 	}
 }

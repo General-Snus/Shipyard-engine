@@ -323,28 +323,28 @@ void Mesh::Init()
 	isLoadedComplete = true;
 
 	bufferSize = 0;
-	vertexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(Matrix) * myInstances.size());
-	vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	vertexBufferDesc.MiscFlags = 0;
-	vertexBufferDesc.StructureByteStride = 0;
-
-	if (myInstances.size())
-	{
-		HRESULT result;
-		result = RHI::Device->CreateBuffer(
-			&vertexBufferDesc,
-			nullptr,
-			myInstanceBuffer.GetAddressOf()
-		);
-		bufferSize = static_cast<int>(myInstances.size());
-		if (FAILED(result))
-		{
-			Logger::Log("Failed to create Instance buffer");
-			return;
-		}
-	}
+	//vertexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(Matrix) * myInstances.size());
+	//vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	//vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	//vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	//vertexBufferDesc.MiscFlags = 0;
+	//vertexBufferDesc.StructureByteStride = 0;
+	//
+	//if (myInstances.size())
+	//{
+	//	HRESULT result;
+	//	result = RHI::Device->CreateBuffer(
+	//		&vertexBufferDesc,
+	//		nullptr,
+	//		myInstanceBuffer.GetAddressOf()
+	//	);
+	//	bufferSize = static_cast<int>(myInstances.size());
+	//	if (FAILED(result))
+	//	{
+	//		Logger::Log("Failed to create Instance buffer");
+	//		return;
+	//	}
+	//}
 
 	return;
 #endif // 
@@ -448,14 +448,26 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 		}
 	}
 
-	ComPtr<ID3D11Buffer> vertexBuffer;
-	if (!RHI::CreateVertexBuffer<Vertex>(vertexBuffer,mdlVertices))
+	ComPtr<ID3D12Resource> vertexBuffer;
+	D3D12_VERTEX_BUFFER_VIEW m_VertexBufferView;
+	m_VertexBufferView.BufferLocation = vertexBuffer->GetGPUVirtualAddress();
+	m_VertexBufferView.SizeInBytes = sizeof(mdlVertices);
+	m_VertexBufferView.StrideInBytes = sizeof(Vertex);
+
+	if (!GPU::CreateVertexBuffer<Vertex>(vertexBuffer,mdlVertices))
 	{
 		std::cout << "Failed to create vertex buffer" << std::endl;
 		return;
 	}
-	ComPtr<ID3D11Buffer> indexBuffer;
-	if (!RHI::CreateIndexBuffer(indexBuffer,mdlIndicies))
+
+	ComPtr<ID3D12Resource> indexBuffer;
+	D3D12_INDEX_BUFFER_VIEW m_IndexBufferView;
+	m_IndexBufferView.BufferLocation = indexBuffer->GetGPUVirtualAddress();
+	m_IndexBufferView.Format = DXGI_FORMAT_R16_UINT;
+	m_IndexBufferView.SizeInBytes = mdlIndicies.size() * sizeof(unsigned);
+
+
+	if (!GPU::CreateIndexBuffer(indexBuffer,mdlIndicies))
 	{
 		std::cout << "Failed to create vertex buffer" << std::endl;
 		return;
@@ -465,6 +477,8 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 		indexBuffer,
 		mdlVertices,
 		mdlIndicies,
+		m_VertexBufferView,
+		m_IndexBufferView,
 		AsUINT(mdlVertices.size()),
 		AsUINT(mdlIndicies.size()),
 		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
@@ -483,34 +497,34 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 
 void Mesh::ResizeBuffer()
 {
-	D3D11_SUBRESOURCE_DATA vertexSubResourceData{};
-	vertexSubResourceData.pSysMem = myInstances.data();
-	vertexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(Matrix) * myInstances.size());
-	HRESULT result;
-	result = RHI::Device->CreateBuffer(
-		&vertexBufferDesc,
-		&vertexSubResourceData,
-		myInstanceBuffer.GetAddressOf()
-	);
-
-	if (FAILED(result))
-	{
-		Logger::Log("Failed to create Instance buffer");
-		return;
-	}
-	bufferSize = static_cast<int>(myInstances.size());
+	//D3D11_SUBRESOURCE_DATA vertexSubResourceData{};
+	//vertexSubResourceData.pSysMem = myInstances.data();
+	//vertexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(Matrix) * myInstances.size());
+	//HRESULT result;
+	//result = RHI::Device->CreateBuffer(
+	//	&vertexBufferDesc,
+	//	&vertexSubResourceData,
+	//	myInstanceBuffer.GetAddressOf()
+	//);
+	//
+	//if (FAILED(result))
+	//{
+	//	Logger::Log("Failed to create Instance buffer");
+	//	return;
+	//}
+	//bufferSize = static_cast<int>(myInstances.size());
 
 }
 
 void Mesh::UpdateInstanceBuffer()
 {
 	OPTICK_EVENT();
-	if (myInstances.size() > bufferSize)
-	{
-		ResizeBuffer();
-	}
-	D3D11_MAPPED_SUBRESOURCE mappedResource{};
-	RHI::Context->Map(myInstanceBuffer.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&mappedResource);
-	memcpy(mappedResource.pData,myInstances.data(),sizeof(Matrix) * myInstances.size());
-	RHI::Context->Unmap(myInstanceBuffer.Get(),0);
+	//if (myInstances.size() > bufferSize)
+	//{
+	//	ResizeBuffer();
+	//}
+	//D3D11_MAPPED_SUBRESOURCE mappedResource{};
+	//RHI::Context->Map(myInstanceBuffer.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&mappedResource);
+	//memcpy(mappedResource.pData,myInstances.data(),sizeof(Matrix) * myInstances.size());
+	//RHI::Context->Unmap(myInstanceBuffer.Get(),0);
 }

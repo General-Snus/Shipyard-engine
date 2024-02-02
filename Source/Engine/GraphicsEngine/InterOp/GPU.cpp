@@ -9,13 +9,14 @@
 #include "Editor/Editor/Windows/Window.h"
 #include "GPU.h" 
 
+#include <d3d11.h>
 #include <d3dcompiler.h> 
 
+#include <DirectX/XTK/DDSTextureLoader.h>
+#include <DirectX/XTK/DirectXHelpers.h>
+#include <DirectX/XTK/source/PlatformHelpers.h>
 #include "PSO.h"
 #include "Tools/Logging/Logging.h"
-#include "XTK/DDSTextureLoader.h"
-#include "XTK/DirectXHelpers.h"
-#include "XTK/source/PlatformHelpers.h"
 
 
 ComPtr<ID3D12CommandAllocator> GPUCommandQueue::CreateCommandAllocator()
@@ -34,6 +35,10 @@ ComPtr<ID3D12GraphicsCommandList> GPUCommandQueue::CreateCommandList(ComPtr<ID3D
 	ThrowIfFailed(commandList->Close());
 
 	return commandList;
+}
+
+D3D12_CPU_DESCRIPTOR_HANDLE GPUDescriptorAllocator::Allocate(UINT aNumDescriptors)
+{
 }
 
 bool GPUCommandQueue::Create(ComPtr<ID3D12Device> device,D3D12_COMMAND_LIST_TYPE type)
@@ -312,7 +317,13 @@ void GPU::Present(unsigned aSyncInterval)
 
 }
 
-void GPU::UpdateBufferResource(ComPtr<ID3D12GraphicsCommandList2> commandList,ID3D12Resource** pDestinationResource,ID3D12Resource** pIntermediateResource,size_t numElements,size_t elementSize,const void* bufferData,D3D12_RESOURCE_FLAGS flags)
+void GPU::UpdateBufferResource(
+	ComPtr<ID3D12GraphicsCommandList> commandList,
+	ID3D12Resource** pDestinationResource,
+	ID3D12Resource** pIntermediateResource,
+	size_t numElements,size_t elementSize,
+	const void* bufferData,D3D12_RESOURCE_FLAGS flags
+)
 {
 
 	const size_t bufferSize = numElements * elementSize;
@@ -345,6 +356,23 @@ void GPU::UpdateBufferResource(ComPtr<ID3D12GraphicsCommandList2> commandList,ID
 	}
 }
 
+void GPU::CreateIndexBuffer(ComPtr<ID3D12Resource>& outIndexBuffer,const std::vector<unsigned>& aIndexList)
+{
+
+	const size_t size = sizeof(unsigned);
+	const size_t numIn = aIndexList.size();
+
+
+
+
+	ComPtr<ID3D12Resource> intermediateIndexBuffer;
+	return UpdateBufferResource(
+		m_CommandQueue->GetCommandList(),
+		&outIndexBuffer,&intermediateIndexBuffer
+		,numIn,size,aIndexList.data()
+	);
+}
+
 bool GPU::CreatePixelShader(ComPtr<ID3DBlob>& outPxShader,const BYTE* someShaderData,size_t aShaderDataSize,UINT CompileFLags)
 {
 	const HRESULT result = D3DCompile(someShaderData,aShaderDataSize,NULL,NULL,D3D_COMPILE_STANDARD_FILE_INCLUDE,NULL,"ps_5_0",CompileFLags,0,&outPxShader,NULL);
@@ -373,15 +401,15 @@ bool GPU::CreateVertexShader(ComPtr<ID3DBlob>& outVxShader,const BYTE* someShade
 bool GPU::CreateDepthStencil(D3D12_DEPTH_STENCIL_DESC depthStencilDesc)
 {
 	depthStencilDesc;
-	//D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
-	//dsvHeapDesc.NumDescriptors = 1;
-	//dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-	//dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	//if (FAILED(m_Device->CreateDescriptorHeap(&dsvHeapDesc,IID_PPV_ARGS(&m_rtvHeap))))
-	//{
-	//	Logger::Err("Failed to make descriptor heap");
-	//	return false;
-	//}
+	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
+	dsvHeapDesc.NumDescriptors = 1;
+	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	if (FAILED(m_Device->CreateDescriptorHeap(&dsvHeapDesc,IID_PPV_ARGS(&m_rtvHeap))))
+	{
+		Logger::Err("Failed to make descriptor heap");
+		return false;
+	}
 	return true;
 }
 

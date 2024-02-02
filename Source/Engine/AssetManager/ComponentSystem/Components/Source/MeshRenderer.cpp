@@ -1,7 +1,7 @@
-#include "AssetManager.pch.h"
 #include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
 #include <Engine/GraphicsEngine/GraphicsEngine.pch.h>  
 #include <Tools/Utilities/System/ThreadPool.hpp> 
+#include "AssetManager.pch.h"
 
 cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId) : Component(anOwnerId)
 {

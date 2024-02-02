@@ -4,9 +4,7 @@
 #include <wrl.h>
 using namespace Microsoft::WRL;
 // We'll be writing this a lot so easier
-// to just typedef it here.
-typedef std::vector<D3D12_INPUT_ELEMENT_DESC> InputElementList;
-
+// to just typedef it here. 
 struct Particlevertex
 {
 	Vector4f Position = { 0,0,0,1 };
@@ -15,6 +13,13 @@ struct Particlevertex
 	Vector3f Scale = { 1,1,1 };
 	float Lifetime = 0;
 
-	static const InputElementList InputLayoutDefinition;
+	static const D3D12_INPUT_ELEMENT_DESC InputLayoutDefinition[] =
+	{
+		{ "POSITION",		0,    DXGI_FORMAT_R32G32B32A32_FLOAT,	0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "COLOR",			0,    DXGI_FORMAT_R32G32B32A32_FLOAT,	0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "VELOCITY",		0,    DXGI_FORMAT_R32G32B32_FLOAT,		0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "SCALE",			0,    DXGI_FORMAT_R32G32B32_FLOAT,		0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "LIFETIME",		0,    DXGI_FORMAT_R32_FLOAT,			0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	};;
 	static ComPtr<ID3D11InputLayout> InputLayout;
 };

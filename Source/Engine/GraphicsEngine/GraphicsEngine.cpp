@@ -179,24 +179,32 @@ void GraphicsEngine::SetupDefaultVariables()
 	}
 	myDepthStencilStates[(int)eDepthStencilStates::DSS_ReadWrite] = nullptr;
 
-	RHI::CreateVertexShaderAndInputLayout(
+	//RHI::CreateVertexShaderAndInputLayout(
+	//	myVertexShader,
+	//	Vertex::InputLayout,
+	//	Vertex::InputLayoutDefinition,
+	//	BuiltIn_Default_VS_ByteCode,
+	//	sizeof(BuiltIn_Default_VS_ByteCode)
+	//);
+
+	GPU::CreateVertexShader(
 		myVertexShader,
-		Vertex::InputLayout,
-		Vertex::InputLayoutDefinition,
 		BuiltIn_Default_VS_ByteCode,
 		sizeof(BuiltIn_Default_VS_ByteCode)
 	);
-	RHI::CreatePixelShader(
+
+	GPU::CreatePixelShader(
 		myPixelShader,
 		BuiltIn_Default_PS_ByteCode,
 		sizeof(BuiltIn_Default_PS_ByteCode)
 	);
-	RHI::CreateInputLayout(
-		Vertex::InputLayout,
-		Vertex::InputLayoutDefinition,
-		BuiltIn_Default_VS_ByteCode,
-		sizeof(BuiltIn_Default_VS_ByteCode)
-	);
+
+	//RHI::CreateInputLayout(
+	//	Vertex::InputLayout,
+	//	Vertex::InputLayoutDefinition,
+	//	BuiltIn_Default_VS_ByteCode,
+	//	sizeof(BuiltIn_Default_VS_ByteCode)
+	//);
 
 	defaultTexture = std::make_shared<TextureHolder>("",eTextureType::ColorMap);
 
