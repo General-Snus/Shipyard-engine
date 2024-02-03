@@ -37,12 +37,12 @@ void GfxCmd_RenderSkeletalMesh::ExecuteAndDestroy()
 		if (!myRenderData->overrideMaterial.empty())
 		{
 			myRenderData->overrideMaterial[0]->Update();
-		}
-		RHI::ConfigureInputAssembler(aElement.PrimitiveTopology,
+		}aElement;
+		/*RHI::ConfigureInputAssembler(aElement.PrimitiveTopology,
 			aElement.VertexBuffer,
 			aElement.IndexBuffer,
 			aElement.Stride,
 			Vertex::InputLayout);
-		RHI::DrawIndexed(aElement.NumIndices);
+		RHI::DrawIndexed(aElement.NumIndices);*/
 	}
 }

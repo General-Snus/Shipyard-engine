@@ -133,8 +133,8 @@ private:
 	//Debug
 	ComPtr<ID3D11Buffer> myLineVertexBuffer;
 	ComPtr<ID3D11Buffer> myLineIndexBuffer;
-	std::shared_ptr< Shader>  debugLineVS;
-	std::shared_ptr< Shader> debugLinePS;
+	std::shared_ptr<Shader>  debugLineVS;
+	std::shared_ptr<Shader> debugLinePS;
 
 	std::shared_ptr<Texture> BRDLookUpTable;
 	std::shared_ptr<TextureHolder> NoiseTable;

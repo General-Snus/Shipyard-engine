@@ -7,7 +7,7 @@
 void ShadowRenderer::Init()
 {
 	ShadowCommandList.Initialize((size_t)10 * MegaByte);
-	myVertexShader = GraphicsEngine::Get().myVertexShader;
+	//myVertexShader = GraphicsEngine::Get().myVertexShader;
 }
 
 void ShadowRenderer::Execute()

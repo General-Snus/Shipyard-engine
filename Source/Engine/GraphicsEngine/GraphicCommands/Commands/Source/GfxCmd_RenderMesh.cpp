@@ -40,11 +40,14 @@ void GfxCmd_RenderMesh::ExecuteAndDestroy()
 		auto device = GPU::m_Device;
 		auto commandQueue = GPU::m_CommandQueue->GetCommandQueue();
 		auto commandList = GPU::m_CommandQueue->GetCommandList();
-		ComPtr<ID3D12Resource> intermediateVertexBuffer;
-		GPU::UpdateBufferResource(commandList.Get(),
-			&aElement.VertexBuffer,&intermediateVertexBuffer,
-			_countof(g_Vertices),aElement.Stride,g_Vertices);
 
+
+		GPU::ConfigureInputAssembler(commandList,
+			aElement.PrimitiveTopology,
+			aElement.m_VertexBufferView,
+			aElement.m_IndexBufferView
+		);
+		commandList->DrawIndexedInstanced(aElement.NumIndices,1,0,0,0);
 
 		/*RHI::ConfigureInputAssembler(
 			aElement.PrimitiveTopology,

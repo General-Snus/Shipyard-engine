@@ -1,6 +1,7 @@
 //#include "GraphicsEngine.pch.h"
 #define NOMINMAX
 #include <DirectX/directx/d3dx12.h> 
+#include <DirectX/XTK/source/PlatformHelpers.h> 
 #include <DirectXMath.h> 
 #include <dxgi1_6.h>
 #include <dxgidebug.h>
@@ -39,6 +40,7 @@ ComPtr<ID3D12GraphicsCommandList> GPUCommandQueue::CreateCommandList(ComPtr<ID3D
 
 D3D12_CPU_DESCRIPTOR_HANDLE GPUDescriptorAllocator::Allocate(UINT aNumDescriptors)
 {
+	aNumDescriptors;
 }
 
 bool GPUCommandQueue::Create(ComPtr<ID3D12Device> device,D3D12_COMMAND_LIST_TYPE type)
@@ -167,9 +169,9 @@ void GPUCommandQueue::Flush()
 }
 
 
-bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,Texture* outBackBuffer,Texture* outDepthBuffer)
+bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,Texture* aBackBuffer,Texture* aDepthBuffer)
 {
-	aWindowHandle; enableDeviceDebug; outBackBuffer; outDepthBuffer;
+	aWindowHandle; enableDeviceDebug; outBackBuffer = aBackBuffer; outDepthBuffer = aDepthBuffer;
 
 	m_Swapchain = std::make_unique<GPUSwapchain>();
 	m_CommandQueue = std::make_unique<GPUCommandQueue>();
@@ -272,6 +274,14 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,Texture* outBackB
 	//g_Fence = CreateFence(m_Device);
 	//g_FenceEvent = CreateEventHandle();
 
+
+	D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
+	featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
+	if (FAILED(m_Device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE,&featureData,sizeof(featureData))))
+	{
+		featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
+	}
+
 	CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
 	rootSignatureDesc.Init(0,nullptr,0,nullptr,D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
@@ -286,6 +296,8 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,Texture* outBackB
 		Logger::Err("Failed to Create RootSignature");
 	}
 
+
+	ResizeDepthBuffer(1920,1080);
 
 	return true;
 }
@@ -314,7 +326,6 @@ void GPU::Present(unsigned aSyncInterval)
 	m_FrameIndex = m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
 
 	m_CommandQueue->WaitForFenceValue(m_FenceValues[m_FrameIndex]);
-
 }
 
 void GPU::UpdateBufferResource(
@@ -354,6 +365,15 @@ void GPU::UpdateBufferResource(
 
 		UpdateSubresources(commandList.Get(),*pDestinationResource,*pIntermediateResource,0,0,1,&subResourceData);
 	}
+}
+
+void GPU::ConfigureInputAssembler(
+	ComPtr<ID3D12GraphicsCommandList> commandList,D3D_PRIMITIVE_TOPOLOGY topology,
+	const D3D12_VERTEX_BUFFER_VIEW& vertView,const D3D12_INDEX_BUFFER_VIEW& indexView)
+{
+	commandList->IASetPrimitiveTopology(topology);
+	commandList->IASetVertexBuffers(0,1,&vertView);
+	commandList->IASetIndexBuffer(&indexView);
 }
 
 void GPU::CreateIndexBuffer(ComPtr<ID3D12Resource>& outIndexBuffer,const std::vector<unsigned>& aIndexList)
@@ -413,6 +433,42 @@ bool GPU::CreateDepthStencil(D3D12_DEPTH_STENCIL_DESC depthStencilDesc)
 	return true;
 }
 
+void GPU::ResizeDepthBuffer(unsigned width,unsigned height)
+{
+	if (outDepthBuffer->IsValid())
+	{
+		// Flush any GPU commands that might be referencing the depth buffer.
+		m_CommandQueue->Flush();
+
+		width = std::max(1u,width);
+		height = std::max(1u,height);
+		// Resize screen dependent resources.
+		   // Create a depth buffer.
+		D3D12_CLEAR_VALUE optimizedClearValue = {};
+		optimizedClearValue.Format = DXGI_FORMAT_D32_FLOAT;
+		optimizedClearValue.DepthStencil = { 1.0f, 0 };
+
+		ThrowIfFailed(m_Device->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+			D3D12_HEAP_FLAG_NONE,
+			&CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_D32_FLOAT,width,height,
+				1,0,1,0,D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL),
+			D3D12_RESOURCE_STATE_DEPTH_WRITE,
+			&optimizedClearValue,
+			IID_PPV_ARGS(&outDepthBuffer)
+		));
+		// Update the depth-stencil view.
+		D3D12_DEPTH_STENCIL_VIEW_DESC dsv = {};
+		dsv.Format = DXGI_FORMAT_D32_FLOAT;
+		dsv.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+		dsv.Texture2D.MipSlice = 0;
+		dsv.Flags = D3D12_DSV_FLAG_NONE;
+
+		m_Device->CreateDepthStencilView(outDepthBuffer->GetResource(),&dsv,
+			m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
+	}
+}
+
 bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName)
 {
 	outTexture; aFileName;
@@ -457,6 +513,39 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 bool GPU::LoadTextureFromMemory(Texture* outTexture,const std::filesystem::path& aName,const BYTE* someImageData,size_t anImageDataSize,const D3D12_SHADER_RESOURCE_VIEW_DESC* aSRVDesc)
 {
 	return false;
+}
+
+void GPU::TransitionResource(
+	ComPtr<ID3D12GraphicsCommandList> commandList,
+	ComPtr<ID3D12Resource> resource,D3D12_RESOURCE_STATES beforeState,
+	D3D12_RESOURCE_STATES afterState)
+{
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		resource.Get(),
+		beforeState,afterState);
+
+	commandList->ResourceBarrier(1,&barrier);
+}
+
+void GPU::ClearRTV(ComPtr<ID3D12GraphicsCommandList> commandList,D3D12_CPU_DESCRIPTOR_HANDLE rtv,FLOAT* clearColor)
+
+{
+	commandList->ClearRenderTargetView(rtv,clearColor,0,nullptr);
+}
+
+void GPU::ClearDepth(ComPtr<ID3D12GraphicsCommandList> commandList,D3D12_CPU_DESCRIPTOR_HANDLE dsv,FLOAT depth)
+{
+	commandList->ClearDepthStencilView(dsv,D3D12_CLEAR_FLAG_DEPTH,depth,0,0,nullptr);
+}
+
+ComPtr<ID3D12Resource> GPU::GetCurrentRenderTargetView()
+{
+	return m_renderTargets[m_FrameIndex];//todo fix
+}
+
+ComPtr<ID3D12Resource> GPU::GetCurrentBackBuffer()
+{
+	return outBackBuffer->GetResource();//todo fix
 }
 
 ComPtr<ID3D12DescriptorHeap>  GPU::CreateDescriptorHeap(ComPtr<ID3D12Device> device,D3D12_DESCRIPTOR_HEAP_TYPE type,uint32_t numDescriptors)

@@ -43,7 +43,7 @@ struct Element
 	D3D12_INDEX_BUFFER_VIEW m_IndexBufferView;
 	UINT NumVertices = 0;
 	UINT NumIndices = 0;
-	UINT PrimitiveTopology = 0;
+	D3D_PRIMITIVE_TOPOLOGY PrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	UINT Stride = 0;
 	unsigned int MaterialIndex = 0;
 };

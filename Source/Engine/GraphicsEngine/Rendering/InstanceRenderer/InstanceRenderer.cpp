@@ -62,7 +62,7 @@ void InstanceRenderer::Execute(bool isShadowPass)
 					}
 				}
 
-				const std::vector<ComPtr<ID3D11Buffer>> vxBuffers
+				/*const std::vector<ComPtr<ID3D12Resource>> vxBuffers
 				{
 					aElement.VertexBuffer,
 					i->myMesh->myInstanceBuffer
@@ -72,16 +72,16 @@ void InstanceRenderer::Execute(bool isShadowPass)
 				{
 					aElement.Stride,
 					sizeof(Matrix)
-				};
+				};*/
 
-				RHI::ConfigureInputAssembler(
+				/*RHI::ConfigureInputAssembler(
 					aElement.PrimitiveTopology,
 					vxBuffers,
 					aElement.IndexBuffer,
 					vfBufferStrides,
 					Vertex::InputLayout);
 				OPTICK_EVENT("Element");
-				RHI::DrawIndexedInstanced(aElement.NumIndices,static_cast<unsigned>(i->myMesh->myInstances.size()));
+				RHI::DrawIndexedInstanced(aElement.NumIndices,static_cast<unsigned>(i->myMesh->myInstances.size()));*/
 			}
 		}
 	}

@@ -26,13 +26,14 @@ void GfxCmd_RenderMeshShadow::ExecuteAndDestroy()
 	}
 	for (const auto& aElement : myRenderData->myMesh->Elements)
 	{
-		RHI::ConfigureInputAssembler(
+		aElement;
+		/*RHI::ConfigureInputAssembler(
 			aElement.PrimitiveTopology,
 			aElement.VertexBuffer,
 			aElement.IndexBuffer,
 			aElement.Stride,
 			Vertex::InputLayout);
-		RHI::DrawIndexed(aElement.NumIndices);
+		RHI::DrawIndexed(aElement.NumIndices);*/
 	}
 }
 

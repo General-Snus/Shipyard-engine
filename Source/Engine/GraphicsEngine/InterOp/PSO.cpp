@@ -26,7 +26,6 @@ void PSO::Init()
 	GPU::CreatePixelShader(pixelShader,BuiltIn_Default_PS_ByteCode,sizeof(BuiltIn_Default_PS_ByteCode),compileFlags);
 	GPU::CreatePixelShader(vertexShader,BuiltIn_Default_VS_ByteCode,sizeof(BuiltIn_Default_VS_ByteCode),compileFlags);
 
-
 	psoDesc.InputLayout = { Vertex::InputLayoutDefinition, _countof(Vertex::InputLayoutDefinition) };
 	psoDesc.pRootSignature = GPU::m_RootSignature.Get();
 	psoDesc.VS = CD3DX12_SHADER_BYTECODE(BuiltIn_Default_VS_ByteCode,sizeof(BuiltIn_Default_VS_ByteCode)); // add shader cache later or never u lazy sob
@@ -45,9 +44,9 @@ void PSO::Init()
 		Logger::Err("Failed to create pipeline state");
 	}
 
-	GPU::m_Device->CreateCommandList(0,D3D12_COMMAND_LIST_TYPE_DIRECT,GPU::m_Allocator.Get(),m_pipelineState.Get(),IID_PPV_ARGS(&GPU::m_CommandList));
+	/*GPU::m_Device->CreateCommandList(0,D3D12_COMMAND_LIST_TYPE_DIRECT,GPU::m_Allocator.Get(),m_pipelineState.Get(),IID_PPV_ARGS(&GPU::m_CommandList));
 
-	GPU::m_CommandList->Close();
+	GPU::m_CommandList->Close();*/
 }
 
 void PSOCache::InitAllStates()

@@ -1,10 +1,10 @@
 #include "GraphicsEngine.pch.h"
+#include <DirectX/XTK/DDSTextureLoader.h>
 #include <Engine/AssetManager/AssetManager.h>
 #include <Engine/AssetManager/ComponentSystem/Components/CameraComponent.h>
 #include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>
 #include <Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h>
 #include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
-#include <Engine/GraphicsEngine/InterOp/XTK/DDSTextureLoader.h>
 #include <Objects/DataObjects/Default_C.h>
 #include <Objects/DataObjects/Default_FX.h>
 #include <Objects/DataObjects/Default_M.h>
@@ -127,13 +127,13 @@ void GraphicsEngine::SetupDefaultVariables()
 	samplerDesc.BorderColor[2] = 1.f;
 	samplerDesc.BorderColor[3] = 1.f;
 	samplerDesc.MinLOD = -D3D11_FLOAT32_MAX;
-	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;/*
 
 	if (!RHI::CreateSamplerState(myDefaultSampleState,samplerDesc))
 	{
 		Logger::Log("Sampler state created");
 		assert(false);
-	}
+	}*/
 	RHI::SetSamplerState(myDefaultSampleState,REG_DefaultSampler);
 
 	D3D11_SAMPLER_DESC shadowSamplerDesc = {};
@@ -273,10 +273,10 @@ void GraphicsEngine::SetupDefaultVariables()
 	defaultVS = std::make_shared<Shader>();
 	defaultPS = std::make_shared<Shader>();
 
-	defaultVS->SetShader(myVertexShader);
+	/*defaultVS->SetShader(myVertexShader);
 	defaultVS->myName = L"Default Vertex Shader";
 	defaultPS->SetShader(myPixelShader);
-	defaultPS->myName = L"Default Pixel Shader";
+	defaultPS->myName = L"Default Pixel Shader";*/
 
 	AssetManager::Get().ForceLoadAsset<Material>("Materials/Default.json",defaultMaterial);
 	defaultMaterial->SetShader(defaultVS,defaultPS);
@@ -518,13 +518,13 @@ void GraphicsEngine::SetupPostProcessing()
 
 void GraphicsEngine::SetupParticleShaders()
 {
-	RHI::CreateVertexShaderAndInputLayout(
+	/*RHI::CreateVertexShaderAndInputLayout(
 		particleVertexShader,
 		Particlevertex::InputLayout,
 		Particlevertex::InputLayoutDefinition,
 		BuiltIn_ParticleShader_VS_ByteCode,
 		sizeof(BuiltIn_ParticleShader_VS_ByteCode)
-	);
+	);*/
 	RHI::CreateGeometryShader(
 		particleGeometryShader,
 		BuiltIn_ParticleShader_GS_ByteCode,
@@ -570,33 +570,39 @@ void GraphicsEngine::BeginFrame()
 	RHI::ClearRenderTarget(IntermediateB.get(),{ 0.0f,0.0f,0.0f,0.0f });
 	myG_Buffer.ClearTargets();
 	RHI::SetBlendState(nullptr);
-
-
-	auto commandAllocator = GPU::m_Allocator[GPU::m_FrameIndex];
-	auto backBuffer = GPU::m_renderTargets[GPU::m_FrameIndex];
-
-	commandAllocator->Reset();
-	GPU::m_CommandList->Reset(commandAllocator.Get(),nullptr);
-
-
-	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-		backBuffer.Get(),
-		D3D12_RESOURCE_STATE_PRESENT,D3D12_RESOURCE_STATE_RENDER_TARGET);
-
-	GPU::m_CommandList->ResourceBarrier(1,&barrier);
-
-	FLOAT clearColor[] = { 0.4f, 0.6f, 0.9f, 1.0f };
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtv(GPU::m_rtvHeap->GetCPUDescriptorHandleForHeapStart(),GPU::m_FrameIndex,GPU::m_RtvDescriptorSize);
-	GPU::m_CommandList->ClearRenderTargetView(rtv,clearColor,0,nullptr);
-
-
 }
 
 void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 {
+
+
+	auto commandQueue = GPU::m_CommandQueue.get();
+	auto commandList = commandQueue->GetCommandList();
+	auto chain = GPU::m_Swapchain->m_SwapChain;
+
+	//UINT currentBackBufferIndex = chain->GetCurrentBackBufferIndex();
+	auto backBuffer = GPU::GetCurrentBackBuffer();
+	auto rtv = GPU::GetCurrentRenderTargetView();
+	auto dsv = GPU::m_rtvHeap->GetCPUDescriptorHandleForHeapStart();
+
+	GPU::TransitionResource(commandList,backBuffer,
+		D3D12_RESOURCE_STATE_PRESENT,D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+	FLOAT clearColor[] = { 0.4f, 0.6f, 0.9f, 1.0f };
+
+	GPU::ClearRTV(commandList,GPU::outBackBuffer->GetSRV(),clearColor);
+	GPU::ClearDepth(commandList,dsv);
+
+	commandList->SetPipelineState(GPU::m_PipeLineState.Get());
+	commandList->SetGraphicsRootSignature(GPU::m_RootSignature.Get());
+	commandList->RSSetViewports(1,&GPU::m_Viewport);
+	commandList->RSSetScissorRects(1,&GPU::m_ScissorRect);
+	commandList->OMSetRenderTargets(1,&GPU::outBackBuffer->GetSRV(),FALSE,&dsv);
+
+
 	OPTICK_EVENT();
 	aDeltaTime; aTotalTime;
-	RHI::SetVertexShader(myVertexShader);
+	//RHI::SetVertexShader(myVertexShader);
 
 	OPTICK_EVENT("Gbuffer");
 	RHI::BeginEvent(L"Start writing to gbuffer");
@@ -604,8 +610,8 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	myG_Buffer.SetWriteTargetToBuffer(); //Let all write to textures
 	OPTICK_EVENT("Deferred");
 	DeferredCommandList.Execute();
-	OPTICK_EVENT("Instanced Deferred");
-	myInstanceRenderer.Execute(false);
+	/*OPTICK_EVENT("Instanced Deferred");
+	myInstanceRenderer.Execute(false);*/
 	RHI::SetRenderTarget(nullptr,nullptr);
 	myG_Buffer.UnsetResources();
 	RHI::EndEvent();
@@ -615,60 +621,60 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	//SSAO
 	//Do ambience pass? Clarit
 	//Render all lights
-	OPTICK_EVENT("SSAO");
+	/*OPTICK_EVENT("SSAO");
 	RHI::BeginEvent(L"SSAO");
 	myCamera->SetCameraToFrameBuffer();
 	GfxCmd_SSAO().ExecuteAndDestroy();
-	RHI::EndEvent();
+	RHI::EndEvent();*/
 
-	////Render shadowmaps
-	OPTICK_EVENT("ShadowMaps");
-	RHI::BeginEvent(L"ShadowMaps");
-	myShadowRenderer.Execute();
-	RHI::EndEvent();
+	//////Render shadowmaps
+	//OPTICK_EVENT("ShadowMaps");
+	//RHI::BeginEvent(L"ShadowMaps");
+	//myShadowRenderer.Execute();
+	//RHI::EndEvent();
 
-	OPTICK_EVENT("Lightning");
-	RHI::BeginEvent(L"Lightning");
-	myCamera->SetCameraToFrameBuffer();
-	GfxCmd_SetRenderTarget(SceneBuffer.get(),nullptr).ExecuteAndDestroy();
-	GfxCmd_SetLightBuffer().ExecuteAndDestroy(); //REFACTOR Change name to fit purpose
-	RHI::EndEvent();
+	//OPTICK_EVENT("Lightning");
+	//RHI::BeginEvent(L"Lightning");
+	//myCamera->SetCameraToFrameBuffer();
+	//GfxCmd_SetRenderTarget(SceneBuffer.get(),nullptr).ExecuteAndDestroy();
+	//GfxCmd_SetLightBuffer().ExecuteAndDestroy(); //REFACTOR Change name to fit purpose
+	////RHI::EndEvent();
 	// //Forward pass for light
 	//Forbidden
 
 
-	//Particles
-	OPTICK_EVENT("Particles")
-		RHI::BeginEvent(L"Particles");
-	RHI::SetBlendState(GraphicsEngine::Get().GetAdditiveBlendState());
-	GfxCmd_SetRenderTarget(SceneBuffer.get(),myDepthBuffer.get()).ExecuteAndDestroy();
-	myParticleRenderer.Execute();
-	RHI::EndEvent();
-
-	//Post processing
-	OPTICK_EVENT("Postpro")
-		RHI::BeginEvent(L"PostPro");
-	RHI::SetBlendState(nullptr);
-	GfxCmd_LuminancePass().ExecuteAndDestroy(); // Render to IntermediateA
-	GfxCmd_GaussianBlur().ExecuteAndDestroy();
-	GfxCmd_Bloom().ExecuteAndDestroy();
-	GfxCmd_ToneMapPass().ExecuteAndDestroy(); // Render: BackBuffer Read: REG_Target01
-	RHI::EndEvent();
-
-	//Debug layers
-	OPTICK_EVENT("DebugLayers")
-		RHI::BeginEvent(L"DebugLayers");
-	myCamera->SetCameraToFrameBuffer();
-	GfxCmd_DebugLayer().ExecuteAndDestroy();
-#ifdef  _DEBUGDRAW
-	if (myGraphicSettings.DebugRenderer_Active)
-	{
-		RHI::SetRenderTarget(GraphicsEngine::Get().GetTargetTextures(eRenderTargets::BackBuffer).get(),GraphicsEngine::Get().GetTargetTextures(eRenderTargets::DepthBuffer).get());
-		DebugDrawer::Get().Render();
-	}
-	OverlayCommandList.Execute();
-#endif //  _DEBUGDRAW
-	RHI::EndEvent();
+//	//Particles
+//	OPTICK_EVENT("Particles")
+//		RHI::BeginEvent(L"Particles");
+//	RHI::SetBlendState(GraphicsEngine::Get().GetAdditiveBlendState());
+//	GfxCmd_SetRenderTarget(SceneBuffer.get(),myDepthBuffer.get()).ExecuteAndDestroy();
+//	myParticleRenderer.Execute();
+//	RHI::EndEvent();
+//
+//	//Post processing
+//	OPTICK_EVENT("Postpro")
+//		RHI::BeginEvent(L"PostPro");
+//	RHI::SetBlendState(nullptr);
+//	GfxCmd_LuminancePass().ExecuteAndDestroy(); // Render to IntermediateA
+//	GfxCmd_GaussianBlur().ExecuteAndDestroy();
+//	GfxCmd_Bloom().ExecuteAndDestroy();
+//	GfxCmd_ToneMapPass().ExecuteAndDestroy(); // Render: BackBuffer Read: REG_Target01
+//	RHI::EndEvent();
+//
+//	//Debug layers
+//	OPTICK_EVENT("DebugLayers")
+//		RHI::BeginEvent(L"DebugLayers");
+//	myCamera->SetCameraToFrameBuffer();
+//	GfxCmd_DebugLayer().ExecuteAndDestroy();
+//#ifdef  _DEBUGDRAW
+//	if (myGraphicSettings.DebugRenderer_Active)
+//	{
+//		RHI::SetRenderTarget(GraphicsEngine::Get().GetTargetTextures(eRenderTargets::BackBuffer).get(),GraphicsEngine::Get().GetTargetTextures(eRenderTargets::DepthBuffer).get());
+//		DebugDrawer::Get().Render();
+//	}
+//	OverlayCommandList.Execute();
+//#endif //  _DEBUGDRAW
+//	RHI::EndEvent();
 }
 
 void GraphicsEngine::RenderTextureTo(eRenderTargets from,eRenderTargets to)  const
@@ -692,8 +698,9 @@ void GraphicsEngine::RenderTextureTo(eRenderTargets from,eRenderTargets to)  con
 void GraphicsEngine::EndFrame()
 {
 	OPTICK_EVENT()
-		// We finish our frame here and present it on screen. 
-		RHI::Present(0);
+		GPU::Present();
+	// We finish our frame here and present it on screen. 
+	//RHI::Present(0);
 	OPTICK_EVENT("ResetShadowList")
 		myShadowRenderer.ResetShadowList();
 	OPTICK_EVENT("DeferredCommandList")

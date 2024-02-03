@@ -100,21 +100,20 @@ public:
 	static bool UnInitialize();
 	static void Present(unsigned aSyncInterval = 0);
 
-
-
-
-
-
-
-
-
-
 	static void UpdateBufferResource(
 		ComPtr<ID3D12GraphicsCommandList> commandList,
 		ID3D12Resource** pDestinationResource,
 		ID3D12Resource** pIntermediateResource,
 		size_t numElements,size_t elementSize,const void* bufferData,
-		D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
+		D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE
+	);
+
+	static void ConfigureInputAssembler(
+		ComPtr<ID3D12GraphicsCommandList> commandList,
+		D3D_PRIMITIVE_TOPOLOGY topology,
+		const D3D12_VERTEX_BUFFER_VIEW& vertView,
+		const D3D12_INDEX_BUFFER_VIEW& indexView
+	);
 
 	template <typename vertexType>
 	static void CreateVertexBuffer(ComPtr<ID3D12Resource>& outVxBuffer,const std::vector<vertexType>& aVertexList);
@@ -126,24 +125,39 @@ public:
 
 	static bool CreateDepthStencil(D3D12_DEPTH_STENCIL_DESC depthStencilDesc);
 
+
+	static void ResizeDepthBuffer(unsigned width,unsigned height);
+
 	static bool LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName);
 
 	static bool LoadTextureFromMemory(Texture* outTexture,const std::filesystem::path& aName,const BYTE* someImageData,size_t anImageDataSize,const
 		D3D12_SHADER_RESOURCE_VIEW_DESC* aSRVDesc = nullptr);
 
+	static void TransitionResource(
+		ComPtr<ID3D12GraphicsCommandList> commandList,
+		ComPtr<ID3D12Resource> resource,
+		D3D12_RESOURCE_STATES beforeState,D3D12_RESOURCE_STATES afterState);
+
+	static void ClearRTV(ComPtr<ID3D12GraphicsCommandList> commandList,
+		D3D12_CPU_DESCRIPTOR_HANDLE rtv,FLOAT* clearColor);
+
+	static void ClearDepth(ComPtr<ID3D12GraphicsCommandList> commandList,
+		D3D12_CPU_DESCRIPTOR_HANDLE dsv,FLOAT depth = 1);
+
+	static ComPtr<ID3D12Resource> GetCurrentRenderTargetView();
+	static ComPtr<ID3D12Resource> GetCurrentBackBuffer();
 
 	static ComPtr<ID3D12DescriptorHeap>  CreateDescriptorHeap(ComPtr<ID3D12Device> device,D3D12_DESCRIPTOR_HEAP_TYPE type,uint32_t numDescriptors);
+
 	static void UpdateRenderTargetViews(ComPtr<ID3D12Device> device,ComPtr<IDXGISwapChain4> swapChain,ComPtr<ID3D12DescriptorHeap> descriptorHeap);
+
 	static ComPtr<ID3D12CommandAllocator> CreateCommandAllocator(ComPtr<ID3D12Device> device,D3D12_COMMAND_LIST_TYPE type);
+
 	static ComPtr<ID3D12GraphicsCommandList> CreateCommandList(ComPtr<ID3D12Device> device,ComPtr<ID3D12CommandAllocator> commandAllocator,D3D12_COMMAND_LIST_TYPE type);
 
 	static ComPtr<ID3D12Fence> CreateFence(ComPtr<ID3D12Device> device);
+
 	static HANDLE CreateEventHandle();
-
-
-
-
-
 
 	static void GetHardwareAdapter(
 		_In_ IDXGIFactory1* pFactory,
@@ -168,10 +182,11 @@ public:
 	static inline ComPtr<ID3D12PipelineState> m_PipeLineState;
 
 
-
 	static inline GPUSupport m_DeviceSupport;
-	D3D12_VIEWPORT m_Viewport;
-	D3D12_RECT m_ScissorRect;
+	static D3D12_VIEWPORT m_Viewport;
+	static D3D12_RECT m_ScissorRect;
+	static Texture* outBackBuffer;
+	static Texture* outDepthBuffer;
 
 private:
 };
