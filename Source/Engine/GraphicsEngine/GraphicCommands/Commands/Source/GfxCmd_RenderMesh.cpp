@@ -22,7 +22,7 @@ void GfxCmd_RenderMesh::ExecuteAndDestroy()
 	objectBuffer.Data.MinExtents = MinExtents;
 	objectBuffer.Data.hasBone = false;
 	objectBuffer.Data.isInstanced = instanced;
-	RHI::UpdateConstantBufferData(objectBuffer);
+	//RHI::UpdateConstantBufferData(objectBuffer);
 
 	G_Buffer& gBuffer = GetGBuffer();
 	gBuffer.UseGBufferShader();

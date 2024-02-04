@@ -129,7 +129,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions);PX_PHYSX_STATIC_LIB;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
@@ -191,34 +191,72 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="DebugDrawer\DebugDrawer.h" />
+    <ClInclude Include="DebugDrawer\DebugDrawer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="Rendering\GpuResource.h" />
     <ClInclude Include="InterOp\GPU.h" />
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_GaussianBlur.h" />
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_LuminancePass.h" />
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetDepthState.h" />
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_ToneMapPass.h" />
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_Bloom.h" />
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_DebugLayer.h" />
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_DrawDebugPrimitive.h" />
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderMesh.h" />
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderMeshShadow.h" />
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderSkeletalMesh.h" />
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderSkeletalMeshShadow.h" />
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderSkybox.h" />
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetFrameBuffer.h" />
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetLightBuffer.h" />
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetRenderTarget.h" />
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SSAO.h" />
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_GaussianBlur.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_LuminancePass.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetDepthState.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_ToneMapPass.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_Bloom.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_DebugLayer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_DrawDebugPrimitive.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderMesh.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderMeshShadow.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderSkeletalMesh.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderSkeletalMeshShadow.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderSkybox.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetFrameBuffer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetLightBuffer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetRenderTarget.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SSAO.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="InterOp\ShaderInfo.h" />
-    <ClInclude Include="InterOp\PSO.h" /> 
+    <ClInclude Include="InterOp\PSO.h" />
     <ClInclude Include="Rendering\Buffers\GraphicSettingsBuffer.h" />
     <ClInclude Include="Rendering\InstanceRenderer\InstanceRenderer.h" />
-    <ClInclude Include="Rendering\ParticleRenderer\ParticleRenderer.h" />
-    <ClInclude Include="Rendering\ParticleRenderer\ParticleVertex.h" />
     <ClInclude Include="Rendering\Buffers\G_Buffer.h" />
     <ClInclude Include="Rendering\Buffers\LightBuffer.h" />
     <ClInclude Include="Rendering\Buffers\LineBuffer.h" />
+    <ClInclude Include="Rendering\ParticleRenderer\ParticleRenderer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="Rendering\ParticleRenderer\ParticleVertex.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="Shaders\Include\Bloom_PS.h" />
     <ClInclude Include="Shaders\Include\brdfLUT_PS.h" />
     <ClInclude Include="Shaders\Include\brdfLUT_VS.h" />
@@ -236,7 +274,7 @@
     <ClInclude Include="Rendering\Buffers\FrameBuffer.h" />
     <ClInclude Include="GraphicCommands\GraphicCommands.h" />
     <ClInclude Include="GraphicsEngine.h" />
-    <ClInclude Include="GraphicsEngine.pch.h" /> 
+    <ClInclude Include="GraphicsEngine.pch.h" />
     <ClInclude Include="InterOp\Helpers.h" />
     <ClInclude Include="Rendering\Buffers\ConstantBuffer.h" />
     <ClInclude Include="Rendering\Texture.h" />
@@ -265,32 +303,64 @@
     <ClInclude Include="Rendering\ShadowRenderer\ShadowRenderer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DebugDrawer\DebugDrawer.cpp" />
+    <ClCompile Include="DebugDrawer\DebugDrawer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Rendering\GpuResource.cpp" />
     <ClCompile Include="InterOp\GPU.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_GaussianBlur.cpp" />
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_LuminancePass.cpp" />
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetDepthState.cpp" />
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_ToneMapPass.cpp" />
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_Bloom.cpp" />
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_DebugLayer.cpp" />
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_DrawDebugPrimitive.cpp" />
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderMesh.cpp" />
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderMeshShadow.cpp" />
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderSkeletalMesh.cpp" />
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderSkeletalMeshShadow.cpp" />
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderSkybox.cpp" />
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetFrameBuffer.cpp" />
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetLightBuffer.cpp" />
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetRenderTarget.cpp" />
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SSAO.cpp" />
-    <ClCompile Include="InterOp\PSO.cpp" /> 
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_GaussianBlur.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_LuminancePass.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetDepthState.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_ToneMapPass.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_Bloom.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_DebugLayer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_DrawDebugPrimitive.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderMesh.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderMeshShadow.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderSkeletalMesh.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderSkeletalMeshShadow.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderSkybox.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetFrameBuffer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetLightBuffer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetRenderTarget.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SSAO.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="InterOp\PSO.cpp" />
     <ClCompile Include="Rendering\InstanceRenderer\InstanceRenderer.cpp" />
-    <ClCompile Include="Rendering\ParticleRenderer\ParticleRenderer.cpp" />
-    <ClCompile Include="Rendering\ParticleRenderer\ParticleVertex.cpp" />
     <ClCompile Include="Rendering\Buffers\G_Buffer.cpp" />
     <ClCompile Include="Rendering\ForwardRenderer.cpp" />
     <ClCompile Include="GraphicCommands\GraphicCommands.cpp" />
@@ -305,19 +375,22 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="InterOp\XTK\DDSTextureLoader.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="InterOp\Helpers.cpp" />
     <ClCompile Include="Rendering\Buffers\ConstantBuffer.cpp" />
+    <ClCompile Include="Rendering\ParticleRenderer\ParticleRenderer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Rendering\ParticleRenderer\ParticleVertex.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Rendering\Texture.cpp" />
     <ClCompile Include="Rendering\Vertex.cpp" />
     <ClCompile Include="Rendering\ShadowRenderer\ShadowRenderer.cpp" />
   </ItemGroup>
-  <ItemGroup> 
+  <ItemGroup>
     <None Include="packages.config" />
     <None Include="Shaders\Headers\ParticleStruct.hlsli" />
+    <None Include="Shaders\Headers\SceneGraph.hlsli" />
     <None Include="Shaders\Headers\ShaderStructs.hlsli" />
     <None Include="Shaders\Headers\Common.hlsli" />
     <None Include="Shaders\Headers\PBRFunctions.hlsli" />
@@ -331,42 +404,58 @@
     <FxCompile Include="Shaders\DefaultShaders\Default_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shaders\Passes\DebugLayer_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shaders\Passes\LineDrawer.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shaders\Passes\LUT\brdfLUT_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shaders\Passes\LUT\ScreenspaceQuad_VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shaders\DefaultShaders\Default_VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shaders\Passes\LineDrawer\LineDrawer_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shaders\Passes\LineDrawer\LineDrawer_VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shaders\Passes\EnvironmentLight_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
@@ -374,94 +463,126 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</TreatWarningAsError>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
+      <EnableUnboundedDescriptorTables Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </EnableUnboundedDescriptorTables>
+      <EnableUnboundedDescriptorTables Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </EnableUnboundedDescriptorTables>
     </FxCompile>
     <FxCompile Include="Shaders\Passes\GBuffer\GBufferPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shaders\Passes\Particles\ParticleShader_GS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Geometry</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Geometry</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shaders\Passes\Particles\ParticleShader_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shaders\Passes\Particles\ParticleShader_VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shaders\Passes\PointLight\LightPass\PointLight_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shaders\Passes\PostProcessing\Bloom_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shaders\Passes\PostProcessing\CopyPixels_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shaders\Passes\PostProcessing\EdgeBlur.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shaders\Passes\PostProcessing\GaussianBlur_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shaders\Passes\PostProcessing\LinearToGammaPass.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shaders\Passes\PostProcessing\LuminancePass_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shaders\Passes\PostProcessing\ToneMapping_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shaders\Passes\SpotLight_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shaders\Passes\PostProcessing\SSAO_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

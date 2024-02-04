@@ -1,7 +1,10 @@
-#include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
-#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>  
-#include <Tools/Utilities/System/ThreadPool.hpp> 
 #include "AssetManager.pch.h"
+#include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h> 
+#include <Tools/Utilities/System/ThreadPool.hpp> 
+
+#include "Engine/GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_RenderMeshShadow.h"
+
+class GfxCmd_RenderMesh;
 
 cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId) : Component(anOwnerId)
 {
@@ -64,7 +67,7 @@ void cMeshRenderer::Render()
 		if (!isInstanced)
 		{
 			GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),isInstanced);
-			GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform(),isInstanced);
+			//GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform(),isInstanced);
 			return;
 		}
 		myRenderData->myMesh->myInstances.emplace_back(myTransform->GetTransform());
@@ -74,7 +77,7 @@ void cMeshRenderer::Render()
 	if (!isInstanced)
 	{
 		GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),isInstanced);
-		GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,Matrix(),isInstanced);
+		//GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,Matrix(),isInstanced);
 	}
 	myRenderData->myMesh->myInstances.emplace_back(Matrix());
 	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),isInstanced);

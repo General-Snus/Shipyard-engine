@@ -1,15 +1,15 @@
 #pragma once 
-#include "BaseAsset.h"
 #include <Engine/GraphicsEngine/Objects/Shader.h>
 #include <Engine/GraphicsEngine/Rendering/Buffers/ConstantBuffer.h>
 #include <Tools/Thirdparty/nlohmann/json.hpp>
+#include "BaseAsset.h"
 
-class TextureHolder; 
+class TextureHolder;
 
 struct MaterialData
 {
-	Vector4f albedoColor = {1.f,1.f,1.f,1.f};
-	Vector2f UVTiling = {1.f,1.f};
+	Vector4f albedoColor = { 1.f,1.f,1.f,1.f };
+	Vector2f UVTiling = { 1.f,1.f };
 	float NormalStrength = 1.0f;
 	float Shine = 100.f;
 };
@@ -26,8 +26,8 @@ public:
 		std::weak_ptr<Shader> vertexShader;
 		std::weak_ptr<Shader> pixelShader;
 		ConstantBuffer<MaterialData> materialData;
-		std::vector<std::pair<std::filesystem::path,std::shared_ptr<TextureHolder>>> textures; 
-	}; 
+		std::vector<std::pair<std::filesystem::path,std::shared_ptr<TextureHolder>>> textures;
+	};
 	static bool CreateJson(const DataMaterial& data,const std::filesystem::path& pth);
 
 

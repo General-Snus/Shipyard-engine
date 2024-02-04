@@ -52,7 +52,7 @@ struct Vertex
 		myBoneWeights = aBoneWeights;
 	}
 	//static const InputElementList InstancedInputLayoutDefinition;
-	static ComPtr<ID3D11InputLayout> InputLayout;
+	//static ComPtr<ID3D11InputLayout> InputLayout;
 	//static ComPtr<ID3D11InputLayout> InstancedInputLayout;
 	static inline const D3D12_INPUT_ELEMENT_DESC InputLayoutDefinition[] =
 	{

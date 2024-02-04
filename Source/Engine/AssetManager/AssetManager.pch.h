@@ -13,11 +13,13 @@
 #include <assimp/Importer.hpp>      // C++ importer interface 
 #include <assimp/postprocess.h>     // Post processing flags
 #include <assimp/scene.h>           // Output data structure
-#include <filesystem> 
-#include <functional>
+#include <filesystem>  
+#include <fstream>
+#include <functional> 
 #include <iostream> 
 #include <memory>
 #include <ranges>
+#include <Tools/ThirdParty/nlohmann/json.hpp>
 #include <unordered_map>
 #include <vector>
 
@@ -68,6 +70,7 @@
 #include "ComponentSystem/Components/Physics/cPhysXDynamicBody.h"
 #include "ComponentSystem/Components/Physics/cPhysXStaticBody.h"
 #include "ComponentSystem/Components/Skybox.h"
+#include "ComponentSystem/Components/TaskSpecific/ProjectileComponent.h"
 #include "ComponentSystem/Components/Transform.h"
 #include "ComponentSystem/GameObject.h"
 #include "ComponentSystem/GameObjectManager.h"

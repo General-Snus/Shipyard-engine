@@ -81,12 +81,6 @@
     <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\RenderMode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\BaseAssets\ParticleEmitter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ComponentSystem\Components\ParticleSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ComponentSystem\Components\ActorSystem\cActor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -168,6 +162,12 @@
     <ClInclude Include="ComponentSystem\Components\Physics\cPhysXStaticBody.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ComponentSystem\Components\ParticleSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\BaseAssets\ParticleEmitter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssetManager.pch.cpp">
@@ -231,12 +231,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\RenderMode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Objects\BaseAssets\Source\ParticleEmitter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ComponentSystem\Components\Source\ParticleSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\cActor.cpp">
@@ -315,6 +309,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysXStaticBody.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ComponentSystem\Components\Source\ParticleSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\BaseAssets\Source\ParticleEmitter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

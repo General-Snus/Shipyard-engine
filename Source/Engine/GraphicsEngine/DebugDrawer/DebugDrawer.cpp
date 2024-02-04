@@ -1,15 +1,15 @@
-#include "DebugDrawer.h"   
 #include "GraphicsEngine.pch.h"
+#include "DebugDrawer.h"
 
 #include "../Shaders/Include/LineDrawer_PS.h"
 #include "../Shaders/Include/LineDrawer_VS.h"
 
-const std::vector<D3D11_INPUT_ELEMENT_DESC> DebugVertex::InputLayoutDescription =
+const std::vector<D3D12_INPUT_ELEMENT_DESC> DebugVertex::InputLayoutDescription =
 {
-	{"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	{"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+	{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 };
-ComPtr<ID3D11InputLayout> DebugVertex::InputLayout;
+//ComPtr<ID3D11InputLayout> DebugVertex::InputLayout;
 
 
 
@@ -39,22 +39,22 @@ bool DebugDrawer::Initialize()
 	);
 
 	//Create DebugVertex input layout
-	RHI::CreateInputLayout(
+	/*RHI::CreateInputLayout(
 		DebugVertex::InputLayout,
 		DebugVertex::InputLayoutDescription,
 		BuiltIn_LineDrawer_VS_ByteCode,
 		sizeof(BuiltIn_LineDrawer_VS_ByteCode)
-	);
+	);*/
 
-	// Create dynamic vertex and index buffer
-	if (!(
-		RHI::CreateDynamicVertexBuffer(myLineVertexBuffer,65536,sizeof(DebugVertex)) &&
-		RHI::CreateDynamicIndexBuffer(myLineIndexBuffer,65536)
-		))
-	{
-		Logger::Err("Failed to initialize the myLineVertexBuffer!");
-		return false;
-	}
+	//// Create dynamic vertex and index buffer
+	//if (!(
+	//	RHI::CreateDynamicVertexBuffer(myLineVertexBuffer,65536,sizeof(DebugVertex)) &&
+	//	RHI::CreateDynamicIndexBuffer(myLineIndexBuffer,65536)
+	//	))
+	//{
+	//	Logger::Err("Failed to initialize the myLineVertexBuffer!");
+	//	return false;
+	//}
 	return true;
 }
 
@@ -98,8 +98,8 @@ void DebugDrawer::Render()
 		D3D11_MAPPED_SUBRESOURCE vxResource{};
 		D3D11_MAPPED_SUBRESOURCE ixResource{};
 
-		RHI::Context->Map(myLineVertexBuffer.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&vxResource);
-		RHI::Context->Map(myLineIndexBuffer.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&ixResource);
+		/*RHI::Context->Map(myLineVertexBuffer.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&vxResource);
+		RHI::Context->Map(myLineIndexBuffer.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&ixResource);*/
 
 		size_t currentVxOffset = 0;
 		size_t currentIxOffset = 0;
@@ -133,21 +133,21 @@ void DebugDrawer::Render()
 
 		myNumLineIndices = currentIxOffset;
 
-		RHI::Context->Unmap(myLineVertexBuffer.Get(),0);
-		RHI::Context->Unmap(myLineIndexBuffer.Get(),0);
+		//RHI::Context->Unmap(myLineVertexBuffer.Get(),0);
+		//RHI::Context->Unmap(myLineIndexBuffer.Get(),0);
 
 		myPrimitiveListDirty = false;
 	}
 
 	if (myNumLineIndices > 0)
-	{
+	{/*
 		RHI::ConfigureInputAssembler(
 			D3D11_PRIMITIVE_TOPOLOGY_LINELIST,
 			myLineVertexBuffer,
 			myLineIndexBuffer,
 			sizeof(DebugVertex),
 			DebugVertex::InputLayout
-		);
+		);*/
 
 		RHI::SetVertexShader(myLineVS.get());
 		RHI::SetPixelShader(myLinePS.get());

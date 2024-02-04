@@ -10,7 +10,6 @@
 #include "Editor/Editor/Windows/Window.h"
 #include "GPU.h" 
 
-#include <d3d11.h>
 #include <d3dcompiler.h> 
 
 #include <DirectX/XTK/DDSTextureLoader.h>
@@ -41,6 +40,7 @@ ComPtr<ID3D12GraphicsCommandList> GPUCommandQueue::CreateCommandList(ComPtr<ID3D
 D3D12_CPU_DESCRIPTOR_HANDLE GPUDescriptorAllocator::Allocate(UINT aNumDescriptors)
 {
 	aNumDescriptors;
+	return D3D12_CPU_DESCRIPTOR_HANDLE();
 }
 
 bool GPUCommandQueue::Create(ComPtr<ID3D12Device> device,D3D12_COMMAND_LIST_TYPE type)
@@ -102,7 +102,7 @@ void GPUCommandQueue::WaitForFenceValue(uint64_t fenceValue)
 ComPtr<ID3D12GraphicsCommandList> GPUCommandQueue::GetCommandList()
 {
 	ComPtr<ID3D12CommandAllocator> commandAllocator;
-	ComPtr<ID3D12GraphicsCommandList2> commandList;
+	ComPtr<ID3D12GraphicsCommandList> commandList;
 
 	if (!m_CommandAllocatorQueue.empty() && IsFenceComplete(m_CommandAllocatorQueue.front().fenceValue))
 	{
@@ -338,22 +338,27 @@ void GPU::UpdateBufferResource(
 {
 
 	const size_t bufferSize = numElements * elementSize;
-
-	ThrowIfFailed(m_Device->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
-		D3D12_HEAP_FLAG_NONE,
-		&CD3DX12_RESOURCE_DESC::Buffer(bufferSize,flags),
-		D3D12_RESOURCE_STATE_COPY_DEST,
-		nullptr,
-		IID_PPV_ARGS(pDestinationResource)));
+	{
+		auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+		auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize,flags);
+		ThrowIfFailed(m_Device->CreateCommittedResource(
+			&heapProperties,
+			D3D12_HEAP_FLAG_NONE,
+			&resourceDesc,
+			D3D12_RESOURCE_STATE_COPY_DEST,
+			nullptr,
+			IID_PPV_ARGS(pDestinationResource)));
+	}
 
 	// Create an committed resource for the upload.
 	if (bufferData)
 	{
+		auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+		auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize);
 		ThrowIfFailed(m_Device->CreateCommittedResource(
-			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+			&heapProperties,
 			D3D12_HEAP_FLAG_NONE,
-			&CD3DX12_RESOURCE_DESC::Buffer(bufferSize),
+			&resourceDesc,
 			D3D12_RESOURCE_STATE_GENERIC_READ,
 			nullptr,
 			IID_PPV_ARGS(pIntermediateResource)));
@@ -376,7 +381,7 @@ void GPU::ConfigureInputAssembler(
 	commandList->IASetIndexBuffer(&indexView);
 }
 
-void GPU::CreateIndexBuffer(ComPtr<ID3D12Resource>& outIndexBuffer,const std::vector<unsigned>& aIndexList)
+bool GPU::CreateIndexBuffer(ComPtr<ID3D12Resource>& outIndexBuffer,const std::vector<unsigned>& aIndexList)
 {
 
 	const size_t size = sizeof(unsigned);
@@ -386,11 +391,12 @@ void GPU::CreateIndexBuffer(ComPtr<ID3D12Resource>& outIndexBuffer,const std::ve
 
 
 	ComPtr<ID3D12Resource> intermediateIndexBuffer;
-	return UpdateBufferResource(
+	UpdateBufferResource(
 		m_CommandQueue->GetCommandList(),
 		&outIndexBuffer,&intermediateIndexBuffer
 		,numIn,size,aIndexList.data()
 	);
+	return true;
 }
 
 bool GPU::CreatePixelShader(ComPtr<ID3DBlob>& outPxShader,const BYTE* someShaderData,size_t aShaderDataSize,UINT CompileFLags)
@@ -448,14 +454,17 @@ void GPU::ResizeDepthBuffer(unsigned width,unsigned height)
 		optimizedClearValue.Format = DXGI_FORMAT_D32_FLOAT;
 		optimizedClearValue.DepthStencil = { 1.0f, 0 };
 
+		auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+		auto resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_D32_FLOAT,width,height,
+			1,0,1,0,D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
+
 		ThrowIfFailed(m_Device->CreateCommittedResource(
-			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+			&heapProperties,
 			D3D12_HEAP_FLAG_NONE,
-			&CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_D32_FLOAT,width,height,
-				1,0,1,0,D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL),
-			D3D12_RESOURCE_STATE_DEPTH_WRITE,
-			&optimizedClearValue,
-			IID_PPV_ARGS(&outDepthBuffer)
+			&resourceDesc,
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			nullptr,
+			IID_PPV_ARGS(&outDepthBuffer->m_pResource)
 		));
 		// Update the depth-stencil view.
 		D3D12_DEPTH_STENCIL_VIEW_DESC dsv = {};
@@ -507,11 +516,12 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 	//textureName = textureName.substr(0,textureName.size() - 4);
 	//outTexture->myName = textureName;
 
-	//return true; 
+	return true;
 }
 
 bool GPU::LoadTextureFromMemory(Texture* outTexture,const std::filesystem::path& aName,const BYTE* someImageData,size_t anImageDataSize,const D3D12_SHADER_RESOURCE_VIEW_DESC* aSRVDesc)
 {
+	outTexture; aName; someImageData; anImageDataSize; aSRVDesc;
 	return false;
 }
 

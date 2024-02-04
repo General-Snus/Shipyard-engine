@@ -1,3 +1,4 @@
+#include "../Headers/SceneGraph.hlsli"  
 #include "../Headers/PBRFunctions.hlsli"  
 
 float3 CalculateIndirectLight(
@@ -16,8 +17,7 @@ float occulusion
     const float3 kA = (diffuseColor * diffuse + specular) * occulusion;
     
     return kA;
-}
-
+} 
 float3 CalculateDirectionLight(
 float3 diffuseColor,
 float3 specularColor,

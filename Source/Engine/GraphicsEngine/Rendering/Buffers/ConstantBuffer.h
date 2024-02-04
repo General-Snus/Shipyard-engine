@@ -9,15 +9,15 @@ using namespace Microsoft::WRL;
  * POD object on the CPU.
  */
 struct ConstantBufferBase
-{ 
+{
 	friend class RHI;
 private:
 	const size_t myDataSize;
 	const void* myDataPtr = nullptr;
-	ComPtr<ID3D11Buffer> myBuffer;
+	ComPtr<ID3D12Resource> myBuffer;
 
 protected:
-	ConstantBufferBase(const void* aPtr, size_t aDataSize);
+	ConstantBufferBase(const void* aPtr,size_t aDataSize);
 
 public:
 	bool Initialize();
@@ -34,10 +34,10 @@ struct ConstantBuffer : public ConstantBufferBase
 	DataStruct Data;
 
 	ConstantBuffer()
-		: ConstantBufferBase(&Data, sizeof(DataStruct))
+		: ConstantBufferBase(&Data,sizeof(DataStruct))
 	{  }
 
 	ConstantBuffer(const ConstantBuffer& aConstantBuffer)
-		: ConstantBufferBase(&Data, sizeof(DataStruct)), Data(aConstantBuffer.Data)
+		: ConstantBufferBase(&Data,sizeof(DataStruct)),Data(aConstantBuffer.Data)
 	{  }
 };

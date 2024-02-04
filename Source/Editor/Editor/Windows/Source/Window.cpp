@@ -1,8 +1,8 @@
+#include <combaseapi.h>
 #include <string>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 #include "../Window.h"
 
-#include <d3d11_1.h>
 
 void Window::Init(const WinInitSettings& init)
 {

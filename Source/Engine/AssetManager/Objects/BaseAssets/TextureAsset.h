@@ -1,8 +1,8 @@
 #pragma once
-#include "BaseAsset.h"
 #include <Engine/GraphicsEngine/Rendering/Texture.h>
+#include "BaseAsset.h"
 
-enum class eTextureType  
+enum class eTextureType
 {
 	ColorMap = 0,
 	NormalMap = 1,
@@ -23,7 +23,9 @@ public:
 	eTextureType GetTextureType() const { return textureType; }
 	void SetTextureType(eTextureType aTextureType) { textureType = aTextureType; }
 private:
+#if WorkingOnPngLoading
 	bool LoadPngTexture(Texture* outTexture,const std::filesystem::path& aFileName);
+#endif
 	eTextureType textureType;
 	std::shared_ptr<Texture> RawTexture;
 };

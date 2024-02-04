@@ -1,5 +1,4 @@
-#pragma once
-#include <d3d11.h>
+#pragma once 
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 #include <wrl.h>
 using namespace Microsoft::WRL;
@@ -20,6 +19,5 @@ struct Particlevertex
 		{ "VELOCITY",		0,    DXGI_FORMAT_R32G32B32_FLOAT,		0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 		{ "SCALE",			0,    DXGI_FORMAT_R32G32B32_FLOAT,		0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 		{ "LIFETIME",		0,    DXGI_FORMAT_R32_FLOAT,			0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-	};;
-	static ComPtr<ID3D11InputLayout> InputLayout;
+	};
 };

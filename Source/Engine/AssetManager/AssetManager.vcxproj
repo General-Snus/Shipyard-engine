@@ -45,7 +45,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <EnableUnitySupport>true</EnableUnitySupport>
+    <EnableUnitySupport>false</EnableUnitySupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -171,6 +171,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ComponentSystem\Components\ActorSystem\CombatComponent.h" />
+    <ClInclude Include="ComponentSystem\Components\ParticleSystem.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="ComponentSystem\Components\Physics\cPhysXDynamicBody.h" />
     <ClInclude Include="ComponentSystem\Components\Physics\cPhysXStaticBody.h" />
     <ClInclude Include="Objects\AI\AgentSystem\AIPollingManager.h" />
@@ -190,7 +193,6 @@
     <ClInclude Include="Objects\AI\AgentSystem\DecisionTree\DecisionTree.h" />
     <ClInclude Include="Objects\AI\AgentSystem\PollingStations\PollingStation.h" />
     <ClInclude Include="Objects\AI\NavMesh\NavMesh.h" />
-    <ClInclude Include="Objects\BaseAssets\ParticleEmitter.h" />
     <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\RenderMode.h" />
     <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\FrameStatistics.h" />
     <ClInclude Include="ComponentSystem\Components\CameraComponent.h" />
@@ -211,9 +213,11 @@
     <ClInclude Include="ComponentSystem\GameObject.h" />
     <ClInclude Include="ComponentSystem\Components\MeshRenderer.h" />
     <ClInclude Include="ComponentSystem\Components\Transform.h" />
+    <ClInclude Include="Objects\BaseAssets\ParticleEmitter.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="Objects\BaseAssets\TextureAsset.h" />
     <ClInclude Include="ComponentSystem\Components\Skybox.h" />
-    <ClInclude Include="ComponentSystem\Components\ParticleSystem.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\WanderController.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\AIController.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\SeparationController.h" />
@@ -226,6 +230,9 @@
     <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\CombatComponent.cpp" />
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysXDynamicBody.cpp" />
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysXStaticBody.cpp" />
+    <ClCompile Include="ComponentSystem\Components\Source\ParticleSystem.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Objects\AI\AgentSystem\Source\AIPollingManager.cpp" />
     <ClCompile Include="AssetManagerUtills.cpp" />
     <ClCompile Include="Objects\BaseAssets\Source\ColliderAsset.cpp" />
@@ -242,7 +249,6 @@
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\Source\PollingController.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\PollingStations\Source\PollingStation.cpp" />
     <ClCompile Include="Objects\AI\NavMesh\Source\NavMesh.cpp" />
-    <ClCompile Include="Objects\BaseAssets\Source\ParticleEmitter.cpp" />
     <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\RenderMode.cpp" />
     <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\FrameStatistics.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\CameraComponent.cpp" />
@@ -267,9 +273,11 @@
     <ClCompile Include="ComponentSystem\Source\GameObject.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\MeshRenderer.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\Transform.cpp" />
+    <ClCompile Include="Objects\BaseAssets\Source\ParticleEmitter.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Objects\BaseAssets\Source\TextureAsset.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\Skybox.cpp" />
-    <ClCompile Include="ComponentSystem\Components\Source\ParticleSystem.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\WanderController.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\AIController.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\SeparationController.cpp" />

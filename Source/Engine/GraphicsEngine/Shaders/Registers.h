@@ -1,5 +1,5 @@
 //General Graphics settings
-  
+
 #define defaultTextureFormat DXGI_FORMAT_R16G16B16A16_FLOAT
 //DXGI_FORMAT_R32G32B32A32_FLOAT
 //DXGI_FORMAT_R32G32B32A32_TYPELESS
@@ -43,8 +43,8 @@
 #define HLSL_REG_GraphicSettingsBuffer b13 
 #define REG_GraphicSettingsBuffer 13
 
-#define HLSL_REG_colorMap t0 
-#define REG_colorMap 0 
+#define HLSL_REG_colorMap t8 
+#define REG_colorMap 8 
 
 #define HLSL_REG_normalMap t1 
 #define REG_normalMap 1 

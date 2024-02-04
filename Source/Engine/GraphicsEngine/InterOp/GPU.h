@@ -116,8 +116,8 @@ public:
 	);
 
 	template <typename vertexType>
-	static void CreateVertexBuffer(ComPtr<ID3D12Resource>& outVxBuffer,const std::vector<vertexType>& aVertexList);
-	static void CreateIndexBuffer(ComPtr<ID3D12Resource>& outVxBuffer,const std::vector<unsigned>& aIndexList);
+	static bool CreateVertexBuffer(ComPtr<ID3D12Resource>& outVxBuffer,const std::vector<vertexType>& aVertexList);
+	static bool CreateIndexBuffer(ComPtr<ID3D12Resource>& outVxBuffer,const std::vector<unsigned>& aIndexList);
 
 	static bool CreatePixelShader(ComPtr<ID3DBlob>& outPxShader,const BYTE* someShaderData,size_t aShaderDataSize,UINT CompileFLags = 0);
 
@@ -192,14 +192,15 @@ private:
 };
 
 template<typename vertexType>
-inline void GPU::CreateVertexBuffer(ComPtr<ID3D12Resource>& outVxBuffer,const std::vector<vertexType>& aVertexList)
+inline bool GPU::CreateVertexBuffer(ComPtr<ID3D12Resource>& outVxBuffer,const std::vector<vertexType>& aVertexList)
 {
 	ComPtr<ID3D12Resource> intermediateVertexBuffer;
 	const size_t vxSize = sizeof(vertexType);
 	const size_t numVx = aVertexList.size();
-	return UpdateBufferResource(
+	UpdateBufferResource(
 		m_CommandQueue->GetCommandList(),
 		&outVxBuffer,&intermediateVertexBuffer
 		,numVx,vxSize,aVertexList.data()
 	);
+	return true;
 }

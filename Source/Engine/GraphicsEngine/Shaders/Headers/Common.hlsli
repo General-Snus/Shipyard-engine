@@ -1,6 +1,6 @@
-#define CommonGuard
-#include "../Registers.h"
- 
+#ifndef COMMON
+#define COMMON
+#include "../Registers.h" 
 
 
 static const float PI = 3.14159265f;
@@ -122,3 +122,4 @@ float2 IntegrateBRDF(float aNdotV, float aRoughness)
 
     return float2(a, b) / NUM_SAMPLES;
 }
+#endif

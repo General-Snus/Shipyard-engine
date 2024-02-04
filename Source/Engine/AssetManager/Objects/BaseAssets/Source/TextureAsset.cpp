@@ -1,6 +1,4 @@
-#include "AssetManager.pch.h"
-#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
-#include <Tools/ThirdParty/DirectXTK/WICTextureLoader.h>
+#include "AssetManager.pch.h" 
 #include "../TextureAsset.h"
 
 #define STB_IMAGE_IMPLEMENTATION	
@@ -19,7 +17,7 @@ TextureHolder::TextureHolder(const std::filesystem::path& aFilePath,eTextureType
 		std::cout << "Error: Default texture was not found" << " \n";
 	}*/
 }
-
+#if WorkingOnPngLoading 
 bool TextureHolder::LoadPngTexture(Texture* outTexture,const std::filesystem::path& aFileName)
 {
 	outTexture->myName = aFileName;
@@ -55,9 +53,9 @@ bool TextureHolder::LoadPngTexture(Texture* outTexture,const std::filesystem::pa
 	ImageTextureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 
 	D3D11_SUBRESOURCE_DATA ImageSubresourceData = {};
-	
+
 	ImageSubresourceData.pSysMem = ImageData;
-	ImageSubresourceData.SysMemPitch = ImagePitch; 
+	ImageSubresourceData.SysMemPitch = ImagePitch;
 	ID3D11Texture2D* ImageTexture;
 	auto Result = RHI::Device->CreateTexture2D(&ImageTextureDesc,
 		&ImageSubresourceData,
@@ -91,7 +89,7 @@ bool TextureHolder::LoadPngTexture(Texture* outTexture,const std::filesystem::pa
 	}*/
 
 	std::wstring textureName = aFileName;
-	if(const size_t pos = textureName.find_last_of(L'\\'); pos != std::wstring::npos)
+	if (const size_t pos = textureName.find_last_of(L'\\'); pos != std::wstring::npos)
 	{
 		textureName = textureName.substr(pos + 1);
 	}
@@ -101,45 +99,47 @@ bool TextureHolder::LoadPngTexture(Texture* outTexture,const std::filesystem::pa
 
 	return true;
 }
+#endif
 
 void TextureHolder::Init()
 {
 	int position = (int)AssetPath.filename().string().find_last_of("_");
-	if(position > -1)
+	if (position > -1)
 	{
 		std::string  typeOfTexture = AssetPath.filename().replace_extension("").string().substr(position);
 
-		if(typeOfTexture == "_C" || typeOfTexture == "_c")
+		if (typeOfTexture == "_C" || typeOfTexture == "_c")
 		{
 			this->textureType = eTextureType::ColorMap;
 		}
-		if(typeOfTexture == "_N" || typeOfTexture == "_n")
+		if (typeOfTexture == "_N" || typeOfTexture == "_n")
 		{
 			this->textureType = eTextureType::NormalMap;
 		}
-		if(typeOfTexture == "_M" || typeOfTexture == "_m")
+		if (typeOfTexture == "_M" || typeOfTexture == "_m")
 		{
 			this->textureType = eTextureType::MaterialMap;
 		}
-		if(typeOfTexture == "_FX" || typeOfTexture == "_fx" || typeOfTexture == "_Fx")
+		if (typeOfTexture == "_FX" || typeOfTexture == "_fx" || typeOfTexture == "_Fx")
 		{
 			this->textureType = eTextureType::EffectMap;
 		}
-		if(typeOfTexture == "_P" || typeOfTexture == "_p")
+		if (typeOfTexture == "_P" || typeOfTexture == "_p")
 		{
 			this->textureType = eTextureType::ParticleMap;
 		}
 	}
 
-	if(AssetPath.extension() == ".png")
+#if WorkingOnPngLoading
+	if (AssetPath.extension() == ".png")
 	{
-		if(!std::filesystem::exists(AssetPath))
+		if (!std::filesystem::exists(AssetPath))
 		{
-			if(!AssetManager::Get().AdaptPath(AssetPath))
+			if (!AssetManager::Get().AdaptPath(AssetPath))
 			{
 				std::string msg = "Error: Coulnt load texture at " + AssetPath.string();
 				std::cout << msg << " \n";
-				if(GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
+				if (GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
 				{
 					RawTexture = GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture();
 					isLoadedComplete = true;
@@ -149,12 +149,11 @@ void TextureHolder::Init()
 				return;
 			}
 		}
-
-		if(!LoadPngTexture(RawTexture.get(),AssetPath))
+		if (!LoadPngTexture(RawTexture.get(),AssetPath))
 		{
 			std::string msg = "Error: Coulnt dds texture at " + AssetPath.string();
 			std::cout << msg << " \n";
-			if(GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
+			if (GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
 			{
 				RawTexture = GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture();
 				isLoadedComplete = true;
@@ -164,15 +163,16 @@ void TextureHolder::Init()
 			isLoadedComplete = false;
 			return;
 		}
-		isLoadedComplete = true; 
+		isLoadedComplete = true;
 	}
-	else if(AssetPath.extension() == ".dds")
+#endif
+	else if (AssetPath.extension() == ".dds")
 	{
-		if(!RHI::LoadTexture(RawTexture.get(),AssetPath.wstring()))
+		if (!RHI::LoadTexture(RawTexture.get(),AssetPath.wstring()))
 		{
 			std::string msg = "Error: Coulnt dds texture at " + AssetPath.string();
 			std::cout << msg << " \n";
-			if(GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
+			if (GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
 			{
 				RawTexture = GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture();
 				isLoadedComplete = true;
@@ -188,7 +188,7 @@ void TextureHolder::Init()
 	{
 		std::string msg = "Error: Coulnt load generic texture at " + AssetPath.string();
 		std::cout << msg << " \n";
-		if(GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
+		if (GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
 		{
 			RawTexture = GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture();
 			isLoadedComplete = true;

@@ -1,7 +1,6 @@
 #include <AssetManager.pch.h>
 #include <cassert>
-#include <cmath>
-#include <d3d11.h>
+#include <cmath> 
 #include <iostream>
 #include <random>
 #include <Tools/Utilities/Math.hpp>
@@ -60,7 +59,6 @@ ParticleEmitter::ParticleEmitter(const ParticleEmitterTemplate& aTemplate) : Ass
 		std::cout << "Failed to create vertex buffer" << std::endl;
 		return;
 	}
-	inputLayout = Particlevertex::InputLayout;
 	stride = sizeof(Particlevertex);
 }
 
@@ -133,14 +131,14 @@ void ParticleEmitter::SetAsResource() const
 
 	RHI::Context->Unmap(vertexBuffer.Get(),0);
 
-	RHI::ConfigureInputAssembler
+	/*RHI::ConfigureInputAssembler
 	(
 		primitiveTopology,
 		vertexBuffer,
 		nullptr,
 		stride,
 		Particlevertex::InputLayout
-	);
+	);*/
 
 	if (texture->isLoadedComplete)
 	{

@@ -616,7 +616,7 @@ void ScriptGraphEditor::RenderNode(const ScriptGraphNode* aNode)
 		ImGui::TableNextColumn();
 		if (const auto It = myNodeTypeIcons.find(aNode->GetNodeType()); It != myNodeTypeIcons.end())
 		{
-			const ImTextureID funcTextureId = (void*)It->second->GetSRV();
+			const ImTextureID funcTextureId = (void*)It->second->GetSRV().ptr;
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 2.0f);
 			ImGui::Image(funcTextureId,{ 16, 16 },{ 0, 0 },{ 1, 1 },{ 255, 255, 255, 255 });
 		}
@@ -662,7 +662,7 @@ void ScriptGraphEditor::RenderNode(const ScriptGraphNode* aNode)
 
 		ImDrawList* nodeDrawList = ImNodeEd::GetNodeBackgroundDrawList(uidAwareBase->GetUID());
 
-		const ImTextureID nodeTextureId = (void*)myNodeHeaderTexture->GetSRV();
+		const ImTextureID nodeTextureId = (void*)myNodeHeaderTexture->GetSRV().ptr;
 		nodeDrawList->AddImageRounded(nodeTextureId,
 			nodeHeader.Min,
 			nodeHeader.Max,
@@ -687,7 +687,7 @@ void ScriptGraphEditor::RenderNode(const ScriptGraphNode* aNode)
 
 		ImDrawList* nodeDrawList = ImNodeEd::GetNodeBackgroundDrawList(uidAwareBase->GetUID());
 
-		const ImTextureID nodeTextureId = (void*)myGetterGradient->GetSRV();
+		const ImTextureID nodeTextureId = (void*)myGetterGradient->GetSRV().ptr;
 		nodeDrawList->AddImageRounded(nodeTextureId,
 			nodeHeader.Min,
 			nodeHeader.Max,

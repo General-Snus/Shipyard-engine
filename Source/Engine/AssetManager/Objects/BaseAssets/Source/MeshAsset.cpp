@@ -1,7 +1,4 @@
-#include "AssetManager.pch.h"
-#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
-
-#include <Editor/Editor/Core/Editor.h>
+#include "AssetManager.pch.h" 
 #include <Tools/Utilities/Math.hpp>
 #include "../MeshAsset.h" 
 
@@ -210,7 +207,7 @@ void Mesh::Init()
 		Logger::LogException(failedMeshLoad,2);
 		return;
 	}
-	Editor::Get().ExpandWorldBounds(boxSphereBounds); // TODO Make a scene contain the boxSphereBounds!! 
+	//Editor::Get().ExpandWorldBounds(boxSphereBounds); // TODO Make a scene contain the boxSphereBounds!! 
 
 	for (size_t i = 0; i < scene->mNumMeshes; i++)
 	{
@@ -464,7 +461,7 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 	D3D12_INDEX_BUFFER_VIEW m_IndexBufferView;
 	m_IndexBufferView.BufferLocation = indexBuffer->GetGPUVirtualAddress();
 	m_IndexBufferView.Format = DXGI_FORMAT_R16_UINT;
-	m_IndexBufferView.SizeInBytes = mdlIndicies.size() * sizeof(unsigned);
+	m_IndexBufferView.SizeInBytes = static_cast<unsigned>(mdlIndicies.size() * sizeof(unsigned));
 
 
 	if (!GPU::CreateIndexBuffer(indexBuffer,mdlIndicies))

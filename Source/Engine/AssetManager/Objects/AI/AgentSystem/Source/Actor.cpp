@@ -1,11 +1,11 @@
-
+#include "AssetManager.pch.h"
 //MOTHBALLED
 #ifdef  MOTHBALLED 
 #include "Actor.h"  
 SteeringOutput Actor::Update(const SteeringInput& input)
 {
 	input;
-	if(controller)
+	if (controller)
 	{
 		//return controller->Update(input); //Velocity
 	}

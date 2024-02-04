@@ -1,8 +1,7 @@
-#include "AssetManager.pch.h"
-#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
+#include "AssetManager.pch.h" 
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
 #include <Tools/Utilities/Math.hpp>
 #include "../Transform.h"
-#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
 
 Transform::Transform(const unsigned int anOwnerId) : Component(anOwnerId),isDirty(true)
 {

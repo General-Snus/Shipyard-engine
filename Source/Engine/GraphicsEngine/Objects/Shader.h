@@ -2,41 +2,34 @@
 #include "../InterOp/ShaderInfo.h"
 
 
-struct ID3D11DeviceChild;
-struct ID3D11ShaderReflection;
 //Do rewrite, not my structure prb doesnt fit, just need for rhi
 class Shader
 {
 	/*ComPtr<ID3D11DeviceChild> myShaderObject;
 	ShaderType myShaderType = ShaderType::VertexShader;*/
 
-	friend class RHI;
+	friend class GPU;
 
-	unsigned char* myBlob = nullptr;
+	ComPtr<ID3DBlob> myBlob = nullptr;
 	size_t myBlobSize = 0;
-	ComPtr<ID3D11DeviceChild> myShaderObject;
 	ShaderInfo myShaderInfo{};
 
 
 public:
 	std::wstring myName;
 
-	FORCEINLINE void SetShader(ComPtr<ID3D11DeviceChild> aShader)
+	FORCEINLINE void SetShader(ComPtr<ID3DBlob> aShader)
 	{
-		myShaderObject = aShader;
+		myBlob = aShader;
 	}
 
 	FORCEINLINE ShaderType GetShaderType() const
 	{
 		return myShaderInfo.Type;
 	}
-	FORCEINLINE ComPtr<ID3D11DeviceChild> GetShader() const
+	FORCEINLINE const ID3DBlob* GetBlob() const
 	{
-		return myShaderObject;
-	}
-	FORCEINLINE const unsigned char* GetBlob() const
-	{
-		return myBlob;
+		return myBlob.Get();
 	}
 	FORCEINLINE size_t GetBlobSize() const
 	{

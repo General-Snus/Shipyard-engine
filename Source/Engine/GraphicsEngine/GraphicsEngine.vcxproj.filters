@@ -35,7 +35,7 @@
     </ClInclude>
     <ClInclude Include="Rendering\Buffers\ConstantBuffer.h">
       <Filter>Header Files</Filter>
-    </ClInclude> 
+    </ClInclude>
     <ClInclude Include="Rendering\Vertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -177,12 +177,6 @@
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_GaussianBlur.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Rendering\ParticleRenderer\ParticleVertex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\ParticleRenderer\ParticleRenderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Rendering\InstanceRenderer\InstanceRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -237,6 +231,12 @@
     <ClInclude Include="Rendering\GpuResource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Rendering\ParticleRenderer\ParticleRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\ParticleRenderer\ParticleVertex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsEngine.pch.cpp">
@@ -253,7 +253,7 @@
     </ClCompile>
     <ClCompile Include="Rendering\Buffers\ConstantBuffer.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile> 
+    </ClCompile>
     <ClCompile Include="Rendering\Vertex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -314,12 +314,6 @@
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_GaussianBlur.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Rendering\ParticleRenderer\ParticleVertex.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Rendering\ParticleRenderer\ParticleRenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Rendering\InstanceRenderer\InstanceRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -338,6 +332,12 @@
     <ClCompile Include="Rendering\GpuResource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Rendering\ParticleRenderer\ParticleRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\ParticleRenderer\ParticleVertex.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Headers\ObjectBuffer.hlsli" />
@@ -350,6 +350,7 @@
     <None Include="Shaders\Headers\ParticleStruct.hlsli" />
     <None Include="Shaders\Headers\Tonemaps.hlsli" />
     <None Include="packages.config" />
+    <None Include="Shaders\Headers\SceneGraph.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\DefaultShaders\Default_VS.hlsl" />

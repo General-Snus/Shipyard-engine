@@ -1,8 +1,7 @@
-#include "AssetManager.pch.h"
 #include "../BaseAsset.h"
-#include <filesystem>
+#include "AssetManager.pch.h"
 
-#include <d3d11.h>
+
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 #include <wrl.h>
 

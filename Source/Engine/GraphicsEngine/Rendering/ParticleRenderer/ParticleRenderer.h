@@ -4,11 +4,11 @@ class ParticleRenderer
 	friend class GraphicsEngine;
 public:
 	void Init();
-	void Execute(); 
+	void Execute();
 private:
 
-	ComPtr<ID3D11VertexShader> vertexShader;
-	ComPtr<ID3D11GeometryShader> geometryShader;
-	ComPtr<ID3D11PixelShader> pixelShader;
+	ComPtr<ID3DBlob> vertexShader;
+	ComPtr<ID3DBlob> geometryShader;
+	ComPtr<ID3DBlob> pixelShader;
 };
 

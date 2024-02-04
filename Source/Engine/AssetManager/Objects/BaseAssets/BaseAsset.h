@@ -1,9 +1,8 @@
-#pragma once
-#include <d3d11.h>
+#pragma once 
 #include <Engine/GraphicsEngine/Rendering/Vertex.h>
 #include <filesystem>
-#include <functional>
-#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp> 
+#include  <functional>
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
 class Material;
 class AssetBase
 {

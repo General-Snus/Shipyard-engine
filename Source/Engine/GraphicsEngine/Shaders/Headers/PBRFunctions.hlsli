@@ -60,8 +60,6 @@ float3 CalculateSpecularLight(float3 specularColor, float3 normal, float3 camera
     const float3 directLightSpecular = (D * F * G) / B;
     
     return directLightSpecular;
-}
-
-#define definedPBR
+} 
 
 

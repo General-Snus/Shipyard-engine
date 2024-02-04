@@ -1,5 +1,5 @@
 #pragma once
-#include <d3d11.h>
+#include <DirectX/directx/d3d12.h>
 #include <Engine/GraphicsEngine/Objects/Shader.h>
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
@@ -11,8 +11,8 @@ struct DebugVertex
 	Vector4f Position = { 0,0,0,0 };
 	Vector4f Color = { 0,0,0,0 };
 
-	static const std::vector<D3D11_INPUT_ELEMENT_DESC> InputLayoutDescription;
-	static ComPtr<ID3D11InputLayout> InputLayout;
+	static const std::vector<D3D12_INPUT_ELEMENT_DESC> InputLayoutDescription;
+	//static ComPtr<ID3D11InputLayout> InputLayout;
 };
 
 class DebugDrawer
@@ -62,8 +62,8 @@ private:
 	std::unordered_map<size_t,float> myDebugLifetime;
 	size_t myNextIndex = 0;
 
-	ComPtr<ID3D11Buffer> myLineVertexBuffer;
-	ComPtr<ID3D11Buffer> myLineIndexBuffer;
+	ComPtr<ID3D12Resource> myLineVertexBuffer;
+	ComPtr<ID3D12Resource> myLineIndexBuffer;
 	size_t myNumLineIndices = 0;
 
 	std::shared_ptr<Shader> myLineVS;

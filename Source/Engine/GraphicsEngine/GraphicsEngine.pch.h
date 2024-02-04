@@ -9,8 +9,13 @@
 #define NOMINMAX 
 
 // add headers that you want to pre-compile here 
-#include <DirectX/directx/d3d12.h >  
-#include <DirectX/directx/d3dx12.h >  
+#include <DirectX/directx/d3d12.h>  
+#include <DirectX/directx/d3dx12.h>
+#include <DirectX/XTK/BufferHelpers.h>
+#include <DirectX/XTK/CommonStates.h>
+#include <DirectX/XTK/DirectXHelpers.h>
+#include <DirectX/XTK/GraphicsMemory.h>
+
 #include <Windows.h>
 #include "GraphicCommands/Commands/Headers/GfxCmd_Bloom.h"
 #include "GraphicCommands/Commands/Headers/GfxCmd_DebugLayer.h" 
@@ -30,8 +35,7 @@
 #include "GraphicCommands/Commands/Headers/GfxCmd_ToneMapPass.h"
 #include "GraphicCommands/GraphicCommands.h"
 #include "GraphicsEngine.h" 
-#include "InterOp/Helpers.h"
-#include "InterOp/RHI.h"
+#include "InterOp/Helpers.h" 
 #include "Objects/Shader.h" 
 #include "Rendering/Buffers/FrameBuffer.h"
 #include "Rendering/Buffers/G_buffer.h"
@@ -42,5 +46,5 @@
 #include "Rendering/Vertex.h" 
 #include "Shaders/Registers.h" 
 #include "Tools/Logging/Logging.h"
-#include "wrl/client.h" 
+#include "wrl/client.h"
 #endif //GRAPHICSENGINE_PCH

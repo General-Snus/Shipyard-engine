@@ -106,8 +106,8 @@ private:
 
 	//SSAO
 	std::shared_ptr<Texture> SSAOTexture;
-	ComPtr<ID3D11PixelShader> ScreenSpaceAmbienceOcclusion;
-	ComPtr<ID3D11PixelShader> EdgeBlur;
+	ComPtr<ID3DBlob> ScreenSpaceAmbienceOcclusion;
+	ComPtr<ID3DBlob> EdgeBlur;
 
 	//Defualtl
 	ComPtr<ID3DBlob> myVertexShader;
@@ -116,23 +116,23 @@ private:
 	std::shared_ptr<Shader> defaultPS;
 
 	//Particle
-	ComPtr<ID3D11VertexShader> particleVertexShader;
-	ComPtr<ID3D11GeometryShader> particleGeometryShader;
-	ComPtr<ID3D11PixelShader> particlePixelShader;
+	ComPtr<ID3DBlob> particleVertexShader;
+	ComPtr<ID3DBlob> particleGeometryShader;
+	ComPtr<ID3DBlob> particlePixelShader;
 
 
 	//Post-pro
-	ComPtr<ID3D11VertexShader> myScreenSpaceQuadShader;
-	ComPtr<ID3D11PixelShader> luminancePass;
-	ComPtr<ID3D11PixelShader> TonemapPass;
-	ComPtr<ID3D11PixelShader> copyShader;
-	ComPtr<ID3D11PixelShader> gaussShader;
-	ComPtr<ID3D11PixelShader> bloomShader;
+	ComPtr<ID3DBlob> myScreenSpaceQuadShader;
+	ComPtr<ID3DBlob> luminancePass;
+	ComPtr<ID3DBlob> TonemapPass;
+	ComPtr<ID3DBlob> copyShader;
+	ComPtr<ID3DBlob> gaussShader;
+	ComPtr<ID3DBlob> bloomShader;
 
 
 	//Debug
-	ComPtr<ID3D11Buffer> myLineVertexBuffer;
-	ComPtr<ID3D11Buffer> myLineIndexBuffer;
+	ComPtr<ID3D12Resource> myLineVertexBuffer;
+	ComPtr<ID3D12Resource> myLineIndexBuffer;
 	std::shared_ptr<Shader>  debugLineVS;
 	std::shared_ptr<Shader> debugLinePS;
 
@@ -148,18 +148,18 @@ private:
 	std::shared_ptr<Mesh> defaultMesh;
 	std::shared_ptr<Material> defaultMaterial;
 
-	ComPtr<ID3D11SamplerState> myDefaultSampleState;
-	ComPtr<ID3D11SamplerState> myShadowSampleState;
-	ComPtr<ID3D11SamplerState> myPointSampleState;
-	ComPtr<ID3D11SamplerState> myBRDFSampleState;
-	ComPtr<ID3D11SamplerState> myNormalDepthSampleState;
+	//ComPtr<ID3D11SamplerState> myDefaultSampleState;
+	//ComPtr<ID3D11SamplerState> myShadowSampleState;
+	//ComPtr<ID3D11SamplerState> myPointSampleState;
+	//ComPtr<ID3D11SamplerState> myBRDFSampleState;
+	//ComPtr<ID3D11SamplerState> myNormalDepthSampleState;
 
 
 
-	std::array<ComPtr<ID3D11DepthStencilState>,(int)eDepthStencilStates::DSS_COUNT> myDepthStencilStates;
+	//std::array<ComPtr<ID3D11DepthStencilState>,(int)eDepthStencilStates::DSS_COUNT> myDepthStencilStates;
 
-	ComPtr<ID3D11BlendState> AlphaBlendState;
-	ComPtr<ID3D11BlendState> AdditiveBlendState;
+	//ComPtr<ID3D11BlendState> AlphaBlendState;
+	//ComPtr<ID3D11BlendState> AdditiveBlendState;
 	ShadowRenderer myShadowRenderer;
 	ParticleRenderer myParticleRenderer;
 	InstanceRenderer myInstanceRenderer;
@@ -196,19 +196,9 @@ public:
 
 	void SetupPostProcessing();
 
-	/**
-	 * Prepares the next frame for rendering by resetting states and clearing all render targets.
-	 */
+	void Update();
 	void BeginFrame();
-
-	/**
-	 * Finishes a rendered frame and swaps the screen buffers to display it on screen.
-	 */
 	void EndFrame();
-
-	/**
-	 * Renders the current scene to the BackBuffer.
-	 */
 	void RenderFrame(float aDeltaTime,double aTotalTime);
 
 	void RenderTextureTo(eRenderTargets from,eRenderTargets to) const;
@@ -250,17 +240,17 @@ public:
 	FORCEINLINE std::shared_ptr<Shader> GetDefaultVSShader() const { return defaultVS; }
 	FORCEINLINE std::shared_ptr<Shader> GetDefaultPSShader() const { return defaultPS; }
 
-	FORCEINLINE ComPtr<ID3D11VertexShader> GetQuadShader() const { return myScreenSpaceQuadShader; }
-	FORCEINLINE ComPtr<ID3D11PixelShader> GetLuminanceShader() const { return luminancePass; }
-	FORCEINLINE ComPtr<ID3D11PixelShader> GetSSAOShader() const { return ScreenSpaceAmbienceOcclusion; }
-	FORCEINLINE ComPtr<ID3D11PixelShader> GetEdgeBlurShader() const { return EdgeBlur; }
-	FORCEINLINE ComPtr<ID3D11PixelShader> GetTonemap() const { return TonemapPass; }
-	FORCEINLINE ComPtr<ID3D11PixelShader> GetCopyShader() const { return copyShader; }
-	FORCEINLINE ComPtr<ID3D11PixelShader> GetGaussShader() const { return gaussShader; }
-	FORCEINLINE ComPtr<ID3D11PixelShader> GetBloomShader() const { return bloomShader; }
-	FORCEINLINE ComPtr<ID3D11VertexShader> GetParticleVSShader() const { return particleVertexShader; }
-	FORCEINLINE ComPtr<ID3D11GeometryShader> GetParticleGSShader() const { return particleGeometryShader; }
-	FORCEINLINE ComPtr<ID3D11PixelShader> GetParticlePSShader() const { return particlePixelShader; }
+	FORCEINLINE ComPtr<ID3DBlob> GetQuadShader() const { return myScreenSpaceQuadShader; }
+	FORCEINLINE ComPtr<ID3DBlob> GetLuminanceShader() const { return luminancePass; }
+	FORCEINLINE ComPtr<ID3DBlob> GetSSAOShader() const { return ScreenSpaceAmbienceOcclusion; }
+	FORCEINLINE ComPtr<ID3DBlob> GetEdgeBlurShader() const { return EdgeBlur; }
+	FORCEINLINE ComPtr<ID3DBlob> GetTonemap() const { return TonemapPass; }
+	FORCEINLINE ComPtr<ID3DBlob> GetCopyShader() const { return copyShader; }
+	FORCEINLINE ComPtr<ID3DBlob> GetGaussShader() const { return gaussShader; }
+	FORCEINLINE ComPtr<ID3DBlob> GetBloomShader() const { return bloomShader; }
+	FORCEINLINE ComPtr<ID3DBlob> GetParticleVSShader() const { return particleVertexShader; }
+	FORCEINLINE ComPtr<ID3DBlob> GetParticleGSShader() const { return particleGeometryShader; }
+	FORCEINLINE ComPtr<ID3DBlob> GetParticlePSShader() const { return particlePixelShader; }
 
 	/*FORCEINLINE ComPtr<ID3D11DeviceChild> GetShader(eShader type) const
 	{
@@ -342,8 +332,8 @@ public:
 	FORCEINLINE std::shared_ptr< Shader> GetDebugLineVS() const { return debugLineVS; }
 	FORCEINLINE std::shared_ptr< Shader> GetDebugLinePS() const { return debugLinePS; }
 
-	FORCEINLINE ComPtr<ID3D11BlendState> GetAlphaBlendState() const { return AlphaBlendState; }
-	FORCEINLINE ComPtr<ID3D11BlendState> GetAdditiveBlendState() const { return AdditiveBlendState; }
+	//FORCEINLINE ComPtr<ID3D11BlendState> GetAlphaBlendState() const { return AlphaBlendState; }
+	//FORCEINLINE ComPtr<ID3D11BlendState> GetAdditiveBlendState() const { return AdditiveBlendState; }
 
 	FORCEINLINE std::shared_ptr<Material> GetDefaultMaterial() const { return defaultMaterial; }
 	FORCEINLINE std::shared_ptr<TextureHolder> GetDefaultTexture(eTextureType type) const

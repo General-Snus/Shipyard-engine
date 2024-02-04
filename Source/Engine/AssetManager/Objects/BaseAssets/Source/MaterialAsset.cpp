@@ -1,10 +1,5 @@
-#include "AssetManager.pch.h"
-
-#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
-#include <Engine/GraphicsEngine/Shaders/Registers.h>
-#include <fstream>
-#include <Tools/ThirdParty/nlohmann/json.hpp>
-#include "../MaterialAsset.h"
+#include "AssetManager.pch.h" 
+#include <Engine/GraphicsEngine/Shaders/Registers.h> 
 
 bool Material::CreateJson(const DataMaterial& data,const std::filesystem::path& writePath)
 {

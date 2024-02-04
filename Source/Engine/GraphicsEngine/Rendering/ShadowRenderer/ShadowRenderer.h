@@ -9,7 +9,7 @@ public:
 	void ResetShadowList();
 private:
 
-	ComPtr<ID3D11VertexShader> myVertexShader;
+	ComPtr<ID3DBlob> myVertexShader;
 	GraphicsCommandList ShadowCommandList;
 };
 
