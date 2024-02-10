@@ -8,5 +8,5 @@ GfxCmd_SetRenderTarget::GfxCmd_SetRenderTarget(const Texture* aRenderTarget,cons
 
 void GfxCmd_SetRenderTarget::ExecuteAndDestroy()
 {
-	RHI::SetRenderTarget(renderTarget,depthStencil);
+	//RHI::SetRenderTarget(renderTarget,depthStencil);
 }

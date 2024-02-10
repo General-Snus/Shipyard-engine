@@ -183,10 +183,10 @@ public:
 
 
 	static inline GPUSupport m_DeviceSupport;
-	static D3D12_VIEWPORT m_Viewport;
-	static D3D12_RECT m_ScissorRect;
-	static Texture* outBackBuffer;
-	static Texture* outDepthBuffer;
+	static inline D3D12_VIEWPORT m_Viewport;
+	static inline D3D12_RECT m_ScissorRect;
+	static inline Texture* m_BackBuffer;
+	static inline Texture* m_DepthBuffer;
 
 private:
 };

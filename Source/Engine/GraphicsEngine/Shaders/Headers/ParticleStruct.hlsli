@@ -1,4 +1,6 @@
-
+#include "../Registers.h" 
+#ifndef ParticleSTRUCTS
+#define ParticleSTRUCTS
 struct ParticlePixelOutput
 {
     float4 Color : SV_TARGET; // carry till geo 
@@ -21,3 +23,4 @@ struct ParticleVertexData
     float3 Scale : SCALE;
     float LifeTime : LIFETIME;
 };
+#endif

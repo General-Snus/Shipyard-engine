@@ -43,6 +43,7 @@
 #include "Rendering/Buffers/LineBuffer.h"
 #include "Rendering/Buffers/ObjectBuffer.h"
 #include "Rendering/ParticleRenderer/ParticleVertex.h" 
+#include "Rendering/Texture.h" 
 #include "Rendering/Vertex.h" 
 #include "Shaders/Registers.h" 
 #include "Tools/Logging/Logging.h"

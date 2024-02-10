@@ -79,7 +79,7 @@ void cCamera::Update()
 	//UpdatePositionVectors();
 	const float mdf = cameraSpeed;
 	const float rotationSpeed = 20000;
-	myScreenSize = Vector2<int>(RHI::GetDeviceSize().Width,RHI::GetDeviceSize().Height);
+	myScreenSize = Editor::GetViewportResolution();
 
 	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::UP))
 	{
@@ -97,8 +97,8 @@ void cCamera::Update()
 			static_cast<float>(InputHandler::GetInstance().GetMousePositionDelta().y),
 			-static_cast<float>(InputHandler::GetInstance().GetMousePositionDelta().x),
 			0.0f
-		}; 
-		myTransform.Rotate(mouseDeltaVector * rotationSpeed  * Timer::GetInstance().GetDeltaTime());
+		};
+		myTransform.Rotate(mouseDeltaVector * rotationSpeed * Timer::GetInstance().GetDeltaTime());
 	}
 
 	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::W))
@@ -172,12 +172,12 @@ std::array<Vector4f,4> cCamera::GetFrustrumCorners() const
 Vector3f cCamera::GetPointerDirection(const Vector2<int> position)
 {
 	Vector4f viewPosition;
-	RHI::DeviceSize size = RHI::GetDeviceSize();
+	auto size = Editor::GetViewportResolution();
 
-	viewPosition.x = ((2.0f * position.x / size.Width) - 1);
+	viewPosition.x = ((2.0f * position.x / size.x) - 1);
 	viewPosition /= myClipMatrix(1,1);
 
-	viewPosition.y = ((-2.0f * position.y / size.Height) - 1);
+	viewPosition.y = ((-2.0f * position.y / size.y) - 1);
 	viewPosition /= myClipMatrix(2,2);
 
 	viewPosition.z = 1;

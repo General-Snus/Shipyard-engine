@@ -28,7 +28,7 @@ void GfxCmd_RenderSkeletalMesh::ExecuteAndDestroy()
 		objectBuffer.Data.myBoneTransforms[i] = myBoneTransforms[i];
 	}
 
-	RHI::UpdateConstantBufferData(objectBuffer);
+	//RHI::UpdateConstantBufferData(objectBuffer);
 	G_Buffer& gBuffer = GetGBuffer();
 	gBuffer.UseGBufferShader();
 	//GetInstanceRenderer().AddInstance( myRenderData);

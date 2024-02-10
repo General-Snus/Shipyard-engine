@@ -13,13 +13,17 @@
 #include <assimp/Importer.hpp>      // C++ importer interface 
 #include <assimp/postprocess.h>     // Post processing flags
 #include <assimp/scene.h>           // Output data structure
+#include <cassert>
+#include <cmath>  
 #include <filesystem>  
 #include <fstream>
 #include <functional> 
-#include <iostream> 
+#include <iostream>  
 #include <memory>
+#include <random>
 #include <ranges>
 #include <Tools/ThirdParty/nlohmann/json.hpp>
+#include <typeinfo> 
 #include <unordered_map>
 #include <vector>
 
@@ -51,6 +55,7 @@
 #include "Objects/BaseAssets/MaterialAsset.h"
 #include "Objects/BaseAssets/MeshAsset.h"
 #include "Objects/BaseAssets/TextureAsset.h" 
+#include "Objects\BaseAssets\ColliderAsset.h"
 
 #include "ComponentSystem/Component.h" 
 #include "ComponentSystem/ComponentManager.h"

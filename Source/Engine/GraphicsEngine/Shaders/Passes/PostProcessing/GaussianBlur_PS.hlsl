@@ -9,7 +9,7 @@ PostProcessPixelOutput main(BRDF_VS_to_PS input)
     const float Quality = 4.0f;
     const float Radius = 2.0f;
     
-    const float2 rad = Radius / FB_ScreenResolution;
+    const float2 rad = Radius /g_FrameBuffer.FB_ScreenResolution;
 
     float4 color = Target0_Texture.Sample(defaultSampler, input.UV);
     

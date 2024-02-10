@@ -23,8 +23,8 @@ void GfxCmd_RenderSkeletalMeshShadow::ExecuteAndDestroy()
 	{
 		objectBuffer.Data.myBoneTransforms[i] = myBoneTransforms[i];
 	}
-	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER,REG_ObjectBuffer,objectBuffer);
-	RHI::UpdateConstantBufferData(objectBuffer);
+	/*RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER,REG_ObjectBuffer,objectBuffer);
+	RHI::UpdateConstantBufferData(objectBuffer);*/
 	//GetInstanceRenderer().AddInstance(myRenderData);
 	for (const auto& aElement : myRenderData->myMesh->Elements)
 	{

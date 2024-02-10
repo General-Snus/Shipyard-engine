@@ -13,22 +13,22 @@ PostProcessPixelOutput main(BRDF_VS_to_PS input)
 {
     PostProcessPixelOutput result;
      
-    const float intensity = GSB_AO_intensity;
-    const float scale = GSB_AO_scale;
-    const float bias = GSB_AO_bias;
-    const float radius = GSB_AO_radius;
-    const float offset = GSB_AO_offset;
+    const float intensity = g_GraphicsSettings.GSB_AO_intensity;
+    const float scale = g_GraphicsSettings.GSB_AO_scale;
+    const float bias = g_GraphicsSettings.GSB_AO_bias;
+    const float radius = g_GraphicsSettings.GSB_AO_radius;
+    const float offset = g_GraphicsSettings.GSB_AO_offset;
     
     int noiseWidth = 0;
     int noiseHeight = 0;
     int numMips = 0;
     Noise_Texture.GetDimensions(0, noiseWidth, noiseHeight, numMips);
     
-    const float2 randomUVScale = FB_ScreenResolution / float2(noiseWidth, noiseHeight);
+    const float2 randomUVScale = g_FrameBuffer.FB_ScreenResolution / float2(noiseWidth, noiseHeight);
     const float2 random = GetRandom(input.UV, randomUVScale);
     const float4 pxPos = GetViewPosition(input.UV);
     const float4 pxNorm = GetViewNormal(input.UV);
-    const float2 frustrumCorners[4] = {FB_FrustrumCorners[0].xy, FB_FrustrumCorners[1].xy, FB_FrustrumCorners[2].xy, FB_FrustrumCorners[3].xy};
+    const float2 frustrumCorners[4] = {g_FrameBuffer.FB_FrustrumCorners[0].xy, g_FrameBuffer.FB_FrustrumCorners[1].xy, g_FrameBuffer.FB_FrustrumCorners[2].xy, g_FrameBuffer.FB_FrustrumCorners[3].xy};
     //const float2 frustrumCorners[4] = {float2(1, 0), float2(-1, 0), float2(0, 1), float2(0, -1)};
     
     float occlusion = 0.0f;  

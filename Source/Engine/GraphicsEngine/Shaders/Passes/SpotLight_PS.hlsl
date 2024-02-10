@@ -20,7 +20,7 @@ float LinearizeDepth(float depth)
 {
     
     float near_plane = .1f;
-    float far_plane = mySpotLight.Range;
+    float far_plane = g_lightBuffer.mySpotLight.Range;
     
     float z = depth * 2.0 - 1.0; // Back to NDC 
     return (2.0 * near_plane * far_plane) / (far_plane + near_plane - z * (far_plane - near_plane));
@@ -28,19 +28,19 @@ float LinearizeDepth(float depth)
 
 float3 CalculateSpotLight(float3 diffuseColor, float3 specularColor, float4 worldPosition, float3 normal, float3 cameraDirection, float roughness, float shine)
 {
-    float3 RayFromSpot = (mySpotLight.Position - worldPosition.xyz);
+    float3 RayFromSpot = (g_lightBuffer.mySpotLight.Position - worldPosition.xyz);
     const float dist = length(RayFromSpot);
     RayFromSpot = normalize(RayFromSpot);
     const float3 halfAngle = normalize(normalize(cameraDirection) + RayFromSpot);
-    const float3 spotlightDirection = normalize(mySpotLight.Direction);
+    const float3 spotlightDirection = normalize(g_lightBuffer.mySpotLight.Direction);
     
     const float spectatorAngle = dot(spotlightDirection, -RayFromSpot);
-    const float umbralAngle = cos(clamp(mySpotLight.OuterConeAngle / 2, 0.001f, PI));
-    const float penumbralAngle = cos(clamp(mySpotLight.InnerConeAngle / 2, 0.001f, PI - umbralAngle));
+    const float umbralAngle = cos(clamp(g_lightBuffer.mySpotLight.OuterConeAngle / 2, 0.001f, PI));
+    const float penumbralAngle = cos(clamp(g_lightBuffer.mySpotLight.InnerConeAngle / 2, 0.001f, PI - umbralAngle));
     const float conalAtt = spotFallof(spectatorAngle, umbralAngle, penumbralAngle);
     
   //  const float3 Attenuation = 1 - saturate(pow(dist * pow(max(spotLightData.Range, 0.000001f), -1), 2));
-    const float3 Attenuation = conalAtt / pow(max(dist, mySpotLight.Range), 2); //REFACTOR: PHYSICS i hate this
+    const float3 Attenuation = conalAtt / pow(max(dist, g_lightBuffer.mySpotLight.Range), 2); //REFACTOR: PHYSICS i hate this
       
     float3 directLightSpecular = CalculateSpecularLight(specularColor, normal, cameraDirection, RayFromSpot, halfAngle, roughness);
     float3 directLightDiffuse = CalculateDiffuseLight(diffuseColor);
@@ -48,11 +48,11 @@ float3 CalculateSpotLight(float3 diffuseColor, float3 specularColor, float4 worl
     
     const float NdotL = saturate(dot(RayFromSpot, normal));
     const float solidAngle = 2 * PI * (1 - .5f * (penumbralAngle + umbralAngle)); // Solid angle of a cone
-    const float radiantIntensity = mySpotLight.Power / solidAngle; // Arbitrary conversion from watts
+    const float radiantIntensity = g_lightBuffer.mySpotLight.Power / solidAngle; // Arbitrary conversion from watts
     
     
-    const float4x4 lightView = mySpotLight.lightView;
-    const float4x4 lightProj = mySpotLight.projection;
+    const float4x4 lightView = g_lightBuffer.mySpotLight.lightView;
+    const float4x4 lightProj = g_lightBuffer.mySpotLight.projection;
     
     float4 lightSpacePos = mul(lightView, worldPosition);
     lightSpacePos = mul(lightProj, lightSpacePos);
@@ -84,7 +84,7 @@ float3 CalculateSpotLight(float3 diffuseColor, float3 specularColor, float4 worl
     const float shadow = sum / 16.0;
     
     
-    return shadow * saturate(directLightDiffuse + directLightSpecular) * NdotL * Attenuation * radiantIntensity * normalize(mySpotLight.Color);
+    return shadow * saturate(directLightDiffuse + directLightSpecular) * NdotL * Attenuation * radiantIntensity * normalize(g_lightBuffer.mySpotLight.Color);
     //saturate(directLightDiffuse + directLightSpecular) * NdotL * Attenuation * radiantIntensity * spotLightData.Color;
 }
 
@@ -102,13 +102,13 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     const float roughness = Material.g;
     const float occlusion = Material.r;
     
-    const float3 cameraDirection = normalize(FB_CameraPosition.xyz - worldPosition.xyz);
+    const float3 cameraDirection = normalize(g_FrameBuffer.FB_CameraPosition.xyz - worldPosition.xyz);
     const float3 diffuseColor = lerp((float3)0.0f, albedo.rgb, 1 - metallic);
     const float3 specularColor = lerp((float3)0.04f, albedo.rgb, metallic);
      
     float3 totalSpotLightContribution = 0;
         [flatten]
-    if(mySpotLight.Power > 0)
+    if(g_lightBuffer.mySpotLight.Power > 0)
     {
         totalSpotLightContribution += CalculateSpotLight(
             diffuseColor,
@@ -117,7 +117,7 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
             Normal.xyz,
             cameraDirection,
             roughness,
-            DefaultMaterial.Shine            
+            g_defaultMaterial.DefaultMaterial.Shine            
             );
     }
    

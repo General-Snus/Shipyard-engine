@@ -1,7 +1,7 @@
-#ifndef COMMON
-#define COMMON
 #include "../Registers.h" 
 
+#ifndef COMMON
+#define COMMON
 
 static const float PI = 3.14159265f;
 float3 PositionInBound(float3 aMin, float3 aMax, float3 aPosition)
@@ -26,10 +26,8 @@ float3 LinearToGamma(float3 aColor)
 }
 
 float2 Hammersley(float i, float numSamples)
-{
-    
+{    
     uint b = uint(i);
-
     b = (b << 16u) | (b >> 16u);
     b = ((b & 0x55555555u) << 1u) | ((b & 0xAAAAAAAAu) >> 1u);
     b = ((b & 0x33333333u) << 2u) | ((b & 0xCCCCCCCCu) >> 2u);

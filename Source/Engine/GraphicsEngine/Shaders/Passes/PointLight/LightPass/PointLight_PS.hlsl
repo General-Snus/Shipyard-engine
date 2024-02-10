@@ -3,7 +3,7 @@
 #include "../../../Registers.h" 
  
 
-float3 CalculatePointLight(float3 diffuseColor, float3 specularColor, float4 worldPosition, float3 normal, float3 cameraDirection, PointLight pointLightData, float roughness, float shine)
+float3 CalculatePointLight(float3 diffuseColor, float3 specularColor, float4 worldPosition, float3 normal, float3 cameraDirection, hlslPointLight pointLightData, float roughness, float shine)
 {
     float3 lightDirection = (pointLightData.Position - worldPosition.xyz);
     const float distance = length(lightDirection);
@@ -16,7 +16,7 @@ float3 CalculatePointLight(float3 diffuseColor, float3 specularColor, float4 wor
     const float quadraticAtt = 8.9 * pow(distance, -0.5);
     
     //const float3 Attenuation = 1 / (constantAtt + distance * (linearAtt + quadraticAtt * distance));
-    const float3 Attenuation = 1 / pow(max(distance, myPointLight.Range), 2);
+    const float3 Attenuation = 1 / pow(max(distance, g_lightBuffer.myPointLight.Range), 2);
     
     float3 directLightSpecular = CalculateSpecularLight(specularColor, normal, cameraDirection, lightDirection, halfAngle, roughness);
     float3 directLightDiffuse = CalculateDiffuseLight(diffuseColor);
@@ -24,8 +24,8 @@ float3 CalculatePointLight(float3 diffuseColor, float3 specularColor, float4 wor
     
     const float NdotL = dot(lightDirection, normal);
     
-    const float4x4 lightView = myPointLight.lightView;
-    const float4x4 lightProj = myPointLight.projection;
+    const float4x4 lightView = g_lightBuffer.myPointLight.lightView;
+    const float4x4 lightProj = g_lightBuffer.myPointLight.projection;
     
     float4 lightSpacePos = mul(lightView, worldPosition);
     lightSpacePos = mul(lightProj, lightSpacePos);
@@ -77,14 +77,14 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     const float roughness = Material.g;
     const float occlusion = Material.r;
     
-    const float3 cameraDirection = normalize(FB_CameraPosition.xyz - worldPosition.xyz);
+    const float3 cameraDirection = normalize(g_FrameBuffer.FB_CameraPosition.xyz - worldPosition.xyz);
     const float3 diffuseColor = lerp((float3)0.0f, albedo.rgb, 1 - metallic);
     const float3 specularColor = lerp((float3)0.04f, albedo.rgb, metallic);
     
     float3 totalPointLightContribution = 0;
      
         [flatten]
-    if(myPointLight.Power > 0)
+    if(g_lightBuffer.myPointLight.Power > 0)
     {
         totalPointLightContribution += CalculatePointLight(
             diffuseColor,
@@ -92,9 +92,9 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
             worldPosition,
             Normal.xyz,
             cameraDirection,
-            myPointLight,
+            g_lightBuffer.myPointLight,
             roughness,
-            DefaultMaterial.Shine            
+            g_defaultMaterial.DefaultMaterial.Shine            
             );
     }
    

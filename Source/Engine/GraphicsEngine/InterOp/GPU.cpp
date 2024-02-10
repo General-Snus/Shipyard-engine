@@ -171,7 +171,7 @@ void GPUCommandQueue::Flush()
 
 bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,Texture* aBackBuffer,Texture* aDepthBuffer)
 {
-	aWindowHandle; enableDeviceDebug; outBackBuffer = aBackBuffer; outDepthBuffer = aDepthBuffer;
+	aWindowHandle; enableDeviceDebug; m_BackBuffer = aBackBuffer; m_DepthBuffer = aDepthBuffer;
 
 	m_Swapchain = std::make_unique<GPUSwapchain>();
 	m_CommandQueue = std::make_unique<GPUCommandQueue>();
@@ -441,7 +441,7 @@ bool GPU::CreateDepthStencil(D3D12_DEPTH_STENCIL_DESC depthStencilDesc)
 
 void GPU::ResizeDepthBuffer(unsigned width,unsigned height)
 {
-	if (outDepthBuffer->IsValid())
+	if (m_DepthBuffer->IsValid())
 	{
 		// Flush any GPU commands that might be referencing the depth buffer.
 		m_CommandQueue->Flush();
@@ -464,7 +464,7 @@ void GPU::ResizeDepthBuffer(unsigned width,unsigned height)
 			&resourceDesc,
 			D3D12_RESOURCE_STATE_GENERIC_READ,
 			nullptr,
-			IID_PPV_ARGS(&outDepthBuffer->m_pResource)
+			IID_PPV_ARGS(&m_DepthBuffer->m_pResource)
 		));
 		// Update the depth-stencil view.
 		D3D12_DEPTH_STENCIL_VIEW_DESC dsv = {};
@@ -473,7 +473,7 @@ void GPU::ResizeDepthBuffer(unsigned width,unsigned height)
 		dsv.Texture2D.MipSlice = 0;
 		dsv.Flags = D3D12_DSV_FLAG_NONE;
 
-		m_Device->CreateDepthStencilView(outDepthBuffer->GetResource(),&dsv,
+		m_Device->CreateDepthStencilView(m_DepthBuffer->GetResource(),&dsv,
 			m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
 	}
 }
@@ -555,7 +555,7 @@ ComPtr<ID3D12Resource> GPU::GetCurrentRenderTargetView()
 
 ComPtr<ID3D12Resource> GPU::GetCurrentBackBuffer()
 {
-	return outBackBuffer->GetResource();//todo fix
+	return m_BackBuffer->GetResource();//todo fix
 }
 
 ComPtr<ID3D12DescriptorHeap>  GPU::CreateDescriptorHeap(ComPtr<ID3D12Device> device,D3D12_DESCRIPTOR_HEAP_TYPE type,uint32_t numDescriptors)

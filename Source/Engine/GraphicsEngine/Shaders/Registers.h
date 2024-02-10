@@ -1,4 +1,7 @@
 //General Graphics settings
+#ifndef Registry
+#define Registry
+
 
 #define defaultTextureFormat DXGI_FORMAT_R16G16B16A16_FLOAT
 //DXGI_FORMAT_R32G32B32A32_FLOAT
@@ -92,4 +95,6 @@
 #define REG_Noise_Texture 126  
 
 #define HLSL_REG_BRDF_LUT_Texture t127
-#define REG_BRDF_LUT_Texture 127  
+#define REG_BRDF_LUT_Texture 127
+
+#endif

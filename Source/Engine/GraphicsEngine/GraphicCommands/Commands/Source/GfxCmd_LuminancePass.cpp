@@ -1,6 +1,6 @@
 #include "GraphicsEngine.pch.h"
-#include "../Headers/GfxCmd_LuminancePass.h"
 #include <Tools/ImGui/ImGui/imgui.h>
+#include "../Headers/GfxCmd_LuminancePass.h"
 
 GfxCmd_LuminancePass::GfxCmd_LuminancePass()
 {
@@ -8,11 +8,11 @@ GfxCmd_LuminancePass::GfxCmd_LuminancePass()
 
 void GfxCmd_LuminancePass::ExecuteAndDestroy()
 {
-	RHI::SetVertexShader(GraphicsEngine::Get().GetQuadShader());
-	RHI::SetPixelShader(GraphicsEngine::Get().GetLuminanceShader()); 
+	/*RHI::SetVertexShader(GraphicsEngine::Get().GetQuadShader());
+	RHI::SetPixelShader(GraphicsEngine::Get().GetLuminanceShader());
 
 
-	GraphicsEngine::Get().RenderTextureTo(eRenderTargets::SceneBuffer, eRenderTargets::IntermediateA);
+	GraphicsEngine::Get().RenderTextureTo(eRenderTargets::SceneBuffer, eRenderTargets::IntermediateA);*/
 
 	//RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_Target0,nullptr);
 	//RHI::SetRenderTarget(GraphicsEngine::Get().GetTargetTextures(eRenderTargets::IntermediateA).get(),nullptr);

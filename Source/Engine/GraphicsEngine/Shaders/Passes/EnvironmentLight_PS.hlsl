@@ -27,7 +27,7 @@ float roughness,
 float4 worldPosition
 )
 {
-    const float3 directionToLight = -myDirectionalLight.Direction.xyz;
+    const float3 directionToLight = -g_lightBuffer.myDirectionalLight.Direction.xyz;
     const float3 halfAngle = normalize(cameraDirection + directionToLight);
     const float NdotL = saturate(dot(normal, directionToLight));
     const float K = pow(roughness + 1, 2) / 8;
@@ -36,8 +36,8 @@ float4 worldPosition
     float3 directLightDiffuse = CalculateDiffuseLight(diffuseColor);
     directLightDiffuse *= (1.0f - directLightSpecular);
     
-    const float4x4 lightView = myDirectionalLight.lightView;
-    const float4x4 lightProj = myDirectionalLight.projection;
+    const float4x4 lightView = g_lightBuffer.myDirectionalLight.lightView;
+    const float4x4 lightProj = g_lightBuffer.myDirectionalLight.projection;
     
     float4 lightSpacePos = mul(lightView, worldPosition);
     lightSpacePos = mul(lightProj, lightSpacePos);
@@ -71,7 +71,7 @@ float4 worldPosition
    const float shadow = sum / 16.0;
     
     const float ShadowStrength = 1;
-    return ShadowStrength * shadow * saturate(directLightDiffuse + directLightSpecular) * myDirectionalLight.Color * myDirectionalLight.Power * NdotL;
+    return ShadowStrength * shadow * saturate(directLightDiffuse + directLightSpecular) * g_lightBuffer.myDirectionalLight.Color * g_lightBuffer.myDirectionalLight.Power * NdotL;
 }
 
 
@@ -90,7 +90,7 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     const float roughness = Material.g;
     const float occlusion = Material.r * SSAOMap.Sample(defaultSampler, uv).r;
     
-    const float3 cameraDirection = normalize(FB_CameraPosition.xyz - worldPosition.xyz);
+    const float3 cameraDirection = normalize(g_FrameBuffer.FB_CameraPosition.xyz - worldPosition.xyz);
     const float3 diffuseColor = lerp((float3)0.0f, albedo.rgb, 1 - metallic);
     const float3 specularColor = lerp((float3)0.04f, albedo.rgb, metallic);
     

@@ -1,8 +1,5 @@
-#include "GraphicsEngine.pch.h"
-#include <DirectX/XTK/DDSTextureLoader.h>
-#include "Texture.h"
-
-#include "Shaders/Headers/ShaderStructs.hlsli"
+#include <DirectX/XTK/DDSTextureLoader.h> 
+#include "GraphicsEngine.pch.h" 
 
 
 bool Texture::CreateDDSFromMemory(const void* filePtr,size_t fileSize,bool sRGB)
@@ -22,4 +19,4 @@ bool Texture::CreateDDSFromMemory(const void* filePtr,size_t fileSize,bool sRGB)
 	texture2DRange.RegisterSpace = 1;
 
 	return SUCCEEDED(true);
-}
+};

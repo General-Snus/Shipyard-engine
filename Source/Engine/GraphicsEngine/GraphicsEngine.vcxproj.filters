@@ -237,6 +237,9 @@
     <ClInclude Include="Rendering\ParticleRenderer\ParticleVertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="InterOp\RHI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsEngine.pch.cpp">
@@ -336,6 +339,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\ParticleRenderer\ParticleVertex.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InterOp\RHI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

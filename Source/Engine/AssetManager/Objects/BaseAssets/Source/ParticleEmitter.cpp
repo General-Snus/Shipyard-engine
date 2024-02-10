@@ -1,8 +1,4 @@
 #include <AssetManager.pch.h>
-#include <cassert>
-#include <cmath> 
-#include <iostream>
-#include <random>
 #include <Tools/Utilities/Math.hpp>
 #include "../ParticleEmitter.h"
 
@@ -16,9 +12,6 @@ void ParticleEmitter::InitParticle(Particlevertex& vertex) const
 	vertex.Lifetime = 0;
 	vertex.Position = settings.StartPosition;
 	vertex.Scale = settings.StartSize;
-
-
-
 	vertex.Velocity = settings.StartVelocity;
 }
 
@@ -54,12 +47,12 @@ ParticleEmitter::ParticleEmitter(const ParticleEmitterTemplate& aTemplate) : Ass
 		part.Lifetime = settings.LifeTime + 1;
 	}
 
-	if (!RHI::CreateDynamicVertexBuffer(vertexBuffer,particles.size(),sizeof(Particlevertex)))
+	//if (!RHI::CreateDynamicVertexBuffer(vertexBuffer,particles.size(),sizeof(Particlevertex)))
 	{
 		std::cout << "Failed to create vertex buffer" << std::endl;
 		return;
 	}
-	stride = sizeof(Particlevertex);
+	//stride = sizeof(Particlevertex);
 }
 
 void ParticleEmitter::Init()
@@ -99,49 +92,49 @@ void ParticleEmitter::Update(float aDeltaTime)
 void ParticleEmitter::Draw()
 {
 	SetAsResource();
-	RHI::Draw(static_cast<unsigned int>(particles.size()));
+	//RHI::Draw(static_cast<unsigned int>(particles.size()));
 }
 
 void ParticleEmitter::SetAsResource() const
 {
-	auto result = ((HRESULT)1L);
+	//auto result = ((HRESULT)1L);
 
-	D3D11_MAPPED_SUBRESOURCE bufferData;
-	ZeroMemory(&bufferData,sizeof(D3D11_MAPPED_SUBRESOURCE));
+	//D3D11_MAPPED_SUBRESOURCE bufferData;
+	//ZeroMemory(&bufferData,sizeof(D3D11_MAPPED_SUBRESOURCE));
 
-	result = RHI::Context->Map(
-		vertexBuffer.Get(),
-		0,
-		D3D11_MAP_WRITE_DISCARD,
-		0,
-		&bufferData);
+	//result = RHI::Context->Map(
+	//	vertexBuffer.Get(),
+	//	0,
+	//	D3D11_MAP_WRITE_DISCARD,
+	//	0,
+	//	&bufferData);
 
-	if (FAILED(result))
-	{
-		Logger::Log("Failed to create vertex buffer for particle emitter");
-		assert(false);
-	}
+	//if (FAILED(result))
+	//{
+	//	Logger::Log("Failed to create vertex buffer for particle emitter");
+	//	assert(false);
+	//}
 
-	memcpy_s(
-		bufferData.pData,
-		sizeof(Particlevertex) * particles.size(),
-		&particles[0],
-		sizeof(Particlevertex) * particles.size()
-	);
+	//memcpy_s(
+	//	bufferData.pData,
+	//	sizeof(Particlevertex) * particles.size(),
+	//	&particles[0],
+	//	sizeof(Particlevertex) * particles.size()
+	//);
 
-	RHI::Context->Unmap(vertexBuffer.Get(),0);
+	//RHI::Context->Unmap(vertexBuffer.Get(),0);
 
-	/*RHI::ConfigureInputAssembler
-	(
-		primitiveTopology,
-		vertexBuffer,
-		nullptr,
-		stride,
-		Particlevertex::InputLayout
-	);*/
+	///*RHI::ConfigureInputAssembler
+	//(
+	//	primitiveTopology,
+	//	vertexBuffer,
+	//	nullptr,
+	//	stride,
+	//	Particlevertex::InputLayout
+	//);*/
 
-	if (texture->isLoadedComplete)
-	{
-		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_colorMap,texture->GetRawTexture().get());
-	}
+	//if (texture->isLoadedComplete)
+	//{
+	//	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_colorMap,texture->GetRawTexture().get());
+	//}
 }

@@ -1,7 +1,7 @@
-#ifndef SCENEGRAPH
-#define SCENEGRAPH
 #include "ShaderStructs.hlsli"
-
+#include "../Registers.h" 
+#ifndef SCENEGRAPH
+#define SCENEGRAPH 
 
 struct Mesh
 {
@@ -16,9 +16,4 @@ struct Mesh
     uint meshletTrianglesOffset;
     uint meshletCount;
 };
-Mesh GetMeshData(uint meshIdx)
-{
-    StructuredBuffer<Mesh> meshes = ResourceDescriptorHeap[meshIdx];
-    return meshes[meshIdx];
-}
 #endif

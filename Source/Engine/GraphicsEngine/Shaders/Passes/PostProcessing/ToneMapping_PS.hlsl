@@ -6,7 +6,7 @@ PostProcessPixelOutput main(BRDF_VS_to_PS input)
 {
     PostProcessPixelOutput output; 
     const float3 color = Target01_Texture.Sample(defaultSampler, input.UV).rgb;
-    switch(GSB_ToneMap)
+    switch(g_GraphicsSettings.GSB_ToneMap)
     {
         default:
             output.Color.rgb = LinearToGamma(color.rgb);

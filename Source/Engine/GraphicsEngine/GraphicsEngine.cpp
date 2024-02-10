@@ -609,14 +609,14 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 
 	FLOAT clearColor[] = { 0.4f, 0.6f, 0.9f, 1.0f };
 
-	GPU::ClearRTV(commandList,GPU::outBackBuffer->GetSRV(),clearColor);
+	GPU::ClearRTV(commandList,GPU::m_BackBuffer->GetSRV(),clearColor);
 	GPU::ClearDepth(commandList,dsv);
 
 	commandList->SetPipelineState(GPU::m_PipeLineState.Get());
 	commandList->SetGraphicsRootSignature(GPU::m_RootSignature.Get());
 	commandList->RSSetViewports(1,&GPU::m_Viewport);
 	commandList->RSSetScissorRects(1,&GPU::m_ScissorRect);
-	commandList->OMSetRenderTargets(1,&GPU::outBackBuffer->GetSRV(),FALSE,&dsv);
+	commandList->OMSetRenderTargets(1,&GPU::m_BackBuffer->GetSRV(),FALSE,&dsv);
 
 
 	OPTICK_EVENT();

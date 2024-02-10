@@ -905,17 +905,17 @@ void ScriptGraphEditor::Init()
 	//TODO: Comment this out if you don't want to use the node header image.
 	//Otherwise change it to be your own texture loader from memory.
 	myNodeHeaderTexture = std::make_shared<Texture>();
-	RHI::LoadTextureFromMemory(myNodeHeaderTexture.get(),L"NodeGradientHeader",BuiltIn_ScriptGraphNodeGradient_ByteCode,sizeof(BuiltIn_ScriptGraphNodeGradient_ByteCode));
+	//RHI::LoadTextureFromMemory(myNodeHeaderTexture.get(),L"NodeGradientHeader",BuiltIn_ScriptGraphNodeGradient_ByteCode,sizeof(BuiltIn_ScriptGraphNodeGradient_ByteCode));
 
 	std::shared_ptr<Texture> eventIconBase = std::make_shared<Texture>();;
-	RHI::LoadTextureFromMemory(eventIconBase.get(),L"NodeEventIcon",BuiltIn_Event_Icon_ByteCode,sizeof(BuiltIn_Event_Icon_ByteCode));
+	//RHI::LoadTextureFromMemory(eventIconBase.get(),L"NodeEventIcon",BuiltIn_Event_Icon_ByteCode,sizeof(BuiltIn_Event_Icon_ByteCode));
 	myNodeTypeIcons.emplace(ScriptGraphNodeType::Event,std::move(eventIconBase));
 
 	std::shared_ptr<Texture> nodeFunctionIcon = std::make_shared<Texture>();;
-	RHI::LoadTextureFromMemory(nodeFunctionIcon.get(),L"NodeFunctionIcon",BuiltIn_Function_Icon_ByteCode,sizeof(BuiltIn_Function_Icon_ByteCode));
+	//RHI::LoadTextureFromMemory(nodeFunctionIcon.get(),L"NodeFunctionIcon",BuiltIn_Function_Icon_ByteCode,sizeof(BuiltIn_Function_Icon_ByteCode));
 	myNodeTypeIcons.emplace(ScriptGraphNodeType::Undefined,std::move(nodeFunctionIcon));
 	myGetterGradient = std::make_shared<Texture>();
-	RHI::LoadTextureFromMemory(myGetterGradient.get(),L"NodeGetterGradient",BuiltIn_GetGradient_ByteCode,sizeof(BuiltIn_GetGradient_ByteCode));
+	//RHI::LoadTextureFromMemory(myGetterGradient.get(),L"NodeGetterGradient",BuiltIn_GetGradient_ByteCode,sizeof(BuiltIn_GetGradient_ByteCode));
 
 	nodeEditorContext = ImNodeEd::CreateEditor(&nodeEditorCfg);
 

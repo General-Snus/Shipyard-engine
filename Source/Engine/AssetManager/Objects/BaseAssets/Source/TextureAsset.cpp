@@ -168,7 +168,7 @@ void TextureHolder::Init()
 #endif
 	else if (AssetPath.extension() == ".dds")
 	{
-		if (!RHI::LoadTexture(RawTexture.get(),AssetPath.wstring()))
+		/*if (!RHI::LoadTexture(RawTexture.get(),AssetPath.wstring()))*/
 		{
 			std::string msg = "Error: Coulnt dds texture at " + AssetPath.string();
 			std::cout << msg << " \n";
@@ -182,7 +182,7 @@ void TextureHolder::Init()
 			isLoadedComplete = false;
 			return;
 		}
-		isLoadedComplete = true;
+		//isLoadedComplete = true;
 	}
 	else
 	{

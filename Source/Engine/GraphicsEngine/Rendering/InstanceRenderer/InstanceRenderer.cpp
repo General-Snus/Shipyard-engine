@@ -14,7 +14,7 @@ void InstanceRenderer::Execute(bool isShadowPass)
 	OPTICK_EVENT();
 	if (isShadowPass)
 	{
-		RHI::Context->PSSetShader(nullptr,nullptr,0);
+		//RHI::Context->PSSetShader(nullptr,nullptr,0);
 	}
 	else
 	{
@@ -33,7 +33,7 @@ void InstanceRenderer::Execute(bool isShadowPass)
 			objectBuffer.Data.MinExtents = i->myMesh->MinBox;
 			objectBuffer.Data.hasBone = false;
 			objectBuffer.Data.isInstanced = true;
-			RHI::UpdateConstantBufferData(GraphicsEngine::Get().myObjectBuffer);
+			//RHI::UpdateConstantBufferData(GraphicsEngine::Get().myObjectBuffer);
 			if (!isShadowPass)
 			{
 				i->myMesh->UpdateInstanceBuffer();

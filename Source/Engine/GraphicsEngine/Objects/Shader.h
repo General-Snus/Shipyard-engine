@@ -1,7 +1,7 @@
 #pragma once
 #include "../InterOp/ShaderInfo.h"
 
-
+#include <DirectX/directx/d3d12.h>
 //Do rewrite, not my structure prb doesnt fit, just need for rhi
 class Shader
 {

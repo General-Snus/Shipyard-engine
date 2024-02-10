@@ -1,18 +1,18 @@
 #include <GraphicsEngine.pch.h>
-#include "../Headers/GfxCmd_SetLightBuffer.h"
 #include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>
+#include "../Headers/GfxCmd_SetLightBuffer.h"
 
 GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 {
-	for(auto& i : GameObjectManager::Get().GetAllComponents<cLight>())
+	for (auto& i : GameObjectManager::Get().GetAllComponents<cLight>())
 	{
-		switch(i.GetType())
+		switch (i.GetType())
 		{
 		case eLightType::Directional:
 		{
 			std::pair<DirectionalLight*,Texture*> pair;
 			pair.first = i.GetData<DirectionalLight>().get();
-			if(i.GetIsShadowCaster())
+			if (i.GetIsShadowCaster())
 			{
 				pair.second = i.GetShadowMap(0).get();
 			}
@@ -23,9 +23,9 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 
 		case eLightType::Point:
 		{
-			if(i.GetIsShadowCaster())
+			if (i.GetIsShadowCaster())
 			{
-				for(int j = 0; j < 6; j++)//REFACTOR
+				for (int j = 0; j < 6; j++)//REFACTOR
 				{
 					std::pair<PointLight*,Texture*> pair;
 					pair.first = i.GetData<PointLight>().get();
@@ -41,7 +41,7 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 			std::pair< SpotLight*,Texture*> pair;
 			pair.first = i.GetData<SpotLight>().get();
 
-			if(i.GetIsShadowCaster())
+			if (i.GetIsShadowCaster())
 			{
 				pair.second = i.GetShadowMap(0).get();
 			}
@@ -57,10 +57,10 @@ GfxCmd_SetLightBuffer::GfxCmd_SetLightBuffer()
 
 void GfxCmd_SetLightBuffer::ExecuteAndDestroy()
 {
-	G_Buffer& gBuffer = GetGBuffer(); 
+	G_Buffer& gBuffer = GetGBuffer();
 	gBuffer.UseEnviromentShader();
 
-	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_SSAO,GraphicsEngine::Get().GetTargetTextures(eRenderTargets::SSAO).get());
+	/*RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_SSAO,GraphicsEngine::Get().GetTargetTextures(eRenderTargets::SSAO).get());
 	for(const auto& [light,shadowMap] : dirLight)
 	{
 		LightBuffer& buff = GetLightBuffer();
@@ -83,7 +83,7 @@ void GfxCmd_SetLightBuffer::ExecuteAndDestroy()
 	for(const auto& [light,shadowMap] : pointLight)
 	{
 		LightBuffer& buff = GetLightBuffer();
-		buff.Data.myPointLight = *light;  
+		buff.Data.myPointLight = *light;
 		RHI::SetTextureResource(  PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,shadowMap);
 
 		RHI::UpdateConstantBufferData(buff);
@@ -117,5 +117,5 @@ void GfxCmd_SetLightBuffer::ExecuteAndDestroy()
 		);
 		RHI::Draw(4);
 	}
-	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,nullptr);
+	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_dirLightShadowMap,nullptr);*/
 }

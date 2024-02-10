@@ -46,7 +46,7 @@ class ParticleEmitter : public AssetBase
 private:
 	void InitParticle(Particlevertex& vertex) const;
 	EmmiterSettingsData settings;
-	ComPtr<ID3D11Buffer> vertexBuffer;
+	//ComPtr<ID3D11Buffer> vertexBuffer;
 	UINT stride;
 	UINT offset;
 	UINT primitiveTopology;

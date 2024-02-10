@@ -22,7 +22,7 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     
     
     
-    switch(FB_RenderMode)
+    switch(g_FrameBuffer.FB_RenderMode)
     {
         default:
         case 0:

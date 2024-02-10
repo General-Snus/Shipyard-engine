@@ -1,5 +1,4 @@
 #pragma once
-#include <DirectX/directx/d3d12.h>
 #include <Engine/GraphicsEngine/Objects/Shader.h>
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>

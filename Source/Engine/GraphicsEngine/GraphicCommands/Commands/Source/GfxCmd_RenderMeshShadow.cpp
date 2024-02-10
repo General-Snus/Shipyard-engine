@@ -16,8 +16,8 @@ void GfxCmd_RenderMeshShadow::ExecuteAndDestroy()
 	objectBuffer.Data.hasBone = false;
 	objectBuffer.Data.isInstanced = instanced;
 
-	RHI::UpdateConstantBufferData(objectBuffer);
-	RHI::Context->PSSetShader(nullptr,nullptr,0);
+	/*RHI::UpdateConstantBufferData(objectBuffer);
+	RHI::Context->PSSetShader(nullptr,nullptr,0);*/
 
 	if (instanced)
 	{

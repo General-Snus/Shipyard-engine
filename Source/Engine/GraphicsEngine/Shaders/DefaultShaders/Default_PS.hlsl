@@ -16,7 +16,7 @@ float3 PositionInBound(float3 aMin, float3 aMax, float3 aPosition)
 DefaultPixelOutput main(DefaultVertexToPixel input)
 {
     DefaultPixelOutput result; 
-    result.Color.rgb = PositionInBound(OB_MinExtents, OB_MaxExtents, input.Position.xyz);
+    result.Color.rgb = PositionInBound(g_ObjectBuffer.OB_MinExtents, g_ObjectBuffer.OB_MaxExtents, input.Position.xyz);
     result.Color.a = 1.0f; 
     return result;
 }
