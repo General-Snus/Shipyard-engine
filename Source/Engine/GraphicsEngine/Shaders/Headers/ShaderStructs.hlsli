@@ -30,8 +30,8 @@ struct DefaultVertexInput
     float2 UV : UV;
     float3 Normal : NORMAL;
     float3 Tangent : TANGENT;
-    uint4 BoneIds : BONEIDS;
-    float4 BoneWeights : BONEWEIGHTS;
+    //uint4 BoneIds : BONEIDS;
+    //float4 BoneWeights : BONEWEIGHTS;
     
     float4x4 World : WORLD;
     uint InstanceID : SV_InstanceID;

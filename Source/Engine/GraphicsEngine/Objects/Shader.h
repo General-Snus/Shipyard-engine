@@ -9,9 +9,9 @@ class Shader
 	ShaderType myShaderType = ShaderType::VertexShader;*/
 
 	friend class GPU;
+	friend class ShipyardShader;
 
 	ComPtr<ID3DBlob> myBlob = nullptr;
-	size_t myBlobSize = 0;
 	ShaderInfo myShaderInfo{};
 
 
@@ -31,9 +31,13 @@ public:
 	{
 		return myBlob.Get();
 	}
+	FORCEINLINE LPVOID GetBufferPtr()
+	{
+		return myBlob->GetBufferPointer();
+	}
 	FORCEINLINE size_t GetBlobSize() const
 	{
-		return myBlobSize;
+		return myBlob->GetBufferSize();
 	}
 	FORCEINLINE const ShaderInfo& GetShaderInfo() const
 	{

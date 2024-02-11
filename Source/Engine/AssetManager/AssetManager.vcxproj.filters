@@ -168,6 +168,9 @@
     <ClInclude Include="Objects\BaseAssets\ParticleEmitter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Objects\BaseAssets\ShipyardShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssetManager.pch.cpp">
@@ -315,6 +318,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Objects\BaseAssets\Source\ParticleEmitter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\BaseAssets\Source\ShipyardShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

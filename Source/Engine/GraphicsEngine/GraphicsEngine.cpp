@@ -63,8 +63,6 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 			Logger::Err("Failed to initialize the RHI!");
 			return false;
 		}*/
-		m_StateCache = std::make_unique<PSOCache>();
-		m_StateCache->InitAllStates();
 
 		SetupDefaultVariables();
 		SetupBRDF();
@@ -72,6 +70,10 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 		SetupPostProcessing();
 		SetupBlendStates();
 		SetupDebugDrawline();
+
+		m_StateCache = std::make_unique<PSOCache>();
+		m_StateCache->InitAllStates();
+
 
 		/*myLightBuffer.Initialize();
 		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_LightBuffer,myLightBuffer);
@@ -98,6 +100,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 	catch (const std::exception& e)
 	{
 		Logger::LogException(e);
+		system("pause");
 		exit(-1);
 	}
 #endif 
@@ -113,20 +116,26 @@ bool GraphicsEngine::SetupDebugDrawline()
 
 void GraphicsEngine::SetupDefaultVariables()
 {
-	//D3D12_SAMPLER_DESC samplerDesc = {};
-	//samplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
-	//samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	//samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	//samplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	//samplerDesc.MipLODBias = 0.f;
-	//samplerDesc.MaxAnisotropy = 1;
-	//samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
-	//samplerDesc.BorderColor[0] = 1.f;
-	//samplerDesc.BorderColor[1] = 1.f;
-	//samplerDesc.BorderColor[2] = 1.f;
-	//samplerDesc.BorderColor[3] = 1.f;
-	//samplerDesc.MinLOD = -D3D11_FLOAT32_MAX;
-	//samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;/*
+	D3D12_SAMPLER_DESC samplerDesc = {};
+	samplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	samplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	samplerDesc.MipLODBias = 0.f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+	samplerDesc.BorderColor[0] = 1.f;
+	samplerDesc.BorderColor[1] = 1.f;
+	samplerDesc.BorderColor[2] = 1.f;
+	samplerDesc.BorderColor[3] = 1.f;
+	samplerDesc.MinLOD = -D3D12_FLOAT32_MAX;
+	samplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
+
+
+	GPU::m_RootSignature.Reset();
+	GPU::m_RootSignature.RegisterSampler(REG_DefaultSampler,samplerDesc,D3D12_SHADER_VISIBILITY_PIXEL);
+
+
 
 	//if (!RHI::CreateSamplerState(myDefaultSampleState,samplerDesc))
 	//{
@@ -135,20 +144,21 @@ void GraphicsEngine::SetupDefaultVariables()
 	//}*/
 	//RHI::SetSamplerState(myDefaultSampleState,REG_DefaultSampler);
 
-	//D3D11_SAMPLER_DESC shadowSamplerDesc = {};
-	//shadowSamplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
-	//shadowSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
-	//shadowSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
-	//shadowSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
-	//shadowSamplerDesc.BorderColor[0] = 1.f;
-	//shadowSamplerDesc.BorderColor[1] = 1.f;
-	//shadowSamplerDesc.BorderColor[2] = 1.f;
-	//shadowSamplerDesc.BorderColor[3] = 1.f;
-	//shadowSamplerDesc.ComparisonFunc = D3D11_COMPARISON_GREATER_EQUAL;/*
-	//shadowSamplerDesc.MinLOD = -D3D11_FLOAT32_MAX;
-	//shadowSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	//shadowSamplerDesc.MipLODBias = 0.f;
-	//shadowSamplerDesc.MaxAnisotropy = 1;*/
+	D3D12_SAMPLER_DESC shadowSamplerDesc = {};
+	shadowSamplerDesc.Filter = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
+	shadowSamplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	shadowSamplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	shadowSamplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	shadowSamplerDesc.BorderColor[0] = 1.f;
+	shadowSamplerDesc.BorderColor[1] = 1.f;
+	shadowSamplerDesc.BorderColor[2] = 1.f;
+	shadowSamplerDesc.BorderColor[3] = 1.f;
+	shadowSamplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+	shadowSamplerDesc.MinLOD = -D3D12_FLOAT32_MAX;
+	shadowSamplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
+	shadowSamplerDesc.MipLODBias = 0.f;
+	shadowSamplerDesc.MaxAnisotropy = 1;
+	GPU::m_RootSignature.RegisterSampler(REG_shadowCmpSampler,shadowSamplerDesc,D3D12_SHADER_VISIBILITY_PIXEL);
 
 	//if (!RHI::CreateSamplerState(myShadowSampleState,shadowSamplerDesc))
 	//{
@@ -163,9 +173,7 @@ void GraphicsEngine::SetupDefaultVariables()
 	//depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_GREATER;
 	//depthStencilDesc.StencilEnable = false;
 	//depthStencilDesc.StencilReadMask = D3D12_DEFAULT_STENCIL_READ_MASK;
-	//depthStencilDesc.StencilWriteMask = D3D12_DEFAULT_STENCIL_WRITE_MASK;
-
-
+	//depthStencilDesc.StencilWriteMask = D3D12_DEFAULT_STENCIL_WRITE_MASK;  
 
 	////auto result = RHI::Device->CreateDepthStencilState(
 	////	&depthStencilDesc,
@@ -217,8 +225,7 @@ void GraphicsEngine::SetupDefaultVariables()
 	//		BuiltIn_Default_C_ByteCode,
 	//		sizeof(BuiltIn_Default_C_ByteCode)
 	//	);
-	//}
-
+	//} 
 
 	//defaultNormalTexture = std::make_shared<TextureHolder>("",eTextureType::NormalMap);
 	//RHI::LoadTextureFromMemory(
@@ -251,12 +258,13 @@ void GraphicsEngine::SetupDefaultVariables()
 
 
 
-	////NOISE
-	//D3D11_SAMPLER_DESC pointSamplerDesc = {};
-	//pointSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-	//pointSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	//pointSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	//pointSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	//NOISE
+	D3D12_SAMPLER_DESC pointSamplerDesc = {};
+	pointSamplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
+	pointSamplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	pointSamplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	pointSamplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	GPU::m_RootSignature.RegisterSampler(REG_PointSampler,pointSamplerDesc,D3D12_SHADER_VISIBILITY_PIXEL);
 
 	//if (!RHI::CreateSamplerState(myPointSampleState,pointSamplerDesc))
 	//{
@@ -272,7 +280,7 @@ void GraphicsEngine::SetupDefaultVariables()
 	//defaultVS = std::make_shared<Shader>();
 	//defaultPS = std::make_shared<Shader>();
 
-	///*defaultVS->SetShader(myVertexShader);
+	//defaultVS->SetShader(myVertexShader);
 	//defaultVS->myName = L"Default Vertex Shader";
 	//defaultPS->SetShader(myPixelShader);
 	//defaultPS->myName = L"Default Pixel Shader";*/
@@ -284,6 +292,14 @@ void GraphicsEngine::SetupDefaultVariables()
 	//defaultCubeMap->SetTextureType(eTextureType::CubeMap);
 	//RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_enviromentCube,defaultCubeMap->GetRawTexture().get());
 
+	GPU::m_RootSignature[MeshConstants].InitAsConstantBuffer(0,D3D12_SHADER_VISIBILITY_VERTEX);
+	GPU::m_RootSignature[MaterialConstants].InitAsConstantBuffer(0,D3D12_SHADER_VISIBILITY_PIXEL);
+	GPU::m_RootSignature[MaterialSRVs].InitAsDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,0,10,D3D12_SHADER_VISIBILITY_PIXEL);
+	GPU::m_RootSignature[MaterialSamplers].InitAsDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER,0,10,D3D12_SHADER_VISIBILITY_PIXEL);
+	GPU::m_RootSignature[CommonSRVs].InitAsDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,10,10,D3D12_SHADER_VISIBILITY_PIXEL);
+	GPU::m_RootSignature[CommonCBV].InitAsConstantBuffer(1);
+	GPU::m_RootSignature[SkinMatrices].InitAsBufferSRV(20,D3D12_SHADER_VISIBILITY_VERTEX);
+	GPU::m_RootSignature.Finalize(L"RootSig",D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 	AssetManager::Get().ForceLoadAsset<Mesh>("default.fbx",defaultMesh);
 }
 

@@ -17,20 +17,20 @@ DefaultVertexToPixel main(DefaultVertexInput input)
     result.Tangent = input.Tangent;
     result.BiNormal = cross(input.Normal, input.Tangent);
     
-    if(g_ObjectBuffer.hasBone)
-    {
-        float4x4 skinMatrix = 0;
-        skinMatrix += g_ObjectBuffer.OB_BoneTransform[input.BoneIds[0]] * input.BoneWeights[0];
-        skinMatrix += g_ObjectBuffer.OB_BoneTransform[input.BoneIds[1]] * input.BoneWeights[1];
-        skinMatrix += g_ObjectBuffer.OB_BoneTransform[input.BoneIds[2]] * input.BoneWeights[2];
-        skinMatrix += g_ObjectBuffer.OB_BoneTransform[input.BoneIds[3]] * input.BoneWeights[3];
-        result.Position = mul(skinMatrix, result.Position);
-        
-        const float3x3 skinNormalRotation = (float3x3)transpose(skinMatrix);
-        result.Normal = mul(input.Normal, skinNormalRotation);
-        result.BiNormal = mul(result.BiNormal, (float3x3)skinMatrix);
-        result.Tangent = mul(result.Tangent, (float3x3)skinMatrix);
-    }
+    //if(g_ObjectBuffer.hasBone)
+    //{
+    //    float4x4 skinMatrix = 0;
+    //    skinMatrix += g_ObjectBuffer.OB_BoneTransform[input.BoneIds[0]] * input.BoneWeights[0];
+    //    skinMatrix += g_ObjectBuffer.OB_BoneTransform[input.BoneIds[1]] * input.BoneWeights[1];
+    //    skinMatrix += g_ObjectBuffer.OB_BoneTransform[input.BoneIds[2]] * input.BoneWeights[2];
+    //    skinMatrix += g_ObjectBuffer.OB_BoneTransform[input.BoneIds[3]] * input.BoneWeights[3];
+    //    result.Position = mul(skinMatrix, result.Position);
+    //    
+    //    const float3x3 skinNormalRotation = (float3x3)transpose(skinMatrix);
+    //    result.Normal = mul(input.Normal, skinNormalRotation);
+    //    result.BiNormal = mul(result.BiNormal, (float3x3)skinMatrix);
+    //    result.Tangent = mul(result.Tangent, (float3x3)skinMatrix);
+    //}
     
     
     

@@ -11,13 +11,18 @@
 #include "GPU.h" 
 
 #include <d3dcompiler.h> 
+#include <map>
+#include <mutex>
 
 #include <DirectX/XTK/DDSTextureLoader.h>
 #include <DirectX/XTK/DirectXHelpers.h>
 #include <DirectX/XTK/source/PlatformHelpers.h>
+
+#include "Helpers.h"
 #include "PSO.h"
 #include "Tools/Logging/Logging.h"
 
+static std::map< size_t,ComPtr<ID3D12RootSignature> > s_RootSignatureHashMap;
 
 ComPtr<ID3D12CommandAllocator> GPUCommandQueue::CreateCommandAllocator()
 {
@@ -55,15 +60,20 @@ bool GPUCommandQueue::Create(ComPtr<ID3D12Device> device,D3D12_COMMAND_LIST_TYPE
 	desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	desc.NodeMask = 0;
 
-	if (FAILED(m_Device->CreateCommandQueue(&desc,IID_PPV_ARGS(&m_CommandQueue))))
+	ThrowIfFailed(m_Device->CreateCommandQueue(&desc,IID_PPV_ARGS(&m_CommandQueue)));
+
+	ThrowIfFailed(m_Device->CreateFence(m_FenceValue,D3D12_FENCE_FLAG_NONE,IID_PPV_ARGS(&m_Fence)));
+	switch (type)
 	{
-		Logger::Err("Failed to create command queue");
-		return false;
-	}
-	if (FAILED(m_Device->CreateFence(m_FenceValue,D3D12_FENCE_FLAG_NONE,IID_PPV_ARGS(&m_CommandQueue))))
-	{
-		Logger::Err("Failed to create fence");
-		return false;
+	case D3D12_COMMAND_LIST_TYPE_COPY:
+		m_CommandQueue->SetName(L"Copy Command Queue");
+		break;
+	case D3D12_COMMAND_LIST_TYPE_COMPUTE:
+		m_CommandQueue->SetName(L"Compute Command Queue");
+		break;
+	case D3D12_COMMAND_LIST_TYPE_DIRECT:
+		m_CommandQueue->SetName(L"Direct Command Queue");
+		break;
 	}
 
 	m_FenceEvent = ::CreateEvent(NULL,FALSE,FALSE,NULL);
@@ -291,7 +301,7 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,Texture* aBackBuf
 	{
 		Logger::Err("Failed to Serialize RootSignature");
 	}
-	if (FAILED(m_Device->CreateRootSignature(0,signature->GetBufferPointer(),signature->GetBufferSize(),IID_PPV_ARGS(&m_RootSignature))))
+	if (FAILED(m_Device->CreateRootSignature(0,signature->GetBufferPointer(),signature->GetBufferSize(),IID_PPV_ARGS(&m_RootSignature->m_RootSignature))))
 	{
 		Logger::Err("Failed to Create RootSignature");
 	}
@@ -401,25 +411,14 @@ bool GPU::CreateIndexBuffer(ComPtr<ID3D12Resource>& outIndexBuffer,const std::ve
 
 bool GPU::CreatePixelShader(ComPtr<ID3DBlob>& outPxShader,const BYTE* someShaderData,size_t aShaderDataSize,UINT CompileFLags)
 {
-	const HRESULT result = D3DCompile(someShaderData,aShaderDataSize,NULL,NULL,D3D_COMPILE_STANDARD_FILE_INCLUDE,NULL,"ps_5_0",CompileFLags,0,&outPxShader,NULL);
-	if (FAILED(result))
-	{
-		Logger::Log("Failed to load vertex shader from the specified file!");
-		return false;
-	}
-
+	ThrowIfFailed(D3DCompile(someShaderData,aShaderDataSize,NULL,NULL,D3D_COMPILE_STANDARD_FILE_INCLUDE,NULL,"ps_5_1",CompileFLags,0,&outPxShader,NULL));
 	return true;
 
 }
 
 bool GPU::CreateVertexShader(ComPtr<ID3DBlob>& outVxShader,const BYTE* someShaderData,size_t aShaderDataSize,UINT CompileFLags)
 {
-	const HRESULT result = D3DCompile(someShaderData,aShaderDataSize,NULL,NULL,D3D_COMPILE_STANDARD_FILE_INCLUDE,NULL,"ps_5_0",CompileFLags,0,&outVxShader,NULL);
-	if (FAILED(result))
-	{
-		Logger::Log("Failed to load vertex shader from the specified file!");
-		return false;
-	}
+	ThrowIfFailed(D3DCompile(someShaderData,aShaderDataSize,NULL,NULL,D3D_COMPILE_STANDARD_FILE_INCLUDE,NULL,"vs_5_1",CompileFLags,0,&outVxShader,NULL));
 
 	return true;
 }
@@ -716,4 +715,124 @@ void GPUSwapchain::Create(HWND hwnd,ComPtr<ID3D12CommandQueue>,UINT Width,UINT H
 	}
 	ThrowIfFailed(dxgiFactory4->MakeWindowAssociation(hwnd,DXGI_MWA_NO_ALT_ENTER));
 	ThrowIfFailed(swapChain.As(&m_SwapChain));
+}
+
+void GPURootSignature::RegisterSampler(UINT aRegister,const D3D12_SAMPLER_DESC& nonStaticSamplerDesc,D3D12_SHADER_VISIBILITY visibility)
+{
+	assert(m_NumInitializedStaticSamplers < m_NumSamplers);
+	D3D12_STATIC_SAMPLER_DESC& StaticSamplerDesc = m_SamplerArray[m_NumInitializedStaticSamplers++];
+
+	StaticSamplerDesc.Filter = nonStaticSamplerDesc.Filter;
+	StaticSamplerDesc.AddressU = nonStaticSamplerDesc.AddressU;
+	StaticSamplerDesc.AddressV = nonStaticSamplerDesc.AddressV;
+	StaticSamplerDesc.AddressW = nonStaticSamplerDesc.AddressW;
+	StaticSamplerDesc.MipLODBias = nonStaticSamplerDesc.MipLODBias;
+	StaticSamplerDesc.MaxAnisotropy = nonStaticSamplerDesc.MaxAnisotropy;
+	StaticSamplerDesc.ComparisonFunc = nonStaticSamplerDesc.ComparisonFunc;
+	StaticSamplerDesc.BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
+	StaticSamplerDesc.MinLOD = nonStaticSamplerDesc.MinLOD;
+	StaticSamplerDesc.MaxLOD = nonStaticSamplerDesc.MaxLOD;
+	StaticSamplerDesc.ShaderRegister = aRegister;
+	StaticSamplerDesc.RegisterSpace = 0;
+	StaticSamplerDesc.ShaderVisibility = visibility;
+}
+
+void GPURootSignature::Reset(UINT NumRootParams,UINT NumStaticSamplers)
+{
+	if (NumRootParams > 0)
+		m_ParamArray.reset(new GPURootParameter[NumRootParams]);
+	else
+		m_ParamArray = nullptr;
+	m_NumParameters = NumRootParams;
+
+	if (NumStaticSamplers > 0)
+		m_SamplerArray.reset(new D3D12_STATIC_SAMPLER_DESC[NumStaticSamplers]);
+	else
+		m_SamplerArray = nullptr;
+	m_NumSamplers = NumStaticSamplers;
+	m_NumInitializedStaticSamplers = 0;
+}
+
+void GPURootSignature::Finalize(const std::wstring& name,D3D12_ROOT_SIGNATURE_FLAGS Flags)
+{
+	assert(m_NumInitializedStaticSamplers == m_NumSamplers);
+
+	D3D12_ROOT_SIGNATURE_DESC RootDesc;
+	RootDesc.NumParameters = m_NumParameters;
+	RootDesc.pParameters = (const D3D12_ROOT_PARAMETER*)m_ParamArray.get();
+	RootDesc.NumStaticSamplers = m_NumSamplers;
+	RootDesc.pStaticSamplers = (const D3D12_STATIC_SAMPLER_DESC*)m_SamplerArray.get();
+	RootDesc.Flags = Flags;
+
+	m_DescriptorTableBitMap = 0;
+	m_SamplerTableBitMap = 0;
+
+	size_t HashCode = Helpers::Utility::HashState(&RootDesc.Flags);
+	HashCode = Helpers::Utility::HashState(RootDesc.pStaticSamplers,m_NumSamplers,HashCode);
+
+	for (UINT Param = 0; Param < m_NumParameters; ++Param)
+	{
+		const D3D12_ROOT_PARAMETER& RootParam = RootDesc.pParameters[Param];
+		m_DescriptorTableSize[Param] = 0;
+
+		if (RootParam.ParameterType == D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE)
+		{
+			assert(RootParam.DescriptorTable.pDescriptorRanges != nullptr);
+
+			HashCode = Helpers::Utility::HashState(RootParam.DescriptorTable.pDescriptorRanges,
+				RootParam.DescriptorTable.NumDescriptorRanges,HashCode);
+
+			// We keep track of sampler descriptor tables separately from CBV_SRV_UAV descriptor tables
+			if (RootParam.DescriptorTable.pDescriptorRanges->RangeType == D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER)
+				m_SamplerTableBitMap |= (1 << Param);
+			else
+				m_DescriptorTableBitMap |= (1 << Param);
+
+			for (UINT TableRange = 0; TableRange < RootParam.DescriptorTable.NumDescriptorRanges; ++TableRange)
+				m_DescriptorTableSize[Param] += RootParam.DescriptorTable.pDescriptorRanges[TableRange].NumDescriptors;
+		}
+		else
+			HashCode = Helpers::Utility::HashState(&RootParam,1,HashCode);
+	}
+
+	ID3D12RootSignature** RSRef = nullptr;
+	bool firstCompile = false;
+	{
+		static std::mutex s_HashMapMutex;
+		std::lock_guard<std::mutex> CS(s_HashMapMutex);
+		auto iter = s_RootSignatureHashMap.find(HashCode);
+
+		// Reserve space so the next inquiry will find that someone got here first.
+		if (iter == s_RootSignatureHashMap.end())
+		{
+			RSRef = s_RootSignatureHashMap[HashCode].GetAddressOf();
+			firstCompile = true;
+		}
+		else
+			RSRef = iter->second.GetAddressOf();
+	}
+
+	if (firstCompile)
+	{
+		ComPtr<ID3DBlob> pOutBlob,pErrorBlob;
+
+		ThrowIfFailed(D3D12SerializeRootSignature(&RootDesc,D3D_ROOT_SIGNATURE_VERSION_1,
+			pOutBlob.GetAddressOf(),pErrorBlob.GetAddressOf()));
+
+		ThrowIfFailed(GPU::m_Device->CreateRootSignature(1,pOutBlob->GetBufferPointer(),pOutBlob->GetBufferSize(),
+			IID_PPV_ARGS(&m_RootSignature)));
+
+		m_RootSignature->SetName(name.c_str());
+
+		s_RootSignatureHashMap[HashCode].Attach(m_RootSignature.Get());
+		assert(*RSRef == m_RootSignature.Get());
+	}
+	else
+	{
+		while (*RSRef == nullptr)
+			std::this_thread::yield();
+		m_RootSignature = *RSRef;
+	}
+
+	m_Finalized = TRUE;
 }
