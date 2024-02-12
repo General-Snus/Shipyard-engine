@@ -8,8 +8,9 @@
 #include <DirectX\directx\d3d12.h> 
 #include <dxgi1_6.h> 
 #include <Engine/GraphicsEngine/Rendering/Texture.h>
-#include <filesystem>
-#include <queue>
+
+#include "CommandQueue.h"
+#include "RootSignature.h"
 
 using namespace DirectX;
 using namespace Microsoft::WRL;
@@ -38,44 +39,6 @@ public:
 	D3D_SHADER_MODEL targetShaderModel;
 };
 
-class GPUCommandQueue
-{
-public:
-	bool Create(ComPtr<ID3D12Device> device,D3D12_COMMAND_LIST_TYPE type);
-	ComPtr<ID3D12GraphicsCommandList> GetCommandList();
-	ComPtr<ID3D12CommandQueue> GetCommandQueue();
-	uint64_t ExecuteCommandList(ComPtr<ID3D12GraphicsCommandList> commandList);
-
-	uint64_t Signal();
-	bool IsFenceComplete(uint64_t fenceValue);
-	void WaitForFenceValue(uint64_t fenceValue);
-	void Flush();
-
-protected:
-	ComPtr<ID3D12CommandAllocator> CreateCommandAllocator();
-	ComPtr<ID3D12GraphicsCommandList> CreateCommandList(ComPtr<ID3D12CommandAllocator> allocator);
-
-
-private:
-	struct CommandAllocatorEntry
-	{
-		uint64_t fenceValue;
-		ComPtr<ID3D12CommandAllocator> commandAllocator;
-	};
-
-	D3D12_COMMAND_LIST_TYPE m_CommandListType;
-	ComPtr<ID3D12Device> m_Device;
-	ComPtr<ID3D12CommandQueue> m_CommandQueue;
-	ComPtr<ID3D12Fence> m_Fence;
-	HANDLE m_FenceEvent;
-	uint64_t m_FenceValue = 0;
-
-	std::queue<CommandAllocatorEntry> m_CommandAllocatorQueue;
-	std::queue<ComPtr<ID3D12GraphicsCommandList>> m_CommandListQueue;
-
-	//ComPtr<ID3D12CommandAllocator> m_Allocator[m_FrameCount];
-	//uint64_t g_FrameFenceValues[m_FrameCount] = {};
-};
 
 class GPUSwapchain
 {
@@ -84,139 +47,7 @@ public:
 	ComPtr<IDXGISwapChain4> m_SwapChain;
 };
 
-class GPURootParameter
-{
-	friend class RootSignature;
-public:
 
-	GPURootParameter()
-	{
-		m_RootParam.ParameterType = (D3D12_ROOT_PARAMETER_TYPE)0xFFFFFFFF;
-	}
-
-	~GPURootParameter()
-	{
-		Clear();
-	}
-
-	void Clear()
-	{
-		if (m_RootParam.ParameterType == D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE)
-			delete[] m_RootParam.DescriptorTable.pDescriptorRanges;
-
-		m_RootParam.ParameterType = (D3D12_ROOT_PARAMETER_TYPE)0xFFFFFFFF;
-	}
-
-	void InitAsConstants(UINT Register,UINT NumDwords,D3D12_SHADER_VISIBILITY Visibility = D3D12_SHADER_VISIBILITY_ALL,UINT Space = 0)
-	{
-		m_RootParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-		m_RootParam.ShaderVisibility = Visibility;
-		m_RootParam.Constants.Num32BitValues = NumDwords;
-		m_RootParam.Constants.ShaderRegister = Register;
-		m_RootParam.Constants.RegisterSpace = Space;
-	}
-
-	void InitAsConstantBuffer(UINT Register,D3D12_SHADER_VISIBILITY Visibility = D3D12_SHADER_VISIBILITY_ALL,UINT Space = 0)
-	{
-		m_RootParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-		m_RootParam.ShaderVisibility = Visibility;
-		m_RootParam.Descriptor.ShaderRegister = Register;
-		m_RootParam.Descriptor.RegisterSpace = Space;
-	}
-
-	void InitAsBufferSRV(UINT Register,D3D12_SHADER_VISIBILITY Visibility = D3D12_SHADER_VISIBILITY_ALL,UINT Space = 0)
-	{
-		m_RootParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
-		m_RootParam.ShaderVisibility = Visibility;
-		m_RootParam.Descriptor.ShaderRegister = Register;
-		m_RootParam.Descriptor.RegisterSpace = Space;
-	}
-
-	void InitAsBufferUAV(UINT Register,D3D12_SHADER_VISIBILITY Visibility = D3D12_SHADER_VISIBILITY_ALL,UINT Space = 0)
-	{
-		m_RootParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_UAV;
-		m_RootParam.ShaderVisibility = Visibility;
-		m_RootParam.Descriptor.ShaderRegister = Register;
-		m_RootParam.Descriptor.RegisterSpace = Space;
-	}
-
-	void InitAsDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE Type,UINT Register,UINT Count,D3D12_SHADER_VISIBILITY Visibility = D3D12_SHADER_VISIBILITY_ALL,UINT Space = 0)
-	{
-		InitAsDescriptorTable(1,Visibility);
-		SetTableRange(0,Type,Register,Count,Space);
-	}
-
-	void InitAsDescriptorTable(UINT RangeCount,D3D12_SHADER_VISIBILITY Visibility = D3D12_SHADER_VISIBILITY_ALL)
-	{
-		m_RootParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-		m_RootParam.ShaderVisibility = Visibility;
-		m_RootParam.DescriptorTable.NumDescriptorRanges = RangeCount;
-		m_RootParam.DescriptorTable.pDescriptorRanges = new D3D12_DESCRIPTOR_RANGE[RangeCount];
-	}
-
-	void SetTableRange(UINT RangeIndex,D3D12_DESCRIPTOR_RANGE_TYPE Type,UINT Register,UINT Count,UINT Space = 0)
-	{
-		D3D12_DESCRIPTOR_RANGE* range = const_cast<D3D12_DESCRIPTOR_RANGE*>(m_RootParam.DescriptorTable.pDescriptorRanges + RangeIndex);
-		range->RangeType = Type;
-		range->NumDescriptors = Count;
-		range->BaseShaderRegister = Register;
-		range->RegisterSpace = Space;
-		range->OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-	}
-
-	const D3D12_ROOT_PARAMETER& operator() (void) const { return m_RootParam; }
-
-
-protected:
-
-	D3D12_ROOT_PARAMETER m_RootParam;
-};
-
-class GPURootSignature
-{
-	friend class GPU;
-public:
-
-	GPURootSignature(UINT NumRootParams = 0,UINT NumStaticSamplers = 0) : m_Finalized(FALSE),m_NumParameters(NumRootParams)
-	{
-		Reset(NumRootParams,NumStaticSamplers);
-	}
-
-	//take your time to learn this when not cracked
-	void RegisterSampler(UINT Register,const D3D12_SAMPLER_DESC& nonStaticSamplerDesc,
-		D3D12_SHADER_VISIBILITY visibility = D3D12_SHADER_VISIBILITY_ALL);
-
-	void Reset(UINT NumRootParams,UINT NumStaticSamplers = 0);
-
-
-	GPURootParameter& operator[] (size_t EntryIndex)
-	{
-		assert(EntryIndex < m_NumParameters);
-		return m_ParamArray.get()[EntryIndex];
-	}
-
-	const GPURootParameter& operator[] (size_t EntryIndex) const
-	{
-		assert(EntryIndex < m_NumParameters);
-		return m_ParamArray.get()[EntryIndex];
-	}
-	//take your time to learn this when not cracked
-	void Finalize(const std::wstring& name,D3D12_ROOT_SIGNATURE_FLAGS Flags = D3D12_ROOT_SIGNATURE_FLAG_NONE);
-
-private:
-	ComPtr<ID3D12RootSignature> m_RootSignature;
-	BOOL m_Finalized;
-	UINT m_NumParameters;
-	UINT m_NumSamplers;
-	UINT m_NumInitializedStaticSamplers;
-	uint32_t m_DescriptorTableBitMap;		// One bit is set for root parameters that are non-sampler descriptor tables
-	uint32_t m_SamplerTableBitMap;			// One bit is set for root parameters that are sampler descriptor tables
-	uint32_t m_DescriptorTableSize[16];		// Non-sampler descriptor tables need to know their descriptor count
-	std::unique_ptr<GPURootParameter[]> m_ParamArray;
-	std::unique_ptr<D3D12_STATIC_SAMPLER_DESC[]> m_SamplerArray;
-
-
-};
 
 enum ePIPELINE_STAGE
 {
@@ -227,18 +58,6 @@ enum ePIPELINE_STAGE
 	PIPELINE_STAGE_PIXEL_SHADER = 0x10L
 } 	inline ePIPELINE_STAGE;
 
-enum eRootBindings
-{
-	MeshConstants,
-	MaterialConstants,
-	MaterialSRVs,
-	MaterialSamplers,
-	CommonSRVs,
-	CommonCBV,
-	SkinMatrices,
-
-	count
-};
 class GPU
 {
 public:

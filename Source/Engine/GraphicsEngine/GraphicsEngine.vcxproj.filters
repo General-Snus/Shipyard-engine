@@ -240,6 +240,12 @@
     <ClInclude Include="InterOp\RHI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="InterOp\RootSignature.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InterOp\CommandQueue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsEngine.pch.cpp">
@@ -248,7 +254,7 @@
     <ClCompile Include="GraphicsEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="InterOp\Helpers.cpp">
+    <ClCompile Include="InterOp\Source\Helpers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\Texture.cpp">
@@ -326,10 +332,10 @@
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetDepthState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="InterOp\GPU.cpp">
+    <ClCompile Include="InterOp\Source\GPU.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="InterOp\PSO.cpp">
+    <ClCompile Include="InterOp\Source\PSO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\GpuResource.cpp">
@@ -341,7 +347,13 @@
     <ClCompile Include="Rendering\ParticleRenderer\ParticleVertex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="InterOp\RHI.cpp">
+    <ClCompile Include="InterOp\Source\RHI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InterOp\Source\RootSignature.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InterOp\Source\CommandQueue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

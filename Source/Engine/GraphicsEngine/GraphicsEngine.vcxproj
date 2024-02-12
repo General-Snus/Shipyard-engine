@@ -191,6 +191,7 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="InterOp\CommandQueue.h" />
     <ClInclude Include="DebugDrawer\DebugDrawer.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -275,6 +276,7 @@
     <ClInclude Include="Rendering\ParticleRenderer\ParticleVertex.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="InterOp\RootSignature.h" />
     <ClInclude Include="Shaders\Include\Bloom_PS.h" />
     <ClInclude Include="Shaders\Include\brdfLUT_PS.h" />
     <ClInclude Include="Shaders\Include\brdfLUT_VS.h" />
@@ -321,13 +323,14 @@
     <ClInclude Include="Rendering\ShadowRenderer\ShadowRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="InterOp\Source\CommandQueue.cpp" />
     <ClCompile Include="DebugDrawer\DebugDrawer.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="InterOp\RHI.cpp" />
+    <ClCompile Include="InterOp\Source\RHI.cpp" />
     <ClCompile Include="Rendering\GpuResource.cpp" />
-    <ClCompile Include="InterOp\GPU.cpp">
+    <ClCompile Include="InterOp\Source\GPU.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -395,7 +398,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="InterOp\PSO.cpp" />
+    <ClCompile Include="InterOp\Source\PSO.cpp" />
     <ClCompile Include="Rendering\InstanceRenderer\InstanceRenderer.cpp" />
     <ClCompile Include="Rendering\Buffers\G_Buffer.cpp" />
     <ClCompile Include="Rendering\ForwardRenderer.cpp" />
@@ -411,7 +414,7 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="InterOp\Helpers.cpp" />
+    <ClCompile Include="InterOp\Source\Helpers.cpp" />
     <ClCompile Include="Rendering\Buffers\ConstantBuffer.cpp" />
     <ClCompile Include="Rendering\ParticleRenderer\ParticleRenderer.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -422,6 +425,7 @@
     <ClCompile Include="Rendering\Texture.cpp" />
     <ClCompile Include="Rendering\Vertex.cpp" />
     <ClCompile Include="Rendering\ShadowRenderer\ShadowRenderer.cpp" />
+    <ClCompile Include="InterOp\Source\RootSignature.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -132,7 +132,7 @@ void GraphicsEngine::SetupDefaultVariables()
 	samplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
 
 
-	GPU::m_RootSignature.Reset();
+	GPU::m_RootSignature.Reset(eRootBindings::count,REG_shadowCmpSampler);
 	GPU::m_RootSignature.RegisterSampler(REG_DefaultSampler,samplerDesc,D3D12_SHADER_VISIBILITY_PIXEL);
 
 
@@ -293,11 +293,11 @@ void GraphicsEngine::SetupDefaultVariables()
 	//RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_enviromentCube,defaultCubeMap->GetRawTexture().get());
 
 	GPU::m_RootSignature[MeshConstants].InitAsConstantBuffer(0,D3D12_SHADER_VISIBILITY_VERTEX);
-	GPU::m_RootSignature[MaterialConstants].InitAsConstantBuffer(0,D3D12_SHADER_VISIBILITY_PIXEL);
-	GPU::m_RootSignature[MaterialSRVs].InitAsDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,0,10,D3D12_SHADER_VISIBILITY_PIXEL);
-	GPU::m_RootSignature[MaterialSamplers].InitAsDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER,0,10,D3D12_SHADER_VISIBILITY_PIXEL);
+	GPU::m_RootSignature[MaterialConstants].InitAsConstantBuffer(1,D3D12_SHADER_VISIBILITY_PIXEL);
+	GPU::m_RootSignature[MaterialSRVs].InitAsDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,2,10,D3D12_SHADER_VISIBILITY_PIXEL);
+	GPU::m_RootSignature[MaterialSamplers].InitAsDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER,3,10,D3D12_SHADER_VISIBILITY_PIXEL);
 	GPU::m_RootSignature[CommonSRVs].InitAsDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,10,10,D3D12_SHADER_VISIBILITY_PIXEL);
-	GPU::m_RootSignature[CommonCBV].InitAsConstantBuffer(1);
+	GPU::m_RootSignature[CommonCBV].InitAsConstantBuffer(4);
 	GPU::m_RootSignature[SkinMatrices].InitAsBufferSRV(20,D3D12_SHADER_VISIBILITY_VERTEX);
 	GPU::m_RootSignature.Finalize(L"RootSig",D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 	AssetManager::Get().ForceLoadAsset<Mesh>("default.fbx",defaultMesh);
@@ -629,7 +629,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	GPU::ClearDepth(commandList,dsv);
 
 	commandList->SetPipelineState(GPU::m_PipeLineState.Get());
-	commandList->SetGraphicsRootSignature(GPU::m_RootSignature.Get());
+	commandList->SetGraphicsRootSignature(GPU::m_RootSignature.GetSignature());
 	commandList->RSSetViewports(1,&GPU::m_Viewport);
 	commandList->RSSetScissorRects(1,&GPU::m_ScissorRect);
 	commandList->OMSetRenderTargets(1,&GPU::m_BackBuffer->GetSRV(),FALSE,&dsv);

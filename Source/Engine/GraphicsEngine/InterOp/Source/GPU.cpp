@@ -1,4 +1,4 @@
-//#include "GraphicsEngine.pch.h"
+#include "GraphicsEngine.pch.h"
 #define NOMINMAX
 #include <DirectX/directx/d3dx12.h> 
 #include <DirectX/XTK/source/PlatformHelpers.h> 
@@ -8,7 +8,7 @@
 #include <string>
 #include <windows.h> 
 #include "Editor/Editor/Windows/Window.h"
-#include "GPU.h" 
+#include "../GPU.h" 
 
 #include <d3dcompiler.h> 
 #include <map>
@@ -18,165 +18,10 @@
 #include <DirectX/XTK/DirectXHelpers.h>
 #include <DirectX/XTK/source/PlatformHelpers.h>
 
-#include "Helpers.h"
-#include "PSO.h"
+#include "../Helpers.h"
+#include "../PSO.h"
 #include "Tools/Logging/Logging.h"
 
-static std::map< size_t,ComPtr<ID3D12RootSignature> > s_RootSignatureHashMap;
-
-ComPtr<ID3D12CommandAllocator> GPUCommandQueue::CreateCommandAllocator()
-{
-	ComPtr<ID3D12CommandAllocator> commandAllocator;
-	ThrowIfFailed(m_Device->CreateCommandAllocator(m_CommandListType,IID_PPV_ARGS(&commandAllocator)));
-
-	return commandAllocator;
-}
-
-ComPtr<ID3D12GraphicsCommandList> GPUCommandQueue::CreateCommandList(ComPtr<ID3D12CommandAllocator> allocator)
-{
-	ComPtr<ID3D12GraphicsCommandList> commandList;
-	ThrowIfFailed(m_Device->CreateCommandList(0,m_CommandListType,allocator.Get(),nullptr,IID_PPV_ARGS(&commandList)));
-
-	ThrowIfFailed(commandList->Close());
-
-	return commandList;
-}
-
-D3D12_CPU_DESCRIPTOR_HANDLE GPUDescriptorAllocator::Allocate(UINT aNumDescriptors)
-{
-	aNumDescriptors;
-	return D3D12_CPU_DESCRIPTOR_HANDLE();
-}
-
-bool GPUCommandQueue::Create(ComPtr<ID3D12Device> device,D3D12_COMMAND_LIST_TYPE type)
-{
-	m_Device = device;
-	m_FenceValue = 0;
-	m_CommandListType = type;
-
-	D3D12_COMMAND_QUEUE_DESC desc = {};
-	desc.Type = type;
-	desc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
-	desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-	desc.NodeMask = 0;
-
-	ThrowIfFailed(m_Device->CreateCommandQueue(&desc,IID_PPV_ARGS(&m_CommandQueue)));
-
-	ThrowIfFailed(m_Device->CreateFence(m_FenceValue,D3D12_FENCE_FLAG_NONE,IID_PPV_ARGS(&m_Fence)));
-	switch (type)
-	{
-	case D3D12_COMMAND_LIST_TYPE_COPY:
-		m_CommandQueue->SetName(L"Copy Command Queue");
-		break;
-	case D3D12_COMMAND_LIST_TYPE_COMPUTE:
-		m_CommandQueue->SetName(L"Compute Command Queue");
-		break;
-	case D3D12_COMMAND_LIST_TYPE_DIRECT:
-		m_CommandQueue->SetName(L"Direct Command Queue");
-		break;
-	}
-
-	m_FenceEvent = ::CreateEvent(NULL,FALSE,FALSE,NULL);
-	assert(m_FenceEvent && "Failed to create fence event handle.");
-	return true;
-}
-
-uint64_t GPUCommandQueue::Signal()
-{
-	uint64_t fenceValueForSignal = ++m_FenceValue;
-	ThrowIfFailed(m_CommandQueue->Signal(m_Fence.Get(),fenceValueForSignal));
-
-	return fenceValueForSignal;
-}
-
-bool GPUCommandQueue::IsFenceComplete(uint64_t fenceValue)
-{
-	return m_Fence->GetCompletedValue() >= fenceValue;
-}
-
-void GPUCommandQueue::WaitForFenceValue(uint64_t fenceValue)
-{
-	if (!IsFenceComplete(fenceValue))
-	{
-		auto event = ::CreateEvent(NULL,FALSE,FALSE,NULL);
-		if (event)
-		{
-			m_Fence->SetEventOnCompletion(fenceValue,event);
-			::WaitForSingleObject(event,DWORD_MAX);
-
-			::CloseHandle(event);
-		}
-	}
-}
-
-ComPtr<ID3D12GraphicsCommandList> GPUCommandQueue::GetCommandList()
-{
-	ComPtr<ID3D12CommandAllocator> commandAllocator;
-	ComPtr<ID3D12GraphicsCommandList> commandList;
-
-	if (!m_CommandAllocatorQueue.empty() && IsFenceComplete(m_CommandAllocatorQueue.front().fenceValue))
-	{
-		commandAllocator = m_CommandAllocatorQueue.front().commandAllocator;
-		m_CommandAllocatorQueue.pop();
-
-		ThrowIfFailed(commandAllocator->Reset());
-	}
-	else
-	{
-		commandAllocator = CreateCommandAllocator();
-	}
-
-	if (!m_CommandListQueue.empty())
-	{
-		commandList = m_CommandListQueue.front();
-		m_CommandListQueue.pop();
-
-		ThrowIfFailed(commandList->Reset(commandAllocator.Get(),nullptr));
-	}
-	else
-	{
-		commandList = CreateCommandList(commandAllocator);
-	}
-	ThrowIfFailed(commandList->SetPrivateDataInterface(__uuidof(ID3D12CommandAllocator),commandAllocator.Get()));
-
-	return commandList;
-}
-
-ComPtr<ID3D12CommandQueue> GPUCommandQueue::GetCommandQueue()
-{
-	return m_CommandQueue;
-}
-
-uint64_t GPUCommandQueue::ExecuteCommandList(ComPtr<ID3D12GraphicsCommandList> commandList)
-{
-	commandList->Close();
-
-	ID3D12CommandAllocator* commandAllocator;
-	UINT dataSize = sizeof(commandAllocator);
-	ThrowIfFailed(commandList->GetPrivateData(__uuidof(ID3D12CommandAllocator),&dataSize,&commandAllocator));
-
-	ID3D12CommandList* const ppCommandLists[] = {
-		commandList.Get()
-	};
-
-	m_CommandQueue->ExecuteCommandLists(1,ppCommandLists);
-	uint64_t fenceValue = Signal();
-
-	m_CommandAllocatorQueue.emplace(CommandAllocatorEntry{ fenceValue, commandAllocator });
-	m_CommandListQueue.push(commandList);
-
-
-	commandAllocator->Release();
-
-	return fenceValue;
-}
-
-void GPUCommandQueue::Flush()
-{
-	uint64_t fenceValueForSignal = Signal();
-
-	WaitForFenceValue(fenceValueForSignal);
-}
 
 
 bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,Texture* aBackBuffer,Texture* aDepthBuffer)
@@ -301,7 +146,7 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,Texture* aBackBuf
 	{
 		Logger::Err("Failed to Serialize RootSignature");
 	}
-	if (FAILED(m_Device->CreateRootSignature(0,signature->GetBufferPointer(),signature->GetBufferSize(),IID_PPV_ARGS(&m_RootSignature->m_RootSignature))))
+	if (FAILED(m_Device->CreateRootSignature(0,signature->GetBufferPointer(),signature->GetBufferSize(),IID_PPV_ARGS(&m_RootSignature.m_RootSignature))))
 	{
 		Logger::Err("Failed to Create RootSignature");
 	}
@@ -332,7 +177,7 @@ void GPU::Present(unsigned aSyncInterval)
 
 	/*UINT syncInterval = m_VSync ? 1 : 0;
 	UINT presentFlags = m_IsTearingSupported && !m_VSync ? DXGI_PRESENT_ALLOW_TEARING : 0;*/
-	ThrowIfFailed(m_Swapchain->m_SwapChain->Present(aSyncInterval,0));
+	Helpers::ThrowIfFailed(m_Swapchain->m_SwapChain->Present(aSyncInterval,0));
 	m_FrameIndex = m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
 
 	m_CommandQueue->WaitForFenceValue(m_FenceValues[m_FrameIndex]);
@@ -351,7 +196,7 @@ void GPU::UpdateBufferResource(
 	{
 		auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 		auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize,flags);
-		ThrowIfFailed(m_Device->CreateCommittedResource(
+		Helpers::ThrowIfFailed(m_Device->CreateCommittedResource(
 			&heapProperties,
 			D3D12_HEAP_FLAG_NONE,
 			&resourceDesc,
@@ -365,7 +210,7 @@ void GPU::UpdateBufferResource(
 	{
 		auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 		auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize);
-		ThrowIfFailed(m_Device->CreateCommittedResource(
+		Helpers::ThrowIfFailed(m_Device->CreateCommittedResource(
 			&heapProperties,
 			D3D12_HEAP_FLAG_NONE,
 			&resourceDesc,
@@ -411,14 +256,14 @@ bool GPU::CreateIndexBuffer(ComPtr<ID3D12Resource>& outIndexBuffer,const std::ve
 
 bool GPU::CreatePixelShader(ComPtr<ID3DBlob>& outPxShader,const BYTE* someShaderData,size_t aShaderDataSize,UINT CompileFLags)
 {
-	ThrowIfFailed(D3DCompile(someShaderData,aShaderDataSize,NULL,NULL,D3D_COMPILE_STANDARD_FILE_INCLUDE,NULL,"ps_5_1",CompileFLags,0,&outPxShader,NULL));
+	Helpers::ThrowIfFailed(D3DCompile(someShaderData,aShaderDataSize,NULL,NULL,D3D_COMPILE_STANDARD_FILE_INCLUDE,NULL,"ps_5_1",CompileFLags,0,&outPxShader,NULL));
 	return true;
 
 }
 
 bool GPU::CreateVertexShader(ComPtr<ID3DBlob>& outVxShader,const BYTE* someShaderData,size_t aShaderDataSize,UINT CompileFLags)
 {
-	ThrowIfFailed(D3DCompile(someShaderData,aShaderDataSize,NULL,NULL,D3D_COMPILE_STANDARD_FILE_INCLUDE,NULL,"vs_5_1",CompileFLags,0,&outVxShader,NULL));
+	Helpers::ThrowIfFailed(D3DCompile(someShaderData,aShaderDataSize,NULL,NULL,D3D_COMPILE_STANDARD_FILE_INCLUDE,NULL,"vs_5_1",CompileFLags,0,&outVxShader,NULL));
 
 	return true;
 }
@@ -457,7 +302,7 @@ void GPU::ResizeDepthBuffer(unsigned width,unsigned height)
 		auto resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_D32_FLOAT,width,height,
 			1,0,1,0,D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
 
-		ThrowIfFailed(m_Device->CreateCommittedResource(
+		Helpers::ThrowIfFailed(m_Device->CreateCommittedResource(
 			&heapProperties,
 			D3D12_HEAP_FLAG_NONE,
 			&resourceDesc,
@@ -565,7 +410,7 @@ ComPtr<ID3D12DescriptorHeap>  GPU::CreateDescriptorHeap(ComPtr<ID3D12Device> dev
 	desc.NumDescriptors = numDescriptors;
 	desc.Type = type;
 
-	ThrowIfFailed(device->CreateDescriptorHeap(&desc,IID_PPV_ARGS(&descriptorHeap)));
+	Helpers::ThrowIfFailed(device->CreateDescriptorHeap(&desc,IID_PPV_ARGS(&descriptorHeap)));
 
 	return descriptorHeap;
 }
@@ -574,7 +419,7 @@ ComPtr<ID3D12Fence> GPU::CreateFence(ComPtr<ID3D12Device> device)
 {
 	ComPtr<ID3D12Fence> fence;
 
-	ThrowIfFailed(device->CreateFence(0,D3D12_FENCE_FLAG_NONE,IID_PPV_ARGS(&fence)));
+	Helpers::ThrowIfFailed(device->CreateFence(0,D3D12_FENCE_FLAG_NONE,IID_PPV_ARGS(&fence)));
 
 	return fence;
 }
@@ -598,7 +443,7 @@ void GPU::UpdateRenderTargetViews(ComPtr<ID3D12Device> device,ComPtr<IDXGISwapCh
 	for (int i = 0; i < m_FrameCount; ++i)
 	{
 		ComPtr<ID3D12Resource> backBuffer;
-		ThrowIfFailed(swapChain->GetBuffer(i,IID_PPV_ARGS(&backBuffer)));
+		Helpers::ThrowIfFailed(swapChain->GetBuffer(i,IID_PPV_ARGS(&backBuffer)));
 		device->CreateRenderTargetView(backBuffer.Get(),nullptr,rtvHandle);
 		m_renderTargets[i] = backBuffer;
 		rtvHandle.Offset(rtvDescriptorSize);
@@ -686,7 +531,7 @@ void GPUSwapchain::Create(HWND hwnd,ComPtr<ID3D12CommandQueue>,UINT Width,UINT H
 	createFactoryFlags = DXGI_CREATE_FACTORY_DEBUG;
 #endif
 
-	ThrowIfFailed(CreateDXGIFactory2(createFactoryFlags,IID_PPV_ARGS(&dxgiFactory4)));
+	Helpers::ThrowIfFailed(CreateDXGIFactory2(createFactoryFlags,IID_PPV_ARGS(&dxgiFactory4)));
 
 
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
@@ -713,126 +558,6 @@ void GPUSwapchain::Create(HWND hwnd,ComPtr<ID3D12CommandQueue>,UINT Width,UINT H
 	{
 		Logger::Err("Failed to create swapchain from hwnd");
 	}
-	ThrowIfFailed(dxgiFactory4->MakeWindowAssociation(hwnd,DXGI_MWA_NO_ALT_ENTER));
-	ThrowIfFailed(swapChain.As(&m_SwapChain));
-}
-
-void GPURootSignature::RegisterSampler(UINT aRegister,const D3D12_SAMPLER_DESC& nonStaticSamplerDesc,D3D12_SHADER_VISIBILITY visibility)
-{
-	assert(m_NumInitializedStaticSamplers < m_NumSamplers);
-	D3D12_STATIC_SAMPLER_DESC& StaticSamplerDesc = m_SamplerArray[m_NumInitializedStaticSamplers++];
-
-	StaticSamplerDesc.Filter = nonStaticSamplerDesc.Filter;
-	StaticSamplerDesc.AddressU = nonStaticSamplerDesc.AddressU;
-	StaticSamplerDesc.AddressV = nonStaticSamplerDesc.AddressV;
-	StaticSamplerDesc.AddressW = nonStaticSamplerDesc.AddressW;
-	StaticSamplerDesc.MipLODBias = nonStaticSamplerDesc.MipLODBias;
-	StaticSamplerDesc.MaxAnisotropy = nonStaticSamplerDesc.MaxAnisotropy;
-	StaticSamplerDesc.ComparisonFunc = nonStaticSamplerDesc.ComparisonFunc;
-	StaticSamplerDesc.BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
-	StaticSamplerDesc.MinLOD = nonStaticSamplerDesc.MinLOD;
-	StaticSamplerDesc.MaxLOD = nonStaticSamplerDesc.MaxLOD;
-	StaticSamplerDesc.ShaderRegister = aRegister;
-	StaticSamplerDesc.RegisterSpace = 0;
-	StaticSamplerDesc.ShaderVisibility = visibility;
-}
-
-void GPURootSignature::Reset(UINT NumRootParams,UINT NumStaticSamplers)
-{
-	if (NumRootParams > 0)
-		m_ParamArray.reset(new GPURootParameter[NumRootParams]);
-	else
-		m_ParamArray = nullptr;
-	m_NumParameters = NumRootParams;
-
-	if (NumStaticSamplers > 0)
-		m_SamplerArray.reset(new D3D12_STATIC_SAMPLER_DESC[NumStaticSamplers]);
-	else
-		m_SamplerArray = nullptr;
-	m_NumSamplers = NumStaticSamplers;
-	m_NumInitializedStaticSamplers = 0;
-}
-
-void GPURootSignature::Finalize(const std::wstring& name,D3D12_ROOT_SIGNATURE_FLAGS Flags)
-{
-	assert(m_NumInitializedStaticSamplers == m_NumSamplers);
-
-	D3D12_ROOT_SIGNATURE_DESC RootDesc;
-	RootDesc.NumParameters = m_NumParameters;
-	RootDesc.pParameters = (const D3D12_ROOT_PARAMETER*)m_ParamArray.get();
-	RootDesc.NumStaticSamplers = m_NumSamplers;
-	RootDesc.pStaticSamplers = (const D3D12_STATIC_SAMPLER_DESC*)m_SamplerArray.get();
-	RootDesc.Flags = Flags;
-
-	m_DescriptorTableBitMap = 0;
-	m_SamplerTableBitMap = 0;
-
-	size_t HashCode = Helpers::Utility::HashState(&RootDesc.Flags);
-	HashCode = Helpers::Utility::HashState(RootDesc.pStaticSamplers,m_NumSamplers,HashCode);
-
-	for (UINT Param = 0; Param < m_NumParameters; ++Param)
-	{
-		const D3D12_ROOT_PARAMETER& RootParam = RootDesc.pParameters[Param];
-		m_DescriptorTableSize[Param] = 0;
-
-		if (RootParam.ParameterType == D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE)
-		{
-			assert(RootParam.DescriptorTable.pDescriptorRanges != nullptr);
-
-			HashCode = Helpers::Utility::HashState(RootParam.DescriptorTable.pDescriptorRanges,
-				RootParam.DescriptorTable.NumDescriptorRanges,HashCode);
-
-			// We keep track of sampler descriptor tables separately from CBV_SRV_UAV descriptor tables
-			if (RootParam.DescriptorTable.pDescriptorRanges->RangeType == D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER)
-				m_SamplerTableBitMap |= (1 << Param);
-			else
-				m_DescriptorTableBitMap |= (1 << Param);
-
-			for (UINT TableRange = 0; TableRange < RootParam.DescriptorTable.NumDescriptorRanges; ++TableRange)
-				m_DescriptorTableSize[Param] += RootParam.DescriptorTable.pDescriptorRanges[TableRange].NumDescriptors;
-		}
-		else
-			HashCode = Helpers::Utility::HashState(&RootParam,1,HashCode);
-	}
-
-	ID3D12RootSignature** RSRef = nullptr;
-	bool firstCompile = false;
-	{
-		static std::mutex s_HashMapMutex;
-		std::lock_guard<std::mutex> CS(s_HashMapMutex);
-		auto iter = s_RootSignatureHashMap.find(HashCode);
-
-		// Reserve space so the next inquiry will find that someone got here first.
-		if (iter == s_RootSignatureHashMap.end())
-		{
-			RSRef = s_RootSignatureHashMap[HashCode].GetAddressOf();
-			firstCompile = true;
-		}
-		else
-			RSRef = iter->second.GetAddressOf();
-	}
-
-	if (firstCompile)
-	{
-		ComPtr<ID3DBlob> pOutBlob,pErrorBlob;
-
-		ThrowIfFailed(D3D12SerializeRootSignature(&RootDesc,D3D_ROOT_SIGNATURE_VERSION_1,
-			pOutBlob.GetAddressOf(),pErrorBlob.GetAddressOf()));
-
-		ThrowIfFailed(GPU::m_Device->CreateRootSignature(1,pOutBlob->GetBufferPointer(),pOutBlob->GetBufferSize(),
-			IID_PPV_ARGS(&m_RootSignature)));
-
-		m_RootSignature->SetName(name.c_str());
-
-		s_RootSignatureHashMap[HashCode].Attach(m_RootSignature.Get());
-		assert(*RSRef == m_RootSignature.Get());
-	}
-	else
-	{
-		while (*RSRef == nullptr)
-			std::this_thread::yield();
-		m_RootSignature = *RSRef;
-	}
-
-	m_Finalized = TRUE;
+	Helpers::ThrowIfFailed(dxgiFactory4->MakeWindowAssociation(hwnd,DXGI_MWA_NO_ALT_ENTER));
+	Helpers::ThrowIfFailed(swapChain.As(&m_SwapChain));
 }

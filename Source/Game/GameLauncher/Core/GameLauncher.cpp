@@ -119,8 +119,10 @@ void GameLauncher::Start()
 {
 	GameObjectManager& gom = GameObjectManager::Get();
 #pragma region BaseSetup
+
 	myCustomHandler = gom.CreateGameObject();
 	myMesh = gom.CreateGameObject();
+
 	{
 		GameObject camera = gom.CreateGameObject();
 		auto& cameraComponent = camera.AddComponent<cCamera>();

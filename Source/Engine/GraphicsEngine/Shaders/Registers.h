@@ -16,17 +16,17 @@
 #define HLSL_REG_DefaultSampler s0 
 #define REG_DefaultSampler 0 
 
-#define HLSL_REG_normalDepthSampler s12
-#define REG_normalDepthSampler 12
+#define HLSL_REG_normalDepthSampler s1
+#define REG_normalDepthSampler 1
 
-#define HLSL_REG_PointSampler s13 
-#define REG_PointSampler 13 
+#define HLSL_REG_PointSampler s2 
+#define REG_PointSampler 2 
 
-#define HLSL_REG_shadowCmpSampler s14 
-#define REG_shadowCmpSampler 14 
+#define HLSL_REG_shadowCmpSampler s3 
+#define REG_shadowCmpSampler 3 
 
-#define HLSL_REG_BRDFSampler s15 
-#define REG_BRDFSampler 15 
+#define HLSL_REG_BRDFSampler s4 
+#define REG_BRDFSampler 4 
 
 #define HLSL_REG_FrameBuffer b0 
 #define REG_FrameBuffer 0

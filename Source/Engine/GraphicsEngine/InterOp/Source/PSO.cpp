@@ -1,8 +1,8 @@
 #include "GraphicsEngine.pch.h"
 #include <d3dcompiler.h>
 #include <DirectX/directx/d3dx12_core.h> 
-#include "GPU.h"
-#include "PSO.h"  
+#include "../GPU.h"
+#include "../PSO.h"  
 
 #include <DirectX/XTK/source/PlatformHelpers.h>
 
@@ -42,7 +42,7 @@ void PSO::Init()
 	inputLayout.NumElements = (UINT)Vertex::InputLayoutDefinition.size();
 
 	psoDesc.InputLayout = inputLayout; //{ Vertex::InputLayoutDefinition,_countof(Vertex::InputLayoutDefinition) };
-	psoDesc.pRootSignature = GPU::m_RootSignature.Get();
+	psoDesc.pRootSignature = GPU::m_RootSignature.GetSignature();
 	psoDesc.VS = CD3DX12_SHADER_BYTECODE(vs->GetShader().GetBufferPtr(),vs->GetShader().GetBlobSize()); // add shader cache later or never u lazy sob
 	psoDesc.PS = CD3DX12_SHADER_BYTECODE(ps->GetShader().GetBufferPtr(),ps->GetShader().GetBlobSize());
 	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
@@ -55,7 +55,7 @@ void PSO::Init()
 	psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 	psoDesc.SampleDesc.Count = 1;
 
-	ThrowIfFailed(GPU::m_Device->CreateGraphicsPipelineState(&psoDesc,IID_PPV_ARGS(m_pipelineState.ReleaseAndGetAddressOf())));
+	Helpers::ThrowIfFailed(GPU::m_Device->CreateGraphicsPipelineState(&psoDesc,IID_PPV_ARGS(m_pipelineState.ReleaseAndGetAddressOf())));
 	/*GPU::m_Device->CreateCommandList(0,D3D12_COMMAND_LIST_TYPE_DIRECT,GPU::m_Allocator.Get(),m_pipelineState.Get(),IID_PPV_ARGS(&GPU::m_CommandList));
 
 	GPU::m_CommandList->Close();*/
