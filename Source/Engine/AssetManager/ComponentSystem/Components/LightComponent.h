@@ -10,6 +10,7 @@ enum class eLightType
 };
 struct DirectionalLight;
 struct SpotLight;
+class Texture;
 struct PointLight;
 class cLight : public Component
 {

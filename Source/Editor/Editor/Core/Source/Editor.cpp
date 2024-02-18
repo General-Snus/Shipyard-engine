@@ -5,8 +5,7 @@
 #include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXDynamicBody.h> 
 #include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXStaticBody.h> 
 #include <Engine/AssetManager/ComponentSystem/Components/Transform.h> 
-#include <Engine/AssetManager/ComponentSystem/GameObject.h>
-#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
+#include <Engine/AssetManager/ComponentSystem/GameObject.h> 
 #include <filesystem>
 #include <fstream>
 #include <functional>
@@ -24,6 +23,9 @@
 #include <Tools/Utilities/System/ThreadPool.hpp>
 #include <Windows/EditorWindows/ChainGraph/GraphTool.h>
 #include "../Editor.h" 
+
+#include "ComponentSystem/Components/LightComponent.h"
+#include "GraphicsEngine.h"
 #include "InterOp/GPU.h"
 #include "Windows.h"
 #include "Windows/SplashWindow.h"

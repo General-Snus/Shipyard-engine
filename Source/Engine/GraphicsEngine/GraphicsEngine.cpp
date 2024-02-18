@@ -4,6 +4,7 @@
 #include <Engine/AssetManager/ComponentSystem/Components/CameraComponent.h>
 #include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>
 #include <Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h>
+#include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
 #include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
 #include <Objects/DataObjects/Default_C.h>
 #include <Objects/DataObjects/Default_FX.h>
@@ -25,12 +26,8 @@
 #include <Shaders/Include/ScreenspaceQuad_VS.h>
 #include <Shaders/Include/SSAO_PS.h> 
 #include <Shaders/Include/ToneMapping_PS.h>
-#include <stdexcept> 
-#include <Tools/ImGui/ImGui/imgui.h>
-#include <Tools/Optick/include/optick.h> 
-#include "GraphicsEngine.h"
 #include "InterOp/GPU.h"
-#include "InterOp/PSO.h"
+#include "InterOp/PSO.h" 
 
 
 bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
@@ -131,19 +128,6 @@ void GraphicsEngine::SetupDefaultVariables()
 	samplerDesc.MinLOD = -D3D12_FLOAT32_MAX;
 	samplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
 
-
-	GPU::m_RootSignature.Reset(eRootBindings::count,REG_shadowCmpSampler);
-	GPU::m_RootSignature.RegisterSampler(REG_DefaultSampler,samplerDesc,D3D12_SHADER_VISIBILITY_PIXEL);
-
-
-
-	//if (!RHI::CreateSamplerState(myDefaultSampleState,samplerDesc))
-	//{
-	//	Logger::Log("Sampler state created");
-	//	assert(false);
-	//}*/
-	//RHI::SetSamplerState(myDefaultSampleState,REG_DefaultSampler);
-
 	D3D12_SAMPLER_DESC shadowSamplerDesc = {};
 	shadowSamplerDesc.Filter = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
 	shadowSamplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
@@ -158,23 +142,36 @@ void GraphicsEngine::SetupDefaultVariables()
 	shadowSamplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
 	shadowSamplerDesc.MipLODBias = 0.f;
 	shadowSamplerDesc.MaxAnisotropy = 1;
-	GPU::m_RootSignature.RegisterSampler(REG_shadowCmpSampler,shadowSamplerDesc,D3D12_SHADER_VISIBILITY_PIXEL);
+
+	D3D12_SAMPLER_DESC pointSamplerDesc = {};
+	pointSamplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
+	pointSamplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	pointSamplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	pointSamplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+
+
+
+	//if (!RHI::CreateSamplerState(myDefaultSampleState,samplerDesc))
+	//{
+	//	Logger::Log("Sampler state created");
+	//	assert(false);
+	//}*/
+	//RHI::SetSamplerState(myDefaultSampleState,REG_DefaultSampler);
+
 
 	//if (!RHI::CreateSamplerState(myShadowSampleState,shadowSamplerDesc))
 	//{
 	//	Logger::Log("Sampler state created");
 	//	assert(false);
 	//}
-	//RHI::SetSamplerState(myShadowSampleState,REG_shadowCmpSampler);
-
+	//RHI::SetSamplerState(myShadowSampleState,REG_shadowCmpSampler); 
 	//D3D12_DEPTH_STENCIL_DESC depthStencilDesc = {};
 	//depthStencilDesc.DepthEnable = true;
 	//depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 	//depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_GREATER;
 	//depthStencilDesc.StencilEnable = false;
 	//depthStencilDesc.StencilReadMask = D3D12_DEFAULT_STENCIL_READ_MASK;
-	//depthStencilDesc.StencilWriteMask = D3D12_DEFAULT_STENCIL_WRITE_MASK;  
-
+	//depthStencilDesc.StencilWriteMask = D3D12_DEFAULT_STENCIL_WRITE_MASK;   
 	////auto result = RHI::Device->CreateDepthStencilState(
 	////	&depthStencilDesc,
 	////	&myDepthStencilStates[(int)eDepthStencilStates::DSS_ReadOnly]
@@ -184,37 +181,31 @@ void GraphicsEngine::SetupDefaultVariables()
 	//	Logger::Log("Failed to create depth stencil read only state");
 	//	assert(false);
 	//}
-	//myDepthStencilStates[(int)eDepthStencilStates::DSS_ReadWrite] = nullptr;
-
+	//myDepthStencilStates[(int)eDepthStencilStates::DSS_ReadWrite] = nullptr; 
 	////RHI::CreateVertexShaderAndInputLayout(
 	////	myVertexShader,
 	////	Vertex::InputLayout,
 	////	Vertex::InputLayoutDefinition,
 	////	BuiltIn_Default_VS_ByteCode,
 	////	sizeof(BuiltIn_Default_VS_ByteCode)
-	////);
-
+	////); 
 	//GPU::CreateVertexShader(
 	//	myVertexShader,
 	//	BuiltIn_Default_VS_ByteCode,
 	//	sizeof(BuiltIn_Default_VS_ByteCode)
-	//);
-
+	//); 
 	//GPU::CreatePixelShader(
 	//	myPixelShader,
 	//	BuiltIn_Default_PS_ByteCode,
 	//	sizeof(BuiltIn_Default_PS_ByteCode)
-	//);
-
+	//); 
 	////RHI::CreateInputLayout(
 	////	Vertex::InputLayout,
 	////	Vertex::InputLayoutDefinition,
 	////	BuiltIn_Default_VS_ByteCode,
 	////	sizeof(BuiltIn_Default_VS_ByteCode)
-	////);
-
-	//defaultTexture = std::make_shared<TextureHolder>("",eTextureType::ColorMap);
-
+	////); 
+	//defaultTexture = std::make_shared<TextureHolder>("",eTextureType::ColorMap); 
 	//if (!RHI::LoadTexture(
 	//	defaultTexture->GetRawTexture().get(),
 	//	AssetManager::Get().AssetPath / "Textures/Default/DefaultTile.dds"))
@@ -225,79 +216,64 @@ void GraphicsEngine::SetupDefaultVariables()
 	//		BuiltIn_Default_C_ByteCode,
 	//		sizeof(BuiltIn_Default_C_ByteCode)
 	//	);
-	//} 
-
+	//}  
 	//defaultNormalTexture = std::make_shared<TextureHolder>("",eTextureType::NormalMap);
 	//RHI::LoadTextureFromMemory(
 	//	defaultNormalTexture->GetRawTexture().get(),
 	//	L"Default Normal texture",
 	//	BuiltIn_Default_N_ByteCode,
 	//	sizeof(BuiltIn_Default_N_ByteCode)
-	//);
-
+	//); 
 	//defaultMatTexture = std::make_shared<TextureHolder>("",eTextureType::MaterialMap);
 	//RHI::LoadTextureFromMemory(
 	//	defaultMatTexture->GetRawTexture().get(),
 	//	L"Default material texture",
 	//	BuiltIn_Default_M_ByteCode,
 	//	sizeof(BuiltIn_Default_M_ByteCode)
-	//);
-
+	//); 
 	//defaultEffectTexture = std::make_shared<TextureHolder>("",eTextureType::EffectMap);
 	//RHI::LoadTextureFromMemory(
 	//	defaultEffectTexture->GetRawTexture().get(),
 	//	L"Default effect texture",
 	//	BuiltIn_Default_FX_ByteCode,
 	//	sizeof(BuiltIn_Default_FX_ByteCode)
-	//);
-
+	//); 
 	////Particle
 	//AssetManager::Get().ForceLoadAsset<TextureHolder>(L"Textures/Default/DefaultParticle_P.dds",defaultParticleTexture);
 	//defaultParticleTexture->SetTextureType(eTextureType::ParticleMap);
 
-
-
-
 	//NOISE
-	D3D12_SAMPLER_DESC pointSamplerDesc = {};
-	pointSamplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
-	pointSamplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	pointSamplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	pointSamplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	GPU::m_RootSignature.RegisterSampler(REG_PointSampler,pointSamplerDesc,D3D12_SHADER_VISIBILITY_PIXEL);
 
 	//if (!RHI::CreateSamplerState(myPointSampleState,pointSamplerDesc))
 	//{
 	//	Logger::Log("Sampler state created");
 	//	assert(false);
 	//}
-	//RHI::SetSamplerState(myPointSampleState,REG_PointSampler);
-
-
+	//RHI::SetSamplerState(myPointSampleState,REG_PointSampler); 
 	//AssetManager::Get().ForceLoadAsset<TextureHolder>(L"Textures/Default/NoiseTable.dds",NoiseTable);
 	//RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_Noise_Texture,NoiseTable->GetRawTexture().get()); //Is there guarantee that this holds?
-
 	//defaultVS = std::make_shared<Shader>();
-	//defaultPS = std::make_shared<Shader>();
-
+	//defaultPS = std::make_shared<Shader>(); 
 	//defaultVS->SetShader(myVertexShader);
 	//defaultVS->myName = L"Default Vertex Shader";
 	//defaultPS->SetShader(myPixelShader);
-	//defaultPS->myName = L"Default Pixel Shader";*/
-
+	//defaultPS->myName = L"Default Pixel Shader";*/ 
 	//AssetManager::Get().ForceLoadAsset<Material>("Materials/Default.json",defaultMaterial);
-	//defaultMaterial->SetShader(defaultVS,defaultPS);
-
+	//defaultMaterial->SetShader(defaultVS,defaultPS); 
 	//AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/skansen_cubemap.dds",defaultCubeMap);
 	//defaultCubeMap->SetTextureType(eTextureType::CubeMap);
 	//RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_enviromentCube,defaultCubeMap->GetRawTexture().get());
 
+	GPU::m_RootSignature.Reset(eRootBindings::count,3);
+	GPU::m_RootSignature.RegisterSampler(REG_DefaultSampler,samplerDesc,D3D12_SHADER_VISIBILITY_PIXEL);
+	GPU::m_RootSignature.RegisterSampler(REG_PointSampler,pointSamplerDesc,D3D12_SHADER_VISIBILITY_PIXEL);
+	GPU::m_RootSignature.RegisterSampler(REG_shadowCmpSampler,shadowSamplerDesc,D3D12_SHADER_VISIBILITY_PIXEL);
 	GPU::m_RootSignature[MeshConstants].InitAsConstantBuffer(0,D3D12_SHADER_VISIBILITY_VERTEX);
-	GPU::m_RootSignature[MaterialConstants].InitAsConstantBuffer(1,D3D12_SHADER_VISIBILITY_PIXEL);
-	GPU::m_RootSignature[MaterialSRVs].InitAsDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,2,10,D3D12_SHADER_VISIBILITY_PIXEL);
-	GPU::m_RootSignature[MaterialSamplers].InitAsDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER,3,10,D3D12_SHADER_VISIBILITY_PIXEL);
+	GPU::m_RootSignature[MaterialConstants].InitAsConstantBuffer(0,D3D12_SHADER_VISIBILITY_PIXEL);
+	GPU::m_RootSignature[MaterialSRVs].InitAsDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,0,10,D3D12_SHADER_VISIBILITY_PIXEL);
+	GPU::m_RootSignature[MaterialSamplers].InitAsDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER,0,10,D3D12_SHADER_VISIBILITY_PIXEL);
 	GPU::m_RootSignature[CommonSRVs].InitAsDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,10,10,D3D12_SHADER_VISIBILITY_PIXEL);
-	GPU::m_RootSignature[CommonCBV].InitAsConstantBuffer(4);
+	GPU::m_RootSignature[CommonCBV].InitAsConstantBuffer(1);
 	GPU::m_RootSignature[SkinMatrices].InitAsBufferSRV(20,D3D12_SHADER_VISIBILITY_VERTEX);
 	GPU::m_RootSignature.Finalize(L"RootSig",D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 	AssetManager::Get().ForceLoadAsset<Mesh>("default.fbx",defaultMesh);
@@ -747,3 +723,31 @@ void GraphicsEngine::EndFrame()
 	OPTICK_EVENT("ClearedEndFrame")
 }
 
+FORCEINLINE std::shared_ptr<Texture> GraphicsEngine::GetTargetTextures(eRenderTargets type) const
+{
+	switch (type)
+	{
+	case::eRenderTargets::BackBuffer:
+		return myBackBuffer;
+	case::eRenderTargets::DepthBuffer:
+		return myDepthBuffer;
+	case::eRenderTargets::SceneBuffer:
+		return SceneBuffer;
+	case::eRenderTargets::halfSceneBuffer:
+		return halfSceneBuffer;
+	case::eRenderTargets::quaterSceneBuffer1:
+		return quaterSceneBuffer1;
+	case::eRenderTargets::quaterSceneBuffer2:
+		return quaterSceneBuffer2;
+	case::eRenderTargets::IntermediateA:
+		return IntermediateA;
+	case::eRenderTargets::IntermediateB:
+		return IntermediateB;
+	case::eRenderTargets::SSAO:
+		return SSAOTexture;
+	case::eRenderTargets::NoiseTexture:
+		return NoiseTable->GetRawTexture();
+	default:
+		return nullptr;
+	}
+}

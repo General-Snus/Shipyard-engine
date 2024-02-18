@@ -1,13 +1,7 @@
 #pragma once 
-#include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
-#include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
 #include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
 #include <Engine/GraphicsEngine/Shaders/Registers.h> 
-#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp> 
-//#include "InterOp/RHI.h"
-#include "InterOp/GPU.h"
-#include "InterOp/PSO.h"
-
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>  
 #include "Rendering/Buffers/ConstantBuffer.h" 
 #include "Rendering/Buffers/FrameBuffer.h"
 #include "Rendering/Buffers/G_Buffer.h"
@@ -15,7 +9,8 @@
 #include "Rendering/Buffers/LineBuffer.h"
 #include "Rendering/Buffers/ObjectBuffer.h" 
 #include "Rendering/ParticleRenderer/ParticleRenderer.h"
-#include "Rendering/ShadowRenderer/ShadowRenderer.h"  
+#include "Rendering/ShadowRenderer/ShadowRenderer.h"
+
 #define _DEBUGDRAW
 
 struct GraphicsSettings
@@ -58,6 +53,9 @@ enum class eShader
 };
 
 class cCamera;
+class Texture;
+class TextureHolder;
+class PSOCache;
 
 class GraphicsEngine
 {
@@ -74,7 +72,7 @@ public:
 	};
 private:
 
-	std::unique_ptr<PSOCache> m_StateCache;
+	std::shared_ptr<PSOCache> m_StateCache;
 
 
 	FrameBuffer myFrameBuffer;
@@ -236,7 +234,6 @@ public:
 	[[nodiscard]] SIZE FORCEINLINE GetWindowSize() const { return myWindowSize; }
 
 
-
 	FORCEINLINE std::shared_ptr<Shader> GetDefaultVSShader() const { return defaultVS; }
 	FORCEINLINE std::shared_ptr<Shader> GetDefaultPSShader() const { return defaultPS; }
 
@@ -298,34 +295,9 @@ public:
 	}
 	*/
 
-	FORCEINLINE std::shared_ptr<Texture> GetTargetTextures(eRenderTargets type) const
-	{
-		switch (type)
-		{
-		case::eRenderTargets::BackBuffer:
-			return myBackBuffer;
-		case::eRenderTargets::DepthBuffer:
-			return myDepthBuffer;
-		case::eRenderTargets::SceneBuffer:
-			return SceneBuffer;
-		case::eRenderTargets::halfSceneBuffer:
-			return halfSceneBuffer;
-		case::eRenderTargets::quaterSceneBuffer1:
-			return quaterSceneBuffer1;
-		case::eRenderTargets::quaterSceneBuffer2:
-			return quaterSceneBuffer2;
-		case::eRenderTargets::IntermediateA:
-			return IntermediateA;
-		case::eRenderTargets::IntermediateB:
-			return IntermediateB;
-		case::eRenderTargets::SSAO:
-			return SSAOTexture;
-		case::eRenderTargets::NoiseTexture:
-			return NoiseTable->GetRawTexture();
-		default:
-			return nullptr;
-		}
-	}
+
+
+	FORCEINLINE std::shared_ptr<Texture> GetTargetTextures(eRenderTargets type) const;
 
 	FORCEINLINE InstanceRenderer& GetInstanceRenderer() { return myInstanceRenderer; }
 	FORCEINLINE GraphicsSettings& GetSettings() { return myGraphicSettings; }

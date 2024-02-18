@@ -7,15 +7,10 @@
 
 using namespace Microsoft::WRL;
 
-struct ID3D11Resource;
-struct ID3D11ShaderResourceView;
-struct ID3D11RenderTargetView;
-struct D3D11_VIEWPORT;
+#include <Engine/GraphicsEngine/InterOp/GpuResource.h>
 
-#include "GpuResource.h"
-/**
- * \brief Represents raw texture data in some format.
- */
+
+
 class Texture : public GpuResource
 {
 	friend class GPU;

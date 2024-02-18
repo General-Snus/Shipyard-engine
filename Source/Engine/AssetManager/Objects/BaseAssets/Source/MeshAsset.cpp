@@ -2,6 +2,7 @@
 #include <Tools/Utilities/Math.hpp>
 #include "../MeshAsset.h" 
 
+#include "Engine/GraphicsEngine/InterOp/GPU.h"
 
 
 std::vector<std::string> GetTextureNames(const TGA::FBX::Material& material)
@@ -447,11 +448,8 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 
 	ComPtr<ID3D12Resource> vertexBuffer;
 	D3D12_VERTEX_BUFFER_VIEW m_VertexBufferView;
-	m_VertexBufferView.BufferLocation = vertexBuffer->GetGPUVirtualAddress();
-	m_VertexBufferView.SizeInBytes = sizeof(mdlVertices);
-	m_VertexBufferView.StrideInBytes = sizeof(Vertex);
 
-	if (!GPU::CreateVertexBuffer<Vertex>(vertexBuffer,mdlVertices))
+	if (!GPU::CreateVertexBuffer<Vertex>(m_VertexBufferView,vertexBuffer,mdlVertices))
 	{
 		std::cout << "Failed to create vertex buffer" << std::endl;
 		return;

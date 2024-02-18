@@ -210,6 +210,7 @@ void GPU::UpdateBufferResource(
 	{
 		auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 		auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize);
+
 		Helpers::ThrowIfFailed(m_Device->CreateCommittedResource(
 			&heapProperties,
 			D3D12_HEAP_FLAG_NONE,
@@ -222,6 +223,7 @@ void GPU::UpdateBufferResource(
 		subResourceData.pData = bufferData;
 		subResourceData.RowPitch = bufferSize;
 		subResourceData.SlicePitch = subResourceData.RowPitch;
+
 
 		UpdateSubresources(commandList.Get(),*pDestinationResource,*pIntermediateResource,0,0,1,&subResourceData);
 	}
@@ -236,22 +238,27 @@ void GPU::ConfigureInputAssembler(
 	commandList->IASetIndexBuffer(&indexView);
 }
 
-bool GPU::CreateIndexBuffer(ComPtr<ID3D12Resource>& outIndexBuffer,const std::vector<unsigned>& aIndexList)
+//bool GPU::CreateIndexBuffer(ComPtr<ID3D12Resource>& outIndexBuffer,const std::vector<unsigned>& aIndexList)
+//{
+//
+//	const size_t size = sizeof(unsigned);
+//	const size_t numIn = aIndexList.size();
+//
+//
+//
+//
+//	ComPtr<ID3D12Resource> intermediateIndexBuffer;
+//	UpdateBufferResource(
+//		m_CommandQueue->GetCommandList(),
+//		&outIndexBuffer,&intermediateIndexBuffer
+//		,numIn,size,aIndexList.data()
+//	);
+//	return true;
+//}
+
+bool GPU::CreateIndexBuffer(D3D12_INDEX_BUFFER_VIEW& outIndexBufferView,ComPtr<ID3D12Resource>& outVxBuffer,const std::vector<unsigned>& aIndexList)
 {
-
-	const size_t size = sizeof(unsigned);
-	const size_t numIn = aIndexList.size();
-
-
-
-
-	ComPtr<ID3D12Resource> intermediateIndexBuffer;
-	UpdateBufferResource(
-		m_CommandQueue->GetCommandList(),
-		&outIndexBuffer,&intermediateIndexBuffer
-		,numIn,size,aIndexList.data()
-	);
-	return true;
+	return false;
 }
 
 bool GPU::CreatePixelShader(ComPtr<ID3DBlob>& outPxShader,const BYTE* someShaderData,size_t aShaderDataSize,UINT CompileFLags)

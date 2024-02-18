@@ -13,20 +13,20 @@
 
 // Purpose: Registers for the shaders.
 
-#define HLSL_REG_DefaultSampler s0 
-#define REG_DefaultSampler 0 
+#define HLSL_REG_DefaultSampler s10 
+#define REG_DefaultSampler 10 
 
-#define HLSL_REG_normalDepthSampler s1
-#define REG_normalDepthSampler 1
+#define HLSL_REG_normalDepthSampler s11
+#define REG_normalDepthSampler 11
 
-#define HLSL_REG_PointSampler s2 
-#define REG_PointSampler 2 
+#define HLSL_REG_PointSampler s12 
+#define REG_PointSampler 12 
 
-#define HLSL_REG_shadowCmpSampler s3 
-#define REG_shadowCmpSampler 3 
+#define HLSL_REG_shadowCmpSampler s13 
+#define REG_shadowCmpSampler 13 
 
-#define HLSL_REG_BRDFSampler s4 
-#define REG_BRDFSampler 4 
+#define HLSL_REG_BRDFSampler s14 
+#define REG_BRDFSampler 14 
 
 #define HLSL_REG_FrameBuffer b0 
 #define REG_FrameBuffer 0

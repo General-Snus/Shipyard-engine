@@ -2,15 +2,7 @@
 #include <Engine/GraphicsEngine/Rendering/Texture.h>
 #include "BaseAsset.h"
 
-enum class eTextureType
-{
-	ColorMap = 0,
-	NormalMap = 1,
-	MaterialMap = 2,
-	EffectMap = 3,
-	ParticleMap = 4,
-	CubeMap = 100
-};
+
 
 class TextureHolder : public AssetBase
 {

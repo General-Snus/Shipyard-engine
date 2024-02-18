@@ -177,6 +177,7 @@
     </ClInclude>
     <ClInclude Include="ComponentSystem\Components\Physics\cPhysXDynamicBody.h" />
     <ClInclude Include="ComponentSystem\Components\Physics\cPhysXStaticBody.h" />
+    <ClInclude Include="Enums.h" />
     <ClInclude Include="Objects\AI\AgentSystem\AIPollingManager.h" />
     <ClInclude Include="AssetManagerUtills.hpp" />
     <ClInclude Include="Objects\BaseAssets\ColliderAsset.h" />

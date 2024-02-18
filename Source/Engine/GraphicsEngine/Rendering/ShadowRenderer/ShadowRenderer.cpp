@@ -1,6 +1,4 @@
-#include "GraphicsEngine.pch.h"
-#include <Tools/ImGui/ImGui/imgui.h>
-#include <Tools/Optick/src/optick.h>
+#include "GraphicsEngine.pch.h" 
 #include "../../Shaders/Include/Default_VS.h"
 #include "ShadowRenderer.h" 
 

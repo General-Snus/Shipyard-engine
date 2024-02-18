@@ -1,4 +1,5 @@
 #pragma once 
+#include <Engine/AssetManager/Enums.h>
 #include <Engine/GraphicsEngine/Rendering/Vertex.h>
 #include <filesystem>
 #include  <functional>

@@ -5,10 +5,25 @@
 
 
 #define D3D12MA_D3D12_HEADERS_ALREADY_INCLUDED
+#include <basetsd.h>
+#include <combaseapi.h>
+#include <cstdint>
 #include <DirectX\directx\d3d12.h> 
-#include <dxgi1_6.h> 
+#include <DirectX\directx\d3dcommon.h>
+#include <DirectX\directx\d3dx12_core.h>
+#include <dxgi.h>
+#include <dxgi1_5.h>
+#include <Engine/GraphicsEngine/InterOp/Helpers.h>
 #include <Engine/GraphicsEngine/Rendering/Texture.h>
-
+#include <filesystem>
+#include <memory>
+#include <minwindef.h>
+#include <sal.h>
+#include <specstrings.h>
+#include <vector>
+#include <windef.h>
+#include <winnt.h>
+#include <wrl\client.h>
 #include "CommandQueue.h"
 #include "RootSignature.h"
 
@@ -80,9 +95,13 @@ public:
 		const D3D12_INDEX_BUFFER_VIEW& indexView
 	);
 
-	template <typename vertexType>
-	static bool CreateVertexBuffer(ComPtr<ID3D12Resource>& outVxBuffer,const std::vector<vertexType>& aVertexList);
-	static bool CreateIndexBuffer(ComPtr<ID3D12Resource>& outVxBuffer,const std::vector<unsigned>& aIndexList);
+	template<typename vertexType = Vertex>
+	static bool CreateVertexBuffer(
+		D3D12_VERTEX_BUFFER_VIEW& outVertexBufferView,
+		ComPtr<ID3D12Resource>& outVxBuffer,
+		const std::vector<vertexType>& aVertexList);
+
+	static bool CreateIndexBuffer(D3D12_INDEX_BUFFER_VIEW& outIndexBufferView,ComPtr<ID3D12Resource>& outVxBuffer,const std::vector<unsigned>& aIndexList);
 
 	static bool CreatePixelShader(ComPtr<ID3DBlob>& outPxShader,const BYTE* someShaderData,size_t aShaderDataSize,UINT CompileFLags = 0);
 
@@ -157,15 +176,45 @@ private:
 };
 
 template<typename vertexType>
-inline bool GPU::CreateVertexBuffer(ComPtr<ID3D12Resource>& outVxBuffer,const std::vector<vertexType>& aVertexList)
+inline bool GPU::CreateVertexBuffer(
+	D3D12_VERTEX_BUFFER_VIEW& outvertexBufferView,
+	ComPtr<ID3D12Resource>& outVxBuffer,
+	const std::vector<vertexType>& aVertexList)
 {
-	ComPtr<ID3D12Resource> intermediateVertexBuffer;
+	const D3D12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+	const CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(aVertexList));
+	Helpers::ThrowIfFailed(m_Device->CreateCommittedResource(
+		&heapProp,
+		D3D12_HEAP_FLAG_NONE,
+		&bufferDesc,
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&outVxBuffer)));
+
+	UINT8* pVertexDataBegin;
+	CD3DX12_RANGE readRange(0,0);
+	Helpers::ThrowIfFailed(
+		outVxBuffer->Map(0,&readRange,reinterpret_cast<void**>(&pVertexDataBegin))
+	);
+	memcpy(pVertexDataBegin,aVertexList.data(),sizeof(aVertexList));
+	outVxBuffer->Unmap(0,nullptr);
+
+	// Initialize the vertex buffer view.
+	outvertexBufferView.BufferLocation = outVxBuffer->GetGPUVirtualAddress();
+	outvertexBufferView.StrideInBytes = sizeof(vertexType);
+	outvertexBufferView.SizeInBytes = sizeof(aVertexList);
+
+
+
+
+
+	/*ComPtr<ID3D12Resource> intermediateVertexBuffer;
 	const size_t vxSize = sizeof(vertexType);
 	const size_t numVx = aVertexList.size();
 	UpdateBufferResource(
 		m_CommandQueue->GetCommandList(),
 		&outVxBuffer,&intermediateVertexBuffer
 		,numVx,vxSize,aVertexList.data()
-	);
+	);*/
 	return true;
 }

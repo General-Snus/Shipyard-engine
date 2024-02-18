@@ -1,6 +1,8 @@
 #include "GraphicsEngine.pch.h"
 #include "../RootSignature.h"
 
+#include <mutex>
+
 
 static std::map< size_t,ComPtr<ID3D12RootSignature> > s_RootSignatureHashMap;
 void GPURootSignature::RegisterSampler(UINT aRegister,const D3D12_SAMPLER_DESC& nonStaticSamplerDesc,D3D12_SHADER_VISIBILITY visibility)
@@ -19,7 +21,8 @@ void GPURootSignature::RegisterSampler(UINT aRegister,const D3D12_SAMPLER_DESC& 
 	StaticSamplerDesc.MinLOD = nonStaticSamplerDesc.MinLOD;
 	StaticSamplerDesc.MaxLOD = nonStaticSamplerDesc.MaxLOD;
 	StaticSamplerDesc.ShaderRegister = aRegister;
-	StaticSamplerDesc.RegisterSpace = 0;  
+	StaticSamplerDesc.RegisterSpace = 0;
+	StaticSamplerDesc.ShaderVisibility = visibility;
 }
 
 void GPURootSignature::Reset(UINT NumRootParams,UINT NumStaticSamplers)
@@ -101,11 +104,17 @@ void GPURootSignature::Finalize(const std::wstring& name,D3D12_ROOT_SIGNATURE_FL
 	{
 		ComPtr<ID3DBlob> pOutBlob,pErrorBlob;
 
-		Helpers::ThrowIfSucceded(D3D12SerializeRootSignature(&RootDesc,D3D_ROOT_SIGNATURE_VERSION_1,
-		                                                   pOutBlob.GetAddressOf(),pErrorBlob.GetAddressOf()));
+		D3D12SerializeRootSignature(&RootDesc,D3D_ROOT_SIGNATURE_VERSION_1,
+			pOutBlob.GetAddressOf(),pErrorBlob.GetAddressOf());
 
-		Helpers::ThrowIfSucceded(GPU::m_Device->CreateRootSignature(1,pOutBlob->GetBufferPointer(),pOutBlob->GetBufferSize(),
-		                                                            IID_PPV_ARGS(&m_RootSignature)));
+		if (pErrorBlob)
+		{
+			Logger::Err((char*)pErrorBlob->GetBufferPointer());
+		}
+
+
+		Helpers::ThrowIfFailed(GPU::m_Device->CreateRootSignature(1,pOutBlob->GetBufferPointer(),pOutBlob->GetBufferSize(),
+			IID_PPV_ARGS(&m_RootSignature)));
 
 		m_RootSignature->SetName(name.c_str());
 

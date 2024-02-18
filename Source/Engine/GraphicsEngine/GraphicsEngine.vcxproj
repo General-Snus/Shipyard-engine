@@ -191,13 +191,14 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="InterOp\GPUBuffer.h" />
     <ClInclude Include="InterOp\CommandQueue.h" />
     <ClInclude Include="DebugDrawer\DebugDrawer.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="InterOp\RHI.h" />
-    <ClInclude Include="Rendering\GpuResource.h" />
+    <ClInclude Include="InterOp\GpuResource.h" />
     <ClInclude Include="InterOp\GPU.h" />
     <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_GaussianBlur.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -323,13 +324,14 @@
     <ClInclude Include="Rendering\ShadowRenderer\ShadowRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="InterOp\Source\GPUBuffer.cpp" />
     <ClCompile Include="InterOp\Source\CommandQueue.cpp" />
     <ClCompile Include="DebugDrawer\DebugDrawer.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="InterOp\Source\RHI.cpp" />
-    <ClCompile Include="Rendering\GpuResource.cpp" />
+    <ClCompile Include="InterOp\Source\GpuResource.cpp" />
     <ClCompile Include="InterOp\Source\GPU.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
