@@ -2,8 +2,8 @@
 #include <string>
 #include <Tools/Utilities/Math.hpp>
 
-#include "Tools/Logging/Logging.h"
 #include <DirectX/XTK/source/PlatformHelpers.h>
+#include "Tools/Logging/Logging.h"
 
 namespace Helpers
 {
@@ -18,7 +18,7 @@ namespace Helpers
 	inline std::wstring string_cast<std::wstring>(const std::string& someString)
 	{
 		const int sLength = static_cast<int>(someString.length());
-		const int len = MultiByteToWideChar(CP_ACP,0,someString.c_str(),sLength,0,0);
+		const int len = MultiByteToWideChar(CP_ACP,0,someString.c_str(),sLength,nullptr,0);
 		std::wstring result(len,L'\0');
 		MultiByteToWideChar(CP_ACP,0,someString.c_str(),sLength,&result[0],len);
 		return result;
@@ -28,13 +28,12 @@ namespace Helpers
 	inline std::string string_cast<std::string>(const std::wstring& someString)
 	{
 		const int sLength = static_cast<int>(someString.length());
-		const int len = WideCharToMultiByte(CP_ACP,0,someString.c_str(),sLength,0,0,0,0);
+		const int len = WideCharToMultiByte(CP_ACP,0,someString.c_str(),sLength,nullptr,0,nullptr,nullptr);
 		std::string result(len,L'\0');
-		WideCharToMultiByte(CP_ACP,0,someString.c_str(),sLength,&result[0],len,0,0);
+		WideCharToMultiByte(CP_ACP,0,someString.c_str(),sLength,&result[0],len,nullptr,nullptr);
 		return result;
 	}
 
-	// Helper utility converts D3D API failures into exceptions.
 	inline void ThrowIfFailed(HRESULT hr) noexcept(false)
 	{
 		if (FAILED(hr))
@@ -44,7 +43,6 @@ namespace Helpers
 			throw err;
 		}
 	}
-	// Helper utility converts D3D API failures into exceptions.
 	inline void ThrowIfSucceded(HRESULT hr) noexcept(false)
 	{
 		if (!FAILED(hr))

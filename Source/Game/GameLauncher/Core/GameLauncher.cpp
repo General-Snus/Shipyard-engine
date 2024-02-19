@@ -17,6 +17,7 @@
 #include <iostream>
 #include <sstream>
 
+#include "GraphicsEngine.h"
 #include "Input/EnumKeys.h"
 
 using json = nlohmann::json;

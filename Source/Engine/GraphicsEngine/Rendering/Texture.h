@@ -22,7 +22,6 @@ public:
 
 	FORCEINLINE const std::wstring& GetName() const { return myName; }
 	FORCEINLINE bool IsValid() const { return m_pResource != nullptr; }
-
 	// The name of this texture, for easy ID.
 	std::wstring myName;
 
@@ -31,6 +30,8 @@ public:
 		GpuResource::Destroy();
 		m_hCpuDescriptorHandle.ptr = D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN;
 	}
+
+	bool AllocateTexture(const unsigned width,const unsigned height);
 
 	bool CreateDDSFromMemory(const void* filePtr,size_t fileSize,bool sRGB);
 	const D3D12_CPU_DESCRIPTOR_HANDLE& GetSRV() const { return m_hCpuDescriptorHandle; }

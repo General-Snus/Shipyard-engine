@@ -11,16 +11,13 @@
 // add headers that you want to pre-compile here 
 #include <DirectX/directx/d3d12.h>  
 #include <DirectX/directx/d3dx12.h>
-#include <DirectX/XTK/BufferHelpers.h>
-#include <DirectX/XTK/CommonStates.h>
-#include <DirectX/XTK/DirectXHelpers.h>
-#include <DirectX/XTK/GraphicsMemory.h>
-#include <DirectX/XTK/source/PlatformHelpers.h> 
 #include <filesystem>
+#include <map>
 #include <memory>
-#include <queue>
-#include <Shaders/Registers.h> 
+#include <mutex>  
+#include <queue> 
 #include <stdexcept> 
+#include <string> 
 #include <Tools/ImGui/ImGui/imgui.h>
 #include <Tools/Optick/include/optick.h>  
 #include <Tools/Utilities/Game/Timer.h> 

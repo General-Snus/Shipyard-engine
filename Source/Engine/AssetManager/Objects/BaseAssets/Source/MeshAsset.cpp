@@ -2,32 +2,11 @@
 #include <Tools/Utilities/Math.hpp>
 #include "../MeshAsset.h" 
 
+#include "Engine/GraphicsEngine/GraphicsEngine.h"
 #include "Engine/GraphicsEngine/InterOp/GPU.h"
 
 
-std::vector<std::string> GetTextureNames(const TGA::FBX::Material& material)
-{
-	std::vector<std::string> textureNames;
 
-	if (material.Diffuse.Name != "")
-	{
-		textureNames.push_back(((std::filesystem::path)material.Diffuse.Name).replace_extension(".dds").string());
-	}
-	if (material.NormalMap.Name != "")
-	{
-		textureNames.push_back(((std::filesystem::path)material.NormalMap.Name).replace_extension(".dds").string());
-	}
-	if (material.Bump.Name != "")
-	{
-		textureNames.push_back(((std::filesystem::path)material.Bump.Name).replace_extension(".dds").string());
-	}
-
-	if (material.Specular.Name != "")
-	{
-		textureNames.push_back(((std::filesystem::path)material.Specular.Name).replace_extension(".dds").string());
-	}
-	return textureNames;
-}
 
 Mesh::Mesh(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)
 {
@@ -457,12 +436,12 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 
 	ComPtr<ID3D12Resource> indexBuffer;
 	D3D12_INDEX_BUFFER_VIEW m_IndexBufferView;
-	m_IndexBufferView.BufferLocation = indexBuffer->GetGPUVirtualAddress();
-	m_IndexBufferView.Format = DXGI_FORMAT_R16_UINT;
-	m_IndexBufferView.SizeInBytes = static_cast<unsigned>(mdlIndicies.size() * sizeof(unsigned));
+	//m_IndexBufferView.BufferLocation = indexBuffer->GetGPUVirtualAddress();
+	//m_IndexBufferView.Format = DXGI_FORMAT_R16_UINT;
+	//m_IndexBufferView.SizeInBytes = static_cast<unsigned>(mdlIndicies.size() * sizeof(unsigned));
 
 
-	if (!GPU::CreateIndexBuffer(indexBuffer,mdlIndicies))
+	if (!GPU::CreateIndexBuffer(m_IndexBufferView,indexBuffer,mdlIndicies))
 	{
 		std::cout << "Failed to create vertex buffer" << std::endl;
 		return;

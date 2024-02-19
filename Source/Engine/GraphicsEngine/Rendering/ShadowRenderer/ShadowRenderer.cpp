@@ -1,5 +1,5 @@
-#include "GraphicsEngine.pch.h" 
 #include "../../Shaders/Include/Default_VS.h"
+#include "GraphicsEngine.pch.h" 
 #include "ShadowRenderer.h" 
 
 void ShadowRenderer::Init()
@@ -11,8 +11,7 @@ void ShadowRenderer::Init()
 void ShadowRenderer::Execute()
 {
 	OPTICK_EVENT();
-	LightBuffer& buffer = GraphicsEngine::Get().myLightBuffer;
-
+	//LightBuffer& buffer = GraphicsEngine::Get().myLightBuffer; 
 	//RHI::SetVertexShader(myVertexShader);
 	//RHI::SetPixelShader(nullptr);
 	//std::shared_ptr<Texture> shadowMap;

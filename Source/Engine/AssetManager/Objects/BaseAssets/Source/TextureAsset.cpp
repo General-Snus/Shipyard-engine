@@ -3,6 +3,10 @@
 
 #define STB_IMAGE_IMPLEMENTATION	
 #include <Tools/Utilities/Files/Images/stb_image.h>
+
+#include "Engine/GraphicsEngine/GraphicsEngine.h"
+#include "Engine/GraphicsEngine/InterOp/GPU.h"
+
 TextureHolder::TextureHolder(const std::filesystem::path& aFilePath,eTextureType aTextureType) : AssetBase(aFilePath),textureType(aTextureType)
 {
 	RawTexture = std::make_shared<Texture>();
@@ -168,7 +172,7 @@ void TextureHolder::Init()
 #endif
 	else if (AssetPath.extension() == ".dds")
 	{
-		/*if (!RHI::LoadTexture(RawTexture.get(),AssetPath.wstring()))*/
+		if (!GPU::LoadTexture(RawTexture.get(),AssetPath.wstring()))
 		{
 			std::string msg = "Error: Coulnt dds texture at " + AssetPath.string();
 			std::cout << msg << " \n";

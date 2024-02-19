@@ -79,14 +79,13 @@
 #include "ComponentSystem/Components/TaskSpecific/ProjectileComponent.h"
 #include "ComponentSystem/Components/Transform.h"
 #include "ComponentSystem/GameObject.h"
-#include "ComponentSystem/GameObjectManager.h"
+#include "ComponentSystem/GameObjectManager.h"/*
 
 #include <Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h>
 #include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
 #include <Engine/GraphicsEngine/GraphicsEngine.h>
 #include <Engine/GraphicsEngine/InterOp/RHI.h>
-#include <Engine/GraphicsEngine/Rendering/Vertex.h> 
-#include <Tools/FBX/TGAFbx.h>
+#include <Engine/GraphicsEngine/Rendering/Vertex.h>*/
 #include "AssetManager.h"
 #include "ComponentSystem/UUID.h"
 

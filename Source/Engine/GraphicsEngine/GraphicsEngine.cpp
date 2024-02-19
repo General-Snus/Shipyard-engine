@@ -42,11 +42,10 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 		myWindowHandle = windowHandle;
 		myBackBuffer = std::make_unique<Texture>();
 		myDepthBuffer = std::make_unique<Texture>();
-
 		if (!GPU::Initialize(myWindowHandle,
 			enableDeviceDebug,
-			myBackBuffer.get(),
-			myDepthBuffer.get()))
+			myBackBuffer,
+			myDepthBuffer))
 		{
 			Logger::Err("Failed to initialize the DX12 GPU!");
 			return false;
@@ -594,7 +593,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	//UINT currentBackBufferIndex = chain->GetCurrentBackBufferIndex();
 	auto backBuffer = GPU::GetCurrentBackBuffer();
 	auto rtv = GPU::GetCurrentRenderTargetView();
-	auto dsv = GPU::m_rtvHeap->GetCPUDescriptorHandleForHeapStart();
+	auto dsv = GPU::m_RtvHeap->GetCPUDescriptorHandleForHeapStart();
 
 	GPU::TransitionResource(commandList,backBuffer,
 		D3D12_RESOURCE_STATE_PRESENT,D3D12_RESOURCE_STATE_RENDER_TARGET);
@@ -690,8 +689,10 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 
 void GraphicsEngine::RenderTextureTo(eRenderTargets from,eRenderTargets to)  const
 {
-	const Texture* texture1 = GraphicsEngine::Get().GetTargetTextures(from).get();
-	const Texture* texture2 = GraphicsEngine::Get().GetTargetTextures(to).get();
+	from; to;
+
+	//const Texture* texture1 = GraphicsEngine::Get().GetTargetTextures(from).get();
+	//const Texture* texture2 = GraphicsEngine::Get().GetTargetTextures(to).get();
 
 	/*RHI::SetRenderTarget(texture2,nullptr);
 	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_Target0,texture1);
@@ -710,8 +711,8 @@ void GraphicsEngine::EndFrame()
 {
 	OPTICK_EVENT()
 		GPU::Present();
-	// We finish our frame here and present it on screen. 
-	//RHI::Present(0);
+
+	// We finish our frame here and present it on screen.  
 	OPTICK_EVENT("ResetShadowList")
 		myShadowRenderer.ResetShadowList();
 	OPTICK_EVENT("DeferredCommandList")

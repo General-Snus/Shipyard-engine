@@ -4,6 +4,7 @@
 
 #include <Tools/ImGui/ImGui/imgui.h>
 
+#include "Engine/GraphicsEngine/GraphicsEngine.h"
 
 
 void ParticleEmitter::InitParticle(Particlevertex& vertex) const

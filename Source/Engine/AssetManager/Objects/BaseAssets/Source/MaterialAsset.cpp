@@ -1,6 +1,8 @@
 #include "AssetManager.pch.h" 
 #include <Engine/GraphicsEngine/Shaders/Registers.h> 
 
+#include "Engine/GraphicsEngine/GraphicsEngine.h"
+
 bool Material::CreateJson(const DataMaterial& data,const std::filesystem::path& writePath)
 {
 	nlohmann::json json = nlohmann::json::basic_json();

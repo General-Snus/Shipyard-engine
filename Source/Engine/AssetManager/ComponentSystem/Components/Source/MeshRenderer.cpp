@@ -3,6 +3,7 @@
 #include <Tools/Utilities/System/ThreadPool.hpp> 
 
 #include "Engine/GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_RenderMeshShadow.h"
+#include "Engine/GraphicsEngine/GraphicsEngine.h"
 
 class GfxCmd_RenderMesh;
 

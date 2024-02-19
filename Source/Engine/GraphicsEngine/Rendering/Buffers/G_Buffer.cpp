@@ -245,10 +245,12 @@ void G_Buffer::ClearTargets()
 
 void G_Buffer::SetTexture(eGbufferTex texture)
 {
+	texture;
 	//RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)texture,vectorOfTextures[(int)texture]);
 }
 
 void G_Buffer::UnSetTexture(eGbufferTex texture)
 {
+	texture;
 	//RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)texture,nullptr);
 }

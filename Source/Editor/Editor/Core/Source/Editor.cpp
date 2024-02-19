@@ -63,9 +63,15 @@ bool Editor::Initialize(HWND aHandle)
 
 	ImGui_ImplWin32_Init(aHandle);
 	//ImGui_ImplDX11_Init(RHI::Device.Get(),RHI::Context.Get());+
-	D3D12_GPU_DESCRIPTOR_HANDLE handle = GPU::m_rtvHeap->GetGPUDescriptorHandleForHeapStart();
-	D3D12_CPU_DESCRIPTOR_HANDLE handle2 = GPU::m_rtvHeap->GetCPUDescriptorHandleForHeapStart();
-	ImGui_ImplDX12_Init(GPU::m_Device.Get(),GPU::m_FrameCount,DXGI_FORMAT_R8G8B8A8_UNORM,GPU::m_rtvHeap.Get(),handle2,handle);
+	const D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle = GPU::m_SrvHeap->GetGPUDescriptorHandleForHeapStart();
+	const D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle = GPU::m_SrvHeap->GetCPUDescriptorHandleForHeapStart();
+	ImGui_ImplDX12_Init(GPU::m_Device.Get(),GPU::m_FrameCount,DXGI_FORMAT_R8G8B8A8_UNORM,GPU::m_SrvHeap.Get(),cpu_handle,gpu_handle);
+
+
+
+
+
+
 #if PHYSX
 	Shipyard_PhysX::Get().InitializePhysx();
 #endif // PHYSX 0
@@ -95,7 +101,7 @@ void Editor::DoWinProc(const MSG& aMessage)
 
 	if (aMessage.message == WM_QUIT)
 	{
-		ImGui_ImplDX11_Shutdown();
+		ImGui_ImplDX12_Shutdown();
 		ImGui_ImplWin32_Shutdown();
 		ImGui::DestroyContext();
 		return;

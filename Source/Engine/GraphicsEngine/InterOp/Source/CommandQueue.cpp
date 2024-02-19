@@ -16,7 +16,7 @@ ComPtr<ID3D12GraphicsCommandList> GPUCommandQueue::CreateCommandList(ComPtr<ID3D
 	ComPtr<ID3D12GraphicsCommandList> commandList;
 	Helpers::ThrowIfFailed(m_Device->CreateCommandList(0,m_CommandListType,allocator.Get(),nullptr,IID_PPV_ARGS(&commandList)));
 
-	Helpers::ThrowIfFailed(commandList->Close());
+	//Helpers::ThrowIfFailed(commandList->Close());
 
 	return commandList;
 }
@@ -35,9 +35,9 @@ bool GPUCommandQueue::Create(ComPtr<ID3D12Device> device,D3D12_COMMAND_LIST_TYPE
 
 	D3D12_COMMAND_QUEUE_DESC desc = {};
 	desc.Type = type;
-	desc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
+	//desc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
 	desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-	desc.NodeMask = 0;
+	//desc.NodeMask = 0;
 
 	Helpers::ThrowIfFailed(m_Device->CreateCommandQueue(&desc,IID_PPV_ARGS(&m_CommandQueue)));
 
@@ -55,7 +55,7 @@ bool GPUCommandQueue::Create(ComPtr<ID3D12Device> device,D3D12_COMMAND_LIST_TYPE
 		break;
 	}
 
-	m_FenceEvent = ::CreateEvent(NULL,FALSE,FALSE,NULL);
+	m_FenceEvent = ::CreateEvent(nullptr,FALSE,FALSE,nullptr);
 	assert(m_FenceEvent && "Failed to create fence event handle.");
 	return true;
 }
@@ -77,7 +77,7 @@ void GPUCommandQueue::WaitForFenceValue(uint64_t fenceValue)
 {
 	if (!IsFenceComplete(fenceValue))
 	{
-		auto event = ::CreateEvent(NULL,FALSE,FALSE,NULL);
+		auto event = ::CreateEvent(nullptr,FALSE,FALSE,nullptr);
 		if (event)
 		{
 			m_Fence->SetEventOnCompletion(fenceValue,event);

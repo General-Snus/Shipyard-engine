@@ -18,15 +18,6 @@ PSO::PSO()
 
 void PSO::Init()
 {
-
-
-
-#if defined(_DEBUG)
-	// Enable better shader debugging with the graphics debugging tools.
-	UINT compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-#else
-	UINT compileFlags = 0;
-#endif
 	std::shared_ptr<ShipyardShader> vs;
 	std::shared_ptr<ShipyardShader> ps;
 

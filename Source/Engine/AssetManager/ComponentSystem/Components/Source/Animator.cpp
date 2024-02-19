@@ -3,6 +3,7 @@
 #include "../Animator.h" 
 
 #include "Engine/GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_RenderSkeletalMeshShadow.h"
+#include "Engine/GraphicsEngine/GraphicsEngine.h"
 
 cAnimator::cAnimator(const unsigned int anOwnerId) : Component(anOwnerId),myCurrentAnimation(0),myAnimationTimer(0)
 {

@@ -1,33 +1,25 @@
 #pragma once
 #pragma comment(lib,"d3d12.lib")
+#pragma comment(lib,"DirectXTK.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "dxguid.lib")
 
 
 #define D3D12MA_D3D12_HEADERS_ALREADY_INCLUDED
-#include <basetsd.h>
-#include <combaseapi.h>
 #include <cstdint>
+#include <DirectX/XTK/GraphicsMemory.h>
 #include <DirectX\directx\d3d12.h> 
 #include <DirectX\directx\d3dcommon.h>
-#include <DirectX\directx\d3dx12_core.h>
 #include <dxgi.h>
-#include <dxgi1_5.h>
-#include <Engine/GraphicsEngine/InterOp/Helpers.h>
-#include <Engine/GraphicsEngine/Rendering/Texture.h>
-#include <filesystem>
-#include <memory>
-#include <minwindef.h>
-#include <sal.h>
-#include <specstrings.h>
-#include <vector>
+#include <dxgi1_5.h> 
+#include <minwindef.h> 
+#include <sal.h>  
 #include <windef.h>
 #include <winnt.h>
 #include <wrl\client.h>
 #include "CommandQueue.h"
 #include "RootSignature.h"
 
-using namespace DirectX;
 using namespace Microsoft::WRL;
 
 class GPUDescriptorHandle
@@ -76,7 +68,7 @@ enum ePIPELINE_STAGE
 class GPU
 {
 public:
-	static bool Initialize(HWND aWindowHandle,bool enableDeviceDebug,Texture* outBackBuffer,Texture* outDepthBuffer);
+	static bool Initialize(HWND aWindowHandle,bool enableDeviceDebug,std::shared_ptr<Texture> outBackBuffer,std::shared_ptr<Texture> outDepthBuffer);
 	static bool UnInitialize();
 	static void Present(unsigned aSyncInterval = 0);
 
@@ -109,10 +101,9 @@ public:
 
 	static bool CreateDepthStencil(D3D12_DEPTH_STENCIL_DESC depthStencilDesc);
 
-
 	static void ResizeDepthBuffer(unsigned width,unsigned height);
 
-	static bool LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName);
+	static bool LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName,bool generateMips = true);
 
 	static bool LoadTextureFromMemory(Texture* outTexture,const std::filesystem::path& aName,const BYTE* someImageData,size_t anImageDataSize,const
 		D3D12_SHADER_RESOURCE_VIEW_DESC* aSRVDesc = nullptr);
@@ -131,7 +122,10 @@ public:
 	static ComPtr<ID3D12Resource> GetCurrentRenderTargetView();
 	static ComPtr<ID3D12Resource> GetCurrentBackBuffer();
 
-	static ComPtr<ID3D12DescriptorHeap>  CreateDescriptorHeap(ComPtr<ID3D12Device> device,D3D12_DESCRIPTOR_HEAP_TYPE type,uint32_t numDescriptors);
+	static ComPtr<ID3D12DescriptorHeap>  CreateDescriptorHeap(
+		ComPtr<ID3D12Device> device,
+		D3D12_DESCRIPTOR_HEAP_TYPE type,uint32_t numDescriptors,
+		D3D12_DESCRIPTOR_HEAP_FLAGS flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE);
 
 	static void UpdateRenderTargetViews(ComPtr<ID3D12Device> device,ComPtr<IDXGISwapChain4> swapChain,ComPtr<ID3D12DescriptorHeap> descriptorHeap);
 
@@ -150,14 +144,15 @@ public:
 
 
 	static inline constexpr bool m_useWarpDevice = false;
-	static inline constexpr UINT m_FrameCount = 3;
+	static inline constexpr UINT m_FrameCount = 2;
 	static inline UINT m_FrameIndex;
 
 	static inline ComPtr<ID3D12Device> m_Device;
 	static inline std::unique_ptr<GPUCommandQueue> m_CommandQueue;
 	static inline std::unique_ptr<GPUSwapchain> m_Swapchain;
 	static inline ComPtr<ID3D12Resource> m_renderTargets[m_FrameCount];
-	static inline ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
+	static inline ComPtr<ID3D12DescriptorHeap> m_RtvHeap;
+	static inline ComPtr<ID3D12DescriptorHeap> m_SrvHeap;
 	static inline UINT m_RtvDescriptorSize;
 
 	static inline uint64_t m_FenceValues[m_FrameCount] = {};
@@ -169,8 +164,10 @@ public:
 	static inline GPUSupport m_DeviceSupport;
 	static inline D3D12_VIEWPORT m_Viewport;
 	static inline D3D12_RECT m_ScissorRect;
-	static inline Texture* m_BackBuffer;
-	static inline Texture* m_DepthBuffer;
+	static inline std::shared_ptr<Texture> m_BackBuffer;
+	static inline std::shared_ptr<Texture> m_DepthBuffer;
+	static inline std::unique_ptr<GraphicsMemory> m_GraphicsMemory;
+
 
 private:
 };
@@ -181,30 +178,38 @@ inline bool GPU::CreateVertexBuffer(
 	ComPtr<ID3D12Resource>& outVxBuffer,
 	const std::vector<vertexType>& aVertexList)
 {
-	const D3D12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-	const CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(aVertexList));
-	Helpers::ThrowIfFailed(m_Device->CreateCommittedResource(
-		&heapProp,
-		D3D12_HEAP_FLAG_NONE,
-		&bufferDesc,
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(&outVxBuffer)));
+	outVxBuffer;
+	//const D3D12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+	//const CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(aVertexList));
+	//Helpers::ThrowIfFailed(m_Device->CreateCommittedResource(
+	//	&heapProp,
+	//	D3D12_HEAP_FLAG_NONE,
+	//	&bufferDesc,
+	//	D3D12_RESOURCE_STATE_GENERIC_READ,
+	//	nullptr,
+	//	IID_PPV_ARGS(&outVxBuffer)));
+	//
+	//UINT8* pVertexDataBegin;
+	//CD3DX12_RANGE readRange(0,0);
+	//Helpers::ThrowIfFailed(
+	//	outVxBuffer->Map(0,&readRange,reinterpret_cast<void**>(&pVertexDataBegin))
+	//);
+	//memcpy(pVertexDataBegin,aVertexList.data(),sizeof(aVertexList));
+	//outVxBuffer->Unmap(0,nullptr);
+	//
+	//// Initialize the vertex buffer view.
+	//outvertexBufferView.BufferLocation = outVxBuffer->GetGPUVirtualAddress();
+	//outvertexBufferView.StrideInBytes = sizeof(vertexType);
+	//outvertexBufferView.SizeInBytes = sizeof(aVertexList);
 
-	UINT8* pVertexDataBegin;
-	CD3DX12_RANGE readRange(0,0);
-	Helpers::ThrowIfFailed(
-		outVxBuffer->Map(0,&readRange,reinterpret_cast<void**>(&pVertexDataBegin))
-	);
-	memcpy(pVertexDataBegin,aVertexList.data(),sizeof(aVertexList));
-	outVxBuffer->Unmap(0,nullptr);
-
-	// Initialize the vertex buffer view.
-	outvertexBufferView.BufferLocation = outVxBuffer->GetGPUVirtualAddress();
-	outvertexBufferView.StrideInBytes = sizeof(vertexType);
-	outvertexBufferView.SizeInBytes = sizeof(aVertexList);
+	const GraphicsResource vertexBuffer = m_GraphicsMemory->Allocate(sizeof(vertexType) * aVertexList.size());
+	memcpy(vertexBuffer.Memory(),aVertexList.data(),sizeof(vertexType) * aVertexList.size());
 
 
+	outvertexBufferView.BufferLocation = vertexBuffer.GpuAddress();
+	outvertexBufferView.StrideInBytes = sizeof(Vertex);
+	outvertexBufferView.SizeInBytes = static_cast<UINT>(vertexBuffer.Size());
+	m_CommandQueue->GetCommandList()->IASetVertexBuffers(0,1,&outvertexBufferView);
 
 
 
