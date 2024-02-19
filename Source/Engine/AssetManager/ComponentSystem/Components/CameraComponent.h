@@ -16,7 +16,7 @@ class cCamera : public Component
 {
 public:
 	explicit cCamera(const unsigned int anOwnerId); // Create a generic cube
-	explicit cCamera(const unsigned int anOwnerId,CameraSettings settings); // Create a generic cube
+	explicit cCamera(const unsigned int anOwnerId,const CameraSettings& settings); // Create a generic cube
 	~cCamera() override;
 
 	//void UpdatePositionVectors();
@@ -26,7 +26,7 @@ public:
 	Vector3f GetPointerDirection(const Vector2<int> position);
 	Vector3f GetPointerDirectionNDC(const Vector2<int> position) const;
 
-	void SetCameraToFrameBuffer(); 
+	void SetCameraToFrameBuffer();
 	Vector4f WoldSpaceToPostProjectionSpace(Vector3f aEntity);
 
 private:

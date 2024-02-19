@@ -4,7 +4,6 @@
 #include "../GPU.h"
 #include "../PSO.h"  
 
-#include <DirectX/XTK/source/PlatformHelpers.h>
 
 #include "Engine/AssetManager/AssetManager.h"
 #include "Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h"

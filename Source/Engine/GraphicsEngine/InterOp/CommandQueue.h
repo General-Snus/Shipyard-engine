@@ -4,10 +4,10 @@
 class GPUCommandQueue
 {
 public:
-	bool Create(ComPtr<ID3D12Device> device,D3D12_COMMAND_LIST_TYPE type);
+	bool Create(const ComPtr<ID3D12Device>& device,D3D12_COMMAND_LIST_TYPE type);
 	ComPtr<ID3D12GraphicsCommandList> GetCommandList();
 	ComPtr<ID3D12CommandQueue> GetCommandQueue();
-	uint64_t ExecuteCommandList(ComPtr<ID3D12GraphicsCommandList> commandList);
+	uint64_t ExecuteCommandList(const ComPtr<ID3D12GraphicsCommandList>& commandList);
 
 	uint64_t Signal();
 	bool IsFenceComplete(uint64_t fenceValue);
@@ -16,7 +16,7 @@ public:
 
 protected:
 	ComPtr<ID3D12CommandAllocator> CreateCommandAllocator();
-	ComPtr<ID3D12GraphicsCommandList> CreateCommandList(ComPtr<ID3D12CommandAllocator> allocator);
+	ComPtr<ID3D12GraphicsCommandList> CreateCommandList(const ComPtr<ID3D12CommandAllocator>& allocator);
 
 
 private:

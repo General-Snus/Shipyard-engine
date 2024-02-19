@@ -2,7 +2,7 @@
 #include "../Headers/GfxCmd_RenderSkeletalMeshShadow.h"
 
 GfxCmd_RenderSkeletalMeshShadow::GfxCmd_RenderSkeletalMeshShadow(
-	const std::shared_ptr<RenderData> aMesh,
+	const std::shared_ptr<RenderData>& aMesh,
 	const Matrix& aTransform,
 	const Matrix* aBoneTransformList,
 	unsigned int aNumBones) :

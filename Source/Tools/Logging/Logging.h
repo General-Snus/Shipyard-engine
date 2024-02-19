@@ -27,14 +27,14 @@ public:
 	static void Warn(const std::string& aString);
 
 	// Log an error.
-	static void Err(const std::string& aString,const std::source_location location =
+	static void Err(const std::string& aString,const std::source_location& location =
 		std::source_location::current());
 
 	// Log a success message.
 	static void Succ(const std::string& aString);
 
 	// Log an exception. Will step through nested exceptions if there are any.
-	static void LogException(const std::exception& anException,unsigned aLevel = 0,const std::source_location location =
+	static void LogException(const std::exception& anException,unsigned aLevel = 0,const std::source_location& location =
 		std::source_location::current());
 
 	// Just force the log to go to next line.

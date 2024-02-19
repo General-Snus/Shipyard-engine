@@ -37,7 +37,7 @@ public:
 	//void AddTexture(const std::shared_ptr<TextureHolder> text);
 	MaterialData& GetMaterialData();
 	void Update();
-	void SetShader(std::shared_ptr<Shader> aVertexShader,std::shared_ptr<Shader> aPixelShader);
+	void SetShader(const std::shared_ptr<Shader>& aVertexShader,const std::shared_ptr<Shader>& aPixelShader);
 	void SetAsResources();
 private:
 	DataMaterial data;

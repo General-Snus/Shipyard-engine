@@ -83,7 +83,7 @@ LRESULT CALLBACK Window::WinProc(_In_ HWND hWnd,_In_ UINT uMsg,_In_ WPARAM wPara
 	}
 	return out;
 }
-void Window::SetCallbackFunction(std::function<void(MSG const& msg)> aCallback)
+void Window::SetCallbackFunction(const std::function<void(MSG const& msg)>& aCallback)
 {
 	callback = aCallback;
 }

@@ -4,7 +4,7 @@
 #include <Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h>
 #include <Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h>
 
-GfxCmd_RenderSkeletalMesh::GfxCmd_RenderSkeletalMesh(const std::shared_ptr<RenderData> aData,
+GfxCmd_RenderSkeletalMesh::GfxCmd_RenderSkeletalMesh(const std::shared_ptr<RenderData>& aData,
 	const Matrix& aTransform,const Matrix* aBoneTransformList,unsigned int aNumBones) : GfxCmd_RenderMesh(aData,aTransform,false)
 {
 	aNumBones;

@@ -1,8 +1,6 @@
 #include "GraphicsEngine.pch.h"
 #include "../CommandQueue.h"
 
-#include <DirectX/XTK/source/PlatformHelpers.h>
-
 ComPtr<ID3D12CommandAllocator> GPUCommandQueue::CreateCommandAllocator()
 {
 	ComPtr<ID3D12CommandAllocator> commandAllocator;
@@ -11,7 +9,7 @@ ComPtr<ID3D12CommandAllocator> GPUCommandQueue::CreateCommandAllocator()
 	return commandAllocator;
 }
 
-ComPtr<ID3D12GraphicsCommandList> GPUCommandQueue::CreateCommandList(ComPtr<ID3D12CommandAllocator> allocator)
+ComPtr<ID3D12GraphicsCommandList> GPUCommandQueue::CreateCommandList(const ComPtr<ID3D12CommandAllocator>& allocator)
 {
 	ComPtr<ID3D12GraphicsCommandList> commandList;
 	Helpers::ThrowIfFailed(m_Device->CreateCommandList(0,m_CommandListType,allocator.Get(),nullptr,IID_PPV_ARGS(&commandList)));
@@ -27,7 +25,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE GPUDescriptorAllocator::Allocate(UINT aNumDescriptor
 	return D3D12_CPU_DESCRIPTOR_HANDLE();
 }
 
-bool GPUCommandQueue::Create(ComPtr<ID3D12Device> device,D3D12_COMMAND_LIST_TYPE type)
+bool GPUCommandQueue::Create(const ComPtr<ID3D12Device>& device,D3D12_COMMAND_LIST_TYPE type)
 {
 	m_Device = device;
 	m_FenceValue = 0;
@@ -126,7 +124,7 @@ ComPtr<ID3D12CommandQueue> GPUCommandQueue::GetCommandQueue()
 	return m_CommandQueue;
 }
 
-uint64_t GPUCommandQueue::ExecuteCommandList(ComPtr<ID3D12GraphicsCommandList> commandList)
+uint64_t GPUCommandQueue::ExecuteCommandList(const ComPtr<ID3D12GraphicsCommandList>& commandList)
 {
 	commandList->Close();
 

@@ -101,7 +101,7 @@ void Logger::Warn(const std::string& aString)
 	}
 }
 
-void Logger::Err(const std::string& aString,const std::source_location location)
+void Logger::Err(const std::string& aString,const std::source_location& location)
 {
 	if (isInitialized)
 	{
@@ -153,7 +153,7 @@ void Logger::Succ(const std::string& aString)
 	}
 }
 
-void Logger::LogException(const std::exception& anException,unsigned aLevel,const std::source_location location)
+void Logger::LogException(const std::exception& anException,unsigned aLevel,const std::source_location& location)
 {
 	if (isInitialized)
 	{

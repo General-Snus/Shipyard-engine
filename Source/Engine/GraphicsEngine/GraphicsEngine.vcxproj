@@ -157,7 +157,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
     </FxCompile>
     <Lib>
-      <AdditionalDependencies>DirectXTK.lib</AdditionalDependencies>
+      <AdditionalDependencies>DirectXTK12.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)..\Dependencies\$(Configuration)\</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
@@ -194,7 +194,7 @@
       <PreprocessorDefinitions>_HLSL;</PreprocessorDefinitions>
     </FxCompile>
     <Lib>
-      <AdditionalDependencies>DirectXTK.lib</AdditionalDependencies>
+      <AdditionalDependencies>DirectXTK12.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)..\Dependencies\$(Configuration)\</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>

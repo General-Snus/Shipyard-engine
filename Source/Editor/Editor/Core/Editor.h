@@ -48,7 +48,7 @@ public:
 	static RECT GetViewportRECT();
 	static Vector2<int> GetViewportResolution();
 
-	void ExpandWorldBounds(Sphere<float> sphere);
+	void ExpandWorldBounds(const Sphere<float>& sphere);
 	const Sphere<float>& GetWorldBounds() const;
 
 	bool GetIsGUIActive() const { return IsGUIActive; };

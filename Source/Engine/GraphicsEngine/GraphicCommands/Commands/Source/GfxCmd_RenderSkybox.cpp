@@ -1,7 +1,7 @@
 #include <GraphicsEngine.pch.h>
 #include "../Headers/GfxCmd_RenderSkybox.h"
 
-GfxCmd_RenderSkybox::GfxCmd_RenderSkybox(std::shared_ptr<Texture> texture) : mySkyboxTexture(texture)
+GfxCmd_RenderSkybox::GfxCmd_RenderSkybox(const std::shared_ptr<Texture>& texture) : mySkyboxTexture(texture)
 {
 }
 

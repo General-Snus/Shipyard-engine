@@ -6,8 +6,9 @@ cCollider::cCollider(const unsigned int anOwnerId) : Component(anOwnerId)
 	myCollider = std::make_shared<ColliderAssetAABB>();
 }
 
-cCollider::cCollider(const unsigned int anOwnerId,const std::filesystem::path aPath) : Component(anOwnerId)
+cCollider::cCollider(const unsigned int anOwnerId,const std::filesystem::path& aPath) : Component(anOwnerId)
 {
+	aPath;
 	myCollider = std::make_shared<ColliderAssetAABB>();
 }
 

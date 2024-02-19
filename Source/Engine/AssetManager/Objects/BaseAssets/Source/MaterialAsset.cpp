@@ -144,7 +144,7 @@ void Material::Update()
 	SetAsResources();
 }
 
-void Material::SetShader(std::shared_ptr<Shader> aVertexShader,std::shared_ptr<Shader> aPixelShader)
+void Material::SetShader(const std::shared_ptr<Shader>& aVertexShader,const std::shared_ptr<Shader>& aPixelShader)
 {
 	data.vertexShader = aVertexShader;
 	data.pixelShader = aPixelShader;

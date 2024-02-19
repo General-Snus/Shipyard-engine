@@ -18,7 +18,7 @@ class Shader
 public:
 	std::wstring myName;
 
-	FORCEINLINE void SetShader(ComPtr<ID3DBlob> aShader)
+	FORCEINLINE void SetShader(const ComPtr<ID3DBlob>& aShader)
 	{
 		myBlob = aShader;
 	}

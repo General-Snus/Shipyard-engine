@@ -1,4 +1,5 @@
 #include "AssetManager.pch.h"
+
 #include <Engine/GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_RenderSkybox.h>
 #include <Engine/GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_SetDepthState.h>
 #include <Engine/GraphicsEngine/GraphicsEngine.h>
@@ -9,7 +10,7 @@ Skybox::Skybox(const unsigned int anOwnerId) : Component(anOwnerId)
 	myCubeMap = GraphicsEngine::Get().GetDefaultTexture(eTextureType::CubeMap);
 }
 
-Skybox::Skybox(const unsigned int anOwnerId,const std::filesystem::path aPath) : Component(anOwnerId)
+Skybox::Skybox(const unsigned int anOwnerId,const std::filesystem::path& aPath) : Component(anOwnerId)
 {
 	AssetManager::Get().ForceLoadAsset<TextureHolder>(aPath,myCubeMap);
 	AssetManager::Get().ForceLoadAsset<Material>(aPath,mySkyboxMaterial);

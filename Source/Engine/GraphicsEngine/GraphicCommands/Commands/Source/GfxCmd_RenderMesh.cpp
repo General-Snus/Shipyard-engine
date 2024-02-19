@@ -1,9 +1,10 @@
 #include <GraphicsEngine.pch.h>
+
 #include <Engine/GraphicsEngine/Rendering/Buffers/ObjectBuffer.h>
 #include <Engine\AssetManager\Objects\BaseAssets\MaterialAsset.h>
 #include "../Headers/GfxCmd_RenderMesh.h" 
 
-GfxCmd_RenderMesh::GfxCmd_RenderMesh(const std::shared_ptr<RenderData> aData,const Matrix& aTransform,bool instanced) : myRenderData(aData),myTransform(aTransform),instanced(instanced)
+GfxCmd_RenderMesh::GfxCmd_RenderMesh(const std::shared_ptr<RenderData>& aData,const Matrix& aTransform,bool instanced) : myRenderData(aData),myTransform(aTransform),instanced(instanced)
 {
 	MaxExtents = aData->myMesh->MaxBox;
 	MinExtents = aData->myMesh->MinBox;

@@ -203,7 +203,7 @@ Vector2<int> Editor::GetViewportResolution()
 	);
 }
 
-void Editor::ExpandWorldBounds(Sphere<float> sphere)
+void Editor::ExpandWorldBounds(const Sphere<float>& sphere)
 {
 	if (myWorldBounds.ExpandSphere(sphere))
 	{

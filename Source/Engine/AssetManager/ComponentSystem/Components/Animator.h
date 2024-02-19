@@ -30,7 +30,7 @@ public:
 
 	void Update() override;
 
-	void RenderAnimation(const std::shared_ptr<RenderData> aData,const Matrix& aTransform) const;
+	void RenderAnimation(const std::shared_ptr<RenderData>& aData,const Matrix& aTransform) const;
 	void AddAnimation(Animation aAnimation);
 	void AddAnimation(const std::filesystem::path& aFilePath);
 	eAnimationState GetState() const;

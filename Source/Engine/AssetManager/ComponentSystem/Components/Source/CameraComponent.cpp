@@ -37,7 +37,7 @@ cCamera::cCamera(const unsigned int anOwnerId) : Component(anOwnerId)
 #endif
 }
 
-cCamera::cCamera(const unsigned int anOwnerId,CameraSettings settings) : Component(anOwnerId)
+cCamera::cCamera(const unsigned int anOwnerId,const CameraSettings& settings) : Component(anOwnerId)
 {
 	GetGameObject().AddComponent<Transform>();
 	GetGameObject().GetComponent<Transform>().SetGizmo(false);

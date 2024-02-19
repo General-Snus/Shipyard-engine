@@ -6,8 +6,7 @@
 #include <DirectX/XTK/DDSTextureLoader.h> 
 #include <DirectX/XTK/DirectXHelpers.h>
 #include <DirectX/XTK/GraphicsMemory.h>
-#include <DirectX/XTK/ResourceUploadBatch.h>
-#include <DirectX/XTK/source/PlatformHelpers.h>  
+#include <DirectX/XTK/ResourceUploadBatch.h> 
 #include <DirectXMath.h> 
 #include <dxgi1_6.h>
 #include <dxgidebug.h>
@@ -21,7 +20,7 @@
 
 
 
-bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,std::shared_ptr<Texture> aBackBuffer,std::shared_ptr<Texture> aDepthBuffer)
+bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared_ptr<Texture>& aBackBuffer,const std::shared_ptr<Texture>& aDepthBuffer)
 {
 	aWindowHandle; enableDeviceDebug; m_BackBuffer = aBackBuffer; m_DepthBuffer = aDepthBuffer;
 
@@ -191,7 +190,7 @@ void GPU::Present(unsigned aSyncInterval)
 }
 
 void GPU::UpdateBufferResource(
-	ComPtr<ID3D12GraphicsCommandList> commandList,
+	const ComPtr<ID3D12GraphicsCommandList>& commandList,
 	ID3D12Resource** pDestinationResource,
 	ID3D12Resource** pIntermediateResource,
 	size_t numElements,size_t elementSize,
@@ -237,7 +236,7 @@ void GPU::UpdateBufferResource(
 }
 
 void GPU::ConfigureInputAssembler(
-	ComPtr<ID3D12GraphicsCommandList> commandList,D3D_PRIMITIVE_TOPOLOGY topology,
+	const ComPtr<ID3D12GraphicsCommandList>& commandList,D3D_PRIMITIVE_TOPOLOGY topology,
 	const D3D12_VERTEX_BUFFER_VIEW& vertView,const D3D12_INDEX_BUFFER_VIEW& indexView)
 {
 	commandList->IASetPrimitiveTopology(topology);
@@ -304,7 +303,7 @@ bool GPU::CreateVertexShader(ComPtr<ID3DBlob>& outVxShader,const BYTE* someShade
 	return true;
 }
 
-bool GPU::CreateDepthStencil(D3D12_DEPTH_STENCIL_DESC depthStencilDesc)
+bool GPU::CreateDepthStencil(const D3D12_DEPTH_STENCIL_DESC& depthStencilDesc)
 {
 	depthStencilDesc;
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
@@ -441,8 +440,8 @@ bool GPU::LoadTextureFromMemory(Texture* outTexture,const std::filesystem::path&
 }
 
 void GPU::TransitionResource(
-	ComPtr<ID3D12GraphicsCommandList> commandList,
-	ComPtr<ID3D12Resource> resource,D3D12_RESOURCE_STATES beforeState,
+	const ComPtr<ID3D12GraphicsCommandList>& commandList,
+	const ComPtr<ID3D12Resource>& resource,D3D12_RESOURCE_STATES beforeState,
 	D3D12_RESOURCE_STATES afterState)
 {
 	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
@@ -452,12 +451,12 @@ void GPU::TransitionResource(
 	commandList->ResourceBarrier(1,&barrier);
 }
 
-void GPU::ClearRTV(ComPtr<ID3D12GraphicsCommandList> commandList,D3D12_CPU_DESCRIPTOR_HANDLE rtv,FLOAT* clearColor)
+void GPU::ClearRTV(const ComPtr<ID3D12GraphicsCommandList>& commandList,D3D12_CPU_DESCRIPTOR_HANDLE rtv,FLOAT* clearColor)
 {
 	commandList->ClearRenderTargetView(rtv,clearColor,0,nullptr);
 }
 
-void GPU::ClearDepth(ComPtr<ID3D12GraphicsCommandList> commandList,D3D12_CPU_DESCRIPTOR_HANDLE dsv,FLOAT depth)
+void GPU::ClearDepth(const ComPtr<ID3D12GraphicsCommandList>& commandList,D3D12_CPU_DESCRIPTOR_HANDLE dsv,FLOAT depth)
 {
 	commandList->ClearDepthStencilView(dsv,D3D12_CLEAR_FLAG_DEPTH,depth,0,0,nullptr);
 }
@@ -472,7 +471,7 @@ ComPtr<ID3D12Resource> GPU::GetCurrentBackBuffer()
 	return m_BackBuffer->GetResource();//todo fix
 }
 
-ComPtr<ID3D12DescriptorHeap>  GPU::CreateDescriptorHeap(ComPtr<ID3D12Device> device,D3D12_DESCRIPTOR_HEAP_TYPE type,uint32_t numDescriptors,D3D12_DESCRIPTOR_HEAP_FLAGS flags)
+ComPtr<ID3D12DescriptorHeap>  GPU::CreateDescriptorHeap(const ComPtr<ID3D12Device>& device,D3D12_DESCRIPTOR_HEAP_TYPE type,uint32_t numDescriptors,D3D12_DESCRIPTOR_HEAP_FLAGS flags)
 {
 	ComPtr<ID3D12DescriptorHeap> descriptorHeap;
 
@@ -486,7 +485,7 @@ ComPtr<ID3D12DescriptorHeap>  GPU::CreateDescriptorHeap(ComPtr<ID3D12Device> dev
 	return descriptorHeap;
 }
 
-ComPtr<ID3D12Fence> GPU::CreateFence(ComPtr<ID3D12Device> device)
+ComPtr<ID3D12Fence> GPU::CreateFence(const ComPtr<ID3D12Device>& device)
 {
 	ComPtr<ID3D12Fence> fence;
 
@@ -505,7 +504,7 @@ HANDLE GPU::CreateEventHandle()
 	return fenceEvent;
 }
 
-void GPU::UpdateRenderTargetViews(ComPtr<ID3D12Device> device,ComPtr<IDXGISwapChain4> swapChain,ComPtr<ID3D12DescriptorHeap> descriptorHeap)
+void GPU::UpdateRenderTargetViews(const ComPtr<ID3D12Device>& device,const ComPtr<IDXGISwapChain4>& swapChain,const ComPtr<ID3D12DescriptorHeap>& descriptorHeap)
 {
 	auto rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 

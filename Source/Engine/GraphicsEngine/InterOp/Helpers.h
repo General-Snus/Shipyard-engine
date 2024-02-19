@@ -2,11 +2,35 @@
 #include <string>
 #include <Tools/Utilities/Math.hpp>
 
-#include <DirectX/XTK/source/PlatformHelpers.h>
+#include <DirectX/XTK/DirectXHelpers.h>
+#include <exception>
 #include "Tools/Logging/Logging.h"
 
 namespace Helpers
 {
+	//stackoverflow Chuck Walbourn <3
+	namespace DX
+	{
+		// Helper class for COM exceptions
+		class com_exception : public std::exception
+		{
+		public:
+			com_exception(HRESULT hr) : result(hr) {}
+
+			virtual const char* what() const override
+			{
+				static char s_str[64] = {};
+				sprintf_s(s_str,"Failure with HRESULT of %08X",
+					static_cast<unsigned int>(result));
+				return s_str;
+			}
+
+		private:
+			HRESULT result;
+		};
+	}
+
+
 	template<typename T,typename U>
 	inline static T string_cast(const U& someString)
 	{
@@ -38,7 +62,7 @@ namespace Helpers
 	{
 		if (FAILED(hr))
 		{
-			auto err = com_exception(hr);
+			auto err = DX::com_exception(hr);
 			Logger::Err(err.what());
 			throw err;
 		}
@@ -47,7 +71,7 @@ namespace Helpers
 	{
 		if (!FAILED(hr))
 		{
-			auto err = com_exception(hr);
+			auto err = DX::com_exception(hr);
 			Logger::Err(err.what());
 			throw err;
 		}

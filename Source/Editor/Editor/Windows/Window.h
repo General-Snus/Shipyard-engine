@@ -18,7 +18,7 @@ public:
 	static bool Update();
 	static LRESULT CALLBACK WinProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
 
-	static void SetCallbackFunction(std::function<void(MSG const& msg)> aCallback);
+	static void SetCallbackFunction(const std::function<void(MSG const& msg)>& aCallback);
 	static void Destroy();
 	static void MoveConsoleToOtherMonitor();
 
