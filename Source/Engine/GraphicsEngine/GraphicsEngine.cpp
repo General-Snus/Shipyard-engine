@@ -1,4 +1,5 @@
 #include "GraphicsEngine.pch.h"
+
 #include <DirectX/XTK/DDSTextureLoader.h>
 #include <Engine/AssetManager/AssetManager.h>
 #include <Engine/AssetManager/ComponentSystem/Components/CameraComponent.h>
@@ -603,7 +604,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	GPU::ClearRTV(commandList,GPU::m_BackBuffer->GetSRV(),clearColor);
 	GPU::ClearDepth(commandList,dsv);
 
-	commandList->SetPipelineState(GPU::m_PipeLineState.Get());
+	commandList->SetPipelineState(PSOCache::GetState(PSOCache::ePipelineStateID::Default)->m_pipelineState.Get());
 	commandList->SetGraphicsRootSignature(GPU::m_RootSignature.GetSignature());
 	commandList->RSSetViewports(1,&GPU::m_Viewport);
 	commandList->RSSetScissorRects(1,&GPU::m_ScissorRect);

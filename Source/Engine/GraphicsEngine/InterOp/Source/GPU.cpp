@@ -102,6 +102,14 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 		return false;
 	}
 
+	ComPtr<ID3D12InfoQueue> pInfoQueue;
+	if (SUCCEEDED(m_Device.As(&pInfoQueue)))
+	{
+		pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION,TRUE);
+		pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR,TRUE);
+		pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING,TRUE);
+	}
+
 	m_DeviceSupport.targetFeatureLevel = caps.MaxSupportedFeatureLevel;
 	m_CommandQueue->Create(m_Device,D3D12_COMMAND_LIST_TYPE_DIRECT);
 
@@ -187,6 +195,12 @@ void GPU::Present(unsigned aSyncInterval)
 	m_FrameIndex = m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
 
 	m_CommandQueue->WaitForFenceValue(m_FenceValues[m_FrameIndex]);
+
+
+
+
+
+
 }
 
 void GPU::UpdateBufferResource(

@@ -58,3 +58,8 @@ void PSOCache::InitAllStates()
 	pso_map[ePipelineStateID::Default] = std::move(pso);
 
 }
+
+std::unique_ptr<PSO>& PSOCache::GetState(ePipelineStateID id)
+{
+	return pso_map[id];
+}

@@ -16,9 +16,10 @@ public:
 		SSAO
 	};
 
-	void InitAllStates();
-
-	std::unordered_map<ePipelineStateID,std::unique_ptr<PSO>> pso_map;
+	static void InitAllStates();
+	static std::unique_ptr<PSO>& GetState(ePipelineStateID id);
+private:
+	static inline std::unordered_map<ePipelineStateID,std::unique_ptr<PSO>> pso_map;
 };
 
 
