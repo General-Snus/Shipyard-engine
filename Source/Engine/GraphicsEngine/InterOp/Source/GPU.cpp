@@ -4,6 +4,7 @@
 #include <DirectX/XTK/BufferHelpers.h>
 #include <DirectX/XTK/CommonStates.h>
 #include <DirectX/XTK/DDSTextureLoader.h> 
+#include <DirectX/XTK/DescriptorHeap.h> 
 #include <DirectX/XTK/DirectXHelpers.h>
 #include <DirectX/XTK/GraphicsMemory.h>
 #include <DirectX/XTK/ResourceUploadBatch.h> 
@@ -14,6 +15,7 @@
 #include "../Helpers.h"
 #include "../PSO.h"
 #include "Editor/Editor/Windows/Window.h"  
+#include "InterOp/Descriptors.h"
 #include "Tools/Logging/Logging.h"
 
 
@@ -381,10 +383,13 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 		std::cout << error << std::endl;
 		return false;
 	}
+	outTexture->myName = aFileName.filename();
+	outTexture->m_Descriptor = std::make_unique<DescriptorHeap>(m_Device.Get(),
+		Descriptors::Textures);
+
 
 	ResourceUploadBatch resourceUpload(m_Device.Get());
 	resourceUpload.Begin();
-
 
 	Helpers::ThrowIfFailed(
 		CreateDDSTextureFromFile(m_Device.Get(),resourceUpload,L"texture.dds",
@@ -392,57 +397,11 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 	);
 
 	CreateShaderResourceView(m_Device.Get(),outTexture->m_pResource.Get(),
-		outTexture->m_hCpuDescriptorHandle);
+		outTexture->m_Descriptor->GetFirstCpuHandle());
 
-	// Upload the resources to the GPU.
 	auto uploadResourcesFinished = resourceUpload.End(m_CommandQueue->GetCommandQueue().Get());
-
-	// Wait for the upload thread to terminate
 	uploadResourcesFinished.wait();
 
-	//else if (aFileName.extension() == ".hdr")
-	//{
-	//	Helpers::ThrowIfFailed(LoadFromHDRFile(fileName.c_str(),&metadata,scratchImage));
-	//}
-	//else if (aFileName.extension() == ".tga")
-	//{
-	//	Helpers::ThrowIfFailed(LoadFromTGAFile(fileName.c_str(),&metadata,scratchImage));
-	//} 
-
-	//assert(outTexture && "Please initialize the Texture Object before calling this function!");
-	////outTexture = std::make_shared<Texture>();
-	//outTexture->myName = aFileName;/*
-	//outTexture->myBindFlags = D3D12_BIND_SHADER_RESOURCE;
-	//outTexture->myUsageFlags = D3D11_USAGE_DEFAULT;
-	//outTexture->myAccessFlags = 0;*/
-	//HRESULT result = DirectX::CreateDDSTextureFromFile(
-	//	m_Device,
-	//	aFileName.c_str(),
-	//	outTexture->myTexture.GetAddressOf(),
-	//	outTexture->mySRV.GetAddressOf()
-	//);
-
-	//if (FAILED(result))
-	//{
-	//	Logger::Err("Failed to load the requested texture! Please check the DirectX Debug Output for more information. If there is none make sure you set enableDeviceDebug to True.");
-	//	return false;
-	//}
-
-	//result = m_Device->CreateShaderResourceView(outTexture->myTexture.Get(),nullptr,outTexture->mySRV.GetAddressOf());
-	//if (FAILED(result))
-	//{
-	//	Logger::Err("Failed to create a shader resource view! Please check the DirectX Debug Output for more information. If there is none make sure you set enableDeviceDebug to True.");
-	//	return false;
-	//}
-
-	//std::wstring textureName = aFileName;
-	//if (const size_t pos = textureName.find_last_of(L'\\'); pos != std::wstring::npos)
-	//{
-	//	textureName = textureName.substr(pos + 1);
-	//}
-
-	//textureName = textureName.substr(0,textureName.size() - 4);
-	//outTexture->myName = textureName;
 
 	return true;
 }

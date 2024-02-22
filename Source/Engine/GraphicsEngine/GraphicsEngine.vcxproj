@@ -199,6 +199,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="InterOp\Descriptors.h" />
     <ClInclude Include="InterOp\GPUBuffer.h" />
     <ClInclude Include="InterOp\CommandQueue.h" />
     <ClInclude Include="DebugDrawer\DebugDrawer.h">

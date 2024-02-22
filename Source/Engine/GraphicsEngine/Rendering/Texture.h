@@ -1,13 +1,19 @@
 #pragma once
 #include <array> 
+#include <Directx/XTK/DescriptorHeap.h>
+#include <Engine/GraphicsEngine/InterOp/GpuResource.h>
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <wrl.h>
 
+namespace DirectX
+{
+	class DescriptorHeap;
+}
+
 using namespace Microsoft::WRL;
 
-#include <Engine/GraphicsEngine/InterOp/GpuResource.h>
 
 
 
@@ -28,23 +34,21 @@ public:
 	virtual void Destroy() override
 	{
 		GpuResource::Destroy();
-		m_hCpuDescriptorHandle.ptr = D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN;
+		m_Descriptor.release();
 	}
 
 	bool AllocateTexture(const unsigned width,const unsigned height);
 
 	bool CreateDDSFromMemory(const void* filePtr,size_t fileSize,bool sRGB);
-	const D3D12_CPU_DESCRIPTOR_HANDLE& GetSRV() const { return m_hCpuDescriptorHandle; }
+	D3D12_CPU_DESCRIPTOR_HANDLE  GetSRV() const { return m_Descriptor->GetFirstCpuHandle(); }
 
 	uint32_t GetWidth() const { return m_Width; }
 	uint32_t GetHeight() const { return m_Height; }
 	uint32_t GetDepth() const { return m_Depth; }
 
 protected:
-	ComPtr<ID3D12DescriptorHeap> m_DSVHeap;
+	std::unique_ptr<DirectX::DescriptorHeap> m_Descriptor;
 	uint32_t m_Width;
 	uint32_t m_Height;
 	uint32_t m_Depth;
-
-	D3D12_CPU_DESCRIPTOR_HANDLE m_hCpuDescriptorHandle;
 };

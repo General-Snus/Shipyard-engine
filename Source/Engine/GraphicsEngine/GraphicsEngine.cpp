@@ -608,7 +608,8 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	commandList->SetGraphicsRootSignature(GPU::m_RootSignature.GetSignature());
 	commandList->RSSetViewports(1,&GPU::m_Viewport);
 	commandList->RSSetScissorRects(1,&GPU::m_ScissorRect);
-	commandList->OMSetRenderTargets(1,&GPU::m_BackBuffer->GetSRV(),FALSE,&dsv);
+	auto srv = GPU::m_BackBuffer->GetSRV();
+	commandList->OMSetRenderTargets(1,&srv,FALSE,&dsv);
 
 
 	OPTICK_EVENT();
