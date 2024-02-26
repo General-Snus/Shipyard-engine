@@ -25,7 +25,7 @@ class Texture : public GpuResource
 public:
 	Texture() = default;
 	~Texture() = default;
-
+	void Initialize();
 	FORCEINLINE const std::wstring& GetName() const { return myName; }
 	FORCEINLINE bool IsValid() const { return m_pResource != nullptr; }
 	// The name of this texture, for easy ID.

@@ -26,6 +26,7 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 {
 	aWindowHandle; enableDeviceDebug; m_BackBuffer = aBackBuffer; m_DepthBuffer = aDepthBuffer;
 
+
 	m_Swapchain = std::make_unique<GPUSwapchain>();
 	m_CommandQueue = std::make_unique<GPUCommandQueue>();
 
@@ -164,6 +165,11 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 	}
 
 	m_GraphicsMemory = std::make_unique<DirectX::DX12::GraphicsMemory>(m_Device.Get());
+
+	m_BackBuffer->Initialize();
+	m_DepthBuffer->Initialize();
+
+
 
 	m_BackBuffer->AllocateTexture(1920,1080);
 	ResizeDepthBuffer(1920,1080);

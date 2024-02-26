@@ -8,6 +8,11 @@
 
 #include "DescriptorHeap.h"
 
+void Texture::Initialize()
+{
+	m_Descriptor = std::make_unique<DescriptorHeap>(GPU::m_Device.Get(),Descriptors::Textures);
+}
+
 bool Texture::AllocateTexture(const unsigned width,const unsigned height)
 {
 	//ComPtr<ID3D12Resource> textureUploadHeap;
@@ -64,15 +69,17 @@ bool Texture::AllocateTexture(const unsigned width,const unsigned height)
 	//	GPU::m_Device->CreateShaderResourceView(m_pResource.Get(),&srvDesc,GPU::m_SrvHeap->GetCPUDescriptorHandleForHeapStart());
 	//}
 
-	// This creates a 1x1 texture in RGBA format
+	Initialize();
+
+	// This creates a x y texture in RGBA format
 	D3D12_RESOURCE_DESC txtDesc = {};
 	txtDesc.MipLevels = txtDesc.DepthOrArraySize = 1;
 	txtDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	txtDesc.Width = 1;
-	txtDesc.Height = 1;
+	txtDesc.Width = width;
+	txtDesc.Height = height;
 	txtDesc.SampleDesc.Count = 1;
 	txtDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-
+	txtDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 	CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_DEFAULT);
 
 	Helpers::ThrowIfFailed(
