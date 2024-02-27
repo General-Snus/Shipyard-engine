@@ -591,7 +591,7 @@ void GraphicsEngine::BeginFrame()
 	UINT currentBackBufferIndex = chain->GetCurrentBackBufferIndex();
 	auto backBuffer = GPU::GetCurrentBackBuffer();
 	auto rtv = GPU::GetCurrentRenderTargetView();
-	auto dsv = GPU::m_RtvHeap->GetCPUDescriptorHandleForHeapStart();
+	auto dsv = GPU::m_DsvHeap->GetCPUDescriptorHandleForHeapStart();
 
 	GPU::TransitionResource(commandList,backBuffer,
 		D3D12_RESOURCE_STATE_PRESENT,D3D12_RESOURCE_STATE_RENDER_TARGET);
@@ -605,14 +605,15 @@ void GraphicsEngine::BeginFrame()
 	CD3DX12_CPU_DESCRIPTOR_HANDLE dsvDescriptor(cpuHandleDSV);
 
 	commandList->OMSetRenderTargets(1,&rtvDescriptor,FALSE,&dsvDescriptor);
-	commandList->ClearRenderTargetView(rtvDescriptor,clearColor,0,nullptr);
-	commandList->ClearDepthStencilView(dsvDescriptor,D3D12_CLEAR_FLAG_DEPTH,1.0f,0,0,nullptr);
+	//commandList->ClearRenderTargetView(rtvDescriptor,clearColor,0,nullptr);
+	//commandList->ClearDepthStencilView(dsvDescriptor,D3D12_CLEAR_FLAG_DEPTH,1.0f,0,0,nullptr);
 
-	//GPU::ClearRTV(commandList,GPU::m_BackBuffer->GetSRV(),clearColor);
-	//GPU::ClearDepth(commandList,dsv);
+	GPU::ClearRTV(commandList,rtvDescriptor,clearColor);
+	GPU::ClearDepth(commandList,dsvDescriptor);
 
 	commandList->SetPipelineState(PSOCache::GetState(PSOCache::ePipelineStateID::Default)->m_pipelineState.Get());
 	commandList->SetGraphicsRootSignature(GPU::m_RootSignature.GetSignature());
+
 
 	commandList->RSSetViewports(1,&GPU::m_Viewport);
 	commandList->RSSetScissorRects(1,&GPU::m_ScissorRect);

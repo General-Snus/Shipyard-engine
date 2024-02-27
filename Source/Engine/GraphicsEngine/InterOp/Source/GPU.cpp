@@ -171,14 +171,18 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 		D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
 		eDescriptors::Count);
 
-	m_BackBuffer->Initialize();
-	m_DepthBuffer->Initialize();
+	const int width = Window::Width();
+	const int height = Window::Height();
 
-
-
-	m_BackBuffer->AllocateTexture(1920,1080);
-	ResizeDepthBuffer(1920,1080);
+	m_BackBuffer->AllocateTexture(width,height);
+	ResizeDepthBuffer(width,height);
 	m_CommandQueue->ExecuteCommandList(m_CommandQueue->GetCommandList());
+
+	m_Viewport = { 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), D3D12_MIN_DEPTH, D3D12_MAX_DEPTH };
+	m_ScissorRect = { 0, 0, static_cast<LONG>(width), static_cast<LONG>(height) };
+
+
+
 
 	return true;
 }
@@ -458,7 +462,7 @@ ComPtr<ID3D12Resource> GPU::GetCurrentRenderTargetView()
 
 ComPtr<ID3D12Resource> GPU::GetCurrentBackBuffer()
 {
-	return m_BackBuffer->GetResource();//todo fix
+	return m_renderTargets[m_FrameIndex];//todo fix fixed
 }
 
 ComPtr<ID3D12DescriptorHeap>  GPU::CreateDescriptorHeap(const ComPtr<ID3D12Device>& device,D3D12_DESCRIPTOR_HEAP_TYPE type,uint32_t numDescriptors,D3D12_DESCRIPTOR_HEAP_FLAGS flags)
@@ -505,6 +509,8 @@ void GPU::UpdateRenderTargetViews(const ComPtr<ID3D12Device>& device,const ComPt
 		ComPtr<ID3D12Resource> backBuffer;
 		Helpers::ThrowIfFailed(swapChain->GetBuffer(i,IID_PPV_ARGS(&backBuffer)));
 		device->CreateRenderTargetView(backBuffer.Get(),nullptr,rtvHandle);
+		auto var = L"backbuffer:" + std::to_wstring(i);
+		backBuffer->SetName(var.c_str());
 		m_renderTargets[i] = backBuffer;
 		rtvHandle.Offset(rtvDescriptorSize);
 	}

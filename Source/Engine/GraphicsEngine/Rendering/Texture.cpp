@@ -46,7 +46,7 @@ bool Texture::AllocateTexture(const unsigned width,const unsigned height)
 			D3D12_RESOURCE_STATE_COPY_DEST,
 			nullptr,
 			IID_PPV_ARGS(m_pResource.ReleaseAndGetAddressOf())));
-
+	m_pResource->SetName(L"Backbuffer");
 
 	static const uint32_t s_whitePixels = 0xFFFFFFFF;
 	void* pixelData = malloc(txtDesc.Height * txtDesc.Width * 4);
@@ -69,7 +69,7 @@ bool Texture::AllocateTexture(const unsigned width,const unsigned height)
 	resourceUpload.Transition(
 		m_pResource.Get(),
 		D3D12_RESOURCE_STATE_COPY_DEST,
-		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	auto uploadResourcesFinished = resourceUpload.End(GPU::m_CommandQueue->GetCommandQueue().Get());
 

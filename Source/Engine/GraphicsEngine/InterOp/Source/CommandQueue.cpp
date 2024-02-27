@@ -101,6 +101,7 @@ ComPtr<ID3D12GraphicsCommandList> GPUCommandQueue::GetCommandList()
 	else
 	{
 		commandAllocator = CreateCommandAllocator();
+		commandAllocator->SetName(L"CommandListAllocator");
 	}
 
 	if (!m_CommandListQueue.empty())
@@ -112,7 +113,12 @@ ComPtr<ID3D12GraphicsCommandList> GPUCommandQueue::GetCommandList()
 	}
 	else
 	{
-		commandList = CreateCommandList(commandAllocator);
+		if (!m_CommandList)
+		{
+			m_CommandList = CreateCommandList(commandAllocator);
+			m_CommandList->SetName(L"CommandList");
+		}
+		commandList = m_CommandList;
 	}
 	Helpers::ThrowIfFailed(commandList->SetPrivateDataInterface(__uuidof(ID3D12CommandAllocator),commandAllocator.Get()));
 
@@ -126,17 +132,13 @@ ComPtr<ID3D12CommandQueue> GPUCommandQueue::GetCommandQueue()
 
 uint64_t GPUCommandQueue::ExecuteCommandList(const ComPtr<ID3D12GraphicsCommandList>& commandList)
 {
-	commandList->Close();
+	Helpers::ThrowIfFailed(commandList->Close());
 
 	ID3D12CommandAllocator* commandAllocator;
 	UINT dataSize = sizeof(commandAllocator);
 	Helpers::ThrowIfFailed(commandList->GetPrivateData(__uuidof(ID3D12CommandAllocator),&dataSize,&commandAllocator));
 
-	ID3D12CommandList* const ppCommandLists[] = {
-		commandList.Get()
-	};
-
-	m_CommandQueue->ExecuteCommandLists(1,ppCommandLists);
+	m_CommandQueue->ExecuteCommandLists(1,CommandListCast(commandList.GetAddressOf()));
 	uint64_t fenceValue = Signal();
 
 	m_CommandAllocatorQueue.emplace(CommandAllocatorEntry{ fenceValue, commandAllocator });

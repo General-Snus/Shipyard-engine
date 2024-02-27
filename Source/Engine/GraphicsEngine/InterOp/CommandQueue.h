@@ -35,6 +35,7 @@ private:
 
 	std::queue<CommandAllocatorEntry> m_CommandAllocatorQueue;
 	std::queue<ComPtr<ID3D12GraphicsCommandList>> m_CommandListQueue;
+	ComPtr<ID3D12GraphicsCommandList> m_CommandList;
 
 	//ComPtr<ID3D12CommandAllocator> m_Allocator[m_FrameCount];
 	//uint64_t g_FrameFenceValues[m_FrameCount] = {};
