@@ -581,17 +581,14 @@ void GraphicsEngine::BeginFrame()
 	RHI::ClearRenderTarget(IntermediateB.get(),{ 0.0f,0.0f,0.0f,0.0f });
 	myG_Buffer.ClearTargets();
 	RHI::SetBlendState(nullptr);*/
-}
 
-void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
-{
 
 
 	auto commandQueue = GPU::m_CommandQueue.get();
 	auto commandList = commandQueue->GetCommandList();
 	auto chain = GPU::m_Swapchain->m_SwapChain;
 
-	//UINT currentBackBufferIndex = chain->GetCurrentBackBufferIndex();
+	UINT currentBackBufferIndex = chain->GetCurrentBackBufferIndex();
 	auto backBuffer = GPU::GetCurrentBackBuffer();
 	auto rtv = GPU::GetCurrentRenderTargetView();
 	auto dsv = GPU::m_RtvHeap->GetCPUDescriptorHandleForHeapStart();
@@ -599,17 +596,34 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	GPU::TransitionResource(commandList,backBuffer,
 		D3D12_RESOURCE_STATE_PRESENT,D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-	FLOAT clearColor[] = { 0.4f, 0.6f, 0.9f, 1.0f };
+	FLOAT clearColor[] = { 0.2f, 0.2f, 0.9f, 1.0f };
 
-	GPU::ClearRTV(commandList,GPU::m_BackBuffer->GetSRV(),clearColor);
-	GPU::ClearDepth(commandList,dsv);
+	auto cpuHandle = GPU::m_RtvHeap->GetCPUDescriptorHandleForHeapStart();
+	auto cpuHandleDSV = GPU::m_DsvHeap->GetCPUDescriptorHandleForHeapStart();
+
+	const CD3DX12_CPU_DESCRIPTOR_HANDLE rtvDescriptor(cpuHandle,static_cast<INT>(currentBackBufferIndex),GPU::m_RtvDescriptorSize);
+	CD3DX12_CPU_DESCRIPTOR_HANDLE dsvDescriptor(cpuHandleDSV);
+
+	commandList->OMSetRenderTargets(1,&rtvDescriptor,FALSE,&dsvDescriptor);
+	commandList->ClearRenderTargetView(rtvDescriptor,clearColor,0,nullptr);
+	commandList->ClearDepthStencilView(dsvDescriptor,D3D12_CLEAR_FLAG_DEPTH,1.0f,0,0,nullptr);
+
+	//GPU::ClearRTV(commandList,GPU::m_BackBuffer->GetSRV(),clearColor);
+	//GPU::ClearDepth(commandList,dsv);
 
 	commandList->SetPipelineState(PSOCache::GetState(PSOCache::ePipelineStateID::Default)->m_pipelineState.Get());
 	commandList->SetGraphicsRootSignature(GPU::m_RootSignature.GetSignature());
+
 	commandList->RSSetViewports(1,&GPU::m_Viewport);
 	commandList->RSSetScissorRects(1,&GPU::m_ScissorRect);
-	auto srv = GPU::m_BackBuffer->GetSRV();
-	commandList->OMSetRenderTargets(1,&srv,FALSE,&dsv);
+}
+
+void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
+{
+
+
+	//auto srv = GPU::m_BackBuffer->GetSRV();
+	//commandList->OMSetRenderTargets(1,&srv,FALSE,&dsv);
 
 
 	OPTICK_EVENT();

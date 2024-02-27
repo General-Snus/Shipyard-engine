@@ -15,7 +15,7 @@
 #include "../Helpers.h"
 #include "../PSO.h"
 #include "Editor/Editor/Windows/Window.h"  
-#include "InterOp/Descriptors.h"
+#include "InterOp/eDescriptors.h"
 #include "Tools/Logging/Logging.h"
 
 
@@ -124,7 +124,7 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 	m_RtvHeap = CreateDescriptorHeap(m_Device,D3D12_DESCRIPTOR_HEAP_TYPE_RTV,m_FrameCount);
 	m_RtvDescriptorSize = m_Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
-
+	m_DsvHeap = CreateDescriptorHeap(m_Device,D3D12_DESCRIPTOR_HEAP_TYPE_DSV,1);
 	m_SrvHeap = CreateDescriptorHeap(m_Device,D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,1,D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
 
 
@@ -165,6 +165,11 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 	}
 
 	m_GraphicsMemory = std::make_unique<DirectX::DX12::GraphicsMemory>(m_Device.Get());
+
+	m_ResourceDescriptors = std::make_unique<DescriptorHeap>(m_Device.Get(),
+		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+		D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
+		eDescriptors::Count);
 
 	m_BackBuffer->Initialize();
 	m_DepthBuffer->Initialize();
@@ -342,31 +347,37 @@ bool GPU::CreateDepthStencil(const D3D12_DEPTH_STENCIL_DESC& depthStencilDesc)
 
 void GPU::ResizeDepthBuffer(unsigned width,unsigned height)
 {
-	if (m_DepthBuffer->IsValid())
+	//if (m_DepthBuffer->IsValid())
 	{
 		// Flush any GPU commands that might be referencing the depth buffer.
 		m_CommandQueue->Flush();
 
 		width = std::max(1u,width);
 		height = std::max(1u,height);
-		// Resize screen dependent resources.
-		   // Create a depth buffer.
-		D3D12_CLEAR_VALUE optimizedClearValue = {};
-		optimizedClearValue.Format = DXGI_FORMAT_D32_FLOAT;
-		optimizedClearValue.DepthStencil = { 1.0f, 0 };
 
 		auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-		auto resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_D32_FLOAT,width,height,
-			1,0,1,0,D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
+		D3D12_RESOURCE_DESC depthStencilDesc = CD3DX12_RESOURCE_DESC::Tex2D(
+			DXGI_FORMAT_D32_FLOAT,
+			width,
+			height,
+			1,
+			1,
+			1,
+			0,
+			D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL
+		);
 
+		const CD3DX12_CLEAR_VALUE depthOptimizedClearValue(DXGI_FORMAT_D32_FLOAT,1.0f,0u);
 		Helpers::ThrowIfFailed(m_Device->CreateCommittedResource(
 			&heapProperties,
 			D3D12_HEAP_FLAG_NONE,
-			&resourceDesc,
-			D3D12_RESOURCE_STATE_GENERIC_READ,
-			nullptr,
+			&depthStencilDesc,
+			D3D12_RESOURCE_STATE_DEPTH_WRITE,
+			&depthOptimizedClearValue,
 			IID_PPV_ARGS(&m_DepthBuffer->m_pResource)
 		));
+		m_DepthBuffer->m_pResource->SetName(L"DepthBuffer");
+
 		// Update the depth-stencil view.
 		D3D12_DEPTH_STENCIL_VIEW_DESC dsv = {};
 		dsv.Format = DXGI_FORMAT_D32_FLOAT;
@@ -375,7 +386,7 @@ void GPU::ResizeDepthBuffer(unsigned width,unsigned height)
 		dsv.Flags = D3D12_DSV_FLAG_NONE;
 
 		m_Device->CreateDepthStencilView(m_DepthBuffer->GetResource(),&dsv,
-			m_RtvHeap->GetCPUDescriptorHandleForHeapStart());
+			m_DsvHeap->GetCPUDescriptorHandleForHeapStart());
 	}
 }
 
@@ -390,8 +401,8 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 		return false;
 	}
 	outTexture->myName = aFileName.filename();
-	outTexture->m_Descriptor = std::make_unique<DescriptorHeap>(m_Device.Get(),
-		Descriptors::Textures);
+	//outTexture->m_DescriptorHandle = std::make_unique<DescriptorHeap>(m_Device.Get(),
+	//	eDescriptors::Textures);
 
 
 	ResourceUploadBatch resourceUpload(m_Device.Get());
@@ -403,7 +414,7 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 	);
 
 	CreateShaderResourceView(m_Device.Get(),outTexture->m_pResource.Get(),
-		outTexture->m_Descriptor->GetFirstCpuHandle());
+		outTexture->m_DescriptorHandle);
 
 	auto uploadResourcesFinished = resourceUpload.End(m_CommandQueue->GetCommandQueue().Get());
 	uploadResourcesFinished.wait();

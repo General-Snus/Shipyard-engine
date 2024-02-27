@@ -149,9 +149,13 @@ public:
 
 	static inline ComPtr<ID3D12Device> m_Device;
 	static inline std::unique_ptr<GPUCommandQueue> m_CommandQueue;
+
 	static inline std::unique_ptr<GPUSwapchain> m_Swapchain;
+	static inline ComPtr<ID3D12CommandAllocator> m_CommandAllocators[m_FrameCount];
 	static inline ComPtr<ID3D12Resource> m_renderTargets[m_FrameCount];
+
 	static inline ComPtr<ID3D12DescriptorHeap> m_RtvHeap;
+	static inline ComPtr<ID3D12DescriptorHeap> m_DsvHeap;
 	static inline ComPtr<ID3D12DescriptorHeap> m_SrvHeap;
 	static inline UINT m_RtvDescriptorSize;
 
@@ -167,7 +171,7 @@ public:
 	static inline std::shared_ptr<Texture> m_BackBuffer;
 	static inline std::shared_ptr<Texture> m_DepthBuffer;
 	static inline std::unique_ptr<GraphicsMemory> m_GraphicsMemory;
-
+	static inline std::unique_ptr<DescriptorHeap> m_ResourceDescriptors;
 
 private:
 };

@@ -3,72 +3,20 @@
 #include <DDSTextureLoader.h>
 #include <ResourceUploadBatch.h>
 #include  "Effects.h"
-#include "InterOp/Descriptors.h"
+#include "InterOp/eDescriptors.h"
 
 
 #include "DescriptorHeap.h"
 
 void Texture::Initialize()
 {
-	m_Descriptor = std::make_unique<DescriptorHeap>(GPU::m_Device.Get(),Descriptors::Textures);
+	//m_DescriptorHandle = std::make_unique<DescriptorHeap>(GPU::m_Device.Get(),eDescriptors::Textures);
 }
 
 bool Texture::AllocateTexture(const unsigned width,const unsigned height)
 {
-	//ComPtr<ID3D12Resource> textureUploadHeap;
-	//// Create the texture.
-	//{
-	//	// Describe and create a Texture2D.
-	//	D3D12_RESOURCE_DESC textureDesc = {};
-	//	textureDesc.MipLevels = 1;
-	//	textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	//	textureDesc.Width = width;
-	//	textureDesc.Height = height;
-	//	textureDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-	//	textureDesc.DepthOrArraySize = 1;
-	//	textureDesc.SampleDesc.Count = 1;
-	//	textureDesc.SampleDesc.Quality = 0;
-	//	textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	//	auto descProperty = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-	//	Helpers::ThrowIfFailed(GPU::m_Device->CreateCommittedResource(
-	//		&descProperty,
-	//		D3D12_HEAP_FLAG_NONE,
-	//		&textureDesc,
-	//		D3D12_RESOURCE_STATE_COPY_DEST,
-	//		nullptr,
-	//		IID_PPV_ARGS(&m_pResource)));
-	//	const UINT64 uploadBufferSize = GetRequiredIntermediateSize(m_pResource.Get(),0,1);
-	//	auto heapProperty = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-	//	auto buffer = CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize);
-	//	// Create the GPU upload buffer.
-	//	Helpers::ThrowIfFailed(GPU::m_Device->CreateCommittedResource(
-	//		&heapProperty,
-	//		D3D12_HEAP_FLAG_NONE,
-	//		&buffer,
-	//		D3D12_RESOURCE_STATE_COMMON,
-	//		nullptr,
-	//		IID_PPV_ARGS(&textureUploadHeap)));
-	//	// Copy data to the intermediate upload heap and then schedule a copy 
-	//	// from the upload heap to the Texture2D.
-	//	std::vector<UINT8> texture;
-	//	texture.resize(width * height * 4);
-	//	D3D12_SUBRESOURCE_DATA textureData = {};
-	//	textureData.pData = &texture[0];
-	//	textureData.RowPitch = width * 4;
-	//	textureData.SlicePitch = textureData.RowPitch * height;
-	//	UpdateSubresources(GPU::m_CommandQueue->GetCommandList().Get(),m_pResource.Get(),textureUploadHeap.Get(),0,0,1,&textureData); 
-	//	GPU::TransitionResource(GPU::m_CommandQueue->GetCommandList(),textureUploadHeap,D3D12_RESOURCE_STATE_COPY_DEST,
-	//		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-
-	//	// Describe and create a SRV for the texture.
-	//	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-	//	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	//	srvDesc.Format = textureDesc.Format;
-	//	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	//	srvDesc.Texture2D.MipLevels = 1;
-	//	GPU::m_Device->CreateShaderResourceView(m_pResource.Get(),&srvDesc,GPU::m_SrvHeap->GetCPUDescriptorHandleForHeapStart());
-	//}
-
+	m_Width = width;
+	m_Height = height;
 	Initialize();
 
 	// This creates a x y texture in RGBA format
@@ -79,8 +27,16 @@ bool Texture::AllocateTexture(const unsigned width,const unsigned height)
 	txtDesc.Height = height;
 	txtDesc.SampleDesc.Count = 1;
 	txtDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	txtDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 	txtDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-	CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_DEFAULT);
+
+
+	D3D12_HEAP_PROPERTIES heapProps;
+	heapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
+	heapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+	heapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+	heapProps.CreationNodeMask = 1;
+	heapProps.VisibleNodeMask = 1;
 
 	Helpers::ThrowIfFailed(
 		GPU::m_Device->CreateCommittedResource(
@@ -92,14 +48,17 @@ bool Texture::AllocateTexture(const unsigned width,const unsigned height)
 			IID_PPV_ARGS(m_pResource.ReleaseAndGetAddressOf())));
 
 
-	static const uint32_t s_whitePixel = 0xFFFFFFFF;
+	static const uint32_t s_whitePixels = 0xFFFFFFFF;
+	void* pixelData = malloc(txtDesc.Height * txtDesc.Width * 4);
+	memset(pixelData,s_whitePixels,txtDesc.Height * txtDesc.Width * 4);
 
 	D3D12_SUBRESOURCE_DATA textureData = {};
-	textureData.pData = &s_whitePixel;
+	textureData.pData = pixelData;
 	textureData.RowPitch = txtDesc.Width * 4;
 	textureData.SlicePitch = txtDesc.Height * txtDesc.Width * 4;
 
-	m_Descriptor = std::make_unique<DescriptorHeap>(GPU::m_Device.Get(),Descriptors::Count);
+	//m_DescriptorHandle = std::make_unique<DescriptorHeap>(GPU::m_Device.Get(),eDescriptors::Count);
+
 
 	ResourceUploadBatch resourceUpload(GPU::m_Device.Get());
 
@@ -115,12 +74,15 @@ bool Texture::AllocateTexture(const unsigned width,const unsigned height)
 	auto uploadResourcesFinished = resourceUpload.End(GPU::m_CommandQueue->GetCommandQueue().Get());
 
 	uploadResourcesFinished.wait();
-
-
+	if (!uploadResourcesFinished.valid())
+	{
+		throw std::runtime_error("Failed to upload texture");
+	}
 	CreateShaderResourceView(GPU::m_Device.Get(),m_pResource.Get(),
-		m_Descriptor->GetCpuHandle(Descriptors::Textures));
+		GPU::m_ResourceDescriptors->GetCpuHandle(eDescriptors::Textures));
 
-
+	//ID3D12DescriptorHeap* heaps[] = { m_DescriptorHandle->Heap() };
+	//GPU::m_CommandQueue->GetCommandList()->SetDescriptorHeaps(static_cast<UINT>(std::size(heaps)),heaps);
 
 	return false;
 }
