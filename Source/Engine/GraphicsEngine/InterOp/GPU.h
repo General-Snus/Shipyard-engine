@@ -119,7 +119,7 @@ public:
 	static void ClearDepth(const ComPtr<ID3D12GraphicsCommandList>& commandList,
 		D3D12_CPU_DESCRIPTOR_HANDLE dsv,FLOAT depth = 1);
 
-	static ComPtr<ID3D12Resource> GetCurrentRenderTargetView();
+	static D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentRenderTargetView();
 	static ComPtr<ID3D12Resource> GetCurrentBackBuffer();
 
 	static ComPtr<ID3D12DescriptorHeap>  CreateDescriptorHeap(
@@ -143,8 +143,8 @@ public:
 		bool requestHighPerformanceAdapter = false);
 
 
-	static inline constexpr bool m_useWarpDevice = false;
 	static inline constexpr UINT m_FrameCount = 2;
+	static inline constexpr bool m_useWarpDevice = false;
 	static inline UINT m_FrameIndex;
 
 	static inline ComPtr<ID3D12Device> m_Device;
@@ -213,7 +213,7 @@ inline bool GPU::CreateVertexBuffer(
 	outvertexBufferView.BufferLocation = vertexBuffer.GpuAddress();
 	outvertexBufferView.StrideInBytes = sizeof(Vertex);
 	outvertexBufferView.SizeInBytes = static_cast<UINT>(vertexBuffer.Size());
-	m_CommandQueue->GetCommandList()->IASetVertexBuffers(0,1,&outvertexBufferView);
+	//m_CommandQueue->GetCommandList()->IASetVertexBuffers(0,1,&outvertexBufferView);
 
 
 

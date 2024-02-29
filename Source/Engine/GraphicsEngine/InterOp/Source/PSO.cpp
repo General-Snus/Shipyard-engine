@@ -46,7 +46,7 @@ void PSO::Init()
 	psoDesc.SampleDesc.Count = 1;
 
 	Helpers::ThrowIfFailed(GPU::m_Device->CreateGraphicsPipelineState(&psoDesc,IID_PPV_ARGS(m_pipelineState.ReleaseAndGetAddressOf())));
-	/*GPU::m_Device->CreateCommandList(0,D3D12_COMMAND_LIST_TYPE_DIRECT,GPU::m_Allocator.Get(),m_pipelineState.Get(),IID_PPV_ARGS(&GPU::m_CommandList));
+	/*GPU::m_Device->CreateCommandList(0,D3D12_COMMAND_LIST_TYPE_DIRECT,GPU::m_AllocatorEntries.Get(),m_pipelineState.Get(),IID_PPV_ARGS(&GPU::m_CommandList));
 
 	GPU::m_CommandList->Close();*/
 }

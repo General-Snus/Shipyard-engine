@@ -1,5 +1,5 @@
-#include "GraphicsEngine.pch.h"
 #include "../CommandQueue.h"
+#include "GraphicsEngine.pch.h"
 
 ComPtr<ID3D12CommandAllocator> GPUCommandQueue::CreateCommandAllocator()
 {
@@ -38,8 +38,8 @@ bool GPUCommandQueue::Create(const ComPtr<ID3D12Device>& device,D3D12_COMMAND_LI
 	//desc.NodeMask = 0;
 
 	Helpers::ThrowIfFailed(m_Device->CreateCommandQueue(&desc,IID_PPV_ARGS(&m_CommandQueue)));
-
 	Helpers::ThrowIfFailed(m_Device->CreateFence(m_FenceValue,D3D12_FENCE_FLAG_NONE,IID_PPV_ARGS(&m_Fence)));
+
 	switch (type)
 	{
 	case D3D12_COMMAND_LIST_TYPE_COPY:
@@ -53,8 +53,11 @@ bool GPUCommandQueue::Create(const ComPtr<ID3D12Device>& device,D3D12_COMMAND_LI
 		break;
 	}
 
-	m_FenceEvent = ::CreateEvent(nullptr,FALSE,FALSE,nullptr);
-	assert(m_FenceEvent && "Failed to create fence event handle.");
+	m_FenceEvent.Attach(CreateEventEx(nullptr,nullptr,0,EVENT_MODIFY_STATE | SYNCHRONIZE));
+	if (!m_FenceEvent.IsValid())
+	{
+		throw std::system_error(std::error_code(static_cast<int>(GetLastError()),std::system_category()),"CreateEventEx");
+	}
 	return true;
 }
 
@@ -79,17 +82,17 @@ void GPUCommandQueue::WaitForFenceValue(uint64_t fenceValue)
 		if (event)
 		{
 			m_Fence->SetEventOnCompletion(fenceValue,event);
-			::WaitForSingleObject(event,DWORD_MAX);
+			std::ignore = WaitForSingleObjectEx(event,INFINITE,FALSE);
 
-			::CloseHandle(event);
+			//::CloseHandle(event);
 		}
 	}
 }
 
 ComPtr<ID3D12GraphicsCommandList> GPUCommandQueue::GetCommandList()
 {
-	ComPtr<ID3D12CommandAllocator> commandAllocator;
-	ComPtr<ID3D12GraphicsCommandList> commandList;
+	ComPtr<ID3D12GraphicsCommandList>  commandList;
+	ComPtr<ID3D12CommandAllocator>  commandAllocator;
 
 	if (!m_CommandAllocatorQueue.empty() && IsFenceComplete(m_CommandAllocatorQueue.front().fenceValue))
 	{
@@ -100,6 +103,7 @@ ComPtr<ID3D12GraphicsCommandList> GPUCommandQueue::GetCommandList()
 	}
 	else
 	{
+
 		commandAllocator = CreateCommandAllocator();
 		commandAllocator->SetName(L"CommandListAllocator");
 	}
@@ -113,12 +117,8 @@ ComPtr<ID3D12GraphicsCommandList> GPUCommandQueue::GetCommandList()
 	}
 	else
 	{
-		if (!m_CommandList)
-		{
-			m_CommandList = CreateCommandList(commandAllocator);
-			m_CommandList->SetName(L"CommandList");
-		}
-		commandList = m_CommandList;
+		commandList = CreateCommandList(commandAllocator);
+		commandList->SetName(L"CommandList");
 	}
 	Helpers::ThrowIfFailed(commandList->SetPrivateDataInterface(__uuidof(ID3D12CommandAllocator),commandAllocator.Get()));
 
@@ -143,8 +143,6 @@ uint64_t GPUCommandQueue::ExecuteCommandList(const ComPtr<ID3D12GraphicsCommandL
 
 	m_CommandAllocatorQueue.emplace(CommandAllocatorEntry{ fenceValue, commandAllocator });
 	m_CommandListQueue.push(commandList);
-
-
 	commandAllocator->Release();
 
 	return fenceValue;

@@ -588,27 +588,19 @@ void GraphicsEngine::BeginFrame()
 	auto commandList = commandQueue->GetCommandList();
 	auto chain = GPU::m_Swapchain->m_SwapChain;
 
-	UINT currentBackBufferIndex = chain->GetCurrentBackBufferIndex();
-	auto backBuffer = GPU::GetCurrentBackBuffer();
-	auto rtv = GPU::GetCurrentRenderTargetView();
-	auto dsv = GPU::m_DsvHeap->GetCPUDescriptorHandleForHeapStart();
+	const UINT currentBackBufferIndex = chain->GetCurrentBackBufferIndex();
+	const auto backBuffer = GPU::GetCurrentBackBuffer();
+	const auto rtv = GPU::GetCurrentRenderTargetView();
+	const auto dsv = GPU::m_DsvHeap->GetCPUDescriptorHandleForHeapStart();
 
 	GPU::TransitionResource(commandList,backBuffer,
 		D3D12_RESOURCE_STATE_PRESENT,D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	FLOAT clearColor[] = { 0.2f, 0.2f, 0.9f, 1.0f };
+	CD3DX12_CPU_DESCRIPTOR_HANDLE dsvDescriptor(dsv);
 
-	auto cpuHandle = GPU::m_RtvHeap->GetCPUDescriptorHandleForHeapStart();
-	auto cpuHandleDSV = GPU::m_DsvHeap->GetCPUDescriptorHandleForHeapStart();
-
-	const CD3DX12_CPU_DESCRIPTOR_HANDLE rtvDescriptor(cpuHandle,static_cast<INT>(currentBackBufferIndex),GPU::m_RtvDescriptorSize);
-	CD3DX12_CPU_DESCRIPTOR_HANDLE dsvDescriptor(cpuHandleDSV);
-
-	commandList->OMSetRenderTargets(1,&rtvDescriptor,FALSE,&dsvDescriptor);
-	//commandList->ClearRenderTargetView(rtvDescriptor,clearColor,0,nullptr);
-	//commandList->ClearDepthStencilView(dsvDescriptor,D3D12_CLEAR_FLAG_DEPTH,1.0f,0,0,nullptr);
-
-	GPU::ClearRTV(commandList,rtvDescriptor,clearColor);
+	commandList->OMSetRenderTargets(1,&rtv,FALSE,&dsvDescriptor);
+	GPU::ClearRTV(commandList,rtv,clearColor);
 	GPU::ClearDepth(commandList,dsvDescriptor);
 
 	commandList->SetPipelineState(PSOCache::GetState(PSOCache::ePipelineStateID::Default)->m_pipelineState.Get());

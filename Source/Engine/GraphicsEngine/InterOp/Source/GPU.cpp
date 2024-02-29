@@ -204,20 +204,13 @@ void GPU::Present(unsigned aSyncInterval)
 
 	m_FenceValues[m_FrameIndex] = m_CommandQueue->ExecuteCommandList(list);
 
-
 	/*UINT syncInterval = m_VSync ? 1 : 0;
 	UINT presentFlags = m_IsTearingSupported && !m_VSync ? DXGI_PRESENT_ALLOW_TEARING : 0;*/
 	Helpers::ThrowIfFailed(m_Swapchain->m_SwapChain->Present(aSyncInterval,0));
 	m_GraphicsMemory->Commit(m_CommandQueue->GetCommandQueue().Get());
+
 	m_FrameIndex = m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
-
 	m_CommandQueue->WaitForFenceValue(m_FenceValues[m_FrameIndex]);
-
-
-
-
-
-
 }
 
 void GPU::UpdateBufferResource(
@@ -455,9 +448,10 @@ void GPU::ClearDepth(const ComPtr<ID3D12GraphicsCommandList>& commandList,D3D12_
 	commandList->ClearDepthStencilView(dsv,D3D12_CLEAR_FLAG_DEPTH,depth,0,0,nullptr);
 }
 
-ComPtr<ID3D12Resource> GPU::GetCurrentRenderTargetView()
+D3D12_CPU_DESCRIPTOR_HANDLE GPU::GetCurrentRenderTargetView()
 {
-	return m_renderTargets[m_FrameIndex];//todo fix
+	return  CD3DX12_CPU_DESCRIPTOR_HANDLE(m_RtvHeap->GetCPUDescriptorHandleForHeapStart(),
+		m_FrameIndex,m_RtvDescriptorSize);
 }
 
 ComPtr<ID3D12Resource> GPU::GetCurrentBackBuffer()
