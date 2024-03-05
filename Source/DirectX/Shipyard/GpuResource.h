@@ -17,7 +17,6 @@ class GpuResource
 
 public:
 	GpuResource();
-
 	GpuResource(const GpuResource& copy);
 	virtual ~GpuResource() { Destroy(); }
 
@@ -30,7 +29,7 @@ public:
 	}
 
 
-	virtual void CreateView(size_t numElements,size_t elementSize) = 0;
+	virtual void CreateView(size_t numElements,size_t elementSize);
 
 
 	ID3D12Resource* operator->();
@@ -41,6 +40,12 @@ public:
 	const ComPtr<ID3D12Resource>& GetResource() const;
 
 	ID3D12Resource** GetAddressOf();
+
+	bool CheckFormatSupport(D3D12_FORMAT_SUPPORT1 formatSupport) const;
+
+	bool CheckFormatSupport(D3D12_FORMAT_SUPPORT2 formatSupport) const;
+
+	void CheckFeatureSupport();
 
 protected:
 	D3D12_RESOURCE_STATES m_UsageState;

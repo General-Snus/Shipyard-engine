@@ -54,19 +54,20 @@
 using namespace Microsoft::WRL;
 
 // DirectX 12 specific headers.
-#include "DirectX/directx/d3dx12.h"
 #include <dxgi1_6.h> 
+#include "DirectX/directx/d3dx12.h"
 
+#include <d3dcompiler.h> 
 #include <DirectXMath.h> 
 #include <DirectX/XTK/DescriptorHeap.h>
 #include <DirectX/XTK/GraphicsMemory.h>   
-#include <d3dcompiler.h> 
 //#include <DirectXTex.h>
 using namespace DirectX;
 
 //myHeaders
 
 // STL Headers
+#include <array> 
 #include <algorithm>
 #include <atomic>
 #include <cassert> 
@@ -75,9 +76,11 @@ using namespace DirectX;
 #include <cstdint>
 #include <filesystem>
 #include <map> 
-#include <memory>
+#include <memory> 
 #include <mutex>  
 #include <new>
+#include <stdexcept>
+#include <string> 
 #include <string>
 #include <thread>
 #include <unordered_map>

@@ -10,6 +10,10 @@
 
 bool GPUCommandQueue::Create(const ComPtr<ID3D12Device>& device,D3D12_COMMAND_LIST_TYPE type)
 {
+	m_CommandListType = type;
+	m_FenceValue = 0;
+	m_bProcessInFlightCommandLists = true;
+
 	D3D12_COMMAND_QUEUE_DESC desc = {};
 	desc.Type = type;
 	desc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
@@ -40,7 +44,6 @@ uint64_t GPUCommandQueue::Signal()
 {
 	uint64_t fenceValueForSignal = ++m_FenceValue;
 	Helpers::ThrowIfFailed(m_CommandQueue->Signal(m_Fence.Get(),fenceValueForSignal));
-
 	return fenceValueForSignal;
 }
 

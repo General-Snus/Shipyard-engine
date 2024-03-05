@@ -4,6 +4,8 @@
 
 #include <cassert>
 
+#include "Shipyard/GPU.h"
+
 VertexResource::VertexResource(std::wstring name)
 {
 	m_ResourceName = name;
@@ -27,6 +29,12 @@ m_pResource(nullptr),m_FormatSupport()
 
 GpuResource::GpuResource(const GpuResource& copy) : m_UsageState(),m_TransitioningState(),m_FormatSupport()
 {
+}
+
+void GpuResource::CreateView(size_t numElements,size_t elementSize)
+{
+	UNREFERENCED_PARAMETER(numElements);
+	UNREFERENCED_PARAMETER(elementSize);
 }
 
 ID3D12Resource* GpuResource::operator->()
@@ -58,6 +66,35 @@ const ComPtr<ID3D12Resource>& GpuResource::GetResource() const
 ID3D12Resource** GpuResource::GetAddressOf()
 {
 	return m_pResource.GetAddressOf();
+}
+
+
+bool GpuResource::CheckFormatSupport(D3D12_FORMAT_SUPPORT1 formatSupport) const
+{
+	return (m_FormatSupport.Support1 & formatSupport) != 0;
+}
+
+bool GpuResource::CheckFormatSupport(D3D12_FORMAT_SUPPORT2 formatSupport) const
+{
+	return (m_FormatSupport.Support2 & formatSupport) != 0;
+}
+
+void GpuResource::CheckFeatureSupport()
+{
+	if (m_pResource)
+	{
+		auto desc = m_pResource->GetDesc();
+
+		m_FormatSupport.Format = desc.Format;
+		Helpers::ThrowIfFailed(GPU::m_Device->CheckFeatureSupport(
+			D3D12_FEATURE_FORMAT_SUPPORT,
+			&m_FormatSupport,
+			sizeof(D3D12_FEATURE_DATA_FORMAT_SUPPORT)));
+	}
+	else
+	{
+		m_FormatSupport = {};
+	}
 }
 
 IndexResource::IndexResource(std::wstring name)

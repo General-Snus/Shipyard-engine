@@ -50,7 +50,7 @@ namespace Helpers
 		MultiByteToWideChar(CP_ACP,0,someString.c_str(),sLength,&result[0],len);
 		return result;
 	}
-
+	 
 	template<>
 	inline std::string string_cast<std::string>(const std::wstring& someString)
 	{

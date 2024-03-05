@@ -5,7 +5,7 @@
 #include "Shipyard/GPU.h"
 #include "Shipyard/GpuResource.h"
 
-CommandList::CommandList(D3D12_COMMAND_LIST_TYPE type)
+CommandList::CommandList(D3D12_COMMAND_LIST_TYPE type) : m_Type(type)
 {
 
 	Helpers::ThrowIfFailed(GPU::m_Device->CreateCommandAllocator(type,IID_PPV_ARGS(&m_CommandAllocator)));
@@ -60,7 +60,7 @@ void CommandList::CopyBuffer(GpuResource& buffer,size_t numElements,size_t eleme
 			subresourceData.RowPitch = bufferSize;
 			subresourceData.SlicePitch = subresourceData.RowPitch;
 
-			TransitionResource(m_CommandList.Get(),d3d12Resource.Get(),D3D12_RESOURCE_STATE_COMMON,D3D12_RESOURCE_STATE_COPY_DEST);
+			m_ResourceStateTracker->TransitionResource(d3d12Resource.Get(),D3D12_RESOURCE_STATE_COPY_DEST);
 			FlushResourceBarriers();
 
 			UpdateSubresources(m_CommandList.Get(),d3d12Resource.Get(),
@@ -80,6 +80,7 @@ void CommandList::TrackResource(Microsoft::WRL::ComPtr<ID3D12Object> object)
 {
 	m_TrackedObjects.push_back(object);
 }
+
 void CommandList::TrackResource(const GpuResource& res)
 {
 	TrackResource(res.GetResource());
@@ -94,6 +95,7 @@ void CommandList::FlushResourceBarriers()
 {
 	m_ResourceStateTracker->FlushResourceBarriers(*this);
 }
+
 bool CommandList::Close(CommandList& pendingCommandList)
 {
 	// Flush any remaining barriers.

@@ -611,7 +611,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	//RHI::BeginEvent(L"Start writing to gbuffer");
 	myCamera->SetCameraToFrameBuffer();
 
-	auto& commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+	auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 	auto commandList = commandQueue->GetCommandList();
 	auto graphicCommandList = commandList->GetGraphicsCommandList();
 	auto chain = GPU::m_Swapchain->m_SwapChain;
@@ -621,7 +621,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	const auto rtv = GPU::GetCurrentRenderTargetView();
 	const auto dsv = GPU::m_DsvHeap->GetCPUDescriptorHandleForHeapStart();
 
-	GPU::TransitionResource(*commandList.get(),backBuffer,
+	GPU::TransitionResource(*commandList.get(),backBuffer.GetResource(),
 		D3D12_RESOURCE_STATE_PRESENT,D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	FLOAT clearColor[] = { 0.2f, 0.2f, 0.9f, 1.0f };
@@ -720,7 +720,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 
 	ImGui::Render();
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(),graphicCommandList.Get());
-	commandQueue->ExecuteCommandList(commandList);
+	//commandQueue->ExecuteCommandList(commandList);
 }
 
 void GraphicsEngine::RenderTextureTo(eRenderTargets from,eRenderTargets to)  const

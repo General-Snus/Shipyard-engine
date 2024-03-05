@@ -429,7 +429,7 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 		}
 	}
 
-	auto& commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COPY);
+	auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COPY);
 	auto commandList = commandQueue->GetCommandList();
 
 

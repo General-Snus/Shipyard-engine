@@ -88,8 +88,25 @@ bool Texture::AllocateTexture(const unsigned width,const unsigned height)
 	return false;
 }
 
-void Texture::CreateView(size_t numElements,size_t elementSize)
+void Texture::CreateView()
 {
+	if (m_pResource)
+	{
+		auto device = GPU::m_Device;
+
+		CD3DX12_RESOURCE_DESC desc(m_pResource->GetDesc());
+
+		if ((desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET) != 0 &&
+			CheckRTVSupport())
+		{
+			device->CreateRenderTargetView(m_pResource.Get(),nullptr,m_DescriptorHandle);
+		}
+		if ((desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) != 0 &&
+			CheckDSVSupport())
+		{
+			device->CreateDepthStencilView(m_pResource.Get(),nullptr,m_DescriptorHandle);
+		}
+	}
 }
 
 bool Texture::CreateDDSFromMemory(const void* filePtr,size_t fileSize,bool sRGB)

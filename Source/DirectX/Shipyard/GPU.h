@@ -17,6 +17,7 @@
 #include "CommandList.h"
 #include "CommandQueue.h"
 #include "RootSignature.h"
+#include "Texture.h"
 
 class IndexResource;
 class VertexResource;
@@ -121,7 +122,7 @@ public:
 		D3D12_CPU_DESCRIPTOR_HANDLE dsv,FLOAT depth = 1);
 
 	static D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentRenderTargetView();
-	static ComPtr<ID3D12Resource> GetCurrentBackBuffer();
+	static Texture& GetCurrentBackBuffer();
 
 	static ComPtr<ID3D12DescriptorHeap>  CreateDescriptorHeap(
 		const ComPtr<ID3D12Device>& device,
@@ -132,7 +133,7 @@ public:
 
 	static ComPtr<ID3D12CommandAllocator> CreateCommandAllocator(ComPtr<ID3D12Device> device,D3D12_COMMAND_LIST_TYPE type);
 	static CommandList& CreateCommandList(ComPtr<ID3D12Device> device,ComPtr<ID3D12CommandAllocator> commandAllocator,D3D12_COMMAND_LIST_TYPE type);
-	static std::unique_ptr<GPUCommandQueue>& GetCommandQueue(D3D12_COMMAND_LIST_TYPE type);
+	static std::shared_ptr<GPUCommandQueue> GetCommandQueue(D3D12_COMMAND_LIST_TYPE type);
 
 	static ComPtr<ID3D12Fence> CreateFence(const ComPtr<ID3D12Device>& device);
 
@@ -152,13 +153,13 @@ public:
 	static inline UINT m_FrameIndex;
 
 	static inline ComPtr<ID3D12Device> m_Device;
-	static inline std::unique_ptr<GPUCommandQueue> m_DirectCommandQueue;
-	static inline std::unique_ptr<GPUCommandQueue> m_CopyCommandQueue;
-	static inline std::unique_ptr<GPUCommandQueue> m_ComputeCommandQueue;
+	static inline std::shared_ptr<GPUCommandQueue> m_DirectCommandQueue;
+	static inline std::shared_ptr<GPUCommandQueue> m_CopyCommandQueue;
+	static inline std::shared_ptr<GPUCommandQueue> m_ComputeCommandQueue;
 
 	static inline std::unique_ptr<GPUSwapchain> m_Swapchain;
 	static inline ComPtr<ID3D12CommandAllocator> m_CommandAllocators[m_FrameCount];
-	static inline ComPtr<ID3D12Resource> m_renderTargets[m_FrameCount];
+	static inline Texture m_renderTargets[m_FrameCount];
 
 	static inline ComPtr<ID3D12DescriptorHeap> m_RtvHeap;
 	static inline ComPtr<ID3D12DescriptorHeap> m_DsvHeap;

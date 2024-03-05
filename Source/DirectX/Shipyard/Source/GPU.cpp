@@ -7,6 +7,7 @@
 #include "../Helpers.h" 
 #include "Shipyard/CommandQueue.h"
 #include "Shipyard/eDescriptors.h"
+#include "Shipyard/ResourceStateTracker.h"
 #include "Shipyard/Texture.h"
 
 
@@ -18,9 +19,9 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 
 	m_Swapchain = std::make_unique<GPUSwapchain>();
 
-	m_DirectCommandQueue = std::make_unique<GPUCommandQueue>();
-	m_CopyCommandQueue = std::make_unique<GPUCommandQueue>();
-	m_ComputeCommandQueue = std::make_unique<GPUCommandQueue>();
+	m_DirectCommandQueue = std::make_shared<GPUCommandQueue>();
+	m_CopyCommandQueue = std::make_shared<GPUCommandQueue>();
+	m_ComputeCommandQueue = std::make_shared<GPUCommandQueue>();
 
 	UINT dxgiFactoryFlags = 0;
 	if (enableDeviceDebug)
@@ -222,10 +223,10 @@ bool GPU::UnInitialize()
 
 void GPU::Present(unsigned aSyncInterval)
 {
-	auto& commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+	auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 	auto commandList = commandQueue->GetCommandList();
 
-	TransitionResource(*commandList.get(),m_renderTargets[m_FrameIndex].Get(),
+	TransitionResource(*commandList.get(),m_renderTargets[m_FrameIndex].GetResource(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET,D3D12_RESOURCE_STATE_PRESENT);
 
 	m_FenceValues[m_FrameIndex] = m_DirectCommandQueue->ExecuteCommandList(commandList);
@@ -534,7 +535,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE GPU::GetCurrentRenderTargetView()
 		m_FrameIndex,m_RtvDescriptorSize);
 }
 
-ComPtr<ID3D12Resource> GPU::GetCurrentBackBuffer()
+Texture& GPU::GetCurrentBackBuffer()
 {
 	return m_renderTargets[m_FrameIndex];//todo fix fixed
 }
@@ -553,23 +554,26 @@ ComPtr<ID3D12DescriptorHeap>  GPU::CreateDescriptorHeap(const ComPtr<ID3D12Devic
 	return descriptorHeap;
 }
 
-std::unique_ptr<GPUCommandQueue>& GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE type)
+std::shared_ptr<GPUCommandQueue> GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE type)
 {
+	std::shared_ptr<GPUCommandQueue> commandQueue;
+
 	switch (type)
 	{
 	case D3D12_COMMAND_LIST_TYPE_DIRECT:
-		return m_DirectCommandQueue;
+		commandQueue = m_DirectCommandQueue;
 		break;
 	case D3D12_COMMAND_LIST_TYPE_COMPUTE:
-		return m_ComputeCommandQueue;
+		commandQueue = m_ComputeCommandQueue;
 		break;
 	case D3D12_COMMAND_LIST_TYPE_COPY:
-		return m_CopyCommandQueue;
+		commandQueue = m_CopyCommandQueue;
 		break;
 	default:
 		assert(false && "Invalid command queue type.");
 	}
-	return m_DirectCommandQueue; //TODO bad
+
+	return commandQueue;
 }
 
 ComPtr<ID3D12Fence> GPU::CreateFence(const ComPtr<ID3D12Device>& device)
@@ -601,10 +605,14 @@ void GPU::UpdateRenderTargetViews(const ComPtr<ID3D12Device>& device,const ComPt
 	{
 		ComPtr<ID3D12Resource> backBuffer;
 		Helpers::ThrowIfFailed(swapChain->GetBuffer(i,IID_PPV_ARGS(&backBuffer)));
+
+		ResourceStateTracker::AddGlobalResourceState(backBuffer.Get(),D3D12_RESOURCE_STATE_COMMON);
+
+		m_renderTargets[i].SetResource(backBuffer);
+		m_renderTargets[i].CreateView();
+		m_renderTargets->myName = L"backbuffer:" + std::to_wstring(i);
+
 		device->CreateRenderTargetView(backBuffer.Get(),nullptr,rtvHandle);
-		auto var = L"backbuffer:" + std::to_wstring(i);
-		backBuffer->SetName(var.c_str());
-		m_renderTargets[i] = backBuffer;
 		rtvHandle.Offset(rtvDescriptorSize);
 	}
 }

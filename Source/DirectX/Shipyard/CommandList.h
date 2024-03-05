@@ -31,7 +31,7 @@ private:
 
 private:
 	std::unique_ptr<ResourceStateTracker> m_ResourceStateTracker;
-	D3D12_COMMAND_LIST_TYPE type;
+	D3D12_COMMAND_LIST_TYPE m_Type;
 	DxCommandList m_CommandList;
 	ComPtr<ID3D12CommandAllocator> m_CommandAllocator;
 	std::vector<ComPtr<ID3D12Object>> m_TrackedObjects;
