@@ -4,8 +4,8 @@
 #define STB_IMAGE_IMPLEMENTATION	
 #include <Tools/Utilities/Files/Images/stb_image.h>
 
-#include "Engine/GraphicsEngine/GraphicsEngine.h"
-#include "Engine/GraphicsEngine/InterOp/GPU.h"
+#include "DirectX/Shipyard/GPU.h"
+#include "Engine/GraphicsEngine/GraphicsEngine.h" 
 
 TextureHolder::TextureHolder(const std::filesystem::path& aFilePath,eTextureType aTextureType) : AssetBase(aFilePath),textureType(aTextureType)
 {

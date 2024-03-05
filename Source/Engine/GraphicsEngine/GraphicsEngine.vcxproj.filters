@@ -27,12 +27,6 @@
     <ClInclude Include="GraphicsEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="InterOp\Helpers.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\Texture.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Rendering\Buffers\ConstantBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -222,15 +216,6 @@
     <ClInclude Include="Shaders\Include\EdgeBlur.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="InterOp\GPU.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="InterOp\PSO.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="InterOp\GpuResource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Rendering\ParticleRenderer\ParticleRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -240,19 +225,7 @@
     <ClInclude Include="InterOp\RHI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="InterOp\RootSignature.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="InterOp\CommandQueue.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="InterOp\GPUBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="InterOp\eDescriptors.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Allocator\D3D12MemAlloc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -261,12 +234,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GraphicsEngine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="InterOp\Source\Helpers.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Rendering\Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\Buffers\ConstantBuffer.cpp">
@@ -341,15 +308,6 @@
     <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetDepthState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="InterOp\Source\GPU.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="InterOp\Source\PSO.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="InterOp\Source\GpuResource.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Rendering\ParticleRenderer\ParticleRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -359,16 +317,7 @@
     <ClCompile Include="InterOp\Source\RHI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="InterOp\Source\RootSignature.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="InterOp\Source\CommandQueue.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="InterOp\Source\GPUBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Allocator\D3D12MemAlloc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

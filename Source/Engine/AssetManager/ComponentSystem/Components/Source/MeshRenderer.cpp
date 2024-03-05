@@ -63,25 +63,25 @@ std::shared_ptr<Mesh> cMeshRenderer::GetRawMesh() const
 void cMeshRenderer::Render()
 {
 	OPTICK_EVENT();
-	if (auto* myTransform = this->TryGetComponent<Transform>())
-	{
-		if (!isInstanced)
-		{
-			GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),isInstanced);
-			//GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform(),isInstanced);
-			return;
-		}
-		myRenderData->myMesh->myInstances.emplace_back(myTransform->GetTransform());
-		GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),isInstanced);
-		return;
-	}
-	if (!isInstanced)
-	{
-		GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),isInstanced);
-		//GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,Matrix(),isInstanced);
-	}
-	myRenderData->myMesh->myInstances.emplace_back(Matrix());
-	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),isInstanced);
+	//if (auto* myTransform = this->TryGetComponent<Transform>())
+	//{
+	//	if (!isInstanced)
+	//	{
+	//		GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),isInstanced);
+	//		//GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform(),isInstanced);
+	//		return;
+	//	}
+	//	myRenderData->myMesh->myInstances.emplace_back(myTransform->GetTransform());
+	//	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),isInstanced);
+	//	return;
+	//}
+	//if (!isInstanced)
+	//{
+	//	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),isInstanced);
+	//	//GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,Matrix(),isInstanced);
+	//}
+	//myRenderData->myMesh->myInstances.emplace_back(Matrix());
+	//GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),isInstanced);
 }
 
 cSkeletalMeshRenderer::cSkeletalMeshRenderer(const unsigned int anOwnerId) : cMeshRenderer(anOwnerId)

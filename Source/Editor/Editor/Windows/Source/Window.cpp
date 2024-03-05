@@ -2,6 +2,7 @@
 #include <string>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 #include "../Window.h"
+#include "Windows.h" 
 
 
 void Window::Init(const WinInitSettings& init)
@@ -33,12 +34,12 @@ void Window::Init(const WinInitSettings& init)
 	// Then we use the class to create our window
 	windowHandler = CreateWindow(
 		windowClassName,                                // Classname
-		init.windowTitle,                                    // Window Title
+		init.windowTitle.c_str(),                                    // Window Title
 		WS_OVERLAPPEDWINDOW | WS_POPUP,    // Flags
-		(GetSystemMetrics(SM_CXSCREEN) - init.windowSize.cx) / 2,
-		(GetSystemMetrics(SM_CYSCREEN) - init.windowSize.cy) / 2,
-		init.windowSize.cx,
-		init.windowSize.cy,
+		(GetSystemMetrics(SM_CXSCREEN) - init.windowSize.x) / 2,
+		(GetSystemMetrics(SM_CYSCREEN) - init.windowSize.y) / 2,
+		init.windowSize.x,
+		init.windowSize.y,
 		nullptr,nullptr,nullptr,
 		nullptr
 	);

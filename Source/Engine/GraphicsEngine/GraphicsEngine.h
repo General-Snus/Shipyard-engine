@@ -2,6 +2,8 @@
 #include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
 #include <Engine/GraphicsEngine/Shaders/Registers.h> 
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>  
+
+#include "DirectX/Shipyard/CommandList.h"
 #include "Rendering/Buffers/ConstantBuffer.h" 
 #include "Rendering/Buffers/FrameBuffer.h"
 #include "Rendering/Buffers/G_Buffer.h"
@@ -172,12 +174,6 @@ public:
 		static GraphicsEngine myInstance;
 		return myInstance;
 	}
-
-	/**
-	 * Initializes the Graphics Engine with the specified settings.
-	 * @param windowHandle The window that will contain this Graphics Engine.
-	 * @param enableDeviceDebug If DirectX should write debug output in the Output.
-	 */
 	bool Initialize(HWND windowHandle,bool enableDeviceDebug);
 
 	bool SetupDebugDrawline();

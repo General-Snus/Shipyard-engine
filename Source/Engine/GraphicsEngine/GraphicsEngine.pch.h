@@ -8,9 +8,7 @@
 #define GRAPHICSENGINE_PCH
 #define NOMINMAX 
 
-// add headers that you want to pre-compile here 
-#include <DirectX/directx/d3d12.h>  
-#include <DirectX/directx/d3dx12.h>
+// add headers that you want to pre-compile here  
 #include <filesystem>
 #include <map>
 #include <memory>
@@ -40,18 +38,14 @@
 #include "GraphicCommands/Commands/Headers/GfxCmd_SSAO.h" 
 #include "GraphicCommands/Commands/Headers/GfxCmd_ToneMapPass.h"
 #include "GraphicCommands/GraphicCommands.h"
-#include "GraphicsEngine.h" 
-#include "InterOp/GPU.h"
-#include "InterOp/Helpers.h" 
-#include "InterOp/PSO.h"
+#include "GraphicsEngine.h"
 #include "Objects/Shader.h" 
 #include "Rendering/Buffers/FrameBuffer.h"
 #include "Rendering/Buffers/G_buffer.h"
 #include "Rendering/Buffers/LightBuffer.h"
 #include "Rendering/Buffers/LineBuffer.h"
 #include "Rendering/Buffers/ObjectBuffer.h"
-#include "Rendering/ParticleRenderer/ParticleVertex.h" 
-#include "Rendering/Texture.h" 
+#include "Rendering/ParticleRenderer/ParticleVertex.h"
 #include "Rendering/Vertex.h" 
 #include "Shaders/Registers.h" 
 #include "Tools/Logging/Logging.h"

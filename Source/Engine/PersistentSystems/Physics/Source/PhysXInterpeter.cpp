@@ -5,10 +5,10 @@
 #include "../PhysXInterpeter.h"
 
 #include "cooking/PxCooking.h"  
+#include "Engine/AssetManager/AssetManager.h"
 #include "geometry\PxTriangleMeshGeometry.h"
 #include "PxPhysics.h"
 #include "PxPhysicsAPI.h" 
-#include "Engine/AssetManager/AssetManager.h"
 
 using namespace physx;
 
@@ -144,11 +144,11 @@ physx::PxTriangleMesh* Shipyard_PhysX::CookMesh<physx::PxTriangleMesh>(std::shar
 		while (myToBeCookedMesh->isLoadedComplete == false)
 		{
 		}
-	} 
+	}
 
 	Element& element = myToBeCookedMesh->Elements[0];
-	const int vertCount = element.NumVertices;
-	const int indexCount = element.NumIndices;
+	const int vertCount = element.VertexBuffer.GetVertexCount();
+	const int indexCount = element.IndexResource.GetIndexCount();
 
 	PxVec3* convexVerts = new PxVec3[vertCount];
 	for (int i = 0; i < vertCount; i++)

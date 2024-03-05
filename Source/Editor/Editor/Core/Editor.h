@@ -1,10 +1,10 @@
-#pragma once
+#pragma once  
 #include <Editor/Editor/Defines.h>
 #include <Editor/Editor/Windows/EditorWindows/ChainGraph/GraphTool.h>
 #include <Game/GameLauncher/Core/GameLauncher.h>
 #include <Tools/Logging/Logging.h> 
 #include <Tools/Utilities/LinearAlgebra/Sphere.hpp>
-#include <Tools/Utilities/System/SingletonTemplate.h> 
+#include <Tools/Utilities/System/SingletonTemplate.h>  
 #include "../Windows/SplashWindow.h" 
 #include "ApplicationState.h" 
 
@@ -67,7 +67,6 @@ private:
 	std::atomic_bool myIsRendering = false;
 	std::atomic_bool myIsRunning = false;
 #endif
-
 
 	Sphere<float> myWorldBounds;
 	GameLauncher myGameLauncher;

@@ -1,0 +1,766 @@
+#include "DirectXHeader.pch.h"
+
+#include <XTK/DDSTextureLoader.h>
+#include <XTK/ResourceUploadBatch.h>
+#include "../GPU.h" 
+
+#include "../Helpers.h" 
+#include "Shipyard/CommandQueue.h"
+#include "Shipyard/eDescriptors.h"
+#include "Shipyard/Texture.h"
+
+
+bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared_ptr<Texture>& aBackBuffer,const std::shared_ptr<Texture>& aDepthBuffer
+	,uint32_t width,uint32_t height)
+{
+	aWindowHandle; enableDeviceDebug; m_BackBuffer = aBackBuffer; m_DepthBuffer = aDepthBuffer;
+
+
+	m_Swapchain = std::make_unique<GPUSwapchain>();
+
+	m_DirectCommandQueue = std::make_unique<GPUCommandQueue>();
+	m_CopyCommandQueue = std::make_unique<GPUCommandQueue>();
+	m_ComputeCommandQueue = std::make_unique<GPUCommandQueue>();
+
+	UINT dxgiFactoryFlags = 0;
+	if (enableDeviceDebug)
+	{
+#if !USE_NSIGHT_AFTERMATH
+		ComPtr<ID3D12Debug5> debugController;
+		if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
+		{
+			debugController->EnableDebugLayer();
+			debugController->SetEnableAutoName(TRUE);
+			// Enable additional debug layers.
+			dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
+		}
+		ComPtr<ID3D12DeviceRemovedExtendedDataSettings> pDredSettings;
+		if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&pDredSettings))))
+		{
+			// Turn on AutoBreadcrumbs and Page Fault reporting
+			pDredSettings->SetAutoBreadcrumbsEnablement(D3D12_DRED_ENABLEMENT_FORCED_ON);
+			pDredSettings->SetPageFaultEnablement(D3D12_DRED_ENABLEMENT_FORCED_ON);
+		}
+#endif
+	}
+
+
+#if USE_NSIGHT_AFTERMATH 
+	m_hAftermathCommandListContext = nullptr;
+	m_gpuCrashTracker = new GpuCrashTracker(m_markerMap);
+	m_frameCounter = 0;
+	// Enable Nsight Aftermath GPU crash dump creation.
+	// This needs to be done before the D3D device is created.
+	m_gpuCrashTracker->Initialize();
+#endif 
+
+
+	ComPtr<IDXGIFactory4> factory;
+	if (FAILED(CreateDXGIFactory2(dxgiFactoryFlags,IID_PPV_ARGS(&factory))))
+	{
+		Logger::Err("Failed to create DXGI factory");
+	}
+
+	ComPtr<IDXGIAdapter1> hardwareAdapter;
+	if (m_useWarpDevice)
+	{/*
+		ComPtr<IDXGIAdapter> warpAdapter;*/
+		if (FAILED(factory->EnumWarpAdapter(IID_PPV_ARGS(&hardwareAdapter))))
+		{
+			Logger::Err("Failed to get warp adapter");
+		}
+
+		if (FAILED(D3D12CreateDevice(
+			hardwareAdapter.Get(),
+			D3D_FEATURE_LEVEL_11_0,
+			IID_PPV_ARGS(&m_Device)
+		)))
+		{
+			Logger::Err("Failed to create warp adapter");
+		}
+	}
+	else
+	{
+		GetHardwareAdapter(factory.Get(),&hardwareAdapter);
+
+		if (FAILED(D3D12CreateDevice(
+			hardwareAdapter.Get(),
+			D3D_FEATURE_LEVEL_11_0,
+			IID_PPV_ARGS(&m_Device)
+		)))
+		{
+			Logger::Err("Failed to create device");
+		}
+	}
+
+#if (USE_NSIGHT_AFTERMATH)
+	const uint32_t aftermathFlags =
+		GFSDK_Aftermath_FeatureFlags_EnableMarkers |             // Enable event marker tracking.
+		GFSDK_Aftermath_FeatureFlags_EnableResourceTracking |    // Enable tracking of resources.
+		GFSDK_Aftermath_FeatureFlags_CallStackCapturing |        // Capture call stacks for all draw calls, compute dispatches, and resource copies.
+		GFSDK_Aftermath_FeatureFlags_GenerateShaderDebugInfo;    // Generate debug information for shaders.
+
+	AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_DX12_Initialize(
+		GFSDK_Aftermath_Version_API,
+		aftermathFlags,
+		m_Device.Get()));
+#endif
+
+	D3D_FEATURE_LEVEL feature_levels[] =
+	{
+		D3D_FEATURE_LEVEL_12_2,
+		D3D_FEATURE_LEVEL_12_1,
+		D3D_FEATURE_LEVEL_12_0,
+		D3D_FEATURE_LEVEL_11_1,
+		D3D_FEATURE_LEVEL_11_0
+	};
+
+	D3D12_FEATURE_DATA_FEATURE_LEVELS caps{};
+	caps.pFeatureLevelsRequested = feature_levels;
+	caps.NumFeatureLevels = ARRAYSIZE(feature_levels);
+	if (FAILED(m_Device->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS,&caps,sizeof(D3D12_FEATURE_DATA_FEATURE_LEVELS))))
+	{
+		Logger::Err("Failed to Check FeatureSupport");
+		return false;
+	}
+	if (FAILED(D3D12CreateDevice(hardwareAdapter.Get(),caps.MaxSupportedFeatureLevel,IID_PPV_ARGS(m_Device.ReleaseAndGetAddressOf()))))
+	{
+		Logger::Err("Failed to create device");
+		return false;
+	}
+
+	ComPtr<ID3D12InfoQueue> pInfoQueue;
+	if (SUCCEEDED(m_Device.As(&pInfoQueue)))
+	{
+		pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION,TRUE);
+		pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR,TRUE);
+		pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING,TRUE);
+	}
+
+	m_DeviceSupport.targetFeatureLevel = caps.MaxSupportedFeatureLevel;
+	m_DirectCommandQueue->Create(m_Device,D3D12_COMMAND_LIST_TYPE_DIRECT);
+	m_CopyCommandQueue->Create(m_Device,D3D12_COMMAND_LIST_TYPE_COPY);
+	m_ComputeCommandQueue->Create(m_Device,D3D12_COMMAND_LIST_TYPE_COMPUTE);
+
+	// Describe and create the swap chain. 
+	m_Swapchain->Create(aWindowHandle,m_DirectCommandQueue->GetCommandQueue(),width,height,m_FrameCount);
+	m_FrameIndex = m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
+
+	// Create descriptor heaps. 
+	m_RtvHeap = CreateDescriptorHeap(m_Device,D3D12_DESCRIPTOR_HEAP_TYPE_RTV,m_FrameCount);
+	m_RtvDescriptorSize = m_Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+
+	m_DsvHeap = CreateDescriptorHeap(m_Device,D3D12_DESCRIPTOR_HEAP_TYPE_DSV,1);
+	m_SrvHeap = CreateDescriptorHeap(m_Device,D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,1,D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
+
+
+
+	// Create frame resources.
+	UpdateRenderTargetViews(m_Device,m_Swapchain->m_SwapChain,m_RtvHeap);
+
+	//for (int i = 0; i < m_FrameCount; i++)
+	//{
+	//	m_Allocator[i] = CreateCommandAllocator(m_Device,D3D12_COMMAND_LIST_TYPE_DIRECT);
+	//}
+	//
+	//m_CommandList = CreateCommandList(m_Device,m_Allocator[m_FrameIndex],D3D12_COMMAND_LIST_TYPE_DIRECT);
+	//g_Fence = CreateFence(m_Device);
+	//g_FenceEvent = CreateEventHandle();
+
+
+	D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
+	featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
+	if (FAILED(m_Device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE,&featureData,sizeof(featureData))))
+	{
+		featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
+	}
+
+	CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
+	rootSignatureDesc.Init(0,nullptr,0,nullptr,D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+	ComPtr<ID3DBlob> signature;
+	ComPtr<ID3DBlob> error;
+	if (FAILED(D3D12SerializeRootSignature(&rootSignatureDesc,D3D_ROOT_SIGNATURE_VERSION_1,&signature,&error)))
+	{
+		Logger::Err("Failed to Serialize RootSignature");
+	}
+
+	if (FAILED(m_Device->CreateRootSignature(0,signature->GetBufferPointer(),signature->GetBufferSize(),IID_PPV_ARGS(&m_RootSignature.m_RootSignature))))
+	{
+		Logger::Err("Failed to Create RootSignature");
+	}
+
+	m_GraphicsMemory = std::make_unique<DirectX::DX12::GraphicsMemory>(m_Device.Get());
+
+	m_ResourceDescriptors = std::make_unique<DescriptorHeap>(m_Device.Get(),
+		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+		D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
+		eDescriptors::Count);
+
+	m_BackBuffer->AllocateTexture(width,height);
+	ResizeDepthBuffer(width,height);
+	m_DirectCommandQueue->ExecuteCommandList(m_DirectCommandQueue->GetCommandList());
+
+	m_Viewport = { 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), D3D12_MIN_DEPTH, D3D12_MAX_DEPTH };
+	m_ScissorRect = { 0, 0, static_cast<LONG>(width), static_cast<LONG>(height) };
+
+
+
+
+	return true;
+}
+
+bool GPU::UnInitialize()
+{
+	m_DirectCommandQueue->Flush();
+	m_CopyCommandQueue->Flush();
+	m_ComputeCommandQueue->Flush();
+	//::CloseHandle(g_FenceEvent);
+
+	return true;
+}
+
+void GPU::Present(unsigned aSyncInterval)
+{
+	auto& commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+	auto commandList = commandQueue->GetCommandList();
+
+	TransitionResource(*commandList.get(),m_renderTargets[m_FrameIndex].Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET,D3D12_RESOURCE_STATE_PRESENT);
+
+	m_FenceValues[m_FrameIndex] = m_DirectCommandQueue->ExecuteCommandList(commandList);
+
+#if  (USE_NSIGHT_AFTERMATH)
+	auto hr = (m_Swapchain->m_SwapChain->Present(aSyncInterval,0));
+	if (FAILED(hr))
+	{
+		// DXGI_ERROR error notification is asynchronous to the NVIDIA display
+		// driver's GPU crash handling. Give the Nsight Aftermath GPU crash dump
+		// thread some time to do its work before terminating the process.
+		auto tdrTerminationTimeout = std::chrono::seconds(3);
+		auto tStart = std::chrono::steady_clock::now();
+		auto tElapsed = std::chrono::milliseconds::zero();
+
+		GFSDK_Aftermath_CrashDump_Status status = GFSDK_Aftermath_CrashDump_Status_Unknown;
+		AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_GetCrashDumpStatus(&status));
+
+		while (status != GFSDK_Aftermath_CrashDump_Status_CollectingDataFailed &&
+			status != GFSDK_Aftermath_CrashDump_Status_Finished &&
+			tElapsed < tdrTerminationTimeout)
+		{
+			// Sleep 50ms and poll the status again until timeout or Aftermath finished processing the crash dump.
+			std::this_thread::sleep_for(std::chrono::milliseconds(50));
+			AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_GetCrashDumpStatus(&status));
+
+			auto tEnd = std::chrono::steady_clock::now();
+			tElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(tEnd - tStart);
+		}
+
+		if (status != GFSDK_Aftermath_CrashDump_Status_Finished)
+		{
+			std::stringstream err_msg;
+			err_msg << "Unexpected crash dump status: " << status;
+			MessageBoxA(NULL,err_msg.str().c_str(),"Aftermath Error",MB_OK);
+		}
+
+		// Terminate on failure
+		GPU::UnInitialize();
+		exit(-1);
+	}
+#else 
+	Helpers::ThrowIfFailed(m_Swapchain->m_SwapChain->Present(aSyncInterval,0));
+#endif
+	m_FenceValues[m_FrameIndex] = m_DirectCommandQueue->Signal();
+	m_FrameIndex = m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
+	m_GraphicsMemory->Commit(m_DirectCommandQueue->GetCommandQueue().Get());
+	m_DirectCommandQueue->WaitForFenceValue(m_FenceValues[m_FrameIndex]);
+}
+
+void GPU::UpdateBufferResource(
+	const CommandList& commandList,
+	ID3D12Resource** pDestinationResource,
+	ID3D12Resource** pIntermediateResource,
+	size_t numElements,size_t elementSize,
+	const void* bufferData,D3D12_RESOURCE_FLAGS flags
+)
+{
+
+	const size_t bufferSize = numElements * elementSize;
+	auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+	auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize,flags);
+
+	Helpers::ThrowIfFailed(m_Device->CreateCommittedResource(
+		&heapProperties,
+		D3D12_HEAP_FLAG_NONE,
+		&resourceDesc,
+		D3D12_RESOURCE_STATE_COPY_DEST,
+		nullptr,
+		IID_PPV_ARGS(pDestinationResource)));
+
+	// Create an committed resource for the upload.
+	if (bufferData)
+	{
+		heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+		resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize);
+
+		Helpers::ThrowIfFailed(m_Device->CreateCommittedResource(
+			&heapProperties,
+			D3D12_HEAP_FLAG_NONE,
+			&resourceDesc,
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			nullptr,
+			IID_PPV_ARGS(pIntermediateResource)));
+
+		D3D12_SUBRESOURCE_DATA subResourceData = {};
+		subResourceData.pData = bufferData;
+		subResourceData.RowPitch = bufferSize;
+		subResourceData.SlicePitch = subResourceData.RowPitch;
+
+
+		UpdateSubresources(commandList.GetGraphicsCommandList().Get(),*pDestinationResource,*pIntermediateResource,0,0,1,&subResourceData);
+	}
+}
+
+void GPU::ConfigureInputAssembler(
+	const CommandList& commandList,D3D_PRIMITIVE_TOPOLOGY topology,
+	const D3D12_VERTEX_BUFFER_VIEW& vertView,const D3D12_INDEX_BUFFER_VIEW& indexView)
+{
+	//commandList->IASetPrimitiveTopology(topology);
+	//commandList->IASetVertexBuffers(0,1,&vertView);
+	//commandList->IASetIndexBuffer(&indexView);
+}
+
+//bool GPU::CreateIndexBuffer(ComPtr<ID3D12Resource>& outIndexBuffer,const std::vector<unsigned>& aIndexList)
+//{
+//
+//	const size_t size = sizeof(unsigned);
+//	const size_t numIn = aIndexList.size();
+//
+//
+//
+//
+//	ComPtr<ID3D12Resource> intermediateIndexBuffer;
+//	UpdateBufferResource(
+//		m_CommandQueue->GetCommandList(),
+//		&outIndexBuffer,&intermediateIndexBuffer
+//		,numIn,size,aIndexList.data()
+//	);
+//	return true;
+//}
+
+//bool GPU::CreateIndexBuffer(
+//	const CommandList& commandList,D3D12_INDEX_BUFFER_VIEW& outIndexBufferView,ComPtr<ID3D12Resource>& outIndexBuffer,const std::vector<unsigned>& aIndexList)
+//{
+//	//const D3D12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+//	//const CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(aIndexList));
+//	//Helpers::ThrowIfFailed(m_Device->CreateCommittedResource(
+//	//	&heapProp,
+//	//	D3D12_HEAP_FLAG_NONE,
+//	//	&bufferDesc,
+//	//	D3D12_RESOURCE_STATE_GENERIC_READ,
+//	//	nullptr,
+//	//	IID_PPV_ARGS(&outIndexBuffer)));
+//	//
+//	//UINT8* pVertexDataBegin;
+//	//CD3DX12_RANGE readRange(0,0);
+//	//Helpers::ThrowIfFailed(
+//	//	outIndexBuffer->Map(0,&readRange,reinterpret_cast<void**>(&pVertexDataBegin))
+//	//);
+//	//memcpy(pVertexDataBegin,aIndexList.data(),sizeof(aIndexList));
+//	//outIndexBuffer->Unmap(0,nullptr);
+//
+//
+//
+//	ComPtr<ID3D12Resource> intermediateIndexBuffer;
+//	UpdateBufferResource(commandList,
+//		&outIndexBuffer,&intermediateIndexBuffer,
+//		aIndexList.size(),sizeof(WORD),aIndexList.data());
+//	intermediateIndexBuffer->SetName(L"IntermediateIndexBuffer");
+//
+//	// Initialize the vertex buffer view.
+//	outIndexBufferView.BufferLocation = outIndexBuffer->GetGPUVirtualAddress();
+//	outIndexBufferView.Format = DXGI_FORMAT_R16_UINT;
+//	outIndexBufferView.SizeInBytes = static_cast<unsigned>(aIndexList.size() * sizeof(unsigned));
+//
+//
+//
+//	return true;
+//}
+
+bool GPU::CreateIndexBuffer(const std::shared_ptr<CommandList>& commandList,IndexResource& outIndexResource,const std::vector<unsigned>& aIndexList)
+{
+	commandList->CopyBuffer(outIndexResource,aIndexList.size(),sizeof(unsigned),aIndexList.data());
+	return true;
+}
+
+bool GPU::CreatePixelShader(ComPtr<ID3DBlob>& outPxShader,const BYTE* someShaderData,size_t aShaderDataSize,UINT CompileFLags)
+{
+	Helpers::ThrowIfFailed(D3DCompile(someShaderData,aShaderDataSize,nullptr,nullptr,D3D_COMPILE_STANDARD_FILE_INCLUDE,nullptr,"ps_5_1",CompileFLags,0,&outPxShader,nullptr));
+	return true;
+
+}
+
+bool GPU::CreateVertexShader(ComPtr<ID3DBlob>& outVxShader,const BYTE* someShaderData,size_t aShaderDataSize,UINT CompileFLags)
+{
+	Helpers::ThrowIfFailed(D3DCompile(someShaderData,aShaderDataSize,nullptr,nullptr,D3D_COMPILE_STANDARD_FILE_INCLUDE,nullptr,"vs_5_1",CompileFLags,0,&outVxShader,nullptr));
+
+	return true;
+}
+
+bool GPU::CreateDepthStencil(const D3D12_DEPTH_STENCIL_DESC& depthStencilDesc)
+{
+	depthStencilDesc;
+	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
+	dsvHeapDesc.NumDescriptors = 1;
+	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	if (FAILED(m_Device->CreateDescriptorHeap(&dsvHeapDesc,IID_PPV_ARGS(&m_RtvHeap))))
+	{
+		Logger::Err("Failed to make descriptor heap");
+		return false;
+	}
+	return true;
+}
+
+void GPU::ResizeDepthBuffer(unsigned width,unsigned height)
+{
+	//if (m_DepthBuffer->IsValid())
+	{
+		// Flush any GPU commands that might be referencing the depth buffer.
+		m_DirectCommandQueue->Flush();
+
+		width = std::max(1u,width);
+		height = std::max(1u,height);
+
+		auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+		D3D12_RESOURCE_DESC depthStencilDesc = CD3DX12_RESOURCE_DESC::Tex2D(
+			DXGI_FORMAT_D32_FLOAT,
+			width,
+			height,
+			1,
+			1,
+			1,
+			0,
+			D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL
+		);
+
+		const CD3DX12_CLEAR_VALUE depthOptimizedClearValue(DXGI_FORMAT_D32_FLOAT,1.0f,0u);
+		Helpers::ThrowIfFailed(m_Device->CreateCommittedResource(
+			&heapProperties,
+			D3D12_HEAP_FLAG_NONE,
+			&depthStencilDesc,
+			D3D12_RESOURCE_STATE_DEPTH_WRITE,
+			&depthOptimizedClearValue,
+			IID_PPV_ARGS(&m_DepthBuffer->m_pResource)
+		));
+		m_DepthBuffer->m_pResource->SetName(L"DepthBuffer");
+
+		// Update the depth-stencil view.
+		D3D12_DEPTH_STENCIL_VIEW_DESC dsv = {};
+		dsv.Format = DXGI_FORMAT_D32_FLOAT;
+		dsv.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+		dsv.Texture2D.MipSlice = 0;
+		dsv.Flags = D3D12_DSV_FLAG_NONE;
+
+		m_Device->CreateDepthStencilView(m_DepthBuffer->GetResource().Get(),&dsv,
+			m_DsvHeap->GetCPUDescriptorHandleForHeapStart());
+	}
+}
+
+bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName,bool generateMips)
+{
+	outTexture; aFileName;
+
+	if (!std::filesystem::exists(aFileName) && aFileName.extension() != "dds")
+	{
+		std::string error = "Failed to load texture: " + aFileName.string() + " does not exist!";
+		std::cout << error << std::endl;
+		return false;
+	}
+	outTexture->myName = aFileName.filename();
+	//outTexture->m_DescriptorHandle = std::make_unique<DescriptorHeap>(m_Device.Get(),
+	//	eDescriptors::Textures);
+
+
+	ResourceUploadBatch resourceUpload(m_Device.Get());
+	resourceUpload.Begin();
+
+	Helpers::ThrowIfFailed(
+		CreateDDSTextureFromFile(m_Device.Get(),resourceUpload,L"texture.dds",
+			outTexture->m_pResource.ReleaseAndGetAddressOf(),generateMips)
+	);
+
+	CreateShaderResourceView(m_Device.Get(),outTexture->m_pResource.Get(),
+		outTexture->m_DescriptorHandle);
+
+	auto uploadResourcesFinished = resourceUpload.End(m_DirectCommandQueue->GetCommandQueue().Get());
+	uploadResourcesFinished.wait();
+
+
+	return true;
+}
+
+bool GPU::LoadTextureFromMemory(Texture* outTexture,const std::filesystem::path& aName,const BYTE* someImageData,size_t anImageDataSize,const D3D12_SHADER_RESOURCE_VIEW_DESC* aSRVDesc)
+{
+	outTexture; aName; someImageData; anImageDataSize; aSRVDesc;
+	return false;
+}
+
+void GPU::TransitionResource(
+	const CommandList& commandList,
+	const ComPtr<ID3D12Resource>& resource,D3D12_RESOURCE_STATES beforeState,
+	D3D12_RESOURCE_STATES afterState)
+{
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		resource.Get(),
+		beforeState,afterState);
+
+	commandList.GetGraphicsCommandList()->ResourceBarrier(1,&barrier);
+}
+
+void GPU::ClearRTV(const CommandList& commandList,D3D12_CPU_DESCRIPTOR_HANDLE rtv,FLOAT* clearColor)
+{
+	commandList.GetGraphicsCommandList()->ClearRenderTargetView(rtv,clearColor,0,nullptr);
+}
+
+void GPU::ClearDepth(const CommandList& commandList,D3D12_CPU_DESCRIPTOR_HANDLE dsv,FLOAT depth)
+{
+	commandList.GetGraphicsCommandList()->ClearDepthStencilView(dsv,D3D12_CLEAR_FLAG_DEPTH,depth,0,0,nullptr);
+}
+
+D3D12_CPU_DESCRIPTOR_HANDLE GPU::GetCurrentRenderTargetView()
+{
+	return  CD3DX12_CPU_DESCRIPTOR_HANDLE(m_RtvHeap->GetCPUDescriptorHandleForHeapStart(),
+		m_FrameIndex,m_RtvDescriptorSize);
+}
+
+ComPtr<ID3D12Resource> GPU::GetCurrentBackBuffer()
+{
+	return m_renderTargets[m_FrameIndex];//todo fix fixed
+}
+
+ComPtr<ID3D12DescriptorHeap>  GPU::CreateDescriptorHeap(const ComPtr<ID3D12Device>& device,D3D12_DESCRIPTOR_HEAP_TYPE type,uint32_t numDescriptors,D3D12_DESCRIPTOR_HEAP_FLAGS flags)
+{
+	ComPtr<ID3D12DescriptorHeap> descriptorHeap;
+
+	D3D12_DESCRIPTOR_HEAP_DESC desc = {};
+	desc.NumDescriptors = numDescriptors;
+	desc.Type = type;
+	desc.Flags = flags;
+
+	Helpers::ThrowIfFailed(device->CreateDescriptorHeap(&desc,IID_PPV_ARGS(&descriptorHeap)));
+
+	return descriptorHeap;
+}
+
+std::unique_ptr<GPUCommandQueue>& GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE type)
+{
+	switch (type)
+	{
+	case D3D12_COMMAND_LIST_TYPE_DIRECT:
+		return m_DirectCommandQueue;
+		break;
+	case D3D12_COMMAND_LIST_TYPE_COMPUTE:
+		return m_ComputeCommandQueue;
+		break;
+	case D3D12_COMMAND_LIST_TYPE_COPY:
+		return m_CopyCommandQueue;
+		break;
+	default:
+		assert(false && "Invalid command queue type.");
+	}
+	return m_DirectCommandQueue; //TODO bad
+}
+
+ComPtr<ID3D12Fence> GPU::CreateFence(const ComPtr<ID3D12Device>& device)
+{
+	ComPtr<ID3D12Fence> fence;
+
+	Helpers::ThrowIfFailed(device->CreateFence(0,D3D12_FENCE_FLAG_NONE,IID_PPV_ARGS(&fence)));
+
+	return fence;
+}
+
+HANDLE GPU::CreateEventHandle()
+{
+	HANDLE fenceEvent;
+
+	fenceEvent = ::CreateEvent(nullptr,FALSE,FALSE,nullptr);
+	assert(fenceEvent && "Failed to create fence event.");
+
+	return fenceEvent;
+}
+
+void GPU::UpdateRenderTargetViews(const ComPtr<ID3D12Device>& device,const ComPtr<IDXGISwapChain4>& swapChain,const ComPtr<ID3D12DescriptorHeap>& descriptorHeap)
+{
+	auto rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+
+	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(descriptorHeap->GetCPUDescriptorHandleForHeapStart());
+
+	for (int i = 0; i < m_FrameCount; ++i)
+	{
+		ComPtr<ID3D12Resource> backBuffer;
+		Helpers::ThrowIfFailed(swapChain->GetBuffer(i,IID_PPV_ARGS(&backBuffer)));
+		device->CreateRenderTargetView(backBuffer.Get(),nullptr,rtvHandle);
+		auto var = L"backbuffer:" + std::to_wstring(i);
+		backBuffer->SetName(var.c_str());
+		m_renderTargets[i] = backBuffer;
+		rtvHandle.Offset(rtvDescriptorSize);
+	}
+}
+
+//*********************************************************
+//
+// Copyright (c) Microsoft. All rights reserved.
+// This code is licensed under the MIT License (MIT).
+// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+//
+//*********************************************************
+void GPU::GetHardwareAdapter(IDXGIFactory1* pFactory,IDXGIAdapter1** ppAdapter,bool requestHighPerformanceAdapter)
+{
+	pFactory; ppAdapter; requestHighPerformanceAdapter;
+	*ppAdapter = nullptr;
+
+	ComPtr<IDXGIAdapter1> adapter;
+
+	ComPtr<IDXGIFactory6> factory6;
+	if (SUCCEEDED(pFactory->QueryInterface(IID_PPV_ARGS(&factory6))))
+	{
+		for (
+			UINT adapterIndex = 0;
+			SUCCEEDED(factory6->EnumAdapterByGpuPreference(
+				adapterIndex,
+				requestHighPerformanceAdapter == true ? DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE : DXGI_GPU_PREFERENCE_UNSPECIFIED,
+				IID_PPV_ARGS(&adapter)));
+				++adapterIndex)
+		{
+			DXGI_ADAPTER_DESC1 desc;
+			adapter->GetDesc1(&desc);
+
+			if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
+			{
+				// Don't select the Basic Render Driver adapter.
+				// If you want a software adapter, pass in "/warp" on the command line.
+				continue;
+			}
+
+			// Check to see whether the adapter supports Direct3D 12, but don't create the
+			// actual device yet.
+			if (SUCCEEDED(D3D12CreateDevice(adapter.Get(),D3D_FEATURE_LEVEL_11_0,_uuidof(ID3D12Device),nullptr)))
+			{
+				break;
+			}
+		}
+	}
+
+	if (adapter.Get() == nullptr)
+	{
+		for (UINT adapterIndex = 0; SUCCEEDED(pFactory->EnumAdapters1(adapterIndex,&adapter)); ++adapterIndex)
+		{
+			DXGI_ADAPTER_DESC1 desc;
+			adapter->GetDesc1(&desc);
+
+			if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
+			{
+				// Don't select the Basic Render Driver adapter.
+				// If you want a software adapter, pass in "/warp" on the command line.
+				continue;
+			}
+
+			// Check to see whether the adapter supports Direct3D 12, but don't create the
+			// actual device yet.
+			if (SUCCEEDED(D3D12CreateDevice(adapter.Get(),D3D_FEATURE_LEVEL_11_0,_uuidof(ID3D12Device),nullptr)))
+			{
+				break;
+			}
+		}
+	}
+
+	*ppAdapter = adapter.Detach();
+}
+
+void GPUSwapchain::Create(HWND hwnd,ComPtr<ID3D12CommandQueue>,UINT Width,UINT Height,UINT bufferCount)
+{
+	ComPtr<IDXGIFactory4> dxgiFactory4;
+	UINT createFactoryFlags = 0;
+#if defined(_DEBUG)
+	createFactoryFlags = DXGI_CREATE_FACTORY_DEBUG;
+#endif
+
+	Helpers::ThrowIfFailed(CreateDXGIFactory2(createFactoryFlags,IID_PPV_ARGS(&dxgiFactory4)));
+
+
+	DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
+	swapChainDesc.Width = Width;
+	swapChainDesc.Height = Height;
+	swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	swapChainDesc.Stereo = FALSE;
+	swapChainDesc.SampleDesc = { 1, 0 };
+	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	swapChainDesc.BufferCount = bufferCount;
+	swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
+	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+	swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
+
+	ComPtr<IDXGISwapChain1> swapChain;
+	if (FAILED(dxgiFactory4->CreateSwapChainForHwnd(
+		GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT)->GetCommandQueue().Get(),        // Swap chain needs the queue so that it can force a flush on it.
+		hwnd,
+		&swapChainDesc,
+		nullptr,
+		nullptr,
+		&swapChain
+	)))
+	{
+		Logger::Err("Failed to create swapchain from hwnd");
+	}
+	Helpers::ThrowIfFailed(dxgiFactory4->MakeWindowAssociation(hwnd,DXGI_MWA_NO_ALT_ENTER));
+	Helpers::ThrowIfFailed(swapChain.As(&m_SwapChain));
+}
+
+
+#if  (USE_NSIGHT_AFTERMATH)
+// A helper for setting Aftermath event markers.
+// For maximum CPU performance, use GFSDK_Aftermath_SetEventMarker() with dataSize=0.
+// This instructs Aftermath not to allocate and copy off memory internally, relying on
+// the application to manage marker pointers itself.
+void GPU::setAftermathEventMarker(const std::string& markerData,bool appManagedMarker)
+{
+	if (appManagedMarker)
+	{
+		// App is responsible for handling marker memory, and for resolving the memory at crash dump generation time.
+		// The actual "const void* markerData" passed to Aftermath in this case can be any uniquely identifying value that the app can resolve to the marker data later.
+		// For this sample, we will use this approach to generating a unique marker value:
+		// We keep a ringbuffer with a marker history of the last c_markerFrameHistory frames (currently 4).
+		UINT markerMapIndex = m_frameCounter % GpuCrashTracker::c_markerFrameHistory;
+		auto& currentFrameMarkerMap = m_markerMap[markerMapIndex];
+		// Take the index into the ringbuffer, multiply by 10000, and add the total number of markers logged so far in the current frame, +1 to avoid a value of zero.
+		size_t markerID = markerMapIndex * 10000 + currentFrameMarkerMap.size() + 1;
+		// This value is the unique identifier we will pass to Aftermath and internally associate with the marker data in the map.
+		currentFrameMarkerMap[markerID] = markerData;
+		AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_SetEventMarker(m_hAftermathCommandListContext,(void*)markerID,0));
+		// For example, if we are on frame 625, markerMapIndex = 625 % 4 = 1...
+		// The first marker for the frame will have markerID = 1 * 10000 + 0 + 1 = 10001.
+		// The 15th marker for the frame will have markerID = 1 * 10000 + 14 + 1 = 10015.
+		// On the next frame, 626, markerMapIndex = 626 % 4 = 2.
+		// The first marker for this frame will have markerID = 2 * 10000 + 0 + 1 = 20001.
+		// The 15th marker for the frame will have markerID = 2 * 10000 + 14 + 1 = 20015.
+		// So with this scheme, we can safely have up to 10000 markers per frame, and can guarantee a unique markerID for each one.
+		// There are many ways to generate and track markers and unique marker identifiers!
+	}
+	else
+	{
+		AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_SetEventMarker(m_hAftermathCommandListContext,(void*)markerData.c_str(),(unsigned int)markerData.size() + 1));
+	}
+};
+
+// A helper that prepends the frame number to a string
+std::string GPU::createMarkerStringForFrame(const char* markerString) {
+	std::stringstream ss;
+	ss << "Frame " << m_frameCounter << ": " << markerString;
+	return ss.str();
+};
+#endif

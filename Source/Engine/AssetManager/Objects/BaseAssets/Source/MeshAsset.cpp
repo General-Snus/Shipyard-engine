@@ -2,9 +2,9 @@
 #include <Tools/Utilities/Math.hpp>
 #include "../MeshAsset.h" 
 
+#include "DirectX/Shipyard/GPU.h"
+#include "DirectX/Shipyard/Helpers.h"
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
-#include "Engine/GraphicsEngine/InterOp/GPU.h"
-
 
 
 
@@ -333,6 +333,10 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 	std::vector<Vertex> mdlVertices;
 	mdlVertices.reserve(mesh->mNumVertices);
 	std::vector<unsigned int> mdlIndicies;
+
+	std::string name = mesh->mName.C_Str();
+	std::wstring wname = Helpers::string_cast<std::wstring>(name).c_str();
+
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 	{
 		auto position = Vector3f(
@@ -425,36 +429,33 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 		}
 	}
 
-	ComPtr<ID3D12Resource> vertexBuffer;
-	D3D12_VERTEX_BUFFER_VIEW m_VertexBufferView;
+	auto& commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COPY);
+	auto commandList = commandQueue->GetCommandList();
 
-	if (!GPU::CreateVertexBuffer<Vertex>(m_VertexBufferView,vertexBuffer,mdlVertices))
+
+	VertexResource vertexRes(wname);
+	if (!GPU::CreateVertexBuffer<Vertex>(commandList,vertexRes,mdlVertices))
 	{
 		std::cout << "Failed to create vertex buffer" << std::endl;
 		return;
 	}
 
-	ComPtr<ID3D12Resource> indexBuffer;
-	D3D12_INDEX_BUFFER_VIEW m_IndexBufferView;
-	//m_IndexBufferView.BufferLocation = indexBuffer->GetGPUVirtualAddress();
-	//m_IndexBufferView.Format = DXGI_FORMAT_R16_UINT;
-	//m_IndexBufferView.SizeInBytes = static_cast<unsigned>(mdlIndicies.size() * sizeof(unsigned));
-
-
-	if (!GPU::CreateIndexBuffer(m_IndexBufferView,indexBuffer,mdlIndicies))
+	IndexResource indexRes(wname);
+	if (!GPU::CreateIndexBuffer(commandList,indexRes,mdlIndicies))
 	{
 		std::cout << "Failed to create vertex buffer" << std::endl;
 		return;
 	}
+
+	auto fenceValue = commandQueue->ExecuteCommandList(commandList);
+	commandQueue->WaitForFenceValue(fenceValue);
+	commandQueue->Flush();
+
 	Element toAdd = {
-		vertexBuffer,
-		indexBuffer,
+		vertexRes,
+		indexRes,
 		mdlVertices,
 		mdlIndicies,
-		m_VertexBufferView,
-		m_IndexBufferView,
-		AsUINT(mdlVertices.size()),
-		AsUINT(mdlIndicies.size()),
 		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
 		sizeof(Vertex)
 	};

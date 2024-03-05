@@ -1,6 +1,6 @@
 #pragma once
-#include <string> 
-#include "GpuResource.h"
+#include <DirectX/Shipyard/GpuResource.h>
+#include <string>
 
 class GPUBuffer : public GpuResource
 {

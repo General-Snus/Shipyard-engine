@@ -1,8 +1,9 @@
 #pragma once 
-#include <Engine/GraphicsEngine/Rendering/Buffers/ConstantBuffer.h>
-#include <Engine/GraphicsEngine/Rendering/Texture.h>
+#include <Engine/GraphicsEngine/Rendering/Buffers/ConstantBuffer.h> 
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp> 
 #include <vector>
+
+#include "DirectX/Shipyard/Texture.h"
 
 enum class eGbufferTex
 {

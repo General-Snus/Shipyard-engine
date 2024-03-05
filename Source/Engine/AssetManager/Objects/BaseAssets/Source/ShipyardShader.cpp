@@ -3,7 +3,7 @@
 
 #include <d3dcompiler.h> 
 
-#include "Engine/GraphicsEngine/InterOp/Helpers.h"
+#include "DirectX/Shipyard/Helpers.h" 
 
 ShipyardShader::ShipyardShader(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)
 {

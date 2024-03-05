@@ -1,4 +1,5 @@
-#define NOMINMAX
+#define NOMINMAX 
+
 #include <assert.h>
 #include <Editor/Editor/Windows/Window.h>
 #include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h> 
@@ -12,7 +13,7 @@
 #include <streambuf> 
 #include <string>
 #include <stringapiset.h>
-#include  <Tools/ImGui/ImGui/backends/imgui_impl_dx12.h>
+#include <Tools/ImGui/ImGui/backends/imgui_impl_dx12.h>
 #include <Tools/ImGUI/ImGUI/imgui.h>
 #include <Tools/ImGUI/ImGUI/imgui_impl_dx11.h>
 #include <Tools/ImGUI/ImGUI/imgui_impl_win32.h>
@@ -21,13 +22,14 @@
 #include <Tools/Utilities/Input/InputHandler.hpp>
 #include <Tools/Utilities/Math.hpp>
 #include <Tools/Utilities/System/ThreadPool.hpp>
+#include <Windows.h>
 #include <Windows/EditorWindows/ChainGraph/GraphTool.h>
-#include "../Editor.h" 
-
+#include "../Editor.h"
+#include "AssetManager.h"
 #include "ComponentSystem/Components/LightComponent.h"
-#include "GraphicsEngine.h"
-#include "InterOp/GPU.h"
-#include "Windows.h"
+#include "Core/Paths.h"
+#include "DirectX/Shipyard/GPU.h"
+#include "GraphicsEngine.h" 
 #include "Windows/SplashWindow.h"
 
 #if PHYSX 
@@ -61,16 +63,36 @@ bool Editor::Initialize(HWND aHandle)
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch 
 	// Setup Platform/Renderer backends
 
+	ImFontConfig font_config{};
+	std::string font_path = AssetManager::AssetPath.string() + "Fonts/roboto/Roboto-Light.ttf";
+	io.Fonts->AddFontFromFileTTF(font_path.c_str(),16.0f,&font_config);
+	font_config.MergeMode = true;
+
+#define FONT_ICON_FILE_NAME_FAR "fa-regular-400.ttf"
+#define FONT_ICON_FILE_NAME_FAS "fa-solid-900.ttf" 
+#define ICON_MIN_FA 0xe005
+#define ICON_MAX_16_FA 0xf8ff
+#define ICON_MAX_FA 0xf8ff
+
+	ImWchar const icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+	std::string icon_path = AssetManager::AssetPath.string() + "Fonts/FontAwesome/" FONT_ICON_FILE_NAME_FAS;
+	io.Fonts->AddFontFromFileTTF(icon_path.c_str(),15.0f,&font_config,icon_ranges);
+	if (!io.Fonts->Build())
+	{
+		std::cout << "fucked up font load";
+	}
+
 	ImGui_ImplWin32_Init(aHandle);
 	//ImGui_ImplDX11_Init(RHI::Device.Get(),RHI::Context.Get());+
-	const D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle = GPU::m_SrvHeap->GetGPUDescriptorHandleForHeapStart();
-	const D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle = GPU::m_SrvHeap->GetCPUDescriptorHandleForHeapStart();
-	ImGui_ImplDX12_Init(GPU::m_Device.Get(),GPU::m_FrameCount,DXGI_FORMAT_R8G8B8A8_UNORM,GPU::m_SrvHeap.Get(),cpu_handle,gpu_handle);
-
-
-
-
-
+	GPU::guiDescriptorHeap = GPU::CreateDescriptorHeap(GPU::m_Device,D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,30);
+	const D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle = GPU::guiDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	const D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle = GPU::guiDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	ImGui_ImplDX12_Init(
+		GPU::m_Device.Get(),
+		GPU::m_FrameCount,
+		DXGI_FORMAT_R8G8B8A8_UNORM,
+		GPU::guiDescriptorHeap.Get(),
+		cpu_handle,gpu_handle);
 
 #if PHYSX
 	Shipyard_PhysX::Get().InitializePhysx();
@@ -145,6 +167,7 @@ void Editor::HideSplashScreen() const
 	ShowWindow(Window::windowHandler,SW_SHOW);
 	SetForegroundWindow(Window::windowHandler);
 }
+
 void Editor::UpdateImGui()
 {
 	ImGui_ImplDX12_NewFrame();
@@ -180,8 +203,6 @@ void Editor::Render()
 {
 	GraphicsEngine::Get().BeginFrame();
 	GraphicsEngine::Get().RenderFrame(0,0);
-	ImGui::Render();
-	//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(),list);
 	GraphicsEngine::Get().EndFrame();
 }
 

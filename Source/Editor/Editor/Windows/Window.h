@@ -1,14 +1,15 @@
 #pragma once
 #include <functional>
-#include "Windows.h" 
+#include <string>
+#include <Tools/Utilities/LinearAlgebra/Vector2.hpp>
+#include <windows.h>
+
 struct WinInitSettings
 {
-	LPCWSTR windowTitle;
-	SIZE windowSize;
+	std::wstring windowTitle;
+	Vector2ui windowSize;
 	HINSTANCE hInstance;
 };
-
-
 
 class Window
 {

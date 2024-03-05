@@ -10,15 +10,13 @@
 #include <imgui_internal.h>
 #include <imgui_node_editor.h>
 #include <misc/cpp/imgui_stdlib.h>
+#include <ScriptGraph/Nodes/Events/SGNode_EventBase.h>
 #include <ScriptGraph/Nodes/Math/SGNode_MathOps.h> 
 #include <ScriptGraph/Nodes/SGNode_DebugText.h>
 #include <ScriptGraph/Nodes/SGNode_FloatToString.h>
 #include <ScriptGraph/Nodes/SGNode_Variable.h>
-#include <ScriptGraph/ScriptGraphTypes.h>
-
-#include <Engine/GraphicsEngine/InterOp/RHI.h> 
-#include <Engine/GraphicsEngine/Rendering/Texture.h> 
-#include <ScriptGraph/Nodes/Events/SGNode_EventBase.h>
+#include <ScriptGraph/ScriptGraphTypes.h> 
+#include "DirectX/Shipyard/Texture.h"
 #include "Function_Icon.h"
 #include "GetGradient.h"
 #include "RegisterExternalTypes.h"

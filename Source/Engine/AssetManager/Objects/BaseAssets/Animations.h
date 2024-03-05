@@ -1,6 +1,18 @@
 #pragma once
 #include "BaseAsset.h"
+struct Bone
+{
+	Matrix BindPoseInverse;
+	int ParentIdx = -1;
+	std::string Name;
+	std::vector<unsigned> Children;
+};
 
+
+struct Frame
+{
+	std::unordered_map<std::string,Matrix > myTransforms;
+};
 class Skeleton : public AssetBase
 {
 public:
@@ -9,7 +21,7 @@ public:
 	std::vector<Bone> myBones;
 	std::string myName;
 	std::unordered_map<std::string,unsigned int> BoneNameToIndex;
-	const Bone* GetRoot() const { if(!myBones.empty()) { return &myBones[0]; } return nullptr; }
+	const Bone* GetRoot() const { if (!myBones.empty()) { return &myBones[0]; } return nullptr; }
 };
 
 class Animation : public AssetBase

@@ -1,6 +1,6 @@
 ﻿#pragma once 
 struct ID3D11Buffer;
-
+struct ID3D12Resource;
 #include <wrl.h> 
 using namespace Microsoft::WRL;
 

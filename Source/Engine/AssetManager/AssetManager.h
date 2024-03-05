@@ -1,12 +1,12 @@
 #pragma once 
 #define AsUINT(v) static_cast<unsigned>(v) 
 
+#include <Engine/AssetManager/ComponentSystem/UUID.h>
 #include <Engine/AssetManager/Objects/BaseAssets/BaseAsset.h>
 #include <Tools/Utilities/DataStructures/Queue.hpp> 
 #include <Tools/Utilities/System/SingletonTemplate.h>
 #include <Tools/Utilities/System/ThreadPool.hpp>
-#include <unordered_map>
-#include "AssetManagerUtills.hpp"
+#include <unordered_map> 
 
 struct Frame;
 struct Element;
@@ -73,7 +73,8 @@ public:
 
 	bool AdaptPath(std::filesystem::path& path);
 
-	const  std::filesystem::path AssetPath = L"../../Content/";
+	static inline constexpr char exprAssetPath[15] = "../../Content/";
+	static inline std::filesystem::path AssetPath = exprAssetPath;
 private:
 
 	//thread 
@@ -181,14 +182,15 @@ void AssetManager::LoadAsset(const std::filesystem::path& aFilePath,bool useExac
 			std::pair<std::filesystem::path,std::shared_ptr<T>> newObject(aFilePath,std::make_shared<T>(aFilePath));
 			ptr = library->Add(newObject);
 			myAssetQueue.EnqueueUnique(newObject.second);
-			ThreadPool::Get().SubmitWork(std::bind(&AssetManager::ThreadedLoading,this));
+			ThreadedLoading();
+			//ThreadPool::Get().SubmitWork(std::bind(&AssetManager::ThreadedLoading,this));
 		}
 		else
 		{
 			std::pair<std::filesystem::path,std::shared_ptr<T>> newObject(aFilePath,std::make_shared<T>(AssetPath / aFilePath));
 			ptr = library->Add<T>(newObject);
-			myAssetQueue.EnqueueUnique(newObject.second);
-			ThreadPool::Get().SubmitWork(std::bind(&AssetManager::ThreadedLoading,this));
+			myAssetQueue.EnqueueUnique(newObject.second); ThreadedLoading();
+			//ThreadPool::Get().SubmitWork(std::bind(&AssetManager::ThreadedLoading,this));
 		}
 	}
 	outAsset = ptr;
