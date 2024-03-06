@@ -1,5 +1,8 @@
 #include "GraphicsEngine.pch.h"
 
+#include <d3dcompiler.h>
+#include <DirectX/directx/d3dx12_pipeline_state_stream.h>
+#include <DirectX/directx/d3dx12_root_signature.h>
 #include <DirectX/XTK/DDSTextureLoader.h>
 #include <Engine/AssetManager/AssetManager.h>
 #include <Engine/AssetManager/ComponentSystem/Components/CameraComponent.h>
@@ -29,8 +32,10 @@
 #include <Shaders/Include/ToneMapping_PS.h> 
 
 #include "DirectX/Shipyard/GPU.h"
+#include "DirectX/Shipyard/Helpers.h"
 #include "DirectX/Shipyard/PSO.h"
 #include "Editor/Editor/Windows/Window.h"
+#include "Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h"
 #include "Tools/ImGui/ImGui/backends/imgui_impl_dx12.h"
 
 
@@ -162,9 +167,62 @@ void GraphicsEngine::SetupDefaultVariables()
 	pointSamplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	pointSamplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	pointSamplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	/*
+	// Create a root signature for the HDR pipeline.
+	{
 
 
+		// Allow input layout and deny unnecessary access to certain pipeline stages.
+	//D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags =
+	//	D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
+	//	D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
+	//	D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
+	//	D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
+	//
+	//CD3DX12_DESCRIPTOR_RANGE1 descriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,1,2);
+	//
+	//CD3DX12_ROOT_PARAMETER1 rootParameters[RootParameters::NumRootParameters];
+	//rootParameters[RootParameters::MatricesCB].InitAsConstantBufferView(0,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_VERTEX);
+	//rootParameters[RootParameters::MaterialCB].InitAsConstantBufferView(0,1,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_PIXEL);
+	//rootParameters[RootParameters::LightPropertiesCB].InitAsConstants(sizeof(LightProperties) / 4,1,0,D3D12_SHADER_VISIBILITY_PIXEL);
+	//rootParameters[RootParameters::PointLights].InitAsShaderResourceView(0,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_PIXEL);
+	//rootParameters[RootParameters::SpotLights].InitAsShaderResourceView(1,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_PIXEL);
+	//rootParameters[RootParameters::Textures].InitAsDescriptorTable(1,&descriptorRange,D3D12_SHADER_VISIBILITY_PIXEL);
+	//
+	//CD3DX12_STATIC_SAMPLER_DESC linearRepeatSampler(0,D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR);
+	//CD3DX12_STATIC_SAMPLER_DESC anisotropicSampler(0,D3D12_FILTER_ANISOTROPIC);
+	//
+	//CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
+	//rootSignatureDescription.Init_1_1(RootParameters::NumRootParameters,rootParameters,1,&linearRepeatSampler,rootSignatureFlags);
+	//
+	//m_HDRRootSignature.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1,featureData.HighestVersion);
 
+		// Setup the HDR pipeline state.
+		struct HDRPipelineStateStream
+		{
+			CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE pRootSignature;
+			CD3DX12_PIPELINE_STATE_STREAM_INPUT_LAYOUT InputLayout;
+			CD3DX12_PIPELINE_STATE_STREAM_PRIMITIVE_TOPOLOGY PrimitiveTopologyType;
+			CD3DX12_PIPELINE_STATE_STREAM_VS VS;
+			CD3DX12_PIPELINE_STATE_STREAM_PS PS;
+			CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL_FORMAT DSVFormat;
+			CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS RTVFormats;
+		} hdrPipelineStateStream;
+
+		hdrPipelineStateStream.pRootSignature = GPU::m_RootSignature.GetSignature();
+		hdrPipelineStateStream.InputLayout = { Vertex::InputLayoutDefinition.data(), static_cast<UINT>(Vertex::InputLayoutDefinition.size()) };
+		hdrPipelineStateStream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+		hdrPipelineStateStream.VS = CD3DX12_SHADER_BYTECODE(vs->GetShader().GetBlob());
+		hdrPipelineStateStream.PS = CD3DX12_SHADER_BYTECODE(ps->GetShader().GetBlob());
+		hdrPipelineStateStream.DSVFormat = myBackBuffer->GetResource()->GetDesc().Format;
+		hdrPipelineStateStream.RTVFormats = { myBackBuffer->GetResource()->GetDesc().Format };
+
+		D3D12_PIPELINE_STATE_STREAM_DESC hdrPipelineStateStreamDesc = {
+			sizeof(HDRPipelineStateStream), &hdrPipelineStateStream
+		};
+		Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&hdrPipelineStateStreamDesc,IID_PPV_ARGS(&GPU::m_PipeLineState)));
+	}
+	*/
 	//if (!RHI::CreateSamplerState(myDefaultSampleState,samplerDesc))
 	//{
 	//	Logger::Log("Sampler state created");
@@ -276,20 +334,11 @@ void GraphicsEngine::SetupDefaultVariables()
 	//defaultMaterial->SetShader(defaultVS,defaultPS); 
 	//AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/skansen_cubemap.dds",defaultCubeMap);
 	//defaultCubeMap->SetTextureType(eTextureType::CubeMap);
-	//RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_enviromentCube,defaultCubeMap->GetRawTexture().get());
+	//RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_enviromentCube,defaultCubeMap->GetRawTexture().get()); 
 
-	GPU::m_RootSignature.Reset(eRootBindings::count,3);
-	GPU::m_RootSignature.RegisterSampler(REG_DefaultSampler,samplerDesc,D3D12_SHADER_VISIBILITY_PIXEL);
-	GPU::m_RootSignature.RegisterSampler(REG_PointSampler,pointSamplerDesc,D3D12_SHADER_VISIBILITY_PIXEL);
-	GPU::m_RootSignature.RegisterSampler(REG_shadowCmpSampler,shadowSamplerDesc,D3D12_SHADER_VISIBILITY_PIXEL);
-	GPU::m_RootSignature[MeshConstants].InitAsConstantBuffer(0,D3D12_SHADER_VISIBILITY_VERTEX);
-	GPU::m_RootSignature[MaterialConstants].InitAsConstantBuffer(0,D3D12_SHADER_VISIBILITY_PIXEL);
-	GPU::m_RootSignature[MaterialSRVs].InitAsDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,0,10,D3D12_SHADER_VISIBILITY_PIXEL);
-	GPU::m_RootSignature[MaterialSamplers].InitAsDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER,0,10,D3D12_SHADER_VISIBILITY_PIXEL);
-	GPU::m_RootSignature[CommonSRVs].InitAsDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,10,10,D3D12_SHADER_VISIBILITY_PIXEL);
-	GPU::m_RootSignature[CommonCBV].InitAsConstantBuffer(1);
-	GPU::m_RootSignature[SkinMatrices].InitAsBufferSRV(20,D3D12_SHADER_VISIBILITY_VERTEX);
-	GPU::m_RootSignature.Finalize(L"RootSig",D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+
+
 	AssetManager::Get().ForceLoadAsset<Mesh>("default.fbx",defaultMesh);
 }
 
@@ -609,7 +658,6 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 
 	OPTICK_EVENT("Gbuffer");
 	//RHI::BeginEvent(L"Start writing to gbuffer");
-	myCamera->SetCameraToFrameBuffer();
 
 	auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 	auto commandList = commandQueue->GetCommandList();
@@ -621,16 +669,12 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	const auto rtv = GPU::GetCurrentRenderTargetView();
 	const auto dsv = GPU::m_DsvHeap->GetCPUDescriptorHandleForHeapStart();
 
-	GPU::TransitionResource(*commandList.get(),backBuffer.GetResource(),
-		D3D12_RESOURCE_STATE_PRESENT,D3D12_RESOURCE_STATE_RENDER_TARGET);
+	commandList->TransitionBarrier(backBuffer.GetResource(),D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	FLOAT clearColor[] = { 0.2f, 0.2f, 0.9f, 1.0f };
 
 	GPU::ClearRTV(*commandList.get(),rtv,clearColor);
 	GPU::ClearDepth(*commandList.get(),dsv);
-
-	graphicCommandList->SetPipelineState(PSOCache::GetState(PSOCache::ePipelineStateID::Default)->m_pipelineState.Get());
-	graphicCommandList->SetGraphicsRootSignature(GPU::m_RootSignature.GetSignature());
 
 
 	graphicCommandList->RSSetViewports(1,&GPU::m_Viewport);
@@ -639,19 +683,33 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	graphicCommandList->OMSetRenderTargets(1,&rtv,FALSE,&dsv);
 
 
+	graphicCommandList->SetPipelineState(PSOCache::GetState(PSOCache::ePipelineStateID::Default)->m_pipelineState.Get());
+	graphicCommandList->SetGraphicsRootSignature(GPU::m_RootSignature.GetRootSignature().Get());
+
+	//myCamera->SetCameraToFrameBuffer(graphicCommandList);
 
 	for (const auto& meshRenderer : GameObjectManager::Get().GetAllComponents<cMeshRenderer>())
 	{
 		for (auto& element : meshRenderer.GetElements())
 		{
-			const auto indexbuffer = element.IndexResource.GetIndexBufferView();
-			const auto vertexbuffer = element.VertexBuffer.GetVertexBufferView();
+
 
 			graphicCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+			commandList->TransitionBarrier(element.VertexBuffer.GetResource(),D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+			const auto vertexbuffer = element.VertexBuffer.GetVertexBufferView();
 			graphicCommandList->IASetVertexBuffers(0,1,&vertexbuffer);
-			graphicCommandList->IASetIndexBuffer(&indexbuffer);
+			commandList->TrackResource(element.VertexBuffer);
+
+			commandList->TransitionBarrier(element.IndexResource.GetResource(),D3D12_RESOURCE_STATE_INDEX_BUFFER);
+			const auto indexBuffer = element.IndexResource.GetIndexBufferView();
+			graphicCommandList->IASetIndexBuffer(&indexBuffer);
+			commandList->TrackResource(element.IndexResource);
+
+			commandList->FlushResourceBarriers();
 
 			graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
+
 		}
 	}
 
@@ -718,9 +776,19 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	//	RHI::EndEvent();
 
 
-	ImGui::Render();
-	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(),graphicCommandList.Get());
+	//auto value = commandQueue->ExecuteCommandList(commandList);
+	//commandQueue->WaitForFenceValue(value);
+
 	//commandQueue->ExecuteCommandList(commandList);
+	commandList->TransitionBarrier(GPU::m_renderTargets[GPU::m_FrameIndex].GetResource(),D3D12_RESOURCE_STATE_PRESENT);
+	commandQueue->ExecuteCommandList(commandList);
+
+	Helpers::ThrowIfFailed(GPU::m_Swapchain->m_SwapChain->Present(1,0));
+	GPU::m_FenceValues[GPU::m_FrameIndex] = commandQueue->Signal();
+	GPU::m_FrameIndex = GPU::m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
+
+	//GraphicsMemory::Get().Commit(commandQueue->GetCommandQueue().Get());
+	commandQueue->WaitForFenceValue(GPU::m_FenceValues[GPU::m_FrameIndex]);
 }
 
 void GraphicsEngine::RenderTextureTo(eRenderTargets from,eRenderTargets to)  const
@@ -746,7 +814,10 @@ void GraphicsEngine::RenderTextureTo(eRenderTargets from,eRenderTargets to)  con
 void GraphicsEngine::EndFrame()
 {
 	OPTICK_EVENT();
-	GPU::Present();
+
+	//ImGui::Render();
+	//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(),commandList->GetGraphicsCommandList().Get());
+	//GPU::Present();
 
 	// We finish our frame here and present it on screen.  
 	OPTICK_EVENT("ResetShadowList")

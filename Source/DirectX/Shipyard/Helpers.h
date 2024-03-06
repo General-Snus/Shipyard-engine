@@ -2,6 +2,7 @@
 #include <string>
 #include <Tools/Utilities/Math.hpp>
 
+#include <comdef.h>
 #include <d3d12.h>
 #include <DirectX/XTK/DirectXHelpers.h>
 #include <exception>
@@ -50,7 +51,7 @@ namespace Helpers
 		MultiByteToWideChar(CP_ACP,0,someString.c_str(),sLength,&result[0],len);
 		return result;
 	}
-	 
+
 	template<>
 	inline std::string string_cast<std::string>(const std::wstring& someString)
 	{
@@ -65,9 +66,10 @@ namespace Helpers
 	{
 		if (FAILED(hr))
 		{
-			auto err = DX::com_exception(hr);
-			Logger::Err(err.what());
-			throw err;
+			_com_error err(hr);
+			std::wstring errMsg = err.ErrorMessage();
+			Logger::Err(string_cast<std::string>(errMsg));
+			throw std::exception(string_cast<std::string>(errMsg).c_str());
 		}
 	}
 	inline void ThrowIfSucceded(HRESULT hr) noexcept(false)

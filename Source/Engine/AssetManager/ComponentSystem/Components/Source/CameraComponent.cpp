@@ -6,6 +6,7 @@
 #include <Tools/Utilities/Input/InputHandler.hpp> 
 #include "../CameraComponent.h"
 
+#include "DirectX/Shipyard/CommandList.h"
 #include "Tools/Utilities/Input/EnumKeys.h"
 
 cCamera::cCamera(const unsigned int anOwnerId) : Component(anOwnerId)
@@ -197,15 +198,26 @@ Vector3f cCamera::GetPointerDirectionNDC(const Vector2<int> position) const
 
 }
 
-void cCamera::SetCameraToFrameBuffer()
+void cCamera::SetCameraToFrameBuffer(DxCommandList& commandList)
 {
 	OPTICK_EVENT();
-	GfxCmd_SetFrameBuffer(
-		myClipMatrix,
-		Matrix::GetFastInverse(GetComponent<Transform>().GetTransform()),
-		(int)Editor::GetApplicationState().filter, //TODO scene again
-		GetFrustrumCorners()
-	).ExecuteAndDestroy();
+	auto& transform = GetComponent<Transform>();
+	FrameBuffer buffer = FrameBuffer();
+	buffer.Data.ProjectionMatrix = myClipMatrix;
+	buffer.Data.ViewMatrix = Matrix::GetFastInverse(transform.GetTransform());
+	buffer.Data.Time = Timer::GetInstance().GetDeltaTime();
+	buffer.Data.FB_RenderMode = (int)Editor::GetApplicationState().filter;
+
+	buffer.Data.FB_CameraPosition = transform.GetPosition();
+
+
+	commandList->SetGraphicsRoot32BitConstants(REG_FrameBuffer,1,&buffer,0);
+	//GfxCmd_SetFrameBuffer(
+	//	myClipMatrix,
+	//	),
+	//	, //TODO scene again
+	//	GetFrustrumCorners()
+	//	).ExecuteAndDestroy();
 }
 
 Vector4f cCamera::WoldSpaceToPostProjectionSpace(Vector3f aEntity)

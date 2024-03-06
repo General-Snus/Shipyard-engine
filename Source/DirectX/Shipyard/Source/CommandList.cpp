@@ -76,6 +76,21 @@ void CommandList::CopyBuffer(GpuResource& buffer,size_t numElements,size_t eleme
 	buffer.CreateView(numElements,elementSize);
 }
 
+void CommandList::TransitionBarrier(ComPtr<ID3D12Resource> resource,D3D12_RESOURCE_STATES stateAfter,UINT subresource,bool flushBarriers)
+{
+	if (resource)
+	{
+		// The "before" state is not important. It will be resolved by the resource state tracker.
+		auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(resource.Get(),D3D12_RESOURCE_STATE_COMMON,stateAfter,subresource);
+		m_ResourceStateTracker->ResourceBarrier(barrier);
+	}
+
+	if (flushBarriers)
+	{
+		FlushResourceBarriers();
+	}
+}
+
 void CommandList::TrackResource(Microsoft::WRL::ComPtr<ID3D12Object> object)
 {
 	m_TrackedObjects.push_back(object);

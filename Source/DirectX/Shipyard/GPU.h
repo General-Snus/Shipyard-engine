@@ -7,6 +7,7 @@
 #define D3D12MA_D3D12_HEADERS_ALREADY_INCLUDED
 
 #include <DirectX/CrashHandler/GFSDK_Aftermath.h> 
+#include <DirectX/CrashHandler/NsightAftermathGpuCrashTracker.h> 
 #include <DirectX/directx/d3d12.h>
 #include <DirectX/XTK/DescriptorHeap.h>
 #include <DirectX/XTK/GraphicsMemory.h>
@@ -152,7 +153,7 @@ public:
 	static inline constexpr bool m_useWarpDevice = false;
 	static inline UINT m_FrameIndex;
 
-	static inline ComPtr<ID3D12Device> m_Device;
+	static inline ComPtr<ID3D12Device2> m_Device;
 	static inline std::shared_ptr<GPUCommandQueue> m_DirectCommandQueue;
 	static inline std::shared_ptr<GPUCommandQueue> m_CopyCommandQueue;
 	static inline std::shared_ptr<GPUCommandQueue> m_ComputeCommandQueue;
@@ -169,7 +170,7 @@ public:
 	static inline uint64_t m_FenceValues[m_FrameCount] = {};
 
 	static inline GPURootSignature m_RootSignature;
-	static inline ComPtr<ID3D12PipelineState> m_PipeLineState;
+	static inline D3D12_FEATURE_DATA_ROOT_SIGNATURE m_FeatureData;
 
 
 #if  (USE_NSIGHT_AFTERMATH)
@@ -188,7 +189,7 @@ public:
 	static inline D3D12_RECT m_ScissorRect;
 	static inline std::shared_ptr<Texture> m_BackBuffer;
 	static inline std::shared_ptr<Texture> m_DepthBuffer;
-	static inline std::unique_ptr<DirectX::GraphicsMemory> m_GraphicsMemory;
+	//static inline std::shared_ptr<DirectX::GraphicsMemory> m_GraphicsMemory;
 	static inline std::unique_ptr<DirectX::DescriptorHeap> m_ResourceDescriptors;
 	static inline ComPtr<ID3D12DescriptorHeap> guiDescriptorHeap;;
 

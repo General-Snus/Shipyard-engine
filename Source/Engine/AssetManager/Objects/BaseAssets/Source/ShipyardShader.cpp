@@ -12,7 +12,13 @@ ShipyardShader::ShipyardShader(const std::filesystem::path& aFilePath) : AssetBa
 
 void ShipyardShader::Init()
 {
+	isBeingLoaded = true;
+
 	Helpers::ThrowIfFailed(D3DReadFileToBlob(AssetPath.wstring().c_str(),&shaderObject.myBlob));
+
+
+	isBeingLoaded = false;
+	isLoadedComplete = true;
 }
 
 Shader& ShipyardShader::GetShader()

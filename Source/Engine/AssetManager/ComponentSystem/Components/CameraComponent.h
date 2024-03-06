@@ -1,6 +1,8 @@
 #pragma once 
 #include <Tools/Utilities/Math.hpp>
 
+#include "DirectX/Shipyard/CommandList.h"
+
 
 struct CameraSettings
 {
@@ -26,7 +28,7 @@ public:
 	Vector3f GetPointerDirection(const Vector2<int> position);
 	Vector3f GetPointerDirectionNDC(const Vector2<int> position) const;
 
-	void SetCameraToFrameBuffer();
+	void SetCameraToFrameBuffer(DxCommandList& commandList);
 	Vector4f WoldSpaceToPostProjectionSpace(Vector3f aEntity);
 
 private:

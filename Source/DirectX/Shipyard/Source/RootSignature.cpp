@@ -1,133 +1,159 @@
-#include "DirectXHeader.pch.h"
+#include "DirectXHeader.pch.h" 
 
-
-#include "DirectX/Shipyard/RootSignature.h"
-
+#include "DirectX/Shipyard/RootSignature.h" 
 #include "Shipyard/GPU.h"
 
-static std::map< size_t,Microsoft::WRL::ComPtr<ID3D12RootSignature> > s_RootSignatureHashMap;
-void GPURootSignature::RegisterSampler(UINT aRegister,const D3D12_SAMPLER_DESC& nonStaticSamplerDesc,D3D12_SHADER_VISIBILITY visibility)
+GPURootSignature::GPURootSignature()
+	: m_RootSignatureDesc{}
+	,m_NumDescriptorsPerTable{ 0 }
+	,m_SamplerTableBitMask(0)
+	,m_DescriptorTableBitMask(0)
 {
-	assert(m_NumInitializedStaticSamplers < m_NumSamplers);
-	D3D12_STATIC_SAMPLER_DESC& StaticSamplerDesc = m_SamplerArray[m_NumInitializedStaticSamplers++];
-
-	StaticSamplerDesc.Filter = nonStaticSamplerDesc.Filter;
-	StaticSamplerDesc.AddressU = nonStaticSamplerDesc.AddressU;
-	StaticSamplerDesc.AddressV = nonStaticSamplerDesc.AddressV;
-	StaticSamplerDesc.AddressW = nonStaticSamplerDesc.AddressW;
-	StaticSamplerDesc.MipLODBias = nonStaticSamplerDesc.MipLODBias;
-	StaticSamplerDesc.MaxAnisotropy = nonStaticSamplerDesc.MaxAnisotropy;
-	StaticSamplerDesc.ComparisonFunc = nonStaticSamplerDesc.ComparisonFunc;
-	StaticSamplerDesc.BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
-	StaticSamplerDesc.MinLOD = nonStaticSamplerDesc.MinLOD;
-	StaticSamplerDesc.MaxLOD = nonStaticSamplerDesc.MaxLOD;
-	StaticSamplerDesc.ShaderRegister = aRegister;
-	StaticSamplerDesc.RegisterSpace = 0;
-	StaticSamplerDesc.ShaderVisibility = visibility;
 }
 
-void GPURootSignature::Reset(UINT NumRootParams,UINT NumStaticSamplers)
+GPURootSignature::GPURootSignature(const D3D12_ROOT_SIGNATURE_DESC1& rootSignatureDesc,D3D_ROOT_SIGNATURE_VERSION rootSignatureVersion)
+	: m_RootSignatureDesc{}
+	,m_NumDescriptorsPerTable{ 0 }
+	,m_SamplerTableBitMask(0)
+	,m_DescriptorTableBitMask(0)
 {
-	if (NumRootParams > 0)
-		m_ParamArray.reset(new GPURootParameter[NumRootParams]);
-	else
-		m_ParamArray = nullptr;
-	m_NumParameters = NumRootParams;
-
-	if (NumStaticSamplers > 0)
-		m_SamplerArray.reset(new D3D12_STATIC_SAMPLER_DESC[NumStaticSamplers]);
-	else
-		m_SamplerArray = nullptr;
-	m_NumSamplers = NumStaticSamplers;
-	m_NumInitializedStaticSamplers = 0;
+	SetRootSignatureDesc(rootSignatureDesc,rootSignatureVersion);
 }
 
-void GPURootSignature::Finalize(const std::wstring& name,D3D12_ROOT_SIGNATURE_FLAGS Flags)
+GPURootSignature::~GPURootSignature()
 {
-	assert(m_NumInitializedStaticSamplers == m_NumSamplers);
+	Destroy();
+}
 
-	D3D12_ROOT_SIGNATURE_DESC RootDesc;
-	RootDesc.NumParameters = m_NumParameters;
-	RootDesc.pParameters = (const D3D12_ROOT_PARAMETER*)m_ParamArray.get();
-	RootDesc.NumStaticSamplers = m_NumSamplers;
-	RootDesc.pStaticSamplers = (const D3D12_STATIC_SAMPLER_DESC*)m_SamplerArray.get();
-	RootDesc.Flags = Flags;
-
-	m_DescriptorTableBitMap = 0;
-	m_SamplerTableBitMap = 0;
-
-	size_t HashCode = Helpers::HashState(&RootDesc.Flags);
-	HashCode = Helpers::HashState(RootDesc.pStaticSamplers,m_NumSamplers,HashCode);
-
-	for (UINT Param = 0; Param < m_NumParameters; ++Param)
+void GPURootSignature::Destroy()
+{
+	for (UINT i = 0; i < m_RootSignatureDesc.NumParameters; ++i)
 	{
-		const D3D12_ROOT_PARAMETER& RootParam = RootDesc.pParameters[Param];
-		m_DescriptorTableSize[Param] = 0;
-
-		if (RootParam.ParameterType == D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE)
+		const D3D12_ROOT_PARAMETER1& rootParameter = m_RootSignatureDesc.pParameters[i];
+		if (rootParameter.ParameterType == D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE)
 		{
-			assert(RootParam.DescriptorTable.pDescriptorRanges != nullptr);
-
-			HashCode = Helpers::HashState(RootParam.DescriptorTable.pDescriptorRanges,
-				RootParam.DescriptorTable.NumDescriptorRanges,HashCode);
-
-			// We keep track of sampler descriptor tables separately from CBV_SRV_UAV descriptor tables
-			if (RootParam.DescriptorTable.pDescriptorRanges->RangeType == D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER)
-				m_SamplerTableBitMap |= (1 << Param);
-			else
-				m_DescriptorTableBitMap |= (1 << Param);
-
-			for (UINT TableRange = 0; TableRange < RootParam.DescriptorTable.NumDescriptorRanges; ++TableRange)
-				m_DescriptorTableSize[Param] += RootParam.DescriptorTable.pDescriptorRanges[TableRange].NumDescriptors;
+			delete[] rootParameter.DescriptorTable.pDescriptorRanges;
 		}
-		else
-			HashCode = Helpers::HashState(&RootParam,1,HashCode);
 	}
 
-	ID3D12RootSignature** RSRef = nullptr;
-	bool firstCompile = false;
-	{
-		static std::mutex s_HashMapMutex;
-		std::lock_guard<std::mutex> CS(s_HashMapMutex);
-		auto iter = s_RootSignatureHashMap.find(HashCode);
+	delete[] m_RootSignatureDesc.pParameters;
+	m_RootSignatureDesc.pParameters = nullptr;
+	m_RootSignatureDesc.NumParameters = 0;
 
-		// Reserve space so the next inquiry will find that someone got here first.
-		if (iter == s_RootSignatureHashMap.end())
+	delete[] m_RootSignatureDesc.pStaticSamplers;
+	m_RootSignatureDesc.pStaticSamplers = nullptr;
+	m_RootSignatureDesc.NumStaticSamplers = 0;
+
+	m_DescriptorTableBitMask = 0;
+	m_SamplerTableBitMask = 0;
+
+	memset(m_NumDescriptorsPerTable,0,sizeof(m_NumDescriptorsPerTable));
+}
+
+void GPURootSignature::SetRootSignatureDesc(const D3D12_ROOT_SIGNATURE_DESC1& rootSignatureDesc,D3D_ROOT_SIGNATURE_VERSION rootSignatureVersion)
+{	// Make sure any previously allocated root signature description is cleaned 
+	// up first.
+	Destroy();
+
+	auto device = GPU::m_Device;
+
+	UINT numParameters = rootSignatureDesc.NumParameters;
+	D3D12_ROOT_PARAMETER1* pParameters = numParameters > 0 ? new D3D12_ROOT_PARAMETER1[numParameters] : nullptr;
+
+	for (UINT i = 0; i < numParameters; ++i)
+	{
+		const D3D12_ROOT_PARAMETER1& rootParameter = rootSignatureDesc.pParameters[i];
+		pParameters[i] = rootParameter;
+
+		if (rootParameter.ParameterType == D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE)
 		{
-			RSRef = s_RootSignatureHashMap[HashCode].GetAddressOf();
-			firstCompile = true;
+			UINT numDescriptorRanges = rootParameter.DescriptorTable.NumDescriptorRanges;
+			D3D12_DESCRIPTOR_RANGE1* pDescriptorRanges = numDescriptorRanges > 0 ? new D3D12_DESCRIPTOR_RANGE1[numDescriptorRanges] : nullptr;
+
+			memcpy(pDescriptorRanges,rootParameter.DescriptorTable.pDescriptorRanges,
+				sizeof(D3D12_DESCRIPTOR_RANGE1) * numDescriptorRanges);
+
+			pParameters[i].DescriptorTable.NumDescriptorRanges = numDescriptorRanges;
+			pParameters[i].DescriptorTable.pDescriptorRanges = pDescriptorRanges;
+
+			// Set the bit mask depending on the type of descriptor table.
+			if (numDescriptorRanges > 0)
+			{
+				switch (pDescriptorRanges[0].RangeType)
+				{
+				case D3D12_DESCRIPTOR_RANGE_TYPE_CBV:
+				case D3D12_DESCRIPTOR_RANGE_TYPE_SRV:
+				case D3D12_DESCRIPTOR_RANGE_TYPE_UAV:
+					m_DescriptorTableBitMask |= (1 << i);
+					break;
+				case D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER:
+					m_SamplerTableBitMask |= (1 << i);
+					break;
+				}
+			}
+
+			// Count the number of descriptors in the descriptor table.
+			for (UINT j = 0; j < numDescriptorRanges; ++j)
+			{
+				m_NumDescriptorsPerTable[i] += pDescriptorRanges[j].NumDescriptors;
+			}
 		}
-		else
-			RSRef = iter->second.GetAddressOf();
 	}
 
-	if (firstCompile)
+	m_RootSignatureDesc.NumParameters = numParameters;
+	m_RootSignatureDesc.pParameters = pParameters;
+
+	UINT numStaticSamplers = rootSignatureDesc.NumStaticSamplers;
+	D3D12_STATIC_SAMPLER_DESC* pStaticSamplers = numStaticSamplers > 0 ? new D3D12_STATIC_SAMPLER_DESC[numStaticSamplers] : nullptr;
+
+	if (pStaticSamplers)
 	{
-		ComPtr<ID3DBlob> pOutBlob,pErrorBlob;
-
-		D3D12SerializeRootSignature(&RootDesc,D3D_ROOT_SIGNATURE_VERSION_1,
-			pOutBlob.GetAddressOf(),pErrorBlob.GetAddressOf());
-
-		if (pErrorBlob)
-		{
-			Logger::Err((char*)pErrorBlob->GetBufferPointer());
-		}
-
-
-		Helpers::ThrowIfFailed(GPU::m_Device->CreateRootSignature(1,pOutBlob->GetBufferPointer(),pOutBlob->GetBufferSize(),
-			IID_PPV_ARGS(&m_RootSignature)));
-
-		m_RootSignature->SetName(name.c_str());
-
-		s_RootSignatureHashMap[HashCode].Attach(m_RootSignature.Get());
-		assert(*RSRef == m_RootSignature.Get());
+		memcpy(pStaticSamplers,rootSignatureDesc.pStaticSamplers,
+			sizeof(D3D12_STATIC_SAMPLER_DESC) * numStaticSamplers);
 	}
-	else
+
+	m_RootSignatureDesc.NumStaticSamplers = numStaticSamplers;
+	m_RootSignatureDesc.pStaticSamplers = pStaticSamplers;
+
+	D3D12_ROOT_SIGNATURE_FLAGS flags = rootSignatureDesc.Flags;
+	m_RootSignatureDesc.Flags = flags;
+
+	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC versionRootSignatureDesc;
+	versionRootSignatureDesc.Init_1_1(numParameters,pParameters,numStaticSamplers,pStaticSamplers,flags);
+
+	// Serialize the root signature.
+	ComPtr<ID3DBlob> rootSignatureBlob;
+	ComPtr<ID3DBlob> errorBlob;
+	if (FAILED(D3DX12SerializeVersionedRootSignature(&versionRootSignatureDesc,
+		rootSignatureVersion,&rootSignatureBlob,&errorBlob)))
 	{
-		while (*RSRef == nullptr)
-			std::this_thread::yield();
-		m_RootSignature = *RSRef;
+		std::string errorString = (char*)errorBlob->GetBufferPointer();
+		Logger::Err(errorString);
+		throw std::exception(errorString.c_str());
 	}
 
-	m_Finalized = TRUE;
+	// Create the root signature.
+	Helpers::ThrowIfFailed(device->CreateRootSignature(0,rootSignatureBlob->GetBufferPointer(),
+		rootSignatureBlob->GetBufferSize(),IID_PPV_ARGS(&m_RootSignature)));
+}
+
+uint32_t GPURootSignature::GetDescriptorTableBitMask(D3D12_DESCRIPTOR_HEAP_TYPE descriptorHeapType) const
+{
+	uint32_t descriptorTableBitMask = 0;
+	switch (descriptorHeapType)
+	{
+	case D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV:
+		descriptorTableBitMask = m_DescriptorTableBitMask;
+		break;
+	case D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER:
+		descriptorTableBitMask = m_SamplerTableBitMask;
+		break;
+	}
+
+	return descriptorTableBitMask;
+}
+
+uint32_t GPURootSignature::GetNumDescriptors(uint32_t rootIndex) const
+{
+	return m_NumDescriptorsPerTable[rootIndex];
 }

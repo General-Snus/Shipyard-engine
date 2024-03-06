@@ -138,7 +138,7 @@ void GameLauncher::Start()
 		GameObject worldRoot = gom.CreateGameObject();
 		gom.SetLastGOAsWorld();
 
-		worldRoot.AddComponent<FrameStatistics>();
+		//worldRoot.AddComponent<FrameStatistics>();
 		//worldRoot.AddComponent<RenderMode>();
 		//worldRoot.AddComponent<Skybox>();
 		worldRoot.AddComponent<cLight>(eLightType::Directional);

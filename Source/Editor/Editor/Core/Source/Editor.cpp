@@ -140,7 +140,7 @@ int	 Editor::Run()
 
 	if (IsGUIActive)
 	{
-		UpdateImGui();
+		//UpdateImGui();
 		Update();
 		Render();
 	}

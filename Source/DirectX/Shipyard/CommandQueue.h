@@ -1,5 +1,6 @@
 #pragma once 
 #include "CommandList.h" 
+#include "DirectX/CrashHandler/GFSDK_Aftermath.h"
 #include "ThreadSafeQueue.h"
 
 class GPUCommandQueue

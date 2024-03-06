@@ -169,11 +169,10 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 	//g_FenceEvent = CreateEventHandle();
 
 
-	D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
-	featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
-	if (FAILED(m_Device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE,&featureData,sizeof(featureData))))
+	m_FeatureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
+	if (FAILED(m_Device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE,&m_FeatureData,sizeof(m_FeatureData))))
 	{
-		featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
+		m_FeatureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
 	}
 
 	CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
@@ -191,7 +190,7 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 		Logger::Err("Failed to Create RootSignature");
 	}
 
-	m_GraphicsMemory = std::make_unique<DirectX::DX12::GraphicsMemory>(m_Device.Get());
+	//m_GraphicsMemory = std::make_shared<DirectX::DX12::GraphicsMemory>(m_Device.Get());
 
 	m_ResourceDescriptors = std::make_unique<DescriptorHeap>(m_Device.Get(),
 		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
@@ -205,7 +204,25 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 	m_Viewport = { 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), D3D12_MIN_DEPTH, D3D12_MAX_DEPTH };
 	m_ScissorRect = { 0, 0, static_cast<LONG>(width), static_cast<LONG>(height) };
 
+	D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags =
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
+		D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
+		D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
+		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 
+	CD3DX12_DESCRIPTOR_RANGE1 descriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,1,2);
+
+	CD3DX12_ROOT_PARAMETER1 rootParameters[count];
+	rootParameters[MatricesCB].InitAsConstantBufferView(0,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_VERTEX);
+	rootParameters[MaterialSRVs].InitAsConstantBufferView(0,1,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_PIXEL);
+	rootParameters[TexturesSRVs].InitAsDescriptorTable(1,&descriptorRange,D3D12_SHADER_VISIBILITY_PIXEL);
+
+	CD3DX12_STATIC_SAMPLER_DESC linearRepeatSampler(0,D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR);
+
+	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
+	rootSignatureDescription.Init_1_1(count,rootParameters,1,&linearRepeatSampler,rootSignatureFlags);
+
+	m_RootSignature.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1,m_FeatureData.HighestVersion);
 
 
 	return true;
@@ -226,10 +243,8 @@ void GPU::Present(unsigned aSyncInterval)
 	auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 	auto commandList = commandQueue->GetCommandList();
 
-	TransitionResource(*commandList.get(),m_renderTargets[m_FrameIndex].GetResource(),
-		D3D12_RESOURCE_STATE_RENDER_TARGET,D3D12_RESOURCE_STATE_PRESENT);
-
-	m_FenceValues[m_FrameIndex] = m_DirectCommandQueue->ExecuteCommandList(commandList);
+	commandList->TransitionBarrier(m_renderTargets[m_FrameIndex].GetResource(),D3D12_RESOURCE_STATE_PRESENT);
+	commandQueue->ExecuteCommandList(commandList);
 
 #if  (USE_NSIGHT_AFTERMATH)
 	auto hr = (m_Swapchain->m_SwapChain->Present(aSyncInterval,0));
@@ -267,14 +282,16 @@ void GPU::Present(unsigned aSyncInterval)
 		// Terminate on failure
 		GPU::UnInitialize();
 		exit(-1);
+		return;
 	}
 #else 
 	Helpers::ThrowIfFailed(m_Swapchain->m_SwapChain->Present(aSyncInterval,0));
 #endif
-	m_FenceValues[m_FrameIndex] = m_DirectCommandQueue->Signal();
+	m_FenceValues[m_FrameIndex] = commandQueue->Signal();
 	m_FrameIndex = m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
-	m_GraphicsMemory->Commit(m_DirectCommandQueue->GetCommandQueue().Get());
-	m_DirectCommandQueue->WaitForFenceValue(m_FenceValues[m_FrameIndex]);
+
+	//GraphicsMemory::Get().Commit(commandQueue->GetCommandQueue().Get());
+	commandQueue->WaitForFenceValue(m_FenceValues[m_FrameIndex]);
 }
 
 void GPU::UpdateBufferResource(
@@ -758,7 +775,7 @@ void GPU::setAftermathEventMarker(const std::string& markerData,bool appManagedM
 		// The 15th marker for the frame will have markerID = 2 * 10000 + 14 + 1 = 20015.
 		// So with this scheme, we can safely have up to 10000 markers per frame, and can guarantee a unique markerID for each one.
 		// There are many ways to generate and track markers and unique marker identifiers!
-	}
+}
 	else
 	{
 		AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_SetEventMarker(m_hAftermathCommandListContext,(void*)markerData.c_str(),(unsigned int)markerData.size() + 1));

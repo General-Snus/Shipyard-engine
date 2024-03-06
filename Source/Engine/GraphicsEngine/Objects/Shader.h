@@ -27,7 +27,7 @@ public:
 	{
 		return myShaderInfo.Type;
 	}
-	FORCEINLINE const ID3DBlob* GetBlob() const
+	FORCEINLINE   ID3DBlob* GetBlob() const
 	{
 		return myBlob.Get();
 	}

@@ -9,6 +9,8 @@ public:
 	CommandList(D3D12_COMMAND_LIST_TYPE type);
 
 	void CopyBuffer(GpuResource& buffer,size_t numElements,size_t elementSize,const void* bufferData,D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
+	void TransitionBarrier(Microsoft::WRL::ComPtr<ID3D12Resource> resource,D3D12_RESOURCE_STATES stateAfter,UINT subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,bool flushBarriers = false);
+
 	DxCommandList GetGraphicsCommandList() const
 	{
 		return m_CommandList;
@@ -17,6 +19,7 @@ public:
 	void TrackResource(Microsoft::WRL::ComPtr<ID3D12Object> object);
 
 	void TrackResource(const GpuResource& res);
+
 	void ReleaseTrackedObjects();
 
 	void FlushResourceBarriers();
