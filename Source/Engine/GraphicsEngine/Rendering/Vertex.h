@@ -50,13 +50,9 @@ struct Vertex
 		myUV = aUV;
 		myNormal = aNormal;
 		myTangent = aTangent;
-		//myBoneIds = aBoneIds;
-		//myBoneWeights = aBoneWeights;
 	}
-	//static const InputElementList InstancedInputLayoutDefinition;
-	//static ComPtr<ID3D11InputLayout> InputLayout;
-	//static ComPtr<ID3D11InputLayout> InstancedInputLayout;
-	static inline const std::vector<D3D12_INPUT_ELEMENT_DESC> InputLayoutDefinition =
+
+	static inline constexpr  D3D12_INPUT_ELEMENT_DESC  InputLayoutDefinition[] =
 	{
 		{ "POSITION",		0,    DXGI_FORMAT_R32G32B32A32_FLOAT,	0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 		{ "COLOR",			0,    DXGI_FORMAT_R32G32B32A32_FLOAT,	0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
@@ -71,5 +67,16 @@ struct Vertex
 	   { "WORLD",			3,    DXGI_FORMAT_R32G32B32A32_FLOAT,   1, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1}
 	   //{ "ANIMATIONFRAME",	0,    DXGI_FORMAT_R32G32B32A32_UINT,				0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 0 }
 	};
+
+
+
+	//static inline constexpr D3D12_INPUT_ELEMENT_DESC InputLayoutDefinition[] =
+	//{
+	//	{ "POSITION",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+	//	{ "NORMAL",     0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+	//	{ "TEXCOORD",   0, DXGI_FORMAT_R32G32_FLOAT,    0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+	//};
+
+	static inline constexpr unsigned InputLayoutDefinitionSize = sizeof(InputLayoutDefinition) / sizeof(D3D12_INPUT_ELEMENT_DESC);
 };
 

@@ -79,8 +79,8 @@ bool Texture::AllocateTexture(const unsigned width,const unsigned height)
 	{
 		throw std::runtime_error("Failed to upload texture");
 	}
-	CreateShaderResourceView(GPU::m_Device.Get(),m_pResource.Get(),
-		GPU::m_ResourceDescriptors->GetCpuHandle(eDescriptors::Textures));
+	//CreateShaderResourceView(GPU::m_Device.Get(),m_pResource.Get(),
+	//	GPU::m_ResourceDescriptors->GetCpuHandle(eRootBindings::Textures));
 
 	//ID3D12DescriptorHeap* heaps[] = { m_DescriptorHandle->Heap() };
 	//GPU::m_CommandQueue->GetCommandList()->SetDescriptorHeaps(static_cast<UINT>(std::size(heaps)),heaps);

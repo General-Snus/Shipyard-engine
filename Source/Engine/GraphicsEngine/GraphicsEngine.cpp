@@ -167,62 +167,7 @@ void GraphicsEngine::SetupDefaultVariables()
 	pointSamplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	pointSamplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	pointSamplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	/*
-	// Create a root signature for the HDR pipeline.
-	{
 
-
-		// Allow input layout and deny unnecessary access to certain pipeline stages.
-	//D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags =
-	//	D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
-	//	D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
-	//	D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
-	//	D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
-	//
-	//CD3DX12_DESCRIPTOR_RANGE1 descriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,1,2);
-	//
-	//CD3DX12_ROOT_PARAMETER1 rootParameters[RootParameters::NumRootParameters];
-	//rootParameters[RootParameters::MatricesCB].InitAsConstantBufferView(0,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_VERTEX);
-	//rootParameters[RootParameters::MaterialCB].InitAsConstantBufferView(0,1,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_PIXEL);
-	//rootParameters[RootParameters::LightPropertiesCB].InitAsConstants(sizeof(LightProperties) / 4,1,0,D3D12_SHADER_VISIBILITY_PIXEL);
-	//rootParameters[RootParameters::PointLights].InitAsShaderResourceView(0,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_PIXEL);
-	//rootParameters[RootParameters::SpotLights].InitAsShaderResourceView(1,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_PIXEL);
-	//rootParameters[RootParameters::Textures].InitAsDescriptorTable(1,&descriptorRange,D3D12_SHADER_VISIBILITY_PIXEL);
-	//
-	//CD3DX12_STATIC_SAMPLER_DESC linearRepeatSampler(0,D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR);
-	//CD3DX12_STATIC_SAMPLER_DESC anisotropicSampler(0,D3D12_FILTER_ANISOTROPIC);
-	//
-	//CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
-	//rootSignatureDescription.Init_1_1(RootParameters::NumRootParameters,rootParameters,1,&linearRepeatSampler,rootSignatureFlags);
-	//
-	//m_HDRRootSignature.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1,featureData.HighestVersion);
-
-		// Setup the HDR pipeline state.
-		struct HDRPipelineStateStream
-		{
-			CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE pRootSignature;
-			CD3DX12_PIPELINE_STATE_STREAM_INPUT_LAYOUT InputLayout;
-			CD3DX12_PIPELINE_STATE_STREAM_PRIMITIVE_TOPOLOGY PrimitiveTopologyType;
-			CD3DX12_PIPELINE_STATE_STREAM_VS VS;
-			CD3DX12_PIPELINE_STATE_STREAM_PS PS;
-			CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL_FORMAT DSVFormat;
-			CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS RTVFormats;
-		} hdrPipelineStateStream;
-
-		hdrPipelineStateStream.pRootSignature = GPU::m_RootSignature.GetSignature();
-		hdrPipelineStateStream.InputLayout = { Vertex::InputLayoutDefinition.data(), static_cast<UINT>(Vertex::InputLayoutDefinition.size()) };
-		hdrPipelineStateStream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-		hdrPipelineStateStream.VS = CD3DX12_SHADER_BYTECODE(vs->GetShader().GetBlob());
-		hdrPipelineStateStream.PS = CD3DX12_SHADER_BYTECODE(ps->GetShader().GetBlob());
-		hdrPipelineStateStream.DSVFormat = myBackBuffer->GetResource()->GetDesc().Format;
-		hdrPipelineStateStream.RTVFormats = { myBackBuffer->GetResource()->GetDesc().Format };
-
-		D3D12_PIPELINE_STATE_STREAM_DESC hdrPipelineStateStreamDesc = {
-			sizeof(HDRPipelineStateStream), &hdrPipelineStateStream
-		};
-		Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&hdrPipelineStateStreamDesc,IID_PPV_ARGS(&GPU::m_PipeLineState)));
-	}
-	*/
 	//if (!RHI::CreateSamplerState(myDefaultSampleState,samplerDesc))
 	//{
 	//	Logger::Log("Sampler state created");

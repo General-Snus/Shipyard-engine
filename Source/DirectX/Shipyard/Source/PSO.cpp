@@ -19,9 +19,6 @@ void PSO::Init()
 	AssetManager::Get().ForceLoadAsset<ShipyardShader>("Shaders/Default_VS.cso",vs);
 	AssetManager::Get().ForceLoadAsset<ShipyardShader>("Shaders/Default_PS.cso",ps);
 
-
-	//GPU::CreatePixelShader(pixelShader,BuiltIn_Default_PS_ByteCode,sizeof(BuiltIn_Default_PS_ByteCode),compileFlags);
-	//GPU::CreateVertexShader(vertexShader,BuiltIn_Default_VS_ByteCode,sizeof(BuiltIn_Default_VS_ByteCode),compileFlags);
 	struct PipelineStateStream
 	{
 		CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE pRootSignature;
@@ -38,9 +35,9 @@ void PSO::Init()
 	rtvFormats.NumRenderTargets = 1;
 
 	stream.pRootSignature = GPU::m_RootSignature.GetRootSignature().Get();
-	stream.InputLayout = { Vertex::InputLayoutDefinition.data(),(UINT)Vertex::InputLayoutDefinition.size() };
+	stream.InputLayout = { Vertex::InputLayoutDefinition , Vertex::InputLayoutDefinitionSize };
 	stream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	stream.VS = CD3DX12_SHADER_BYTECODE(vs->GetShader().GetBlob()); // add shader cache later or never u lazy sob
+	stream.VS = CD3DX12_SHADER_BYTECODE(vs->GetShader().GetBlob());
 	stream.PS = CD3DX12_SHADER_BYTECODE(ps->GetShader().GetBlob());
 	stream.DSVFormat = DXGI_FORMAT_R32_FLOAT;
 	stream.RTVFormats = rtvFormats;
@@ -49,9 +46,6 @@ void PSO::Init()
 			sizeof(PipelineStateStream), &stream
 	};
 	Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&psoDescStreamDesc,IID_PPV_ARGS(&m_pipelineState)));
-	/*GPU::m_Device->CreateCommandList(0,D3D12_COMMAND_LIST_TYPE_DIRECT,GPU::m_AllocatorEntries.Get(),m_pipelineState.Get(),IID_PPV_ARGS(&GPU::m_CommandList));
-
-	GPU::m_CommandList->Close();*/
 }
 
 void PSOCache::InitAllStates()

@@ -190,7 +190,7 @@ public:
 	static inline std::shared_ptr<Texture> m_BackBuffer;
 	static inline std::shared_ptr<Texture> m_DepthBuffer;
 	//static inline std::shared_ptr<DirectX::GraphicsMemory> m_GraphicsMemory;
-	static inline std::unique_ptr<DirectX::DescriptorHeap> m_ResourceDescriptors;
+	//static inline std::unique_ptr<DirectX::DescriptorHeap> m_ResourceDescriptors;
 	static inline ComPtr<ID3D12DescriptorHeap> guiDescriptorHeap;;
 
 private:

@@ -1,4 +1,31 @@
- #include "../Headers/ShaderStructs.hlsli"
+#include "../Registers.h" 
+struct DefaultVertexToPixel
+{
+    float4 Position : SV_POSITION;
+    float4 VxColor : COLOR;
+    float4 WorldPosition : WORLDPOSITION;
+    float2 UV : UV;
+    float3 Normal : NORMAL;
+    float3 Tangent : TANGENT;
+    float3 BiNormal : BINORMAL;
+};
+
+struct DefaultPixelOutput
+{
+    float4 Color : SV_TARGET;
+};
+
+struct ObjectBuffer
+{
+    float4x4 OB_Transform; // 64 bytes
+    float3 OB_MinExtents; // 12 bytes
+    bool hasBone; // 4 bytes
+    float3 OB_MaxExtents; // 12 bytes
+    bool OB_Instanced;
+    float4x4 OB_BoneTransform[128]; //64*128  
+};
+ConstantBuffer<ObjectBuffer> g_ObjectBuffer : register(HLSL_REG_ObjectBuffer);
+
 
 float Sine(float aValue)
 {

@@ -5,6 +5,7 @@
 #include "../GPU.h" 
 
 #include "../Helpers.h" 
+#include "Engine/GraphicsEngine/Shaders/Registers.h"
 #include "Shipyard/CommandQueue.h"
 #include "Shipyard/eDescriptors.h"
 #include "Shipyard/ResourceStateTracker.h"
@@ -27,11 +28,14 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 	if (enableDeviceDebug)
 	{
 #if !USE_NSIGHT_AFTERMATH
-		ComPtr<ID3D12Debug5> debugController;
-		if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
+		ComPtr<ID3D12Debug3> debugController;
+		auto result = D3D12GetDebugInterface(IID_PPV_ARGS(&debugController));
+		if (SUCCEEDED(result))
 		{
 			debugController->EnableDebugLayer();
-			debugController->SetEnableAutoName(TRUE);
+			debugController->SetEnableGPUBasedValidation(TRUE);
+			debugController->SetEnableSynchronizedCommandQueueValidation(TRUE);
+			//debugController->SetEnableAutoName(TRUE);
 			// Enable additional debug layers.
 			dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 		}
@@ -138,6 +142,13 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 		pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING,TRUE);
 	}
 
+
+
+	ComPtr<ID3D12DebugDevice1> pDebugQueue;
+	if (SUCCEEDED(m_Device.As(&pDebugQueue)))
+	{
+	}
+
 	m_DeviceSupport.targetFeatureLevel = caps.MaxSupportedFeatureLevel;
 	m_DirectCommandQueue->Create(m_Device,D3D12_COMMAND_LIST_TYPE_DIRECT);
 	m_CopyCommandQueue->Create(m_Device,D3D12_COMMAND_LIST_TYPE_COPY);
@@ -192,10 +203,10 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 
 	//m_GraphicsMemory = std::make_shared<DirectX::DX12::GraphicsMemory>(m_Device.Get());
 
-	m_ResourceDescriptors = std::make_unique<DescriptorHeap>(m_Device.Get(),
-		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-		D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
-		eDescriptors::Count);
+	//m_ResourceDescriptors = std::make_unique<DescriptorHeap>(m_Device.Get(),
+	//	D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+	//	D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
+	//	SpotLights);
 
 	m_BackBuffer->AllocateTexture(width,height);
 	ResizeDepthBuffer(width,height);
@@ -212,15 +223,18 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 
 	CD3DX12_DESCRIPTOR_RANGE1 descriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,1,2);
 
-	CD3DX12_ROOT_PARAMETER1 rootParameters[count];
-	rootParameters[MatricesCB].InitAsConstantBufferView(0,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_VERTEX);
-	rootParameters[MaterialSRVs].InitAsConstantBufferView(0,1,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_PIXEL);
-	rootParameters[TexturesSRVs].InitAsDescriptorTable(1,&descriptorRange,D3D12_SHADER_VISIBILITY_PIXEL);
+	CD3DX12_ROOT_PARAMETER1 rootParameters[NumRootParameters];
+	rootParameters[frameBuffer].InitAsConstantBufferView(REG_FrameBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_VERTEX);
+	rootParameters[objectBuffer].InitAsConstantBufferView(REG_ObjectBuffer,1,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_PIXEL);
+	//rootParameters[materialBuffer].InitAsConstantBufferView(REG_DefaultMaterialBuffer,1,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_PIXEL);
+	//rootParameters[PointLights].InitAsShaderResourceView(0,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_PIXEL);
+	//rootParameters[SpotLights].InitAsShaderResourceView(1,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_PIXEL);
+	//rootParameters[Textures].InitAsShaderResourceView(REG_colorMap);
 
 	CD3DX12_STATIC_SAMPLER_DESC linearRepeatSampler(0,D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR);
 
 	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
-	rootSignatureDescription.Init_1_1(count,rootParameters,1,&linearRepeatSampler,rootSignatureFlags);
+	rootSignatureDescription.Init_1_1(NumRootParameters,rootParameters,1,&linearRepeatSampler,rootSignatureFlags);
 
 	m_RootSignature.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1,m_FeatureData.HighestVersion);
 
@@ -775,7 +789,7 @@ void GPU::setAftermathEventMarker(const std::string& markerData,bool appManagedM
 		// The 15th marker for the frame will have markerID = 2 * 10000 + 14 + 1 = 20015.
 		// So with this scheme, we can safely have up to 10000 markers per frame, and can guarantee a unique markerID for each one.
 		// There are many ways to generate and track markers and unique marker identifiers!
-}
+	}
 	else
 	{
 		AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_SetEventMarker(m_hAftermathCommandListContext,(void*)markerData.c_str(),(unsigned int)markerData.size() + 1));
