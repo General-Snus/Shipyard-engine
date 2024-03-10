@@ -52,8 +52,8 @@ void Transform::MakeClean()
 
 void Transform::Render()
 {
-	OPTICK_EVENT();
 #ifdef _DEBUGDRAW 
+	OPTICK_EVENT();
 
 #endif // _DEBUGDRAW 
 }

@@ -53,7 +53,7 @@ int Shipyard_PhysX::InitializePhysx()
 	gDispatcher = PxDefaultCpuDispatcherCreate(2);
 
 	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
-	sceneDesc.gravity = PxVec3(0.0f,-9.81f,0.0f);
+	sceneDesc.gravity = PxVec3(0.0f,-900.81f,0.0f);
 	sceneDesc.cpuDispatcher = gDispatcher;
 	sceneDesc.filterShader = PxDefaultSimulationFilterShader;
 

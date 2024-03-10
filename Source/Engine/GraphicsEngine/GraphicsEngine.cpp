@@ -624,8 +624,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 
 	const auto& pipelineState = PSOCache::GetState(PSOCache::ePipelineStateID::Default)->m_pipelineState;
 	graphicCommandList->SetPipelineState(pipelineState.Get());
-	commandList->TrackResource(pipelineState);
-
+	commandList->TrackResource(pipelineState); 
 
 	const auto& rootSignature = GPU::m_RootSignature.GetRootSignature();
 	graphicCommandList->SetGraphicsRootSignature(rootSignature.Get());
@@ -633,15 +632,17 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 
 	myCamera->SetCameraToFrameBuffer(graphicCommandList);
 
-	ObjectBuffer& objectBuffer = myObjectBuffer;
-	for (const auto& meshRenderer : GameObjectManager::Get().GetAllComponents<cMeshRenderer>())
+	ObjectBuffer objectBuffer;
+	static const auto& list = GameObjectManager::Get().GetAllComponents<cMeshRenderer>();
+	Logger::Log(std::to_string(list.size()));
+	for (const auto& meshRenderer : list)
 	{
 		const auto& transform = meshRenderer.GetComponent<Transform>();
 		for (const auto& element : meshRenderer.GetElements())
 		{
 			objectBuffer.myTransform = transform.GetRawTransform();
-			objectBuffer.MaxExtents = Vector3f(100,100,100);
-			objectBuffer.MinExtents = -Vector3f(100,100,100);
+			objectBuffer.MaxExtents = Vector3f(1,1,1);
+			objectBuffer.MinExtents = -Vector3f(1,1,1);
 			objectBuffer.hasBone = false;
 			objectBuffer.isInstanced = false;
 
@@ -650,8 +651,8 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 			graphicCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			commandList->TransitionBarrier(element.VertexBuffer.GetResource(),D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
-			const auto vertexbuffer = element.VertexBuffer.GetVertexBufferView();
-			graphicCommandList->IASetVertexBuffers(0,1,&vertexbuffer);
+			const auto vertexBuffer = element.VertexBuffer.GetVertexBufferView();
+			graphicCommandList->IASetVertexBuffers(0,1,&vertexBuffer);
 			commandList->TrackResource(element.VertexBuffer);
 
 			commandList->TransitionBarrier(element.IndexResource.GetResource(),D3D12_RESOURCE_STATE_INDEX_BUFFER);
