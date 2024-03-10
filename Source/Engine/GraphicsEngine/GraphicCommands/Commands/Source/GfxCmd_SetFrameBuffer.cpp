@@ -16,14 +16,14 @@ void GfxCmd_SetFrameBuffer::ExecuteAndDestroy()
 {
 	OPTICK_EVENT();
 	FrameBuffer& buffert = GetFrameBuffer();
-	buffert.Data.ProjectionMatrix = myProjectionMatrix;
-	buffert.Data.ViewMatrix = myViewMatrix;
-	buffert.Data.Time = Timer::GetInstance().GetDeltaTime();
-	buffert.Data.FB_RenderMode = RenderMode;
+	buffert.ProjectionMatrix = myProjectionMatrix;
+	buffert.ViewMatrix = myViewMatrix;
+	buffert.Time = Timer::GetInstance().GetDeltaTime();
+	buffert.FB_RenderMode = RenderMode;
 
-	buffert.Data.FB_CameraPosition[0] = myPosition.x;
-	buffert.Data.FB_CameraPosition[1] = myPosition.y;
-	buffert.Data.FB_CameraPosition[2] = myPosition.z;
+	buffert.FB_CameraPosition[0] = myPosition.x;
+	buffert.FB_CameraPosition[1] = myPosition.y;
+	buffert.FB_CameraPosition[2] = myPosition.z;
 
 	//buffert.Data.FB_ScreenResolution[0] = static_cast<int>(RHI::GetDeviceSize().Width);
 	//buffert.Data.FB_ScreenResolution[1] = static_cast<int>(RHI::GetDeviceSize().Height);

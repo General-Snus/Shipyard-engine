@@ -28,11 +28,11 @@ void InstanceRenderer::Execute(bool isShadowPass)
 		{
 			OPTICK_EVENT("Mesh");
 			ObjectBuffer& objectBuffer = GraphicsEngine::Get().myObjectBuffer;
-			objectBuffer.Data.myTransform = Matrix();
-			objectBuffer.Data.MaxExtents = i->myMesh->MaxBox;
-			objectBuffer.Data.MinExtents = i->myMesh->MinBox;
-			objectBuffer.Data.hasBone = false;
-			objectBuffer.Data.isInstanced = true;
+			objectBuffer.myTransform = Matrix();
+			objectBuffer.MaxExtents = i->myMesh->MaxBox;
+			objectBuffer.MinExtents = i->myMesh->MinBox;
+			objectBuffer.hasBone = false;
+			objectBuffer.isInstanced = true;
 			//RHI::UpdateConstantBufferData(GraphicsEngine::Get().myObjectBuffer);
 			if (!isShadowPass)
 			{

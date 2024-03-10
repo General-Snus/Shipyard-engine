@@ -22,7 +22,7 @@ struct ObjectBuffer
     bool hasBone; // 4 bytes
     float3 OB_MaxExtents; // 12 bytes
     bool OB_Instanced;
-    float4x4 OB_BoneTransform[128]; //64*128  
+    //float4x4 OB_BoneTransform[128]; //64*128  
 };
 ConstantBuffer<ObjectBuffer> g_ObjectBuffer : register(HLSL_REG_ObjectBuffer);
 
@@ -43,7 +43,8 @@ float3 PositionInBound(float3 aMin, float3 aMax, float3 aPosition)
 DefaultPixelOutput main(DefaultVertexToPixel input)
 {
     DefaultPixelOutput result; 
-    result.Color.rgb = PositionInBound(g_ObjectBuffer.OB_MinExtents, g_ObjectBuffer.OB_MaxExtents, input.Position.xyz);
+    result.Color.r = 1;
+    result.Color.gb = 0;
     result.Color.a = 1.0f; 
     return result;
 }

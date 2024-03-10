@@ -6,7 +6,11 @@
 #include <Tools/Utilities/Input/InputHandler.hpp> 
 #include "../CameraComponent.h"
 
+#include <ResourceUploadBatch.h>
+
 #include "DirectX/Shipyard/CommandList.h"
+#include "DirectX/Shipyard/GPU.h"
+#include "Engine/GraphicsEngine/GraphicsEngine.h"
 #include "Tools/Utilities/Input/EnumKeys.h"
 
 cCamera::cCamera(const unsigned int anOwnerId) : Component(anOwnerId)
@@ -202,16 +206,17 @@ void cCamera::SetCameraToFrameBuffer(DxCommandList& commandList)
 {
 	OPTICK_EVENT();
 	auto& transform = GetComponent<Transform>();
-	FrameBuffer buffer = FrameBuffer();
-	buffer.Data.ProjectionMatrix = myClipMatrix;
-	buffer.Data.ViewMatrix = Matrix::GetFastInverse(transform.GetTransform());
-	buffer.Data.Time = Timer::GetInstance().GetDeltaTime();
-	buffer.Data.FB_RenderMode = (int)Editor::GetApplicationState().filter;
+	FrameBuffer& buffer = GraphicsEngine::Get().myFrameBuffer;
+	buffer.ProjectionMatrix = myClipMatrix;
+	buffer.ViewMatrix = Matrix::GetFastInverse(transform.GetTransform());
+	buffer.Time = Timer::GetInstance().GetDeltaTime();
+	buffer.FB_RenderMode = (int)Editor::GetApplicationState().filter;
+	buffer.FB_CameraPosition = transform.GetPosition();
+	buffer.FB_ScreenResolution = Editor::Get().GetViewportResolution();
+	//buffer.Data.FB_FrustrumCorners = { Vector4f(),Vector4f(),Vector4f(),Vector4f() };;
+	auto  alloc = GPU::m_GraphicsMemory->AllocateConstant<FrameBuffer>(buffer);
 
-	buffer.Data.FB_CameraPosition = transform.GetPosition();
-
-
-	commandList->SetGraphicsRoot32BitConstants(REG_FrameBuffer,1,&buffer,0);
+	commandList->SetGraphicsRootConstantBufferView(REG_FrameBuffer,alloc.GpuAddress());
 	//GfxCmd_SetFrameBuffer(
 	//	myClipMatrix,
 	//	),

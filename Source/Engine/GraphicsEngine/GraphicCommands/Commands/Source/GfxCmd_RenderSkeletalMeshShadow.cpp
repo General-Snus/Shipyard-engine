@@ -13,16 +13,16 @@ GfxCmd_RenderSkeletalMeshShadow::GfxCmd_RenderSkeletalMeshShadow(
 void GfxCmd_RenderSkeletalMeshShadow::ExecuteAndDestroy()
 {
 	ObjectBuffer& objectBuffer = GetObjectBuffer();
-	objectBuffer.Data.myTransform = myTransform;
-	objectBuffer.Data.MaxExtents = MaxExtents;
-	objectBuffer.Data.MinExtents = MinExtents;
-	objectBuffer.Data.hasBone = true;
-	objectBuffer.Data.isInstanced = false;
+	objectBuffer.myTransform = myTransform;
+	objectBuffer.MaxExtents = MaxExtents;
+	objectBuffer.MinExtents = MinExtents;
+	objectBuffer.hasBone = true;
+	objectBuffer.isInstanced = false;
 
-	for (int i = 0; i < 128; i++)
-	{
-		objectBuffer.Data.myBoneTransforms[i] = myBoneTransforms[i];
-	}
+	//for (int i = 0; i < 128; i++)
+	//{
+	//	objectBuffer.Data.myBoneTransforms[i] = myBoneTransforms[i];
+	//}
 	/*RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER,REG_ObjectBuffer,objectBuffer);
 	RHI::UpdateConstantBufferData(objectBuffer);*/
 	//GetInstanceRenderer().AddInstance(myRenderData);

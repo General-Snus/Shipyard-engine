@@ -10,11 +10,11 @@ GfxCmd_RenderMeshShadow::GfxCmd_RenderMeshShadow(const std::shared_ptr<RenderDat
 void GfxCmd_RenderMeshShadow::ExecuteAndDestroy()
 {
 	ObjectBuffer& objectBuffer = GetObjectBuffer();
-	objectBuffer.Data.myTransform = myTransform;
-	objectBuffer.Data.MaxExtents = MaxExtents;
-	objectBuffer.Data.MinExtents = MinExtents;
-	objectBuffer.Data.hasBone = false;
-	objectBuffer.Data.isInstanced = instanced;
+	objectBuffer.myTransform = myTransform;
+	objectBuffer.MaxExtents = MaxExtents;
+	objectBuffer.MinExtents = MinExtents;
+	objectBuffer.hasBone = false;
+	objectBuffer.isInstanced = instanced;
 
 	/*RHI::UpdateConstantBufferData(objectBuffer);
 	RHI::Context->PSSetShader(nullptr,nullptr,0);*/

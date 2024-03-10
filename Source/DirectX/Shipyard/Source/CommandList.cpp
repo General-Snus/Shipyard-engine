@@ -63,8 +63,11 @@ void CommandList::CopyBuffer(GpuResource& buffer,size_t numElements,size_t eleme
 			m_ResourceStateTracker->TransitionResource(d3d12Resource.Get(),D3D12_RESOURCE_STATE_COPY_DEST);
 			FlushResourceBarriers();
 
-			UpdateSubresources(m_CommandList.Get(),d3d12Resource.Get(),
-				uploadResource.Get(),0,0,1,&subresourceData);
+			if (UpdateSubresources(m_CommandList.Get(),d3d12Resource.Get(),
+				uploadResource.Get(),0,0,1,&subresourceData) == 0)
+			{
+				throw std::exception("UpdateSubresources failed");
+			}
 
 			// Add references to resources so they stay in scope until the command aCommandList is reset.
 			TrackResource(uploadResource);
@@ -76,13 +79,17 @@ void CommandList::CopyBuffer(GpuResource& buffer,size_t numElements,size_t eleme
 	buffer.CreateView(numElements,elementSize);
 }
 
-void CommandList::TransitionBarrier(ComPtr<ID3D12Resource> resource,D3D12_RESOURCE_STATES stateAfter,UINT subresource,bool flushBarriers)
+void CommandList::TransitionBarrier(const ComPtr<ID3D12Resource>& resource,D3D12_RESOURCE_STATES stateAfter,UINT subresource,bool flushBarriers)
 {
 	if (resource)
 	{
 		// The "before" state is not important. It will be resolved by the resource state tracker.
 		auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(resource.Get(),D3D12_RESOURCE_STATE_COMMON,stateAfter,subresource);
 		m_ResourceStateTracker->ResourceBarrier(barrier);
+	}
+	else
+	{
+		Logger::Err("Could not transition resource");
 	}
 
 	if (flushBarriers)

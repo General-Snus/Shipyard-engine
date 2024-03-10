@@ -35,6 +35,7 @@
 #include "DirectX/Shipyard/Helpers.h"
 #include "DirectX/Shipyard/PSO.h"
 #include "Editor/Editor/Windows/Window.h"
+#include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
 #include "Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h"
 #include "Tools/ImGui/ImGui/backends/imgui_impl_dx12.h"
 
@@ -599,10 +600,6 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 {
 	OPTICK_EVENT();
 	aDeltaTime; aTotalTime;
-	//RHI::SetVertexShader(myVertexShader);
-
-	OPTICK_EVENT("Gbuffer");
-	//RHI::BeginEvent(L"Start writing to gbuffer");
 
 	auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 	auto commandList = commandQueue->GetCommandList();
@@ -613,7 +610,6 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	const auto backBuffer = GPU::GetCurrentBackBuffer();
 	const auto rtv = GPU::GetCurrentRenderTargetView();
 	const auto dsv = GPU::m_DsvHeap->GetCPUDescriptorHandleForHeapStart();
-
 	commandList->TransitionBarrier(backBuffer.GetResource(),D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	FLOAT clearColor[] = { 0.2f, 0.2f, 0.9f, 1.0f };
@@ -624,21 +620,33 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 
 	graphicCommandList->RSSetViewports(1,&GPU::m_Viewport);
 	graphicCommandList->RSSetScissorRects(1,&GPU::m_ScissorRect);
-
 	graphicCommandList->OMSetRenderTargets(1,&rtv,FALSE,&dsv);
 
+	const auto& pipelineState = PSOCache::GetState(PSOCache::ePipelineStateID::Default)->m_pipelineState;
+	graphicCommandList->SetPipelineState(pipelineState.Get());
+	commandList->TrackResource(pipelineState);
 
-	graphicCommandList->SetPipelineState(PSOCache::GetState(PSOCache::ePipelineStateID::Default)->m_pipelineState.Get());
-	graphicCommandList->SetGraphicsRootSignature(GPU::m_RootSignature.GetRootSignature().Get());
 
-	//myCamera->SetCameraToFrameBuffer(graphicCommandList);
+	const auto& rootSignature = GPU::m_RootSignature.GetRootSignature();
+	graphicCommandList->SetGraphicsRootSignature(rootSignature.Get());
+	commandList->TrackResource(rootSignature);
 
+	myCamera->SetCameraToFrameBuffer(graphicCommandList);
+
+	ObjectBuffer& objectBuffer = myObjectBuffer;
 	for (const auto& meshRenderer : GameObjectManager::Get().GetAllComponents<cMeshRenderer>())
 	{
-		for (auto& element : meshRenderer.GetElements())
+		const auto& transform = meshRenderer.GetComponent<Transform>();
+		for (const auto& element : meshRenderer.GetElements())
 		{
+			objectBuffer.myTransform = transform.GetRawTransform();
+			objectBuffer.MaxExtents = Vector3f(100,100,100);
+			objectBuffer.MinExtents = -Vector3f(100,100,100);
+			objectBuffer.hasBone = false;
+			objectBuffer.isInstanced = false;
 
-
+			const auto& alloc = GPU::m_GraphicsMemory->AllocateConstant<ObjectBuffer>(objectBuffer);
+			graphicCommandList->SetGraphicsRootConstantBufferView(REG_ObjectBuffer,alloc.GpuAddress()); 
 			graphicCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			commandList->TransitionBarrier(element.VertexBuffer.GetResource(),D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
@@ -651,10 +659,8 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 			graphicCommandList->IASetIndexBuffer(&indexBuffer);
 			commandList->TrackResource(element.IndexResource);
 
-			commandList->FlushResourceBarriers();
-
-			graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
-
+			commandList->FlushResourceBarriers(); 
+			graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0); 
 		}
 	}
 
@@ -724,16 +730,10 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	//auto value = commandQueue->ExecuteCommandList(commandList);
 	//commandQueue->WaitForFenceValue(value);
 
-	//commandQueue->ExecuteCommandList(commandList);
-	commandList->TransitionBarrier(GPU::m_renderTargets[GPU::m_FrameIndex].GetResource(),D3D12_RESOURCE_STATE_PRESENT);
 	commandQueue->ExecuteCommandList(commandList);
 
-	Helpers::ThrowIfFailed(GPU::m_Swapchain->m_SwapChain->Present(1,0));
-	GPU::m_FenceValues[GPU::m_FrameIndex] = commandQueue->Signal();
-	GPU::m_FrameIndex = GPU::m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
 
-	//GraphicsMemory::Get().Commit(commandQueue->GetCommandQueue().Get());
-	commandQueue->WaitForFenceValue(GPU::m_FenceValues[GPU::m_FrameIndex]);
+
 }
 
 void GraphicsEngine::RenderTextureTo(eRenderTargets from,eRenderTargets to)  const
@@ -759,7 +759,19 @@ void GraphicsEngine::RenderTextureTo(eRenderTargets from,eRenderTargets to)  con
 void GraphicsEngine::EndFrame()
 {
 	OPTICK_EVENT();
+	auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+	auto commandList = commandQueue->GetCommandList();
 
+	const auto& backBuffer = GPU::GetCurrentBackBuffer();
+	commandList->TransitionBarrier(backBuffer.GetResource(),D3D12_RESOURCE_STATE_PRESENT);
+	commandQueue->ExecuteCommandList(commandList);
+
+	Helpers::ThrowIfFailed(GPU::m_Swapchain->m_SwapChain->Present(1,0));
+	GPU::m_FenceValues[GPU::m_FrameIndex] = commandQueue->Signal();
+	GPU::m_FrameIndex = GPU::m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
+
+	GPU::m_GraphicsMemory->Commit(commandQueue->GetCommandQueue().Get());
+	commandQueue->WaitForFenceValue(GPU::m_FenceValues[GPU::m_FrameIndex]);
 	//ImGui::Render();
 	//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(),commandList->GetGraphicsCommandList().Get());
 	//GPU::Present();

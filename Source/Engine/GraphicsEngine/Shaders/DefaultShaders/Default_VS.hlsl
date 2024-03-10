@@ -6,11 +6,6 @@ struct DefaultVertexInput
     float2 UV : UV;
     float3 Normal : NORMAL;
     float3 Tangent : TANGENT;
-    //uint4 BoneIds : BONEIDS;
-    //float4 BoneWeights : BONEWEIGHTS;
-    
-    float4x4 World : WORLD;
-    uint InstanceID : SV_InstanceID;
 };
 
 struct DefaultVertexToPixel
@@ -33,7 +28,6 @@ struct FrameBuffer
     int FB_RenderMode;
     int2 FB_ScreenResolution;
     float1 padding;
-    float4 FB_FrustrumCorners[4];
 };
 ConstantBuffer<FrameBuffer> g_FrameBuffer : register(HLSL_REG_FrameBuffer); 
 
@@ -44,7 +38,6 @@ struct ObjectBuffer
     bool hasBone; // 4 bytes
     float3 OB_MaxExtents; // 12 bytes
     bool OB_Instanced;
-    float4x4 OB_BoneTransform[128]; //64*128  
 };
 ConstantBuffer<ObjectBuffer> g_ObjectBuffer : register(HLSL_REG_ObjectBuffer);
 
@@ -85,11 +78,14 @@ DefaultVertexToPixel main(DefaultVertexInput input)
     
     float3x3 worldNormalRotation = (float3x3)g_ObjectBuffer.OB_Transform;
     result.WorldPosition = mul(g_ObjectBuffer.OB_Transform, result.Position);
-    if(g_ObjectBuffer.OB_Instanced)
+    
+    if (g_ObjectBuffer.OB_Instanced)
     {
-        worldNormalRotation = (float3x3)input.World;
-        result.WorldPosition = mul(input.World, result.Position);
+    //    worldNormalRotation = (float3x3)input.World;
+    //    result.WorldPosition = mul(input.World, result.Position);
     }
+    
+    
     result.Normal = mul(result.Normal, transpose(worldNormalRotation));
     result.BiNormal = mul(result.BiNormal, worldNormalRotation);
     result.Tangent = mul(result.Tangent, worldNormalRotation);

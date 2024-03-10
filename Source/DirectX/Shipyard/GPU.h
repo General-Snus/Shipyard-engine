@@ -95,7 +95,7 @@ public:
 	static bool CreateIndexBuffer(
 		const std::shared_ptr<CommandList>& commandList,
 		IndexResource& outIndexResource,
-		const std::vector<unsigned>& aIndexList
+		const std::vector<uint16_t>& aIndexList
 	);
 
 	static bool CreatePixelShader(ComPtr<ID3DBlob>& outPxShader,const BYTE* someShaderData,size_t aShaderDataSize,UINT CompileFLags = 0);
@@ -189,7 +189,7 @@ public:
 	static inline D3D12_RECT m_ScissorRect;
 	static inline std::shared_ptr<Texture> m_BackBuffer;
 	static inline std::shared_ptr<Texture> m_DepthBuffer;
-	//static inline std::shared_ptr<DirectX::GraphicsMemory> m_GraphicsMemory;
+	static inline std::shared_ptr<DirectX::GraphicsMemory> m_GraphicsMemory;
 	//static inline std::unique_ptr<DirectX::DescriptorHeap> m_ResourceDescriptors;
 	static inline ComPtr<ID3D12DescriptorHeap> guiDescriptorHeap;;
 

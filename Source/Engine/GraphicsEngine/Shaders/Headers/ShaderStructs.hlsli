@@ -78,7 +78,7 @@ struct FrameBuffer
     int FB_RenderMode;
     int2 FB_ScreenResolution;
     float1 padding;
-    float4 FB_FrustrumCorners[4];
+    //float4 FB_FrustrumCorners[4];
 };
 ConstantBuffer<FrameBuffer> g_FrameBuffer : register(HLSL_REG_FrameBuffer);
 

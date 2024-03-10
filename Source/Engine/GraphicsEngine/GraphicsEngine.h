@@ -72,12 +72,12 @@ public:
 		DSS_ReadOnly,
 		DSS_COUNT,
 	};
+	FrameBuffer myFrameBuffer;
 private:
 
 	std::shared_ptr<PSOCache> m_StateCache;
 
 
-	FrameBuffer myFrameBuffer;
 	ObjectBuffer myObjectBuffer;
 	LineBuffer myLineBuffer;
 	LightBuffer myLightBuffer;

@@ -18,6 +18,8 @@ public:
 	Sphere<float> boxSphereBounds;
 	std::vector<Element> Elements;
 	const std::unordered_map<unsigned int,std::shared_ptr<Material>>& GetMaterialList();
+	void FillMaterialPaths(const aiScene* scene);
+
 private:
 	std::unordered_map<unsigned int,std::shared_ptr<Material>> materials;
 	std::unordered_map<unsigned int,std::filesystem::path> idToMaterial;

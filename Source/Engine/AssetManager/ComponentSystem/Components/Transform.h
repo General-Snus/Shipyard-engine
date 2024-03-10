@@ -19,6 +19,8 @@ public:
 	void Render() override;
 	// Matrix& GetTransform();
 	const Matrix& GetTransform();
+	//not dirty checked
+	const Matrix& GetRawTransform() const;
 	const Quaternionf& GetQuatF();
 
 

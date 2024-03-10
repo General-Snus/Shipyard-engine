@@ -128,9 +128,9 @@ void GameLauncher::Start()
 		GameObject camera = gom.CreateGameObject();
 		auto& cameraComponent = camera.AddComponent<cCamera>();
 		gom.SetLastGOAsCamera();
-		cameraComponent.SetActive(false);
+		cameraComponent.SetActive(true);
 		auto& transform = camera.AddComponent<Transform>();
-		transform.SetPosition(0,0,-5);
+		transform.SetPosition(0,5,-50);
 		transform.SetRotation(0,0,0);
 	}
 
@@ -161,7 +161,7 @@ void GameLauncher::Start()
 		auto& transform = floor.AddComponent<Transform>();
 		transform.SetPosition(0,-0.0f,0);
 		transform.SetRotation(90,0.f,0.f);
-		//transform.SetScale(50.f);
+		transform.SetScale(50.f);
 		transform.SetGizmo(false);
 
 		floor.AddComponent<cMeshRenderer>("Models/Cube.fbx");

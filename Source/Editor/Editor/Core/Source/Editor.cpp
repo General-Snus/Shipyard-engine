@@ -123,6 +123,7 @@ void Editor::DoWinProc(const MSG& aMessage)
 
 	if (aMessage.message == WM_QUIT)
 	{
+		GPU::UnInitialize();
 		ImGui_ImplDX12_Shutdown();
 		ImGui_ImplWin32_Shutdown();
 		ImGui::DestroyContext();

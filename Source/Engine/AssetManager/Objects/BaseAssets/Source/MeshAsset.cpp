@@ -18,6 +18,105 @@ const std::unordered_map<unsigned int,std::shared_ptr<Material>>& Mesh::GetMater
 	return materials;
 }
 
+void Mesh::FillMaterialPaths(const aiScene* scene)
+{
+	for (auto& [key,matPath] : idToMaterial)
+	{
+		std::filesystem::path texturePath;
+		int textureLoaded = 0;
+		Vector4f color;
+		auto material = scene->mMaterials[key];
+		material->Get(AI_MATKEY_COLOR_DIFFUSE,color);
+
+		Material::DataMaterial dataMat;
+		//dataMat.materialData.Data.albedoColor = color;
+		dataMat.textures.resize(4);
+
+
+		aiString  str;
+		matPath = "Materials/Temporary/";
+		matPath += material->GetName().C_Str();
+
+		std::wstring mdf = matPath.wstring();
+		std::wstring illegalChars = L":?\"<>|";
+		for (auto& i : mdf)
+		{
+			bool found = illegalChars.find(i) != std::string::npos;
+			if (found)
+			{
+				i = '_';
+			}
+		}
+		matPath = mdf;
+		matPath.replace_extension("json");
+
+		std::pair<std::filesystem::path,std::shared_ptr<TextureHolder>> holder;
+		if (material->GetTextureCount(aiTextureType_BASE_COLOR))
+		{
+			material->GetTexture(aiTextureType_BASE_COLOR,0,&str);
+			holder.first = str.C_Str();
+			dataMat.textures[0] = holder;
+			textureLoaded++;
+		}
+
+		if (material->GetTextureCount(aiTextureType_DIFFUSE) && !str.length)
+		{
+			material->GetTexture(aiTextureType_DIFFUSE,0,&str);
+			holder.first = str.C_Str();
+			dataMat.textures[0] = holder;
+			textureLoaded++;
+		}
+
+		if (material->GetTextureCount(aiTextureType_NORMALS))
+		{
+			material->GetTexture(aiTextureType_NORMALS,0,&str);
+			holder.first = str.C_Str();
+			dataMat.textures[1] = holder;
+			textureLoaded++;
+		}
+
+		if (material->GetTextureCount(aiTextureType_DIFFUSE_ROUGHNESS))
+		{
+			material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS,0,&str);
+			holder.first = str.C_Str();
+			dataMat.textures[2] = holder;
+			textureLoaded++;
+		}
+
+		if (material->GetTextureCount(aiTextureType_AMBIENT_OCCLUSION))
+		{
+			material->GetTexture(aiTextureType_AMBIENT_OCCLUSION,0,&str);
+			holder.first = str.C_Str();
+			dataMat.textures[2] = holder;
+			textureLoaded++;
+		}
+
+		if (material->GetTextureCount(aiTextureType_METALNESS))
+		{
+			material->GetTexture(aiTextureType_METALNESS,0,&str);
+			holder.first = str.C_Str();
+			dataMat.textures[2] = holder;
+			textureLoaded++;
+		}
+
+		if (material->GetTextureCount(aiTextureType_EMISSIVE))
+		{
+			material->GetTexture(aiTextureType_EMISSIVE,0,&str);
+			holder.first = str.C_Str();
+			dataMat.textures[3] = holder;
+			textureLoaded++;
+		}
+
+		if (!textureLoaded)
+		{
+			materials[key] = GraphicsEngine::Get().GetDefaultMaterial();
+			continue;
+		}
+		Material::CreateJson(dataMat,matPath);
+		AssetManager::Get().LoadAsset<Material>(matPath,materials[key]);
+	}
+}
+
 void Mesh::Init()
 {
 	if (!std::filesystem::exists(AssetPath))
@@ -194,101 +293,7 @@ void Mesh::Init()
 		processMesh(scene->mMeshes[i],scene);
 	}
 	//FillMatPath   
-	for (auto& [key,matPath] : idToMaterial)
-	{
-		std::filesystem::path texturePath;
-		int textureLoaded = 0;
-		Vector4f color;
-		auto material = scene->mMaterials[key];
-		material->Get(AI_MATKEY_COLOR_DIFFUSE,color);
-
-		Material::DataMaterial dataMat;
-		//dataMat.materialData.Data.albedoColor = color;
-		dataMat.textures.resize(4);
-
-
-		aiString  str;
-		matPath = "Materials/Temporary/";
-		matPath += material->GetName().C_Str();
-
-		std::wstring mdf = matPath.wstring();
-		std::wstring illegalChars = L":?\"<>|";
-		for (auto& i : mdf)
-		{
-			bool found = illegalChars.find(i) != std::string::npos;
-			if (found)
-			{
-				i = '_';
-			}
-		}
-		matPath = mdf;
-		matPath.replace_extension("json");
-
-		std::pair<std::filesystem::path,std::shared_ptr<TextureHolder>> holder;
-		if (material->GetTextureCount(aiTextureType_BASE_COLOR))
-		{
-			material->GetTexture(aiTextureType_BASE_COLOR,0,&str);
-			holder.first = str.C_Str();
-			dataMat.textures[0] = holder;
-			textureLoaded++;
-		}
-
-		if (material->GetTextureCount(aiTextureType_DIFFUSE) && !str.length)
-		{
-			material->GetTexture(aiTextureType_DIFFUSE,0,&str);
-			holder.first = str.C_Str();
-			dataMat.textures[0] = holder;
-			textureLoaded++;
-		}
-
-		if (material->GetTextureCount(aiTextureType_NORMALS))
-		{
-			material->GetTexture(aiTextureType_NORMALS,0,&str);
-			holder.first = str.C_Str();
-			dataMat.textures[1] = holder;
-			textureLoaded++;
-		}
-
-		if (material->GetTextureCount(aiTextureType_DIFFUSE_ROUGHNESS))
-		{
-			material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS,0,&str);
-			holder.first = str.C_Str();
-			dataMat.textures[2] = holder;
-			textureLoaded++;
-		}
-
-		if (material->GetTextureCount(aiTextureType_AMBIENT_OCCLUSION))
-		{
-			material->GetTexture(aiTextureType_AMBIENT_OCCLUSION,0,&str);
-			holder.first = str.C_Str();
-			dataMat.textures[2] = holder;
-			textureLoaded++;
-		}
-
-		if (material->GetTextureCount(aiTextureType_METALNESS))
-		{
-			material->GetTexture(aiTextureType_METALNESS,0,&str);
-			holder.first = str.C_Str();
-			dataMat.textures[2] = holder;
-			textureLoaded++;
-		}
-
-		if (material->GetTextureCount(aiTextureType_EMISSIVE))
-		{
-			material->GetTexture(aiTextureType_EMISSIVE,0,&str);
-			holder.first = str.C_Str();
-			dataMat.textures[3] = holder;
-			textureLoaded++;
-		}
-
-		if (!textureLoaded)
-		{
-			materials[key] = GraphicsEngine::Get().GetDefaultMaterial();
-			continue;
-		}
-		Material::CreateJson(dataMat,matPath);
-		AssetManager::Get().LoadAsset<Material>(matPath,materials[key]);
-	}
+	FillMaterialPaths(scene);
 
 	MaxBox = Vector3f(scene->mMeshes[0]->mAABB.mMax.x,scene->mMeshes[0]->mAABB.mMax.y,scene->mMeshes[0]->mAABB.mMax.z);
 	MinBox = Vector3f(scene->mMeshes[0]->mAABB.mMin.x,scene->mMeshes[0]->mAABB.mMin.y,scene->mMeshes[0]->mAABB.mMin.z);
@@ -332,7 +337,7 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 	scene;
 	std::vector<Vertex> mdlVertices;
 	mdlVertices.reserve(mesh->mNumVertices);
-	std::vector<unsigned int> mdlIndicies;
+	std::vector<uint16_t> mdlIndicies;
 
 	std::string name = mesh->mName.C_Str();
 	std::wstring wname = Helpers::string_cast<std::wstring>(name).c_str();
@@ -416,7 +421,7 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 		aiFace face = mesh->mFaces[i];
 		for (unsigned int j = 0; j < face.mNumIndices; j++)
 		{
-			mdlIndicies.push_back(face.mIndices[j]);
+			mdlIndicies.push_back(static_cast<uint16_t>(face.mIndices[j]));
 		}
 	}
 
@@ -451,19 +456,18 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 	commandQueue->WaitForFenceValue(fenceValue);
 	commandQueue->Flush();
 
-	Element toAdd = {
-		vertexRes,
-		indexRes,
-		mdlVertices,
-		mdlIndicies,
-		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
-		sizeof(Vertex)
-	};
+	Element toAdd;
 
+	toAdd.VertexBuffer = vertexRes;
+	toAdd.IndexResource = indexRes;
+	toAdd.Vertices = mdlVertices;
+	toAdd.Indicies = mdlIndicies;
+	toAdd.PrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	toAdd.Stride = sizeof(Vertex);
 	toAdd.MaterialIndex = mesh->mMaterialIndex;
 	idToMaterial.try_emplace(mesh->mMaterialIndex,"");
 
-	Elements.push_back(toAdd);
+	Elements.emplace_back(toAdd);
 	mdlVertices.clear();
 	mdlIndicies.clear();
 

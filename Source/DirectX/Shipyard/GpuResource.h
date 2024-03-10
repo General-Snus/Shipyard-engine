@@ -17,10 +17,12 @@ class GpuResource
 
 public:
 	GpuResource();
-	GpuResource(const GpuResource& copy);
 	virtual ~GpuResource() { Destroy(); }
 
-
+	GpuResource(const GpuResource& toCopy);
+	GpuResource& operator=(const GpuResource& other);
+	GpuResource& operator=(GpuResource&& other) noexcept;
+	GpuResource(GpuResource& toCopy);
 
 	inline virtual void Destroy()
 	{
@@ -30,12 +32,13 @@ public:
 
 
 	virtual void CreateView(size_t numElements,size_t elementSize);
+	void Reset();
 
 
 	ID3D12Resource* operator->();
 	const ID3D12Resource* operator->() const;
 
-	void SetResource(ComPtr<ID3D12Resource> resource);
+	void SetResource(const ComPtr<ID3D12Resource>& resource);
 	ComPtr<ID3D12Resource> GetResource();
 	const ComPtr<ID3D12Resource>& GetResource() const;
 
@@ -54,7 +57,6 @@ protected:
 
 	ComPtr<ID3D12Resource> m_pResource;
 	D3D12_FEATURE_DATA_FORMAT_SUPPORT m_FormatSupport;
-	std::unique_ptr<D3D12_CLEAR_VALUE> m_d3d12ClearValue;
 };
 
 class IndexResource : public GpuResource

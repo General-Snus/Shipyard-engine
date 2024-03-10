@@ -18,11 +18,11 @@ void GfxCmd_RenderMesh::ExecuteAndDestroy()
 	}
 
 	ObjectBuffer& objectBuffer = GetObjectBuffer();
-	objectBuffer.Data.myTransform = myTransform;
-	objectBuffer.Data.MaxExtents = MaxExtents;
-	objectBuffer.Data.MinExtents = MinExtents;
-	objectBuffer.Data.hasBone = false;
-	objectBuffer.Data.isInstanced = instanced;
+	objectBuffer.myTransform = myTransform;
+	objectBuffer.MaxExtents = MaxExtents;
+	objectBuffer.MinExtents = MinExtents;
+	objectBuffer.hasBone = false;
+	objectBuffer.isInstanced = instanced;
 	//RHI::UpdateConstantBufferData(objectBuffer);
 
 	G_Buffer& gBuffer = GetGBuffer();
@@ -30,6 +30,7 @@ void GfxCmd_RenderMesh::ExecuteAndDestroy()
 
 	for (const auto& aElement : myRenderData->myMesh->Elements)
 	{
+		aElement;
 		if (myRenderData->overrideMaterial.size())
 		{
 			myRenderData->overrideMaterial[0]->Update();

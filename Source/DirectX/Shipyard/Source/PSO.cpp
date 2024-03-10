@@ -39,7 +39,7 @@ void PSO::Init()
 	stream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	stream.VS = CD3DX12_SHADER_BYTECODE(vs->GetShader().GetBlob());
 	stream.PS = CD3DX12_SHADER_BYTECODE(ps->GetShader().GetBlob());
-	stream.DSVFormat = DXGI_FORMAT_R32_FLOAT;
+	stream.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 	stream.RTVFormats = rtvFormats;
 
 	D3D12_PIPELINE_STATE_STREAM_DESC psoDescStreamDesc = {

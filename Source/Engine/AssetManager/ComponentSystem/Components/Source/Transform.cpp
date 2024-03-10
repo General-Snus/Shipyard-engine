@@ -67,6 +67,11 @@ const Matrix& Transform::GetTransform()
 	return myTransform;
 }
 
+const Matrix& Transform::GetRawTransform() const
+{
+	return myTransform;
+}
+
 const Quaternionf& Transform::GetQuatF()
 {
 	return myQuaternion;

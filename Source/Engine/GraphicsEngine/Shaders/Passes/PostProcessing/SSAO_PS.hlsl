@@ -28,22 +28,22 @@ PostProcessPixelOutput main(BRDF_VS_to_PS input)
     const float2 random = GetRandom(input.UV, randomUVScale);
     const float4 pxPos = GetViewPosition(input.UV);
     const float4 pxNorm = GetViewNormal(input.UV);
-    const float2 frustrumCorners[4] = {g_FrameBuffer.FB_FrustrumCorners[0].xy, g_FrameBuffer.FB_FrustrumCorners[1].xy, g_FrameBuffer.FB_FrustrumCorners[2].xy, g_FrameBuffer.FB_FrustrumCorners[3].xy};
+   // const float2 frustrumCorners[4] = {g_FrameBuffer.FB_FrustrumCorners[0].xy, g_FrameBuffer.FB_FrustrumCorners[1].xy, g_FrameBuffer.FB_FrustrumCorners[2].xy, g_FrameBuffer.FB_FrustrumCorners[3].xy};
     //const float2 frustrumCorners[4] = {float2(1, 0), float2(-1, 0), float2(0, 1), float2(0, -1)};
     
     float occlusion = 0.0f;  
-    for(uint i = 0; i < 4; i++)
-    {
-        const uint idx = i % 4;
-        const float2 coord1 = reflect(frustrumCorners[idx], random) * radius;
-        const float2 coord2 = float2((coord1.x - coord1.y) * offset, (coord1.x + coord1.y) * offset);
-        
-        occlusion += SSAO(input.UV, coord1 * 0.25f, pxPos.xyz, pxNorm.xyz, scale, bias, intensity);
-        occlusion += SSAO(input.UV, coord2 * 0.50f, pxPos.xyz, pxNorm.xyz, scale, bias, intensity);
-        occlusion += SSAO(input.UV, coord1 * 0.75f, pxPos.xyz, pxNorm.xyz, scale, bias, intensity);
-        occlusion += SSAO(input.UV, coord2 * 1.00f, pxPos.xyz, pxNorm.xyz, scale, bias, intensity);
-        
-    }
+   // for(uint i = 0; i < 4; i++)
+   // {
+   //     const uint idx = i % 4;
+   //     const float2 coord1 = reflect(frustrumCorners[idx], random) * radius;
+   //     const float2 coord2 = float2((coord1.x - coord1.y) * offset, (coord1.x + coord1.y) * offset);
+   //     
+   //     occlusion += SSAO(input.UV, coord1 * 0.25f, pxPos.xyz, pxNorm.xyz, scale, bias, intensity);
+   //     occlusion += SSAO(input.UV, coord2 * 0.50f, pxPos.xyz, pxNorm.xyz, scale, bias, intensity);
+   //     occlusion += SSAO(input.UV, coord1 * 0.75f, pxPos.xyz, pxNorm.xyz, scale, bias, intensity);
+   //     occlusion += SSAO(input.UV, coord2 * 1.00f, pxPos.xyz, pxNorm.xyz, scale, bias, intensity);
+   //     
+   // }
     const float occludeTotal = 1 - occlusion;
    // result.Color.rgb = pow(occludeTotal, 4);
     result.Color.rgb =  occludeTotal ;

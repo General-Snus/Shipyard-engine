@@ -27,8 +27,35 @@ m_pResource(nullptr),m_FormatSupport()
 {
 }
 
-GpuResource::GpuResource(const GpuResource& copy) : m_UsageState(),m_TransitioningState(),m_FormatSupport()
+GpuResource::GpuResource(const GpuResource& toCopy) :
+	m_UsageState(toCopy.m_UsageState),
+	m_TransitioningState(toCopy.m_TransitioningState),
+	m_FormatSupport(toCopy.m_FormatSupport),
+	m_pResource(toCopy.m_pResource)
 {
+}
+
+GpuResource& GpuResource::operator=(const GpuResource& other)
+{
+	if (this != &other)
+	{
+		m_pResource = other.m_pResource;
+		m_FormatSupport = other.m_FormatSupport;
+		m_ResourceName = other.m_ResourceName;
+	}
+	return *this;
+}
+
+GpuResource& GpuResource::operator=(GpuResource&& other) noexcept
+{
+	if (this != &other)
+	{
+		m_pResource = std::move(other.m_pResource);
+		m_FormatSupport = other.m_FormatSupport;
+		m_ResourceName = std::move(other.m_ResourceName);
+		other.Reset();
+	}
+	return *this;
 }
 
 void GpuResource::CreateView(size_t numElements,size_t elementSize)
@@ -36,6 +63,14 @@ void GpuResource::CreateView(size_t numElements,size_t elementSize)
 	UNREFERENCED_PARAMETER(numElements);
 	UNREFERENCED_PARAMETER(elementSize);
 }
+
+void GpuResource::Reset()
+{
+	m_pResource.Reset();
+	m_ResourceName.clear();
+	m_FormatSupport = {};
+}
+
 
 ID3D12Resource* GpuResource::operator->()
 {
@@ -47,7 +82,7 @@ const ID3D12Resource* GpuResource::operator->() const
 	return m_pResource.Get();
 }
 
-void GpuResource::SetResource(ComPtr<ID3D12Resource> resource)
+void GpuResource::SetResource(const ComPtr<ID3D12Resource>& resource)
 {
 	m_pResource = resource;
 	m_pResource->SetName(m_ResourceName.c_str());
@@ -60,7 +95,7 @@ ComPtr<ID3D12Resource> GpuResource::GetResource()
 
 const ComPtr<ID3D12Resource>& GpuResource::GetResource() const
 {
-	return m_pResource.Get();
+	return m_pResource;
 }
 
 ID3D12Resource** GpuResource::GetAddressOf()

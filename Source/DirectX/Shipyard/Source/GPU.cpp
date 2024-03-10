@@ -25,7 +25,7 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 	m_ComputeCommandQueue = std::make_shared<GPUCommandQueue>();
 
 	UINT dxgiFactoryFlags = 0;
-	if (enableDeviceDebug)
+	if (false)
 	{
 #if !USE_NSIGHT_AFTERMATH
 		ComPtr<ID3D12Debug3> debugController;
@@ -170,15 +170,6 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 	// Create frame resources.
 	UpdateRenderTargetViews(m_Device,m_Swapchain->m_SwapChain,m_RtvHeap);
 
-	//for (int i = 0; i < m_FrameCount; i++)
-	//{
-	//	m_Allocator[i] = CreateCommandAllocator(m_Device,D3D12_COMMAND_LIST_TYPE_DIRECT);
-	//}
-	//
-	//m_CommandList = CreateCommandList(m_Device,m_Allocator[m_FrameIndex],D3D12_COMMAND_LIST_TYPE_DIRECT);
-	//g_Fence = CreateFence(m_Device);
-	//g_FenceEvent = CreateEventHandle();
-
 
 	m_FeatureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
 	if (FAILED(m_Device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE,&m_FeatureData,sizeof(m_FeatureData))))
@@ -201,7 +192,7 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 		Logger::Err("Failed to Create RootSignature");
 	}
 
-	//m_GraphicsMemory = std::make_shared<DirectX::DX12::GraphicsMemory>(m_Device.Get());
+	m_GraphicsMemory = std::make_shared<DirectX::DX12::GraphicsMemory>(m_Device.Get());
 
 	//m_ResourceDescriptors = std::make_unique<DescriptorHeap>(m_Device.Get(),
 	//	D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
@@ -224,8 +215,8 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 	CD3DX12_DESCRIPTOR_RANGE1 descriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,1,2);
 
 	CD3DX12_ROOT_PARAMETER1 rootParameters[NumRootParameters];
-	rootParameters[frameBuffer].InitAsConstantBufferView(REG_FrameBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_VERTEX);
-	rootParameters[objectBuffer].InitAsConstantBufferView(REG_ObjectBuffer,1,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_PIXEL);
+	rootParameters[frameBuffer].InitAsConstantBufferView(REG_FrameBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
+	rootParameters[objectBuffer].InitAsConstantBufferView(REG_ObjectBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
 	//rootParameters[materialBuffer].InitAsConstantBufferView(REG_DefaultMaterialBuffer,1,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_PIXEL);
 	//rootParameters[PointLights].InitAsShaderResourceView(0,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_PIXEL);
 	//rootParameters[SpotLights].InitAsShaderResourceView(1,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_PIXEL);
@@ -419,9 +410,11 @@ void GPU::ConfigureInputAssembler(
 //	return true;
 //}
 
-bool GPU::CreateIndexBuffer(const std::shared_ptr<CommandList>& commandList,IndexResource& outIndexResource,const std::vector<unsigned>& aIndexList)
+bool GPU::CreateIndexBuffer(const std::shared_ptr<CommandList>& commandList,IndexResource& outIndexResource,const std::vector<uint16_t>& aIndexList)
 {
-	commandList->CopyBuffer(outIndexResource,aIndexList.size(),sizeof(unsigned),aIndexList.data());
+	DXGI_FORMAT indexFormat = (sizeof(uint16_t) == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
+	size_t indexSizeInBytes = indexFormat == DXGI_FORMAT_R16_UINT ? 2 : 4;
+	commandList->CopyBuffer(outIndexResource,aIndexList.size(),indexSizeInBytes,aIndexList.data());
 	return true;
 }
 
