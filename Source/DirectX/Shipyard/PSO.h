@@ -29,10 +29,19 @@ class PSO
 public:
 	PSO();
 	void Init();
-
+protected:
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
 	ComPtr<ID3D12PipelineState> m_pipelineState;
 	ComPtr<ID3DBlob> vertexShader;
 	ComPtr<ID3DBlob> pixelShader;
+};
+
+class GbufferPSO : public PSO
+{
+public:
+	GbufferPSO();
+	void Init();
+private:
+	Texture renderTargets[8];
 };
 
