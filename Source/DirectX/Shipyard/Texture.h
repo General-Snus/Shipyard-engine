@@ -32,6 +32,7 @@ public:
 	uint32_t GetHeight() const { return m_Height; }
 	uint32_t GetDepth() const { return m_Depth; }
 
+	virtual bool IsSRV() const override { return true; };
 
 
 

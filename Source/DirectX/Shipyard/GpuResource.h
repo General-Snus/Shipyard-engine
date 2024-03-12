@@ -44,10 +44,10 @@ public:
 
 	ID3D12Resource** GetAddressOf();
 
-	bool CheckFormatSupport(D3D12_FORMAT_SUPPORT1 formatSupport) const;
+	virtual bool IsSRV() const { return false; };
 
-	bool CheckFormatSupport(D3D12_FORMAT_SUPPORT2 formatSupport) const;
-
+	bool CheckFormatSupport(D3D12_FORMAT_SUPPORT1 formatSupport) const; 
+	bool CheckFormatSupport(D3D12_FORMAT_SUPPORT2 formatSupport) const; 
 	void CheckFeatureSupport();
 
 protected:

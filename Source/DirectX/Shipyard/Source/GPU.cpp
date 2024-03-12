@@ -237,7 +237,8 @@ bool GPU::UnInitialize()
 {
 	m_DirectCommandQueue->Flush();
 	m_CopyCommandQueue->Flush();
-	m_ComputeCommandQueue->Flush();
+	m_ComputeCommandQueue->Flush(); 
+	m_GraphicsMemory.reset();
 	//::CloseHandle(g_FenceEvent);
 
 	return true;

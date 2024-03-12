@@ -14,6 +14,13 @@ CommandList::CommandList(D3D12_COMMAND_LIST_TYPE type) : m_Type(type)
 		nullptr,IID_PPV_ARGS(&m_CommandList)));
 
 	m_ResourceStateTracker = std::make_unique<ResourceStateTracker>();
+
+
+	m_DescriptorHeap = std::make_unique<DescriptorHeap>(GPU::m_Device,
+		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+		D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
+		Descriptors::Count);
+
 }
 
 void CommandList::CopyBuffer(GpuResource& buffer,size_t numElements,size_t elementSize,const void* bufferData,D3D12_RESOURCE_FLAGS flags)
@@ -97,6 +104,30 @@ void CommandList::TransitionBarrier(const ComPtr<ID3D12Resource>& resource,D3D12
 		FlushResourceBarriers();
 	}
 }
+
+void CommandList::TransitionBarrier(const GpuResource& resource,D3D12_RESOURCE_STATES stateAfter,UINT subresource,bool flushBarriers)
+{
+	TransitionBarrier(resource.GetResource(),stateAfter,subresource,flushBarriers);
+}
+
+void CommandList::SetView(Descriptors rootParameterIndex,uint32_t descriptorOffset,const GpuResource& resource,D3D12_RESOURCE_STATES stateAfter,UINT firstSubresource,UINT numSubresources,const D3D12_SHADER_RESOURCE_VIEW_DESC* srv)
+{
+	if (numSubresources < D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES)
+	{
+		for (uint32_t i = 0; i < numSubresources; ++i)
+		{
+			TransitionBarrier(resource,stateAfter,firstSubresource + i);
+		}
+	}
+	else
+	{
+		TransitionBarrier(resource,stateAfter);
+	}
+	m_DescriptorHeap->WriteDescriptors(GPU::m_Device,descriptorOffset,resource.GetResource()->GetC,,rootParameterIndex,descrptorOffset,1,resource.);
+
+	TrackResource(resource);
+}
+ 
 
 void CommandList::TrackResource(Microsoft::WRL::ComPtr<ID3D12Object> object)
 {
