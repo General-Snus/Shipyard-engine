@@ -122,8 +122,10 @@ void CommandList::SetView(Descriptors rootParameterIndex,uint32_t descriptorOffs
 	else
 	{
 		TransitionBarrier(resource,stateAfter);
-	}
-	m_DescriptorHeap->WriteDescriptors(GPU::m_Device,descriptorOffset,resource.GetResource()->GetC,,rootParameterIndex,descrptorOffset,1,resource.);
+	} 
+
+	CreateBufferShaderResourceView(resource.GetResource().Get(),resource->GetCpuHandle(Descriptors::WindowsLogo));
+	 
 
 	TrackResource(resource);
 }
