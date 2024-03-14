@@ -70,7 +70,7 @@ void GbufferPSO::Init()
 	for (size_t i = 0; i < numRenderTargets; i++)
 	{
 		renderTargets[i].AllocateTexture(GPU::m_Width, GPU::m_Height);
-		rtvFormats.RTFormats[i] = { renderTargets[i]->GetResource()->GetDesc().Format};
+		rtvFormats.RTFormats[i] = { renderTargets[i].GetResource()->GetDesc().Format};
 	}
 	rtvFormats.NumRenderTargets = numRenderTargets;
 

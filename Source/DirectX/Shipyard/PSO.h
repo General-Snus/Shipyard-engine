@@ -43,7 +43,7 @@ public:
 	GbufferPSO() = default;
 	void Init() override;
 private:
-	constexpr unsigned numRenderTargets = 8;
+	static inline constexpr unsigned numRenderTargets = 8;
 	Texture renderTargets[numRenderTargets];
 };
 
