@@ -17,6 +17,8 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 {
 	aWindowHandle; enableDeviceDebug; m_BackBuffer = aBackBuffer; m_DepthBuffer = aDepthBuffer;
 
+	m_Height = height;
+	m_Width = width;
 
 	m_Swapchain = std::make_unique<GPUSwapchain>();
 
@@ -25,7 +27,7 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 	m_ComputeCommandQueue = std::make_shared<GPUCommandQueue>();
 
 	UINT dxgiFactoryFlags = 0;
-	if (false)
+	if (enableDeviceDebug)
 	{
 #if !USE_NSIGHT_AFTERMATH
 		ComPtr<ID3D12Debug3> debugController;

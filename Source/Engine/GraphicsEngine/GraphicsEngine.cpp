@@ -622,7 +622,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	graphicCommandList->RSSetScissorRects(1,&GPU::m_ScissorRect);
 	graphicCommandList->OMSetRenderTargets(1,&rtv,FALSE,&dsv);
 
-	const auto& pipelineState = PSOCache::GetState(PSOCache::ePipelineStateID::Default)->m_pipelineState;
+	const auto& pipelineState = PSOCache::GetState(PSOCache::ePipelineStateID::Default)->GetPipelineState();
 	graphicCommandList->SetPipelineState(pipelineState.Get());
 	commandList->TrackResource(pipelineState); 
 

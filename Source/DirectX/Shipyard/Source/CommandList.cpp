@@ -16,10 +16,10 @@ CommandList::CommandList(D3D12_COMMAND_LIST_TYPE type) : m_Type(type)
 	m_ResourceStateTracker = std::make_unique<ResourceStateTracker>();
 
 
-	m_DescriptorHeap = std::make_unique<DescriptorHeap>(GPU::m_Device,
-		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-		D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
-		Descriptors::Count);
+//m_DescriptorHeap = std::make_unique<DescriptorHeap>(GPU::m_Device,
+//	D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+//	D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
+//	Descriptors::Count);
 
 }
 
@@ -124,7 +124,7 @@ void CommandList::SetView(Descriptors rootParameterIndex,uint32_t descriptorOffs
 		TransitionBarrier(resource,stateAfter);
 	} 
 
-	CreateBufferShaderResourceView(resource.GetResource().Get(),resource->GetCpuHandle(Descriptors::WindowsLogo));
+	//CreateBufferShaderResourceView(GPU::m_Device.Get(),resource.GetResource().Get(),resource->GetCpuHandle(Descriptors::WindowsLogo));
 	 
 
 	TrackResource(resource);

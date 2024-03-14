@@ -1,4 +1,5 @@
 #pragma once 
+#include <DirectX/XTK/DescriptorHeap.h>
 enum Descriptors
 {
 	WindowsLogo,
@@ -18,6 +19,7 @@ public:
 	void CopyBuffer(GpuResource& buffer,size_t numElements,size_t elementSize,const void* bufferData,D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
 	void TransitionBarrier(const ComPtr<ID3D12Resource>& resource,D3D12_RESOURCE_STATES stateAfter,UINT subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,bool flushBarriers = false); 
 	void TransitionBarrier(const GpuResource& resource,D3D12_RESOURCE_STATES stateAfter,UINT subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,bool flushBarriers = false);
+	void SetView(Descriptors rootParameterIndex,uint32_t descriptorOffset,const GpuResource& resource,D3D12_RESOURCE_STATES stateAfter,UINT firstSubresource,UINT numSubresources,const D3D12_SHADER_RESOURCE_VIEW_DESC* srv);
 	DxCommandList GetGraphicsCommandList() const
 	{
 		return m_CommandList;
@@ -48,7 +50,7 @@ private:
 
 private:
 	std::unique_ptr<ResourceStateTracker> m_ResourceStateTracker;
-	std::unique_ptr<DescriptorHeap> m_DescriptorHeap;
+	//std::unique_ptr<DescriptorHeap> m_DescriptorHeap;
 	D3D12_COMMAND_LIST_TYPE m_Type;
 	DxCommandList m_CommandList;
 	ComPtr<ID3D12CommandAllocator> m_CommandAllocator;

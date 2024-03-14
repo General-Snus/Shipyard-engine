@@ -27,8 +27,9 @@ private:
 class PSO
 {
 public:
-	PSO();
-	void Init();
+	PSO() = default;
+	virtual void Init();
+	virtual ComPtr<ID3D12PipelineState> GetPipelineState() const;
 protected:
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
 	ComPtr<ID3D12PipelineState> m_pipelineState;
@@ -39,9 +40,10 @@ protected:
 class GbufferPSO : public PSO
 {
 public:
-	GbufferPSO();
-	void Init();
+	GbufferPSO() = default;
+	void Init() override;
 private:
-	Texture renderTargets[8];
+	constexpr unsigned numRenderTargets = 8;
+	Texture renderTargets[numRenderTargets];
 };
 

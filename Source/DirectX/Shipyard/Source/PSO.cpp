@@ -5,11 +5,7 @@
 #include "../PSO.h" 
 #include "Engine/AssetManager/AssetManager.h"
 #include "Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h" 
-
-PSO::PSO()
-{
-
-}
+ 
 
 void PSO::Init()
 {
@@ -47,6 +43,10 @@ void PSO::Init()
 	Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&psoDescStreamDesc,IID_PPV_ARGS(&m_pipelineState)));
 }
 
+ComPtr<ID3D12PipelineState> PSO::GetPipelineState() const
+{
+	return m_pipelineState;
+}
 
 void GbufferPSO::Init()
 {
@@ -67,8 +67,12 @@ void GbufferPSO::Init()
 	}  stream;
 
 	D3D12_RT_FORMAT_ARRAY rtvFormats = {};
-	rtvFormats.RTFormats[0] = { GPU::m_BackBuffer->GetResource()->GetDesc().Format };
-	rtvFormats.NumRenderTargets = 1;
+	for (size_t i = 0; i < numRenderTargets; i++)
+	{
+		renderTargets[i].AllocateTexture(GPU::m_Width, GPU::m_Height);
+		rtvFormats.RTFormats[i] = { renderTargets[i]->GetResource()->GetDesc().Format};
+	}
+	rtvFormats.NumRenderTargets = numRenderTargets;
 
 	stream.pRootSignature = GPU::m_RootSignature.GetRootSignature().Get();
 	stream.InputLayout = { Vertex::InputLayoutDefinition , Vertex::InputLayoutDefinitionSize };

@@ -281,17 +281,11 @@
     <ClInclude Include="Rendering\ParticleRenderer\ParticleVertex.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="Shaders\Include\Bloom_PS.h" />
-    <ClInclude Include="Shaders\Include\brdfLUT_PS.h" />
     <ClInclude Include="Shaders\Include\brdfLUT_VS.h" />
-    <ClInclude Include="Shaders\Include\CopyPixels_PS.h" />
-    <ClInclude Include="Shaders\Include\DebugLayer_PS.h" />
     <ClInclude Include="Objects\DataObjects\Default_C.h" />
     <ClInclude Include="Objects\DataObjects\Default_FX.h" />
     <ClInclude Include="Objects\DataObjects\Default_M.h" />
     <ClInclude Include="Objects\DataObjects\Default_N.h" />
-    <ClInclude Include="Shaders\Include\Default_PS.h" />
-    <ClInclude Include="Shaders\Include\Default_VS.h" />
     <ClInclude Include="Objects\Shader.h" />
     <ClInclude Include="Rendering\ForwardRenderer.h" />
     <ClInclude Include="Rendering\Buffers\ObjectBuffer.h" />
@@ -301,26 +295,9 @@
     <ClInclude Include="GraphicsEngine.pch.h" />
     <ClInclude Include="Rendering\Buffers\ConstantBuffer.h" />
     <ClInclude Include="Rendering\Vertex.h" />
-    <ClInclude Include="Shaders\Include\EdgeBlur.h" />
-    <ClInclude Include="Shaders\Include\EnvironmentLight_PS.h" />
-    <ClInclude Include="Shaders\Include\GaussianBlur_PS.h" />
-    <ClInclude Include="Shaders\Include\GBufferPS.h" />
-    <ClInclude Include="Shaders\Include\LinearToGammaPass.h" />
-    <ClInclude Include="Shaders\Include\LineDrawer.h" />
-    <ClInclude Include="Shaders\Include\LineDrawer_PS.h" />
-    <ClInclude Include="Shaders\Include\LineDrawer_VS.h" />
-    <ClInclude Include="Shaders\Include\LuminancePass_PS.h" />
-    <ClInclude Include="Shaders\Include\ParticleShader_GS.h" />
-    <ClInclude Include="Shaders\Include\ParticleShader_PS.h" />
-    <ClInclude Include="Shaders\Include\ParticleShader_VS.h" />
     <ClInclude Include="Shaders\Include\PointLightShadow_GS.h" />
     <ClInclude Include="Shaders\Include\PointLightShadow_PS.h" />
     <ClInclude Include="Shaders\Include\PointLightShadow_VS.h" />
-    <ClInclude Include="Shaders\Include\PointLight_PS.h" />
-    <ClInclude Include="Shaders\Include\ScreenspaceQuad_VS.h" />
-    <ClInclude Include="Shaders\Include\SpotLight_PS.h" />
-    <ClInclude Include="Shaders\Include\SSAO_PS.h" />
-    <ClInclude Include="Shaders\Include\ToneMapping_PS.h" />
     <ClInclude Include="Shaders\Registers.h" />
     <ClInclude Include="Rendering\ShadowRenderer\ShadowRenderer.h" />
   </ItemGroup>
@@ -437,8 +414,8 @@
     <FxCompile Include="Shaders\DefaultShaders\Default_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">6.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">6.0</ShaderModel>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)..\Content\Shaders\%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)..\Content\Shaders\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
@@ -485,8 +462,8 @@
     <FxCompile Include="Shaders\DefaultShaders\Default_VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">6.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">6.0</ShaderModel>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)..\Content\Shaders\%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)..\Content\Shaders\%(Filename).cso</ObjectFileOutput>
     </FxCompile>

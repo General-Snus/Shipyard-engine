@@ -154,6 +154,8 @@ public:
 	static inline UINT m_FrameIndex;
 
 	static inline ComPtr<ID3D12Device2> m_Device;
+	static inline unsigned m_Width;
+	static inline unsigned m_Height;
 	static inline std::shared_ptr<GPUCommandQueue> m_DirectCommandQueue;
 	static inline std::shared_ptr<GPUCommandQueue> m_CopyCommandQueue;
 	static inline std::shared_ptr<GPUCommandQueue> m_ComputeCommandQueue;
