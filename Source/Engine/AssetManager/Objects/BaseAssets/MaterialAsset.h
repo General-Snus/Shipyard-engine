@@ -1,5 +1,6 @@
 #pragma once 
 #include <Engine/GraphicsEngine/Objects/Shader.h>
+#include <Engine/AssetManager/Enums.h>
 #include <Engine/GraphicsEngine/Rendering/Buffers/ConstantBuffer.h>
 #include <Tools/Thirdparty/nlohmann/json.hpp>
 #include "BaseAsset.h"
@@ -16,10 +17,11 @@ struct MaterialData
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(MaterialData,
 	albedoColor.x,albedoColor.y,albedoColor.z,albedoColor.w,
 	UVTiling.x,UVTiling.y,NormalStrength,Shine
-);
+); 
 
 class Material : public AssetBase
 {
+	friend class cMeshRenderer;
 public:
 	struct DataMaterial
 	{
@@ -40,5 +42,6 @@ public:
 	void SetShader(const std::shared_ptr<Shader>& aVertexShader,const std::shared_ptr<Shader>& aPixelShader);
 	void SetAsResources();
 private:
+	std::shared_ptr<TextureHolder> GetTexture(eTextureType );
 	DataMaterial data;
 };

@@ -5,9 +5,9 @@ enum eRootBindings
 {
 	frameBuffer,         // ConstantBuffer<Mat> MatCB : register(b0);
 	objectBuffer,         // ConstantBuffer<Material> objectBuffer : register( b0, space1 );
+	Textures,         // Texture2D DiffuseTexture : register( t2 );
 	NumRootParameters,
 	materialBuffer,  // ConstantBuffer<LightProperties> materialBuffer : register( b1 );
-	Textures,         // Texture2D DiffuseTexture : register( t2 );
 	PointLights,        // StructuredBuffer<PointLight> PointLights : register( t0 );
 	SpotLights          // StructuredBuffer<SpotLight> SpotLights : register( t1 );
 };

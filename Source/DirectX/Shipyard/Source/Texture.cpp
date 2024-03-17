@@ -79,8 +79,7 @@ bool Texture::AllocateTexture(const unsigned width,const unsigned height)
 	{
 		throw std::runtime_error("Failed to upload texture");
 	}
-	//CreateShaderResourceView(GPU::m_Device.Get(),m_pResource.Get(),
-	//	GPU::m_ResourceDescriptors->GetCpuHandle(eRootBindings::Textures));
+
 
 	//ID3D12DescriptorHeap* heaps[] = { m_DescriptorHandle->Heap() };
 	//GPU::m_CommandQueue->GetCommandList()->SetDescriptorHeaps(static_cast<UINT>(std::size(heaps)),heaps);
@@ -99,12 +98,24 @@ void Texture::CreateView()
 		if ((desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET) != 0 &&
 			CheckRTVSupport())
 		{
+			heapOffset = (int)GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_RTV]->Allocate();
+			m_DescriptorHandle = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_RTV]->GetCpuHandle(heapOffset);
 			device->CreateRenderTargetView(m_pResource.Get(),nullptr,m_DescriptorHandle);
 		}
-		if ((desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) != 0 &&
+		else if ((desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) != 0 &&
 			CheckDSVSupport())
 		{
+			heapOffset = (int)GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_DSV]->Allocate();
+			m_DescriptorHandle = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_DSV]->GetCpuHandle(heapOffset);
 			device->CreateDepthStencilView(m_pResource.Get(),nullptr,m_DescriptorHandle);
+		} 
+
+		else if (CheckSRVSupport())
+		{
+			heapOffset = (int)GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->Allocate();
+			m_DescriptorHandle = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->GetCpuHandle(heapOffset);
+			CreateShaderResourceView(GPU::m_Device.Get(),m_pResource.Get(),
+				m_DescriptorHandle);
 		}
 	}
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include <Engine/AssetManager/Objects/BaseAssets/BaseAsset.h>
 #include "Engine/AssetManager/ComponentSystem/Component.h"
+#include "Engine/AssetManager/Enums.h"
 #define AsUINT(v) static_cast<unsigned>(v)
 
 class Mesh;
@@ -34,6 +35,7 @@ public:
 	const std::vector<Element>& GetElements() const;
 	std::shared_ptr<Mesh> GetRawMesh() const;
 
+	std::shared_ptr<TextureHolder> GetTexture(eTextureType type);
 	bool IsDefaultMesh() const;
 
 	FORCEINLINE bool IsStaticMesh()

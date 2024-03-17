@@ -100,7 +100,7 @@ void GameLauncher::GenerateNewRandomCubes()
 {
 	const float range = 1000.f;
 	std::string arr[3] = { "Models/Cube.fbx","Models/CubeHoled.fbx","Models/SteelFloor.fbx" };
-	for (size_t i = 0; i < 10000; i++)
+	for (size_t i = 0; i < 1000; i++)
 	{
 		vectorOfGameObjects.push_back(GameObjectManager::Get().CreateGameObject());
 		GameObject vectorObject = vectorOfGameObjects.back();

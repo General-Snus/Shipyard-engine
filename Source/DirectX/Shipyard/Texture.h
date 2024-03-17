@@ -31,6 +31,8 @@ public:
 	uint32_t GetWidth() const { return m_Width; }
 	uint32_t GetHeight() const { return m_Height; }
 	uint32_t GetDepth() const { return m_Depth; }
+	//-1 is invalid sizet so we need to check that, flinging in max sizet will cause crash making sure we check the value by instantcrashing in case we dont
+	int GetHeapOffset() const { return heapOffset; }
 
 	virtual bool IsSRV() const override { return true; };
 
@@ -61,6 +63,7 @@ public:
 protected:
 	//std::unique_ptr<DirectX::DescriptorHeap> m_DescriptorHandle;
 	D3D12_CPU_DESCRIPTOR_HANDLE m_DescriptorHandle;
+	int heapOffset = -1;  
 	uint32_t m_Width;
 	uint32_t m_Height;
 	uint32_t m_Depth;

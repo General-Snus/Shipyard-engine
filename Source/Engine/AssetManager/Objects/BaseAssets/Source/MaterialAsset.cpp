@@ -144,6 +144,24 @@ void Material::Update()
 	SetAsResources();
 }
 
+std::shared_ptr<TextureHolder> Material::GetTexture(eTextureType type)
+{
+	if (data.textures.empty())
+	{
+		return nullptr;
+	}
+		
+	for (const auto& i : data.textures)
+	{
+		if (i.second->textureType != type)
+		{
+			continue;
+		}
+		return i.second;
+	}
+	return nullptr;
+}
+
 void Material::SetShader(const std::shared_ptr<Shader>& aVertexShader,const std::shared_ptr<Shader>& aPixelShader)
 {
 	data.vertexShader = aVertexShader;

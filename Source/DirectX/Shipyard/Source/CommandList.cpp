@@ -4,6 +4,7 @@
 #include "../ResourceStateTracker.h"
 #include "Shipyard/GPU.h"
 #include "Shipyard/GpuResource.h"
+#include "Shipyard/Texture.h"
 
 CommandList::CommandList(D3D12_COMMAND_LIST_TYPE type) : m_Type(type)
 {
@@ -89,8 +90,7 @@ void CommandList::CopyBuffer(GpuResource& buffer,size_t numElements,size_t eleme
 void CommandList::TransitionBarrier(const ComPtr<ID3D12Resource>& resource,D3D12_RESOURCE_STATES stateAfter,UINT subresource,bool flushBarriers)
 {
 	if (resource)
-	{
-		// The "before" state is not important. It will be resolved by the resource state tracker.
+	{ 
 		auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(resource.Get(),D3D12_RESOURCE_STATE_COMMON,stateAfter,subresource);
 		m_ResourceStateTracker->ResourceBarrier(barrier);
 	}
@@ -110,7 +110,7 @@ void CommandList::TransitionBarrier(const GpuResource& resource,D3D12_RESOURCE_S
 	TransitionBarrier(resource.GetResource(),stateAfter,subresource,flushBarriers);
 }
 
-void CommandList::SetView(Descriptors rootParameterIndex,uint32_t descriptorOffset,const GpuResource& resource,D3D12_RESOURCE_STATES stateAfter,UINT firstSubresource,UINT numSubresources,const D3D12_SHADER_RESOURCE_VIEW_DESC* srv)
+void CommandList::SetView(eRootBindings rootParameterIndex,uint32_t descriptorOffset,const GpuResource& resource,D3D12_RESOURCE_STATES stateAfter,UINT firstSubresource,UINT numSubresources,const D3D12_SHADER_RESOURCE_VIEW_DESC* srv)
 {
 	if (numSubresources < D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES)
 	{
@@ -129,7 +129,26 @@ void CommandList::SetView(Descriptors rootParameterIndex,uint32_t descriptorOffs
 
 	TrackResource(resource);
 }
- 
+
+void CommandList::SetDescriptorTable(unsigned slot,Texture* texture)
+{
+	const size_t offset = texture->GetHeapOffset();
+
+	if (offset == -1)
+	{
+		Logger::Warn("Texture has no heap offset");
+		return;
+	}
+
+	TransitionBarrier(texture->GetResource(),D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
+	m_CommandList->SetGraphicsRootDescriptorTable(
+		eRootBindings::Textures,
+		GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->GetGpuHandle(offset));
+
+
+	TrackResource(texture->GetResource());
+}
 
 void CommandList::TrackResource(Microsoft::WRL::ComPtr<ID3D12Object> object)
 {

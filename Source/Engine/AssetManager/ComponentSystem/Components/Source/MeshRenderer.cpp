@@ -60,6 +60,40 @@ std::shared_ptr<Mesh> cMeshRenderer::GetRawMesh() const
 	return myRenderData->myMesh;
 }
 
+
+std::shared_ptr<TextureHolder> cMeshRenderer::GetTexture(eTextureType type)
+{
+	if (!myRenderData->overrideMaterial.empty())
+	{
+		for (const auto& material : myRenderData->overrideMaterial)
+		{
+			if (!material)
+			{
+				continue;
+			}
+
+			if (auto tex = material->GetTexture(type))
+			{
+				return tex;
+			}
+		}
+	}
+
+	for (const auto& [value,material] : myRenderData->myMesh->materials)
+	{
+		if (!material)
+		{
+			continue;
+		}
+
+		if (auto tex = material->GetTexture(type))
+		{
+			return tex;
+		}
+	}
+
+	return nullptr;
+}
 void cMeshRenderer::Render()
 {
 	OPTICK_EVENT();

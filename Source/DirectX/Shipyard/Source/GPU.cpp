@@ -144,6 +144,35 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 		pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING,TRUE);
 	}
 
+	m_GraphicsMemory = std::make_shared<DirectX::DX12::GraphicsMemory>(m_Device.Get());
+	 
+	m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV] = std::make_unique<DescriptorPile>(
+		m_Device.Get(),
+		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+		D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
+		2048
+	);
+
+	m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_SAMPLER] = std::make_unique<DescriptorPile>(
+		m_Device.Get(),
+		D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
+		D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
+		2048
+	); 
+
+	m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_RTV] = std::make_unique<DescriptorPile>(
+		m_Device.Get(),
+		D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
+		D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
+		2048
+	);
+	m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_RTV] = std::make_unique<DescriptorPile>(
+		m_Device.Get(),
+		D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
+		D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
+		2048
+	);
+
 
 
 	ComPtr<ID3D12DebugDevice1> pDebugQueue;
@@ -194,7 +223,8 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 		Logger::Err("Failed to Create RootSignature");
 	}
 
-	m_GraphicsMemory = std::make_shared<DirectX::DX12::GraphicsMemory>(m_Device.Get());
+
+
 
 	//m_ResourceDescriptors = std::make_unique<DescriptorHeap>(m_Device.Get(),
 	//	D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
@@ -214,11 +244,12 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 
-	CD3DX12_DESCRIPTOR_RANGE1 descriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,1,2);
-
 	CD3DX12_ROOT_PARAMETER1 rootParameters[NumRootParameters];
-	rootParameters[frameBuffer].InitAsConstantBufferView(REG_FrameBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
-	rootParameters[objectBuffer].InitAsConstantBufferView(REG_ObjectBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
+	rootParameters[eRootBindings::frameBuffer].InitAsConstantBufferView(REG_FrameBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
+	rootParameters[eRootBindings::objectBuffer].InitAsConstantBufferView(REG_ObjectBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
+
+	CD3DX12_DESCRIPTOR_RANGE1 descriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,1,2);
+	rootParameters[eRootBindings::Textures].InitAsDescriptorTable(1,&descriptorRange);
 	//rootParameters[materialBuffer].InitAsConstantBufferView(REG_DefaultMaterialBuffer,1,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_PIXEL);
 	//rootParameters[PointLights].InitAsShaderResourceView(0,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_PIXEL);
 	//rootParameters[SpotLights].InitAsShaderResourceView(1,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_PIXEL);
@@ -239,7 +270,7 @@ bool GPU::UnInitialize()
 {
 	m_DirectCommandQueue->Flush();
 	m_CopyCommandQueue->Flush();
-	m_ComputeCommandQueue->Flush(); 
+	m_ComputeCommandQueue->Flush();
 	m_GraphicsMemory.reset();
 	//::CloseHandle(g_FenceEvent);
 
@@ -355,70 +386,17 @@ void GPU::ConfigureInputAssembler(
 	//commandList->IASetVertexBuffers(0,1,&vertView);
 	//commandList->IASetIndexBuffer(&indexView);
 }
-
-//bool GPU::CreateIndexBuffer(ComPtr<ID3D12Resource>& outIndexBuffer,const std::vector<unsigned>& aIndexList)
-//{
-//
-//	const size_t size = sizeof(unsigned);
-//	const size_t numIn = aIndexList.size();
-//
-//
-//
-//
-//	ComPtr<ID3D12Resource> intermediateIndexBuffer;
-//	UpdateBufferResource(
-//		m_CommandQueue->GetCommandList(),
-//		&outIndexBuffer,&intermediateIndexBuffer
-//		,numIn,size,aIndexList.data()
-//	);
-//	return true;
-//}
-
-//bool GPU::CreateIndexBuffer(
-//	const CommandList& commandList,D3D12_INDEX_BUFFER_VIEW& outIndexBufferView,ComPtr<ID3D12Resource>& outIndexBuffer,const std::vector<unsigned>& aIndexList)
-//{
-//	//const D3D12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-//	//const CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(aIndexList));
-//	//Helpers::ThrowIfFailed(m_Device->CreateCommittedResource(
-//	//	&heapProp,
-//	//	D3D12_HEAP_FLAG_NONE,
-//	//	&bufferDesc,
-//	//	D3D12_RESOURCE_STATE_GENERIC_READ,
-//	//	nullptr,
-//	//	IID_PPV_ARGS(&outIndexBuffer)));
-//	//
-//	//UINT8* pVertexDataBegin;
-//	//CD3DX12_RANGE readRange(0,0);
-//	//Helpers::ThrowIfFailed(
-//	//	outIndexBuffer->Map(0,&readRange,reinterpret_cast<void**>(&pVertexDataBegin))
-//	//);
-//	//memcpy(pVertexDataBegin,aIndexList.data(),sizeof(aIndexList));
-//	//outIndexBuffer->Unmap(0,nullptr);
-//
-//
-//
-//	ComPtr<ID3D12Resource> intermediateIndexBuffer;
-//	UpdateBufferResource(commandList,
-//		&outIndexBuffer,&intermediateIndexBuffer,
-//		aIndexList.size(),sizeof(WORD),aIndexList.data());
-//	intermediateIndexBuffer->SetName(L"IntermediateIndexBuffer");
-//
-//	// Initialize the vertex buffer view.
-//	outIndexBufferView.BufferLocation = outIndexBuffer->GetGPUVirtualAddress();
-//	outIndexBufferView.Format = DXGI_FORMAT_R16_UINT;
-//	outIndexBufferView.SizeInBytes = static_cast<unsigned>(aIndexList.size() * sizeof(unsigned));
-//
-//
-//
-//	return true;
-//}
-
 bool GPU::CreateIndexBuffer(const std::shared_ptr<CommandList>& commandList,IndexResource& outIndexResource,const std::vector<uint16_t>& aIndexList)
 {
 	DXGI_FORMAT indexFormat = (sizeof(uint16_t) == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
 	size_t indexSizeInBytes = indexFormat == DXGI_FORMAT_R16_UINT ? 2 : 4;
 	commandList->CopyBuffer(outIndexResource,aIndexList.size(),indexSizeInBytes,aIndexList.data());
 	return true;
+}
+
+bool GPU::AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE type,int amount)
+{
+	return false;
 }
 
 bool GPU::CreatePixelShader(ComPtr<ID3DBlob>& outPxShader,const BYTE* someShaderData,size_t aShaderDataSize,UINT CompileFLags)
@@ -499,13 +477,37 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 {
 	outTexture; aFileName;
 
-	if (!std::filesystem::exists(aFileName) && aFileName.extension() != "dds")
+	if (!std::filesystem::exists(aFileName) || aFileName.extension() != ".dds")
 	{
 		std::string error = "Failed to load texture: " + aFileName.string() + " does not exist!";
 		std::cout << error << std::endl;
 		return false;
 	}
-	outTexture->myName = aFileName.filename();
+	outTexture->myName = aFileName.filename();  
+	ResourceUploadBatch resourceUpload(m_Device.Get());
+	resourceUpload.Begin(); 
+	Helpers::ThrowIfFailed(
+		CreateDDSTextureFromFile(m_Device.Get(),resourceUpload,aFileName.wstring().c_str(),
+			outTexture->m_pResource.ReleaseAndGetAddressOf(),generateMips)
+	);
+
+
+	auto uploadResourcesFinished = resourceUpload.End(m_DirectCommandQueue->GetCommandQueue().Get());
+	uploadResourcesFinished.wait();
+
+	outTexture->heapOffset = (int)GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->Allocate();
+	outTexture->m_DescriptorHandle = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->GetCpuHandle(outTexture->heapOffset);
+	CreateShaderResourceView(GPU::m_Device.Get(),outTexture->m_pResource.Get(),
+		outTexture->m_DescriptorHandle);
+
+
+	return true;
+}
+
+bool GPU::LoadTextureFromMemory(Texture* outTexture,const std::filesystem::path& aName,const BYTE* someImageData,size_t anImageDataSize,bool generateMips,const D3D12_SHADER_RESOURCE_VIEW_DESC* aSRVDesc)
+{
+	outTexture; aName; someImageData; anImageDataSize; aSRVDesc;
+	outTexture->myName = aName;
 	//outTexture->m_DescriptorHandle = std::make_unique<DescriptorHeap>(m_Device.Get(),
 	//	eDescriptors::Textures);
 
@@ -514,24 +516,17 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 	resourceUpload.Begin();
 
 	Helpers::ThrowIfFailed(
-		CreateDDSTextureFromFile(m_Device.Get(),resourceUpload,L"texture.dds",
+		CreateDDSTextureFromMemory(m_Device.Get(),resourceUpload,someImageData,anImageDataSize,
 			outTexture->m_pResource.ReleaseAndGetAddressOf(),generateMips)
 	);
-
-	CreateShaderResourceView(m_Device.Get(),outTexture->m_pResource.Get(),
-		outTexture->m_DescriptorHandle);
+	outTexture->heapOffset = 0;
+	//CreateShaderResourceView(m_Device.Get(),outTexture->m_pResource.Get(),
+	//	outTexture->m_DescriptorHandle);
 
 	auto uploadResourcesFinished = resourceUpload.End(m_DirectCommandQueue->GetCommandQueue().Get());
 	uploadResourcesFinished.wait();
 
-
 	return true;
-}
-
-bool GPU::LoadTextureFromMemory(Texture* outTexture,const std::filesystem::path& aName,const BYTE* someImageData,size_t anImageDataSize,const D3D12_SHADER_RESOURCE_VIEW_DESC* aSRVDesc)
-{
-	outTexture; aName; someImageData; anImageDataSize; aSRVDesc;
-	return false;
 }
 
 void GPU::TransitionResource(

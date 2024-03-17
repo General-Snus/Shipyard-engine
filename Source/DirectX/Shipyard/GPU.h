@@ -50,16 +50,25 @@ public:
 	ComPtr<IDXGISwapChain4> m_SwapChain;
 };
 
+enum class eHeapTypes : int
+{
+	HEAP_TYPE_CBV_SRV_UAV = 0,
+	HEAP_TYPE_SAMPLER,
+	HEAP_TYPE_RTV,
+	HEAP_TYPE_DSV,
+	HEAP_COUNT
+};
+	 
 
 
-enum ePIPELINE_STAGE
+enum class ePIPELINE_STAGE
 {
 	PIPELINE_STAGE_INPUTASSEMBLER = 0x1L,
 	PIPELINE_STAGE_VERTEX_SHADER = 0x2L,
 	PIPELINE_STAGE_GEOMETERY_SHADER = 0x4L,
 	PIPELINE_STAGE_RASTERIZER = 0x8L,
 	PIPELINE_STAGE_PIXEL_SHADER = 0x10L
-} 	inline ePIPELINE_STAGE;
+};
 
 class GPU
 {
@@ -98,6 +107,9 @@ public:
 		const std::vector<uint16_t>& aIndexList
 	);
 
+	static bool AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE type, int amount = 1);
+
+
 	static bool CreatePixelShader(ComPtr<ID3DBlob>& outPxShader,const BYTE* someShaderData,size_t aShaderDataSize,UINT CompileFLags = 0);
 
 	static bool CreateVertexShader(ComPtr<ID3DBlob>& outVxShader,const BYTE* someShaderData,size_t aShaderDataSize,UINT CompileFLags = 0);
@@ -108,7 +120,7 @@ public:
 
 	static bool LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName,bool generateMips = true);
 
-	static bool LoadTextureFromMemory(Texture* outTexture,const std::filesystem::path& aName,const BYTE* someImageData,size_t anImageDataSize,const
+	static bool LoadTextureFromMemory(Texture* outTexture,const std::filesystem::path& aName,const BYTE* someImageData,size_t anImageDataSize,bool generateMips = true,const
 		D3D12_SHADER_RESOURCE_VIEW_DESC* aSRVDesc = nullptr);
 
 	static void TransitionResource(
@@ -163,6 +175,7 @@ public:
 	static inline std::unique_ptr<GPUSwapchain> m_Swapchain;
 	static inline ComPtr<ID3D12CommandAllocator> m_CommandAllocators[m_FrameCount];
 	static inline Texture m_renderTargets[m_FrameCount];
+	 
 
 	static inline ComPtr<ID3D12DescriptorHeap> m_RtvHeap;
 	static inline ComPtr<ID3D12DescriptorHeap> m_DsvHeap;
@@ -192,7 +205,7 @@ public:
 	static inline std::shared_ptr<Texture> m_BackBuffer;
 	static inline std::shared_ptr<Texture> m_DepthBuffer;
 	static inline std::shared_ptr<DirectX::GraphicsMemory> m_GraphicsMemory;
-	//static inline std::unique_ptr<DirectX::DescriptorHeap> m_ResourceDescriptors;
+	static inline std::unique_ptr<DirectX::DescriptorPile> m_ResourceDescriptors[(int)eHeapTypes::HEAP_COUNT];
 	static inline ComPtr<ID3D12DescriptorHeap> guiDescriptorHeap;;
 
 private:

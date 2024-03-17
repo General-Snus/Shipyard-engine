@@ -25,6 +25,7 @@ GpuResource::GpuResource() : m_UsageState(D3D12_RESOURCE_STATE_COMMON),
 m_TransitioningState((D3D12_RESOURCE_STATES)-1),
 m_pResource(nullptr),m_FormatSupport()
 {
+	CheckFeatureSupport();
 }
 
 GpuResource::GpuResource(const GpuResource& toCopy) :
@@ -86,6 +87,8 @@ void GpuResource::SetResource(const ComPtr<ID3D12Resource>& resource)
 {
 	m_pResource = resource;
 	m_pResource->SetName(m_ResourceName.c_str());
+
+	CheckFeatureSupport();
 }
 
 ComPtr<ID3D12Resource> GpuResource::GetResource()

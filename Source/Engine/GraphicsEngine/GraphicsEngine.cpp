@@ -284,6 +284,28 @@ void GraphicsEngine::SetupDefaultVariables()
 
 
 
+	 AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultTile.dds",defaultTexture);
+	/*
+	if (!GPU::LoadTexture(
+		defaultTexture->GetRawTexture().get(), 
+	))
+	{
+		Logger::Log("Failed to load default color texture");
+		assert(false); 
+	}
+	*/
+
+	defaultTexture->GetRawTexture()->CreateView();
+	//if (!RHI::LoadTexture(
+	//	defaultTexture->GetRawTexture().get(),
+	//	AssetManager::Get().AssetPath / "Textures/Default/DefaultTile.dds"))
+	//{
+	//	RHI::LoadTextureFromMemory(
+	//		defaultTexture->GetRawTexture().get(),
+	//		L"Default Color texture",
+	//		BuiltIn_Default_C_ByteCode,
+	//		sizeof(BuiltIn_Default_C_ByteCode)
+	//	);
 
 	AssetManager::Get().ForceLoadAsset<Mesh>("default.fbx",defaultMesh);
 }
@@ -624,18 +646,21 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 
 	const auto& pipelineState = PSOCache::GetState(PSOCache::ePipelineStateID::Default)->GetPipelineState();
 	graphicCommandList->SetPipelineState(pipelineState.Get());
-	commandList->TrackResource(pipelineState); 
+	commandList->TrackResource(pipelineState);
 
 	const auto& rootSignature = GPU::m_RootSignature.GetRootSignature();
 	graphicCommandList->SetGraphicsRootSignature(rootSignature.Get());
 	commandList->TrackResource(rootSignature);
 
+	ID3D12DescriptorHeap* heaps[] = { GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->Heap() };
+	graphicCommandList->SetDescriptorHeaps(static_cast<UINT>(std::size(heaps)),heaps);
+
 	myCamera->SetCameraToFrameBuffer(graphicCommandList);
 
 	ObjectBuffer objectBuffer;
-	static const auto& list = GameObjectManager::Get().GetAllComponents<cMeshRenderer>();
+	static auto& list = GameObjectManager::Get().GetAllComponents<cMeshRenderer>();
 	Logger::Log(std::to_string(list.size()));
-	for (const auto& meshRenderer : list)
+	for (auto& meshRenderer : list)
 	{
 		const auto& transform = meshRenderer.GetComponent<Transform>();
 		for (const auto& element : meshRenderer.GetElements())
@@ -647,7 +672,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 			objectBuffer.isInstanced = false;
 
 			const auto& alloc = GPU::m_GraphicsMemory->AllocateConstant<ObjectBuffer>(objectBuffer);
-			graphicCommandList->SetGraphicsRootConstantBufferView(REG_ObjectBuffer,alloc.GpuAddress()); 
+			graphicCommandList->SetGraphicsRootConstantBufferView(REG_ObjectBuffer,alloc.GpuAddress());
 			graphicCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			commandList->TransitionBarrier(element.VertexBuffer.GetResource(),D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
@@ -660,8 +685,18 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 			graphicCommandList->IASetIndexBuffer(&indexBuffer);
 			commandList->TrackResource(element.IndexResource);
 
-			commandList->FlushResourceBarriers(); 
-			graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0); 
+
+			if (auto albedoIndex = meshRenderer.GetTexture(eTextureType::ColorMap))
+			{
+				commandList->SetDescriptorTable(eRootBindings::Textures,albedoIndex->GetRawTexture().get());
+			}
+			else
+			{
+				commandList->SetDescriptorTable(eRootBindings::Textures,defaultTexture->GetRawTexture().get());
+			}
+
+			commandList->FlushResourceBarriers();
+			graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
 		}
 	}
 
