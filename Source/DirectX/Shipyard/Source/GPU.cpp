@@ -166,9 +166,9 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 		D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
 		2048
 	);
-	m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_RTV] = std::make_unique<DescriptorPile>(
+	m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_DSV] = std::make_unique<DescriptorPile>(
 		m_Device.Get(),
-		D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
+		D3D12_DESCRIPTOR_HEAP_TYPE_DSV,
 		D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
 		2048
 	);
@@ -208,23 +208,6 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 		m_FeatureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
 	}
 
-	CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
-	rootSignatureDesc.Init(0,nullptr,0,nullptr,D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
-
-	ComPtr<ID3DBlob> signature;
-	ComPtr<ID3DBlob> error;
-	if (FAILED(D3D12SerializeRootSignature(&rootSignatureDesc,D3D_ROOT_SIGNATURE_VERSION_1,&signature,&error)))
-	{
-		Logger::Err("Failed to Serialize RootSignature");
-	}
-
-	if (FAILED(m_Device->CreateRootSignature(0,signature->GetBufferPointer(),signature->GetBufferSize(),IID_PPV_ARGS(&m_RootSignature.m_RootSignature))))
-	{
-		Logger::Err("Failed to Create RootSignature");
-	}
-
-
-
 
 	//m_ResourceDescriptors = std::make_unique<DescriptorHeap>(m_Device.Get(),
 	//	D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
@@ -238,31 +221,7 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 	m_Viewport = { 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), D3D12_MIN_DEPTH, D3D12_MAX_DEPTH };
 	m_ScissorRect = { 0, 0, static_cast<LONG>(width), static_cast<LONG>(height) };
 
-	D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags =
-		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
-
-	CD3DX12_ROOT_PARAMETER1 rootParameters[NumRootParameters];
-	rootParameters[eRootBindings::frameBuffer].InitAsConstantBufferView(REG_FrameBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
-	rootParameters[eRootBindings::objectBuffer].InitAsConstantBufferView(REG_ObjectBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
-
-	CD3DX12_DESCRIPTOR_RANGE1 descriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,1,2);
-	rootParameters[eRootBindings::Textures].InitAsDescriptorTable(1,&descriptorRange);
-	//rootParameters[materialBuffer].InitAsConstantBufferView(REG_DefaultMaterialBuffer,1,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_PIXEL);
-	//rootParameters[PointLights].InitAsShaderResourceView(0,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_PIXEL);
-	//rootParameters[SpotLights].InitAsShaderResourceView(1,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_PIXEL);
-	//rootParameters[Textures].InitAsShaderResourceView(REG_colorMap);
-
-	CD3DX12_STATIC_SAMPLER_DESC linearRepeatSampler(0,D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR);
-
-	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
-	rootSignatureDescription.Init_1_1(NumRootParameters,rootParameters,1,&linearRepeatSampler,rootSignatureFlags);
-
-	m_RootSignature.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1,m_FeatureData.HighestVersion);
-
-
+	
 	return true;
 }
 
@@ -272,6 +231,7 @@ bool GPU::UnInitialize()
 	m_CopyCommandQueue->Flush();
 	m_ComputeCommandQueue->Flush();
 	m_GraphicsMemory.reset();
+
 	//::CloseHandle(g_FenceEvent);
 
 	return true;
@@ -468,8 +428,11 @@ void GPU::ResizeDepthBuffer(unsigned width,unsigned height)
 		dsv.Texture2D.MipSlice = 0;
 		dsv.Flags = D3D12_DSV_FLAG_NONE;
 
-		m_Device->CreateDepthStencilView(m_DepthBuffer->GetResource().Get(),&dsv,
-			m_DsvHeap->GetCPUDescriptorHandleForHeapStart());
+
+		m_DepthBuffer->CheckFeatureSupport();
+		m_DepthBuffer->CreateView();
+		/*m_Device->CreateDepthStencilView(m_DepthBuffer->GetResource().Get(),&dsv,
+			m_DsvHeap->GetCPUDescriptorHandleForHeapStart());*/
 	}
 }
 
@@ -484,19 +447,24 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 		return false;
 	}
 	outTexture->myName = aFileName.filename();  
+
 	ResourceUploadBatch resourceUpload(m_Device.Get());
-	resourceUpload.Begin(); 
+	resourceUpload.Begin();
+
 	Helpers::ThrowIfFailed(
 		CreateDDSTextureFromFile(m_Device.Get(),resourceUpload,aFileName.wstring().c_str(),
 			outTexture->m_pResource.ReleaseAndGetAddressOf(),generateMips)
 	);
 
+	outTexture->CheckFeatureSupport();
 
 	auto uploadResourcesFinished = resourceUpload.End(m_DirectCommandQueue->GetCommandQueue().Get());
 	uploadResourcesFinished.wait();
-
+	 
 	outTexture->heapOffset = (int)GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->Allocate();
 	outTexture->m_DescriptorHandle = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->GetCpuHandle(outTexture->heapOffset);
+	  
+
 	CreateShaderResourceView(GPU::m_Device.Get(),outTexture->m_pResource.Get(),
 		outTexture->m_DescriptorHandle);
 
@@ -557,9 +525,9 @@ D3D12_CPU_DESCRIPTOR_HANDLE GPU::GetCurrentRenderTargetView()
 		m_FrameIndex,m_RtvDescriptorSize);
 }
 
-Texture& GPU::GetCurrentBackBuffer()
+Texture* GPU::GetCurrentBackBuffer()
 {
-	return m_renderTargets[m_FrameIndex];//todo fix fixed
+	return &m_renderTargets[m_FrameIndex];//todo fix fixed
 }
 
 ComPtr<ID3D12DescriptorHeap>  GPU::CreateDescriptorHeap(const ComPtr<ID3D12Device>& device,D3D12_DESCRIPTOR_HEAP_TYPE type,uint32_t numDescriptors,D3D12_DESCRIPTOR_HEAP_FLAGS flags)

@@ -14,12 +14,12 @@ void Texture::Initialize()
 	//m_DescriptorHandle = std::make_unique<DescriptorHeap>(GPU::m_Device.Get(),eDescriptors::Textures);
 }
 
-bool Texture::AllocateTexture(const unsigned width,const unsigned height)
+bool Texture::AllocateTexture(const unsigned width,const unsigned height,const std::filesystem::path& name)
 {
 	m_Width = width;
 	m_Height = height;
 	Initialize();
-
+	myName = name;
 	// This creates a x y texture in RGBA format
 	D3D12_RESOURCE_DESC txtDesc = {};
 	txtDesc.MipLevels = txtDesc.DepthOrArraySize = 1;
@@ -47,7 +47,7 @@ bool Texture::AllocateTexture(const unsigned width,const unsigned height)
 			D3D12_RESOURCE_STATE_COPY_DEST,
 			nullptr,
 			IID_PPV_ARGS(m_pResource.ReleaseAndGetAddressOf())));
-	m_pResource->SetName(L"Backbuffer");
+	m_pResource->SetName(name.wstring().c_str());
 
 	static const uint32_t s_whitePixels = 0xFFFFFFFF;
 	void* pixelData = malloc(txtDesc.Height * txtDesc.Width * 4);
@@ -79,10 +79,8 @@ bool Texture::AllocateTexture(const unsigned width,const unsigned height)
 	{
 		throw std::runtime_error("Failed to upload texture");
 	}
-
-
-	//ID3D12DescriptorHeap* heaps[] = { m_DescriptorHandle->Heap() };
-	//GPU::m_CommandQueue->GetCommandList()->SetDescriptorHeaps(static_cast<UINT>(std::size(heaps)),heaps);
+	CheckFeatureSupport();
+	CreateView(); 
 
 	return false;
 }
@@ -107,7 +105,14 @@ void Texture::CreateView()
 		{
 			heapOffset = (int)GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_DSV]->Allocate();
 			m_DescriptorHandle = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_DSV]->GetCpuHandle(heapOffset);
-			device->CreateDepthStencilView(m_pResource.Get(),nullptr,m_DescriptorHandle);
+
+			D3D12_DEPTH_STENCIL_VIEW_DESC dsv = {};
+			dsv.Format = DXGI_FORMAT_D32_FLOAT;
+			dsv.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+			dsv.Texture2D.MipSlice = 0;
+			dsv.Flags = D3D12_DSV_FLAG_NONE;
+
+			device->CreateDepthStencilView(m_pResource.Get(),&dsv,m_DescriptorHandle);
 		} 
 
 		else if (CheckSRVSupport())

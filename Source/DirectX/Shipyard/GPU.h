@@ -135,7 +135,7 @@ public:
 		D3D12_CPU_DESCRIPTOR_HANDLE dsv,FLOAT depth = 1);
 
 	static D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentRenderTargetView();
-	static Texture& GetCurrentBackBuffer();
+	static Texture* GetCurrentBackBuffer();
 
 	static ComPtr<ID3D12DescriptorHeap>  CreateDescriptorHeap(
 		const ComPtr<ID3D12Device>& device,
@@ -184,7 +184,6 @@ public:
 
 	static inline uint64_t m_FenceValues[m_FrameCount] = {};
 
-	static inline GPURootSignature m_RootSignature;
 	static inline D3D12_FEATURE_DATA_ROOT_SIGNATURE m_FeatureData;
 
 

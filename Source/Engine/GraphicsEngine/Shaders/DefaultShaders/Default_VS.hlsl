@@ -1,45 +1,5 @@
 #include "../Registers.h" 
-struct DefaultVertexInput
-{
-    float4 Position : POSITION;
-    float4 VxColor : COLOR;
-    float2 UV : UV;
-    float3 Normal : NORMAL;
-    float3 Tangent : TANGENT;
-};
-
-struct DefaultVertexToPixel
-{
-    float4 Position : SV_POSITION;
-    float4 VxColor : COLOR;
-    float4 WorldPosition : WORLDPOSITION;
-    float2 UV : UV;
-    float3 Normal : NORMAL;
-    float3 Tangent : TANGENT;
-    float3 BiNormal : BINORMAL;
-};
-
-struct FrameBuffer
-{
-    float4x4 FB_InvView;
-    float4x4 FB_Proj;
-    float FB_Time;
-    float3 FB_CameraPosition;
-    int FB_RenderMode;
-    int2 FB_ScreenResolution;
-    float1 padding;
-};
-ConstantBuffer<FrameBuffer> g_FrameBuffer : register(HLSL_REG_FrameBuffer); 
-
-struct ObjectBuffer
-{
-    float4x4 OB_Transform; // 64 bytes
-    float3 OB_MinExtents; // 12 bytes
-    bool hasBone; // 4 bytes
-    float3 OB_MaxExtents; // 12 bytes
-    bool OB_Instanced;
-};
-ConstantBuffer<ObjectBuffer> g_ObjectBuffer : register(HLSL_REG_ObjectBuffer);
+#include "../Headers/ShaderStructs.hlsli"  
 
 
 float3 PositionInBound(float3 aMin, float3 aMax, float3 aPosition)

@@ -150,6 +150,19 @@ void CommandList::SetDescriptorTable(unsigned slot,Texture* texture)
 	TrackResource(texture->GetResource());
 }
 
+void CommandList::SetRenderTargets(uint16_t numberOfTargets,Texture* renderTargets,Texture* depthBuffer)
+{
+	assert(numberOfTargets <= 16);
+	D3D12_CPU_DESCRIPTOR_HANDLE RTVs[16] = {};
+	for (size_t i = 0; i < numberOfTargets; i++)
+	{ 
+		TransitionBarrier(renderTargets[i].GetResource(),D3D12_RESOURCE_STATE_RENDER_TARGET);
+		RTVs[i] = renderTargets[i].GetHandle();
+	}
+	auto copy = depthBuffer->GetHandle();
+	m_CommandList->OMSetRenderTargets(numberOfTargets,RTVs,FALSE,&copy);
+}
+
 void CommandList::TrackResource(Microsoft::WRL::ComPtr<ID3D12Object> object)
 {
 	m_TrackedObjects.push_back(object);

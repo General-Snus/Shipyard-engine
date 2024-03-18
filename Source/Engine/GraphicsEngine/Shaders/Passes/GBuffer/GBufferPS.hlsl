@@ -15,14 +15,14 @@ GBufferOutput main(DefaultVertexToPixel input)
     const float3 cameraDirection = g_FrameBuffer.FB_CameraPosition.xyz - input.WorldPosition.xyz;
     const float3 cameraNormalizedDirection = normalize(cameraDirection);
    // result.Color.rgb = (input.Normal.rgb + 1) / 2.0f;
-    const float2 uv = input.UV ;
+    const float2 uv = input.UV;
     
-   // const float4 textureColor = colorMap.Sample(defaultSampler, uv) * g_defaultMaterial.DefaultMaterial.albedoColor;
+    const float4 textureColor = colorMap.Sample(defaultSampler, uv); // * g_defaultMaterial.DefaultMaterial.albedoColor;
     
-   //if(textureColor.a < 0.1f)
-   //{
-   //    discard;
-   //}
+   if(textureColor.a < 0.1f)
+   {
+       discard;
+   }
     
     //const float4 materialComponent = materialMap.Sample(defaultSampler, uv);
     //const float2 textureNormal = normalMap.Sample(defaultSampler, uv).xy;
@@ -45,7 +45,7 @@ GBufferOutput main(DefaultVertexToPixel input)
     result.Normal.xyz = 1;
     result.Normal.w = 1;
     
-    result.Material = 1; 
+    result.Material = 1;
     
     result.Effect = 1;
     

@@ -186,7 +186,7 @@ void TextureHolder::Init()
 			isLoadedComplete = false;
 			return;
 		}
-		//isLoadedComplete = true;
+		isLoadedComplete = true;
 	}
 	else
 	{

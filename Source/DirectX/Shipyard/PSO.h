@@ -28,22 +28,50 @@ class PSO
 {
 public:
 	PSO() = default;
-	virtual void Init();
+	virtual void Init(const ComPtr<ID3D12Device2>& dev);
+	virtual Texture* GetRenderTargets() { return nullptr; };
+	virtual uint16_t GetRenderTargetAmounts() { return 0; };
 	virtual ComPtr<ID3D12PipelineState> GetPipelineState() const;
+
+	Microsoft::WRL::ComPtr<ID3D12RootSignature> GetRootSignature() const
+	{
+		return m_RootSignature.GetRootSignature();
+	}
 protected:
+	virtual void InitRootSignature();
+
+	GPURootSignature m_RootSignature;
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
 	ComPtr<ID3D12PipelineState> m_pipelineState;
 	ComPtr<ID3DBlob> vertexShader;
 	ComPtr<ID3DBlob> pixelShader;
+	ComPtr<ID3D12Device2> m_Device;
 };
 
 class GbufferPSO : public PSO
 {
 public:
 	GbufferPSO() = default;
-	void Init() override;
+	void Init(const ComPtr<ID3D12Device2>& dev) override;
+	Texture* GetRenderTargets() override;	
+	uint16_t GetRenderTargetAmounts() override { return numRenderTargets; };
+
 private:
-	static inline constexpr unsigned numRenderTargets = 8;
+	  void InitRootSignature() override;
+
+	static inline constexpr uint16_t numRenderTargets = 8;
 	Texture renderTargets[numRenderTargets];
+};
+
+class TonemapPSO : public PSO
+{
+public:
+	TonemapPSO() = default;
+	void Init(const ComPtr<ID3D12Device2>& dev) override;
+	Texture* GetRenderTargets() override;
+	uint16_t GetRenderTargetAmounts() override { return 1; };
+
+private:
+	void InitRootSignature() override; 
 };
 

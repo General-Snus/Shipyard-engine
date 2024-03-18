@@ -33,11 +33,7 @@ public:
 
 	virtual void CreateView(size_t numElements,size_t elementSize);
 	void Reset();
-
-
-	ID3D12Resource* operator->();
-	const ID3D12Resource* operator->() const;
-
+	 
 	void SetResource(const ComPtr<ID3D12Resource>& resource);
 	ComPtr<ID3D12Resource> GetResource();
 	const ComPtr<ID3D12Resource>& GetResource() const;

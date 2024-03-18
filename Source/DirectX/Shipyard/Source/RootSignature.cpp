@@ -51,8 +51,7 @@ void GPURootSignature::Destroy()
 }
 
 void GPURootSignature::SetRootSignatureDesc(const D3D12_ROOT_SIGNATURE_DESC1& rootSignatureDesc,D3D_ROOT_SIGNATURE_VERSION rootSignatureVersion)
-{	// Make sure any previously allocated root signature description is cleaned 
-	// up first.
+{
 	Destroy();
 
 	auto device = GPU::m_Device;

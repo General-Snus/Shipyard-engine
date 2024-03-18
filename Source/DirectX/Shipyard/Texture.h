@@ -23,10 +23,10 @@ public:
 		m_DescriptorHandle.ptr = 0;
 	}
 
-	bool AllocateTexture(const unsigned width,const unsigned height);
+	bool AllocateTexture(const unsigned width,const unsigned height,const std::filesystem::path& name = "Unnamed texture");
 	void CreateView();
 	bool CreateDDSFromMemory(const void* filePtr,size_t fileSize,bool sRGB);
-	D3D12_CPU_DESCRIPTOR_HANDLE  GetSRV() const { return  m_DescriptorHandle; }
+	D3D12_CPU_DESCRIPTOR_HANDLE  GetHandle() const { return  m_DescriptorHandle; }
 
 	uint32_t GetWidth() const { return m_Width; }
 	uint32_t GetHeight() const { return m_Height; }

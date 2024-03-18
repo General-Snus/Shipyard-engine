@@ -98,7 +98,7 @@ std::vector<GameObject> LoadTest(const std::filesystem::path& path)
 
 void GameLauncher::GenerateNewRandomCubes()
 {
-	const float range = 1000.f;
+	const float range = 100.f;
 	std::string arr[3] = { "Models/Cube.fbx","Models/CubeHoled.fbx","Models/SteelFloor.fbx" };
 	for (size_t i = 0; i < 1000; i++)
 	{
@@ -158,19 +158,19 @@ void GameLauncher::Start()
 	}
 
 	{
-		//GameObject floor = gom.CreateGameObject();
-		//auto& transform = floor.AddComponent<Transform>();
-		//transform.SetPosition(0,-0.0f,0);
-		//transform.SetRotation( 0,0.f,0.f);
-		//transform.SetScale(50.f,2.f,50.f);
-		//transform.SetGizmo(false); 
-		//floor.SetActive(false);
-		//floor.AddComponent<cMeshRenderer>("Models/Cube.fbx");
+		GameObject floor = gom.CreateGameObject();
+		auto& transform = floor.AddComponent<Transform>();
+		transform.SetPosition(0,-0.0f,0);
+		transform.SetRotation( 0,0.f,0.f);
+		transform.SetScale(50.f,2.f,50.f);
+		transform.SetGizmo(false); 
+		floor.SetActive(false);
+		floor.AddComponent<cMeshRenderer>("Models/Cube.fbx");
 		//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json"); 
 #if PHYSX
-		//auto& collider = floor.AddComponent<cCollider>();
-		//collider.SetColliderType<ColliderAssetPlanar>("Models/ColliderMesh.fbx");
-		//floor.AddComponent<cPhysXStaticBody>();
+		auto& collider = floor.AddComponent<cCollider>();
+		collider.SetColliderType<ColliderAssetPlanar>("Models/ColliderMesh.fbx");
+		floor.AddComponent<cPhysXStaticBody>();
 #endif 
 	}
 #if WorkingOnPngLoading

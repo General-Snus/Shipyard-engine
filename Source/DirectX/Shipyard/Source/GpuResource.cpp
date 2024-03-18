@@ -71,18 +71,7 @@ void GpuResource::Reset()
 	m_ResourceName.clear();
 	m_FormatSupport = {};
 }
-
-
-ID3D12Resource* GpuResource::operator->()
-{
-	return m_pResource.Get();
-}
-
-const ID3D12Resource* GpuResource::operator->() const
-{
-	return m_pResource.Get();
-}
-
+  
 void GpuResource::SetResource(const ComPtr<ID3D12Resource>& resource)
 {
 	m_pResource = resource;
