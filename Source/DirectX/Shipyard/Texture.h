@@ -1,8 +1,19 @@
 #pragma once
 #include <DirectX/Shipyard/GpuResource.h> 
+#include <unordered_map> 
 
 
 using namespace Microsoft::WRL;
+
+enum class ViewType
+{
+	SRV,
+	RTV,
+	UAV,
+	DSV
+};
+
+using OffsetHandlePair = std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, int>;
 
 class Texture : public GpuResource
 {
@@ -10,29 +21,29 @@ class Texture : public GpuResource
 	friend class TextureHolder;
 
 public:
-	explicit Texture() : m_Width(0),m_Height(0),m_Depth(0) { m_DescriptorHandle.ptr = 0; };
-	void Initialize();
+	explicit Texture();
+
 	FORCEINLINE const std::wstring& GetName() const { return myName; }
 	FORCEINLINE bool IsValid() const { return m_pResource != nullptr; }
 	// The name of this texture, for easy ID.
 	std::wstring myName;
 
-	virtual void Destroy() override
-	{
-		GpuResource::Destroy();
-		m_DescriptorHandle.ptr = 0;
-	}
+	void Destroy() override;
+	//Default state is render target
+	bool AllocateTexture(const unsigned width, const unsigned height, const std::filesystem::path& name = "Unnamed texture");
 
-	bool AllocateTexture(const unsigned width,const unsigned height,const std::filesystem::path& name = "Unnamed texture");
 	void CreateView();
-	bool CreateDDSFromMemory(const void* filePtr,size_t fileSize,bool sRGB);
-	D3D12_CPU_DESCRIPTOR_HANDLE  GetHandle() const { return  m_DescriptorHandle; }
+	void SetView(ViewType view);
+	bool CreateDDSFromMemory(const void* filePtr, size_t fileSize, bool sRGB);
+
+	OffsetHandlePair  GetHandle(ViewType type);
+	
+	OffsetHandlePair  GetHandle() const;
 
 	uint32_t GetWidth() const { return m_Width; }
 	uint32_t GetHeight() const { return m_Height; }
-	uint32_t GetDepth() const { return m_Depth; }
 	//-1 is invalid sizet so we need to check that, flinging in max sizet will cause crash making sure we check the value by instantcrashing in case we dont
-	int GetHeapOffset() const { return heapOffset; }
+	int GetHeapOffset() const;
 
 	virtual bool IsSRV() const override { return true; };
 
@@ -61,10 +72,13 @@ public:
 	}
 
 protected:
-	//std::unique_ptr<DirectX::DescriptorHeap> m_DescriptorHandle;
-	D3D12_CPU_DESCRIPTOR_HANDLE m_DescriptorHandle;
-	int heapOffset = -1;  
+	//D3D12_CPU_DESCRIPTOR_HANDLE m_RTVDescriptorHandle;
+	//D3D12_CPU_DESCRIPTOR_HANDLE m_SRVDescriptorHandle; 
+	//int heapOffset = -1;
+
+	std::unordered_map<ViewType, OffsetHandlePair> m_DescriptorHandles;
+	ViewType m_RecentBoundType = ViewType::SRV;
+
 	uint32_t m_Width;
 	uint32_t m_Height;
-	uint32_t m_Depth;
 };

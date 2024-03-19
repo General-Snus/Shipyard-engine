@@ -1,14 +1,7 @@
 #include "GraphicsEngine.pch.h"
 #include "G_Buffer.h"
 
-#include <Engine/GraphicsEngine/GraphicsEngine.h> 
-#include <Shaders/Include/DebugLayer_PS.h> 
-#include <Shaders/Include/Default_VS.h> 
-#include <Shaders/Include/EnvironmentLight_PS.h>
-#include <Shaders/Include/GBufferPS.h>
-#include <Shaders/Include/PointLight_PS.h> 
-#include <Shaders/Include/ScreenspaceQuad_VS.h>
-#include <Shaders/Include/SpotLight_PS.h> 
+#include <Engine/GraphicsEngine/GraphicsEngine.h>  
 
 
 void G_Buffer::Init()

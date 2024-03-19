@@ -182,8 +182,7 @@ uint32_t ResourceStateTracker::FlushPendingResourceBarriers(CommandList& command
 void ResourceStateTracker::CommitFinalResourceStates()
 {
 	assert(ms_IsLocked);
-
-	// Commit final resource states to the global resource state array (map).
+	 
 	for (const auto& resourceState : m_FinalResourceState)
 	{
 		ms_GlobalResourceState[resourceState.first] = resourceState.second;

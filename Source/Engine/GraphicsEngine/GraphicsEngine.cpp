@@ -10,26 +10,11 @@
 #include <Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h>
 #include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
 #include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
+
 #include <Objects/DataObjects/Default_C.h>
 #include <Objects/DataObjects/Default_FX.h>
 #include <Objects/DataObjects/Default_M.h>
 #include <Objects/DataObjects/Default_N.h>
-#include <Shaders/Include/Bloom_PS.h> 
-#include <Shaders/Include/brdfLUT_PS.h>
-#include <Shaders/Include/CopyPixels_PS.h> 
-#include <Shaders/Include/Default_PS.h>
-#include <Shaders/Include/Default_VS.h>
-#include <Shaders/Include/EdgeBlur.h> 
-#include <Shaders/Include/GaussianBlur_PS.h> 
-#include <Shaders/Include/LineDrawer_PS.h>
-#include <Shaders/Include/LineDrawer_VS.h>
-#include <Shaders/Include/LuminancePass_PS.h>
-#include <Shaders/Include/ParticleShader_GS.h> 
-#include <Shaders/Include/ParticleShader_PS.h> 
-#include <Shaders/Include/ParticleShader_VS.h> 
-#include <Shaders/Include/ScreenspaceQuad_VS.h>
-#include <Shaders/Include/SSAO_PS.h> 
-#include <Shaders/Include/ToneMapping_PS.h> 
 
 #include "DirectX/Shipyard/GPU.h"
 #include "DirectX/Shipyard/Helpers.h"
@@ -40,7 +25,7 @@
 #include "Tools/ImGui/ImGui/backends/imgui_impl_dx12.h"
 
 
-bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
+bool GraphicsEngine::Initialize(HWND windowHandle, bool enableDeviceDebug)
 {
 	DeferredCommandList.Initialize();
 	OverlayCommandList.Initialize();
@@ -56,7 +41,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 			enableDeviceDebug,
 			myBackBuffer,
 			myDepthBuffer,
-			Window::Width(),Window::Height()))
+			Window::Width(), Window::Height()))
 		{
 			Logger::Err("Failed to initialize the DX12 GPU!");
 			return false;
@@ -127,7 +112,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 bool GraphicsEngine::SetupDebugDrawline()
 {
 	DebugDrawer::Get().Initialize();
-	DebugDrawer::Get().AddDebugGrid({ 0.f, 0.0f, 0.f },1000,10,{ 1.0f, 1.0f, 1.0f });
+	DebugDrawer::Get().AddDebugGrid({ 0.f, 0.0f, 0.f }, 1000, 10, { 1.0f, 1.0f, 1.0f });
 	return true;
 }
 
@@ -284,14 +269,14 @@ void GraphicsEngine::SetupDefaultVariables()
 
 
 
-	 AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultTile.dds",defaultTexture);
+	AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultTile.dds", defaultTexture);
 	/*
 	if (!GPU::LoadTexture(
-		defaultTexture->GetRawTexture().get(), 
+		defaultTexture->GetRawTexture().get(),
 	))
 	{
 		Logger::Log("Failed to load default color texture");
-		assert(false); 
+		assert(false);
 	}
 	*/
 
@@ -307,7 +292,7 @@ void GraphicsEngine::SetupDefaultVariables()
 	//		sizeof(BuiltIn_Default_C_ByteCode)
 	//	);
 
-	AssetManager::Get().ForceLoadAsset<Mesh>("default.fbx",defaultMesh);
+	AssetManager::Get().ForceLoadAsset<Mesh>("default.fbx", defaultMesh);
 }
 
 void GraphicsEngine::SetupBlendStates()
@@ -618,7 +603,7 @@ void GraphicsEngine::BeginFrame()
 
 }
 
-void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
+void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 {
 	OPTICK_EVENT();
 	aDeltaTime; aTotalTime;
@@ -631,35 +616,37 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	//const UINT currentBackBufferIndex = chain->GetCurrentBackBufferIndex();
 	const auto* backBuffer = GPU::GetCurrentBackBuffer();
 	const auto rtv = GPU::GetCurrentRenderTargetView();
-	const auto dsv = GPU::m_DepthBuffer->GetHandle();
-	commandList->TransitionBarrier(backBuffer->GetResource(),D3D12_RESOURCE_STATE_RENDER_TARGET);
+	const auto dsv = GPU::m_DepthBuffer->GetHandle(ViewType::DSV).first;
+	commandList->TransitionBarrier(backBuffer->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	FLOAT clearColor[] = { 0.2f, 0.2f, 0.9f, 1.0f };
 
-	GPU::ClearRTV(*commandList.get(),rtv,clearColor);
-	GPU::ClearDepth(*commandList.get(),GPU::m_DepthBuffer->GetHandle());
+	GPU::ClearRTV(*commandList.get(), rtv, clearColor);
+	GPU::ClearDepth(*commandList.get(), GPU::m_DepthBuffer->GetHandle(ViewType::DSV).first);
 
 
-	graphicCommandList->RSSetViewports(1,&GPU::m_Viewport);
-	graphicCommandList->RSSetScissorRects(1,&GPU::m_ScissorRect);
+	graphicCommandList->RSSetViewports(1, &GPU::m_Viewport);
+	graphicCommandList->RSSetScissorRects(1, &GPU::m_ScissorRect);
 	//graphicCommandList->OMSetRenderTargets(1,&rtv,FALSE,&dsv);
 
+	Texture* albedoBuffer;
+
 	{
-		const auto& defaultPSO = PSOCache::GetState(PSOCache::ePipelineStateID::GBuffer);
+		const auto& gbufferPSO = PSOCache::GetState(PSOCache::ePipelineStateID::GBuffer);
+		albedoBuffer = gbufferPSO->GetRenderTargets();
+		commandList->SetRenderTargets(gbufferPSO->GetRenderTargetAmounts(), gbufferPSO->GetRenderTargets(), GPU::m_DepthBuffer.get());
 
-		commandList->SetRenderTargets(defaultPSO->GetRenderTargetAmounts(),defaultPSO->GetRenderTargets(),GPU::m_DepthBuffer.get());
-
-		const auto& pipelineState = defaultPSO->GetPipelineState().Get();
+		const auto& pipelineState = gbufferPSO->GetPipelineState().Get();
 		graphicCommandList->SetPipelineState(pipelineState);
 		commandList->TrackResource(pipelineState);
 
-		const auto& rootSignature = defaultPSO->GetRootSignature();
+		const auto& rootSignature = gbufferPSO->GetRootSignature();
 		graphicCommandList->SetGraphicsRootSignature(rootSignature.Get());
 		commandList->TrackResource(rootSignature);
 	}
 
 	ID3D12DescriptorHeap* heaps[] = { GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->Heap() };
-	graphicCommandList->SetDescriptorHeaps(static_cast<UINT>(std::size(heaps)),heaps);
+	graphicCommandList->SetDescriptorHeaps(static_cast<UINT>(std::size(heaps)), heaps);
 
 	myCamera->SetCameraToFrameBuffer(graphicCommandList);
 
@@ -672,21 +659,21 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 		for (const auto& element : meshRenderer.GetElements())
 		{
 			objectBuffer.myTransform = transform.GetRawTransform();
-			objectBuffer.MaxExtents = Vector3f(1,1,1);
-			objectBuffer.MinExtents = -Vector3f(1,1,1);
+			objectBuffer.MaxExtents = Vector3f(1, 1, 1);
+			objectBuffer.MinExtents = -Vector3f(1, 1, 1);
 			objectBuffer.hasBone = false;
 			objectBuffer.isInstanced = false;
 
 			const auto& alloc = GPU::m_GraphicsMemory->AllocateConstant<ObjectBuffer>(objectBuffer);
-			graphicCommandList->SetGraphicsRootConstantBufferView(REG_ObjectBuffer,alloc.GpuAddress());
+			graphicCommandList->SetGraphicsRootConstantBufferView(REG_ObjectBuffer, alloc.GpuAddress());
 			graphicCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-			commandList->TransitionBarrier(element.VertexBuffer.GetResource(),D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+			commandList->TransitionBarrier(element.VertexBuffer.GetResource(), D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 			const auto vertexBuffer = element.VertexBuffer.GetVertexBufferView();
-			graphicCommandList->IASetVertexBuffers(0,1,&vertexBuffer);
+			graphicCommandList->IASetVertexBuffers(0, 1, &vertexBuffer);
 			commandList->TrackResource(element.VertexBuffer);
 
-			commandList->TransitionBarrier(element.IndexResource.GetResource(),D3D12_RESOURCE_STATE_INDEX_BUFFER);
+			commandList->TransitionBarrier(element.IndexResource.GetResource(), D3D12_RESOURCE_STATE_INDEX_BUFFER);
 			const auto indexBuffer = element.IndexResource.GetIndexBufferView();
 			graphicCommandList->IASetIndexBuffer(&indexBuffer);
 			commandList->TrackResource(element.IndexResource);
@@ -696,35 +683,46 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 				if (auto albedoIndex = meshRenderer.GetTexture((eTextureType)i))
 				{
 					const auto tex = albedoIndex->GetRawTexture().get();
-					commandList->SetDescriptorTable(eRootBindings::Textures,tex); 
-					commandList->TrackResource(tex->GetResource()); 
+					commandList->SetDescriptorTable(eRootBindings::Textures, tex);
+					commandList->TrackResource(tex->GetResource());
 				}
 				else
 				{
 					const auto tex = defaultTexture->GetRawTexture().get();
-					commandList->SetDescriptorTable(eRootBindings::Textures,tex);
+					commandList->SetDescriptorTable(eRootBindings::Textures, tex);
 					commandList->TrackResource(tex->GetResource());
-				} 
+				}
 			}
 
 			commandList->FlushResourceBarriers();
-			graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
+			graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(), 1, 0, 0, 0);
 		}
 	}
 
-	const auto& tonemapping= PSOCache::GetState(PSOCache::ePipelineStateID::ToneMap);
+	//const auto& tonemapping = PSOCache::GetState(PSOCache::ePipelineStateID::ToneMap);
+	//
+	//commandList->SetRenderTargets(tonemapping->GetRenderTargetAmounts(), tonemapping->GetRenderTargets(), GPU::m_DepthBuffer.get());
+	//
+	//const auto& pipelineState = tonemapping->GetPipelineState().Get();
+	//graphicCommandList->SetPipelineState(pipelineState);
+	//commandList->TrackResource(pipelineState);
+	//
+	//const auto& rootSignature = tonemapping->GetRootSignature();
+	//graphicCommandList->SetGraphicsRootSignature(rootSignature.Get());
+	//commandList->TrackResource(rootSignature);
+	//
+	//graphicCommandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
+	// 
+	//
+	//commandList->TransitionBarrier(albedoBuffer->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	//commandList->FlushResourceBarriers();
+	//albedoBuffer->SetView(ViewType::SRV);
+	//commandList->SetDescriptorTable(eRootBindings::Textures, albedoBuffer);
+	//commandList->TrackResource(albedoBuffer->GetResource());
+	//
+	//commandList->FlushResourceBarriers();
+	//graphicCommandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
-	commandList->SetRenderTargets(tonemapping->GetRenderTargetAmounts(),tonemapping->GetRenderTargets(),GPU::m_DepthBuffer.get());
-
-	const auto& pipelineState = tonemapping->GetPipelineState().Get();
-	graphicCommandList->SetPipelineState(pipelineState);
-	commandList->TrackResource(pipelineState);
-
-	const auto& rootSignature = tonemapping->GetRootSignature();
-	graphicCommandList->SetGraphicsRootSignature(rootSignature.Get());
-	commandList->TrackResource(rootSignature);
-
-	 graphicCommandList->OMSetRenderTargets(1,&rtv,FALSE,&dsv);
 	//	myG_Buffer.SetWriteTargetToBuffer(); //Let all write to textures
 	//	OPTICK_EVENT("Deferred");
 	//	DeferredCommandList.Execute();
@@ -785,19 +783,12 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	//	}
 	//	OverlayCommandList.Execute();
 	//#endif //  _DEBUGDRAW
-	//	RHI::EndEvent();
-
-
-	//auto value = commandQueue->ExecuteCommandList(commandList);
-	//commandQueue->WaitForFenceValue(value);
+	//	RHI::EndEvent(); 
 
 	commandQueue->ExecuteCommandList(commandList);
-
-
-
 }
 
-void GraphicsEngine::RenderTextureTo(eRenderTargets from,eRenderTargets to)  const
+void GraphicsEngine::RenderTextureTo(eRenderTargets from, eRenderTargets to)  const
 {
 	from; to;
 
@@ -824,10 +815,10 @@ void GraphicsEngine::EndFrame()
 	auto commandList = commandQueue->GetCommandList();
 
 	const auto* backBuffer = GPU::GetCurrentBackBuffer();
-	commandList->TransitionBarrier(backBuffer->GetResource(),D3D12_RESOURCE_STATE_PRESENT);
+	commandList->TransitionBarrier(backBuffer->GetResource(), D3D12_RESOURCE_STATE_PRESENT);
 	commandQueue->ExecuteCommandList(commandList);
 
-	Helpers::ThrowIfFailed(GPU::m_Swapchain->m_SwapChain->Present(1,0));
+	Helpers::ThrowIfFailed(GPU::m_Swapchain->m_SwapChain->Present(1, 0));
 	GPU::m_FenceValues[GPU::m_FrameIndex] = commandQueue->Signal();
 	GPU::m_FrameIndex = GPU::m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
 

@@ -152,14 +152,14 @@ void CommandList::SetDescriptorTable(unsigned slot,Texture* texture)
 
 void CommandList::SetRenderTargets(uint16_t numberOfTargets,Texture* renderTargets,Texture* depthBuffer)
 {
-	assert(numberOfTargets <= 16);
-	D3D12_CPU_DESCRIPTOR_HANDLE RTVs[16] = {};
+	assert(numberOfTargets <= D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
+	D3D12_CPU_DESCRIPTOR_HANDLE RTVs[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT] = {};
 	for (size_t i = 0; i < numberOfTargets; i++)
 	{ 
 		TransitionBarrier(renderTargets[i].GetResource(),D3D12_RESOURCE_STATE_RENDER_TARGET);
-		RTVs[i] = renderTargets[i].GetHandle();
+		RTVs[i] = renderTargets[i].GetHandle(ViewType::RTV).first;
 	}
-	auto copy = depthBuffer->GetHandle();
+	auto copy = depthBuffer->GetHandle(ViewType::DSV).first;
 	m_CommandList->OMSetRenderTargets(numberOfTargets,RTVs,FALSE,&copy);
 }
 
@@ -184,15 +184,12 @@ void CommandList::FlushResourceBarriers()
 }
 
 bool CommandList::Close(CommandList& pendingCommandList)
-{
-	// Flush any remaining barriers.
+{ 
 	FlushResourceBarriers();
 
 	m_CommandList->Close();
-
-	// Flush pending resource barriers.
-	uint32_t numPendingBarriers = m_ResourceStateTracker->FlushPendingResourceBarriers(pendingCommandList);
-	// Commit the final resource state to the global state.
+	 
+	uint32_t numPendingBarriers = m_ResourceStateTracker->FlushPendingResourceBarriers(pendingCommandList); 
 	m_ResourceStateTracker->CommitFinalResourceStates();
 
 	return numPendingBarriers > 0;
