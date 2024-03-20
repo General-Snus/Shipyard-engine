@@ -31,7 +31,7 @@ bool Texture::AllocateTexture(const unsigned width,const unsigned height,const s
 {
 	m_Width = width;
 	m_Height = height; 
-	myName = name;
+	myName = name.string();
 
 	 
 	D3D12_RESOURCE_DESC txtDesc = {};
@@ -148,7 +148,8 @@ void Texture::CreateView()
 
 void Texture::SetView(ViewType view)
 {
-	if (!m_pResource)
+	if (!m_pResource || 
+		m_DescriptorHandles.contains(view) && m_DescriptorHandles.at(view).second != -1)
 	{
 		return;
 	}
@@ -165,8 +166,8 @@ void Texture::SetView(ViewType view)
 		const int heapOffset = (int)GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->Allocate();
 		const auto descriptorHandle = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->GetCpuHandle(heapOffset);
 		CreateShaderResourceView(GPU::m_Device.Get(), m_pResource.Get(), descriptorHandle);
-
-		m_DescriptorHandles.emplace(ViewType::SRV, OffsetHandlePair(descriptorHandle, heapOffset));
+		 
+		m_DescriptorHandles[ViewType::SRV] = OffsetHandlePair(descriptorHandle,heapOffset);
 
 		break;
 	}

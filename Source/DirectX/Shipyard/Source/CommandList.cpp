@@ -132,11 +132,11 @@ void CommandList::SetView(eRootBindings rootParameterIndex,uint32_t descriptorOf
 
 void CommandList::SetDescriptorTable(unsigned slot,Texture* texture)
 {
-	const size_t offset = texture->GetHeapOffset();
+	const size_t offset = texture->GetHandle(ViewType::SRV).second;
 
 	if (offset == -1)
 	{
-		Logger::Warn("Texture has no heap offset");
+		Logger::Warn("Texture has no heap offset: " + texture->GetName());
 		return;
 	}
 

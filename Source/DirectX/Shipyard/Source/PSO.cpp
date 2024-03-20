@@ -135,6 +135,9 @@ void GbufferPSO::Init(const ComPtr<ID3D12Device2>& dev)
 	for (size_t i = 0; i < numRenderTargets; i++)
 	{
 		renderTargets[i].AllocateTexture(GPU::m_Width, GPU::m_Height, "GBufferRenderTexture" + std::to_string(i));
+
+		renderTargets[i].SetView(ViewType::SRV);
+		renderTargets[i].SetView(ViewType::RTV);
 		rtvFormats.RTFormats[i] = { renderTargets[i].GetResource()->GetDesc().Format };
 	}
 	rtvFormats.NumRenderTargets = numRenderTargets;

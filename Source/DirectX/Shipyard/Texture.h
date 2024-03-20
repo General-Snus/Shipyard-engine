@@ -23,10 +23,10 @@ class Texture : public GpuResource
 public:
 	explicit Texture();
 
-	FORCEINLINE const std::wstring& GetName() const { return myName; }
+	FORCEINLINE const std::string& GetName() const { return myName; }
 	FORCEINLINE bool IsValid() const { return m_pResource != nullptr; }
 	// The name of this texture, for easy ID.
-	std::wstring myName;
+	std::string myName;
 
 	void Destroy() override;
 	//Default state is render target

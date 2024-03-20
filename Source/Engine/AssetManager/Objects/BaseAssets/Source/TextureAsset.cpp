@@ -180,12 +180,14 @@ void TextureHolder::Init()
 			{
 				RawTexture = GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture();
 				isLoadedComplete = true;
+				RawTexture->SetView(ViewType::SRV);
 				return;
 			}
 			std::cout << "Error: Default texture was not found" << " \n";
 			isLoadedComplete = false;
 			return;
 		}
+				RawTexture->SetView(ViewType::SRV);
 		isLoadedComplete = true;
 	}
 	else
@@ -196,6 +198,7 @@ void TextureHolder::Init()
 		{
 			RawTexture = GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture();
 			isLoadedComplete = true;
+			RawTexture->SetView(ViewType::SRV);
 			return;
 		}
 		std::cout << "Error: Default texture was not found" << " \n";

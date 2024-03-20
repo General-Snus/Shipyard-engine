@@ -698,6 +698,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 			graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(), 1, 0, 0, 0);
 		}
 	}
+			commandList->FlushResourceBarriers();
 
 	//const auto& tonemapping = PSOCache::GetState(PSOCache::ePipelineStateID::ToneMap);
 	//

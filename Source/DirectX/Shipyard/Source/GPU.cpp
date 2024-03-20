@@ -442,7 +442,7 @@ bool GPU::LoadTexture(Texture* outTexture, const std::filesystem::path& aFileNam
 		std::cout << error << std::endl;
 		return false;
 	}
-	outTexture->myName = aFileName.filename();
+	outTexture->myName = aFileName.filename().string();
 
 	ResourceUploadBatch resourceUpload(m_Device.Get());
 	resourceUpload.Begin();
@@ -464,7 +464,7 @@ bool GPU::LoadTexture(Texture* outTexture, const std::filesystem::path& aFileNam
 bool GPU::LoadTextureFromMemory(Texture* outTexture, const std::filesystem::path& aName, const BYTE* someImageData, size_t anImageDataSize, bool generateMips, const D3D12_SHADER_RESOURCE_VIEW_DESC* aSRVDesc)
 {
 	outTexture; aName; someImageData; anImageDataSize; aSRVDesc;
-	outTexture->myName = aName;
+	outTexture->myName = aName.string();
 	//outTexture->m_DescriptorHandle = std::make_unique<DescriptorHeap>(m_Device.Get(),
 	//	eDescriptors::Textures);
 
@@ -587,7 +587,7 @@ void GPU::UpdateRenderTargetViews(const ComPtr<ID3D12Device>& device, const ComP
 
 		m_renderTargets[i].SetResource(backBuffer);
 		m_renderTargets[i].CreateView();
-		m_renderTargets->myName = L"backbuffer:" + std::to_wstring(i);
+		m_renderTargets->myName = "backbuffer: " + std::to_string(i);
 
 		device->CreateRenderTargetView(backBuffer.Get(), nullptr, rtvHandle);
 		rtvHandle.Offset(rtvDescriptorSize);
