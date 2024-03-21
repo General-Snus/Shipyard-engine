@@ -619,7 +619,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 	const auto dsv = GPU::m_DepthBuffer->GetHandle(ViewType::DSV).first;
 	commandList->TransitionBarrier(backBuffer->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-	FLOAT clearColor[] = { 0.2f, 0.2f, 0.9f, 1.0f };
+	const float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 	GPU::ClearRTV(*commandList.get(), rtv, clearColor);
 	GPU::ClearDepth(*commandList.get(), GPU::m_DepthBuffer->GetHandle(ViewType::DSV).first);
@@ -629,12 +629,15 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 	graphicCommandList->RSSetScissorRects(1, &GPU::m_ScissorRect);
 	//graphicCommandList->OMSetRenderTargets(1,&rtv,FALSE,&dsv);
 
-	Texture* albedoBuffer;
-
+	Texture* gbufferTextures;
+	int targetAmount = 0;
 	{
 		const auto& gbufferPSO = PSOCache::GetState(PSOCache::ePipelineStateID::GBuffer);
-		albedoBuffer = gbufferPSO->GetRenderTargets();
-		commandList->SetRenderTargets(gbufferPSO->GetRenderTargetAmounts(), gbufferPSO->GetRenderTargets(), GPU::m_DepthBuffer.get());
+		gbufferTextures = gbufferPSO->GetRenderTargets();
+		targetAmount = gbufferPSO->GetRenderTargetAmounts();
+
+		GPU::ClearRTV(*commandList.get(), gbufferTextures, targetAmount, clearColor);
+		commandList->SetRenderTargets(targetAmount, gbufferPSO->GetRenderTargets(), GPU::m_DepthBuffer.get());
 
 		const auto& pipelineState = gbufferPSO->GetPipelineState().Get();
 		graphicCommandList->SetPipelineState(pipelineState);
@@ -653,6 +656,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 	ObjectBuffer objectBuffer;
 	static auto& list = GameObjectManager::Get().GetAllComponents<cMeshRenderer>();
 	Logger::Log(std::to_string(list.size()));
+
 	for (auto& meshRenderer : list)
 	{
 		const auto& transform = meshRenderer.GetComponent<Transform>();
@@ -698,31 +702,58 @@ void GraphicsEngine::RenderFrame(float aDeltaTime, double aTotalTime)
 			graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(), 1, 0, 0, 0);
 		}
 	}
-			commandList->FlushResourceBarriers();
+	commandList->FlushResourceBarriers();
+	{
+		const auto& enviromentLight = PSOCache::GetState(PSOCache::ePipelineStateID::DeferredLighting);
 
-	//const auto& tonemapping = PSOCache::GetState(PSOCache::ePipelineStateID::ToneMap);
-	//
-	//commandList->SetRenderTargets(tonemapping->GetRenderTargetAmounts(), tonemapping->GetRenderTargets(), GPU::m_DepthBuffer.get());
-	//
-	//const auto& pipelineState = tonemapping->GetPipelineState().Get();
-	//graphicCommandList->SetPipelineState(pipelineState);
-	//commandList->TrackResource(pipelineState);
-	//
-	//const auto& rootSignature = tonemapping->GetRootSignature();
-	//graphicCommandList->SetGraphicsRootSignature(rootSignature.Get());
-	//commandList->TrackResource(rootSignature);
-	//
-	//graphicCommandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
-	// 
-	//
-	//commandList->TransitionBarrier(albedoBuffer->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-	//commandList->FlushResourceBarriers();
-	//albedoBuffer->SetView(ViewType::SRV);
-	//commandList->SetDescriptorTable(eRootBindings::Textures, albedoBuffer);
-	//commandList->TrackResource(albedoBuffer->GetResource());
-	//
-	//commandList->FlushResourceBarriers();
-	//graphicCommandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+		GPU::ClearRTV(*commandList.get(), enviromentLight->GetRenderTargets(), enviromentLight->GetRenderTargetAmounts(), clearColor);
+		commandList->SetRenderTargets(enviromentLight->GetRenderTargetAmounts(), enviromentLight->GetRenderTargets(), GPU::m_DepthBuffer.get());
+
+		const auto& pipelineState = enviromentLight->GetPipelineState().Get();
+		graphicCommandList->SetPipelineState(pipelineState);
+		commandList->TrackResource(pipelineState);
+
+		const auto& rootSignature = enviromentLight->GetRootSignature();
+		graphicCommandList->SetGraphicsRootSignature(rootSignature.Get());
+		commandList->TrackResource(rootSignature);
+		for (int i = 0; i < targetAmount; i++)
+		{
+		GPU::TransitionResource(*commandList.get(), gbufferTextures->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET,D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			commandList->SetDescriptorTable(eRootBindings::Textures, &gbufferTextures[i]); 
+		}
+
+
+
+		graphicCommandList->IASetVertexBuffers(0, 1, nullptr);
+		graphicCommandList->IASetIndexBuffer(nullptr);
+		graphicCommandList->DrawInstanced(6, 1, 0, 0);
+	}
+
+	{
+		const auto& toneMapper = PSOCache::GetState(PSOCache::ePipelineStateID::ToneMap);
+
+		GPU::ClearRTV(*commandList.get(), toneMapper->GetRenderTargets(), toneMapper->GetRenderTargetAmounts(), clearColor);
+		commandList->SetRenderTargets(toneMapper->GetRenderTargetAmounts(), toneMapper->GetRenderTargets(), GPU::m_DepthBuffer.get());
+
+		const auto& pipelineState = toneMapper->GetPipelineState().Get();
+		graphicCommandList->SetPipelineState(pipelineState);
+		commandList->TrackResource(pipelineState);
+
+		const auto& rootSignature = toneMapper->GetRootSignature();
+		graphicCommandList->SetGraphicsRootSignature(rootSignature.Get());
+		commandList->TrackResource(rootSignature);
+
+		graphicCommandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
+
+		commandList->TransitionBarrier(gbufferTextures->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		gbufferTextures->SetView(ViewType::SRV);
+		commandList->SetDescriptorTable(eRootBindings::Textures, gbufferTextures);
+		commandList->TrackResource(gbufferTextures->GetResource());
+
+		graphicCommandList->IASetVertexBuffers(0, 1, nullptr);
+		graphicCommandList->IASetIndexBuffer(nullptr);
+		graphicCommandList->DrawInstanced(6, 1, 0, 0);
+	}
 
 	//	myG_Buffer.SetWriteTargetToBuffer(); //Let all write to textures
 	//	OPTICK_EVENT("Deferred");

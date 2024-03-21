@@ -63,6 +63,22 @@ private:
 	Texture renderTargets[numRenderTargets];
 };
 
+class EnviromentLightPSO : public PSO
+{
+public:
+	EnviromentLightPSO() = default;
+	void Init(const ComPtr<ID3D12Device2>& dev) override;
+
+	void SetResources(Texture* texArray, int amount) override;
+	Texture* GetRenderTargets() override;
+	uint16_t GetRenderTargetAmounts() override { return 1; };
+
+private:
+	static inline constexpr uint16_t numRenderTargets = 8;
+	Texture textureResources[numRenderTargets];
+	void InitRootSignature() override;
+};
+
 class TonemapPSO : public PSO
 {
 public:

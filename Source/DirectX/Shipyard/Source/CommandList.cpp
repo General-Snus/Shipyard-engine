@@ -143,14 +143,14 @@ void CommandList::SetDescriptorTable(unsigned slot,Texture* texture)
 	TransitionBarrier(texture->GetResource(),D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 	m_CommandList->SetGraphicsRootDescriptorTable(
-		eRootBindings::Textures,
+		slot,
 		GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->GetGpuHandle(offset));
 
 
 	TrackResource(texture->GetResource());
 }
 
-void CommandList::SetRenderTargets(uint16_t numberOfTargets,Texture* renderTargets,Texture* depthBuffer)
+void CommandList::SetRenderTargets(int numberOfTargets,Texture* renderTargets,Texture* depthBuffer)
 {
 	assert(numberOfTargets <= D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
 	D3D12_CPU_DESCRIPTOR_HANDLE RTVs[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT] = {};

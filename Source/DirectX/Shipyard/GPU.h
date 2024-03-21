@@ -129,7 +129,9 @@ public:
 		D3D12_RESOURCE_STATES beforeState,D3D12_RESOURCE_STATES afterState);
 
 	static void ClearRTV(const CommandList& commandList,
-		D3D12_CPU_DESCRIPTOR_HANDLE rtv,FLOAT* clearColor);
+		D3D12_CPU_DESCRIPTOR_HANDLE rtv,const float clearColor[]);
+	static void ClearRTV(const CommandList& commandList, D3D12_CPU_DESCRIPTOR_HANDLE* rtv, int amountOfTargets, const float clearColor[]);
+	static void ClearRTV(const CommandList& commandList, Texture* rtv, int amountOfTargets, const float clearColor[]);
 
 	static void ClearDepth(const CommandList& commandList,
 		D3D12_CPU_DESCRIPTOR_HANDLE dsv,FLOAT depth = 1);

@@ -218,7 +218,7 @@ bool GPU::Initialize(HWND aWindowHandle, bool enableDeviceDebug, const std::shar
 	ResizeDepthBuffer(width, height);
 
 
-	m_DirectCommandQueue->ExecuteCommandList(m_DirectCommandQueue->GetCommandList());
+	//m_DirectCommandQueue->ExecuteCommandList(m_DirectCommandQueue->GetCommandList());
 
 	m_Viewport = { 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), D3D12_MIN_DEPTH, D3D12_MAX_DEPTH };
 	m_ScissorRect = { 0, 0, static_cast<LONG>(width), static_cast<LONG>(height) };
@@ -496,9 +496,25 @@ void GPU::TransitionResource(
 	commandList.GetGraphicsCommandList()->ResourceBarrier(1, &barrier);
 }
 
-void GPU::ClearRTV(const CommandList& commandList, D3D12_CPU_DESCRIPTOR_HANDLE rtv, FLOAT* clearColor)
+void GPU::ClearRTV(const CommandList& commandList, D3D12_CPU_DESCRIPTOR_HANDLE rtv, const float clearColor[])
 {
 	commandList.GetGraphicsCommandList()->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
+}
+void GPU::ClearRTV(const CommandList& commandList, D3D12_CPU_DESCRIPTOR_HANDLE* rtv, int amountOfTargets, const float clearColor[])
+{
+	for (size_t i = 0; i < amountOfTargets; i++)
+	{
+		commandList.GetGraphicsCommandList()->ClearRenderTargetView(*rtv, clearColor, 0, nullptr);
+		rtv++;
+	}
+}
+void GPU::ClearRTV(const CommandList& commandList, Texture* rtv, int amountOfTargets, const float clearColor[])
+{
+	for (size_t i = 0; i < amountOfTargets; i++)
+	{
+		commandList.GetGraphicsCommandList()->ClearRenderTargetView(rtv->GetHandle(ViewType::RTV).first, clearColor, 0, nullptr);
+		rtv++;
+	}
 }
 
 void GPU::ClearDepth(const CommandList& commandList, D3D12_CPU_DESCRIPTOR_HANDLE dsv, FLOAT depth)
@@ -574,8 +590,7 @@ HANDLE GPU::CreateEventHandle()
 
 void GPU::UpdateRenderTargetViews(const ComPtr<ID3D12Device>& device, const ComPtr<IDXGISwapChain4>& swapChain, const ComPtr<ID3D12DescriptorHeap>& descriptorHeap)
 {
-	auto rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-
+	auto rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV); 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(descriptorHeap->GetCPUDescriptorHandleForHeapStart());
 
 	for (int i = 0; i < m_FrameCount; ++i)

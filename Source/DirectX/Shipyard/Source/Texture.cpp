@@ -8,12 +8,12 @@
 #include "Shipyard/eDescriptors.h"
 #include "Shipyard/GPU.h"
 #include "Shipyard/Helpers.h"
- 
+
 
 Texture::Texture() : m_Width(0), m_Height(0)
 {
 	auto value = OffsetHandlePair(D3D12_CPU_DESCRIPTOR_HANDLE(), -1);
-	m_DescriptorHandles.emplace(ViewType::SRV,value);
+	m_DescriptorHandles.emplace(ViewType::SRV, value);
 };
 
 void Texture::Destroy()
@@ -27,13 +27,13 @@ void Texture::Destroy()
 	}
 }
 
-bool Texture::AllocateTexture(const unsigned width,const unsigned height,const std::filesystem::path& name)
+bool Texture::AllocateTexture(const unsigned width, const unsigned height, const std::filesystem::path& name)
 {
 	m_Width = width;
-	m_Height = height; 
+	m_Height = height;
 	myName = name.string();
 
-	 
+
 	D3D12_RESOURCE_DESC txtDesc = {};
 	txtDesc.MipLevels = txtDesc.DepthOrArraySize = 1;
 	txtDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -42,7 +42,7 @@ bool Texture::AllocateTexture(const unsigned width,const unsigned height,const s
 	txtDesc.SampleDesc.Count = 1;
 	txtDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	txtDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-	txtDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+	txtDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS;
 
 
 
@@ -53,30 +53,37 @@ bool Texture::AllocateTexture(const unsigned width,const unsigned height,const s
 	heapProps.CreationNodeMask = 1;
 	heapProps.VisibleNodeMask = 1;
 
+	FLOAT clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };;
+	CD3DX12_CLEAR_VALUE   clearValue
+	(
+		DXGI_FORMAT_R8G8B8A8_UNORM,
+		clearColor
+	);
+
 	Helpers::ThrowIfFailed(
 		GPU::m_Device->CreateCommittedResource(
 			&heapProps,
 			D3D12_HEAP_FLAG_NONE,
 			&txtDesc,
 			D3D12_RESOURCE_STATE_COPY_DEST,
-			nullptr,
+			&clearValue,
 			IID_PPV_ARGS(m_pResource.ReleaseAndGetAddressOf())));
 	m_pResource->SetName(name.wstring().c_str());
 
 	static const uint32_t s_whitePixels = 0xFFFFFFFF;
 	void* pixelData = malloc(txtDesc.Height * txtDesc.Width * 4);
-	memset(pixelData,s_whitePixels,txtDesc.Height * txtDesc.Width * 4);
+	memset(pixelData, s_whitePixels, txtDesc.Height * txtDesc.Width * 4);
 
 	D3D12_SUBRESOURCE_DATA textureData = {};
 	textureData.pData = pixelData;
 	textureData.RowPitch = txtDesc.Width * 4;
-	textureData.SlicePitch = txtDesc.Height * txtDesc.Width * 4; 
+	textureData.SlicePitch = txtDesc.Height * txtDesc.Width * 4;
 
 	ResourceUploadBatch resourceUpload(GPU::m_Device.Get());
 
 	resourceUpload.Begin();
 
-	resourceUpload.Upload(m_pResource.Get(),0,&textureData,1);
+	resourceUpload.Upload(m_pResource.Get(), 0, &textureData, 1);
 
 	resourceUpload.Transition(
 		m_pResource.Get(),
@@ -132,7 +139,7 @@ void Texture::CreateView()
 			device->CreateDepthStencilView(m_pResource.Get(), &dsvDesc, descriptorHandle);
 
 			m_DescriptorHandles.emplace(ViewType::DSV, OffsetHandlePair(descriptorHandle, heapOffset));
-		} 
+		}
 
 		else if (CheckSRVSupport())
 		{
@@ -148,15 +155,15 @@ void Texture::CreateView()
 
 void Texture::SetView(ViewType view)
 {
-	if (!m_pResource || 
+	if (!m_pResource ||
 		m_DescriptorHandles.contains(view) && m_DescriptorHandles.at(view).second != -1)
 	{
 		return;
 	}
 
 	auto device = GPU::m_Device;
-	CheckFeatureSupport(); 
-	CD3DX12_RESOURCE_DESC desc(m_pResource->GetDesc()); 
+	CheckFeatureSupport();
+	CD3DX12_RESOURCE_DESC desc(m_pResource->GetDesc());
 
 	switch (view)
 	{
@@ -166,8 +173,8 @@ void Texture::SetView(ViewType view)
 		const int heapOffset = (int)GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->Allocate();
 		const auto descriptorHandle = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->GetCpuHandle(heapOffset);
 		CreateShaderResourceView(GPU::m_Device.Get(), m_pResource.Get(), descriptorHandle);
-		 
-		m_DescriptorHandles[ViewType::SRV] = OffsetHandlePair(descriptorHandle,heapOffset);
+
+		m_DescriptorHandles[ViewType::SRV] = OffsetHandlePair(descriptorHandle, heapOffset);
 
 		break;
 	}
@@ -184,7 +191,7 @@ void Texture::SetView(ViewType view)
 	}
 	case ViewType::UAV:
 		break;
-	case ViewType::DSV: 
+	case ViewType::DSV:
 	{
 		assert(CheckDSVSupport());
 		const int heapOffset = (int)GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_DSV]->Allocate();
@@ -207,7 +214,7 @@ void Texture::SetView(ViewType view)
 	}
 }
 
-bool Texture::CreateDDSFromMemory(const void* filePtr,size_t fileSize,bool sRGB)
+bool Texture::CreateDDSFromMemory(const void* filePtr, size_t fileSize, bool sRGB)
 {
 	filePtr; fileSize; sRGB;
 	/*if (m_hCpuDescriptorHandle.ptr == D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN)
