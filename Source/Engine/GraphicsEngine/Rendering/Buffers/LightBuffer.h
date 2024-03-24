@@ -1,13 +1,13 @@
-#pragma once
-#include <Engine/GraphicsEngine/Rendering/Buffers/ConstantBuffer.h> 
+#pragma once 
 #include <Engine/AssetManager/Objects/BaseAssets/LightDataBase.h> 
 #include "../../Shaders/Registers.h"
 
-struct LightBufferData 
+struct LightBuffer
 {
-   DirectionalLight myDirectionalLight= DirectionalLight();
-   PointLight myPointLight  = {PointLight()};
-   SpotLight mySpotLight = {SpotLight()};;
+	DirectionalLight directionalLight = DirectionalLight();
+	int pointLightAmount = 0;
+	PointLight pointLight[8] = {};
+	int spotLightAmount = 0;
+	SpotLight spotLight[8] = {};
+	float padding[2];
 };
-
-typedef ConstantBuffer<LightBufferData> LightBuffer;

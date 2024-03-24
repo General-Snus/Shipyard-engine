@@ -7,8 +7,11 @@ struct DefaultMaterialData
     float2 UVTiling;
     float NormalStrength;
     float Shine;
-    float Roughness;
-    int4 TextureBinds;
+    float Roughness; 
+    int albedoTexture ;
+    int normalTexture  ;
+    int materialTexture ;
+    int emissiveTexture ;
 };
 
 struct DefaultMaterialBuffer

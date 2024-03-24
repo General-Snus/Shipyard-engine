@@ -31,8 +31,7 @@ bool Texture::AllocateTexture(const unsigned width, const unsigned height, const
 {
 	m_Width = width;
 	m_Height = height;
-	myName = name.string();
-
+	myName = name.string(); 
 
 	D3D12_RESOURCE_DESC txtDesc = {};
 	txtDesc.MipLevels = txtDesc.DepthOrArraySize = 1;
@@ -42,9 +41,7 @@ bool Texture::AllocateTexture(const unsigned width, const unsigned height, const
 	txtDesc.SampleDesc.Count = 1;
 	txtDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	txtDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-	txtDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS;
-
-
+	txtDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS; 
 
 	CD3DX12_HEAP_PROPERTIES heapProps;
 	heapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
@@ -52,12 +49,13 @@ bool Texture::AllocateTexture(const unsigned width, const unsigned height, const
 	heapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
 	heapProps.CreationNodeMask = 1;
 	heapProps.VisibleNodeMask = 1;
+	 
+	m_ClearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 
-	FLOAT clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };;
 	CD3DX12_CLEAR_VALUE   clearValue
 	(
 		DXGI_FORMAT_R8G8B8A8_UNORM,
-		clearColor
+		&m_ClearColor.x
 	);
 
 	Helpers::ThrowIfFailed(
@@ -79,12 +77,9 @@ bool Texture::AllocateTexture(const unsigned width, const unsigned height, const
 	textureData.RowPitch = txtDesc.Width * 4;
 	textureData.SlicePitch = txtDesc.Height * txtDesc.Width * 4;
 
-	ResourceUploadBatch resourceUpload(GPU::m_Device.Get());
-
-	resourceUpload.Begin();
-
-	resourceUpload.Upload(m_pResource.Get(), 0, &textureData, 1);
-
+	ResourceUploadBatch resourceUpload(GPU::m_Device.Get()); 
+	resourceUpload.Begin(); 
+	resourceUpload.Upload(m_pResource.Get(), 0, &textureData, 1); 
 	resourceUpload.Transition(
 		m_pResource.Get(),
 		D3D12_RESOURCE_STATE_COPY_DEST,
@@ -97,60 +92,11 @@ bool Texture::AllocateTexture(const unsigned width, const unsigned height, const
 	{
 		throw std::runtime_error("Failed to upload texture");
 	}
+
 	CheckFeatureSupport();
 	SetView(ViewType::RTV);
 
 	return false;
-}
-
-void Texture::CreateView()
-{
-	if (m_pResource)
-	{
-		auto device = GPU::m_Device;
-		CheckFeatureSupport();
-
-		CD3DX12_RESOURCE_DESC desc(m_pResource->GetDesc());
-
-		if ((desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET) != 0 &&
-			CheckRTVSupport())
-		{
-			assert(CheckRTVSupport());
-			const int heapOffset = (int)GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_RTV]->Allocate();
-			const auto descriptorHandle = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_RTV]->GetCpuHandle(heapOffset);
-			device->CreateRenderTargetView(m_pResource.Get(), nullptr, descriptorHandle);
-
-
-			m_DescriptorHandles.emplace(ViewType::RTV, OffsetHandlePair(descriptorHandle, heapOffset));
-		}
-		else if ((desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) != 0 &&
-			CheckDSVSupport())
-		{
-			assert(CheckDSVSupport());
-			const int heapOffset = (int)GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_DSV]->Allocate();
-			const auto descriptorHandle = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_DSV]->GetCpuHandle(heapOffset);
-
-			D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
-			dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
-			dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-			dsvDesc.Texture2D.MipSlice = 0;
-			dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
-
-			device->CreateDepthStencilView(m_pResource.Get(), &dsvDesc, descriptorHandle);
-
-			m_DescriptorHandles.emplace(ViewType::DSV, OffsetHandlePair(descriptorHandle, heapOffset));
-		}
-
-		else if (CheckSRVSupport())
-		{
-			assert(CheckSRVSupport());
-			const int heapOffset = (int)GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->Allocate();
-			const auto descriptorHandle = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->GetCpuHandle(heapOffset);
-			CreateShaderResourceView(GPU::m_Device.Get(), m_pResource.Get(), descriptorHandle);
-
-			m_DescriptorHandles.emplace(ViewType::SRV, OffsetHandlePair(descriptorHandle, heapOffset));
-		}
-	}
 }
 
 void Texture::SetView(ViewType view)
@@ -173,7 +119,6 @@ void Texture::SetView(ViewType view)
 		const int heapOffset = (int)GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->Allocate();
 		const auto descriptorHandle = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->GetCpuHandle(heapOffset);
 		CreateShaderResourceView(GPU::m_Device.Get(), m_pResource.Get(), descriptorHandle);
-
 		m_DescriptorHandles[ViewType::SRV] = OffsetHandlePair(descriptorHandle, heapOffset);
 
 		break;
@@ -183,10 +128,8 @@ void Texture::SetView(ViewType view)
 		assert(CheckRTVSupport());
 		const int heapOffset = (int)GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_RTV]->Allocate();
 		const auto descriptorHandle = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_RTV]->GetCpuHandle(heapOffset);
-		device->CreateRenderTargetView(m_pResource.Get(), nullptr, descriptorHandle);
-
-
-		m_DescriptorHandles.emplace(ViewType::RTV, OffsetHandlePair(descriptorHandle, heapOffset));
+		device->CreateRenderTargetView(m_pResource.Get(), nullptr, descriptorHandle); 
+		m_DescriptorHandles[ViewType::RTV] = OffsetHandlePair(descriptorHandle, heapOffset); 
 		break;
 	}
 	case ViewType::UAV:
@@ -203,15 +146,15 @@ void Texture::SetView(ViewType view)
 		dsvDesc.Texture2D.MipSlice = 0;
 		dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
 
-		device->CreateDepthStencilView(m_pResource.Get(), &dsvDesc, descriptorHandle);
-
-		m_DescriptorHandles.emplace(ViewType::DSV, OffsetHandlePair(descriptorHandle, heapOffset));
+		device->CreateDepthStencilView(m_pResource.Get(), &dsvDesc, descriptorHandle); 
+		m_DescriptorHandles[ViewType::DSV] = OffsetHandlePair(descriptorHandle, heapOffset); 
 		break;
 	}
 	default:
 		assert(false && "Out of range view type");
 		break;
 	}
+	m_RecentBoundType = view;
 }
 
 bool Texture::CreateDDSFromMemory(const void* filePtr, size_t fileSize, bool sRGB)

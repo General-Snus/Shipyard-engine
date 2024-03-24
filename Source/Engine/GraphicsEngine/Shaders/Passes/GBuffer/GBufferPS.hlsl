@@ -40,14 +40,14 @@ GBufferOutput main(DefaultVertexToPixel input)
     //pixelNormal = normalize(mul(pixelNormal, TBN));
     //pixelNormal *= g_defaultMaterial.DefaultMaterial.NormalStrength;
      
-    result.Albedo = 1;
+    result.Albedo = textureColor;
     
-    result.Normal.xyz = 1;
-    result.Normal.w = 1;
+    result.Normal.xyz = 0;
+    result.Normal.w = 0;
     
-    result.Material = 1;
+    result.Material = 0;
     
-    result.Effect = 1;
+    result.Effect = 0;
     
     result.VertexNormal.xyz = input.Normal;
     result.VertexNormal.w = 1;

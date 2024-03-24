@@ -187,7 +187,6 @@ void TextureHolder::Init()
 			isLoadedComplete = false;
 			return;
 		}
-				RawTexture->SetView(ViewType::SRV);
 		isLoadedComplete = true;
 	}
 	else

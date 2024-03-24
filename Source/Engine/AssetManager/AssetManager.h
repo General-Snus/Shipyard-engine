@@ -10,7 +10,7 @@
 
 struct Frame;
 struct Element;
-struct MaterialData;
+struct MaterialBuffer;
 struct Bone;
 class Mesh;
 class Animation;

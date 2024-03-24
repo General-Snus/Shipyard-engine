@@ -18,61 +18,60 @@
     
 //    return kA;
 //} 
-//float3 CalculateDirectionLight(
-//float3 diffuseColor,
-//float3 specularColor,
-//float3 normal,
-//float3 cameraDirection,
-//float roughness,
-//float4 worldPosition
-//)
-//{
-//    const float3 directionToLight = -g_lightBuffer.myDirectionalLight.Direction.xyz;
-//    const float3 halfAngle = normalize(cameraDirection + directionToLight);
-//    const float NdotL = saturate(dot(normal, directionToLight));
-//    const float K = pow(roughness + 1, 2) / 8;
-//
-//    float3 directLightSpecular = CalculateSpecularLight(specularColor, normal, cameraDirection, directionToLight, halfAngle, roughness);
-//    float3 directLightDiffuse = CalculateDiffuseLight(diffuseColor);
-//    directLightDiffuse *= (1.0f - directLightSpecular);
-//    
-//    const float4x4 lightView = g_lightBuffer.myDirectionalLight.lightView;
-//    const float4x4 lightProj = g_lightBuffer.myDirectionalLight.projection;
-//    
-//    float4 lightSpacePos = mul(lightView, worldPosition);
-//    lightSpacePos = mul(lightProj, lightSpacePos);
-//    
-//    float3 lightSpaceUV = 0;
-//    lightSpaceUV = lightSpacePos.xyz / lightSpacePos.w; 
-//    lightSpaceUV.x = (lightSpacePos.x * .5 + 0.5);
-//    lightSpaceUV.y = 1 - (lightSpacePos.y * .5 + 0.5f);
-//     
-//    const float bias = 0.005f;
-//    const float Depth = lightSpaceUV.z + bias; 
-//    
-//   uint2 dim = 0;
-//   uint numMips = 0;
-//   shadowMap.GetDimensions(0, dim.x, dim.y, numMips);
-//   float2 texelSize = 1.0 / dim;
-//   
-//   float sum = 0;
-//   float x, y;
-//   for(y = -1.5; y <= 1.5; y += 1.0)
-//   {
-//       for(x = -1.5; x <= 1.5; x += 1.0)
-//       {
-//           float2 newUV;
-//           newUV.x = lightSpaceUV.x + x * texelSize.x;
-//           newUV.y = lightSpaceUV.y + y * texelSize.y;
-//           
-//           sum += shadowMap.SampleCmpLevelZero(shadowCmpSampler, newUV, Depth).r;
-//       }
-//   }
-//   const float shadow = sum / 16.0;
-//    
-//    const float ShadowStrength = 1;
-//    return ShadowStrength * shadow * saturate(directLightDiffuse + directLightSpecular) * g_lightBuffer.myDirectionalLight.Color * g_lightBuffer.myDirectionalLight.Power * NdotL;
-//}
+float3 CalculateDirectionLight(
+float3 diffuseColor,
+float3 specularColor,
+float3 normal,
+float3 cameraDirection,
+float roughness,
+float4 worldPosition
+)
+{
+    const float3 directionToLight = -g_lightBuffer.myDirectionalLight.Direction.xyz;
+    const float3 halfAngle = normalize(cameraDirection + directionToLight);
+    const float NdotL = saturate(dot(normal, directionToLight));
+    const float K = pow(roughness + 1, 2) / 8;
+
+    float3 directLightSpecular = CalculateSpecularLight(specularColor, normal, cameraDirection, directionToLight, halfAngle, roughness);
+    float3 directLightDiffuse = CalculateDiffuseLight(diffuseColor);
+    directLightDiffuse *= (1.0f - directLightSpecular);
+    
+    const float4x4 lightView = g_lightBuffer.myDirectionalLight.lightView;
+    const float4x4 lightProj = g_lightBuffer.myDirectionalLight.projection;
+    
+    float4 lightSpacePos = mul(lightView, worldPosition);
+    lightSpacePos = mul(lightProj, lightSpacePos);
+    
+    float3 lightSpaceUV = 0;
+    lightSpaceUV = lightSpacePos.xyz / lightSpacePos.w;
+    lightSpaceUV.x = (lightSpacePos.x * .5 + 0.5);
+    lightSpaceUV.y = 1 - (lightSpacePos.y * .5 + 0.5f);
+     
+    const float bias = 0.005f;
+    const float Depth = lightSpaceUV.z + bias;
+    
+    //uint2 dim = 0;
+    //uint numMips = 0;
+    //shadowMap.GetDimensions(0, dim.x, dim.y, numMips);
+    //float2 texelSize = 1.0 / dim;
+   
+  //float sum = 0;
+  //float x, y;
+  //for(y = -1.5; y <= 1.5; y += 1.0)
+  //{
+  //    for(x = -1.5; x <= 1.5; x += 1.0)
+  //    {
+  //        float2 newUV;
+  //        newUV.x = lightSpaceUV.x + x * texelSize.x;
+  //        newUV.y = lightSpaceUV.y + y * texelSize.y;
+  //        
+  //        sum += shadowMap.SampleCmpLevelZero(shadowCmpSampler, newUV, Depth).r;
+  //    }
+  //}
+  //const float shadow = sum / 16.0;
+     
+    return saturate(directLightDiffuse + directLightSpecular) * g_lightBuffer.myDirectionalLight.Color * g_lightBuffer.myDirectionalLight.Power * NdotL;
+}
 
 
 DefaultPixelOutput main(BRDF_VS_to_PS input)
@@ -88,14 +87,13 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     const float4 worldPosition = float4(worldPositionMap.Sample(defaultSampler, uv).xyz, 1);
     const float metallic = Material.b;
     const float roughness = Material.g;
-    const float occlusion = Material.r * 1/*SSAOMap.Sample(defaultSampler, uv).r*/;
+    const float occlusion = Material.r * 1 /*SSAOMap.Sample(defaultSampler, uv).r*/;
     
     const float3 cameraDirection = normalize(g_FrameBuffer.FB_CameraPosition.xyz - worldPosition.xyz);
-    const float3 diffuseColor = lerp((float3)0.0f, albedo.rgb, 1 - metallic);
-    const float3 specularColor = lerp((float3)0.04f, albedo.rgb, metallic);
+    const float3 diffuseColor = lerp((float3) 0.0f, albedo.rgb, 1 - metallic);
+    const float3 specularColor = lerp((float3) 0.04f, albedo.rgb, metallic);
     
-    const float3 radiance = albedo.rgb;
-    //CalculateDirectionLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, roughness, worldPosition);
+    const float3 radiance = CalculateDirectionLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, roughness, worldPosition);
     //+ CalculateIndirectLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, enviromentCube, roughness, occlusion);
     
     result.Color.rgb = radiance + Effect.r * albedo.rgb;

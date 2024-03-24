@@ -1,6 +1,8 @@
 #pragma once
 #include <DirectX/directx/d3d12.h>
 
+#include "Engine/GraphicsEngine/Rendering/Buffers/LightBuffer.h"
+
 class PSO;
 using namespace Microsoft::WRL;
 
@@ -68,10 +70,11 @@ class EnviromentLightPSO : public PSO
 public:
 	EnviromentLightPSO() = default;
 	void Init(const ComPtr<ID3D12Device2>& dev) override;
-
-	void SetResources(Texture* texArray, int amount) override;
+	 
 	Texture* GetRenderTargets() override;
 	uint16_t GetRenderTargetAmounts() override { return 1; };
+
+	LightBuffer CreateLightBuffer();
 
 private:
 	static inline constexpr uint16_t numRenderTargets = 8;

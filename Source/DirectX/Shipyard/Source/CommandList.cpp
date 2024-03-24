@@ -150,7 +150,7 @@ void CommandList::SetDescriptorTable(unsigned slot,Texture* texture)
 	TrackResource(texture->GetResource());
 }
 
-void CommandList::SetRenderTargets(int numberOfTargets,Texture* renderTargets,Texture* depthBuffer)
+void CommandList::SetRenderTargets(unsigned numberOfTargets,Texture* renderTargets,Texture* depthBuffer)
 {
 	assert(numberOfTargets <= D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
 	D3D12_CPU_DESCRIPTOR_HANDLE RTVs[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT] = {};

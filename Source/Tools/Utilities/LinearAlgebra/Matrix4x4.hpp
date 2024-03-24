@@ -2,7 +2,7 @@
 #pragma once 
 #include <cmath> 
 #include <DirectXMath.h>
-#include "assimp/matrix4x4.h"
+#include <Tools/Assimp/include/assimp/matrix4x4.h>
 #include "Vectors.hpp" 
 
 template <class T>

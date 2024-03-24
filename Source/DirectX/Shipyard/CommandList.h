@@ -17,7 +17,7 @@ public:
 	void SetView(eRootBindings rootParameterIndex,uint32_t descriptorOffset,const GpuResource& resource,D3D12_RESOURCE_STATES stateAfter,UINT firstSubresource,UINT numSubresources,const D3D12_SHADER_RESOURCE_VIEW_DESC* srv);
 	void SetDescriptorTable(unsigned slot,Texture* texture);
 
-	void SetRenderTargets(int numberOfTargets, Texture* renderTargets,Texture* depthBuffer);
+	void SetRenderTargets(unsigned numberOfTargets, Texture* renderTargets,Texture* depthBuffer);
 
 	DxCommandList GetGraphicsCommandList() const
 	{

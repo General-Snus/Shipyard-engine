@@ -1,4 +1,6 @@
 #pragma once  
+#include "Tools/Utilities/LinearAlgebra/Matrix4x4.hpp"
+
 struct SpotLight
 { 
 	Vector3f Color = {1,1,1};

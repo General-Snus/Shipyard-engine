@@ -7,7 +7,7 @@ bool Material::CreateJson(const DataMaterial& data,const std::filesystem::path& 
 {
 	nlohmann::json json = nlohmann::json::basic_json();
 	{
-		nlohmann::json& js = json["MaterialData"];
+		nlohmann::json& js = json["MaterialBuffer"];
 		js["albedoColor"][0] = data.materialData.Data.albedoColor[0];
 		js["albedoColor"][1] = data.materialData.Data.albedoColor[1];
 		js["albedoColor"][2] = data.materialData.Data.albedoColor[2];
@@ -59,7 +59,7 @@ void Material::Init()
 	}
 	else
 	{
-		data.materialData.Data = MaterialData();
+		data.materialData.Data = MaterialBuffer();
 	}
 	data.vertexShader = GraphicsEngine::Get().GetDefaultVSShader();
 	data.pixelShader = GraphicsEngine::Get().GetDefaultPSShader();
@@ -77,7 +77,7 @@ void Material::Init()
 		{
 			try
 			{
-				nlohmann::json& js = json["MaterialData"];
+				nlohmann::json& js = json["MaterialBuffer"];
 
 				data.materialData.Data.albedoColor[0] = js["albedoColor"][0];
 				data.materialData.Data.albedoColor[1] = js["albedoColor"][1];
@@ -123,7 +123,7 @@ void Material::Init()
 	isLoadedComplete = true;
 }
 
-MaterialData& Material::GetMaterialData()
+MaterialBuffer& Material::GetMaterialData()
 {
 	return data.materialData.Data;
 }

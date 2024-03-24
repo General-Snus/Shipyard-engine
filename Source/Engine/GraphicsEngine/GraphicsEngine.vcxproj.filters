@@ -36,9 +36,6 @@
     <ClInclude Include="Rendering\ForwardRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicCommands\GraphicCommands.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Rendering\Buffers\FrameBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -111,54 +108,6 @@
     <ClInclude Include="InterOp\GPUBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_Bloom.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_DebugLayer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_DrawDebugPrimitive.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_GaussianBlur.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_LuminancePass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderMesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderMeshShadow.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderSkeletalMesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderSkeletalMeshShadow.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_RenderSkybox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetDepthState.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetFrameBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetLightBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SetRenderTarget.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_SSAO.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicCommands\Commands\Headers\GfxCmd_ToneMapPass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsEngine.pch.cpp">
@@ -174,9 +123,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\ForwardRenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicCommands\GraphicCommands.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DebugDrawer\DebugDrawer.cpp">
@@ -201,54 +147,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="InterOp\Source\GPUBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_Bloom.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_DebugLayer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_DrawDebugPrimitive.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_GaussianBlur.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_LuminancePass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderMesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderMeshShadow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderSkeletalMesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderSkeletalMeshShadow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_RenderSkybox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetDepthState.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetFrameBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetLightBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SetRenderTarget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_SSAO.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicCommands\Commands\Source\GfxCmd_ToneMapPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -30,9 +30,7 @@ public:
 
 	void Destroy() override;
 	//Default state is render target
-	bool AllocateTexture(const unsigned width, const unsigned height, const std::filesystem::path& name = "Unnamed texture");
-
-	void CreateView();
+	bool AllocateTexture(const unsigned width, const unsigned height, const std::filesystem::path& name = "Unnamed texture"); 
 	void SetView(ViewType view);
 	bool CreateDDSFromMemory(const void* filePtr, size_t fileSize, bool sRGB);
 
@@ -78,7 +76,7 @@ protected:
 
 	std::unordered_map<ViewType, OffsetHandlePair> m_DescriptorHandles;
 	ViewType m_RecentBoundType = ViewType::SRV;
-
+	Vector4f m_ClearColor = {0,0,0,1};
 	uint32_t m_Width;
 	uint32_t m_Height;
 };

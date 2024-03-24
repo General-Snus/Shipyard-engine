@@ -31,8 +31,7 @@ void ResourceStateTracker::ResourceBarrier(const D3D12_RESOURCE_BARRIER& barrier
 		{
 			auto& resourceState = iter->second;
 			// If the known final state of the resource is different...
-			if (transitionBarrier.Subresource == D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES &&
-				!resourceState.SubresourceState.empty())
+			if (transitionBarrier.Subresource == D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES &&!resourceState.SubresourceState.empty())
 			{
 				// First transition all of the subresources if they are different than the StateAfter.
 				for (auto subresourceState : resourceState.SubresourceState)
@@ -102,7 +101,7 @@ void ResourceStateTracker::AliasBarrier(const GpuResource* resourceBefore,const 
 
 	ResourceBarrier(CD3DX12_RESOURCE_BARRIER::Aliasing(pResourceBefore,pResourceAfter));
 }
-
+ 
 void ResourceStateTracker::FlushResourceBarriers(CommandList& commandList)
 {
 	UINT numBarriers = static_cast<UINT>(m_ResourceBarriers.size());

@@ -58,7 +58,7 @@ enum class eHeapTypes : int
 	HEAP_TYPE_DSV,
 	HEAP_COUNT
 };
-	 
+
 
 
 enum class ePIPELINE_STAGE
@@ -107,7 +107,7 @@ public:
 		const std::vector<uint16_t>& aIndexList
 	);
 
-	static bool AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE type, int amount = 1);
+	static bool AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE type,int amount = 1);
 
 
 	static bool CreatePixelShader(ComPtr<ID3DBlob>& outPxShader,const BYTE* someShaderData,size_t aShaderDataSize,UINT CompileFLags = 0);
@@ -129,9 +129,10 @@ public:
 		D3D12_RESOURCE_STATES beforeState,D3D12_RESOURCE_STATES afterState);
 
 	static void ClearRTV(const CommandList& commandList,
-		D3D12_CPU_DESCRIPTOR_HANDLE rtv,const float clearColor[]);
-	static void ClearRTV(const CommandList& commandList, D3D12_CPU_DESCRIPTOR_HANDLE* rtv, int amountOfTargets, const float clearColor[]);
-	static void ClearRTV(const CommandList& commandList, Texture* rtv, int amountOfTargets, const float clearColor[]);
+		D3D12_CPU_DESCRIPTOR_HANDLE rtv,Vector4f clearColor = { 0,0,0,0 });
+
+	static void ClearRTV(const CommandList& commandList,
+		Texture* rtv,unsigned textureCount = 1 );
 
 	static void ClearDepth(const CommandList& commandList,
 		D3D12_CPU_DESCRIPTOR_HANDLE dsv,FLOAT depth = 1);
@@ -177,7 +178,7 @@ public:
 	static inline std::unique_ptr<GPUSwapchain> m_Swapchain;
 	static inline ComPtr<ID3D12CommandAllocator> m_CommandAllocators[m_FrameCount];
 	static inline Texture m_renderTargets[m_FrameCount];
-	 
+
 
 	static inline ComPtr<ID3D12DescriptorHeap> m_RtvHeap;
 	static inline ComPtr<ID3D12DescriptorHeap> m_DsvHeap;
@@ -187,6 +188,7 @@ public:
 	static inline uint64_t m_FenceValues[m_FrameCount] = {};
 
 	static inline D3D12_FEATURE_DATA_ROOT_SIGNATURE m_FeatureData;
+	static inline D3D12_FEATURE_DATA_SHADER_MODEL m_ShaderModelSupport;
 
 
 #if  (USE_NSIGHT_AFTERMATH)

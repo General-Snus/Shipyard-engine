@@ -44,8 +44,11 @@ struct hlslSpotLight
 struct LightBuffer
 {
     hlslDirectionalLight myDirectionalLight; //32
-    hlslPointLight myPointLight; //32
-    hlslSpotLight mySpotLight; //64
+    int pointLightAmount;
+    hlslPointLight myPointLight[8]; //32
+    int spotLightAmount;
+    hlslSpotLight mySpotLight[8]; //64
+    float2 padding;
 };
 ConstantBuffer<LightBuffer> g_lightBuffer : register(HLSL_REG_LightBuffer);
 
