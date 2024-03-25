@@ -22,87 +22,87 @@ TextureHolder::TextureHolder(const std::filesystem::path& aFilePath,eTextureType
 	}*/
 }
 #if WorkingOnPngLoading 
-bool TextureHolder::LoadPngTexture(Texture* outTexture,const std::filesystem::path& aFileName)
-{
-	outTexture->myName = aFileName;
-	outTexture->myBindFlags = D3D11_BIND_SHADER_RESOURCE;
-	outTexture->myUsageFlags = D3D11_USAGE_DEFAULT;
-	outTexture->myAccessFlags = 0;
-
-
-	int ImageWidth;
-	int ImageHeight;
-	int ImageChannels;
-	int ImageDesiredChannels = 4;
-
-	unsigned char* ImageData = stbi_load(aFileName.string().c_str(),
-		&ImageWidth,
-		&ImageHeight,
-		&ImageChannels,
-		ImageDesiredChannels);
-	assert(ImageData);
-
-	int ImagePitch = ImageWidth * 4;
-
-
-	D3D11_TEXTURE2D_DESC ImageTextureDesc = {};
-	ImageTextureDesc.Width = ImageWidth;
-	ImageTextureDesc.Height = ImageHeight;
-	ImageTextureDesc.MipLevels = 1;
-	ImageTextureDesc.ArraySize = 1;
-	ImageTextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	ImageTextureDesc.SampleDesc.Count = 1;
-	ImageTextureDesc.SampleDesc.Quality = 0;
-	ImageTextureDesc.Usage = D3D11_USAGE_DEFAULT;
-	ImageTextureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-
-	D3D11_SUBRESOURCE_DATA ImageSubresourceData = {};
-
-	ImageSubresourceData.pSysMem = ImageData;
-	ImageSubresourceData.SysMemPitch = ImagePitch;
-	ID3D11Texture2D* ImageTexture;
-	auto Result = RHI::Device->CreateTexture2D(&ImageTextureDesc,
-		&ImageSubresourceData,
-		&ImageTexture
-	);
-	assert(SUCCEEDED(Result));
-
-	outTexture->myTexture = ImageTexture;
-	free(ImageData);
-
-	// Shader resource view 
-	Result = RHI::Device->CreateShaderResourceView(
-		outTexture->myTexture.Get(),
-		nullptr,
-		outTexture->mySRV.GetAddressOf()
-	);
-	assert(SUCCEEDED(Result));
-
-
-	//auto res = DirectX::CreateWICTextureFromFile(
-	//	RHI::Device.Get(),
-	//	aFileName.c_str(),
-	//	outTexture->myTexture.GetAddressOf(),
-	//	outTexture->mySRV.GetAddressOf());
-
-
-	/*auto res = RHI::Device.Get()->CreateShaderResourceView(outTexture->myTexture.Get(),nullptr,outTexture->mySRV.GetAddressOf());
-	if(res < 0)
-	{
-		return false;
-	}*/
-
-	std::wstring textureName = aFileName;
-	if (const size_t pos = textureName.find_last_of(L'\\'); pos != std::wstring::npos)
-	{
-		textureName = textureName.substr(pos + 1);
-	}
-
-	textureName = textureName.substr(0,textureName.size() - 4);
-	outTexture->myName = textureName;
-
-	return true;
-}
+//bool TextureHolder::LoadPngTexture(Texture* outTexture,const std::filesystem::path& aFileName)
+//{
+//	outTexture->myName = aFileName;
+//	outTexture->myBindFlags = D3D11_BIND_SHADER_RESOURCE;
+//	outTexture->myUsageFlags = D3D11_USAGE_DEFAULT;
+//	outTexture->myAccessFlags = 0;
+//
+//
+//	int ImageWidth;
+//	int ImageHeight;
+//	int ImageChannels;
+//	int ImageDesiredChannels = 4;
+//
+//	unsigned char* ImageData = stbi_load(aFileName.string().c_str(),
+//		&ImageWidth,
+//		&ImageHeight,
+//		&ImageChannels,
+//		ImageDesiredChannels);
+//	assert(ImageData);
+//
+//	int ImagePitch = ImageWidth * 4;
+//
+//
+//	D3D11_TEXTURE2D_DESC ImageTextureDesc = {};
+//	ImageTextureDesc.Width = ImageWidth;
+//	ImageTextureDesc.Height = ImageHeight;
+//	ImageTextureDesc.MipLevels = 1;
+//	ImageTextureDesc.ArraySize = 1;
+//	ImageTextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+//	ImageTextureDesc.SampleDesc.Count = 1;
+//	ImageTextureDesc.SampleDesc.Quality = 0;
+//	ImageTextureDesc.Usage = D3D11_USAGE_DEFAULT;
+//	ImageTextureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+//
+//	D3D11_SUBRESOURCE_DATA ImageSubresourceData = {};
+//
+//	ImageSubresourceData.pSysMem = ImageData;
+//	ImageSubresourceData.SysMemPitch = ImagePitch;
+//	ID3D11Texture2D* ImageTexture;
+//	auto Result = RHI::Device->CreateTexture2D(&ImageTextureDesc,
+//		&ImageSubresourceData,
+//		&ImageTexture
+//	);
+//	assert(SUCCEEDED(Result));
+//
+//	outTexture->myTexture = ImageTexture;
+//	free(ImageData);
+//
+//	// Shader resource view 
+//	Result = RHI::Device->CreateShaderResourceView(
+//		outTexture->myTexture.Get(),
+//		nullptr,
+//		outTexture->mySRV.GetAddressOf()
+//	);
+//	assert(SUCCEEDED(Result));
+//
+//
+//	//auto res = DirectX::CreateWICTextureFromFile(
+//	//	RHI::Device.Get(),
+//	//	aFileName.c_str(),
+//	//	outTexture->myTexture.GetAddressOf(),
+//	//	outTexture->mySRV.GetAddressOf());
+//
+//
+//	/*auto res = RHI::Device.Get()->CreateShaderResourceView(outTexture->myTexture.Get(),nullptr,outTexture->mySRV.GetAddressOf());
+//	if(res < 0)
+//	{
+//		return false;
+//	}*/
+//
+//	std::wstring textureName = aFileName;
+//	if (const size_t pos = textureName.find_last_of(L'\\'); pos != std::wstring::npos)
+//	{
+//		textureName = textureName.substr(pos + 1);
+//	}
+//
+//	textureName = textureName.substr(0,textureName.size() - 4);
+//	outTexture->myName = textureName;
+//
+//	return true;
+//}
 #endif
 
 void TextureHolder::Init()
@@ -135,7 +135,42 @@ void TextureHolder::Init()
 	}
 
 #if WorkingOnPngLoading
-	if (AssetPath.extension() == ".png")
+	//if (AssetPath.extension() == ".png")
+	//{
+	//	if (!std::filesystem::exists(AssetPath))
+	//	{
+	//		if (!AssetManager::Get().AdaptPath(AssetPath))
+	//		{
+	//			std::string msg = "Error: Coulnt load texture at " + AssetPath.string();
+	//			std::cout << msg << " \n";
+	//			if (GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
+	//			{
+	//				RawTexture = GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture();
+	//				isLoadedComplete = true;
+	//				return;
+	//			}
+	//			isLoadedComplete = false;
+	//			return;
+	//		}
+	//	}
+	//	if (!LoadPngTexture(RawTexture.get(),AssetPath))
+	//	{
+	//		std::string msg = "Error: Coulnt dds texture at " + AssetPath.string();
+	//		std::cout << msg << " \n";
+	//		if (GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
+	//		{
+	//			RawTexture = GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture();
+	//			isLoadedComplete = true;
+	//			return;
+	//		}
+	//		std::cout << "Error: Default texture was not found" << " \n";
+	//		isLoadedComplete = false;
+	//		return;
+	//	}
+	//	isLoadedComplete = true;
+	//}
+#endif
+	if (AssetPath.extension() == ".dds" || AssetPath.extension() == ".png")
 	{
 		if (!std::filesystem::exists(AssetPath))
 		{
@@ -153,25 +188,7 @@ void TextureHolder::Init()
 				return;
 			}
 		}
-		if (!LoadPngTexture(RawTexture.get(),AssetPath))
-		{
-			std::string msg = "Error: Coulnt dds texture at " + AssetPath.string();
-			std::cout << msg << " \n";
-			if (GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
-			{
-				RawTexture = GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture();
-				isLoadedComplete = true;
-				return;
-			}
-			std::cout << "Error: Default texture was not found" << " \n";
-			isLoadedComplete = false;
-			return;
-		}
-		isLoadedComplete = true;
-	}
-#endif
-	else if (AssetPath.extension() == ".dds")
-	{
+
 		if (!GPU::LoadTexture(RawTexture.get(),AssetPath.wstring()))
 		{
 			std::string msg = "Error: Coulnt dds texture at " + AssetPath.string();

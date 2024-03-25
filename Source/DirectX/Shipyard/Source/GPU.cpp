@@ -2,6 +2,7 @@
 
 #include <XTK/DDSTextureLoader.h>
 #include <XTK/ResourceUploadBatch.h>
+#include <XTK/WICTextureLoader.h>
 #include "../GPU.h" 
 
 #include "../Helpers.h" 
@@ -404,7 +405,7 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 {
 	outTexture; aFileName;
 
-	if (!std::filesystem::exists(aFileName) || aFileName.extension() != ".dds")
+	if (!std::filesystem::exists(aFileName) || aFileName.extension() != ".dds" && aFileName.extension() != ".png")
 	{
 		std::string error = "Failed to load texture: " + aFileName.string() + " does not exist!";
 		std::cout << error << std::endl;
@@ -414,10 +415,21 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 	ResourceUploadBatch resourceUpload(m_Device.Get());
 	resourceUpload.Begin();
 
-	Helpers::ThrowIfFailed(
-		CreateDDSTextureFromFile(m_Device.Get(),resourceUpload,aFileName.wstring().c_str(),
-			outTexture->m_Resource.ReleaseAndGetAddressOf(),generateMips)
-	);
+	if (aFileName.extension() == ".dds")
+	{
+		Helpers::ThrowIfFailed(
+			CreateDDSTextureFromFile(m_Device.Get(),resourceUpload,aFileName.wstring().c_str(),
+				outTexture->m_Resource.ReleaseAndGetAddressOf(),generateMips)
+		);
+	}
+	else if (aFileName.extension() == ".png")
+	{
+		Helpers::ThrowIfFailed(
+			CreateWICTextureFromFile(m_Device.Get(),resourceUpload,aFileName.wstring().c_str(),
+				outTexture->m_Resource.ReleaseAndGetAddressOf(),generateMips)
+		);
+
+	}
 
 
 	auto uploadResourcesFinished = resourceUpload.End(m_DirectCommandQueue->GetCommandQueue().Get());
