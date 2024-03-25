@@ -1,8 +1,7 @@
-#pragma once 
-#include <Engine/GraphicsEngine/Objects/Shader.h>
-#include <Engine/AssetManager/Enums.h>
-#include <Engine/GraphicsEngine/Rendering/Buffers/ConstantBuffer.h>
-#include <Tools/Thirdparty/nlohmann/json.hpp>
+#pragma once  
+#include <Engine/AssetManager/Enums.h> 
+#include <Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h> 
+#include <Tools/Thirdparty/nlohmann/json_fwd.hpp>
 #include "BaseAsset.h"
 
 class TextureHolder;
@@ -21,7 +20,7 @@ struct MaterialBuffer
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(MaterialBuffer,
 	albedoColor.x,albedoColor.y,albedoColor.z,albedoColor.w,
 	UVTiling.x,UVTiling.y,NormalStrength,Shine
-); 
+);
 
 class Material : public AssetBase
 {
@@ -29,9 +28,9 @@ class Material : public AssetBase
 public:
 	struct DataMaterial
 	{
-		std::weak_ptr<Shader> vertexShader;
-		std::weak_ptr<Shader> pixelShader;
-		ConstantBuffer<MaterialBuffer> materialData;
+		std::weak_ptr<ShipyardShader> vertexShader;
+		std::weak_ptr<ShipyardShader> pixelShader;
+		MaterialBuffer materialData;
 		std::vector<std::pair<std::filesystem::path,std::shared_ptr<TextureHolder>>> textures;
 	};
 	static bool CreateJson(const DataMaterial& data,const std::filesystem::path& pth);
@@ -43,9 +42,9 @@ public:
 	//void AddTexture(const std::shared_ptr<TextureHolder> text);
 	MaterialBuffer& GetMaterialData();
 	void Update();
-	void SetShader(const std::shared_ptr<Shader>& aVertexShader,const std::shared_ptr<Shader>& aPixelShader);
+	void SetShader(const std::shared_ptr<ShipyardShader>& aVertexShader,const std::shared_ptr<ShipyardShader>& aPixelShader);
 	void SetAsResources();
 private:
-	std::shared_ptr<TextureHolder> GetTexture(eTextureType );
+	std::shared_ptr<TextureHolder> GetTexture(eTextureType);
 	DataMaterial data;
 };

@@ -1,8 +1,7 @@
-#pragma once
-#include <Engine/GraphicsEngine/Rendering/Buffers/ConstantBuffer.h>  
+#pragma once 
 #include "../../Shaders/Registers.h"
 
-struct GraphicSettingsBufferData
+struct GraphicSettingsBuffer
 {
 	int GSB_ToneMap; // 4 
 	float GSB_AO_intensity = 0.35f;
@@ -13,7 +12,5 @@ struct GraphicSettingsBufferData
 	//16
 	float GSB_AO_radius = 0.02f;
 	float GSB_AO_offset = 0.707f;
-	float padding1[2]{0};
+	float padding1[2]{ 0 };
 };
-
-using GraphicSettingsBuffer = ConstantBuffer<GraphicSettingsBufferData>;

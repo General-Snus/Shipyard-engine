@@ -4,15 +4,14 @@
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "dxguid.lib") 
 
-#define D3D12MA_D3D12_HEADERS_ALREADY_INCLUDED
+#define D3D12MA_D3D12_HEADERS_ALREADY_INCLUDED 
 
 #include <DirectX/CrashHandler/GFSDK_Aftermath.h> 
 #include <DirectX/CrashHandler/NsightAftermathGpuCrashTracker.h> 
 #include <DirectX/directx/d3d12.h>
 #include <DirectX/XTK/DescriptorHeap.h>
 #include <DirectX/XTK/GraphicsMemory.h>
-#include <dxgi1_6.h>
-
+#include <dxgi1_6.h> 
 
 
 #include "CommandList.h"
@@ -132,7 +131,7 @@ public:
 		D3D12_CPU_DESCRIPTOR_HANDLE rtv,Vector4f clearColor = { 0,0,0,0 });
 
 	static void ClearRTV(const CommandList& commandList,
-		Texture* rtv,unsigned textureCount = 1 );
+		Texture* rtv,unsigned textureCount = 1);
 
 	static void ClearDepth(const CommandList& commandList,
 		D3D12_CPU_DESCRIPTOR_HANDLE dsv,FLOAT depth = 1);
@@ -187,8 +186,7 @@ public:
 
 	static inline uint64_t m_FenceValues[m_FrameCount] = {};
 
-	static inline D3D12_FEATURE_DATA_ROOT_SIGNATURE m_FeatureData;
-	static inline D3D12_FEATURE_DATA_SHADER_MODEL m_ShaderModelSupport;
+	static inline D3D_ROOT_SIGNATURE_VERSION m_FeatureData;
 
 
 #if  (USE_NSIGHT_AFTERMATH)

@@ -1,9 +1,4 @@
-#include "AssetManager.pch.h" 
-#include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
-#include "../Animator.h" 
-
-#include "Engine/GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_RenderSkeletalMeshShadow.h"
-#include "Engine/GraphicsEngine/GraphicsEngine.h"
+#include "AssetManager.pch.h"
 
 cAnimator::cAnimator(const unsigned int anOwnerId) : Component(anOwnerId),myCurrentAnimation(0),myAnimationTimer(0)
 {
@@ -20,7 +15,7 @@ cAnimator::cAnimator(const unsigned int anOwnerId,const std::filesystem::path& a
 	mySkeleton = (this->TryGetComponent<cSkeletalMeshRenderer>())->GetRawSkeleton();
 	if (!mySkeleton)
 	{
-		std::cout << "cSkeletalMeshRenderer component does not have a skeleton" << std::endl;
+		Logger::Warn("cSkeletalMeshRenderer component does not have a skeleton");
 	}
 	std::shared_ptr<Animation> animation;
 	AssetManager::Get().LoadAsset<Animation>(aFilePath,animation);
@@ -57,8 +52,9 @@ void cAnimator::Update()
 
 void cAnimator::RenderAnimation(const std::shared_ptr<RenderData>& aData,const Matrix& aTransform) const
 {
-	GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderSkeletalMeshShadow>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
-	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderSkeletalMesh>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
+	aData; aTransform;
+	//GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderSkeletalMeshShadow>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
+	//GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderSkeletalMesh>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
 }
 
 void cAnimator::AddAnimation(Animation aAnimation)
@@ -100,7 +96,7 @@ void cAnimator::SetPlayingAnimation(unsigned int aAnimationIndex)
 {
 	if (aAnimationIndex >= myAnimations.size())
 	{
-		std::cout << "Animation index out of range" << std::endl;
+		Logger::Warn("Animation index out of range");
 		return;
 	}
 	myCurrentAnimation = aAnimationIndex;

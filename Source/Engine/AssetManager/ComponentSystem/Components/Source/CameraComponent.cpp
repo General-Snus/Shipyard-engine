@@ -2,7 +2,6 @@
 
 #include <DirectXMath.h>
 #include <Editor/Editor/Core/Editor.h>
-#include <Engine/GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h> 
 #include <Tools/Utilities/Input/InputHandler.hpp> 
 #include "../CameraComponent.h"
 
@@ -21,11 +20,14 @@ cCamera::cCamera(const unsigned int anOwnerId) : Component(anOwnerId)
 
 	if (!mySettings.isOrtho)
 	{
-		myClipMatrix = DirectX::XMMatrixPerspectiveFovLH(mySettings.fow,mySettings.APRatio,mySettings.farfield,mySettings.nearField);
+		const auto dxMatrix = XMMatrixPerspectiveFovLH(mySettings.fow,mySettings.APRatio,mySettings.farfield,
+			mySettings.nearField);
+		myClipMatrix = Matrix(&dxMatrix);
 	}
 	else
 	{
-		myClipMatrix = DirectX::XMMatrixOrthographicLH(40,40,1000000,mySettings.nearField);
+		const auto dxMatrix = XMMatrixOrthographicLH(40,40,1000000,mySettings.nearField);
+		myClipMatrix = Matrix(&dxMatrix);
 	}
 
 #ifdef Flashlight
@@ -50,11 +52,14 @@ cCamera::cCamera(const unsigned int anOwnerId,const CameraSettings& settings) : 
 
 	if (!mySettings.isOrtho)
 	{
-		myClipMatrix = DirectX::XMMatrixPerspectiveFovLH(mySettings.fow,mySettings.APRatio,mySettings.farfield,mySettings.nearField);
+		const auto dxMatrix = XMMatrixPerspectiveFovLH(mySettings.fow,mySettings.APRatio,mySettings.farfield,
+			mySettings.nearField);
+		myClipMatrix = Matrix(&dxMatrix);
 	}
 	else
 	{
-		myClipMatrix = DirectX::XMMatrixOrthographicLH(40,40,1000000,mySettings.nearField);
+		const auto dxMatrix = XMMatrixOrthographicLH(40,40,1000000,mySettings.nearField);
+		myClipMatrix = Matrix(&dxMatrix);
 	}
 
 #ifdef Flashlight
@@ -202,11 +207,11 @@ Vector3f cCamera::GetPointerDirectionNDC(const Vector2<int> position) const
 
 }
 
-void cCamera::SetCameraToFrameBuffer(DxCommandList& commandList)
+FrameBuffer cCamera::GetFrameBuffer()
 {
 	OPTICK_EVENT();
 	auto& transform = GetComponent<Transform>();
-	FrameBuffer& buffer = GraphicsEngine::Get().myFrameBuffer;
+	FrameBuffer buffer;
 	buffer.ProjectionMatrix = myClipMatrix;
 	buffer.ViewMatrix = Matrix::GetFastInverse(transform.GetTransform());
 	buffer.Time = Timer::GetInstance().GetDeltaTime();
@@ -214,15 +219,7 @@ void cCamera::SetCameraToFrameBuffer(DxCommandList& commandList)
 	buffer.FB_CameraPosition = transform.GetPosition();
 	buffer.FB_ScreenResolution = Editor::Get().GetViewportResolution();
 	//buffer.Data.FB_FrustrumCorners = { Vector4f(),Vector4f(),Vector4f(),Vector4f() };;
-	auto  alloc = GPU::m_GraphicsMemory->AllocateConstant<FrameBuffer>(buffer);
-
-	commandList->SetGraphicsRootConstantBufferView(REG_FrameBuffer,alloc.GpuAddress());
-	//GfxCmd_SetFrameBuffer(
-	//	myClipMatrix,
-	//	),
-	//	, //TODO scene again
-	//	GetFrustrumCorners()
-	//	).ExecuteAndDestroy();
+	return buffer;
 }
 
 Vector4f cCamera::WoldSpaceToPostProjectionSpace(Vector3f aEntity)

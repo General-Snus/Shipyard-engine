@@ -13,7 +13,7 @@ enum class ViewType
 	DSV
 };
 
-using OffsetHandlePair = std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, int>;
+using OffsetHandlePair = std::pair<D3D12_CPU_DESCRIPTOR_HANDLE,int>;
 
 class Texture : public GpuResource
 {
@@ -30,12 +30,12 @@ public:
 
 	void Destroy() override;
 	//Default state is render target
-	bool AllocateTexture(const unsigned width, const unsigned height, const std::filesystem::path& name = "Unnamed texture"); 
+	bool AllocateTexture(const unsigned width,const unsigned height,const std::filesystem::path& name = "Unnamed texture");
 	void SetView(ViewType view);
-	bool CreateDDSFromMemory(const void* filePtr, size_t fileSize, bool sRGB);
+	bool CreateDDSFromMemory(const void* filePtr,size_t fileSize,bool sRGB);
 
 	OffsetHandlePair  GetHandle(ViewType type);
-	
+
 	OffsetHandlePair  GetHandle() const;
 
 	uint32_t GetWidth() const { return m_Width; }
@@ -74,9 +74,9 @@ protected:
 	//D3D12_CPU_DESCRIPTOR_HANDLE m_SRVDescriptorHandle; 
 	//int heapOffset = -1;
 
-	std::unordered_map<ViewType, OffsetHandlePair> m_DescriptorHandles;
+	std::unordered_map<ViewType,OffsetHandlePair> m_DescriptorHandles;
 	ViewType m_RecentBoundType = ViewType::SRV;
-	Vector4f m_ClearColor = {0,0,0,1};
+	Vector4f m_ClearColor = { 0,0,0,1 };
 	uint32_t m_Width;
 	uint32_t m_Height;
 };

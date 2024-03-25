@@ -1,8 +1,5 @@
 #include "AssetManager.pch.h"
-#include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h> 
-#include <Tools/Utilities/System/ThreadPool.hpp> 
-
-#include "Engine/GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_RenderMeshShadow.h"
+#include <Tools/Utilities/System/ThreadPool.hpp>
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 
 class GfxCmd_RenderMesh;
@@ -144,10 +141,10 @@ void cSkeletalMeshRenderer::Render()
 			myAnimation->RenderAnimation(myRenderData,myTransform->GetTransform());
 			return;
 		}
-		GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform(),false);
-		GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),false);
+		//	GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform(),false);
+		//	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),false);
 		return;
 	}
-	GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,Matrix(),false);
-	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),false);
+	//GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,Matrix(),false);
+	//GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),false);
 }

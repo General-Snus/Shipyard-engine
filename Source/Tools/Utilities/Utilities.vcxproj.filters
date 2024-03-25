@@ -42,7 +42,7 @@
     <ClInclude Include="LinearAlgebra\Matrix3x3.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LinearAlgebra\Matrix4x4.hpp">
+    <ClInclude Include="LinearAlgebra\Matrix4x4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LinearAlgebra\Plane.hpp">
@@ -141,6 +141,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Game\Timer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LinearAlgebra\Matrix4x4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

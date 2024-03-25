@@ -1,27 +1,46 @@
 #include "AssetManager.pch.h"
+
+#include <d3dcompiler.h>
 #include "../ShipyardShader.h"
-
-#include <d3dcompiler.h> 
-
 #include "DirectX/Shipyard/Helpers.h" 
 
 ShipyardShader::ShipyardShader(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)
 {
-	shaderObject.myName = aFilePath.filename();
+	m_ShaderName = aFilePath.filename();
 }
 
 void ShipyardShader::Init()
 {
 	isBeingLoaded = true;
 
-	Helpers::ThrowIfFailed(D3DReadFileToBlob(AssetPath.wstring().c_str(),&shaderObject.myBlob));
-
+	Helpers::ThrowIfFailed(D3DReadFileToBlob(AssetPath.wstring().c_str(),&myBlob));
 
 	isBeingLoaded = false;
 	isLoadedComplete = true;
 }
 
-Shader& ShipyardShader::GetShader()
+void ShipyardShader::SetShader(const ComPtr<ID3DBlob>& aShader)
 {
-	return shaderObject;
+	myBlob = aShader;
+}
+
+ShaderType ShipyardShader::GetShaderType() const
+{
+	return myShaderInfo.Type;
+}
+ID3DBlob* ShipyardShader::GetBlob() const
+{
+	return myBlob.Get();
+}
+LPVOID ShipyardShader::GetBufferPtr()
+{
+	return myBlob->GetBufferPointer();
+}
+size_t ShipyardShader::GetBlobSize() const
+{
+	return myBlob->GetBufferSize();
+}
+const ShaderInfo& ShipyardShader::GetShaderInfo() const
+{
+	return myShaderInfo;
 }

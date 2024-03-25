@@ -1,6 +1,5 @@
-#pragma once
-#include <Engine/GraphicsEngine/Rendering/Buffers/ConstantBuffer.h>
-#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
+#pragma once 
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
 
 struct ObjectBuffer
 {
@@ -10,4 +9,4 @@ struct ObjectBuffer
 	Vector3f MaxExtents;
 	alignas(4) bool isInstanced = false;
 	//std::array < Matrix,128> myBoneTransforms; // 64 * 128 = 8192 bytes
-}; 
+};

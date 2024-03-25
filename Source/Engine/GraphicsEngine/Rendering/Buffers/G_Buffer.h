@@ -1,9 +1,10 @@
-#pragma once 
-#include <Engine/GraphicsEngine/Rendering/Buffers/ConstantBuffer.h> 
-#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp> 
-#include <vector>
+#pragma once  
+#include <DirectX/directx/d3dcommon.h>
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.h> 
+#include <vector> 
+#include <wrl/client.h>
 
-#include "DirectX/Shipyard/Texture.h"
+class Texture;
 
 enum class eGbufferTex
 {
@@ -36,13 +37,13 @@ struct G_Buffer
 	std::vector<Texture*> vectorOfTextures;
 
 	//Custom shader 
-	ComPtr<ID3DBlob> myVertexShader;
-	ComPtr<ID3DBlob> myPixelShader;
-	ComPtr<ID3DBlob> myScreenSpaceShader;
-	ComPtr<ID3DBlob> myEnviromentPixelShader;
-	ComPtr<ID3DBlob> myDebugPixelShader;
-	ComPtr<ID3DBlob> myPointPixelShader;
-	ComPtr<ID3DBlob> mySpotShader;
+	Microsoft::WRL::ComPtr<ID3DBlob> myVertexShader;
+	Microsoft::WRL::ComPtr<ID3DBlob> myPixelShader;
+	Microsoft::WRL::ComPtr<ID3DBlob> myScreenSpaceShader;
+	Microsoft::WRL::ComPtr<ID3DBlob> myEnviromentPixelShader;
+	Microsoft::WRL::ComPtr<ID3DBlob> myDebugPixelShader;
+	Microsoft::WRL::ComPtr<ID3DBlob> myPointPixelShader;
+	Microsoft::WRL::ComPtr<ID3DBlob> mySpotShader;
 
 	int mask = 0;
 	/* Can i send Gbuffer as a light?

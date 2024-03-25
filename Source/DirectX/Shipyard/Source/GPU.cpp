@@ -113,24 +113,13 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 		m_Device.Get()));
 #endif
 
-	D3D_FEATURE_LEVEL feature_levels[] =
-	{
-		D3D_FEATURE_LEVEL_12_2,
-		D3D_FEATURE_LEVEL_12_1,
-		D3D_FEATURE_LEVEL_12_0,
-		D3D_FEATURE_LEVEL_11_1,
-		D3D_FEATURE_LEVEL_11_0
-	};
+	CD3DX12FeatureSupport featureSupport;
+	featureSupport.Init(m_Device.Get());
+	m_FeatureData = featureSupport.HighestRootSignatureVersion();
+	m_DeviceSupport.targetFeatureLevel = featureSupport.MaxSupportedFeatureLevel();
+	m_DeviceSupport.targetShaderModel = featureSupport.HighestShaderModel();
 
-	D3D12_FEATURE_DATA_FEATURE_LEVELS caps{};
-	caps.pFeatureLevelsRequested = feature_levels;
-	caps.NumFeatureLevels = ARRAYSIZE(feature_levels);
-	if (FAILED(m_Device->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS,&caps,sizeof(D3D12_FEATURE_DATA_FEATURE_LEVELS))))
-	{
-		Logger::Err("Failed to Check FeatureSupport");
-		return false;
-	}
-	if (FAILED(D3D12CreateDevice(hardwareAdapter.Get(),caps.MaxSupportedFeatureLevel,IID_PPV_ARGS(m_Device.ReleaseAndGetAddressOf()))))
+	if (FAILED(D3D12CreateDevice(hardwareAdapter.Get(),m_DeviceSupport.targetFeatureLevel,IID_PPV_ARGS(m_Device.ReleaseAndGetAddressOf()))))
 	{
 		Logger::Err("Failed to create device");
 		return false;
@@ -180,7 +169,6 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 	{
 	}
 
-	m_DeviceSupport.targetFeatureLevel = caps.MaxSupportedFeatureLevel;
 	m_DirectCommandQueue->Create(m_Device,D3D12_COMMAND_LIST_TYPE_DIRECT);
 	m_CopyCommandQueue->Create(m_Device,D3D12_COMMAND_LIST_TYPE_COPY);
 	m_ComputeCommandQueue->Create(m_Device,D3D12_COMMAND_LIST_TYPE_COMPUTE);
@@ -200,82 +188,6 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 
 	// Create frame resources.
 	UpdateRenderTargetViews(m_Device,m_Swapchain->m_SwapChain,m_RtvHeap);
-
-
-	m_FeatureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
-	if (FAILED(m_Device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE,&m_FeatureData,sizeof(m_FeatureData))))
-	{
-		m_FeatureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
-	}
-	D3D_SHADER_MODEL model;
-	bool foundHighestShaderModel = false;
-	{
-		m_ShaderModelSupport.HighestShaderModel = D3D_SHADER_MODEL_6_8;
-		if (!foundHighestShaderModel && SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL,&m_ShaderModelSupport,sizeof(m_ShaderModelSupport))))
-		{
-			foundHighestShaderModel = true; model = m_ShaderModelSupport.HighestShaderModel;
-		};
-
-		m_ShaderModelSupport.HighestShaderModel = D3D_SHADER_MODEL_6_7;
-		if (!foundHighestShaderModel && SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL,&m_ShaderModelSupport,sizeof(m_ShaderModelSupport))))
-		{
-			foundHighestShaderModel = true; model = m_ShaderModelSupport.HighestShaderModel;
-		};
-
-		m_ShaderModelSupport.HighestShaderModel = D3D_SHADER_MODEL_6_6;
-		if (!foundHighestShaderModel && SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL,&m_ShaderModelSupport,sizeof(m_ShaderModelSupport))))
-		{
-			foundHighestShaderModel = true; model = m_ShaderModelSupport.HighestShaderModel;
-		};
-
-		m_ShaderModelSupport.HighestShaderModel = D3D_SHADER_MODEL_6_5;
-		if (!foundHighestShaderModel && SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL,&m_ShaderModelSupport,sizeof(m_ShaderModelSupport))))
-		{
-			foundHighestShaderModel = true; model = m_ShaderModelSupport.HighestShaderModel;
-		};
-
-		m_ShaderModelSupport.HighestShaderModel = D3D_SHADER_MODEL_6_4;
-		if (!foundHighestShaderModel && SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL,&m_ShaderModelSupport,sizeof(m_ShaderModelSupport))))
-		{
-			foundHighestShaderModel = true; model = m_ShaderModelSupport.HighestShaderModel;
-		};
-
-		m_ShaderModelSupport.HighestShaderModel = D3D_SHADER_MODEL_6_3;
-		if (!foundHighestShaderModel && SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL,&m_ShaderModelSupport,sizeof(m_ShaderModelSupport))))
-		{
-			foundHighestShaderModel = true; model = m_ShaderModelSupport.HighestShaderModel;
-		};
-
-		m_ShaderModelSupport.HighestShaderModel = D3D_SHADER_MODEL_6_2;
-		if (!foundHighestShaderModel && SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL,&m_ShaderModelSupport,sizeof(m_ShaderModelSupport))))
-		{
-			foundHighestShaderModel = true; model = m_ShaderModelSupport.HighestShaderModel;
-		};
-
-		m_ShaderModelSupport.HighestShaderModel = D3D_SHADER_MODEL_6_1;
-		if (!foundHighestShaderModel && SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL,&m_ShaderModelSupport,sizeof(m_ShaderModelSupport))))
-		{
-			foundHighestShaderModel = true; model = m_ShaderModelSupport.HighestShaderModel;
-		};
-
-		m_ShaderModelSupport.HighestShaderModel = D3D_SHADER_MODEL_6_0;
-		if (!foundHighestShaderModel && SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL,&m_ShaderModelSupport,sizeof(m_ShaderModelSupport))))
-		{
-			foundHighestShaderModel = true; model = m_ShaderModelSupport.HighestShaderModel;
-		};
-
-		m_ShaderModelSupport.HighestShaderModel = D3D_SHADER_MODEL_5_1;
-		if (!foundHighestShaderModel && SUCCEEDED(m_Device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL,&m_ShaderModelSupport,sizeof(m_ShaderModelSupport))))
-		{
-			foundHighestShaderModel = true; model = m_ShaderModelSupport.HighestShaderModel;
-		};
-
-	}
-	m_ShaderModelSupport.HighestShaderModel = model;
-	//m_ResourceDescriptors = std::make_unique<DescriptorHeap>(m_Device.Get(),
-	//	D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-	//	D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
-	//	SpotLights);
 
 	m_BackBuffer->AllocateTexture(width,height);
 	ResizeDepthBuffer(width,height);
@@ -516,13 +428,13 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 
 
 	auto uploadResourcesFinished = resourceUpload.End(m_DirectCommandQueue->GetCommandQueue().Get());
-	uploadResourcesFinished.wait(); 
+	uploadResourcesFinished.wait();
 
 	outTexture->m_Width = outTexture->m_pResource->GetDesc().Width;
-	outTexture->m_Height = outTexture->m_pResource->GetDesc().Height; 
+	outTexture->m_Height = outTexture->m_pResource->GetDesc().Height;
 	outTexture->m_pResource->SetName(aFileName.wstring().c_str());
 
-	outTexture->CheckFeatureSupport(); 
+	outTexture->CheckFeatureSupport();
 	outTexture->SetView(ViewType::SRV);
 	return true;
 }
@@ -809,7 +721,7 @@ void GPU::setAftermathEventMarker(const std::string& markerData,bool appManagedM
 		// The 15th marker for the frame will have markerID = 2 * 10000 + 14 + 1 = 20015.
 		// So with this scheme, we can safely have up to 10000 markers per frame, and can guarantee a unique markerID for each one.
 		// There are many ways to generate and track markers and unique marker identifiers!
-}
+	}
 	else
 	{
 		AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_SetEventMarker(m_hAftermathCommandListContext,(void*)markerData.c_str(),(unsigned int)markerData.size() + 1));

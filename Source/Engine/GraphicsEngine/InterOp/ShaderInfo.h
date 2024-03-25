@@ -1,14 +1,14 @@
 ﻿#pragma once
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 #include <wrl.h>
 using namespace Microsoft::WRL;
 
 enum class ShaderType : unsigned
 {
 	PixelShader = 0,
-    VertexShader = 1,
-    GeometryShader = 2,
+	VertexShader = 1,
+	GeometryShader = 2,
 };
 
 enum class TextureType : unsigned
@@ -35,7 +35,7 @@ struct ShaderInfo
 		size_t Size{};
 		unsigned Slot{};
 		std::vector<VariableInfo> Variables;
-		std::unordered_map<std::wstring, size_t> VariableNameToIndex;
+		std::unordered_map<std::wstring,size_t> VariableNameToIndex;
 	};
 
 	struct SamplerInfo
@@ -51,13 +51,13 @@ struct ShaderInfo
 		TextureType Type;
 	};
 
-	std::unordered_map<std::wstring, size_t> ConstantBufferNameToIndex;
+	std::unordered_map<std::wstring,size_t> ConstantBufferNameToIndex;
 	std::vector<ConstantBufferInfo> ConstantBuffers;
 
-	std::unordered_map<std::wstring, size_t> SamplerNameToIndex;
+	std::unordered_map<std::wstring,size_t> SamplerNameToIndex;
 	std::vector<SamplerInfo> Samplers;
 
-	std::unordered_map<std::wstring, size_t> TextureNameToIndex;
+	std::unordered_map<std::wstring,size_t> TextureNameToIndex;
 	std::vector<TextureInfo> Textures;
 
 	unsigned InstructionCount = 0;

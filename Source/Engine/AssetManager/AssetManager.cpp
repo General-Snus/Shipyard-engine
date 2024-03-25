@@ -1,6 +1,4 @@
-#include "AssetManager.pch.h"
-#include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
-#include <Engine/GraphicsEngine/Objects/Shader.h>
+#include "AssetManager.pch.h" 
 #include <filesystem>
 
 #include <algorithm>

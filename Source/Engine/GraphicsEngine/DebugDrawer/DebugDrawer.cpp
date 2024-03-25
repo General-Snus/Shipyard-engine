@@ -21,7 +21,7 @@ DebugDrawer& DebugDrawer::Get()
 bool DebugDrawer::Initialize()
 {
 	// Load shaders from memory
-	myLineVS = std::make_shared<Shader>();
+	//myLineVS = std::make_shared<Shader>();
 	/*RHI::LoadShaderFromMemory(
 		myLineVS.get(),
 		L"LineVertexShader",
@@ -29,7 +29,7 @@ bool DebugDrawer::Initialize()
 		sizeof(BuiltIn_LineDrawer_VS_ByteCode)
 	);*/
 
-	myLinePS = std::make_shared<Shader>();
+	//myLinePS = std::make_shared<Shader>();
 	/*RHI::LoadShaderFromMemory(
 		myLinePS.get(),
 		L"LinePixelShader",

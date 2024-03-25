@@ -1,10 +1,7 @@
-#pragma once
-#include <Engine/GraphicsEngine/Rendering/Buffers/ConstantBuffer.h>
-#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
+#pragma once 
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
 
-struct LineBufferData
+struct LineBuffer
 {
-     Matrix myTransform; // 64 bytes 
+	Matrix myTransform; // 64 bytes 
 };
-
-typedef ConstantBuffer<LineBufferData> LineBuffer;

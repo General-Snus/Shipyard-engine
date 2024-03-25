@@ -55,26 +55,26 @@ class GbufferPSO : public PSO
 public:
 	GbufferPSO() = default;
 	void Init(const ComPtr<ID3D12Device2>& dev) override;
-	Texture* GetRenderTargets() override;	
+	Texture* GetRenderTargets() override;
 	uint16_t GetRenderTargetAmounts() override { return numRenderTargets; };
 
 private:
-	  void InitRootSignature() override;
+	void InitRootSignature() override;
 
 	static inline constexpr uint16_t numRenderTargets = 8;
 	Texture renderTargets[numRenderTargets];
 };
 
-class EnviromentLightPSO : public PSO
+class EnvironmentLightPSO : public PSO
 {
 public:
-	EnviromentLightPSO() = default;
+	EnvironmentLightPSO() = default;
 	void Init(const ComPtr<ID3D12Device2>& dev) override;
-	 
+
 	Texture* GetRenderTargets() override;
 	uint16_t GetRenderTargetAmounts() override { return 1; };
 
-	LightBuffer CreateLightBuffer();
+	static LightBuffer CreateLightBuffer();
 
 private:
 	static inline constexpr uint16_t numRenderTargets = 8;
@@ -91,6 +91,6 @@ public:
 	uint16_t GetRenderTargetAmounts() override { return 1; };
 
 private:
-	void InitRootSignature() override; 
+	void InitRootSignature() override;
 };
 

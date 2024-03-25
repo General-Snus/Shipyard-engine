@@ -1,17 +1,17 @@
 #include "DirectXHeader.pch.h"
 
+#include <DirectX/Shipyard/RootSignature.h>
 #include <dxgiformat.h>
+#include <Engine/GraphicsEngine/Rendering/Buffers/LightBuffer.h>
+#include <Engine/GraphicsEngine/Shaders/Registers.h>
+#include <strsafe.h>
 #include "../GPU.h"
 #include "../PSO.h" 
 #include "Engine/AssetManager/AssetManager.h"
 #include "Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h" 
-#include <strsafe.h>
-#include <Engine/GraphicsEngine/Shaders/Registers.h>
-#include <Engine/GraphicsEngine/Rendering/Buffers/LightBuffer.h>
-#include <DirectX/Shipyard/RootSignature.h>
 
-#include "Engine/AssetManager/ComponentSystem/GameObjectManager.h"
 #include "Engine/AssetManager/ComponentSystem/Components/LightComponent.h"
+#include "Engine/AssetManager/ComponentSystem/GameObjectManager.h"
 
 void PSOCache::InitAllStates()
 {
@@ -23,7 +23,7 @@ void PSOCache::InitAllStates()
 	gbuffer->Init(GPU::m_Device);
 	pso_map[ePipelineStateID::GBuffer] = std::move(gbuffer);
 
-	std::unique_ptr<EnviromentLightPSO> env = std::make_unique<EnviromentLightPSO>();
+	std::unique_ptr<EnvironmentLightPSO> env = std::make_unique<EnvironmentLightPSO>();
 	env->Init(GPU::m_Device);
 	pso_map[ePipelineStateID::DeferredLighting] = std::move(env);
 
@@ -66,8 +66,8 @@ void PSO::Init(const ComPtr<ID3D12Device2>& dev)
 	stream.pRootSignature = m_RootSignature.GetRootSignature().Get();
 	stream.InputLayout = { Vertex::InputLayoutDefinition , Vertex::InputLayoutDefinitionSize };
 	stream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	stream.VS = CD3DX12_SHADER_BYTECODE(vs->GetShader().GetBlob());
-	stream.PS = CD3DX12_SHADER_BYTECODE(ps->GetShader().GetBlob());
+	stream.VS = CD3DX12_SHADER_BYTECODE(vs->GetBlob());
+	stream.PS = CD3DX12_SHADER_BYTECODE(ps->GetBlob());
 	stream.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 	stream.RTVFormats = rtvFormats;
 
@@ -108,7 +108,7 @@ void PSO::InitRootSignature()
 	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
 	rootSignatureDescription.Init_1_1(NumRootParameters,rootParameters,1,&linearRepeatSampler,rootSignatureFlags);
 
-	m_RootSignature.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1,GPU::m_FeatureData.HighestVersion);
+	m_RootSignature.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1,GPU::m_FeatureData);
 }
 
 ComPtr<ID3D12PipelineState> PSO::GetPipelineState() const
@@ -151,8 +151,8 @@ void GbufferPSO::Init(const ComPtr<ID3D12Device2>& dev)
 	stream.pRootSignature = m_RootSignature.GetRootSignature().Get();
 	stream.InputLayout = { Vertex::InputLayoutDefinition , Vertex::InputLayoutDefinitionSize };
 	stream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	stream.VS = CD3DX12_SHADER_BYTECODE(vs->GetShader().GetBlob());
-	stream.PS = CD3DX12_SHADER_BYTECODE(ps->GetShader().GetBlob());
+	stream.VS = CD3DX12_SHADER_BYTECODE(vs->GetBlob());
+	stream.PS = CD3DX12_SHADER_BYTECODE(ps->GetBlob());
 	stream.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 	stream.RTVFormats = rtvFormats;
 
@@ -173,7 +173,7 @@ void GbufferPSO::InitRootSignature()
 }
 
 
-void EnviromentLightPSO::Init(const ComPtr<ID3D12Device2>& dev)
+void EnvironmentLightPSO::Init(const ComPtr<ID3D12Device2>& dev)
 {
 	m_Device = dev;
 	InitRootSignature();
@@ -199,8 +199,8 @@ void EnviromentLightPSO::Init(const ComPtr<ID3D12Device2>& dev)
 
 	stream.pRootSignature = m_RootSignature.GetRootSignature().Get();
 	stream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	stream.VS = CD3DX12_SHADER_BYTECODE(vs->GetShader().GetBlob());
-	stream.PS = CD3DX12_SHADER_BYTECODE(ps->GetShader().GetBlob());
+	stream.VS = CD3DX12_SHADER_BYTECODE(vs->GetBlob());
+	stream.PS = CD3DX12_SHADER_BYTECODE(ps->GetBlob());
 	stream.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 	stream.RTVFormats = rtvFormats;
 
@@ -211,12 +211,12 @@ void EnviromentLightPSO::Init(const ComPtr<ID3D12Device2>& dev)
 }
 
 
-Texture* EnviromentLightPSO::GetRenderTargets()
+Texture* EnvironmentLightPSO::GetRenderTargets()
 {
 	return GPU::GetCurrentBackBuffer();
 }
 
-void EnviromentLightPSO::InitRootSignature()
+void EnvironmentLightPSO::InitRootSignature()
 {
 	CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
 	rootSignatureDesc.Init(0,nullptr,0,nullptr,D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
@@ -260,10 +260,10 @@ void EnviromentLightPSO::InitRootSignature()
 	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
 	rootSignatureDescription.Init_1_1(NumRootParameters,rootParameters,1,&linearRepeatSampler,rootSignatureFlags);
 
-	m_RootSignature.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1,GPU::m_FeatureData.HighestVersion);
+	m_RootSignature.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1,GPU::m_FeatureData);
 }
 
-LightBuffer EnviromentLightPSO::CreateLightBuffer()
+LightBuffer EnvironmentLightPSO::CreateLightBuffer()
 {
 	std::vector<std::pair< DirectionalLight*,Texture*>> dirLight;
 	std::vector<std::pair< PointLight*,Texture*>> pointLight;
@@ -375,8 +375,8 @@ void TonemapPSO::Init(const ComPtr<ID3D12Device2>& dev)
 		1
 	};*/
 	stream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	stream.VS = CD3DX12_SHADER_BYTECODE(vs->GetShader().GetBlob());
-	stream.PS = CD3DX12_SHADER_BYTECODE(ps->GetShader().GetBlob());
+	stream.VS = CD3DX12_SHADER_BYTECODE(vs->GetBlob());
+	stream.PS = CD3DX12_SHADER_BYTECODE(ps->GetBlob());
 	stream.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 	stream.RTVFormats = rtvFormats;
 
@@ -424,5 +424,5 @@ void TonemapPSO::InitRootSignature()
 	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
 	rootSignatureDescription.Init_1_1(NumRootParameters,rootParameters,1,&linearRepeatSampler,rootSignatureFlags);
 
-	m_RootSignature.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1,GPU::m_FeatureData.HighestVersion);
+	m_RootSignature.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1,GPU::m_FeatureData);
 }

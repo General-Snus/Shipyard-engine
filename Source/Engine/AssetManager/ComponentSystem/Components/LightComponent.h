@@ -18,7 +18,7 @@ class cLight : public Component
 
 	friend class GraphicsEngine;
 	friend class ShadowRenderer;
-	friend class EnviromentLightPSO;
+	friend class EnvironmentLightPSO;
 public:
 	cLight() = delete; // Create a generic cube
 	cLight(const unsigned int anOwnerId); // Create a generic cube 

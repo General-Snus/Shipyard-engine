@@ -17,7 +17,6 @@ enum class eAnimationState
 
 
 
-class GfxCmd_RenderSkeletalMesh;
 struct RenderData;
 
 class cAnimator : public Component

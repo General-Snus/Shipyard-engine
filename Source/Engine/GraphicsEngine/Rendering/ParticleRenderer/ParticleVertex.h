@@ -1,4 +1,5 @@
 #pragma once 
+#include <DirectX/directx/d3d12.h>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 #include <wrl.h>
 using namespace Microsoft::WRL;

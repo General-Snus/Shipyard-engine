@@ -1,10 +1,10 @@
- 
+
 #include "GraphicsEngine.pch.h" 
 #include "ShadowRenderer.h" 
 
 void ShadowRenderer::Init()
 {
-	ShadowCommandList.Initialize((size_t)10 * MegaByte);
+	//ShadowCommandList.Initialize((size_t)10 * MegaByte);
 	//myVertexShader = GraphicsEngine::Get().myVertexShader;
 }
 
@@ -85,11 +85,11 @@ void ShadowRenderer::Execute()
 	//		}
 	//	}
 	//}
-	ShadowCommandList.ForceSetDone();
+	//ShadowCommandList.ForceSetDone();
 }
 
 void ShadowRenderer::ResetShadowList()
 {
-	ShadowCommandList.ForceSetDone();
-	ShadowCommandList.Reset();
+	//ShadowCommandList.ForceSetDone();
+	//ShadowCommandList.Reset();
 }

@@ -1,7 +1,6 @@
 #pragma once
-#include <array>
-#include <Engine/GraphicsEngine/Rendering/Buffers/ConstantBuffer.h>
-#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
+#include <array> 
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
 #include <Tools/Utilities/LinearAlgebra/Vector4.hpp>
 
 struct FrameBuffer
@@ -14,4 +13,4 @@ struct FrameBuffer
 	Vector2i FB_ScreenResolution = { 1920,1080 };
 	float padding = 0;
 	//std::array<Vector4f,4> FB_FrustrumCorners = { Vector4f(),Vector4f(),Vector4f(),Vector4f() };
-}; 
+};

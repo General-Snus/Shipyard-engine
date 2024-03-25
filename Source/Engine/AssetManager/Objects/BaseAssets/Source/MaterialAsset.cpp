@@ -8,16 +8,16 @@ bool Material::CreateJson(const DataMaterial& data,const std::filesystem::path& 
 	nlohmann::json json = nlohmann::json::basic_json();
 	{
 		nlohmann::json& js = json["MaterialBuffer"];
-		js["albedoColor"][0] = data.materialData.Data.albedoColor[0];
-		js["albedoColor"][1] = data.materialData.Data.albedoColor[1];
-		js["albedoColor"][2] = data.materialData.Data.albedoColor[2];
-		js["albedoColor"][3] = data.materialData.Data.albedoColor[3];
+		js["albedoColor"][0] = data.materialData.albedoColor[0];
+		js["albedoColor"][1] = data.materialData.albedoColor[1];
+		js["albedoColor"][2] = data.materialData.albedoColor[2];
+		js["albedoColor"][3] = data.materialData.albedoColor[3];
 
-		js["UVTiling"][0] = data.materialData.Data.UVTiling[0];
-		js["UVTiling"][1] = data.materialData.Data.UVTiling[1];
+		js["UVTiling"][0] = data.materialData.UVTiling[0];
+		js["UVTiling"][1] = data.materialData.UVTiling[1];
 
-		js["NormalStrength"] = data.materialData.Data.NormalStrength;
-		js["Shine"] = data.materialData.Data.Shine;
+		js["NormalStrength"] = data.materialData.NormalStrength;
+		js["Shine"] = data.materialData.Shine;
 	}
 
 	{
@@ -55,11 +55,11 @@ void Material::Init()
 
 	if (GraphicsEngine::Get().GetDefaultMaterial() != nullptr)
 	{
-		data.materialData.Data = GraphicsEngine::Get().GetDefaultMaterial()->data.materialData.Data; //yo dawg i put some data in your data so you can data while you data
+		data.materialData = GraphicsEngine::Get().GetDefaultMaterial()->data.materialData; //yo dawg i put some data in your data so you can data while you data
 	}
 	else
 	{
-		data.materialData.Data = MaterialBuffer();
+		data.materialData = MaterialBuffer();
 	}
 	data.vertexShader = GraphicsEngine::Get().GetDefaultVSShader();
 	data.pixelShader = GraphicsEngine::Get().GetDefaultPSShader();
@@ -79,16 +79,16 @@ void Material::Init()
 			{
 				nlohmann::json& js = json["MaterialBuffer"];
 
-				data.materialData.Data.albedoColor[0] = js["albedoColor"][0];
-				data.materialData.Data.albedoColor[1] = js["albedoColor"][1];
-				data.materialData.Data.albedoColor[2] = js["albedoColor"][2];
-				data.materialData.Data.albedoColor[3] = js["albedoColor"][3];
+				data.materialData.albedoColor[0] = js["albedoColor"][0];
+				data.materialData.albedoColor[1] = js["albedoColor"][1];
+				data.materialData.albedoColor[2] = js["albedoColor"][2];
+				data.materialData.albedoColor[3] = js["albedoColor"][3];
 
-				data.materialData.Data.UVTiling[0] = js["UVTiling"][0];
-				data.materialData.Data.UVTiling[1] = js["UVTiling"][1];
+				data.materialData.UVTiling[0] = js["UVTiling"][0];
+				data.materialData.UVTiling[1] = js["UVTiling"][1];
 
-				data.materialData.Data.NormalStrength = js["NormalStrength"];
-				data.materialData.Data.Shine = js["Shine"];
+				data.materialData.NormalStrength = js["NormalStrength"];
+				data.materialData.Shine = js["Shine"];
 			}
 			catch (const std::exception& e)
 			{
@@ -118,14 +118,12 @@ void Material::Init()
 	{
 		isLoadedComplete = false;
 	}
-
-	data.materialData.Initialize();
 	isLoadedComplete = true;
 }
 
 MaterialBuffer& Material::GetMaterialData()
 {
-	return data.materialData.Data;
+	return data.materialData;
 }
 
 void Material::Update()
@@ -150,7 +148,7 @@ std::shared_ptr<TextureHolder> Material::GetTexture(eTextureType type)
 	{
 		return nullptr;
 	}
-		
+
 	for (const auto& i : data.textures)
 	{
 		if (i.second->textureType != type)
@@ -162,7 +160,7 @@ std::shared_ptr<TextureHolder> Material::GetTexture(eTextureType type)
 	return nullptr;
 }
 
-void Material::SetShader(const std::shared_ptr<Shader>& aVertexShader,const std::shared_ptr<Shader>& aPixelShader)
+void Material::SetShader(const std::shared_ptr<ShipyardShader>& aVertexShader,const std::shared_ptr<ShipyardShader>& aPixelShader)
 {
 	data.vertexShader = aVertexShader;
 	data.pixelShader = aPixelShader;

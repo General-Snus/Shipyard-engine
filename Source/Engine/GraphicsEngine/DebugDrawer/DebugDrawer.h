@@ -1,7 +1,10 @@
-#pragma once
-#include <Engine/GraphicsEngine/Objects/Shader.h>
-#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
-#include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
+#pragma once  
+#include <Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h>
+
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
+#include <Tools/Utilities/LinearAlgebra/Vectors.hpp> 
+#include  <wrl/client.h>
+
 
 //Credited for work: Daniel Borghammar & Simon Nilsson 
 struct DebugVertex
@@ -65,7 +68,7 @@ private:
 	ComPtr<ID3D12Resource> myLineIndexBuffer;
 	size_t myNumLineIndices = 0;
 
-	std::shared_ptr<Shader> myLineVS;
-	std::shared_ptr<Shader> myLinePS;
+	std::shared_ptr<ShipyardShader> myLineVS;
+	std::shared_ptr<ShipyardShader> myLinePS;
 	bool myPrimitiveListDirty = false;
 };

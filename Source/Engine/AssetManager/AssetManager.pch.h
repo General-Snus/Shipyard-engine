@@ -29,7 +29,7 @@
 
 #include <Tools/Optick/src/optick.h> 
 #include <Tools/Utilities/Game/Timer.h>
-#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 #include <Tools/Utilities/Math.hpp>
 #include "Tools/Logging/Logging.h"
@@ -62,8 +62,8 @@
 #include "ComponentSystem/ComponentManager.h"
 #include "ComponentSystem/Components/ActorSystem/cActor.h"
 #include "ComponentSystem/Components/ActorSystem/CombatComponent.h"
-#include "ComponentSystem/Components/Animator.h"
-#include "ComponentSystem/Components/CameraComponent.h"
+#include "ComponentSystem/Components/Animator.h" 
+#include "ComponentSystem/Components/CameraComponent.h" 
 #include "ComponentSystem/Components/Collider.h"
 #include "ComponentSystem/Components/DEBUGCOMPONENTS/BackgroundColor.h"
 #include "ComponentSystem/Components/DEBUGCOMPONENTS/FrameStatistics.h"
@@ -82,14 +82,11 @@
 #include "ComponentSystem/GameObjectManager.h"/*
 
 #include <Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h>
-#include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
 #include <Engine/GraphicsEngine/GraphicsEngine.h>
 #include <Engine/GraphicsEngine/InterOp/RHI.h>
 #include <Engine/GraphicsEngine/Rendering/Vertex.h>*/
+#include <Editor/Editor/Defines.h>  
 #include "AssetManager.h"
-#include "ComponentSystem/UUID.h"
-
-#include <Editor/Editor/Defines.h> 
-
+#include "ComponentSystem/UUID.h" 
 #define UseTGAImporter 0
 #endif //ASSETMANAGER_PCH_H 

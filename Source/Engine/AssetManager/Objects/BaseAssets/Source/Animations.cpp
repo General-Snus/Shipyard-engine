@@ -8,8 +8,6 @@ void Animation::Init()
 	this->numFrames = 0;
 	this->isLoadedComplete = false;
 
-
-
 	if (!std::filesystem::exists(AssetPath))
 	{
 		assert(false && "Animation file does not exist");
@@ -201,7 +199,7 @@ void Skeleton::Init()
 					boneIndex = BoneNameToIndex[name];
 				}
 				BoneNameToIndex[name] = boneIndex;
-				Matrix matrix(scene->mMeshes[i]->mBones[j]->mOffsetMatrix);
+				Matrix matrix(&scene->mMeshes[i]->mBones[j]->mOffsetMatrix);
 				matrix = Matrix::Transpose(matrix);
 				myBones[boneIndex].BindPoseInverse = matrix;
 			}

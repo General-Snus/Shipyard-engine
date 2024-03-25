@@ -1,5 +1,4 @@
-#pragma once   
-
+#pragma once 
 
 enum eRootBindings
 {
@@ -10,6 +9,8 @@ enum eRootBindings
 	Textures,
 	NumRootParameters,
 };
+
+struct ID3D12RootSignature;
 
 class GPURootSignature
 {
@@ -24,7 +25,7 @@ public:
 
 	void Destroy();
 
-	Microsoft::WRL::ComPtr<ID3D12RootSignature> GetRootSignature() const
+	ComPtr<ID3D12RootSignature> GetRootSignature() const
 	{
 		return m_RootSignature;
 	}

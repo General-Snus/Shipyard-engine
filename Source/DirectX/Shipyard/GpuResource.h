@@ -1,6 +1,5 @@
 #pragma once
 // Reosurce wrapper for GPU resources
-#include <DirectX\directx\d3d12.h>
 
 #define D3D12_GPU_VIRTUAL_ADDRESS_NULL      ((D3D12_GPU_VIRTUAL_ADDRESS)0) 
 #define D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN   ((D3D12_GPU_VIRTUAL_ADDRESS)-1)
@@ -33,7 +32,7 @@ public:
 
 	virtual void CreateView(size_t numElements,size_t elementSize);
 	void Reset();
-	 
+
 	void SetResource(const ComPtr<ID3D12Resource>& resource);
 	ComPtr<ID3D12Resource> GetResource();
 	const ComPtr<ID3D12Resource>& GetResource() const;
@@ -42,8 +41,8 @@ public:
 
 	virtual bool IsSRV() const { return false; };
 
-	bool CheckFormatSupport(D3D12_FORMAT_SUPPORT1 formatSupport) const; 
-	bool CheckFormatSupport(D3D12_FORMAT_SUPPORT2 formatSupport) const; 
+	bool CheckFormatSupport(D3D12_FORMAT_SUPPORT1 formatSupport) const;
+	bool CheckFormatSupport(D3D12_FORMAT_SUPPORT2 formatSupport) const;
 	void CheckFeatureSupport();
 
 protected:

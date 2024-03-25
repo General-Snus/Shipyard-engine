@@ -10,6 +10,7 @@
 #include <Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h>
 #include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
 #include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
+#include "DirectX/Shipyard/CommandList.h"
 
 #include <Objects/DataObjects/Default_C.h>
 #include <Objects/DataObjects/Default_FX.h>
@@ -20,6 +21,7 @@
 #include "DirectX/Shipyard/Helpers.h"
 #include "DirectX/Shipyard/PSO.h"
 #include "Editor/Editor/Windows/Window.h"
+#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
 #include "Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h"
 #include "Tools/ImGui/ImGui/backends/imgui_impl_dx12.h"
@@ -27,9 +29,6 @@
 
 bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 {
-	DeferredCommandList.Initialize();
-	OverlayCommandList.Initialize();
-
 #ifdef _DEBUG
 	//try
 	//{
@@ -536,12 +535,12 @@ void GraphicsEngine::SetupParticleShaders()
 
 void GraphicsEngine::UpdateSettings()
 {
-	myGraphicSettingsBuffer.Data.GSB_ToneMap = myGraphicSettings.Tonemaptype;
-	myGraphicSettingsBuffer.Data.GSB_AO_intensity = 0.35f;
-	myGraphicSettingsBuffer.Data.GSB_AO_scale = 0.05f;
-	myGraphicSettingsBuffer.Data.GSB_AO_bias = 0.5f;
-	myGraphicSettingsBuffer.Data.GSB_AO_radius = 0.002f;
-	myGraphicSettingsBuffer.Data.GSB_AO_offset = 0.707f;
+	myGraphicSettingsBuffer.GSB_ToneMap = myGraphicSettings.Tonemaptype;
+	myGraphicSettingsBuffer.GSB_AO_intensity = 0.35f;
+	myGraphicSettingsBuffer.GSB_AO_scale = 0.05f;
+	myGraphicSettingsBuffer.GSB_AO_bias = 0.5f;
+	myGraphicSettingsBuffer.GSB_AO_radius = 0.002f;
+	myGraphicSettingsBuffer.GSB_AO_offset = 0.707f;
 	/*
 	RHI::SetConstantBuffer(PIPELINE_STAGE_PIXEL_SHADER,REG_GraphicSettingsBuffer,myGraphicSettingsBuffer);
 	RHI::UpdateConstantBufferData(myGraphicSettingsBuffer);
@@ -641,10 +640,12 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	ID3D12DescriptorHeap* heaps[] = { GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->Heap() };
 	graphicCommandList->SetDescriptorHeaps(static_cast<UINT>(std::size(heaps)),heaps);
 
-	myCamera->SetCameraToFrameBuffer(graphicCommandList);
+	auto frameBuffer = myCamera->GetFrameBuffer();
+	const auto& alloc0 = GPU::m_GraphicsMemory->AllocateConstant<FrameBuffer>(frameBuffer);
+	graphicCommandList->SetGraphicsRootConstantBufferView(REG_FrameBuffer,alloc0.GpuAddress());
 
 	ObjectBuffer objectBuffer;
-	MaterialBuffer materialBuffer;
+
 	static auto& list = GameObjectManager::Get().GetAllComponents<cMeshRenderer>();
 	Logger::Log(std::to_string(list.size()));
 
@@ -662,8 +663,6 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 			const auto& alloc1 = GPU::m_GraphicsMemory->AllocateConstant<ObjectBuffer>(objectBuffer);
 			graphicCommandList->SetGraphicsRootConstantBufferView(REG_ObjectBuffer,alloc1.GpuAddress());
 
-
-
 			graphicCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			commandList->TransitionBarrier(element.VertexBuffer.GetResource(),D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
@@ -676,6 +675,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 			graphicCommandList->IASetIndexBuffer(&indexBuffer);
 			commandList->TrackResource(element.IndexResource);
 
+			MaterialBuffer materialBuffer;
 			for (size_t i = 0; i < (int)eTextureType::EffectMap + 1; i++)
 			{
 				if (auto textureAsset = meshRenderer.GetTexture((eTextureType)i))
@@ -732,13 +732,13 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 			graphicCommandList->SetGraphicsRootDescriptorTable(eRootBindings::Textures,GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->GetFirstGpuHandle());
 			graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
 		}
-	} 
+	}
 
 	{
 		const auto& enviromentLight = PSOCache::GetState(PSOCache::ePipelineStateID::DeferredLighting);
 
 
-		
+
 		GPU::ClearRTV(*commandList.get(),enviromentLight->GetRenderTargets(),enviromentLight->GetRenderTargetAmounts());
 		commandList->SetRenderTargets(enviromentLight->GetRenderTargetAmounts(),enviromentLight->GetRenderTargets(),GPU::m_DepthBuffer.get());
 
@@ -797,7 +797,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	//	Render all lights
 	//	 OPTICK_EVENT("SSAO");
 	//	RHI::BeginEvent(L"SSAO");
-	//	myCamera->SetCameraToFrameBuffer();
+	//	myCamera->GetFrameBuffer();
 	//	GfxCmd_SSAO().ExecuteAndDestroy();
 	//	RHI::EndEvent();
 	//	////Render shadowmaps
@@ -807,7 +807,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	//	RHI::EndEvent();
 	//	OPTICK_EVENT("Lightning");
 	//	RHI::BeginEvent(L"Lightning");
-	//	myCamera->SetCameraToFrameBuffer();
+	//	myCamera->GetFrameBuffer();
 	//	GfxCmd_SetRenderTarget(SceneBuffer.get(),nullptr).ExecuteAndDestroy();
 	//	GfxCmd_SetLightBuffer().ExecuteAndDestroy(); //REFACTOR Change name to fit purpose
 	//	//RHI::EndEvent();
@@ -832,7 +832,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	//	//Debug layers
 	//	OPTICK_EVENT("DebugLayers")
 	//		RHI::BeginEvent(L"DebugLayers");
-	//	myCamera->SetCameraToFrameBuffer();
+	//	myCamera->GetFrameBuffer();
 	//	GfxCmd_DebugLayer().ExecuteAndDestroy();
 	//#ifdef  _DEBUGDRAW
 	//	if (myGraphicSettings.DebugRenderer_Active)
@@ -885,18 +885,7 @@ void GraphicsEngine::EndFrame()
 	commandQueue->WaitForFenceValue(GPU::m_FenceValues[GPU::m_FrameIndex]);
 	//ImGui::Render();
 	//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(),commandList->GetGraphicsCommandList().Get());
-	//GPU::Present();
-
-	// We finish our frame here and present it on screen.  
-	OPTICK_EVENT("ResetShadowList")
-		myShadowRenderer.ResetShadowList();
-	OPTICK_EVENT("DeferredCommandList")
-		DeferredCommandList.Reset();
-	OPTICK_EVENT("OverlayCommandList")
-		OverlayCommandList.Reset();
-	OPTICK_EVENT("myInstanceRenderer")
-		myInstanceRenderer.Clear();
-	OPTICK_EVENT("ClearedEndFrame")
+	//GPU::Present(); 
 }
 
 FORCEINLINE std::shared_ptr<Texture> GraphicsEngine::GetTargetTextures(eRenderTargets type) const

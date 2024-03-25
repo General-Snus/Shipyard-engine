@@ -2,7 +2,7 @@
 #include <iostream>
 #include "../Math.hpp"
 #include "Matrix3x3.hpp"
-#include "Matrix4x4.hpp"
+#include "Matrix4x4.h"
 #include "Vectors.hpp"
 
 template <typename T = float>

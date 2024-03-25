@@ -1,5 +1,6 @@
 #pragma once
 #include "BaseAsset.h"
+
 struct Bone
 {
 	Matrix BindPoseInverse;

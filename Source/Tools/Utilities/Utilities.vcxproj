@@ -187,7 +187,7 @@
     <ClInclude Include="LinearAlgebra\Line.hpp" />
     <ClInclude Include="LinearAlgebra\LineVolume.hpp" />
     <ClInclude Include="LinearAlgebra\Matrix3x3.hpp" />
-    <ClInclude Include="LinearAlgebra\Matrix4x4.hpp" />
+    <ClInclude Include="LinearAlgebra\Matrix4x4.h" />
     <ClInclude Include="LinearAlgebra\Plane.hpp" />
     <ClInclude Include="LinearAlgebra\PlaneVolume.hpp" />
     <ClInclude Include="LinearAlgebra\Quaternions.hpp" />
@@ -207,6 +207,7 @@
   <ItemGroup>
     <ClCompile Include="Game\Camera.cpp" />
     <ClCompile Include="Game\Timer.cpp" />
+    <ClCompile Include="LinearAlgebra\Matrix4x4.cpp" />
     <ClInclude Include="TemplateHelpers.h" />
   </ItemGroup>
   <ItemGroup>

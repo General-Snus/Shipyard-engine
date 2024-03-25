@@ -4,6 +4,9 @@
 #include <Tools/Utilities/Math.hpp> 
 #include <Tools/Optick/src/optick.h>
 
+#include "DirectX/Shipyard/Texture.h"
+
+
 cLight::cLight(const unsigned int anOwnerId) : Component(anOwnerId),isDirty(true)
 {
 	myLightType = eLightType::uninitialized;
@@ -546,7 +549,8 @@ void cLight::RedrawPointMap()
 	const float farfield = myPointLightData->Range * 5;
 	const float nearField = .01f;
 
-	myPointLightData->projection = DirectX::XMMatrixPerspectiveFovLH(fow,1,farfield,nearField);;
+	const auto dxMatrix = XMMatrixPerspectiveFovLH(fow,1,farfield,nearField);
+	myPointLightData->projection = Matrix(&dxMatrix);
 	myPointLightData->lightView = Matrix::GetFastInverse(myPointLightData->lightView);
 }
 
@@ -559,7 +563,10 @@ void cLight::RedrawSpotMap()
 	const float fow = mySpotLightData->OuterConeAngle;
 	const float farfield = mySpotLightData->Range * 2;
 	const float nearField = 0.01f;
-	mySpotLightData->projection = DirectX::XMMatrixPerspectiveFovLH(fow,1,farfield,nearField);;
+
+
+	const auto dxMatrix = XMMatrixPerspectiveFovLH(fow,1,farfield,nearField);
+	mySpotLightData->projection = Matrix(&dxMatrix);
 	mySpotLightData->lightView = Matrix::GetFastInverse(mySpotLightData->lightView);
 }
 
