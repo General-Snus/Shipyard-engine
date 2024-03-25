@@ -269,17 +269,11 @@ void GraphicsEngine::SetupDefaultVariables()
 
 
 	AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultTile.dds",defaultTexture);
-	defaultTexture->GetRawTexture()->SetView(ViewType::SRV);;
-	//if (!RHI::LoadTexture(
-	//	defaultTexture->GetRawTexture().get(),
-	//	AssetManager::Get().AssetPath / "Textures/Default/DefaultTile.dds"))
-	//{
-	//	RHI::LoadTextureFromMemory(
-	//		defaultTexture->GetRawTexture().get(),
-	//		L"Default Color texture",
-	//		BuiltIn_Default_C_ByteCode,
-	//		sizeof(BuiltIn_Default_C_ByteCode)
-	//	);
+	AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultNormal.dds",defaultNormalTexture);
+	AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultMaterial.dds",defaultMatTexture);
+	AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultEffect.dds",defaultEffectTexture);
+	//	defaultTexture->GetRawTexture()->SetView(ViewType::SRV);;
+
 
 	AssetManager::Get().ForceLoadAsset<Mesh>("default.fbx",defaultMesh);
 }
@@ -704,25 +698,23 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 				}
 				else
 				{
-					const auto tex = defaultTexture->GetRawTexture().get();
 					switch ((eTextureType)i)
 					{
 					case eTextureType::ColorMap:
-						materialBuffer.albedoTexture = tex->GetHeapOffset();
+						materialBuffer.albedoTexture = defaultTexture->GetRawTexture()->GetHeapOffset();
 						break;
 					case eTextureType::NormalMap:
-						materialBuffer.normalTexture = tex->GetHeapOffset();
+						materialBuffer.normalTexture = defaultNormalTexture->GetRawTexture()->GetHeapOffset();
 						break;
 					case eTextureType::MaterialMap:
-						materialBuffer.materialTexture = tex->GetHeapOffset();
+						materialBuffer.materialTexture = defaultMatTexture->GetRawTexture()->GetHeapOffset();
 						break;
 					case eTextureType::EffectMap:
-						materialBuffer.emissiveTexture = tex->GetHeapOffset();
+						materialBuffer.emissiveTexture = defaultEffectTexture->GetRawTexture()->GetHeapOffset();
 						break;
 					default:
 						break;
 					}
-					commandList->TrackResource(tex->GetResource());
 				}
 			}
 
@@ -734,9 +726,13 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 		}
 	}
 
+	commandList->FlushResourceBarriers();
 	{
 		const auto& enviromentLight = PSOCache::GetState(PSOCache::ePipelineStateID::DeferredLighting);
+		LightBuffer lightbuffer = EnvironmentLightPSO::CreateLightBuffer();
 
+		const auto& alloc = GPU::m_GraphicsMemory->AllocateConstant<LightBuffer>(lightbuffer);
+		graphicCommandList->SetGraphicsRootConstantBufferView(REG_LightBuffer,alloc.GpuAddress());
 
 
 		GPU::ClearRTV(*commandList.get(),enviromentLight->GetRenderTargets(),enviromentLight->GetRenderTargetAmounts());
@@ -754,13 +750,13 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 		{
 			gBufferTextures[i].SetView(ViewType::SRV);
 			commandList->TransitionBarrier(gBufferTextures[i].GetResource(),D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			commandList->TrackResource(gBufferTextures[i].GetResource());
 		}
 
 		commandList->SetDescriptorTable(eRootBindings::Textures,gBufferTextures);
 
 		graphicCommandList->IASetVertexBuffers(0,1,nullptr);
 		graphicCommandList->IASetIndexBuffer(nullptr);
-		commandList->FlushResourceBarriers();
 		graphicCommandList->DrawInstanced(6,1,0,0);
 	}
 

@@ -189,7 +189,7 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 	// Create frame resources.
 	UpdateRenderTargetViews(m_Device,m_Swapchain->m_SwapChain,m_RtvHeap);
 
-	m_BackBuffer->AllocateTexture(width,height);
+	m_BackBuffer->AllocateTexture({ width,height },"Backbuffer");
 	ResizeDepthBuffer(width,height);
 
 
@@ -259,7 +259,7 @@ void GPU::Present(unsigned aSyncInterval)
 		GPU::UnInitialize();
 		exit(-1);
 		return;
-}
+	}
 #else 
 	Helpers::ThrowIfFailed(m_Swapchain->m_SwapChain->Present(aSyncInterval,0));
 #endif
@@ -378,29 +378,22 @@ void GPU::ResizeDepthBuffer(unsigned width,unsigned height)
 		width,
 		height,
 		1,
-		1,
+		0,
 		1,
 		0,
 		D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL
 	);
 
-	const CD3DX12_CLEAR_VALUE depthOptimizedClearValue(DXGI_FORMAT_D32_FLOAT,1.0f,0u);
+	const CD3DX12_CLEAR_VALUE depthOptimizedClearValue(DXGI_FORMAT_D32_FLOAT,0.0f,0u);
 	Helpers::ThrowIfFailed(m_Device->CreateCommittedResource(
 		&heapProperties,
 		D3D12_HEAP_FLAG_NONE,
 		&depthStencilDesc,
 		D3D12_RESOURCE_STATE_DEPTH_WRITE,
 		&depthOptimizedClearValue,
-		IID_PPV_ARGS(&m_DepthBuffer->m_pResource)
+		IID_PPV_ARGS(&m_DepthBuffer->m_Resource)
 	));
-	m_DepthBuffer->m_pResource->SetName(L"DepthBuffer");
-
-	// Update the depth-stencil view.
-	D3D12_DEPTH_STENCIL_VIEW_DESC dsv = {};
-	dsv.Format = DXGI_FORMAT_D32_FLOAT;
-	dsv.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-	dsv.Texture2D.MipSlice = 0;
-	dsv.Flags = D3D12_DSV_FLAG_NONE;
+	m_DepthBuffer->m_Resource->SetName(L"DepthBuffer");
 
 
 	m_DepthBuffer->CheckFeatureSupport();
@@ -423,16 +416,16 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 
 	Helpers::ThrowIfFailed(
 		CreateDDSTextureFromFile(m_Device.Get(),resourceUpload,aFileName.wstring().c_str(),
-			outTexture->m_pResource.ReleaseAndGetAddressOf(),generateMips)
+			outTexture->m_Resource.ReleaseAndGetAddressOf(),generateMips)
 	);
 
 
 	auto uploadResourcesFinished = resourceUpload.End(m_DirectCommandQueue->GetCommandQueue().Get());
 	uploadResourcesFinished.wait();
 
-	outTexture->m_Width = outTexture->m_pResource->GetDesc().Width;
-	outTexture->m_Height = outTexture->m_pResource->GetDesc().Height;
-	outTexture->m_pResource->SetName(aFileName.wstring().c_str());
+	outTexture->m_Width = outTexture->m_Resource->GetDesc().Width;
+	outTexture->m_Height = outTexture->m_Resource->GetDesc().Height;
+	outTexture->m_Resource->SetName(aFileName.wstring().c_str());
 
 	outTexture->CheckFeatureSupport();
 	outTexture->SetView(ViewType::SRV);
@@ -452,7 +445,7 @@ bool GPU::LoadTextureFromMemory(Texture* outTexture,const std::filesystem::path&
 
 	Helpers::ThrowIfFailed(
 		CreateDDSTextureFromMemory(m_Device.Get(),resourceUpload,someImageData,anImageDataSize,
-			outTexture->m_pResource.ReleaseAndGetAddressOf(),generateMips)
+			outTexture->m_Resource.ReleaseAndGetAddressOf(),generateMips)
 	);
 
 	auto uploadResourcesFinished = resourceUpload.End(m_DirectCommandQueue->GetCommandQueue().Get());

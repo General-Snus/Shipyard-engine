@@ -59,6 +59,9 @@ void GPURootSignature::SetRootSignatureDesc(const D3D12_ROOT_SIGNATURE_DESC1& ro
 	UINT numParameters = rootSignatureDesc.NumParameters;
 	D3D12_ROOT_PARAMETER1* pParameters = numParameters > 0 ? new D3D12_ROOT_PARAMETER1[numParameters] : nullptr;
 
+	D3D12_ROOT_SIGNATURE_FLAGS flags = rootSignatureDesc.Flags;
+	m_RootSignatureDesc.Flags = flags;
+
 	for (UINT i = 0; i < numParameters; ++i)
 	{
 		const D3D12_ROOT_PARAMETER1& rootParameter = rootSignatureDesc.pParameters[i];
@@ -113,9 +116,6 @@ void GPURootSignature::SetRootSignatureDesc(const D3D12_ROOT_SIGNATURE_DESC1& ro
 
 	m_RootSignatureDesc.NumStaticSamplers = numStaticSamplers;
 	m_RootSignatureDesc.pStaticSamplers = pStaticSamplers;
-
-	D3D12_ROOT_SIGNATURE_FLAGS flags = rootSignatureDesc.Flags;
-	m_RootSignatureDesc.Flags = flags;
 
 	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC versionRootSignatureDesc;
 	versionRootSignatureDesc.Init_1_1(numParameters,pParameters,numStaticSamplers,pStaticSamplers,flags);

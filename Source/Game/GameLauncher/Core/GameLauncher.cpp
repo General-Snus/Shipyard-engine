@@ -98,20 +98,20 @@ std::vector<GameObject> LoadTest(const std::filesystem::path& path)
 
 void GameLauncher::GenerateNewRandomCubes()
 {
-	const float range = 100.f;
+	const float range = 50.f;
 	std::string arr[3] = { "Models/Cube.fbx","Models/CubeHoled.fbx","Models/SteelFloor.fbx" };
-	for (size_t i = 0; i < 1000; i++)
+	for (size_t i = 0; i < 10; i++)
 	{
 		vectorOfGameObjects.push_back(GameObjectManager::Get().CreateGameObject());
 		GameObject vectorObject = vectorOfGameObjects.back();
 		vectorObject.AddComponent<cMeshRenderer>(arr[rand() % 3]);
 		auto& transform = vectorObject.AddComponent<Transform>();
 
-		Vector3f position = { RandomEngine::RandomInRange(-range,range),RandomEngine::RandomInRange(0.f,2*range),RandomEngine::RandomInRange(-range,range) };
+		Vector3f position = { RandomEngine::RandomInRange(-range,range),RandomEngine::RandomInRange(0.f,2 * range),RandomEngine::RandomInRange(-range,range) };
 		transform.SetPosition(position);
 		transform.SetScale(1.f);
 
-		//vectorObject.AddComponent<cPhysXDynamicBody>();
+		vectorObject.AddComponent<cPhysXDynamicBody>();
 
 		//Logger::Log("Created: " + std::to_string(vectorObject.GetID()));
 	}
@@ -142,14 +142,13 @@ void GameLauncher::Start()
 		//worldRoot.AddComponent<FrameStatistics>();
 		//worldRoot.AddComponent<RenderMode>();
 		//worldRoot.AddComponent<Skybox>();
-		worldRoot.AddComponent<cLight>(eLightType::Directional);
-
 		Transform& transform = worldRoot.AddComponent<Transform>();
 		transform.SetRotation(0,45,-45);
+		cLight& pLight = worldRoot.AddComponent<cLight>(eLightType::Directional);
 
-		cLight& pLight = worldRoot.GetComponent<cLight>();
+
 		pLight.SetColor(Vector3f(1,1,1));
-		pLight.SetPower(1.0f);
+		pLight.SetPower(25.0f);
 		pLight.BindDirectionToTransform(true);
 		//if(gom.GetAllComponents<BackgroundColor>().empty())
 		//{
@@ -161,15 +160,15 @@ void GameLauncher::Start()
 		GameObject floor = gom.CreateGameObject();
 		auto& transform = floor.AddComponent<Transform>();
 		transform.SetPosition(0,-0.0f,0);
-		transform.SetRotation( 0,0.f,0.f);
-		transform.SetScale(50.f,2.f,50.f);
-		transform.SetGizmo(false); 
+		transform.SetRotation(0,0.f,0.f);
+		transform.SetScale(500.f,20.f,500.f);
+		transform.SetGizmo(false);
 		floor.SetActive(false);
 		floor.AddComponent<cMeshRenderer>("Models/Cube.fbx");
 		//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json"); 
 #if PHYSX
 		auto& collider = floor.AddComponent<cCollider>();
-		collider.SetColliderType<ColliderAssetPlanar>("Models/ColliderMesh.fbx");
+		collider.SetColliderType<ColliderAssetAABB>();
 		floor.AddComponent<cPhysXStaticBody>();
 #endif 
 	}
@@ -188,7 +187,7 @@ void GameLauncher::Start()
 #if PHYSX 
 	if (std::filesystem::exists("GameObjectSaveFile.SaveFiles"))
 	{
-		vectorOfGameObjects = LoadTest("GameObjectSaveFile.SaveFiles");
+		//vectorOfGameObjects = LoadTest("GameObjectSaveFile.SaveFiles");
 	}
 	else
 	{
@@ -253,6 +252,6 @@ void GameLauncher::Update(float delta)
 		}
 	}
 
-	//Transform& pLight = GameObjectManager::GetInstance().GetWorldRoot().GetComponent<Transform>();
-	//pLight.Rotate(0,delta,0);
+	Transform& pLight = GameObjectManager::Get().GetWorldRoot().GetComponent<Transform>();
+	pLight.Rotate(0,delta,0);
 }

@@ -19,40 +19,35 @@ GBufferOutput main(DefaultVertexToPixel input)
     
     const float4 textureColor = colorMap.Sample(defaultSampler, uv); // * g_defaultMaterial.DefaultMaterial.albedoColor;
     
-   if(textureColor.a < 0.1f)
-   {
-       discard;
-   }
+    if(textureColor.a < 0.1f)
+    {
+        discard;
+    }
     
-    //const float4 materialComponent = materialMap.Sample(defaultSampler, uv);
-    //const float2 textureNormal = normalMap.Sample(defaultSampler, uv).xy;
-   // const float4 effect = effectMap.Sample(defaultSampler, uv);
-    
-    //const float occlusion = materialComponent.r;
-    //const float roughness = materialComponent.g;
-    //const float metallic = materialComponent.b;
-    
-    
+    const float4 materialComponent = materialMap.Sample(defaultSampler, uv);
+    const float2 textureNormal = normalMap.Sample(defaultSampler, uv).xy;
+    const float4 effect = effectMap.Sample(defaultSampler, uv);
+
     //Normals
-    //float3 pixelNormal;
-    //pixelNormal.xy = ((2.0f * textureNormal.xy) - 1.0f);
-    //pixelNormal.z = sqrt(1 - (pow(pixelNormal.x, 2.0f) + pow(pixelNormal.y, 2.0f)));
-    //pixelNormal = normalize(mul(pixelNormal, TBN));
-    //pixelNormal *= g_defaultMaterial.DefaultMaterial.NormalStrength;
+    float3 pixelNormal;
+    pixelNormal.xy = ((2.0f * textureNormal.xy) - 1.0f);
+    pixelNormal.z = sqrt(1 - (pow(pixelNormal.x, 2.0f) + pow(pixelNormal.y, 2.0f)));
+    pixelNormal = normalize(mul(pixelNormal, TBN));
+     pixelNormal *= g_defaultMaterial.DefaultMaterial.NormalStrength;
      
     result.Albedo = textureColor;
     
-    result.Normal.xyz = 0;
-    result.Normal.w = 0;
+    result.Normal.xyz = pixelNormal;
+    result.Normal.w = 1;
     
-    result.Material = 0;
+    result.Material = materialComponent;
     
-    result.Effect = 0;
+    result.Effect = effect;
     
     result.VertexNormal.xyz = input.Normal;
     result.VertexNormal.w = 1;
     
     result.WorldPosition = input.WorldPosition;
-    result.Depth = saturate(length(cameraDirection));
+    result.Depth =  (length(cameraDirection));
     return result;
 }

@@ -61,7 +61,7 @@ public:
 private:
 	void InitRootSignature() override;
 
-	static inline constexpr uint16_t numRenderTargets = 8;
+	static inline constexpr uint16_t numRenderTargets = 7;
 	Texture renderTargets[numRenderTargets];
 };
 
@@ -77,7 +77,7 @@ public:
 	static LightBuffer CreateLightBuffer();
 
 private:
-	static inline constexpr uint16_t numRenderTargets = 8;
+	static inline constexpr uint16_t numRenderTargets = 7;
 	Texture textureResources[numRenderTargets];
 	void InitRootSignature() override;
 };

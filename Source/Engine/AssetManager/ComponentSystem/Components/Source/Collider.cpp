@@ -75,12 +75,12 @@ void cCollider::OnSiblingChanged(const std::type_info* SourceClass)
 	OPTICK_EVENT();
 	if (SourceClass == &typeid(Transform)) // Transform dirty
 	{
-		//Transform& transform = GetComponent<Transform>();
+		Transform& transform = GetComponent<Transform>();
 		const auto colliderType = myCollider->GetColliderType();
 		switch (colliderType)
 		{
 		case eColliderType::AABB:
-			//GetColliderAssetOfType<ColliderAssetAABB>()->UpdateWithTransform(transform.GetTransform());
+			GetColliderAssetOfType<ColliderAssetAABB>()->UpdateWithTransform(transform.GetTransform());
 			break;
 		case eColliderType::SPHERE:
 			break;

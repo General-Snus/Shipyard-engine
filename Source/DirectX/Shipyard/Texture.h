@@ -24,13 +24,17 @@ public:
 	explicit Texture();
 
 	FORCEINLINE const std::string& GetName() const { return myName; }
-	FORCEINLINE bool IsValid() const { return m_pResource != nullptr; }
+	FORCEINLINE bool IsValid() const { return m_Resource != nullptr; }
 	// The name of this texture, for easy ID.
 	std::string myName;
 
 	void Destroy() override;
 	//Default state is render target
-	bool AllocateTexture(const unsigned width,const unsigned height,const std::filesystem::path& name = "Unnamed texture");
+	bool AllocateTexture(const Vector2ui dimentions,
+		const std::filesystem::path& name = "UnnamedTexture",
+		DXGI_FORMAT Format = DXGI_FORMAT_R8G8B8A8_UNORM,
+		D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS);
+
 	void SetView(ViewType view);
 	bool CreateDDSFromMemory(const void* filePtr,size_t fileSize,bool sRGB);
 

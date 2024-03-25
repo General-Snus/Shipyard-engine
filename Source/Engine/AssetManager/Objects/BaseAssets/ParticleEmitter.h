@@ -1,5 +1,6 @@
 #pragma once
 #include <Engine/AssetManager/ComponentSystem/Components/ParticleSystem.h>
+#include <Engine/AssetManager/Objects/BaseAssets/BaseAsset.h>
 #include <Engine/GraphicsEngine/Rendering/ParticleRenderer/ParticleVertex.h>
 
 class ParticleSystem;

@@ -13,7 +13,7 @@ using namespace Microsoft::WRL;
 
 class GpuResource
 {
-
+	friend class CommandList;
 public:
 	GpuResource();
 	virtual ~GpuResource() { Destroy(); }
@@ -25,7 +25,7 @@ public:
 
 	inline virtual void Destroy()
 	{
-		m_pResource = nullptr;
+		m_Resource = nullptr;
 		//Potential resource management here
 	}
 
@@ -50,7 +50,7 @@ protected:
 	D3D12_RESOURCE_STATES m_TransitioningState;
 	std::wstring m_ResourceName;
 
-	ComPtr<ID3D12Resource> m_pResource;
+	ComPtr<ID3D12Resource> m_Resource;
 	D3D12_FEATURE_DATA_FORMAT_SUPPORT m_FormatSupport;
 };
 

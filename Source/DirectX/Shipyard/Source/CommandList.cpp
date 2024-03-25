@@ -17,10 +17,10 @@ CommandList::CommandList(D3D12_COMMAND_LIST_TYPE type) : m_Type(type)
 	m_ResourceStateTracker = std::make_unique<ResourceStateTracker>();
 
 
-//m_DescriptorHeap = std::make_unique<DescriptorHeap>(GPU::m_Device,
-//	D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-//	D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
-//	Descriptors::Count);
+	//m_DescriptorHeap = std::make_unique<DescriptorHeap>(GPU::m_Device,
+	//	D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+	//	D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
+	//	Descriptors::Count);
 
 }
 
@@ -90,7 +90,7 @@ void CommandList::CopyBuffer(GpuResource& buffer,size_t numElements,size_t eleme
 void CommandList::TransitionBarrier(const ComPtr<ID3D12Resource>& resource,D3D12_RESOURCE_STATES stateAfter,UINT subresource,bool flushBarriers)
 {
 	if (resource)
-	{ 
+	{
 		auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(resource.Get(),D3D12_RESOURCE_STATE_COMMON,stateAfter,subresource);
 		m_ResourceStateTracker->ResourceBarrier(barrier);
 	}
@@ -105,12 +105,13 @@ void CommandList::TransitionBarrier(const ComPtr<ID3D12Resource>& resource,D3D12
 	}
 }
 
-void CommandList::TransitionBarrier(const GpuResource& resource,D3D12_RESOURCE_STATES stateAfter,UINT subresource,bool flushBarriers)
+void CommandList::TransitionBarrier(GpuResource& resource,D3D12_RESOURCE_STATES stateAfter,UINT subresource,bool flushBarriers)
 {
+	resource.m_TransitioningState = stateAfter;
 	TransitionBarrier(resource.GetResource(),stateAfter,subresource,flushBarriers);
 }
 
-void CommandList::SetView(eRootBindings rootParameterIndex,uint32_t descriptorOffset,const GpuResource& resource,D3D12_RESOURCE_STATES stateAfter,UINT firstSubresource,UINT numSubresources,const D3D12_SHADER_RESOURCE_VIEW_DESC* srv)
+void CommandList::SetView(eRootBindings rootParameterIndex,uint32_t descriptorOffset,GpuResource& resource,D3D12_RESOURCE_STATES stateAfter,UINT firstSubresource,UINT numSubresources,const D3D12_SHADER_RESOURCE_VIEW_DESC* srv)
 {
 	if (numSubresources < D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES)
 	{
@@ -122,10 +123,10 @@ void CommandList::SetView(eRootBindings rootParameterIndex,uint32_t descriptorOf
 	else
 	{
 		TransitionBarrier(resource,stateAfter);
-	} 
+	}
 
 	//CreateBufferShaderResourceView(GPU::m_Device.Get(),resource.GetResource().Get(),resource->GetCpuHandle(Descriptors::WindowsLogo));
-	 
+
 
 	TrackResource(resource);
 }
@@ -155,7 +156,7 @@ void CommandList::SetRenderTargets(unsigned numberOfTargets,Texture* renderTarge
 	assert(numberOfTargets <= D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
 	D3D12_CPU_DESCRIPTOR_HANDLE RTVs[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT] = {};
 	for (size_t i = 0; i < numberOfTargets; i++)
-	{ 
+	{
 		TransitionBarrier(renderTargets[i].GetResource(),D3D12_RESOURCE_STATE_RENDER_TARGET);
 		RTVs[i] = renderTargets[i].GetHandle(ViewType::RTV).first;
 	}
@@ -184,12 +185,12 @@ void CommandList::FlushResourceBarriers()
 }
 
 bool CommandList::Close(CommandList& pendingCommandList)
-{ 
+{
 	FlushResourceBarriers();
 
 	m_CommandList->Close();
-	 
-	uint32_t numPendingBarriers = m_ResourceStateTracker->FlushPendingResourceBarriers(pendingCommandList); 
+
+	uint32_t numPendingBarriers = m_ResourceStateTracker->FlushPendingResourceBarriers(pendingCommandList);
 	m_ResourceStateTracker->CommitFinalResourceStates();
 
 	return numPendingBarriers > 0;

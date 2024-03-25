@@ -16,14 +16,14 @@ void VertexResource::CreateView(size_t numElements,size_t elementSize)
 	m_NumVertices = (uint32_t)numElements;
 	m_VertexStride = (uint32_t)elementSize;
 
-	m_VertexBufferView.BufferLocation = m_pResource->GetGPUVirtualAddress();
+	m_VertexBufferView.BufferLocation = m_Resource->GetGPUVirtualAddress();
 	m_VertexBufferView.SizeInBytes = static_cast<UINT>(m_NumVertices * m_VertexStride);
 	m_VertexBufferView.StrideInBytes = static_cast<UINT>(m_VertexStride);
 }
 
 GpuResource::GpuResource() : m_UsageState(D3D12_RESOURCE_STATE_COMMON),
 m_TransitioningState((D3D12_RESOURCE_STATES)-1),
-m_pResource(nullptr),m_FormatSupport()
+m_Resource(nullptr),m_FormatSupport()
 {
 	CheckFeatureSupport();
 }
@@ -32,7 +32,7 @@ GpuResource::GpuResource(const GpuResource& toCopy) :
 	m_UsageState(toCopy.m_UsageState),
 	m_TransitioningState(toCopy.m_TransitioningState),
 	m_FormatSupport(toCopy.m_FormatSupport),
-	m_pResource(toCopy.m_pResource)
+	m_Resource(toCopy.m_Resource)
 {
 }
 
@@ -40,7 +40,7 @@ GpuResource& GpuResource::operator=(const GpuResource& other)
 {
 	if (this != &other)
 	{
-		m_pResource = other.m_pResource;
+		m_Resource = other.m_Resource;
 		m_FormatSupport = other.m_FormatSupport;
 		m_ResourceName = other.m_ResourceName;
 	}
@@ -51,7 +51,7 @@ GpuResource& GpuResource::operator=(GpuResource&& other) noexcept
 {
 	if (this != &other)
 	{
-		m_pResource = std::move(other.m_pResource);
+		m_Resource = std::move(other.m_Resource);
 		m_FormatSupport = other.m_FormatSupport;
 		m_ResourceName = std::move(other.m_ResourceName);
 		other.Reset();
@@ -67,32 +67,32 @@ void GpuResource::CreateView(size_t numElements,size_t elementSize)
 
 void GpuResource::Reset()
 {
-	m_pResource.Reset();
+	m_Resource.Reset();
 	m_ResourceName.clear();
 	m_FormatSupport = {};
 }
   
 void GpuResource::SetResource(const ComPtr<ID3D12Resource>& resource)
 {
-	m_pResource = resource;
-	m_pResource->SetName(m_ResourceName.c_str());
+	m_Resource = resource;
+	m_Resource->SetName(m_ResourceName.c_str());
 
 	CheckFeatureSupport();
 }
 
 ComPtr<ID3D12Resource> GpuResource::GetResource()
 {
-	return m_pResource;
+	return m_Resource;
 }
 
 const ComPtr<ID3D12Resource>& GpuResource::GetResource() const
 {
-	return m_pResource;
+	return m_Resource;
 }
 
 ID3D12Resource** GpuResource::GetAddressOf()
 {
-	return m_pResource.GetAddressOf();
+	return m_Resource.GetAddressOf();
 }
 
 
@@ -108,9 +108,9 @@ bool GpuResource::CheckFormatSupport(D3D12_FORMAT_SUPPORT2 formatSupport) const
 
 void GpuResource::CheckFeatureSupport()
 {
-	if (m_pResource)
+	if (m_Resource)
 	{
-		auto desc = m_pResource->GetDesc();
+		auto desc = m_Resource->GetDesc();
 
 		m_FormatSupport.Format = desc.Format;
 		Helpers::ThrowIfFailed(GPU::m_Device->CheckFeatureSupport(
@@ -136,7 +136,7 @@ void IndexResource::CreateView(size_t numElements,size_t elementSize)
 	m_NumIndices = (uint32_t)numElements;
 	m_IndexFormat = (elementSize == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
 
-	m_IndexBufferView.BufferLocation = m_pResource->GetGPUVirtualAddress();
+	m_IndexBufferView.BufferLocation = m_Resource->GetGPUVirtualAddress();
 	m_IndexBufferView.SizeInBytes = static_cast<UINT>(numElements * elementSize);
 	m_IndexBufferView.Format = m_IndexFormat;
 }

@@ -1,23 +1,23 @@
 #include "../Headers/SceneGraph.hlsli"  
 #include "../Headers/PBRFunctions.hlsli"  
 
-//float3 CalculateIndirectLight(
-//float3 diffuseColor,
-//float3 specularColor,
-//float3 normal,
-//float3 cameraDirection,
-//TextureCube enviromentCube,
-//float roughness,
-//float occulusion
-//)
-//{
-//    const float3 diffuse = CalculateDiffuseIBL(normal, enviromentCube);
-//    const float3 specular = CalculateSpecularIBL(specularColor, normal, cameraDirection, roughness, enviromentCube);
-    
-//    const float3 kA = (diffuseColor * diffuse + specular) * occulusion;
-    
-//    return kA;
-//} 
+float3 CalculateIndirectLight(
+float3 diffuseColor,
+float3 specularColor,
+float3 normal,
+float3 cameraDirection,
+TextureCube enviromentCube,
+float roughness,
+float occulusion
+)
+{
+    const float3 diffuse = CalculateDiffuseIBL(normal, enviromentCube);
+    const float3 specular = CalculateSpecularIBL(specularColor, normal, cameraDirection, roughness, enviromentCube);
+  
+    const float3 kA = (diffuseColor * diffuse + specular) * occulusion;
+  
+    return kA;
+} 
 float3 CalculateDirectionLight(
 float3 diffuseColor,
 float3 specularColor,
@@ -93,7 +93,7 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     const float3 diffuseColor = lerp((float3) 0.0f, albedo.rgb, 1 - metallic);
     const float3 specularColor = lerp((float3) 0.04f, albedo.rgb, metallic);
     
-    const float3 radiance = CalculateDirectionLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, roughness, worldPosition);
+    const float3 radiance = albedo.rgb*.1f + CalculateDirectionLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, roughness, worldPosition);
     //+ CalculateIndirectLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, enviromentCube, roughness, occlusion);
     
     result.Color.rgb = radiance + Effect.r * albedo.rgb;

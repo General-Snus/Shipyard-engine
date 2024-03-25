@@ -1,9 +1,9 @@
 ﻿
+#include <Tools/ThirdParty/dpp/dpp.h>
+#include <Windows.h> // Mean and lean is in compiler defines
 #include "Core/Editor.h" 
 #include "resource.h"
 #include "Windows/Window.h" 
-#include <Tools/ThirdParty/dpp/dpp.h>
-#include <Windows.h> // Mean and lean is in compiler defines
 
 #include <dbghelp.h>
 #include <shellapi.h>
@@ -37,7 +37,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 
 
-	if(IsDebuggerPresent())
+	if (IsDebuggerPresent())
 	{
 		Run(hInstance);
 	}
@@ -47,7 +47,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		{
 			Run(hInstance);
 		}
-		__except(ExceptionFilterFunction(GetExceptionInformation()))
+		__except (ExceptionFilterFunction(GetExceptionInformation()))
 		{
 		}
 	}
@@ -58,14 +58,14 @@ int Run(HINSTANCE& hInstance)
 {
 	WinInitSettings settings{};
 	settings.hInstance = hInstance;
-	settings.windowSize = {1920, 1080};
+	settings.windowSize = { 1920, 1080 };
 	settings.windowTitle = L"Shipyard";
 	Window::Init(settings);
 
-	Editor editor;
+	Editor& editor = Editor::Get();
 	editor.Initialize(Window::windowHandler);
 	Window::SetCallbackFunction([&editor](MSG const& msg_data) { editor.DoWinProc(msg_data); });
-	while(Window::Update())
+	while (Window::Update())
 	{
 		editor.Run();
 	}
@@ -163,7 +163,7 @@ void CreateMiniDump(EXCEPTION_POINTERS* someExceptionPointers)
 	SelectObject(hMemDC,hBitmap);
 	BitBlt(hMemDC,0,0,lWidth,lHeight,hDC,x,y,SRCCOPY);
 	hFile = CreateFileW(bmpFileName,GENERIC_WRITE | GENERIC_READ,0,NULL,CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL,NULL);
-	if(hFile != INVALID_HANDLE_VALUE)
+	if (hFile != INVALID_HANDLE_VALUE)
 	{
 		WriteFile(hFile,&bfHeader,sizeof(BITMAPFILEHEADER),&dwWritten,NULL);
 		WriteFile(hFile,&biHeader,sizeof(BITMAPINFOHEADER),&dwWritten,NULL);
@@ -179,10 +179,10 @@ void CreateMiniDump(EXCEPTION_POINTERS* someExceptionPointers)
 	newDirectory.operator+=("\\..\\..\\Logs\\" + directory.filename().string());
 	std::filesystem::create_directories(newDirectory);
 	std::error_code arg;
-	if(std::filesystem::exists(newDirectory))
+	if (std::filesystem::exists(newDirectory))
 	{
 		auto dur = std::chrono::duration<double,std::milli>(500.0);
-		for(int i = 1; i <= 5; ++i)
+		for (int i = 1; i <= 5; ++i)
 		{
 			try
 			{
@@ -190,9 +190,9 @@ void CreateMiniDump(EXCEPTION_POINTERS* someExceptionPointers)
 					std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing,arg);
 				break;
 			}
-			catch(std::exception e)
+			catch (std::exception e)
 			{
-				if(i <= 5)
+				if (i <= 5)
 				{
 					std::cout << arg.message() << " \n\n";
 					std::this_thread::sleep_for(dur);
