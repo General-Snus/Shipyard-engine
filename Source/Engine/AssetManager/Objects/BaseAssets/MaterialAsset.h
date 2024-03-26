@@ -9,13 +9,18 @@ class TextureHolder;
 struct MaterialBuffer
 {
 	Vector4f albedoColor = { 1.f,1.f,1.f,1.f };
+
 	Vector2f UVTiling = { 1.f,1.f };
 	float NormalStrength = 1.0f;
 	float Shine = 100.f;
+
+	float Roughness = 1.f;
 	int albedoTexture = -1;
 	int normalTexture = -1;
 	int materialTexture = -1;
+
 	int emissiveTexture = -1;
+	float padding[3]{ -1.f, -1.f, -1.f };
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(MaterialBuffer,
 	albedoColor.x,albedoColor.y,albedoColor.z,albedoColor.w,

@@ -153,14 +153,6 @@ void GraphicsEngine::SetupDefaultVariables()
 	pointSamplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	pointSamplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 
-	//if (!RHI::CreateSamplerState(myDefaultSampleState,samplerDesc))
-	//{
-	//	Logger::Log("Sampler state created");
-	//	assert(false);
-	//}*/
-	//RHI::SetSamplerState(myDefaultSampleState,REG_DefaultSampler);
-
-
 	//if (!RHI::CreateSamplerState(myShadowSampleState,shadowSamplerDesc))
 	//{
 	//	Logger::Log("Sampler state created");
@@ -183,63 +175,9 @@ void GraphicsEngine::SetupDefaultVariables()
 	//	Logger::Log("Failed to create depth stencil read only state");
 	//	assert(false);
 	//}
-	//myDepthStencilStates[(int)eDepthStencilStates::DSS_ReadWrite] = nullptr; 
-	////RHI::CreateVertexShaderAndInputLayout(
-	////	myVertexShader,
-	////	Vertex::InputLayout,
-	////	Vertex::InputLayoutDefinition,
-	////	BuiltIn_Default_VS_ByteCode,
-	////	sizeof(BuiltIn_Default_VS_ByteCode)
-	////); 
-	//GPU::CreateVertexShader(
-	//	myVertexShader,
-	//	BuiltIn_Default_VS_ByteCode,
-	//	sizeof(BuiltIn_Default_VS_ByteCode)
-	//); 
-	//GPU::CreatePixelShader(
-	//	myPixelShader,
-	//	BuiltIn_Default_PS_ByteCode,
-	//	sizeof(BuiltIn_Default_PS_ByteCode)
-	//); 
-	////RHI::CreateInputLayout(
-	////	Vertex::InputLayout,
-	////	Vertex::InputLayoutDefinition,
-	////	BuiltIn_Default_VS_ByteCode,
-	////	sizeof(BuiltIn_Default_VS_ByteCode)
-	////); 
-	//defaultTexture = std::make_shared<TextureHolder>("",eTextureType::ColorMap); 
-	//if (!RHI::LoadTexture(
-	//	defaultTexture->GetRawTexture().get(),
-	//	AssetManager::Get().AssetPath / "Textures/Default/DefaultTile.dds"))
-	//{
-	//	RHI::LoadTextureFromMemory(
-	//		defaultTexture->GetRawTexture().get(),
-	//		L"Default Color texture",
-	//		BuiltIn_Default_C_ByteCode,
-	//		sizeof(BuiltIn_Default_C_ByteCode)
-	//	);
-	//}  
-	//defaultNormalTexture = std::make_shared<TextureHolder>("",eTextureType::NormalMap);
-	//RHI::LoadTextureFromMemory(
-	//	defaultNormalTexture->GetRawTexture().get(),
-	//	L"Default Normal texture",
-	//	BuiltIn_Default_N_ByteCode,
-	//	sizeof(BuiltIn_Default_N_ByteCode)
-	//); 
-	//defaultMatTexture = std::make_shared<TextureHolder>("",eTextureType::MaterialMap);
-	//RHI::LoadTextureFromMemory(
-	//	defaultMatTexture->GetRawTexture().get(),
-	//	L"Default material texture",
-	//	BuiltIn_Default_M_ByteCode,
-	//	sizeof(BuiltIn_Default_M_ByteCode)
-	//); 
-	//defaultEffectTexture = std::make_shared<TextureHolder>("",eTextureType::EffectMap);
-	//RHI::LoadTextureFromMemory(
-	//	defaultEffectTexture->GetRawTexture().get(),
-	//	L"Default effect texture",
-	//	BuiltIn_Default_FX_ByteCode,
-	//	sizeof(BuiltIn_Default_FX_ByteCode)
-	//); 
+	//myDepthStencilStates[(int)eDepthStencilStates::DSS_ReadWrite] = nullptr;
+
+
 	////Particle
 	//AssetManager::Get().ForceLoadAsset<TextureHolder>(L"Textures/Default/DefaultParticle_P.dds",defaultParticleTexture);
 	//defaultParticleTexture->SetTextureType(eTextureType::ParticleMap);
@@ -251,29 +189,35 @@ void GraphicsEngine::SetupDefaultVariables()
 	//	Logger::Log("Sampler state created");
 	//	assert(false);
 	//}
+
+
 	//RHI::SetSamplerState(myPointSampleState,REG_PointSampler); 
 	//AssetManager::Get().ForceLoadAsset<TextureHolder>(L"Textures/Default/NoiseTable.dds",NoiseTable);
 	//RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_Noise_Texture,NoiseTable->GetRawTexture().get()); //Is there guarantee that this holds?
-	//defaultVS = std::make_shared<Shader>();
-	//defaultPS = std::make_shared<Shader>(); 
-	//defaultVS->SetShader(myVertexShader);
-	//defaultVS->myName = L"Default Vertex Shader";
-	//defaultPS->SetShader(myPixelShader);
-	//defaultPS->myName = L"Default Pixel Shader";*/ 
-	//AssetManager::Get().ForceLoadAsset<Material>("Materials/Default.json",defaultMaterial);
-	//defaultMaterial->SetShader(defaultVS,defaultPS); 
-	//AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/skansen_cubemap.dds",defaultCubeMap);
-	//defaultCubeMap->SetTextureType(eTextureType::CubeMap);
+
+
+	AssetManager::Get().ForceLoadAsset<ShipyardShader>("Shaders/Default_VS.cso",defaultVS);
+	AssetManager::Get().ForceLoadAsset<ShipyardShader>("Shaders/Default_PS.cso",defaultPS);
+	AssetManager::Get().ForceLoadAsset<Material>("Materials/Default.json",defaultMaterial);
+	defaultMaterial->SetShader(defaultVS,defaultPS);
+
+
 	//RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_enviromentCube,defaultCubeMap->GetRawTexture().get()); 
 
 
 
 	AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultTile.dds",defaultTexture);
+	defaultTexture->SetTextureType(eTextureType::ColorMap);
 	AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultNormal.dds",defaultNormalTexture);
+	defaultNormalTexture->SetTextureType(eTextureType::NormalMap);
 	AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultMaterial.dds",defaultMatTexture);
+	defaultMatTexture->SetTextureType(eTextureType::MaterialMap);
 	AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultEffect.dds",defaultEffectTexture);
+	defaultEffectTexture->SetTextureType(eTextureType::EffectMap);
 	//	defaultTexture->GetRawTexture()->SetView(ViewType::SRV);;
 
+	AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/skansen_cubemap.dds",defaultCubeMap);
+	defaultCubeMap->SetTextureType(eTextureType::CubeMap);
 
 	AssetManager::Get().ForceLoadAsset<Mesh>("default.fbx",defaultMesh);
 }
@@ -610,7 +554,6 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 
 	graphicCommandList->RSSetViewports(1,&GPU::m_Viewport);
 	graphicCommandList->RSSetScissorRects(1,&GPU::m_ScissorRect);
-	//graphicCommandList->OMSetRenderTargets(1,&rtv,FALSE,&dsv);
 
 	Texture* gBufferTextures;
 	unsigned bufferCount = 0;
@@ -622,13 +565,15 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 
 		commandList->SetRenderTargets(bufferCount,gBufferTextures,GPU::m_DepthBuffer.get());
 
+		const auto& rootSignature = gbufferPSO->GetRootSignature();
+		graphicCommandList->SetGraphicsRootSignature(rootSignature.Get());
+		commandList->TrackResource(rootSignature);
+
 		const auto& pipelineState = gbufferPSO->GetPipelineState().Get();
 		graphicCommandList->SetPipelineState(pipelineState);
 		commandList->TrackResource(pipelineState);
 
-		const auto& rootSignature = gbufferPSO->GetRootSignature();
-		graphicCommandList->SetGraphicsRootSignature(rootSignature.Get());
-		commandList->TrackResource(rootSignature);
+
 	}
 
 	ID3D12DescriptorHeap* heaps[] = { GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->Heap() };
@@ -638,7 +583,9 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	const auto& alloc0 = GPU::m_GraphicsMemory->AllocateConstant<FrameBuffer>(frameBuffer);
 	graphicCommandList->SetGraphicsRootConstantBufferView(REG_FrameBuffer,alloc0.GpuAddress());
 
-	ObjectBuffer objectBuffer;
+	const auto cubeMap = defaultCubeMap->GetRawTexture().get();
+	commandList->SetDescriptorTable(eRootBindings::CubeMaps,cubeMap);
+	commandList->TrackResource(cubeMap->GetResource());
 
 	static auto& list = GameObjectManager::Get().GetAllComponents<cMeshRenderer>();
 	Logger::Log(std::to_string(list.size()));
@@ -646,8 +593,9 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	for (auto& meshRenderer : list)
 	{
 		const auto& transform = meshRenderer.GetComponent<Transform>();
-		for (const auto& element : meshRenderer.GetElements())
+		for (auto& element : meshRenderer.GetElements())
 		{
+			ObjectBuffer objectBuffer;
 			objectBuffer.myTransform = transform.GetRawTransform();
 			objectBuffer.MaxExtents = Vector3f(1,1,1);
 			objectBuffer.MinExtents = -Vector3f(1,1,1);
@@ -657,22 +605,14 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 			const auto& alloc1 = GPU::m_GraphicsMemory->AllocateConstant<ObjectBuffer>(objectBuffer);
 			graphicCommandList->SetGraphicsRootConstantBufferView(REG_ObjectBuffer,alloc1.GpuAddress());
 
-			graphicCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			GPU::ConfigureInputAssembler(*commandList,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.VertexBuffer,element.IndexResource);
 
-			commandList->TransitionBarrier(element.VertexBuffer.GetResource(),D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
-			const auto vertexBuffer = element.VertexBuffer.GetVertexBufferView();
-			graphicCommandList->IASetVertexBuffers(0,1,&vertexBuffer);
-			commandList->TrackResource(element.VertexBuffer);
-
-			commandList->TransitionBarrier(element.IndexResource.GetResource(),D3D12_RESOURCE_STATE_INDEX_BUFFER);
-			const auto indexBuffer = element.IndexResource.GetIndexBufferView();
-			graphicCommandList->IASetIndexBuffer(&indexBuffer);
-			commandList->TrackResource(element.IndexResource);
-
+			const unsigned materialIndex = element.MaterialIndex;
 			MaterialBuffer materialBuffer;
+
 			for (size_t i = 0; i < (int)eTextureType::EffectMap + 1; i++)
 			{
-				if (auto textureAsset = meshRenderer.GetTexture((eTextureType)i))
+				if (auto textureAsset = meshRenderer.GetTexture((eTextureType)i,materialIndex))
 				{
 					auto tex = textureAsset->GetRawTexture();
 					tex->SetView(ViewType::SRV);
@@ -726,7 +666,6 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 		}
 	}
 
-	commandList->FlushResourceBarriers();
 	{
 		const auto& enviromentLight = PSOCache::GetState(PSOCache::ePipelineStateID::DeferredLighting);
 		LightBuffer lightbuffer = EnvironmentLightPSO::CreateLightBuffer();
@@ -741,10 +680,6 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 		const auto& pipelineState = enviromentLight->GetPipelineState().Get();
 		graphicCommandList->SetPipelineState(pipelineState);
 		commandList->TrackResource(pipelineState);
-
-		const auto& rootSignature = enviromentLight->GetRootSignature();
-		graphicCommandList->SetGraphicsRootSignature(rootSignature.Get());
-		commandList->TrackResource(rootSignature);
 
 		for (unsigned i = 0; i < bufferCount; i++)
 		{
@@ -762,15 +697,12 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 
 	{
 		const auto& toneMapper = PSOCache::GetState(PSOCache::ePipelineStateID::ToneMap);
-		commandList->SetRenderTargets(toneMapper->GetRenderTargetAmounts(),toneMapper->GetRenderTargets(),GPU::m_DepthBuffer.get());
 
 		const auto& pipelineState = toneMapper->GetPipelineState().Get();
 		graphicCommandList->SetPipelineState(pipelineState);
 		commandList->TrackResource(pipelineState);
 
-		const auto& rootSignature = toneMapper->GetRootSignature();
-		graphicCommandList->SetGraphicsRootSignature(rootSignature.Get());
-		commandList->TrackResource(rootSignature);
+		commandList->SetRenderTargets(toneMapper->GetRenderTargetAmounts(),toneMapper->GetRenderTargets(),GPU::m_DepthBuffer.get());
 
 		graphicCommandList->IASetVertexBuffers(0,1,nullptr);
 		graphicCommandList->IASetIndexBuffer(nullptr);

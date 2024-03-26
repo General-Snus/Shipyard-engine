@@ -317,12 +317,20 @@ void GPU::UpdateBufferResource(
 }
 
 void GPU::ConfigureInputAssembler(
-	const CommandList& commandList,D3D_PRIMITIVE_TOPOLOGY topology,
-	const D3D12_VERTEX_BUFFER_VIEW& vertView,const D3D12_INDEX_BUFFER_VIEW& indexView)
+	CommandList& commandList,D3D_PRIMITIVE_TOPOLOGY topology,
+	VertexResource& vertexResource,IndexResource& indexResource)
 {
-	//commandList->IASetPrimitiveTopology(topology);
-	//commandList->IASetVertexBuffers(0,1,&vertView);
-	//commandList->IASetIndexBuffer(&indexView);
+	commandList.GetGraphicsCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	commandList.TransitionBarrier(vertexResource,D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+	const auto& vertView = vertexResource.GetVertexBufferView();
+	commandList.GetGraphicsCommandList()->IASetVertexBuffers(0,1,&vertView);
+	commandList.TrackResource(vertexResource);
+
+	commandList.TransitionBarrier(indexResource,D3D12_RESOURCE_STATE_INDEX_BUFFER);
+	const auto& indexView = indexResource.GetIndexBufferView();
+	commandList.GetGraphicsCommandList()->IASetIndexBuffer(&indexView);
+	commandList.TrackResource(indexResource);
 }
 bool GPU::CreateIndexBuffer(const std::shared_ptr<CommandList>& commandList,IndexResource& outIndexResource,const std::vector<uint16_t>& aIndexList)
 {

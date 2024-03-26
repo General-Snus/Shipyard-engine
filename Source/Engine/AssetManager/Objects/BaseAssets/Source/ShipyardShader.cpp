@@ -13,6 +13,14 @@ void ShipyardShader::Init()
 {
 	isBeingLoaded = true;
 
+	if (!std::filesystem::exists(AssetPath))
+	{
+		Logger::Warn("Failed to load shader at: " + AssetPath.string());
+		isBeingLoaded = false;
+		isLoadedComplete = true;
+		return;
+	}
+
 	Helpers::ThrowIfFailed(D3DReadFileToBlob(AssetPath.wstring().c_str(),&myBlob));
 
 	isBeingLoaded = false;

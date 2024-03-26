@@ -151,10 +151,11 @@ std::shared_ptr<TextureHolder> Material::GetTexture(eTextureType type)
 
 	for (const auto& i : data.textures)
 	{
-		if (i.second->textureType != type)
+		if (!i.second || i.second->textureType != type)
 		{
 			continue;
 		}
+
 		return i.second;
 	}
 	return nullptr;

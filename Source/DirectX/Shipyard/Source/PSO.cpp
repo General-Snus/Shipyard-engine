@@ -105,8 +105,12 @@ void PSO::InitRootSignature()
 	rootParameters[eRootBindings::materialBuffer].InitAsConstantBufferView(REG_DefaultMaterialBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
 	rootParameters[eRootBindings::lightBuffer].InitAsConstantBufferView(REG_LightBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
 
-	CD3DX12_DESCRIPTOR_RANGE1 descriptorRange = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,4,REG_colorMap);
+	CD3DX12_DESCRIPTOR_RANGE1 descriptorRange = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,15,REG_colorMap);
 	rootParameters[eRootBindings::Textures].InitAsDescriptorTable(1,&descriptorRange,D3D12_SHADER_VISIBILITY_PIXEL);
+
+
+	CD3DX12_DESCRIPTOR_RANGE1 cubeMapRange = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,2,REG_enviromentCube);
+	rootParameters[eRootBindings::CubeMaps].InitAsDescriptorTable(1,&cubeMapRange,D3D12_SHADER_VISIBILITY_PIXEL);
 
 	CD3DX12_STATIC_SAMPLER_DESC linearRepeatSampler(REG_DefaultSampler,D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR);
 
@@ -229,7 +233,7 @@ void GbufferPSO::InitRootSignature()
 void EnvironmentLightPSO::Init(const ComPtr<ID3D12Device2>& dev)
 {
 	m_Device = dev;
-	InitRootSignature();
+	PSO::InitRootSignature();
 	std::shared_ptr<ShipyardShader> vs;
 	std::shared_ptr<ShipyardShader> ps;
 	AssetManager::Get().ForceLoadAsset<ShipyardShader>("Shaders/ScreenspaceQuad_VS.cso",vs);
@@ -294,8 +298,10 @@ void EnvironmentLightPSO::InitRootSignature()
 	rootParameters[eRootBindings::lightBuffer].InitAsConstantBufferView(REG_LightBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
 
 	CD3DX12_DESCRIPTOR_RANGE1 gbufferRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,numRenderTargets,REG_colorMap);
-
 	rootParameters[eRootBindings::Textures].InitAsDescriptorTable(1,&gbufferRange,D3D12_SHADER_VISIBILITY_PIXEL);
+
+	CD3DX12_DESCRIPTOR_RANGE1 cubeMapRange = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,2,REG_enviromentCube);
+	rootParameters[eRootBindings::CubeMaps].InitAsDescriptorTable(1,&cubeMapRange,D3D12_SHADER_VISIBILITY_PIXEL);
 
 	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
 	rootSignatureDescription.Init_1_1(NumRootParameters,rootParameters,1,&linearRepeatSampler,rootSignatureFlags);
@@ -386,7 +392,7 @@ LightBuffer EnvironmentLightPSO::CreateLightBuffer()
 void TonemapPSO::Init(const ComPtr<ID3D12Device2>& dev)
 {
 	m_Device = dev;
-	InitRootSignature();
+	PSO::InitRootSignature();
 	std::shared_ptr<ShipyardShader> vs;
 	std::shared_ptr<ShipyardShader> ps;
 	AssetManager::Get().ForceLoadAsset<ShipyardShader>("Shaders/ScreenspaceQuad_VS.cso",vs);
@@ -455,6 +461,9 @@ void TonemapPSO::InitRootSignature()
 
 	CD3DX12_DESCRIPTOR_RANGE1 descriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,1,REG_Target01);
 	rootParameters[eRootBindings::Textures].InitAsDescriptorTable(1,&descriptorRange,D3D12_SHADER_VISIBILITY_PIXEL);
+
+	CD3DX12_DESCRIPTOR_RANGE1 cubeMapRange = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,2,REG_enviromentCube);
+	rootParameters[eRootBindings::CubeMaps].InitAsDescriptorTable(1,&cubeMapRange,D3D12_SHADER_VISIBILITY_PIXEL);
 
 	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
 	rootSignatureDescription.Init_1_1(NumRootParameters,rootParameters,1,&linearRepeatSampler,rootSignatureFlags);

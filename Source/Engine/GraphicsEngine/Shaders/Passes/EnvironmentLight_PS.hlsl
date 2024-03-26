@@ -36,19 +36,19 @@ float4 worldPosition
     float3 directLightDiffuse = CalculateDiffuseLight(diffuseColor);
     directLightDiffuse *= (1.0f - directLightSpecular);
     
-    const float4x4 lightView = g_lightBuffer.myDirectionalLight.lightView;
-    const float4x4 lightProj = g_lightBuffer.myDirectionalLight.projection;
-    
-    float4 lightSpacePos = mul(lightView, worldPosition);
-    lightSpacePos = mul(lightProj, lightSpacePos);
-    
-    float3 lightSpaceUV = 0;
-    lightSpaceUV = lightSpacePos.xyz / lightSpacePos.w;
-    lightSpaceUV.x = (lightSpacePos.x * .5 + 0.5);
-    lightSpaceUV.y = 1 - (lightSpacePos.y * .5 + 0.5f);
-     
-    const float bias = 0.005f;
-    const float Depth = lightSpaceUV.z + bias;
+    //const float4x4 lightView = g_lightBuffer.myDirectionalLight.lightView;
+    //const float4x4 lightProj = g_lightBuffer.myDirectionalLight.projection;
+    //
+    //float4 lightSpacePos = mul(lightView, worldPosition);
+    //lightSpacePos = mul(lightProj, lightSpacePos);
+    //
+    //float3 lightSpaceUV = 0;
+    //lightSpaceUV = lightSpacePos.xyz / lightSpacePos.w;
+    //lightSpaceUV.x = (lightSpacePos.x * .5 + 0.5);
+    //lightSpaceUV.y = 1 - (lightSpacePos.y * .5 + 0.5f);
+    // 
+    //const float bias = 0.005f;
+    //const float Depth = lightSpaceUV.z + bias;
     
     //uint2 dim = 0;
     //uint numMips = 0;
@@ -80,10 +80,10 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     DefaultPixelOutput result;
     const float2 uv = input.UV;
     
-    const float4 albedo = colorMap.Sample(defaultSampler, uv);
-    const float4 Material = materialMap.Sample(defaultSampler, uv);
-    const float4 Normal = normalMap.Sample(defaultSampler, uv);
-    const float4 Effect = effectMap.Sample(defaultSampler, uv);
+    const float4 albedo = colorMap[g_defaultMaterial.albedoTexture].Sample(defaultSampler, uv);
+    const float4 Material = colorMap[g_defaultMaterial.materialTexture].Sample(defaultSampler, uv);
+    const float4 Normal = colorMap[g_defaultMaterial.normalTexture].Sample(defaultSampler, uv);
+    const float4 Effect = colorMap[g_defaultMaterial.emissiveTexture].Sample(defaultSampler, uv);
     const float4 worldPosition = float4(worldPositionMap.Sample(defaultSampler, uv).xyz, 1);
     const float metallic = Material.b;
     const float roughness = Material.g;
@@ -93,8 +93,8 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     const float3 diffuseColor = lerp((float3) 0.0f, albedo.rgb, 1 - metallic);
     const float3 specularColor = lerp((float3) 0.04f, albedo.rgb, metallic);
     
-    const float3 radiance = albedo.rgb*.1f + CalculateDirectionLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, roughness, worldPosition);
-    //+ CalculateIndirectLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, enviromentCube, roughness, occlusion);
+    const float3 radiance = albedo.rgb * .1f + CalculateDirectionLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, roughness, worldPosition) 
+      + CalculateIndirectLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, enviromentCube, roughness, occlusion);
     
     result.Color.rgb = radiance + Effect.r * albedo.rgb;
     result.Color.a = 1.0f;

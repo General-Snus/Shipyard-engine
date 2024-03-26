@@ -117,10 +117,10 @@ SamplerState NormalDepthSampler : register(HLSL_REG_normalDepthSampler);
 SamplerState PointSampler : register(HLSL_REG_PointSampler);
 SamplerComparisonState shadowCmpSampler : register(HLSL_REG_shadowCmpSampler);
 
-Texture2D colorMap : register(HLSL_REG_colorMap);
-Texture2D normalMap : register(HLSL_REG_normalMap);
-Texture2D materialMap : register(HLSL_REG_materialMap);
-Texture2D effectMap : register(HLSL_REG_effectMap);
+Texture2D colorMap[4] : register(HLSL_REG_colorMap);
+//Texture2D normalMap : register(HLSL_REG_normalMap);
+//Texture2D materialMap : register(HLSL_REG_materialMap);
+//Texture2D effectMap : register(HLSL_REG_effectMap);
 Texture2D vertexNormalMap : register(HLSL_REG_VertexNormal);
 Texture2D worldPositionMap : register(HLSL_REG_WorldPosition);
 Texture2D DepthMap : register(HLSL_REG_DepthMap);

@@ -7,6 +7,7 @@ enum eRootBindings
 	materialBuffer,
 	lightBuffer,
 	Textures,
+	CubeMaps,
 	NumRootParameters,
 };
 

@@ -17,23 +17,23 @@ GBufferOutput main(DefaultVertexToPixel input)
    // result.Color.rgb = (input.Normal.rgb + 1) / 2.0f;
     const float2 uv = input.UV;
     
-    const float4 textureColor = colorMap.Sample(defaultSampler, uv); // * g_defaultMaterial.DefaultMaterial.albedoColor;
+    const float4 textureColor = colorMap[g_defaultMaterial.albedoTexture].Sample(defaultSampler, uv); // * g_defaultMaterial.DefaultMaterial.albedoColor;
     
     if(textureColor.a < 0.1f)
     {
         discard;
     }
     
-    const float4 materialComponent = materialMap.Sample(defaultSampler, uv);
-    const float2 textureNormal = normalMap.Sample(defaultSampler, uv).xy;
-    const float4 effect = effectMap.Sample(defaultSampler, uv);
+    const float4 materialComponent = colorMap[g_defaultMaterial.materialTexture].Sample(defaultSampler, uv);
+    const float2 textureNormal = colorMap[g_defaultMaterial.normalTexture].Sample(defaultSampler, uv).xy;
+    const float4 effect = colorMap[g_defaultMaterial.emissiveTexture].Sample(defaultSampler, uv);
 
     //Normals
     float3 pixelNormal;
     pixelNormal.xy = ((2.0f * textureNormal.xy) - 1.0f);
     pixelNormal.z = sqrt(1 - (pow(pixelNormal.x, 2.0f) + pow(pixelNormal.y, 2.0f)));
     pixelNormal = normalize(mul(pixelNormal, TBN));
-     pixelNormal *= g_defaultMaterial.DefaultMaterial.NormalStrength;
+     pixelNormal *= g_defaultMaterial.NormalStrength;
      
     result.Albedo = textureColor;
     

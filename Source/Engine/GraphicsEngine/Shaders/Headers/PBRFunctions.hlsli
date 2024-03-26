@@ -17,7 +17,7 @@ float4 GetViewPosition(float2 uv)
 
 float4 GetViewNormal(float2 uv)
 {
-    const float4 worldNormal = float4(normalMap.Sample(defaultSampler, uv).xyz, 0);
+    const float4 worldNormal = float4(colorMap[g_defaultMaterial.normalTexture].Sample(defaultSampler, uv).xyz, 0);
     const float4 viewNormal = mul(g_FrameBuffer.FB_InvView, worldNormal);
     return viewNormal;
 }
@@ -37,7 +37,10 @@ float3 CalculateSpecularIBL(float3 specularColor, float3 normal, float3 cameraDi
     const float3 cubeMap = enviromentCube.SampleLevel(defaultSampler, ReflectionVector, roughness * CubeMips).rgb;
     
     const float NdotV = saturate(dot(normal, cameraDirection));
-    const float2 brdfLUT = BRDF_LUT_Texture.Sample(BRDFSampler, float2(NdotV, roughness)).xy;
+    const float2 uv = float2(NdotV, roughness);    
+
+
+    const float2 brdfLUT = IntegrateBRDF(uv.x, uv.y);
     
     return cubeMap * (specularColor * brdfLUT.x + brdfLUT.y);;
 }

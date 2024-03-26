@@ -5,7 +5,7 @@
 ParticlePixelOutput main(ParticleGeometryToPixel input)
 {
     ParticlePixelOutput output;
-    output.Color = colorMap.Sample(defaultSampler, input.UV);
+    output.Color = colorMap[g_defaultMaterial.albedoTexture].Sample(defaultSampler, input.UV);
     
     if(input.Color.a < 0.05f)
     {   

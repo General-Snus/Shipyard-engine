@@ -8,10 +8,10 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     DefaultPixelOutput result;
     float2 uv = input.UV;
     
-    const float4 albedo = colorMap.Sample(defaultSampler, uv);
-    const float4 Material = materialMap.Sample(defaultSampler, uv);
-    const float4 Normal = normalMap.Sample(defaultSampler, uv);
-    const float4 Effect = effectMap.Sample(defaultSampler, uv);
+    const float4 albedo = colorMap[0].Sample(defaultSampler, uv);
+    const float4 Material = colorMap[g_defaultMaterial.materialTexture].Sample(defaultSampler, uv);
+    const float4 Normal = colorMap[g_defaultMaterial.materialTexture].Sample(defaultSampler, uv);
+    const float4 Effect = colorMap[g_defaultMaterial.emissiveTexture].Sample(defaultSampler, uv);
     const float4 vertexNormal = vertexNormalMap.Sample(defaultSampler, uv);
     const float4 worldPosition = float4(normalize(worldPositionMap.Sample(defaultSampler, uv).xyz), 1);
     const float metallic = Material.b;

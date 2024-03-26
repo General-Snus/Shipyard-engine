@@ -253,5 +253,5 @@ void GameLauncher::Update(float delta)
 	}
 
 	Transform& pLight = GameObjectManager::Get().GetWorldRoot().GetComponent<Transform>();
-	pLight.Rotate(0,delta,0);
+	pLight.Rotate(0,delta * 10,0);
 }

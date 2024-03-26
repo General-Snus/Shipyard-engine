@@ -1,5 +1,5 @@
-#include "AssetManager.pch.h"
 #include <Tools/Utilities/System/ThreadPool.hpp>
+#include "AssetManager.pch.h"
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 
 class GfxCmd_RenderMesh;
@@ -47,7 +47,7 @@ bool cMeshRenderer::IsDefaultMesh() const
 	return false;
 }
 
-const std::vector<Element>& cMeshRenderer::GetElements() const
+std::vector<Element>& cMeshRenderer::GetElements() const
 {
 	return myRenderData->myMesh->Elements;
 }
@@ -58,10 +58,23 @@ std::shared_ptr<Mesh> cMeshRenderer::GetRawMesh() const
 }
 
 
-std::shared_ptr<TextureHolder> cMeshRenderer::GetTexture(eTextureType type)
+std::shared_ptr<TextureHolder> cMeshRenderer::GetTexture(eTextureType type,unsigned materialIndex)
 {
+	assert(materialIndex >= 0);
+
 	if (!myRenderData->overrideMaterial.empty())
 	{
+		if (myRenderData->overrideMaterial.size() > materialIndex)
+		{
+			if (const auto mat = myRenderData->overrideMaterial[materialIndex])
+			{
+				if (const auto tex = mat->GetTexture(type))
+				{
+					return tex;
+				}
+			};
+		}
+
 		for (const auto& material : myRenderData->overrideMaterial)
 		{
 			if (!material)
@@ -76,6 +89,17 @@ std::shared_ptr<TextureHolder> cMeshRenderer::GetTexture(eTextureType type)
 		}
 	}
 
+	if (myRenderData->myMesh->materials.size() > materialIndex)
+	{
+		if (const auto mat = myRenderData->myMesh->materials[materialIndex])
+		{
+			if (const auto tex = mat->GetTexture(type))
+			{
+				return tex;
+			}
+		};
+	}
+
 	for (const auto& [value,material] : myRenderData->myMesh->materials)
 	{
 		if (!material)
@@ -83,7 +107,7 @@ std::shared_ptr<TextureHolder> cMeshRenderer::GetTexture(eTextureType type)
 			continue;
 		}
 
-		if (auto tex = material->GetTexture(type))
+		if (const auto tex = material->GetTexture(type))
 		{
 			return tex;
 		}

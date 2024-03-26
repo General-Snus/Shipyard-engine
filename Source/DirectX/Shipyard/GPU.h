@@ -88,10 +88,8 @@ public:
 	static void CopyBuffer(const CommandList& aCommandList,GpuResource& buffer,size_t numElements,size_t elementSize,const void* bufferData,D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
 
 	static void ConfigureInputAssembler(
-		const CommandList& commandList,
-		D3D_PRIMITIVE_TOPOLOGY topology,
-		const D3D12_VERTEX_BUFFER_VIEW& vertView,
-		const D3D12_INDEX_BUFFER_VIEW& indexView
+		CommandList& commandList,D3D_PRIMITIVE_TOPOLOGY topology,
+		VertexResource& vertexResource,IndexResource& indexResource
 	);
 
 	template<typename vertexType>

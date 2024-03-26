@@ -19,7 +19,7 @@ PostProcessPixelOutput main(BRDF_VS_to_PS input)
      
     float4 color = gWeights[5] * SSAOMap.Sample(defaultSampler, input.UV);
     float totalWeight = gWeights[5];
-    const float4 centerNormalDepth = float4(normalMap.Sample(defaultSampler, input.UV).rgb, 0);
+    const float4 centerNormalDepth = float4(colorMap[g_defaultMaterial.normalTexture].Sample(defaultSampler, input.UV).rgb, 0);
 
     for (float y = -gBlurRadius; y <= gBlurRadius; ++y)
     { 
@@ -30,7 +30,7 @@ PostProcessPixelOutput main(BRDF_VS_to_PS input)
                 continue;
             }
             float2 tex = float2(input.UV.x + x * pixelWidth, input.UV.y + y * pixelHeight);
-            float4 neighborNormalDepth = float4(normalMap.Sample(defaultSampler, tex).rgb, 0);
+            float4 neighborNormalDepth = float4(colorMap[g_defaultMaterial.normalTexture].Sample(defaultSampler, tex).rgb, 0);
     
             if (dot(neighborNormalDepth.xyz, centerNormalDepth.xyz) >= 0.8f && abs(neighborNormalDepth.a - centerNormalDepth.a) <= 0.2f)
             {
@@ -44,7 +44,7 @@ PostProcessPixelOutput main(BRDF_VS_to_PS input)
             continue;
         }
         float2 tex = input.UV + y * float2(0.0f, pixelHeight);
-        float4 neighborNormalDepth = float4(normalMap.Sample(defaultSampler, tex).rgb, 0);
+        float4 neighborNormalDepth = float4(colorMap[g_defaultMaterial.normalTexture].Sample(defaultSampler, tex).rgb, 0);
         if (dot(neighborNormalDepth.xyz, centerNormalDepth.xyz) >= 0.8f && abs(neighborNormalDepth.a - centerNormalDepth.a) <= 0.2f)
         {
             float weight = gWeights[y + gBlurRadius]; 

@@ -32,10 +32,10 @@ public:
 	void SetMaterialPath(const std::filesystem::path& aFilePath,int elementIndex);
 	~cMeshRenderer() override = default;
 
-	const std::vector<Element>& GetElements() const;
+	std::vector<Element>& GetElements() const;
 	std::shared_ptr<Mesh> GetRawMesh() const;
 
-	std::shared_ptr<TextureHolder> GetTexture(eTextureType type);
+	std::shared_ptr<TextureHolder> GetTexture(eTextureType type,unsigned materialIndex = 0);
 	bool IsDefaultMesh() const;
 
 	FORCEINLINE bool IsStaticMesh()
