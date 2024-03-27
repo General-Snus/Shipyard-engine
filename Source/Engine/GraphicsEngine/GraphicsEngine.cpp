@@ -572,20 +572,20 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 		const auto& pipelineState = gbufferPSO->GetPipelineState().Get();
 		graphicCommandList->SetPipelineState(pipelineState);
 		commandList->TrackResource(pipelineState);
-
-
 	}
 
 	ID3D12DescriptorHeap* heaps[] = { GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->Heap() };
 	graphicCommandList->SetDescriptorHeaps(static_cast<UINT>(std::size(heaps)),heaps);
 
+	graphicCommandList->SetGraphicsRootDescriptorTable(eRootBindings::Textures,GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->GetFirstGpuHandle());
+
 	auto frameBuffer = myCamera->GetFrameBuffer();
 	const auto& alloc0 = GPU::m_GraphicsMemory->AllocateConstant<FrameBuffer>(frameBuffer);
-	graphicCommandList->SetGraphicsRootConstantBufferView(REG_FrameBuffer,alloc0.GpuAddress());
+	graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::frameBuffer,alloc0.GpuAddress());
 
-	const auto cubeMap = defaultCubeMap->GetRawTexture().get();
-	commandList->SetDescriptorTable(eRootBindings::CubeMaps,cubeMap);
-	commandList->TrackResource(cubeMap->GetResource());
+	//const auto cubeMap = defaultCubeMap->GetRawTexture().get();
+	//commandList->SetDescriptorTable(eRootBindings::PermanentTextures,cubeMap);
+	//commandList->TrackResource(cubeMap->GetResource());
 
 	static auto& list = GameObjectManager::Get().GetAllComponents<cMeshRenderer>();
 	Logger::Log(std::to_string(list.size()));
@@ -603,7 +603,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 			objectBuffer.isInstanced = false;
 
 			const auto& alloc1 = GPU::m_GraphicsMemory->AllocateConstant<ObjectBuffer>(objectBuffer);
-			graphicCommandList->SetGraphicsRootConstantBufferView(REG_ObjectBuffer,alloc1.GpuAddress());
+			graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::objectBuffer,alloc1.GpuAddress());
 
 			GPU::ConfigureInputAssembler(*commandList,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.VertexBuffer,element.IndexResource);
 
@@ -661,7 +661,6 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 			const auto& alloc2 = GPU::m_GraphicsMemory->AllocateConstant<MaterialBuffer>(materialBuffer);
 			graphicCommandList->SetGraphicsRootConstantBufferView(REG_DefaultMaterialBuffer,alloc2.GpuAddress());
 
-			graphicCommandList->SetGraphicsRootDescriptorTable(eRootBindings::Textures,GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->GetFirstGpuHandle());
 			graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
 		}
 	}
