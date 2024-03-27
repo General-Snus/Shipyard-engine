@@ -10,14 +10,14 @@ float2 GetRandom(float2 uv, float2 uvScale)
 
 float4 GetViewPosition(float2 uv)
 {
-    const float4 worldPosition = float4(worldPositionMap.Sample(defaultSampler, uv).xyz, 1);
+    const float4 worldPosition = float4(worldPositionPass.Sample(defaultSampler, uv).xyz, 1);
     const float4 viewPosition = mul(g_FrameBuffer.FB_InvView, worldPosition);
     return viewPosition;
 } 
 
 float4 GetViewNormal(float2 uv)
 {
-    const float4 worldNormal = float4(colorMap[g_defaultMaterial.normalTexture].Sample(defaultSampler, uv).xyz, 0);
+    const float4 worldNormal = float4(textureHeap[g_defaultMaterial.normalTexture].Sample(defaultSampler, uv).xyz, 0);
     const float4 viewNormal = mul(g_FrameBuffer.FB_InvView, worldNormal);
     return viewNormal;
 }

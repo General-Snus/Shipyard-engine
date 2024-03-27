@@ -18,7 +18,7 @@ float3 PositionInBound(float3 aMin, float3 aMax, float3 aPosition)
 DefaultPixelOutput main(DefaultVertexToPixel input)
 {
     DefaultPixelOutput result; 
-    result.Color.rgb = colorMap[0].Sample(defaultSampler, input.UV).rgb;
+    result.Color.rgb = textureHeap[0].Sample(defaultSampler, input.UV).rgb;
     result.Color.a = 1.0f; 
     return result;
 }

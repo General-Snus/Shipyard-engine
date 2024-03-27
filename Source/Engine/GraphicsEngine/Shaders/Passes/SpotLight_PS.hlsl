@@ -93,14 +93,17 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     DefaultPixelOutput result;
     float2 uv = input.UV;
     
-    const float4 albedo = colorMap[g_defaultMaterial.albedoTexture].Sample(defaultSampler, uv);
-    const float4 Material = colorMap[g_defaultMaterial.materialTexture].Sample(defaultSampler, uv);
-    const float4 Normal = colorMap[g_defaultMaterial.normalTexture].Sample(defaultSampler, uv);
-    const float4 Effect = colorMap[g_defaultMaterial.emissiveTexture].Sample(defaultSampler, uv);
-    const float4 worldPosition = float4(worldPositionMap.Sample(defaultSampler, uv).xyz, 1);
+    const float4 albedo = colorPass.Sample(defaultSampler, uv);
+    const float4 Material = normalPass.Sample(defaultSampler, uv);
+    const float4 Normal = materialPass.Sample(defaultSampler, uv);
+    const float4 Effect = effectPass.Sample(defaultSampler, uv);
+    const float4 vertexNormal = vertexNormalPass.Sample(defaultSampler, uv);
+    const float4 worldPosition = float4(normalize(worldPositionPass.Sample(defaultSampler, uv).xyz), 1);
     const float metallic = Material.b;
     const float roughness = Material.g;
     const float occlusion = Material.r;
+    const float depth = DepthPass.Sample(defaultSampler, uv).r;
+    const float4 ssao = SSAOPass.Sample(defaultSampler, uv);
     
     const float3 cameraDirection = normalize(g_FrameBuffer.FB_CameraPosition.xyz - worldPosition.xyz);
     const float3 diffuseColor = lerp((float3)0.0f, albedo.rgb, 1 - metallic);

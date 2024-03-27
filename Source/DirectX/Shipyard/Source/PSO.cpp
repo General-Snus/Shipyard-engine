@@ -15,20 +15,23 @@
 
 void PSOCache::InitAllStates()
 {
-	std::unique_ptr<PSO> pso = std::make_unique<PSO>();
-	pso->Init(GPU::m_Device);
+
+	InitRootSignature();
+
+	auto pso = std::make_unique<PSO>();
+	pso->Init(GPU::m_Device,m_RootSignature);
 	pso_map[ePipelineStateID::Default] = std::move(pso);
 
-	std::unique_ptr<GbufferPSO> gbuffer = std::make_unique<GbufferPSO>();
-	gbuffer->Init(GPU::m_Device);
+	auto gbuffer = std::make_unique<GbufferPSO>();
+	gbuffer->Init(GPU::m_Device,m_RootSignature);
 	pso_map[ePipelineStateID::GBuffer] = std::move(gbuffer);
 
-	std::unique_ptr<EnvironmentLightPSO> env = std::make_unique<EnvironmentLightPSO>();
-	env->Init(GPU::m_Device);
+	auto env = std::make_unique<EnvironmentLightPSO>();
+	env->Init(GPU::m_Device,m_RootSignature);
 	pso_map[ePipelineStateID::DeferredLighting] = std::move(env);
 
-	std::unique_ptr<TonemapPSO> tonemapPSO = std::make_unique<TonemapPSO>();
-	tonemapPSO->Init(GPU::m_Device);
+	auto tonemapPSO = std::make_unique<TonemapPSO>();
+	tonemapPSO->Init(GPU::m_Device,m_RootSignature);
 	pso_map[ePipelineStateID::ToneMap] = std::move(tonemapPSO);
 
 }
@@ -38,11 +41,60 @@ std::unique_ptr<PSO>& PSOCache::GetState(ePipelineStateID id)
 	return pso_map[id];
 }
 
+void PSOCache::InitRootSignature()
+{
+	m_RootSignature = std::make_shared<GPURootSignature>();
 
-void PSO::Init(const ComPtr<ID3D12Device2>& dev)
+	CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
+	rootSignatureDesc.Init(0,nullptr,0,nullptr,D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+	ComPtr<ID3DBlob> signature;
+	ComPtr<ID3DBlob> error;
+	Helpers::ThrowIfFailed(D3D12SerializeRootSignature(&rootSignatureDesc,D3D_ROOT_SIGNATURE_VERSION_1,&signature,&error));
+	Helpers::ThrowIfFailed(GPU::m_Device->CreateRootSignature(
+		0,
+		signature->GetBufferPointer(),
+		signature->GetBufferSize(),
+		IID_PPV_ARGS(&m_RootSignature->GetRootSignature())
+	));
+
+
+	const D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags =
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
+		D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
+		D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
+		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
+
+	CD3DX12_ROOT_PARAMETER1 rootParameters[NumRootParameters];
+	rootParameters[eRootBindings::frameBuffer].InitAsConstantBufferView(REG_FrameBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
+	rootParameters[eRootBindings::objectBuffer].InitAsConstantBufferView(REG_ObjectBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
+	rootParameters[eRootBindings::materialBuffer].InitAsConstantBufferView(REG_DefaultMaterialBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
+	rootParameters[eRootBindings::lightBuffer].InitAsConstantBufferView(REG_LightBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
+
+	const auto descriptorRange = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,127,REG_colorMap,0);
+	rootParameters[eRootBindings::Textures].InitAsDescriptorTable(1,&descriptorRange,D3D12_SHADER_VISIBILITY_PIXEL);
+
+	const auto GbufferPasses = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,127,REG_colorMap,1);
+	rootParameters[eRootBindings::GbufferPasses].InitAsDescriptorTable(1,&GbufferPasses,D3D12_SHADER_VISIBILITY_PIXEL);
+
+	const auto TargetTexture = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,127,REG_Target0,2);
+	rootParameters[eRootBindings::TargetTexture].InitAsDescriptorTable(1,&TargetTexture,D3D12_SHADER_VISIBILITY_PIXEL);
+
+	const auto PermanentTextures = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,127,REG_enviromentCube,3);
+	rootParameters[eRootBindings::PermanentTextures].InitAsDescriptorTable(1,&PermanentTextures,D3D12_SHADER_VISIBILITY_PIXEL);
+
+	const CD3DX12_STATIC_SAMPLER_DESC linearRepeatSampler(REG_DefaultSampler,D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR);
+
+	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
+	rootSignatureDescription.Init_1_1(NumRootParameters,rootParameters,1,&linearRepeatSampler,rootSignatureFlags);
+
+	m_RootSignature->SetRootSignatureDesc(rootSignatureDescription.Desc_1_1,GPU::m_FeatureData);
+}
+
+void PSO::Init(const ComPtr<ID3D12Device2>& dev,std::shared_ptr<GPURootSignature> root)
 {
 	m_Device = dev;
-	InitRootSignature();
+	m_RootSignature = root;
 
 	std::shared_ptr<ShipyardShader> vs;
 	std::shared_ptr<ShipyardShader> ps;
@@ -65,7 +117,7 @@ void PSO::Init(const ComPtr<ID3D12Device2>& dev)
 	rtvFormats.RTFormats[0] = { GPU::m_BackBuffer->GetResource()->GetDesc().Format };
 	rtvFormats.NumRenderTargets = 1;
 
-	stream.pRootSignature = m_RootSignature.GetRootSignature().Get();
+	stream.pRootSignature = m_RootSignature->GetRootSignature().Get();
 	stream.InputLayout = { Vertex::InputLayoutDefinition , Vertex::InputLayoutDefinitionSize };
 	stream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	stream.VS = CD3DX12_SHADER_BYTECODE(vs->GetBlob());
@@ -77,47 +129,10 @@ void PSO::Init(const ComPtr<ID3D12Device2>& dev)
 	depthStencil.DepthFunc = D3D12_COMPARISON_FUNC_GREATER_EQUAL;
 	stream.DepthStencilState = depthStencil;
 
-	D3D12_PIPELINE_STATE_STREAM_DESC psoDescStreamDesc = {
+	const D3D12_PIPELINE_STATE_STREAM_DESC psoDescStreamDesc = {
 			sizeof(PipelineStateStream), &stream
 	};
 	Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&psoDescStreamDesc,IID_PPV_ARGS(&m_pipelineState)));
-}
-void PSO::InitRootSignature()
-{
-	CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
-	rootSignatureDesc.Init(0,nullptr,0,nullptr,D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
-
-	ComPtr<ID3DBlob> signature;
-	ComPtr<ID3DBlob> error;
-	Helpers::ThrowIfFailed(D3D12SerializeRootSignature(&rootSignatureDesc,D3D_ROOT_SIGNATURE_VERSION_1,&signature,&error));
-	Helpers::ThrowIfFailed(m_Device->CreateRootSignature(0,signature->GetBufferPointer(),signature->GetBufferSize(),IID_PPV_ARGS(&m_RootSignature.GetRootSignature())));
-
-
-	D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags =
-		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
-
-	CD3DX12_ROOT_PARAMETER1 rootParameters[NumRootParameters];
-	rootParameters[eRootBindings::frameBuffer].InitAsConstantBufferView(REG_FrameBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
-	rootParameters[eRootBindings::objectBuffer].InitAsConstantBufferView(REG_ObjectBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
-	rootParameters[eRootBindings::materialBuffer].InitAsConstantBufferView(REG_DefaultMaterialBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
-	rootParameters[eRootBindings::lightBuffer].InitAsConstantBufferView(REG_LightBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
-
-	CD3DX12_DESCRIPTOR_RANGE1 descriptorRange = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,15,REG_colorMap);
-	rootParameters[eRootBindings::Textures].InitAsDescriptorTable(1,&descriptorRange,D3D12_SHADER_VISIBILITY_PIXEL);
-
-
-	CD3DX12_DESCRIPTOR_RANGE1 cubeMapRange = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,2,REG_enviromentCube);
-	rootParameters[eRootBindings::CubeMaps].InitAsDescriptorTable(1,&cubeMapRange,D3D12_SHADER_VISIBILITY_PIXEL);
-
-	CD3DX12_STATIC_SAMPLER_DESC linearRepeatSampler(REG_DefaultSampler,D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR);
-
-	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
-	rootSignatureDescription.Init_1_1(NumRootParameters,rootParameters,1,&linearRepeatSampler,rootSignatureFlags);
-
-	m_RootSignature.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1,GPU::m_FeatureData);
 }
 ComPtr<ID3D12PipelineState> PSO::GetPipelineState() const
 {
@@ -125,10 +140,10 @@ ComPtr<ID3D12PipelineState> PSO::GetPipelineState() const
 }
 
 
-void GbufferPSO::Init(const ComPtr<ID3D12Device2>& dev)
+void GbufferPSO::Init(const ComPtr<ID3D12Device2>& dev,std::shared_ptr<GPURootSignature> root)
 {
 	m_Device = dev;
-	InitRootSignature();
+	m_RootSignature = root;
 
 	std::shared_ptr<ShipyardShader> vs;
 	std::shared_ptr<ShipyardShader> ps;
@@ -203,7 +218,7 @@ void GbufferPSO::Init(const ComPtr<ID3D12Device2>& dev)
 		rtvFormats.RTFormats[i] = renderTargets[i].GetResource()->GetDesc().Format;
 	}
 
-	stream.pRootSignature = m_RootSignature.GetRootSignature().Get();
+	stream.pRootSignature = m_RootSignature->GetRootSignature().Get();
 	stream.InputLayout = { Vertex::InputLayoutDefinition , Vertex::InputLayoutDefinitionSize };
 	stream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	stream.VS = CD3DX12_SHADER_BYTECODE(vs->GetBlob());
@@ -215,7 +230,7 @@ void GbufferPSO::Init(const ComPtr<ID3D12Device2>& dev)
 	depthStencil.DepthFunc = D3D12_COMPARISON_FUNC_GREATER_EQUAL;
 	stream.DepthStencilState = depthStencil;
 
-	D3D12_PIPELINE_STATE_STREAM_DESC psoDescStreamDesc = {
+	const D3D12_PIPELINE_STATE_STREAM_DESC psoDescStreamDesc = {
 			sizeof(PipelineStateStream), &stream
 	};
 	Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&psoDescStreamDesc,IID_PPV_ARGS(&m_pipelineState)));
@@ -224,16 +239,13 @@ Texture* GbufferPSO::GetRenderTargets()
 {
 	return renderTargets;
 }
-void GbufferPSO::InitRootSignature()
-{
-	PSO::InitRootSignature();
-}
 
 
-void EnvironmentLightPSO::Init(const ComPtr<ID3D12Device2>& dev)
+void EnvironmentLightPSO::Init(const ComPtr<ID3D12Device2>& dev,std::shared_ptr<GPURootSignature> root)
 {
 	m_Device = dev;
-	PSO::InitRootSignature();
+	m_RootSignature = root;
+
 	std::shared_ptr<ShipyardShader> vs;
 	std::shared_ptr<ShipyardShader> ps;
 	AssetManager::Get().ForceLoadAsset<ShipyardShader>("Shaders/ScreenspaceQuad_VS.cso",vs);
@@ -254,14 +266,14 @@ void EnvironmentLightPSO::Init(const ComPtr<ID3D12Device2>& dev)
 	rtvFormats.RTFormats[0] = { GPU::m_BackBuffer->GetResource()->GetDesc().Format };
 	rtvFormats.NumRenderTargets = 1;
 
-	stream.pRootSignature = m_RootSignature.GetRootSignature().Get();
+	stream.pRootSignature = m_RootSignature->GetRootSignature().Get();
 	stream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	stream.VS = CD3DX12_SHADER_BYTECODE(vs->GetBlob());
 	stream.PS = CD3DX12_SHADER_BYTECODE(ps->GetBlob());
 	stream.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 	stream.RTVFormats = rtvFormats;
 
-	D3D12_PIPELINE_STATE_STREAM_DESC psoDescStreamDesc = {
+	const D3D12_PIPELINE_STATE_STREAM_DESC psoDescStreamDesc = {
 			sizeof(PipelineStateStream), &stream
 	};
 	Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&psoDescStreamDesc,IID_PPV_ARGS(&m_pipelineState)));
@@ -269,44 +281,6 @@ void EnvironmentLightPSO::Init(const ComPtr<ID3D12Device2>& dev)
 Texture* EnvironmentLightPSO::GetRenderTargets()
 {
 	return GPU::GetCurrentBackBuffer();
-}
-void EnvironmentLightPSO::InitRootSignature()
-{
-	CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
-	rootSignatureDesc.Init(0,nullptr,0,nullptr,D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
-
-	ComPtr<ID3DBlob> signature;
-	ComPtr<ID3DBlob> error;
-	Helpers::ThrowIfFailed(D3D12SerializeRootSignature(&rootSignatureDesc,D3D_ROOT_SIGNATURE_VERSION_1,&signature,&error));
-	Helpers::ThrowIfFailed(m_Device->CreateRootSignature(0,signature->GetBufferPointer(),signature->GetBufferSize(),IID_PPV_ARGS(&m_RootSignature.GetRootSignature())));
-
-
-	D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags =
-		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
-
-	CD3DX12_STATIC_SAMPLER_DESC linearRepeatSampler(REG_DefaultSampler,D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR);
-
-	CD3DX12_ROOT_PARAMETER1 rootParameters[NumRootParameters];
-
-
-	rootParameters[eRootBindings::frameBuffer].InitAsConstantBufferView(REG_FrameBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
-	rootParameters[eRootBindings::objectBuffer].InitAsConstantBufferView(REG_ObjectBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
-	rootParameters[eRootBindings::materialBuffer].InitAsConstantBufferView(REG_DefaultMaterialBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
-	rootParameters[eRootBindings::lightBuffer].InitAsConstantBufferView(REG_LightBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
-
-	CD3DX12_DESCRIPTOR_RANGE1 gbufferRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,numRenderTargets,REG_colorMap);
-	rootParameters[eRootBindings::Textures].InitAsDescriptorTable(1,&gbufferRange,D3D12_SHADER_VISIBILITY_PIXEL);
-
-	CD3DX12_DESCRIPTOR_RANGE1 cubeMapRange = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,2,REG_enviromentCube);
-	rootParameters[eRootBindings::CubeMaps].InitAsDescriptorTable(1,&cubeMapRange,D3D12_SHADER_VISIBILITY_PIXEL);
-
-	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
-	rootSignatureDescription.Init_1_1(NumRootParameters,rootParameters,1,&linearRepeatSampler,rootSignatureFlags);
-
-	m_RootSignature.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1,GPU::m_FeatureData);
 }
 LightBuffer EnvironmentLightPSO::CreateLightBuffer()
 {
@@ -389,10 +363,11 @@ LightBuffer EnvironmentLightPSO::CreateLightBuffer()
 }
 
 
-void TonemapPSO::Init(const ComPtr<ID3D12Device2>& dev)
+void TonemapPSO::Init(const ComPtr<ID3D12Device2>& dev,std::shared_ptr<GPURootSignature> root)
 {
 	m_Device = dev;
-	PSO::InitRootSignature();
+	m_RootSignature = root;
+
 	std::shared_ptr<ShipyardShader> vs;
 	std::shared_ptr<ShipyardShader> ps;
 	AssetManager::Get().ForceLoadAsset<ShipyardShader>("Shaders/ScreenspaceQuad_VS.cso",vs);
@@ -413,7 +388,7 @@ void TonemapPSO::Init(const ComPtr<ID3D12Device2>& dev)
 	rtvFormats.RTFormats[0] = { GPU::m_BackBuffer->GetResource()->GetDesc().Format };
 	rtvFormats.NumRenderTargets = 1;
 
-	stream.pRootSignature = m_RootSignature.GetRootSignature().Get();
+	stream.pRootSignature = m_RootSignature->GetRootSignature().Get();
 	/*stream.InputLayout =
 	{
 		{ "SV_VertexID",0,DXGI_FORMAT_R32G32B32A32_FLOAT,0,D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
@@ -425,7 +400,7 @@ void TonemapPSO::Init(const ComPtr<ID3D12Device2>& dev)
 	stream.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 	stream.RTVFormats = rtvFormats;
 
-	D3D12_PIPELINE_STATE_STREAM_DESC psoDescStreamDesc = {
+	const D3D12_PIPELINE_STATE_STREAM_DESC psoDescStreamDesc = {
 			sizeof(PipelineStateStream), &stream
 	};
 	Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&psoDescStreamDesc,IID_PPV_ARGS(&m_pipelineState)));
@@ -433,40 +408,4 @@ void TonemapPSO::Init(const ComPtr<ID3D12Device2>& dev)
 Texture* TonemapPSO::GetRenderTargets()
 {
 	return GPU::GetCurrentBackBuffer();
-}
-void TonemapPSO::InitRootSignature()
-{
-	CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
-	rootSignatureDesc.Init(0,nullptr,0,nullptr,D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
-
-	ComPtr<ID3DBlob> signature;
-	ComPtr<ID3DBlob> error;
-	Helpers::ThrowIfFailed(D3D12SerializeRootSignature(&rootSignatureDesc,D3D_ROOT_SIGNATURE_VERSION_1,&signature,&error));
-	Helpers::ThrowIfFailed(m_Device->CreateRootSignature(0,signature->GetBufferPointer(),signature->GetBufferSize(),IID_PPV_ARGS(&m_RootSignature.GetRootSignature())));
-
-
-	D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags =
-		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
-
-	CD3DX12_STATIC_SAMPLER_DESC linearRepeatSampler(REG_DefaultSampler,D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR);
-	CD3DX12_ROOT_PARAMETER1 rootParameters[NumRootParameters];
-
-	rootParameters[eRootBindings::frameBuffer].InitAsConstantBufferView(REG_FrameBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
-	rootParameters[eRootBindings::objectBuffer].InitAsConstantBufferView(REG_ObjectBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
-	rootParameters[eRootBindings::materialBuffer].InitAsConstantBufferView(REG_DefaultMaterialBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
-	rootParameters[eRootBindings::lightBuffer].InitAsConstantBufferView(REG_LightBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
-
-	CD3DX12_DESCRIPTOR_RANGE1 descriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,1,REG_Target01);
-	rootParameters[eRootBindings::Textures].InitAsDescriptorTable(1,&descriptorRange,D3D12_SHADER_VISIBILITY_PIXEL);
-
-	CD3DX12_DESCRIPTOR_RANGE1 cubeMapRange = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,2,REG_enviromentCube);
-	rootParameters[eRootBindings::CubeMaps].InitAsDescriptorTable(1,&cubeMapRange,D3D12_SHADER_VISIBILITY_PIXEL);
-
-	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
-	rootSignatureDescription.Init_1_1(NumRootParameters,rootParameters,1,&linearRepeatSampler,rootSignatureFlags);
-
-	m_RootSignature.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1,GPU::m_FeatureData);
 }

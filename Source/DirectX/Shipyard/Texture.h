@@ -77,7 +77,7 @@ protected:
 	//D3D12_CPU_DESCRIPTOR_HANDLE m_RTVDescriptorHandle;
 	//D3D12_CPU_DESCRIPTOR_HANDLE m_SRVDescriptorHandle; 
 	//int heapOffset = -1;
-
+	bool isCubeMap = false;
 	std::unordered_map<ViewType,OffsetHandlePair> m_DescriptorHandles;
 	ViewType m_RecentBoundType = ViewType::SRV;
 	Vector4f m_ClearColor = { 0,0,0,1 };

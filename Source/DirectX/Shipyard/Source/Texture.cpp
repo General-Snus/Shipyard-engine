@@ -119,7 +119,10 @@ void Texture::SetView(ViewType view)
 		assert(CheckSRVSupport());
 		const int heapOffset = (int)GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->Allocate();
 		const auto descriptorHandle = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->GetCpuHandle(heapOffset);
-		CreateShaderResourceView(GPU::m_Device.Get(),m_Resource.Get(),descriptorHandle);
+
+
+
+		CreateShaderResourceView(GPU::m_Device.Get(),m_Resource.Get(),descriptorHandle,isCubeMap);
 		m_DescriptorHandles[ViewType::SRV] = OffsetHandlePair(descriptorHandle,heapOffset);
 
 		break;

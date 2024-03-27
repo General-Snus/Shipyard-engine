@@ -19,9 +19,12 @@ public:
 		SSAO
 	};
 
+	static void InitRootSignature();
 	static void InitAllStates();
 	static std::unique_ptr<PSO>& GetState(ePipelineStateID id);
 private:
+
+	static inline std::shared_ptr<GPURootSignature> m_RootSignature;
 	static inline std::unordered_map<ePipelineStateID,std::unique_ptr<PSO>> pso_map;
 };
 
@@ -30,19 +33,17 @@ class PSO
 {
 public:
 	PSO() = default;
-	virtual void Init(const ComPtr<ID3D12Device2>& dev);
+	virtual void Init(const ComPtr<ID3D12Device2>& dev,std::shared_ptr<GPURootSignature> root);
 	virtual Texture* GetRenderTargets() { return nullptr; };
 	virtual uint16_t GetRenderTargetAmounts() { return 0; };
 	virtual ComPtr<ID3D12PipelineState> GetPipelineState() const;
 
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> GetRootSignature() const
 	{
-		return m_RootSignature.GetRootSignature();
+		return m_RootSignature->GetRootSignature();
 	}
 protected:
-	virtual void InitRootSignature();
-
-	GPURootSignature m_RootSignature;
+	std::shared_ptr<GPURootSignature> m_RootSignature;
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
 	ComPtr<ID3D12PipelineState> m_pipelineState;
 	ComPtr<ID3DBlob> vertexShader;
@@ -54,12 +55,11 @@ class GbufferPSO : public PSO
 {
 public:
 	GbufferPSO() = default;
-	void Init(const ComPtr<ID3D12Device2>& dev) override;
+	void Init(const ComPtr<ID3D12Device2>& dev,std::shared_ptr<GPURootSignature> root) override;
 	Texture* GetRenderTargets() override;
 	uint16_t GetRenderTargetAmounts() override { return numRenderTargets; };
 
 private:
-	void InitRootSignature() override;
 
 	static inline constexpr uint16_t numRenderTargets = 7;
 	Texture renderTargets[numRenderTargets];
@@ -69,7 +69,7 @@ class EnvironmentLightPSO : public PSO
 {
 public:
 	EnvironmentLightPSO() = default;
-	void Init(const ComPtr<ID3D12Device2>& dev) override;
+	void Init(const ComPtr<ID3D12Device2>& dev,std::shared_ptr<GPURootSignature> root) override;
 
 	Texture* GetRenderTargets() override;
 	uint16_t GetRenderTargetAmounts() override { return 1; };
@@ -79,18 +79,15 @@ public:
 private:
 	static inline constexpr uint16_t numRenderTargets = 7;
 	Texture textureResources[numRenderTargets];
-	void InitRootSignature() override;
 };
 
 class TonemapPSO : public PSO
 {
 public:
 	TonemapPSO() = default;
-	void Init(const ComPtr<ID3D12Device2>& dev) override;
+	void Init(const ComPtr<ID3D12Device2>& dev,std::shared_ptr<GPURootSignature> root) override;
 	Texture* GetRenderTargets() override;
 	uint16_t GetRenderTargetAmounts() override { return 1; };
-
 private:
-	void InitRootSignature() override;
 };
 

@@ -7,7 +7,9 @@ enum eRootBindings
 	materialBuffer,
 	lightBuffer,
 	Textures,
-	CubeMaps,
+	GbufferPasses,
+	TargetTexture,
+	PermanentTextures,
 	NumRootParameters,
 };
 

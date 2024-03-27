@@ -1,5 +1,6 @@
 #pragma once 
 #include "BaseAsset.h"
+#include "DirectX/Shipyard/Texture.h"
 class Texture;
 
 class TextureHolder : public AssetBase
@@ -11,7 +12,11 @@ public:
 	TextureHolder(const std::filesystem::path& aFilePath,eTextureType atextureType);
 	std::shared_ptr<Texture> GetRawTexture() const { return RawTexture; }
 	eTextureType GetTextureType() const { return textureType; }
-	void SetTextureType(eTextureType aTextureType) { textureType = aTextureType; }
+	void SetTextureType(eTextureType aTextureType)
+	{
+		RawTexture->isCubeMap = (aTextureType == eTextureType::CubeMap);
+		textureType = aTextureType;
+	}
 private:
 #if WorkingOnPngLoading
 	bool LoadPngTexture(Texture* outTexture,const std::filesystem::path& aFileName);

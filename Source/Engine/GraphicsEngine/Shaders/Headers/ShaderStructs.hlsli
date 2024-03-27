@@ -74,7 +74,7 @@ struct FrameBuffer
     float4x4 FB_InvView;
     float4x4 FB_Proj;
     float FB_Time;
-    float3 FB_CameraPosition; 
+    float3 FB_CameraPosition;
     int FB_RenderMode;
     int2 FB_ScreenResolution;
     float1 padding;
@@ -102,36 +102,31 @@ struct GraphicSettingsBuffer
 };
 ConstantBuffer<GraphicSettingsBuffer> g_GraphicsSettings : register(HLSL_REG_GraphicSettingsBuffer);
 
-
-
-
-//#define myTex2DSpace space1
-//#define myTexCubeSpace space2
-
-//Texture2D<float4> Texture2DTable[] : register(t0, myTex2DSpace);
-//TextureCube TextureCubeTable[] : register(t0, myTexCubeSpace);
-
 SamplerState defaultSampler : register(HLSL_REG_DefaultSampler);
 SamplerState BRDFSampler : register(HLSL_REG_BRDFSampler);
 SamplerState NormalDepthSampler : register(HLSL_REG_normalDepthSampler);
 SamplerState PointSampler : register(HLSL_REG_PointSampler);
 SamplerComparisonState shadowCmpSampler : register(HLSL_REG_shadowCmpSampler);
 
-Texture2D colorMap[4] : register(HLSL_REG_colorMap);
-//Texture2D normalMap : register(HLSL_REG_normalMap);
-//Texture2D materialMap : register(HLSL_REG_materialMap);
-//Texture2D effectMap : register(HLSL_REG_effectMap);
-Texture2D vertexNormalMap : register(HLSL_REG_VertexNormal);
-Texture2D worldPositionMap : register(HLSL_REG_WorldPosition);
-Texture2D DepthMap : register(HLSL_REG_DepthMap);
-Texture2D SSAOMap : register(HLSL_REG_SSAO);
-TextureCube enviromentCube : register(HLSL_REG_enviromentCube);
-Texture2D<float4> Noise_Texture : register(HLSL_REG_Noise_Texture);
-Texture2D<float4> BRDF_LUT_Texture : register(HLSL_REG_BRDF_LUT_Texture);
-Texture2D<float4> Target0_Texture : register(HLSL_REG_Target0);
-Texture2D<float4> Target01_Texture : register(HLSL_REG_Target01);
-Texture2D<float4> Target02_Texture : register(HLSL_REG_Target02);
-Texture2D<float4> Target03_Texture : register(HLSL_REG_Target03);
-Texture2D<float4> Target04_Texture : register(HLSL_REG_Target04);
-Texture2D<float4> shadowMap : register(HLSL_REG_dirLightShadowMap);
+Texture2D textureHeap[] : register(HLSL_REG_colorMap);
+
+Texture2D colorPass : register(HLSL_REG_colorMap, space1);
+Texture2D normalPass : register(HLSL_REG_normalMap, space1);
+Texture2D materialPass : register(HLSL_REG_materialMap, space1);
+Texture2D effectPass : register(HLSL_REG_effectMap, space1);
+Texture2D vertexNormalPass : register(HLSL_REG_VertexNormal, space1);
+Texture2D worldPositionPass : register(HLSL_REG_WorldPosition, space1);
+Texture2D DepthPass : register(HLSL_REG_DepthMap, space1);
+Texture2D SSAOPass : register(HLSL_REG_SSAO, space1);
+
+Texture2D<float4> Target0_Texture : register(HLSL_REG_Target0, space2);
+Texture2D<float4> Target01_Texture : register(HLSL_REG_Target01, space2);
+Texture2D<float4> Target02_Texture : register(HLSL_REG_Target02, space2);
+Texture2D<float4> Target03_Texture : register(HLSL_REG_Target03, space2);
+Texture2D<float4> Target04_Texture : register(HLSL_REG_Target04, space2);
+Texture2D<float4> shadowMap : register(HLSL_REG_dirLightShadowMap, space2);
+
+TextureCube enviromentCube : register(HLSL_REG_enviromentCube,space3);
+Texture2D<float4> Noise_Texture : register(HLSL_REG_Noise_Texture, space3);
+Texture2D<float4> BRDF_LUT_Texture : register(HLSL_REG_BRDF_LUT_Texture, space3);
 #endif
