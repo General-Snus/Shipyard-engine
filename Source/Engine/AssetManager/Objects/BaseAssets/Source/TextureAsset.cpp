@@ -134,42 +134,6 @@ void TextureHolder::Init()
 		}
 	}
 
-#if WorkingOnPngLoading
-	//if (AssetPath.extension() == ".png")
-	//{
-	//	if (!std::filesystem::exists(AssetPath))
-	//	{
-	//		if (!AssetManager::Get().AdaptPath(AssetPath))
-	//		{
-	//			std::string msg = "Error: Coulnt load texture at " + AssetPath.string();
-	//			std::cout << msg << " \n";
-	//			if (GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
-	//			{
-	//				RawTexture = GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture();
-	//				isLoadedComplete = true;
-	//				return;
-	//			}
-	//			isLoadedComplete = false;
-	//			return;
-	//		}
-	//	}
-	//	if (!LoadPngTexture(RawTexture.get(),AssetPath))
-	//	{
-	//		std::string msg = "Error: Coulnt dds texture at " + AssetPath.string();
-	//		std::cout << msg << " \n";
-	//		if (GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
-	//		{
-	//			RawTexture = GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture();
-	//			isLoadedComplete = true;
-	//			return;
-	//		}
-	//		std::cout << "Error: Default texture was not found" << " \n";
-	//		isLoadedComplete = false;
-	//		return;
-	//	}
-	//	isLoadedComplete = true;
-	//}
-#endif
 	if (AssetPath.extension() == ".dds" || AssetPath.extension() == ".png")
 	{
 		if (!std::filesystem::exists(AssetPath))

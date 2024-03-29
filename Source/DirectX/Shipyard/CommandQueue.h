@@ -7,7 +7,7 @@ class GPUCommandQueue
 {
 public:
 	bool Create(const ComPtr<ID3D12Device>& device,D3D12_COMMAND_LIST_TYPE type);
-	std::shared_ptr<CommandList> GetCommandList();
+	std::shared_ptr<CommandList> GetCommandList(const std::wstring& name = L"NoName");
 
 	ComPtr<ID3D12CommandQueue> GetCommandQueue();
 	uint64_t ExecuteCommandList(std::shared_ptr<CommandList> commandList);

@@ -37,10 +37,9 @@ float3 CalculateSpecularIBL(float3 specularColor, float3 normal, float3 cameraDi
     const float3 cubeMap = enviromentCube.SampleLevel(defaultSampler, ReflectionVector, roughness * CubeMips).rgb;
     
     const float NdotV = saturate(dot(normal, cameraDirection));
-    const float2 uv = float2(NdotV, roughness);    
+    const float2 uv = float2(NdotV, roughness);     
 
-
-    const float2 brdfLUT = IntegrateBRDF(uv.x, uv.y);
+    const float2 brdfLUT = BRDF_LUT_Texture.Sample(BRDFSampler, uv).rg; 
     
     return cubeMap * (specularColor * brdfLUT.x + brdfLUT.y);;
 }

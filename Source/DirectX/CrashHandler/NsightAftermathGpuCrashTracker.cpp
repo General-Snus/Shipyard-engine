@@ -126,6 +126,7 @@ void GpuCrashTracker::OnDescription(PFN_GFSDK_Aftermath_AddGpuCrashDumpDescripti
 // Handler for app-managed marker resolve callback
 void GpuCrashTracker::OnResolveMarker(const void* pMarkerData,const uint32_t markerDataSize,void** ppResolvedMarkerData,uint32_t* pResolvedMarkerDataSize)
 {
+	markerDataSize;
 	// Important: the pointer passed back via ppResolvedMarkerData must remain valid after this function returns
 	// using references for all of the m_markerMap accesses ensures that the pointers refer to the persistent data
 	for (auto& map : m_markerMap)

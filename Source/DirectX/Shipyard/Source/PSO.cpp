@@ -7,6 +7,9 @@
 #include <strsafe.h>
 #include "../GPU.h"
 #include "../PSO.h" 
+
+#include "Editor/Editor/Core/Editor.h"
+#include "Editor/Editor/Windows/Window.h"
 #include "Engine/AssetManager/AssetManager.h"
 #include "Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h" 
 
@@ -19,19 +22,19 @@ void PSOCache::InitAllStates()
 	InitRootSignature();
 
 	auto pso = std::make_unique<PSO>();
-	pso->Init(GPU::m_Device,m_RootSignature);
+	pso->Init(GPU::m_Device);
 	pso_map[ePipelineStateID::Default] = std::move(pso);
 
 	auto gbuffer = std::make_unique<GbufferPSO>();
-	gbuffer->Init(GPU::m_Device,m_RootSignature);
+	gbuffer->Init(GPU::m_Device);
 	pso_map[ePipelineStateID::GBuffer] = std::move(gbuffer);
 
 	auto env = std::make_unique<EnvironmentLightPSO>();
-	env->Init(GPU::m_Device,m_RootSignature);
+	env->Init(GPU::m_Device);
 	pso_map[ePipelineStateID::DeferredLighting] = std::move(env);
 
 	auto tonemapPSO = std::make_unique<TonemapPSO>();
-	tonemapPSO->Init(GPU::m_Device,m_RootSignature);
+	tonemapPSO->Init(GPU::m_Device);
 	pso_map[ePipelineStateID::ToneMap] = std::move(tonemapPSO);
 
 }
@@ -71,33 +74,97 @@ void PSOCache::InitRootSignature()
 	rootParameters[eRootBindings::materialBuffer].InitAsConstantBufferView(REG_DefaultMaterialBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
 	rootParameters[eRootBindings::lightBuffer].InitAsConstantBufferView(REG_LightBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
 
-	const auto descriptorRange = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,127,REG_colorMap,0);
+	const auto descriptorRange = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,127,REG_colorMap,0,D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
 	rootParameters[eRootBindings::Textures].InitAsDescriptorTable(1,&descriptorRange,D3D12_SHADER_VISIBILITY_PIXEL);
 
-	const auto GbufferPasses = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,127,REG_colorMap,1);
+	const auto GbufferPasses = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,127,REG_colorMap,1,D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
 	rootParameters[eRootBindings::GbufferPasses].InitAsDescriptorTable(1,&GbufferPasses,D3D12_SHADER_VISIBILITY_PIXEL);
 
-	const auto TargetTexture = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,127,REG_Target0,2);
+	const auto TargetTexture = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,127,REG_Target0,2,D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
 	rootParameters[eRootBindings::TargetTexture].InitAsDescriptorTable(1,&TargetTexture,D3D12_SHADER_VISIBILITY_PIXEL);
 
-	const auto PermanentTextures = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,127,REG_enviromentCube,3);
+	const auto PermanentTextures = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,127,REG_enviromentCube,3,D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
 	rootParameters[eRootBindings::PermanentTextures].InitAsDescriptorTable(1,&PermanentTextures,D3D12_SHADER_VISIBILITY_PIXEL);
 
-	const CD3DX12_STATIC_SAMPLER_DESC linearRepeatSampler(REG_DefaultSampler,D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR);
+	const CD3DX12_STATIC_SAMPLER_DESC samplers[]
+	{
+		CD3DX12_STATIC_SAMPLER_DESC(REG_DefaultSampler,D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR),
+
+		CD3DX12_STATIC_SAMPLER_DESC(REG_BRDFSampler,
+		D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT,
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+		0,1,D3D12_COMPARISON_FUNC_NEVER,D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE,0,0),
+
+		CD3DX12_STATIC_SAMPLER_DESC(REG_shadowCmpSampler,
+		D3D12_FILTER_COMPARISON_MIN_MAG_MIP_POINT,
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,
+		0,1,D3D12_COMPARISON_FUNC_GREATER_EQUAL,D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE,-D3D12_FLOAT32_MAX,D3D12_FLOAT32_MAX)
+	};
 
 	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
-	rootSignatureDescription.Init_1_1(NumRootParameters,rootParameters,1,&linearRepeatSampler,rootSignatureFlags);
+	rootSignatureDescription.Init_1_1(NumRootParameters,rootParameters,(unsigned)std::size(samplers),samplers,rootSignatureFlags);
 
 	m_RootSignature->SetRootSignatureDesc(rootSignatureDescription.Desc_1_1,GPU::m_FeatureData);
 }
 
-void PSO::Init(const ComPtr<ID3D12Device2>& dev,std::shared_ptr<GPURootSignature> root)
+PSO PSO::CreatePSO(std::filesystem::path vertexShader,std::filesystem::path pixelShader,unsigned renderTargetAmount,
+	DXGI_FORMAT renderTargetFormat,DXGI_FORMAT depthStencilFormat)
+{
+	PSO pso;
+	pso.m_Device = GPU::m_Device;
+
+	AssetManager::Get().ForceLoadAsset<ShipyardShader>(vertexShader.string(),pso.vs);
+	AssetManager::Get().ForceLoadAsset<ShipyardShader>(pixelShader.string(),pso.ps);
+
+
+	struct PipelineStateStream
+	{
+		CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE pRootSignature;
+		CD3DX12_PIPELINE_STATE_STREAM_INPUT_LAYOUT InputLayout;
+		CD3DX12_PIPELINE_STATE_STREAM_PRIMITIVE_TOPOLOGY PrimitiveTopologyType;
+		CD3DX12_PIPELINE_STATE_STREAM_VS VS;
+		CD3DX12_PIPELINE_STATE_STREAM_PS PS;
+		CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL_FORMAT DSVFormat;
+		CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS RTVFormats;
+		CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL DepthStencilState;
+	}  stream;
+
+	D3D12_RT_FORMAT_ARRAY rtvFormats = {};
+	for (size_t i = 0; i < renderTargetAmount; i++)
+	{
+		rtvFormats.RTFormats[i] = { renderTargetFormat };
+	}
+	rtvFormats.NumRenderTargets = renderTargetAmount;
+
+	stream.pRootSignature = PSOCache::m_RootSignature->GetRootSignature().Get();
+	stream.InputLayout = { Vertex::InputLayoutDefinition , Vertex::InputLayoutDefinitionSize };
+	stream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	stream.VS = CD3DX12_SHADER_BYTECODE(pso.vs->GetBlob());
+	stream.PS = CD3DX12_SHADER_BYTECODE(pso.ps->GetBlob());
+	stream.DSVFormat = depthStencilFormat;
+	stream.RTVFormats = rtvFormats;
+
+	auto depthStencil = CD3DX12_DEPTH_STENCIL_DESC(CD3DX12_DEFAULT());
+	depthStencil.DepthFunc = D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+	stream.DepthStencilState = depthStencil;
+
+	const D3D12_PIPELINE_STATE_STREAM_DESC psoDescStreamDesc = {
+			sizeof(PipelineStateStream), &stream
+	};
+	Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&psoDescStreamDesc,IID_PPV_ARGS(&pso.m_pipelineState)));
+	pso.m_pipelineState->SetName(L"LowLifetimePSO");
+
+	return pso;
+}
+
+void PSO::Init(const ComPtr<ID3D12Device2>& dev)
 {
 	m_Device = dev;
-	m_RootSignature = root;
 
-	std::shared_ptr<ShipyardShader> vs;
-	std::shared_ptr<ShipyardShader> ps;
 	AssetManager::Get().ForceLoadAsset<ShipyardShader>("Shaders/Default_VS.cso",vs);
 	AssetManager::Get().ForceLoadAsset<ShipyardShader>("Shaders/Default_PS.cso",ps);
 
@@ -117,7 +184,7 @@ void PSO::Init(const ComPtr<ID3D12Device2>& dev,std::shared_ptr<GPURootSignature
 	rtvFormats.RTFormats[0] = { GPU::m_BackBuffer->GetResource()->GetDesc().Format };
 	rtvFormats.NumRenderTargets = 1;
 
-	stream.pRootSignature = m_RootSignature->GetRootSignature().Get();
+	stream.pRootSignature = PSOCache::m_RootSignature->GetRootSignature().Get();
 	stream.InputLayout = { Vertex::InputLayoutDefinition , Vertex::InputLayoutDefinitionSize };
 	stream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	stream.VS = CD3DX12_SHADER_BYTECODE(vs->GetBlob());
@@ -133,6 +200,7 @@ void PSO::Init(const ComPtr<ID3D12Device2>& dev,std::shared_ptr<GPURootSignature
 			sizeof(PipelineStateStream), &stream
 	};
 	Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&psoDescStreamDesc,IID_PPV_ARGS(&m_pipelineState)));
+	m_pipelineState->SetName(L"Default pipeline state");
 }
 ComPtr<ID3D12PipelineState> PSO::GetPipelineState() const
 {
@@ -140,13 +208,10 @@ ComPtr<ID3D12PipelineState> PSO::GetPipelineState() const
 }
 
 
-void GbufferPSO::Init(const ComPtr<ID3D12Device2>& dev,std::shared_ptr<GPURootSignature> root)
+void GbufferPSO::Init(const ComPtr<ID3D12Device2>& dev)
 {
 	m_Device = dev;
-	m_RootSignature = root;
 
-	std::shared_ptr<ShipyardShader> vs;
-	std::shared_ptr<ShipyardShader> ps;
 	AssetManager::Get().ForceLoadAsset<ShipyardShader>("Shaders/Default_VS.cso",vs);
 	AssetManager::Get().ForceLoadAsset<ShipyardShader>("Shaders/GBufferPS.cso",ps);
 
@@ -218,7 +283,7 @@ void GbufferPSO::Init(const ComPtr<ID3D12Device2>& dev,std::shared_ptr<GPURootSi
 		rtvFormats.RTFormats[i] = renderTargets[i].GetResource()->GetDesc().Format;
 	}
 
-	stream.pRootSignature = m_RootSignature->GetRootSignature().Get();
+	stream.pRootSignature = PSOCache::m_RootSignature->GetRootSignature().Get();
 	stream.InputLayout = { Vertex::InputLayoutDefinition , Vertex::InputLayoutDefinitionSize };
 	stream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	stream.VS = CD3DX12_SHADER_BYTECODE(vs->GetBlob());
@@ -234,6 +299,7 @@ void GbufferPSO::Init(const ComPtr<ID3D12Device2>& dev,std::shared_ptr<GPURootSi
 			sizeof(PipelineStateStream), &stream
 	};
 	Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&psoDescStreamDesc,IID_PPV_ARGS(&m_pipelineState)));
+	m_pipelineState->SetName(L"GbufferPSO");
 }
 Texture* GbufferPSO::GetRenderTargets()
 {
@@ -241,13 +307,9 @@ Texture* GbufferPSO::GetRenderTargets()
 }
 
 
-void EnvironmentLightPSO::Init(const ComPtr<ID3D12Device2>& dev,std::shared_ptr<GPURootSignature> root)
+void EnvironmentLightPSO::Init(const ComPtr<ID3D12Device2>& dev)
 {
 	m_Device = dev;
-	m_RootSignature = root;
-
-	std::shared_ptr<ShipyardShader> vs;
-	std::shared_ptr<ShipyardShader> ps;
 	AssetManager::Get().ForceLoadAsset<ShipyardShader>("Shaders/ScreenspaceQuad_VS.cso",vs);
 	AssetManager::Get().ForceLoadAsset<ShipyardShader>("Shaders/EnvironmentLight_PS.cso",ps);
 
@@ -263,24 +325,29 @@ void EnvironmentLightPSO::Init(const ComPtr<ID3D12Device2>& dev,std::shared_ptr<
 	}  stream;
 
 	D3D12_RT_FORMAT_ARRAY rtvFormats = {};
-	rtvFormats.RTFormats[0] = { GPU::m_BackBuffer->GetResource()->GetDesc().Format };
+
+	renderTarget.AllocateTexture({ Window::Width(),Window::Height() },"Target0");
+	rtvFormats.RTFormats[0] = { renderTarget.GetResource()->GetDesc().Format };
 	rtvFormats.NumRenderTargets = 1;
 
-	stream.pRootSignature = m_RootSignature->GetRootSignature().Get();
+
+
+	stream.pRootSignature = PSOCache::m_RootSignature->GetRootSignature().Get();
 	stream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	stream.VS = CD3DX12_SHADER_BYTECODE(vs->GetBlob());
 	stream.PS = CD3DX12_SHADER_BYTECODE(ps->GetBlob());
-	stream.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+	stream.DSVFormat = DXGI_FORMAT_UNKNOWN;
 	stream.RTVFormats = rtvFormats;
 
 	const D3D12_PIPELINE_STATE_STREAM_DESC psoDescStreamDesc = {
 			sizeof(PipelineStateStream), &stream
 	};
 	Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&psoDescStreamDesc,IID_PPV_ARGS(&m_pipelineState)));
+	m_pipelineState->SetName(L"EnvironmentLightPSO");
 }
 Texture* EnvironmentLightPSO::GetRenderTargets()
 {
-	return GPU::GetCurrentBackBuffer();
+	return &renderTarget;
 }
 LightBuffer EnvironmentLightPSO::CreateLightBuffer()
 {
@@ -299,6 +366,7 @@ LightBuffer EnvironmentLightPSO::CreateLightBuffer()
 			if (i.GetIsShadowCaster())
 			{
 				pair.second = i.GetShadowMap(0).get();
+				pair.first->shadowMapIndex = pair.second->GetHandle(ViewType::SRV).heapOffset;
 			}
 
 			dirLight.push_back(pair);
@@ -315,6 +383,7 @@ LightBuffer EnvironmentLightPSO::CreateLightBuffer()
 					pair.first = i.GetData<PointLight>().get();
 					pair.first->lightView = i.GetLightViewMatrix(j);
 					pair.second = i.GetShadowMap(j).get();
+					pair.first->shadowMapIndex[j] = pair.second->GetHandle(ViewType::SRV).heapOffset;
 					pointLight.push_back(pair);
 				}
 			}
@@ -328,6 +397,7 @@ LightBuffer EnvironmentLightPSO::CreateLightBuffer()
 			if (i.GetIsShadowCaster())
 			{
 				pair.second = i.GetShadowMap(0).get();
+				pair.first->shadowMapIndex = pair.second->GetHandle(ViewType::SRV).heapOffset;
 			}
 			spotLight.push_back(pair);
 			break;
@@ -363,13 +433,10 @@ LightBuffer EnvironmentLightPSO::CreateLightBuffer()
 }
 
 
-void TonemapPSO::Init(const ComPtr<ID3D12Device2>& dev,std::shared_ptr<GPURootSignature> root)
+void TonemapPSO::Init(const ComPtr<ID3D12Device2>& dev)
 {
 	m_Device = dev;
-	m_RootSignature = root;
 
-	std::shared_ptr<ShipyardShader> vs;
-	std::shared_ptr<ShipyardShader> ps;
 	AssetManager::Get().ForceLoadAsset<ShipyardShader>("Shaders/ScreenspaceQuad_VS.cso",vs);
 	AssetManager::Get().ForceLoadAsset<ShipyardShader>("Shaders/ToneMapping_PS.cso",ps);
 
@@ -388,22 +455,18 @@ void TonemapPSO::Init(const ComPtr<ID3D12Device2>& dev,std::shared_ptr<GPURootSi
 	rtvFormats.RTFormats[0] = { GPU::m_BackBuffer->GetResource()->GetDesc().Format };
 	rtvFormats.NumRenderTargets = 1;
 
-	stream.pRootSignature = m_RootSignature->GetRootSignature().Get();
-	/*stream.InputLayout =
-	{
-		{ "SV_VertexID",0,DXGI_FORMAT_R32G32B32A32_FLOAT,0,D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		1
-	};*/
+	stream.pRootSignature = PSOCache::m_RootSignature->GetRootSignature().Get();
 	stream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	stream.VS = CD3DX12_SHADER_BYTECODE(vs->GetBlob());
 	stream.PS = CD3DX12_SHADER_BYTECODE(ps->GetBlob());
-	stream.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+	stream.DSVFormat = DXGI_FORMAT_UNKNOWN;
 	stream.RTVFormats = rtvFormats;
 
 	const D3D12_PIPELINE_STATE_STREAM_DESC psoDescStreamDesc = {
 			sizeof(PipelineStateStream), &stream
 	};
 	Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&psoDescStreamDesc,IID_PPV_ARGS(&m_pipelineState)));
+	m_pipelineState->SetName(L"TonemapPSO");
 }
 Texture* TonemapPSO::GetRenderTargets()
 {

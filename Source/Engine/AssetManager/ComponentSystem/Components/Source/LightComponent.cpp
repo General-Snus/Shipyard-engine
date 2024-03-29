@@ -4,6 +4,7 @@
 #include <Tools/Utilities/Math.hpp> 
 #include <Tools/Optick/src/optick.h>
 
+#include "DirectX/Shipyard/GPU.h"
 #include "DirectX/Shipyard/Texture.h"
 
 
@@ -18,7 +19,6 @@ cLight::cLight(const unsigned int anOwnerId,const eLightType type) : Component(a
 {
 	myLightType = type;
 	shadowMap[0] = std::make_shared<Texture>();
-
 	switch (myLightType)
 	{
 		using enum eLightType;
@@ -64,7 +64,7 @@ void cLight::SetIsShadowCaster(bool active)
 	{
 		isDirty = true;
 		std::wstring name = L"unNamedMap";
-		Vector2 resolution = { 512,512 };
+		Vector2ui resolution = { 512,512 };
 		int mapsToCreate = 0;
 		switch (myLightType)
 		{
@@ -93,6 +93,19 @@ void cLight::SetIsShadowCaster(bool active)
 		for (int i = 0; i < mapsToCreate; i++)
 		{
 			shadowMap[i] = std::make_shared<Texture>();
+
+			shadowMap[i]->AllocateTexture(
+				resolution,
+				name + std::to_wstring(i) + L"_" +
+				std::to_wstring(resolution.x) + L"|" +
+				std::to_wstring(resolution.y),
+				DXGI_FORMAT_D32_FLOAT,
+				D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL,
+				D3D12_RESOURCE_STATE_DEPTH_WRITE);
+
+			shadowMap[i]->SetView(ViewType::DSV);
+			shadowMap[i]->SetView(ViewType::SRV);
+
 
 			/*if (!RHI::CreateTexture(
 				shadowMap[i].get(),

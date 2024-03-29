@@ -10,6 +10,9 @@ struct hlslDirectionalLight
     
     float4x4 lightView;
     float4x4 projection;
+
+    int shadowMapIndex;
+    float3 padding;
 };
 
 struct hlslPointLight
@@ -22,6 +25,9 @@ struct hlslPointLight
     
     float4x4 lightView;
     float4x4 projection;
+
+    int1 shadowMapIndex[6];
+    float2 padding;
 };
 
 struct hlslSpotLight
@@ -36,10 +42,11 @@ struct hlslSpotLight
     float InnerConeAngle; //4
     
     float OuterConeAngle; //4
-    float3 Pad; //12
+    int shadowMapIndex;
+    float2 Pad; //12
     
     float4x4 lightView;
-    float4x4 projection;
+    float4x4 projection; 
 };
 struct LightBuffer
 {

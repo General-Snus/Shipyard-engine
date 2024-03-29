@@ -13,7 +13,14 @@ enum class ViewType
 	DSV
 };
 
-using OffsetHandlePair = std::pair<D3D12_CPU_DESCRIPTOR_HANDLE,int>;
+
+struct textureHandle
+{
+	D3D12_CPU_DESCRIPTOR_HANDLE cpuPtr;;
+	int heapOffset = -1;
+	int space = 0;
+
+};
 
 class Texture : public GpuResource
 {
@@ -33,14 +40,16 @@ public:
 	bool AllocateTexture(const Vector2ui dimentions,
 		const std::filesystem::path& name = "UnnamedTexture",
 		DXGI_FORMAT Format = DXGI_FORMAT_R8G8B8A8_UNORM,
-		D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS);
+		D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS,
+		D3D12_RESOURCE_STATES targetResourceState = D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-	void SetView(ViewType view);
+	void SetView(ViewType view,unsigned space = 0);
+	void ClearView(ViewType view);
 	bool CreateDDSFromMemory(const void* filePtr,size_t fileSize,bool sRGB);
 
-	OffsetHandlePair  GetHandle(ViewType type);
+	textureHandle  GetHandle(ViewType type);
 
-	OffsetHandlePair  GetHandle() const;
+	textureHandle  GetHandle() const;
 
 	uint32_t GetWidth() const { return m_Width; }
 	uint32_t GetHeight() const { return m_Height; }
@@ -72,15 +81,15 @@ public:
 	{
 		return CheckFormatSupport(D3D12_FORMAT_SUPPORT1_DEPTH_STENCIL);
 	}
+	static DXGI_FORMAT GetBaseFormat(DXGI_FORMAT defaultFormat);
+	DXGI_FORMAT GetDepthFormat(DXGI_FORMAT defaultFormat);
 
 protected:
-	//D3D12_CPU_DESCRIPTOR_HANDLE m_RTVDescriptorHandle;
-	//D3D12_CPU_DESCRIPTOR_HANDLE m_SRVDescriptorHandle; 
-	//int heapOffset = -1;
 	bool isCubeMap = false;
-	std::unordered_map<ViewType,OffsetHandlePair> m_DescriptorHandles;
+	std::unordered_map<ViewType,textureHandle> m_DescriptorHandles;
 	ViewType m_RecentBoundType = ViewType::SRV;
 	Vector4f m_ClearColor = { 0,0,0,1 };
 	uint32_t m_Width;
 	uint32_t m_Height;
+	DXGI_FORMAT m_Format;
 };

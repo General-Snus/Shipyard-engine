@@ -55,15 +55,16 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 		return false;
 	}*/
 
+	m_StateCache = std::make_unique<PSOCache>();
+	m_StateCache->InitAllStates();
+
 	SetupDefaultVariables();
-	SetupBRDF();
+	SetupSpace3();
 	SetupParticleShaders();
 	SetupPostProcessing();
 	SetupBlendStates();
 	SetupDebugDrawline();
 
-	m_StateCache = std::make_unique<PSOCache>();
-	m_StateCache->InitAllStates();
 
 
 	/*myLightBuffer.Initialize();
@@ -214,10 +215,7 @@ void GraphicsEngine::SetupDefaultVariables()
 	defaultMatTexture->SetTextureType(eTextureType::MaterialMap);
 	AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultEffect.dds",defaultEffectTexture);
 	defaultEffectTexture->SetTextureType(eTextureType::EffectMap);
-	//	defaultTexture->GetRawTexture()->SetView(ViewType::SRV);;
-
-	AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/skansen_cubemap.dds",defaultCubeMap);
-	defaultCubeMap->SetTextureType(eTextureType::CubeMap);
+	//	defaultTexture->GetRawTexture()->SetView(ViewType::SRV);; 
 
 	AssetManager::Get().ForceLoadAsset<Mesh>("default.fbx",defaultMesh);
 }
@@ -253,66 +251,48 @@ void GraphicsEngine::SetupBlendStates()
 	}*/
 }
 
-void GraphicsEngine::SetupBRDF()
+void GraphicsEngine::SetupSpace3()
 {
+
+	auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+	auto commandList = commandQueue->GetCommandList(L"RenderFrame");
+	auto graphicCommandList = commandList->GetGraphicsCommandList();
+
+
 	//Light
-	/*BRDLookUpTable = std::make_shared<Texture>();
-	RHI::CreateTexture(BRDLookUpTable.get(),L"brdfLUT",512,512,
-		DXGI_FORMAT_R16G16_FLOAT,
-		D3D11_USAGE_DEFAULT,
-		D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET
+	AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/skansen_cubemap.dds",defaultCubeMap);
+	defaultCubeMap->SetTextureType(eTextureType::CubeMap);
+
+	Vector2ui size = { 512,512 };
+	BRDLookUpTable = std::make_shared<Texture>();
+	BRDLookUpTable->AllocateTexture(
+		size,
+		L"brdfLUT",
+		DXGI_FORMAT_R16G16_FLOAT
 	);
-	RHI::ClearRenderTarget(BRDLookUpTable.get());
+	BRDLookUpTable->SetView(ViewType::SRV);
+	commandList->SetRenderTargets(1,BRDLookUpTable.get(),nullptr);
+	PSO brdfPSO = PSO::CreatePSO("Shaders/ScreenspaceQuad_VS.cso","Shaders/brdfLUT_PS.cso",1,DXGI_FORMAT_R16G16_FLOAT);
 
-	ComPtr<ID3D11PixelShader> brdfPS;
+	D3D12_VIEWPORT viewPort = { 0.0f, 0.0f, static_cast<float>(size.x), static_cast<float>(size.y), D3D12_MIN_DEPTH, D3D12_MAX_DEPTH };
+	D3D12_RECT rect = { 0, 0, static_cast<LONG>(size.x), static_cast<LONG>(size.y) };
 
-	RHI::CreateVertexShader(
-		myScreenSpaceQuadShader,
-		BuiltIn_ScreenspaceQuad_VS_ByteCode,
-		sizeof(BuiltIn_ScreenspaceQuad_VS_ByteCode)
-	);
+	graphicCommandList->RSSetViewports(1,&viewPort);
+	graphicCommandList->RSSetScissorRects(1,&rect);
 
-	RHI::CreatePixelShader(
-		brdfPS,
-		BuiltIn_brdfLUT_PS_ByteCode,
-		sizeof(BuiltIn_brdfLUT_PS_ByteCode)
-	);
-	RHI::SetVertexShader(myScreenSpaceQuadShader);
-	RHI::SetPixelShader(brdfPS);
+	const auto& rootSignature = PSOCache::m_RootSignature->GetRootSignature();
+	graphicCommandList->SetGraphicsRootSignature(rootSignature.Get());
+	commandList->TrackResource(rootSignature);
 
-	RHI::SetRenderTarget(BRDLookUpTable.get(),nullptr);
+	graphicCommandList->SetPipelineState(brdfPSO.GetPipelineState().Get());
 
-	RHI::ConfigureInputAssembler(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
-		nullptr,nullptr,0,nullptr);
-	RHI::Draw(4);
+	graphicCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	graphicCommandList->IASetVertexBuffers(0,1,nullptr);
+	graphicCommandList->IASetIndexBuffer(nullptr);
+	graphicCommandList->DrawInstanced(6,1,0,0);
 
-	RHI::SetRenderTarget(nullptr,nullptr);
-	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_BRDF_LUT_Texture,BRDLookUpTable.get());
-
-
-	D3D11_SAMPLER_DESC lutsamplerDesc = {};
-	lutsamplerDesc.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
-	lutsamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-	lutsamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-	lutsamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-	lutsamplerDesc.MipLODBias = 0.f;
-	lutsamplerDesc.MaxAnisotropy = 1;
-	lutsamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	lutsamplerDesc.BorderColor[0] = 1.f;
-	lutsamplerDesc.BorderColor[1] = 1.f;
-	lutsamplerDesc.BorderColor[2] = 1.f;
-	lutsamplerDesc.BorderColor[3] = 1.f;
-	lutsamplerDesc.MinLOD = 0;
-	lutsamplerDesc.MaxLOD = 0;
-
-	if (!RHI::CreateSamplerState(myBRDFSampleState,lutsamplerDesc))
-	{
-		Logger::Log("Sampler state created");
-		assert(false);
-	}
-
-	RHI::SetSamplerState(myBRDFSampleState,REG_BRDFSampler);*/
-
+	auto fence = commandQueue->ExecuteCommandList(commandList);
+	commandQueue->WaitForFenceValue(fence);
 }
 
 void GraphicsEngine::SetupPostProcessing()
@@ -485,7 +465,6 @@ void GraphicsEngine::UpdateSettings()
 	*/
 }
 
-
 void GraphicsEngine::Update()
 {
 	myCamera = GameObjectManager::Get().GetCamera().TryGetComponent<cCamera>();
@@ -536,24 +515,33 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	aDeltaTime; aTotalTime;
 
 	auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
-	auto commandList = commandQueue->GetCommandList();
+	auto commandList = commandQueue->GetCommandList(L"RenderFrame");
 	auto graphicCommandList = commandList->GetGraphicsCommandList();
 	auto chain = GPU::m_Swapchain->m_SwapChain;
 
 	//const UINT currentBackBufferIndex = chain->GetCurrentBackBufferIndex();
 	const auto* backBuffer = GPU::GetCurrentBackBuffer();
 	const auto rtv = GPU::GetCurrentRenderTargetView();
-	const auto dsv = GPU::m_DepthBuffer->GetHandle(ViewType::DSV).first;
+	const auto dsv = GPU::m_DepthBuffer->GetHandle(ViewType::DSV).cpuPtr;
 	commandList->TransitionBarrier(backBuffer->GetResource(),D3D12_RESOURCE_STATE_RENDER_TARGET);
-
-	Vector4f clearColor = { 0.2f, 0.2f, 0.9f, 1.0f };
-
+	Vector4f clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
 	GPU::ClearRTV(*commandList.get(),rtv,clearColor);
-	GPU::ClearDepth(*commandList.get(),GPU::m_DepthBuffer->GetHandle(ViewType::DSV).first);
+	GPU::ClearDepth(*commandList.get(),GPU::m_DepthBuffer->GetHandle(ViewType::DSV).cpuPtr);
 
 
 	graphicCommandList->RSSetViewports(1,&GPU::m_Viewport);
 	graphicCommandList->RSSetScissorRects(1,&GPU::m_ScissorRect);
+
+	const auto& rootSignature = PSOCache::m_RootSignature->GetRootSignature();
+	graphicCommandList->SetGraphicsRootSignature(rootSignature.Get());
+	commandList->TrackResource(rootSignature);
+
+	ID3D12DescriptorHeap* heaps[] =
+	{
+		GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->Heap(),
+		GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_SAMPLER]->Heap()
+	};
+	graphicCommandList->SetDescriptorHeaps(static_cast<UINT>(std::size(heaps)),heaps);
 
 	Texture* gBufferTextures;
 	unsigned bufferCount = 0;
@@ -562,31 +550,24 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 		bufferCount = gbufferPSO->GetRenderTargetAmounts();
 		gBufferTextures = gbufferPSO->GetRenderTargets();
 		GPU::ClearRTV(*commandList.get(),gBufferTextures,bufferCount);
-
 		commandList->SetRenderTargets(bufferCount,gBufferTextures,GPU::m_DepthBuffer.get());
-
-		const auto& rootSignature = gbufferPSO->GetRootSignature();
-		graphicCommandList->SetGraphicsRootSignature(rootSignature.Get());
-		commandList->TrackResource(rootSignature);
 
 		const auto& pipelineState = gbufferPSO->GetPipelineState().Get();
 		graphicCommandList->SetPipelineState(pipelineState);
 		commandList->TrackResource(pipelineState);
 	}
 
-	ID3D12DescriptorHeap* heaps[] = { GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->Heap() };
-	graphicCommandList->SetDescriptorHeaps(static_cast<UINT>(std::size(heaps)),heaps);
 
-	graphicCommandList->SetGraphicsRootDescriptorTable(eRootBindings::Textures,GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->GetFirstGpuHandle());
 
 	auto frameBuffer = myCamera->GetFrameBuffer();
 	const auto& alloc0 = GPU::m_GraphicsMemory->AllocateConstant<FrameBuffer>(frameBuffer);
 	graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::frameBuffer,alloc0.GpuAddress());
 
-	//const auto cubeMap = defaultCubeMap->GetRawTexture().get();
-	//commandList->SetDescriptorTable(eRootBindings::PermanentTextures,cubeMap);
-	//commandList->TrackResource(cubeMap->GetResource());
+	const auto cubeMap = defaultCubeMap->GetRawTexture().get();
+	commandList->SetDescriptorTable(eRootBindings::PermanentTextures,cubeMap);
+	commandList->TrackResource(cubeMap->GetResource());
 
+	graphicCommandList->SetGraphicsRootDescriptorTable(eRootBindings::Textures,GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->GetFirstGpuHandle());
 	static auto& list = GameObjectManager::Get().GetAllComponents<cMeshRenderer>();
 	Logger::Log(std::to_string(list.size()));
 
@@ -665,8 +646,8 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 		}
 	}
 
+	const auto& enviromentLight = PSOCache::GetState(PSOCache::ePipelineStateID::DeferredLighting);
 	{
-		const auto& enviromentLight = PSOCache::GetState(PSOCache::ePipelineStateID::DeferredLighting);
 		LightBuffer lightbuffer = EnvironmentLightPSO::CreateLightBuffer();
 
 		const auto& alloc = GPU::m_GraphicsMemory->AllocateConstant<LightBuffer>(lightbuffer);
@@ -674,7 +655,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 
 
 		GPU::ClearRTV(*commandList.get(),enviromentLight->GetRenderTargets(),enviromentLight->GetRenderTargetAmounts());
-		commandList->SetRenderTargets(enviromentLight->GetRenderTargetAmounts(),enviromentLight->GetRenderTargets(),GPU::m_DepthBuffer.get());
+		commandList->SetRenderTargets(enviromentLight->GetRenderTargetAmounts(),enviromentLight->GetRenderTargets(),nullptr);
 
 		const auto& pipelineState = enviromentLight->GetPipelineState().Get();
 		graphicCommandList->SetPipelineState(pipelineState);
@@ -682,13 +663,12 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 
 		for (unsigned i = 0; i < bufferCount; i++)
 		{
-			gBufferTextures[i].SetView(ViewType::SRV);
-			commandList->TransitionBarrier(gBufferTextures[i].GetResource(),D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-			commandList->TrackResource(gBufferTextures[i].GetResource());
+			gBufferTextures[i].SetView(ViewType::SRV,1);
+			commandList->TransitionBarrier(gBufferTextures[i],D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			commandList->TrackResource(gBufferTextures[i]);
 		}
-
-		commandList->SetDescriptorTable(eRootBindings::Textures,gBufferTextures);
-
+		commandList->FlushResourceBarriers();
+		commandList->SetDescriptorTable(eRootBindings::GbufferPasses,gBufferTextures);
 		graphicCommandList->IASetVertexBuffers(0,1,nullptr);
 		graphicCommandList->IASetIndexBuffer(nullptr);
 		graphicCommandList->DrawInstanced(6,1,0,0);
@@ -701,11 +681,14 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 		graphicCommandList->SetPipelineState(pipelineState);
 		commandList->TrackResource(pipelineState);
 
-		commandList->SetRenderTargets(toneMapper->GetRenderTargetAmounts(),toneMapper->GetRenderTargets(),GPU::m_DepthBuffer.get());
+		auto* renderTargets = enviromentLight->GetRenderTargets();
+		commandList->SetDescriptorTable(TargetTexture,renderTargets);
+		commandList->FlushResourceBarriers();
+		commandList->SetRenderTargets(1,GPU::GetCurrentBackBuffer(),nullptr);
+
 
 		graphicCommandList->IASetVertexBuffers(0,1,nullptr);
 		graphicCommandList->IASetIndexBuffer(nullptr);
-		commandList->FlushResourceBarriers();
 		graphicCommandList->DrawInstanced(6,1,0,0);
 	}
 

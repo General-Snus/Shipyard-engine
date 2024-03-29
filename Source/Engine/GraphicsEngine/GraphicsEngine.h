@@ -170,7 +170,7 @@ public:
 
 	void UpdateSettings();
 
-	void SetupBRDF();
+	void SetupSpace3();
 
 	void SetupPostProcessing();
 

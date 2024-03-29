@@ -67,7 +67,7 @@ void GPUCommandQueue::WaitForFenceValue(uint64_t fenceValue)
 	}
 }
 
-std::shared_ptr<CommandList> GPUCommandQueue::GetCommandList()
+std::shared_ptr<CommandList> GPUCommandQueue::GetCommandList(const std::wstring& name)
 {
 	std::shared_ptr<CommandList> commandList;
 
@@ -79,7 +79,7 @@ std::shared_ptr<CommandList> GPUCommandQueue::GetCommandList()
 	else
 	{
 		// Otherwise create a new command list.
-		commandList = std::make_shared<CommandList>(m_CommandListType);
+		commandList = std::make_shared<CommandList>(m_CommandListType,name);
 	}
 #if  (USE_NSIGHT_AFTERMATH)
 	// Create an Nsight Aftermath context handle for setting Aftermath event markers in this command list.

@@ -134,6 +134,9 @@ void GPURootSignature::SetRootSignatureDesc(const D3D12_ROOT_SIGNATURE_DESC1& ro
 	// Create the root signature.
 	Helpers::ThrowIfFailed(device->CreateRootSignature(0,rootSignatureBlob->GetBufferPointer(),
 		rootSignatureBlob->GetBufferSize(),IID_PPV_ARGS(&m_RootSignature)));
+
+	m_RootSignature->SetName(L"Default root signature");
+
 }
 
 uint32_t GPURootSignature::GetDescriptorTableBitMask(D3D12_DESCRIPTOR_HEAP_TYPE descriptorHeapType) const

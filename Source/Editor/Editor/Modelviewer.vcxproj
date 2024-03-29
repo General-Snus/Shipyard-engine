@@ -156,7 +156,8 @@
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);</AdditionalLibraryDirectories>
       <TreatLinkerWarningAsErrors>false</TreatLinkerWarningAsErrors>
-      <ShowProgress>LinkVerboseLib</ShowProgress>
+      <ShowProgress>
+      </ShowProgress>
       <LinkStatus>
       </LinkStatus>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
@@ -208,7 +209,8 @@
       <TreatLinkerWarningAsErrors>false</TreatLinkerWarningAsErrors>
       <LinkStatus>
       </LinkStatus>
-      <ShowProgress>LinkVerboseLib</ShowProgress>
+      <ShowProgress>
+      </ShowProgress>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
       <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
     </Link>

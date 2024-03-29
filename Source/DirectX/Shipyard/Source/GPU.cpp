@@ -136,6 +136,7 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 
 	m_GraphicsMemory = std::make_shared<DirectX::DX12::GraphicsMemory>(m_Device.Get());
 
+
 	m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV] = std::make_unique<DescriptorPile>(
 		m_Device.Get(),
 		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
@@ -179,16 +180,16 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 	m_FrameIndex = m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
 
 	// Create descriptor heaps. 
-	m_RtvHeap = CreateDescriptorHeap(m_Device,D3D12_DESCRIPTOR_HEAP_TYPE_RTV,m_FrameCount);
-	m_RtvDescriptorSize = m_Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	//m_RtvHeap = CreateDescriptorHeap(m_Device,D3D12_DESCRIPTOR_HEAP_TYPE_RTV,m_FrameCount);
+	//m_RtvDescriptorSize = m_Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
-	m_DsvHeap = CreateDescriptorHeap(m_Device,D3D12_DESCRIPTOR_HEAP_TYPE_DSV,1);
-	m_SrvHeap = CreateDescriptorHeap(m_Device,D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,1,D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
+	//m_DsvHeap = CreateDescriptorHeap(m_Device,D3D12_DESCRIPTOR_HEAP_TYPE_DSV,1);
+	//m_SrvHeap = CreateDescriptorHeap(m_Device,D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,1,D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
 
 
 
 	// Create frame resources.
-	UpdateRenderTargetViews(m_Device,m_Swapchain->m_SwapChain,m_RtvHeap);
+	UpdateRenderTargetViews(m_Device,m_Swapchain->m_SwapChain,nullptr);
 
 	m_BackBuffer->AllocateTexture({ width,height },"Backbuffer");
 	ResizeDepthBuffer(width,height);
@@ -320,7 +321,7 @@ void GPU::ConfigureInputAssembler(
 	CommandList& commandList,D3D_PRIMITIVE_TOPOLOGY topology,
 	VertexResource& vertexResource,IndexResource& indexResource)
 {
-	commandList.GetGraphicsCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	commandList.GetGraphicsCommandList()->IASetPrimitiveTopology(topology);
 
 	commandList.TransitionBarrier(vertexResource,D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 	const auto& vertView = vertexResource.GetVertexBufferView();
@@ -340,11 +341,6 @@ bool GPU::CreateIndexBuffer(const std::shared_ptr<CommandList>& commandList,Inde
 	return true;
 }
 
-bool GPU::AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE type,int amount)
-{
-	return false;
-}
-
 bool GPU::CreatePixelShader(ComPtr<ID3DBlob>& outPxShader,const BYTE* someShaderData,size_t aShaderDataSize,UINT CompileFLags)
 {
 	Helpers::ThrowIfFailed(D3DCompile(someShaderData,aShaderDataSize,nullptr,nullptr,D3D_COMPILE_STANDARD_FILE_INCLUDE,nullptr,"ps_5_1",CompileFLags,0,&outPxShader,nullptr));
@@ -362,15 +358,6 @@ bool GPU::CreateVertexShader(ComPtr<ID3DBlob>& outVxShader,const BYTE* someShade
 bool GPU::CreateDepthStencil(const D3D12_DEPTH_STENCIL_DESC& depthStencilDesc)
 {
 	depthStencilDesc;
-	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
-	dsvHeapDesc.NumDescriptors = 1;
-	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	if (FAILED(m_Device->CreateDescriptorHeap(&dsvHeapDesc,IID_PPV_ARGS(&m_RtvHeap))))
-	{
-		Logger::Err("Failed to make descriptor heap");
-		return false;
-	}
 	return true;
 }
 
@@ -422,12 +409,12 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 	outTexture->myName = aFileName.filename().string();
 	ResourceUploadBatch resourceUpload(m_Device.Get());
 	resourceUpload.Begin();
-
+	bool isCubeMap = false;
 	if (aFileName.extension() == ".dds")
 	{
 		Helpers::ThrowIfFailed(
 			CreateDDSTextureFromFile(m_Device.Get(),resourceUpload,aFileName.wstring().c_str(),
-				outTexture->m_Resource.ReleaseAndGetAddressOf(),generateMips)
+				outTexture->m_Resource.ReleaseAndGetAddressOf(),generateMips,0,nullptr,&isCubeMap)
 		);
 	}
 	else if (aFileName.extension() == ".png")
@@ -439,11 +426,11 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 
 	}
 
-
+	outTexture->isCubeMap = isCubeMap;
 	auto uploadResourcesFinished = resourceUpload.End(m_DirectCommandQueue->GetCommandQueue().Get());
 	uploadResourcesFinished.wait();
 
-	outTexture->m_Width = outTexture->m_Resource->GetDesc().Width;
+	outTexture->m_Width = static_cast<uint32_t>(outTexture->m_Resource->GetDesc().Width);
 	outTexture->m_Height = outTexture->m_Resource->GetDesc().Height;
 	outTexture->m_Resource->SetName(aFileName.wstring().c_str());
 
@@ -496,7 +483,7 @@ void GPU::ClearRTV(const CommandList& commandList,Texture* rtv,unsigned textureC
 {
 	for (unsigned i = 0; i < textureCount; ++i)
 	{
-		commandList.GetGraphicsCommandList()->ClearRenderTargetView(rtv[i].GetHandle(ViewType::RTV).first,&rtv->m_ClearColor.x,0,nullptr);
+		commandList.GetGraphicsCommandList()->ClearRenderTargetView(rtv[i].GetHandle(ViewType::RTV).cpuPtr,&rtv->m_ClearColor.x,0,nullptr);
 	}
 }
 
@@ -508,8 +495,7 @@ void GPU::ClearDepth(const CommandList& commandList,D3D12_CPU_DESCRIPTOR_HANDLE 
 
 D3D12_CPU_DESCRIPTOR_HANDLE GPU::GetCurrentRenderTargetView()
 {
-	return  CD3DX12_CPU_DESCRIPTOR_HANDLE(m_RtvHeap->GetCPUDescriptorHandleForHeapStart(),
-		m_FrameIndex,m_RtvDescriptorSize);
+	return m_renderTargets[m_FrameIndex].GetHandle(ViewType::RTV).cpuPtr;
 }
 
 Texture* GPU::GetCurrentBackBuffer()
@@ -574,9 +560,7 @@ HANDLE GPU::CreateEventHandle()
 
 void GPU::UpdateRenderTargetViews(const ComPtr<ID3D12Device>& device,const ComPtr<IDXGISwapChain4>& swapChain,const ComPtr<ID3D12DescriptorHeap>& descriptorHeap)
 {
-	auto rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(descriptorHeap->GetCPUDescriptorHandleForHeapStart());
-
+	descriptorHeap; device;
 	for (int i = 0; i < m_FrameCount; ++i)
 	{
 		ComPtr<ID3D12Resource> backBuffer;
@@ -587,9 +571,6 @@ void GPU::UpdateRenderTargetViews(const ComPtr<ID3D12Device>& device,const ComPt
 		m_renderTargets[i].SetResource(backBuffer);
 		m_renderTargets[i].SetView(ViewType::RTV);
 		m_renderTargets->myName = "backbuffer: " + std::to_string(i);
-
-		device->CreateRenderTargetView(backBuffer.Get(),nullptr,rtvHandle);
-		rtvHandle.Offset(rtvDescriptorSize);
 	}
 }
 

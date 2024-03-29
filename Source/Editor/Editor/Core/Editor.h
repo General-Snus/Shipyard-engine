@@ -46,7 +46,7 @@ public:
 		return myApplicationState;
 	}
 	static RECT GetViewportRECT();
-	static Vector2<int> GetViewportResolution();
+	static Vector2<unsigned int> GetViewportResolution();
 
 	void ExpandWorldBounds(const Sphere<float>& sphere);
 	const Sphere<float>& GetWorldBounds() const;

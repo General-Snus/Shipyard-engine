@@ -216,10 +216,10 @@ RECT Editor::GetViewportRECT()
 	return ViewportRect;
 }
 
-Vector2<int> Editor::GetViewportResolution()
+Vector2<unsigned int> Editor::GetViewportResolution()
 {
 	const RECT rect = GetViewportRECT();
-	return Vector2<int>(
+	return Vector2<unsigned int>(
 		rect.right - rect.left,
 		rect.bottom - rect.top
 	);

@@ -2,5 +2,5 @@
 #define WorkingOnPngLoading true  
 #define WorkingOnMultiThread false  
 #define ActorDecicionTree false  
-#define PHYSX true  
+#define PHYSX false  
 #define UseScriptGraph false  

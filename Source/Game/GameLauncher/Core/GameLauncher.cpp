@@ -131,7 +131,7 @@ void GameLauncher::Start()
 		gom.SetLastGOAsCamera();
 		cameraComponent.SetActive(true);
 		auto& transform = camera.AddComponent<Transform>();
-		transform.SetPosition(0,5,-50);
+		transform.SetPosition(0,27,0);
 		transform.SetRotation(0,0,0);
 	}
 
@@ -178,10 +178,25 @@ void GameLauncher::Start()
 		sponza.AddComponent<cMeshRenderer>("Models/Sponza.fbx");
 		//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
 		auto& transform = sponza.AddComponent<Transform>();
-		transform.SetPosition(50,0,0);
+		transform.SetPosition(0,25,0);
 		transform.SetGizmo(false);
 	}
-#endif 
+#endif
+
+	GameObject buddha = gom.CreateGameObject();
+	buddha.AddComponent<cMeshRenderer>("Models/Buddha.fbx");
+	buddha.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BuddhaMaterial.json");
+	auto& transform = buddha.AddComponent<Transform>();
+	transform.SetPosition(25,25,0);
+	transform.SetGizmo(false);
+
+	//GameObject buddha = gom.CreateGameObject();
+	//buddha.AddComponent<cMeshRenderer>("Models/Sponza.fbx");
+	////test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
+	//auto& transform = buddha.AddComponent<Transform>();
+	//transform.SetPosition(0,25,0);
+	//transform.SetGizmo(false);
+
 #pragma endregion
 
 #if PHYSX 
@@ -234,7 +249,7 @@ void GameLauncher::Update(float delta)
 			}
 			GameObjectManager::Get().CustomOrderUpdate();
 			vectorOfGameObjects = LoadTest("GameObjectSaveFile.SaveFiles");
-		}
+}
 	}
 
 	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::R))

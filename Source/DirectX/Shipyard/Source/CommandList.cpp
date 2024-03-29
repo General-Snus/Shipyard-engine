@@ -6,7 +6,7 @@
 #include "Shipyard/GpuResource.h"
 #include "Shipyard/Texture.h"
 
-CommandList::CommandList(D3D12_COMMAND_LIST_TYPE type) : m_Type(type)
+CommandList::CommandList(D3D12_COMMAND_LIST_TYPE type,const std::wstring& name) : m_Type(type)
 {
 
 	Helpers::ThrowIfFailed(GPU::m_Device->CreateCommandAllocator(type,IID_PPV_ARGS(&m_CommandAllocator)));
@@ -14,19 +14,14 @@ CommandList::CommandList(D3D12_COMMAND_LIST_TYPE type) : m_Type(type)
 	Helpers::ThrowIfFailed(GPU::m_Device->CreateCommandList(0,type,m_CommandAllocator.Get(),
 		nullptr,IID_PPV_ARGS(&m_CommandList)));
 
+	m_CommandAllocator->SetName((name + L"Allocator").c_str());
+	m_CommandList->SetName((name + L"List").c_str());
 	m_ResourceStateTracker = std::make_unique<ResourceStateTracker>();
-
-
-	//m_DescriptorHeap = std::make_unique<DescriptorHeap>(GPU::m_Device,
-	//	D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-	//	D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
-	//	Descriptors::Count);
-
 }
 
 void CommandList::CopyBuffer(GpuResource& buffer,size_t numElements,size_t elementSize,const void* bufferData,D3D12_RESOURCE_FLAGS flags)
 {
-	size_t bufferSize = numElements * elementSize;
+	const size_t bufferSize = numElements * elementSize;
 
 	ComPtr<ID3D12Resource> d3d12Resource;
 	if (bufferSize == 0)
@@ -35,15 +30,17 @@ void CommandList::CopyBuffer(GpuResource& buffer,size_t numElements,size_t eleme
 	}
 	else
 	{
-		auto var1 = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-		auto var2 = CD3DX12_RESOURCE_DESC::Buffer(bufferSize,flags);
-		Helpers::ThrowIfFailed(GPU::m_Device->CreateCommittedResource(
-			&var1,
-			D3D12_HEAP_FLAG_NONE,
-			&var2,
-			D3D12_RESOURCE_STATE_COMMON,
-			nullptr,
-			IID_PPV_ARGS(&d3d12Resource)));
+		{
+			const auto var1 = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+			const auto var2 = CD3DX12_RESOURCE_DESC::Buffer(bufferSize,flags);
+			Helpers::ThrowIfFailed(GPU::m_Device->CreateCommittedResource(
+				&var1,
+				D3D12_HEAP_FLAG_NONE,
+				&var2,
+				D3D12_RESOURCE_STATE_COMMON,
+				nullptr,
+				IID_PPV_ARGS(&d3d12Resource)));
+		}
 
 
 		// Add the resource to the global resource state tracker.
@@ -53,8 +50,8 @@ void CommandList::CopyBuffer(GpuResource& buffer,size_t numElements,size_t eleme
 		{
 			// Create an upload resource to use as an intermediate buffer to copy the buffer resource 
 			ComPtr<ID3D12Resource> uploadResource;
-			auto var1 = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-			auto var2 = CD3DX12_RESOURCE_DESC::Buffer(bufferSize);
+			const auto var1 = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+			const auto var2 = CD3DX12_RESOURCE_DESC::Buffer(bufferSize);
 			Helpers::ThrowIfFailed(GPU::m_Device->CreateCommittedResource(
 				&var1,
 				D3D12_HEAP_FLAG_NONE,
@@ -91,7 +88,7 @@ void CommandList::TransitionBarrier(const ComPtr<ID3D12Resource>& resource,D3D12
 {
 	if (resource)
 	{
-		auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(resource.Get(),D3D12_RESOURCE_STATE_COMMON,stateAfter,subresource);
+		const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(resource.Get(),D3D12_RESOURCE_STATE_COMMON,stateAfter,subresource);
 		m_ResourceStateTracker->ResourceBarrier(barrier);
 	}
 	else
@@ -109,31 +106,12 @@ void CommandList::TransitionBarrier(GpuResource& resource,D3D12_RESOURCE_STATES 
 {
 	resource.m_TransitioningState = stateAfter;
 	TransitionBarrier(resource.GetResource(),stateAfter,subresource,flushBarriers);
-}
-
-void CommandList::SetView(eRootBindings rootParameterIndex,uint32_t descriptorOffset,GpuResource& resource,D3D12_RESOURCE_STATES stateAfter,UINT firstSubresource,UINT numSubresources,const D3D12_SHADER_RESOURCE_VIEW_DESC* srv)
-{
-	if (numSubresources < D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES)
-	{
-		for (uint32_t i = 0; i < numSubresources; ++i)
-		{
-			TransitionBarrier(resource,stateAfter,firstSubresource + i);
-		}
-	}
-	else
-	{
-		TransitionBarrier(resource,stateAfter);
-	}
-
-	//CreateBufferShaderResourceView(GPU::m_Device.Get(),resource.GetResource().Get(),resource->GetCpuHandle(Descriptors::WindowsLogo));
-
-
-	TrackResource(resource);
+	resource.m_TransitioningState = stateAfter;
 }
 
 void CommandList::SetDescriptorTable(unsigned slot,Texture* texture)
 {
-	const size_t offset = texture->GetHandle(ViewType::SRV).second;
+	const size_t offset = texture->GetHandle(ViewType::SRV).heapOffset;
 
 	if (offset == -1)
 	{
@@ -155,13 +133,23 @@ void CommandList::SetRenderTargets(unsigned numberOfTargets,Texture* renderTarge
 {
 	assert(numberOfTargets <= D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
 	D3D12_CPU_DESCRIPTOR_HANDLE RTVs[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT] = {};
-	for (size_t i = 0; i < numberOfTargets; i++)
+	if (renderTargets)
 	{
-		TransitionBarrier(renderTargets[i].GetResource(),D3D12_RESOURCE_STATE_RENDER_TARGET);
-		RTVs[i] = renderTargets[i].GetHandle(ViewType::RTV).first;
+		for (size_t i = 0; i < numberOfTargets; i++)
+		{
+			TransitionBarrier(renderTargets[i],D3D12_RESOURCE_STATE_RENDER_TARGET);
+			RTVs[i] = renderTargets[i].GetHandle(ViewType::RTV).cpuPtr;
+		}
 	}
-	auto copy = depthBuffer->GetHandle(ViewType::DSV).first;
-	m_CommandList->OMSetRenderTargets(numberOfTargets,RTVs,FALSE,&copy);
+	if (depthBuffer)
+	{
+		const auto dsv = depthBuffer->GetHandle(ViewType::DSV).cpuPtr;
+		m_CommandList->OMSetRenderTargets(numberOfTargets,RTVs,FALSE,&dsv);
+	}
+	else
+	{
+		m_CommandList->OMSetRenderTargets(numberOfTargets,RTVs,FALSE,nullptr);
+	}
 }
 
 void CommandList::TrackResource(Microsoft::WRL::ComPtr<ID3D12Object> object)
@@ -190,7 +178,7 @@ bool CommandList::Close(CommandList& pendingCommandList)
 
 	m_CommandList->Close();
 
-	uint32_t numPendingBarriers = m_ResourceStateTracker->FlushPendingResourceBarriers(pendingCommandList);
+	const uint32_t numPendingBarriers = m_ResourceStateTracker->FlushPendingResourceBarriers(pendingCommandList);
 	m_ResourceStateTracker->CommitFinalResourceStates();
 
 	return numPendingBarriers > 0;

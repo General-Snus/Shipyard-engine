@@ -76,7 +76,7 @@ struct FrameBuffer
     float FB_Time;
     float3 FB_CameraPosition;
     int FB_RenderMode;
-    int2 FB_ScreenResolution;
+    uint2 FB_ScreenResolution;
     float1 padding;
     //float4 FB_FrustrumCorners[4];
 };
@@ -127,6 +127,6 @@ Texture2D<float4> Target04_Texture : register(HLSL_REG_Target04, space2);
 Texture2D<float4> shadowMap : register(HLSL_REG_dirLightShadowMap, space2);
 
 TextureCube enviromentCube : register(HLSL_REG_enviromentCube,space3);
-Texture2D<float4> Noise_Texture : register(HLSL_REG_Noise_Texture, space3);
 Texture2D<float4> BRDF_LUT_Texture : register(HLSL_REG_BRDF_LUT_Texture, space3);
+Texture2D<float4> Noise_Texture : register(HLSL_REG_Noise_Texture, space3);
 #endif

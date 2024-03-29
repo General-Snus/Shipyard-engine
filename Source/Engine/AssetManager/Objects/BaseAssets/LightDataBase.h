@@ -13,7 +13,8 @@ struct SpotLight
 	float InnerConeAngle = 0; // 4
 
 	float OuterConeAngle = 0; //4  
-	Vector3f padding = { 0,0,0 };	//12
+	int shadowMapIndex;
+	Vector2f padding = { 0,0 };	//12
 
 	Matrix lightView;
 	Matrix projection;
@@ -29,6 +30,10 @@ struct PointLight
 
 	Matrix lightView;
 	Matrix projection;
+
+
+	int shadowMapIndex[6] = { -1 };
+	float padding[2]{};
 };
 
 struct DirectionalLight
@@ -40,4 +45,7 @@ struct DirectionalLight
 
 	Matrix lightView;
 	Matrix projection;
+
+	int shadowMapIndex;
+	float padding[3];
 };

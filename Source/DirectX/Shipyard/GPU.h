@@ -58,7 +58,14 @@ enum class eHeapTypes : int
 	HEAP_COUNT
 };
 
-
+enum class eSRVSpace : int
+{
+	Space0 = 0,
+	Space1,
+	Space2,
+	Space3,
+	SPACE_COUNT
+};
 
 enum class ePIPELINE_STAGE
 {
@@ -103,9 +110,6 @@ public:
 		IndexResource& outIndexResource,
 		const std::vector<uint16_t>& aIndexList
 	);
-
-	static bool AllocateDescriptor(D3D12_DESCRIPTOR_HEAP_TYPE type,int amount = 1);
-
 
 	static bool CreatePixelShader(ComPtr<ID3DBlob>& outPxShader,const BYTE* someShaderData,size_t aShaderDataSize,UINT CompileFLags = 0);
 
@@ -177,9 +181,9 @@ public:
 	static inline Texture m_renderTargets[m_FrameCount];
 
 
-	static inline ComPtr<ID3D12DescriptorHeap> m_RtvHeap;
-	static inline ComPtr<ID3D12DescriptorHeap> m_DsvHeap;
-	static inline ComPtr<ID3D12DescriptorHeap> m_SrvHeap;
+	//static inline ComPtr<ID3D12DescriptorHeap> m_RtvHeap;
+	//static inline ComPtr<ID3D12DescriptorHeap> m_DsvHeap;
+	//static inline ComPtr<ID3D12DescriptorHeap> m_SrvHeap;
 	static inline UINT m_RtvDescriptorSize;
 
 	static inline uint64_t m_FenceValues[m_FrameCount] = {};
