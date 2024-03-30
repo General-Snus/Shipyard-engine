@@ -1,0 +1,38 @@
+{
+    "MaterialBuffer": {
+        "NormalStrength": 1.0,
+        "Shine": 100.0,
+        "UVTiling": [
+            1.0,
+            1.0
+        ],
+        "albedoColor": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+        ]
+    },
+    "Textures": [
+        {
+            "TextureName": "M_Toyblocks_01_c.png",
+            "TexturePath": "D:\\Users\\thea.holmdahlarnman\\Perforce\\thea.holmdahlarnman_TGASG50_1615\\Ghastlight\\Asset_Folder\\Models\\Environment\\ToyBlocks\\M_Toyblocks_01_c.png",
+            "TextureType": 0
+        },
+        {
+            "TextureName": "M_Toyblocks_01_n.png",
+            "TexturePath": "D:\\Users\\thea.holmdahlarnman\\Perforce\\thea.holmdahlarnman_TGASG50_1615\\Ghastlight\\Asset_Folder\\Models\\Environment\\ToyBlocks\\M_Toyblocks_01_n.png",
+            "TextureType": 1
+        },
+        {
+            "TextureName": "",
+            "TexturePath": "",
+            "TextureType": 2
+        },
+        {
+            "TextureName": "M_DefaultMaterial_fx.png",
+            "TexturePath": "D:\\DumpFolder\\M_DefaultMaterial_fx.png",
+            "TextureType": 3
+        }
+    ]
+}

@@ -40,7 +40,7 @@ struct Element
 	VertexResource VertexBuffer;
 	IndexResource IndexResource;
 	std::vector<Vertex> Vertices;
-	std::vector<uint16_t> Indicies;
+	std::vector<uint32_t> Indicies;
 	D3D_PRIMITIVE_TOPOLOGY PrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	UINT Stride = 0;
 	unsigned int MaterialIndex = 0;

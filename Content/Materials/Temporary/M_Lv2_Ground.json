@@ -1,0 +1,38 @@
+{
+    "MaterialBuffer": {
+        "NormalStrength": 1.0,
+        "Shine": 100.0,
+        "UVTiling": [
+            1.0,
+            1.0
+        ],
+        "albedoColor": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+        ]
+    },
+    "Textures": [
+        {
+            "TextureName": "M_Lv2_Ground_c.png",
+            "TexturePath": "E:\\TGA 2022\\Perforce\\TGA_G1_P7_FridaBackman_Development_Home\\Ghastlight\\Asset_Folder\\Models\\Base\\Textures\\M_Lv2_Ground_c.png",
+            "TextureType": 0
+        },
+        {
+            "TextureName": "M_Ground_n.png",
+            "TexturePath": "D:\\Users\\alexander.ekengren\\Perforce\\alexander.ekengren_P7_TGA\\Ghastlight\\Asset_Folder\\Models\\Base\\Textures\\M_Ground_n.png",
+            "TextureType": 1
+        },
+        {
+            "TextureName": "",
+            "TexturePath": "",
+            "TextureType": 2
+        },
+        {
+            "TextureName": "",
+            "TexturePath": "",
+            "TextureType": 3
+        }
+    ]
+}

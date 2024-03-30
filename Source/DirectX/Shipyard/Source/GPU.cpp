@@ -32,7 +32,7 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 	{
 #if !USE_NSIGHT_AFTERMATH
 		ComPtr<ID3D12Debug3> debugController;
-		auto result = D3D12GetDebugInterface(IID_PPV_ARGS(&debugController));
+		const auto result = D3D12GetDebugInterface(IID_PPV_ARGS(&debugController));
 		if (SUCCEEDED(result))
 		{
 			debugController->EnableDebugLayer();
@@ -218,8 +218,8 @@ bool GPU::UnInitialize()
 
 void GPU::Present(unsigned aSyncInterval)
 {
-	auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
-	auto commandList = commandQueue->GetCommandList();
+	const auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+	const auto commandList = commandQueue->GetCommandList();
 
 	commandList->TransitionBarrier(m_renderTargets[m_FrameIndex].GetResource(),D3D12_RESOURCE_STATE_PRESENT);
 	commandQueue->ExecuteCommandList(commandList);
@@ -333,27 +333,14 @@ void GPU::ConfigureInputAssembler(
 	commandList.GetGraphicsCommandList()->IASetIndexBuffer(&indexView);
 	commandList.TrackResource(indexResource);
 }
-bool GPU::CreateIndexBuffer(const std::shared_ptr<CommandList>& commandList,IndexResource& outIndexResource,const std::vector<uint16_t>& aIndexList)
+bool GPU::CreateIndexBuffer(const std::shared_ptr<CommandList>& commandList,IndexResource& outIndexResource,const std::vector<uint32_t>& aIndexList)
 {
-	DXGI_FORMAT indexFormat = (sizeof(uint16_t) == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
-	size_t indexSizeInBytes = indexFormat == DXGI_FORMAT_R16_UINT ? 2 : 4;
+	const DXGI_FORMAT indexFormat = (sizeof(uint32_t) == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
+	const size_t indexSizeInBytes = indexFormat == DXGI_FORMAT_R16_UINT ? 2 : 4;
 	commandList->CopyBuffer(outIndexResource,aIndexList.size(),indexSizeInBytes,aIndexList.data());
 	return true;
 }
 
-bool GPU::CreatePixelShader(ComPtr<ID3DBlob>& outPxShader,const BYTE* someShaderData,size_t aShaderDataSize,UINT CompileFLags)
-{
-	Helpers::ThrowIfFailed(D3DCompile(someShaderData,aShaderDataSize,nullptr,nullptr,D3D_COMPILE_STANDARD_FILE_INCLUDE,nullptr,"ps_5_1",CompileFLags,0,&outPxShader,nullptr));
-	return true;
-
-}
-
-bool GPU::CreateVertexShader(ComPtr<ID3DBlob>& outVxShader,const BYTE* someShaderData,size_t aShaderDataSize,UINT CompileFLags)
-{
-	Helpers::ThrowIfFailed(D3DCompile(someShaderData,aShaderDataSize,nullptr,nullptr,D3D_COMPILE_STANDARD_FILE_INCLUDE,nullptr,"vs_5_1",CompileFLags,0,&outVxShader,nullptr));
-
-	return true;
-}
 
 bool GPU::CreateDepthStencil(const D3D12_DEPTH_STENCIL_DESC& depthStencilDesc)
 {
@@ -368,8 +355,8 @@ void GPU::ResizeDepthBuffer(unsigned width,unsigned height)
 	width = std::max(1u,width);
 	height = std::max(1u,height);
 
-	auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-	D3D12_RESOURCE_DESC depthStencilDesc = CD3DX12_RESOURCE_DESC::Tex2D(
+	const auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+	const D3D12_RESOURCE_DESC depthStencilDesc = CD3DX12_RESOURCE_DESC::Tex2D(
 		DXGI_FORMAT_D32_FLOAT,
 		width,
 		height,
@@ -402,7 +389,7 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 
 	if (!std::filesystem::exists(aFileName) || aFileName.extension() != ".dds" && aFileName.extension() != ".png")
 	{
-		std::string error = "Failed to load texture: " + aFileName.string() + " does not exist!";
+		const std::string error = "Failed to load texture: " + aFileName.string() + " does not exist!";
 		std::cout << error << std::endl;
 		return false;
 	}
@@ -427,7 +414,7 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 	}
 
 	outTexture->isCubeMap = isCubeMap;
-	auto uploadResourcesFinished = resourceUpload.End(m_DirectCommandQueue->GetCommandQueue().Get());
+	const auto uploadResourcesFinished = resourceUpload.End(m_DirectCommandQueue->GetCommandQueue().Get());
 	uploadResourcesFinished.wait();
 
 	outTexture->m_Width = static_cast<uint32_t>(outTexture->m_Resource->GetDesc().Width);
@@ -455,7 +442,7 @@ bool GPU::LoadTextureFromMemory(Texture* outTexture,const std::filesystem::path&
 			outTexture->m_Resource.ReleaseAndGetAddressOf(),generateMips)
 	);
 
-	auto uploadResourcesFinished = resourceUpload.End(m_DirectCommandQueue->GetCommandQueue().Get());
+	const auto uploadResourcesFinished = resourceUpload.End(m_DirectCommandQueue->GetCommandQueue().Get());
 	uploadResourcesFinished.wait();
 
 	outTexture->SetView(ViewType::SRV);
@@ -467,7 +454,7 @@ void GPU::TransitionResource(
 	const ComPtr<ID3D12Resource>& resource,D3D12_RESOURCE_STATES beforeState,
 	D3D12_RESOURCE_STATES afterState)
 {
-	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+	const CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
 		resource.Get(),
 		beforeState,afterState);
 

@@ -272,12 +272,18 @@ void Mesh::Init()
 	const aiScene* scene = importer.ReadFile(AssetPath.string(),(unsigned int)
 		aiProcess_CalcTangentSpace |
 		aiProcess_Triangulate |
-		aiProcess_JoinIdenticalVertices |
+		aiProcess_ValidateDataStructure |
 		aiProcess_SortByPType |
 		aiProcess_GenBoundingBoxes |
-		aiProcess_GlobalScale |
+		aiProcess_GlobalScale | aiProcessPreset_TargetRealtime_MaxQuality |
 		aiProcess_ConvertToLeftHanded);
 
+	auto  exception = importer.GetErrorString();
+	if (importer.GetException())
+	{
+		Logger::Err(exception);
+		return;
+	}
 	// If the import failed, report it
 	if (nullptr == scene)
 	{
@@ -337,7 +343,8 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 	scene;
 	std::vector<Vertex> mdlVertices;
 	mdlVertices.reserve(mesh->mNumVertices);
-	std::vector<uint16_t> mdlIndicies;
+	std::vector<uint32_t> mdlIndicies;
+	mdlIndicies.reserve(mesh->mNumFaces * 3);
 
 	std::string name = mesh->mName.C_Str();
 	std::wstring wname = Helpers::string_cast<std::wstring>(name).c_str();
@@ -384,10 +391,14 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 			0
 		);
 
-		auto UVCoord = Vector2f(
-			mesh->mTextureCoords[0][i].x,
-			mesh->mTextureCoords[0][i].y
-		);
+		auto UVCoord = Vector2f();
+		if (mesh->HasTextureCoords(0))
+		{
+			UVCoord = Vector2f(
+				mesh->mTextureCoords[0][i].x,
+				mesh->mTextureCoords[0][i].y
+			);
+		}
 
 		auto normal = Vector3f();
 		if (mesh->HasNormals())
@@ -399,12 +410,15 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 			);
 		}
 
-		auto tangent = Vector3f(
-			mesh->mTangents[i].x,
-			mesh->mTangents[i].y,
-			mesh->mTangents[i].z
-		);
-
+		auto tangent = Vector3f();
+		if (mesh->HasTangentsAndBitangents())
+		{
+			tangent = Vector3f(
+				mesh->mTangents[i].x,
+				mesh->mTangents[i].y,
+				mesh->mTangents[i].z
+			);
+		}
 		mdlVertices.emplace_back(
 			position,
 			color,
@@ -421,7 +435,7 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 		aiFace face = mesh->mFaces[i];
 		for (unsigned int j = 0; j < face.mNumIndices; j++)
 		{
-			mdlIndicies.push_back(static_cast<uint16_t>(face.mIndices[j]));
+			mdlIndicies.push_back(face.mIndices[j]);
 		}
 	}
 
@@ -462,7 +476,7 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 	toAdd.IndexResource = indexRes;
 	toAdd.Vertices = mdlVertices;
 	toAdd.Indicies = mdlIndicies;
-	toAdd.PrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	toAdd.PrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	toAdd.Stride = sizeof(Vertex);
 	toAdd.MaterialIndex = mesh->mMaterialIndex;
 	idToMaterial.try_emplace(mesh->mMaterialIndex,"");

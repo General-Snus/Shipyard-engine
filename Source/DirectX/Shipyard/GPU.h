@@ -108,13 +108,8 @@ public:
 	static bool CreateIndexBuffer(
 		const std::shared_ptr<CommandList>& commandList,
 		IndexResource& outIndexResource,
-		const std::vector<uint16_t>& aIndexList
+		const std::vector<uint32_t>& aIndexList
 	);
-
-	static bool CreatePixelShader(ComPtr<ID3DBlob>& outPxShader,const BYTE* someShaderData,size_t aShaderDataSize,UINT CompileFLags = 0);
-
-	static bool CreateVertexShader(ComPtr<ID3DBlob>& outVxShader,const BYTE* someShaderData,size_t aShaderDataSize,UINT CompileFLags = 0);
-
 	static bool CreateDepthStencil(const D3D12_DEPTH_STENCIL_DESC& depthStencilDesc);
 
 	static void ResizeDepthBuffer(unsigned width,unsigned height);

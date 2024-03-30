@@ -183,19 +183,32 @@ void GameLauncher::Start()
 	}
 #endif
 
-	GameObject buddha = gom.CreateGameObject();
-	buddha.AddComponent<cMeshRenderer>("Models/Buddha.fbx");
-	buddha.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BuddhaMaterial.json");
-	auto& transform = buddha.AddComponent<Transform>();
-	transform.SetPosition(25,25,0);
-	transform.SetGizmo(false);
-
-	//GameObject buddha = gom.CreateGameObject();
-	//buddha.AddComponent<cMeshRenderer>("Models/Sponza.fbx");
-	////test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
-	//auto& transform = buddha.AddComponent<Transform>();
-	//transform.SetPosition(0,25,0);
-	//transform.SetGizmo(false);
+	{
+		GameObject buddha = gom.CreateGameObject();
+		buddha.AddComponent<cMeshRenderer>("Models/Buddha.fbx");
+		buddha.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BuddhaMaterial.json");
+		auto& transform = buddha.AddComponent<Transform>();
+		transform.SetPosition(25,25,0);
+		transform.SetGizmo(false);
+	}
+	{
+		//for (int x = 0; x < 2; x++)
+		//{
+		//	for (int y = 0; y < 2; y++)
+		//	{
+		//		for (int z = 0; z < 2; z++)
+		//		{
+		//			GameObject p7 = gom.CreateGameObject();
+		//			p7.AddComponent<cMeshRenderer>("Models/L_Main.FBX");
+		//			//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
+		//			auto& transform = p7.AddComponent<Transform>();
+		//			transform.SetPosition(500.f * x,500.f * y,500.f * z);
+		//			transform.SetRotation(90,0,0);
+		//			transform.SetGizmo(false);
+		//		}
+		//	}
+		//}
+	}
 
 #pragma endregion
 
@@ -249,7 +262,7 @@ void GameLauncher::Update(float delta)
 			}
 			GameObjectManager::Get().CustomOrderUpdate();
 			vectorOfGameObjects = LoadTest("GameObjectSaveFile.SaveFiles");
-}
+		}
 	}
 
 	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::R))

@@ -1,4 +1,5 @@
 #pragma once 
+#include <Engine/GraphicsEngine/Rendering/Buffers/FrameBuffer.h>
 #include "Engine/AssetManager/ComponentSystem/Component.h"
 
 enum class eLightType
@@ -27,8 +28,8 @@ public:
 	eLightType GetType() const;
 	void SetType(const eLightType aType);
 
+	bool GetIsShadowCaster() const;
 	void SetIsShadowCaster(bool active);
-	bool GetIsShadowCaster();
 
 	bool GetIsRendered() const;
 	void SetIsRendered(bool isRendered);
@@ -36,30 +37,32 @@ public:
 	bool GetIsDirty() const;
 	void SetIsDirty(bool dirty);
 
+	float GetPower() const;
 	void SetPower(float power);
-	float GetPower();
 
+	Vector3f GetColor() const;
 	void SetColor(Vector3f color);
-	Vector3f GetColor();
 
 	void SetPosition(Vector3f position);
-	Vector3f GetPosition();
+	Vector3f GetPosition() const;
 
 	void SetDirection(Vector3f direction);
-	Vector3f GetDirection();
+	Vector3f GetDirection() const;
 
 	void SetRange(float range);
-	float GetRange();
+	float GetRange() const;
 
 	void SetInnerAngle(float angle);
-	float GetInnerAngle();
+	float GetInnerAngle() const;
 
 	void SetOuterAngle(float angle);
-	float GetOuterAngle();
+	float GetOuterAngle() const;
 
 	std::shared_ptr<Texture> GetShadowMap(int number) const;
 	void BindDirectionToTransform(bool active);
-	bool GetIsBound();
+	bool GetIsBound() const;
+
+	FrameBuffer GetShadowMapFrameBuffer(const int number = 0) const;
 
 	template<class T>
 	std::shared_ptr<T> GetData();
@@ -72,7 +75,7 @@ private:
 	void RedrawDirectionMap();
 	void RedrawPointMap();
 	void RedrawSpotMap();
-	Matrix GetLightViewMatrix(int number);
+	Matrix GetLightViewMatrix(int number) const;
 
 	std::shared_ptr<DirectionalLight> myDirectionLightData;
 	std::shared_ptr<SpotLight> mySpotLightData;

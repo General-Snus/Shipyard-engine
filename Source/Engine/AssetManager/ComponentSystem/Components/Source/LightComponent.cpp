@@ -52,11 +52,11 @@ void cLight::SetType(const eLightType aType)
 	myLightType = aType;
 }
 
-bool cLight::GetIsShadowCaster()
+bool cLight::GetIsShadowCaster() const
 {
 	return isShadowCaster;
 }
-void cLight::SetIsShadowCaster(bool active)
+void cLight::SetIsShadowCaster(const bool active)
 {
 	isShadowCaster = active;
 
@@ -106,24 +106,23 @@ void cLight::SetIsShadowCaster(bool active)
 			shadowMap[i]->SetView(ViewType::DSV);
 			shadowMap[i]->SetView(ViewType::SRV);
 
-
-			/*if (!RHI::CreateTexture(
-				shadowMap[i].get(),
-				name
-				+ std::to_wstring(i) + L"_"
-				+ std::to_wstring(resolution.x) + L"|"
-				+ std::to_wstring(resolution.y),
-				resolution.x,
-				resolution.y,
-				DXGI_FORMAT_R32_TYPELESS,
-				D3D11_USAGE_DEFAULT,
-				D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE
-			))
+			switch (myLightType)
 			{
-				std::cout << "Error in texture creation shadowmap" << std::endl;
+				using enum eLightType;
+			case Directional:
+				myDirectionLightData->shadowMapIndex = shadowMap[i]->GetHandle(ViewType::SRV).heapOffset;
+				break;
+			case Point:
+				myPointLightData->shadowMapIndex[i] = shadowMap[i]->GetHandle(ViewType::SRV).heapOffset;
+				break;
+			case Spot:
+				mySpotLightData->shadowMapIndex = shadowMap[i]->GetHandle(ViewType::SRV).heapOffset;
+				break;
+			case uninitialized:
+				break;
+			default:
+				break;
 			}
-
-			RHI::ClearDepthStencil(shadowMap[i].get());*/
 		}
 	}
 }
@@ -132,7 +131,7 @@ bool cLight::GetIsRendered() const
 {
 	return isRendered;
 }
-void cLight::SetIsRendered(bool aRendered)
+void cLight::SetIsRendered(const bool aRendered)
 {
 	isRendered = aRendered;
 }
@@ -141,7 +140,7 @@ bool cLight::GetIsDirty() const
 {
 	return isDirty;
 }
-void cLight::SetIsDirty(bool dirty)
+void cLight::SetIsDirty(const bool dirty)
 {
 	isDirty = dirty;
 	if (isShadowCaster)
@@ -150,7 +149,7 @@ void cLight::SetIsDirty(bool dirty)
 	}
 }
 
-void cLight::SetPower(float power)
+void cLight::SetPower(const float power)
 {
 	SetIsDirty(true);
 	switch (myLightType)
@@ -171,7 +170,7 @@ void cLight::SetPower(float power)
 		break;
 	}
 }
-float cLight::GetPower()
+float cLight::GetPower()const
 {
 	switch (myLightType)
 	{
@@ -193,7 +192,7 @@ float cLight::GetPower()
 	return 0;
 }
 
-void cLight::SetColor(Vector3f color)
+void cLight::SetColor(const Vector3f color)
 {
 	SetIsDirty(true);
 	switch (myLightType)
@@ -214,7 +213,7 @@ void cLight::SetColor(Vector3f color)
 		break;
 	}
 }
-Vector3f cLight::GetColor()
+Vector3f cLight::GetColor()const
 {
 	switch (myLightType)
 	{
@@ -236,7 +235,7 @@ Vector3f cLight::GetColor()
 	return Vector3f();
 }
 
-void cLight::SetPosition(Vector3f position)
+void cLight::SetPosition(const Vector3f position)
 {
 	SetIsDirty(true);
 	switch (myLightType)
@@ -256,7 +255,7 @@ void cLight::SetPosition(Vector3f position)
 		break;
 	}
 }
-Vector3f cLight::GetPosition()
+Vector3f cLight::GetPosition()const
 {
 	switch (myLightType)
 	{
@@ -278,7 +277,7 @@ Vector3f cLight::GetPosition()
 	return Vector3f();
 }
 
-void cLight::SetDirection(Vector3f direction)
+void cLight::SetDirection(const Vector3f direction)
 {
 	SetIsDirty(true);
 	switch (myLightType)
@@ -298,7 +297,7 @@ void cLight::SetDirection(Vector3f direction)
 		break;
 	}
 }
-Vector3f cLight::GetDirection()
+Vector3f cLight::GetDirection() const
 {
 	switch (myLightType)
 	{
@@ -324,7 +323,7 @@ Vector3f cLight::GetDirection()
 	return Vector3f();
 }
 
-void cLight::SetRange(float range)
+void cLight::SetRange(const float range)
 {
 	SetIsDirty(true);
 	switch (myLightType)
@@ -344,7 +343,7 @@ void cLight::SetRange(float range)
 		break;
 	}
 }
-float cLight::GetRange()
+float cLight::GetRange() const
 {
 	switch (myLightType)
 	{
@@ -366,7 +365,7 @@ float cLight::GetRange()
 	return 0;
 }
 
-void cLight::SetInnerAngle(float angle)
+void cLight::SetInnerAngle(const float angle)
 {
 
 	SetIsDirty(true);
@@ -386,14 +385,13 @@ void cLight::SetInnerAngle(float angle)
 		break;
 	}
 }
-float cLight::GetInnerAngle()
+float cLight::GetInnerAngle()const
 {
 	return 0.0f;
 }
 
-void cLight::SetOuterAngle(float angle)
+void cLight::SetOuterAngle(const float angle)
 {
-
 	SetIsDirty(true);
 	switch (myLightType)
 	{
@@ -411,7 +409,7 @@ void cLight::SetOuterAngle(float angle)
 		break;
 	}
 }
-float cLight::GetOuterAngle()
+float cLight::GetOuterAngle()const
 {
 	switch (myLightType)
 	{
@@ -433,7 +431,7 @@ float cLight::GetOuterAngle()
 	return 0.0f;
 }
 
-std::shared_ptr<Texture> cLight::GetShadowMap(int number) const
+std::shared_ptr<Texture> cLight::GetShadowMap(const int number) const
 {
 	return shadowMap[number];
 }
@@ -583,13 +581,13 @@ void cLight::RedrawSpotMap()
 	mySpotLightData->lightView = Matrix::GetFastInverse(mySpotLightData->lightView);
 }
 
-void cLight::BindDirectionToTransform(bool active)
+void cLight::BindDirectionToTransform(const bool active)
 {
 	SetIsDirty(true);
 	boundToTransform = active;
 }
 
-Matrix cLight::GetLightViewMatrix(int number)
+Matrix cLight::GetLightViewMatrix(const int number) const
 {
 	Vector3f lightPos = myPointLightData->Position;
 	assert(number < 6 && "There are only 6 faces to a cubemap");
@@ -620,7 +618,41 @@ Matrix cLight::GetLightViewMatrix(int number)
 	}
 }
 
-bool cLight::GetIsBound()
+bool cLight::GetIsBound()const
 {
 	return boundToTransform;
+}
+
+FrameBuffer cLight::GetShadowMapFrameBuffer(const int number) const
+{
+	FrameBuffer fb;
+
+	switch (myLightType)
+	{
+		using enum eLightType;
+	case Directional:
+		fb.ProjectionMatrix = myDirectionLightData->projection;
+		fb.ViewMatrix = myDirectionLightData->lightView;
+		fb.FB_ScreenResolution = { shadowMap[0]->GetWidth(),shadowMap[0]->GetHeight() };
+		fb.FB_CameraPosition = GetPosition();
+		break;
+	case Point:
+		fb.ProjectionMatrix = myPointLightData->projection;
+		fb.ViewMatrix = GetLightViewMatrix(number);
+		fb.FB_ScreenResolution = { shadowMap[number]->GetWidth(),shadowMap[number]->GetHeight() };
+		fb.FB_CameraPosition = GetPosition();
+		break;
+	case Spot:
+		fb.ProjectionMatrix = mySpotLightData->projection;
+		fb.ViewMatrix = mySpotLightData->lightView;
+		fb.FB_ScreenResolution = { shadowMap[0]->GetWidth(),shadowMap[0]->GetHeight() };
+		fb.FB_CameraPosition = GetPosition();
+		break;
+	case uninitialized:
+		break;
+	default:
+		break;
+	}
+
+	return fb;
 }

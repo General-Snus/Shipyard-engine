@@ -543,6 +543,14 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	};
 	graphicCommandList->SetDescriptorHeaps(static_cast<UINT>(std::size(heaps)),heaps);
 
+
+
+
+
+	static auto& list = GameObjectManager::Get().GetAllComponents<cMeshRenderer>();
+	ShadowMapperPSO::WriteShadows(commandList,list);
+	commandList->FlushResourceBarriers();
+
 	Texture* gBufferTextures;
 	unsigned bufferCount = 0;
 	{
@@ -557,8 +565,6 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 		commandList->TrackResource(pipelineState);
 	}
 
-
-
 	auto frameBuffer = myCamera->GetFrameBuffer();
 	const auto& alloc0 = GPU::m_GraphicsMemory->AllocateConstant<FrameBuffer>(frameBuffer);
 	graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::frameBuffer,alloc0.GpuAddress());
@@ -568,9 +574,8 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	commandList->TrackResource(cubeMap->GetResource());
 
 	graphicCommandList->SetGraphicsRootDescriptorTable(eRootBindings::Textures,GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->GetFirstGpuHandle());
-	static auto& list = GameObjectManager::Get().GetAllComponents<cMeshRenderer>();
 	Logger::Log(std::to_string(list.size()));
-
+	int vertCount = 0;
 	for (auto& meshRenderer : list)
 	{
 		const auto& transform = meshRenderer.GetComponent<Transform>();
@@ -585,7 +590,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 
 			const auto& alloc1 = GPU::m_GraphicsMemory->AllocateConstant<ObjectBuffer>(objectBuffer);
 			graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::objectBuffer,alloc1.GpuAddress());
-
+			vertCount += element.VertexBuffer.GetVertexCount();
 			GPU::ConfigureInputAssembler(*commandList,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.VertexBuffer,element.IndexResource);
 
 			const unsigned materialIndex = element.MaterialIndex;
@@ -645,7 +650,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 			graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
 		}
 	}
-
+	Logger::Log(std::to_string(vertCount));
 	const auto& enviromentLight = PSOCache::GetState(PSOCache::ePipelineStateID::DeferredLighting);
 	{
 		LightBuffer lightbuffer = EnvironmentLightPSO::CreateLightBuffer();

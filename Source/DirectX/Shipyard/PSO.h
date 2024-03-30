@@ -3,6 +3,7 @@
 
 #include "Engine/GraphicsEngine/Rendering/Buffers/LightBuffer.h"
 
+class cMeshRenderer;
 class ShipyardShader;
 class PSO;
 using namespace Microsoft::WRL;
@@ -13,6 +14,7 @@ public:
 	enum class ePipelineStateID : short
 	{
 		Default,
+		ShadowMapper,
 		GBuffer,
 		Ambient,
 		DeferredLighting,
@@ -65,6 +67,14 @@ private:
 
 	static inline constexpr uint16_t numRenderTargets = 7;
 	Texture renderTargets[numRenderTargets];
+};
+
+class ShadowMapperPSO : public PSO
+{
+public:
+	ShadowMapperPSO() = default;
+	void Init(const ComPtr<ID3D12Device2>& dev) override;
+	static void WriteShadows(std::shared_ptr<CommandList>& commandList,const std::vector<cMeshRenderer>& objectsToRender);
 };
 
 class EnvironmentLightPSO : public PSO

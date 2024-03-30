@@ -42,13 +42,10 @@ void CommandList::CopyBuffer(GpuResource& buffer,size_t numElements,size_t eleme
 				IID_PPV_ARGS(&d3d12Resource)));
 		}
 
-
-		// Add the resource to the global resource state tracker.
 		ResourceStateTracker::AddGlobalResourceState(d3d12Resource.Get(),D3D12_RESOURCE_STATE_COMMON);
 
 		if (bufferData != nullptr)
 		{
-			// Create an upload resource to use as an intermediate buffer to copy the buffer resource 
 			ComPtr<ID3D12Resource> uploadResource;
 			const auto var1 = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 			const auto var2 = CD3DX12_RESOURCE_DESC::Buffer(bufferSize);
@@ -73,8 +70,6 @@ void CommandList::CopyBuffer(GpuResource& buffer,size_t numElements,size_t eleme
 			{
 				throw std::exception("UpdateSubresources failed");
 			}
-
-			// Add references to resources so they stay in scope until the command aCommandList is reset.
 			TrackResource(uploadResource);
 		}
 		TrackResource(d3d12Resource);
@@ -143,7 +138,9 @@ void CommandList::SetRenderTargets(unsigned numberOfTargets,Texture* renderTarge
 	}
 	if (depthBuffer)
 	{
+
 		const auto dsv = depthBuffer->GetHandle(ViewType::DSV).cpuPtr;
+		TransitionBarrier(*depthBuffer,D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		m_CommandList->OMSetRenderTargets(numberOfTargets,RTVs,FALSE,&dsv);
 	}
 	else

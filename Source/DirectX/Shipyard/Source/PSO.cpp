@@ -14,7 +14,11 @@
 #include "Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h" 
 
 #include "Engine/AssetManager/ComponentSystem/Components/LightComponent.h"
+#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
+#include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
 #include "Engine/AssetManager/ComponentSystem/GameObjectManager.h"
+#include "Engine/GraphicsEngine/Rendering/Buffers/FrameBuffer.h"
+#include "Engine/GraphicsEngine/Rendering/Buffers/ObjectBuffer.h"
 
 void PSOCache::InitAllStates()
 {
@@ -24,6 +28,11 @@ void PSOCache::InitAllStates()
 	auto pso = std::make_unique<PSO>();
 	pso->Init(GPU::m_Device);
 	pso_map[ePipelineStateID::Default] = std::move(pso);
+
+
+	auto shadowMapper = std::make_unique<ShadowMapperPSO>();
+	shadowMapper->Init(GPU::m_Device);
+	pso_map[ePipelineStateID::ShadowMapper] = std::move(shadowMapper);
 
 	auto gbuffer = std::make_unique<GbufferPSO>();
 	gbuffer->Init(GPU::m_Device);
@@ -306,6 +315,160 @@ Texture* GbufferPSO::GetRenderTargets()
 	return renderTargets;
 }
 
+
+void ShadowMapperPSO::Init(const ComPtr<ID3D12Device2>& dev)
+{
+	m_Device = dev;
+
+	AssetManager::Get().ForceLoadAsset<ShipyardShader>("Shaders/Default_VS.cso",vs);
+
+	struct PipelineStateStream
+	{
+		CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE pRootSignature;
+		CD3DX12_PIPELINE_STATE_STREAM_INPUT_LAYOUT InputLayout;
+		CD3DX12_PIPELINE_STATE_STREAM_PRIMITIVE_TOPOLOGY PrimitiveTopologyType;
+		CD3DX12_PIPELINE_STATE_STREAM_VS VS;
+		CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL_FORMAT DSVFormat;
+		CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL DepthStencilState;
+	}  stream;
+
+
+	stream.pRootSignature = PSOCache::m_RootSignature->GetRootSignature().Get();
+	stream.InputLayout = { Vertex::InputLayoutDefinition , Vertex::InputLayoutDefinitionSize };
+	stream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	stream.VS = CD3DX12_SHADER_BYTECODE(vs->GetBlob());
+	stream.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+
+	auto depthStencil = CD3DX12_DEPTH_STENCIL_DESC(CD3DX12_DEFAULT());
+	depthStencil.DepthFunc = D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+	stream.DepthStencilState = depthStencil;
+
+	const D3D12_PIPELINE_STATE_STREAM_DESC psoDescStreamDesc = {
+			sizeof(PipelineStateStream), &stream
+	};
+	Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&psoDescStreamDesc,IID_PPV_ARGS(&m_pipelineState)));
+	m_pipelineState->SetName(L"ShadowMapperPSO");
+}
+
+void ShadowMapperPSO::WriteShadows(std::shared_ptr<CommandList>& commandList,const std::vector<cMeshRenderer>& objectsToRender)
+{
+	std::shared_ptr<Texture> shadowMap = nullptr;
+	const auto graphicCommandList = commandList->GetGraphicsCommandList();
+
+
+
+	const auto& shadowMapper = PSOCache::GetState(PSOCache::ePipelineStateID::ShadowMapper);
+
+	const auto& pipelineState = shadowMapper->GetPipelineState().Get();
+	graphicCommandList->SetPipelineState(pipelineState);
+	commandList->TrackResource(pipelineState);
+
+	for (auto& light : GameObjectManager::Get().GetAllComponents<cLight>())
+	{
+		if (light.GetIsShadowCaster())
+		{
+			if (light.GetType() == eLightType::Directional && !light.GetIsRendered())
+			{
+				shadowMap = light.GetShadowMap(0);
+				commandList->SetRenderTargets(0,nullptr,shadowMap.get());
+
+				auto frameBuffer = light.GetShadowMapFrameBuffer(0);
+				const auto& alloc0 = GPU::m_GraphicsMemory->AllocateConstant<FrameBuffer>(frameBuffer);
+				graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::frameBuffer,alloc0.GpuAddress());
+
+				for (const auto& object : objectsToRender)
+				{
+					const auto& transform = object.GetComponent<Transform>();
+					for (auto& element : object.GetElements())
+					{
+						ObjectBuffer objectBuffer;
+						objectBuffer.myTransform = transform.GetRawTransform();
+						objectBuffer.MaxExtents = Vector3f(1,1,1);
+						objectBuffer.MinExtents = -Vector3f(1,1,1);
+						objectBuffer.hasBone = false;
+						objectBuffer.isInstanced = false;
+
+						const auto& alloc1 = GPU::m_GraphicsMemory->AllocateConstant<ObjectBuffer>(objectBuffer);
+						graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::objectBuffer,alloc1.GpuAddress());
+						GPU::ConfigureInputAssembler(*commandList,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.VertexBuffer,element.IndexResource);
+						graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
+					}
+				}
+				shadowMap->SetView(ViewType::SRV);
+				commandList->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+				commandList->TrackResource(*shadowMap);
+			}
+
+			if (light.GetType() == eLightType::Spot && !light.GetIsRendered())
+			{
+				shadowMap = light.GetShadowMap(0);
+				commandList->SetRenderTargets(0,nullptr,shadowMap.get());
+
+				auto frameBuffer = light.GetShadowMapFrameBuffer(0);
+				const auto& alloc0 = GPU::m_GraphicsMemory->AllocateConstant<FrameBuffer>(frameBuffer);
+				graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::frameBuffer,alloc0.GpuAddress());
+
+				for (const auto& object : objectsToRender)
+				{
+					const auto& transform = object.GetComponent<Transform>();
+					for (auto& element : object.GetElements())
+					{
+						ObjectBuffer objectBuffer;
+						objectBuffer.myTransform = transform.GetRawTransform();
+						objectBuffer.MaxExtents = Vector3f(1,1,1);
+						objectBuffer.MinExtents = -Vector3f(1,1,1);
+						objectBuffer.hasBone = false;
+						objectBuffer.isInstanced = false;
+
+						const auto& alloc1 = GPU::m_GraphicsMemory->AllocateConstant<ObjectBuffer>(objectBuffer);
+						graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::objectBuffer,alloc1.GpuAddress());
+						GPU::ConfigureInputAssembler(*commandList,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.VertexBuffer,element.IndexResource);
+						graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
+					}
+				}
+				shadowMap->SetView(ViewType::SRV);
+				commandList->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+				commandList->TrackResource(*shadowMap);
+			}
+
+			if (light.GetType() == eLightType::Point && !light.GetIsRendered())
+			{
+				for (int j = 0; j < 6; j++)
+				{
+					shadowMap = light.GetShadowMap(j);
+					commandList->SetRenderTargets(0,nullptr,shadowMap.get());
+
+					auto frameBuffer = light.GetShadowMapFrameBuffer(j);
+					const auto& alloc0 = GPU::m_GraphicsMemory->AllocateConstant<FrameBuffer>(frameBuffer);
+					graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::frameBuffer,alloc0.GpuAddress());
+
+					for (const auto& object : objectsToRender)
+					{
+						const auto& transform = object.GetComponent<Transform>();
+						for (auto& element : object.GetElements())
+						{
+							ObjectBuffer objectBuffer;
+							objectBuffer.myTransform = transform.GetRawTransform();
+							objectBuffer.MaxExtents = Vector3f(1,1,1);
+							objectBuffer.MinExtents = -Vector3f(1,1,1);
+							objectBuffer.hasBone = false;
+							objectBuffer.isInstanced = false;
+
+							const auto& alloc1 = GPU::m_GraphicsMemory->AllocateConstant<ObjectBuffer>(objectBuffer);
+							graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::objectBuffer,alloc1.GpuAddress());
+							GPU::ConfigureInputAssembler(*commandList,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.VertexBuffer,element.IndexResource);
+							graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
+						}
+					}
+					shadowMap->SetView(ViewType::SRV);
+					commandList->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+					commandList->TrackResource(*shadowMap);
+				}
+			}
+		}
+		light.SetIsRendered(true);
+	}
+}
 
 void EnvironmentLightPSO::Init(const ComPtr<ID3D12Device2>& dev)
 {

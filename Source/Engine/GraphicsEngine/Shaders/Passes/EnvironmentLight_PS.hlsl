@@ -56,10 +56,9 @@ float4 worldPosition
     float2 texelSize = 1.0 / dim;
    
     float sum = 0;
-    float x, y;
-    for(y = -1.5; y <= 1.5; y += 1.0)
+    for(float y = -1.5; y <= 1.5; y += 1.0)
     {
-        for(x = -1.5; x <= 1.5; x += 1.0)
+        for(float x = -1.5; x <= 1.5; x += 1.0)
         {
               float2 newUV;
             newUV.x = lightSpaceUV.x + x * texelSize.x;
