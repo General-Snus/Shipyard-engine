@@ -358,35 +358,32 @@ template<typename T>
 inline Matrix4x4<T> Matrix4x4<T>::CreateOrthographicProjection(float aLeftPlane,float aRightPlane,float aBottomPlane,float aTopPlane,
 	float aNearPlane,float aFarPlane)
 {
-	const float reciprocalWidth = 1.0f / (aRightPlane - aLeftPlane);
-	const float reciprocalHeight = 1.0f / (aTopPlane - aBottomPlane);
+	Matrix4x4<T> result;
+	const float ViewWidth = std::abs(aRightPlane - aLeftPlane);
+	const float ViewHeight = std::abs(aTopPlane - aBottomPlane);
 	const float fRange = 1.0f / (aFarPlane - aNearPlane);
 
-	Matrix4x4<T> result;
-	result(1,1) = reciprocalWidth + reciprocalWidth;
-	result(1,2) = 0.0f;
-	result(1,3) = 0.0f;
-	result(1,4) = 0.0f;
+	result.arr[0][0] = 2.0f / ViewWidth;
+	result.arr[0][1] = 0.0f;
+	result.arr[0][2] = 0.0f;
+	result.arr[0][3] = 0.0f;
 
-	result(2,1) = 0.0f;
-	result(2,2) = reciprocalHeight + reciprocalHeight;
-	result(2,3) = 0.0f;
-	result(2,4) = 0.0f;
+	result.arr[1][0] = 0.0f;
+	result.arr[1][1] = 2.0f / ViewHeight;
+	result.arr[1][2] = 0.0f;
+	result.arr[1][3] = 0.0f;
 
-	result(3,1) = 0.0f;
-	result(3,2) = 0.0f;
-	result(3,3) = fRange;
-	result(3,4) = 0.0f;
+	result.arr[2][0] = 0.0f;
+	result.arr[2][1] = 0.0f;
+	result.arr[2][2] = fRange;
+	result.arr[2][3] = 0.0f;
 
-	result(4,1) = -(aLeftPlane + aRightPlane) * reciprocalWidth;
-	result(4,2) = -(aTopPlane + aBottomPlane) * reciprocalHeight;
-	result(4,3) = -fRange * aNearPlane;
-	result(4,4) = 1.0f;
-
-
+	result.arr[3][0] = 0.0f;
+	result.arr[3][1] = 0.0f;
+	result.arr[3][2] = -fRange * aNearPlane;
+	result.arr[3][3] = 1.0f;
 	return result;
 }
-
 
 
 

@@ -67,6 +67,14 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 			textureLoaded++;
 		}
 
+		if (material->GetTextureCount(aiTextureType_HEIGHT))
+		{
+			material->GetTexture(aiTextureType_HEIGHT,0,&str);
+			holder.first = str.C_Str();
+			dataMat.textures[1] = holder;
+			textureLoaded++;
+		}
+
 		if (material->GetTextureCount(aiTextureType_NORMALS))
 		{
 			material->GetTexture(aiTextureType_NORMALS,0,&str);
@@ -74,7 +82,6 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 			dataMat.textures[1] = holder;
 			textureLoaded++;
 		}
-
 		if (material->GetTextureCount(aiTextureType_DIFFUSE_ROUGHNESS))
 		{
 			material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS,0,&str);
@@ -336,7 +343,7 @@ void Mesh::Init()
 
 	return;
 #endif // 
-}
+		}
 
 void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 {

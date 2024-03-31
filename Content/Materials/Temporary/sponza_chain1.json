@@ -20,8 +20,8 @@
             "TextureType": 0
         },
         {
-            "TextureName": "",
-            "TexturePath": "",
+            "TextureName": "ChainTexture_Normal.png",
+            "TexturePath": "ChainTexture_Normal.png",
             "TextureType": 1
         },
         {

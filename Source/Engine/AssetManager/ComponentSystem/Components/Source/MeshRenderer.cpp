@@ -1,5 +1,5 @@
-#include <Tools/Utilities/System/ThreadPool.hpp>
 #include "AssetManager.pch.h"
+#include <Tools/Utilities/System/ThreadPool.hpp>
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 
 class GfxCmd_RenderMesh;
@@ -49,7 +49,15 @@ bool cMeshRenderer::IsDefaultMesh() const
 
 std::vector<Element>& cMeshRenderer::GetElements() const
 {
-	return myRenderData->myMesh->Elements;
+	if (myRenderData->myMesh->isLoadedComplete)
+	{
+		return myRenderData->myMesh->Elements;
+	}
+	else
+	{
+		static std::vector<Element> empty;
+		return empty;
+	}
 }
 
 std::shared_ptr<Mesh> cMeshRenderer::GetRawMesh() const

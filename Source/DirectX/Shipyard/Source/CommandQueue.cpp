@@ -10,6 +10,7 @@
 
 bool GPUCommandQueue::Create(const ComPtr<ID3D12Device>& device,D3D12_COMMAND_LIST_TYPE type)
 {
+	m_Device = device;
 	m_CommandListType = type;
 	m_FenceValue = 0;
 	m_bProcessInFlightCommandLists = true;
@@ -88,7 +89,7 @@ std::shared_ptr<CommandList> GPUCommandQueue::GetCommandList(const std::wstring&
 
 
 	return commandList;
-}
+	}
 
 ComPtr<ID3D12CommandQueue> GPUCommandQueue::GetCommandQueue()
 {

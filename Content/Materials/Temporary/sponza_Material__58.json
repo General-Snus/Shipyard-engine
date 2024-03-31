@@ -20,8 +20,8 @@
             "TextureType": 0
         },
         {
-            "TextureName": "",
-            "TexturePath": "",
+            "TextureName": "VasePlant_normal.png",
+            "TexturePath": "VasePlant_normal.png",
             "TextureType": 1
         },
         {

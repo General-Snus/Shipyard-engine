@@ -11,14 +11,13 @@
 #include "Shipyard/Helpers.h"
 
 
-Texture::Texture() : m_Width(0),m_Height(0)
+Texture::Texture() : m_Viewport(0,0,0,0,0,1),m_Rect(0,0,0,0)
 {
 	auto value = textureHandle(D3D12_CPU_DESCRIPTOR_HANDLE(),-1,0);
 	m_DescriptorHandles.emplace(ViewType::SRV,value);
 };
 
 void Texture::Destroy()
-
 {
 	GpuResource::Destroy();
 	for (auto& [type,pair] : m_DescriptorHandles)
@@ -31,16 +30,20 @@ void Texture::Destroy()
 
 bool Texture::AllocateTexture(const Vector2ui dimentions,const std::filesystem::path& name,DXGI_FORMAT Format,D3D12_RESOURCE_FLAGS flags,D3D12_RESOURCE_STATES targetResourceState)
 {
-	m_Width = dimentions.x;
-	m_Height = dimentions.y;
+	const auto width = dimentions.x;
+	const auto height = dimentions.y;
+
+	m_Rect = D3D12_RECT(0,0,static_cast<LONG>(width),height);
+	m_Viewport = D3D12_VIEWPORT(0,0,static_cast<FLOAT>(width),static_cast<FLOAT>(height),0,1);
+
 	myName = name.string();
 	m_Format = Format;
 
 	D3D12_RESOURCE_DESC txtDesc = {};
 	txtDesc.MipLevels = txtDesc.DepthOrArraySize = 1;
 	txtDesc.Format = Format;
-	txtDesc.Width = m_Width;
-	txtDesc.Height = m_Height;
+	txtDesc.Width = width;
+	txtDesc.Height = height;
 	txtDesc.SampleDesc.Count = 1;
 	txtDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	txtDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
@@ -134,7 +137,6 @@ void Texture::SetView(ViewType view,unsigned space)
 		}
 		else
 		{
-
 			const int heapOffset = (int)GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->Allocate();
 			const auto descriptorHandle = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->GetCpuHandle(heapOffset);
 			CreateShaderResourceView(GPU::m_Device.Get(),m_Resource.Get(),descriptorHandle,isCubeMap);

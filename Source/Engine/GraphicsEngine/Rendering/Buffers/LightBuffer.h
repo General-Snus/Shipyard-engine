@@ -4,10 +4,11 @@
 
 struct LightBuffer
 {
-	DirectionalLight directionalLight = DirectionalLight();
 	int pointLightAmount = 0;
-	PointLight pointLight[8] = {};
 	int spotLightAmount = 0;
-	SpotLight spotLight[8] = {};
 	float padding[2];
+
+	DirectionalLight directionalLight = DirectionalLight();
+	PointLight pointLight[8] = {};
+	SpotLight spotLight[8] = {};
 };

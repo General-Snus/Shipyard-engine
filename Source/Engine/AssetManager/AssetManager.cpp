@@ -43,7 +43,12 @@ void AssetManager::ThreadedLoading()
 	{
 		const double timeStart = Timer::GetInstance().GetTotalTime();
 		{
-			std::shared_ptr<AssetBase> working = myAssetQueue.Dequeue();
+			std::shared_ptr<AssetBase> working;
+			{
+				std::scoped_lock deQueueLock(dequeMutex);
+				working = myAssetQueue.Dequeue();
+
+			}
 			working->isBeingLoaded = true;
 			working->Init();
 			if (working->isLoadedComplete)

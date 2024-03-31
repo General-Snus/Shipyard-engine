@@ -523,12 +523,11 @@ void cLight::RedrawDirectionMap()
 {
 	OPTICK_EVENT();
 	//TODO GET ACTIVE SCENE
-	const float radius = 100;//ModelViewer::Get().GetWorldBounds().GetRadius();
+	constexpr float radius = 20;//ModelViewer::Get().GetWorldBounds().GetRadius();
 	myDirectionLightData->Direction.Normalize();
-	Vector3f lightPosition = radius * 2.0f * -Vector3f(myDirectionLightData->Direction.x,myDirectionLightData->Direction.y,myDirectionLightData->Direction.z);
-	const Vector3f worldCenter = Vector3f();// ModelViewer::Get().GetWorldBounds().GetCenter();
 
-	myDirectionLightData->Direction = Vector4f((worldCenter - lightPosition).GetNormalized(),1);
+	const Vector3f worldCenter = GameObjectManager::Get().GetCamera().GetComponent<Transform>().GetPosition();
+	const Vector3f lightPosition = radius * 5.0f * -Vector3f(myDirectionLightData->Direction.x,myDirectionLightData->Direction.y,myDirectionLightData->Direction.z);
 	myDirectionLightData->lightView = Matrix::LookAt(lightPosition,worldCenter,{ 0,1,0 }); // REFACTOR, Magic value up
 
 	const Vector4f cameraCenter = Vector4f(worldCenter,0.0f) * myDirectionLightData->lightView;
@@ -538,8 +537,8 @@ void cLight::RedrawDirectionMap()
 	const float rightPlane = cameraCenter.x + radius * 1;
 	const float bottomPlane = cameraCenter.y - radius * 1;
 	const float topPlane = cameraCenter.y + radius * 1;
-	const float nearPlane = 0.1f;
-	const float farPlane = radius * 4;
+	constexpr float nearPlane = 0.1f;
+	constexpr float farPlane = radius * 5.f;
 	myDirectionLightData->projection = Matrix::CreateOrthographicProjection(
 		leftPlane,
 		rightPlane,
@@ -556,9 +555,9 @@ void cLight::RedrawPointMap()
 	Vector3f lightPosition = myPointLightData->Position;
 	myPointLightData->lightView = Matrix::LookAt(lightPosition,lightPosition + GlobalFwd,{ 0,1,0 }); // REFACTOR, Magic value up
 
-	const float fow = 90.0f * DEG_TO_RAD;
+	constexpr float fow = 90.0f * DEG_TO_RAD;
 	const float farfield = myPointLightData->Range * 5;
-	const float nearField = .01f;
+	constexpr float nearField = .01f;
 
 	const auto dxMatrix = XMMatrixPerspectiveFovLH(fow,1,farfield,nearField);
 	myPointLightData->projection = Matrix(&dxMatrix);
@@ -573,7 +572,7 @@ void cLight::RedrawSpotMap()
 
 	const float fow = mySpotLightData->OuterConeAngle;
 	const float farfield = mySpotLightData->Range * 2;
-	const float nearField = 0.01f;
+	constexpr float nearField = 0.01f;
 
 
 	const auto dxMatrix = XMMatrixPerspectiveFovLH(fow,1,farfield,nearField);

@@ -80,7 +80,7 @@ private:
 	//thread 
 	void ThreadedLoading();
 	Queue<std::shared_ptr<AssetBase>> myAssetQueue;
-
+	std::mutex dequeMutex;
 	//NameToPath
 	void RecursiveNameSave();
 	std::unordered_map<std::filesystem::path,std::filesystem::path> nameToPathMap;
@@ -182,15 +182,23 @@ void AssetManager::LoadAsset(const std::filesystem::path& aFilePath,bool useExac
 			std::pair<std::filesystem::path,std::shared_ptr<T>> newObject(aFilePath,std::make_shared<T>(aFilePath));
 			ptr = library->Add(newObject);
 			myAssetQueue.EnqueueUnique(newObject.second);
+#if ThreadedAssetLoading
+			ThreadPool::Get().SubmitWork(std::bind(&AssetManager::ThreadedLoading,this));
+#else
 			ThreadedLoading();
-			//ThreadPool::Get().SubmitWork(std::bind(&AssetManager::ThreadedLoading,this));
+#endif
+
 		}
 		else
 		{
 			std::pair<std::filesystem::path,std::shared_ptr<T>> newObject(aFilePath,std::make_shared<T>(AssetPath / aFilePath));
 			ptr = library->Add<T>(newObject);
-			myAssetQueue.EnqueueUnique(newObject.second); ThreadedLoading();
-			//ThreadPool::Get().SubmitWork(std::bind(&AssetManager::ThreadedLoading,this));
+			myAssetQueue.EnqueueUnique(newObject.second);
+#if ThreadedAssetLoading
+			ThreadPool::Get().SubmitWork(std::bind(&AssetManager::ThreadedLoading,this));
+#else
+			ThreadedLoading();
+#endif
 		}
 	}
 	outAsset = ptr;

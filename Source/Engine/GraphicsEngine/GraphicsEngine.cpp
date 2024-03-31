@@ -529,8 +529,6 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	GPU::ClearDepth(*commandList.get(),GPU::m_DepthBuffer->GetHandle(ViewType::DSV).cpuPtr);
 
 
-	graphicCommandList->RSSetViewports(1,&GPU::m_Viewport);
-	graphicCommandList->RSSetScissorRects(1,&GPU::m_ScissorRect);
 
 	const auto& rootSignature = PSOCache::m_RootSignature->GetRootSignature();
 	graphicCommandList->SetGraphicsRootSignature(rootSignature.Get());
@@ -543,9 +541,21 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	};
 	graphicCommandList->SetDescriptorHeaps(static_cast<UINT>(std::size(heaps)),heaps);
 
+	{
+		LightBuffer lightBuffer = EnvironmentLightPSO::CreateLightBuffer();
+		const auto& alloc = GPU::m_GraphicsMemory->AllocateConstant<LightBuffer>(lightBuffer);
+		graphicCommandList->SetGraphicsRootConstantBufferView(REG_LightBuffer,alloc.GpuAddress());
 
+		auto frameBuffer = myCamera->GetFrameBuffer();
+		const auto& alloc0 = GPU::m_GraphicsMemory->AllocateConstant<FrameBuffer>(frameBuffer);
+		graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::frameBuffer,alloc0.GpuAddress());
 
+		const auto cubeMap = defaultCubeMap->GetRawTexture().get();
+		commandList->SetDescriptorTable(eRootBindings::PermanentTextures,cubeMap);
+		commandList->TrackResource(cubeMap->GetResource());
 
+		graphicCommandList->SetGraphicsRootDescriptorTable(eRootBindings::Textures,GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->GetFirstGpuHandle());
+	}
 
 	static auto& list = GameObjectManager::Get().GetAllComponents<cMeshRenderer>();
 	ShadowMapperPSO::WriteShadows(commandList,list);
@@ -554,6 +564,10 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	Texture* gBufferTextures;
 	unsigned bufferCount = 0;
 	{
+
+		graphicCommandList->RSSetViewports(1,&GPU::m_Viewport);
+		graphicCommandList->RSSetScissorRects(1,&GPU::m_ScissorRect);
+
 		const auto& gbufferPSO = PSOCache::GetState(PSOCache::ePipelineStateID::GBuffer);
 		bufferCount = gbufferPSO->GetRenderTargetAmounts();
 		gBufferTextures = gbufferPSO->GetRenderTargets();
@@ -563,18 +577,12 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 		const auto& pipelineState = gbufferPSO->GetPipelineState().Get();
 		graphicCommandList->SetPipelineState(pipelineState);
 		commandList->TrackResource(pipelineState);
+
+		auto frameBuffer = myCamera->GetFrameBuffer();
+		const auto& alloc0 = GPU::m_GraphicsMemory->AllocateConstant<FrameBuffer>(frameBuffer);
+		graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::frameBuffer,alloc0.GpuAddress());
 	}
 
-	auto frameBuffer = myCamera->GetFrameBuffer();
-	const auto& alloc0 = GPU::m_GraphicsMemory->AllocateConstant<FrameBuffer>(frameBuffer);
-	graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::frameBuffer,alloc0.GpuAddress());
-
-	const auto cubeMap = defaultCubeMap->GetRawTexture().get();
-	commandList->SetDescriptorTable(eRootBindings::PermanentTextures,cubeMap);
-	commandList->TrackResource(cubeMap->GetResource());
-
-	graphicCommandList->SetGraphicsRootDescriptorTable(eRootBindings::Textures,GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->GetFirstGpuHandle());
-	Logger::Log(std::to_string(list.size()));
 	int vertCount = 0;
 	for (auto& meshRenderer : list)
 	{
@@ -650,15 +658,9 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 			graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
 		}
 	}
-	Logger::Log(std::to_string(vertCount));
+
 	const auto& enviromentLight = PSOCache::GetState(PSOCache::ePipelineStateID::DeferredLighting);
 	{
-		LightBuffer lightbuffer = EnvironmentLightPSO::CreateLightBuffer();
-
-		const auto& alloc = GPU::m_GraphicsMemory->AllocateConstant<LightBuffer>(lightbuffer);
-		graphicCommandList->SetGraphicsRootConstantBufferView(REG_LightBuffer,alloc.GpuAddress());
-
-
 		GPU::ClearRTV(*commandList.get(),enviromentLight->GetRenderTargets(),enviromentLight->GetRenderTargetAmounts());
 		commandList->SetRenderTargets(enviromentLight->GetRenderTargetAmounts(),enviromentLight->GetRenderTargets(),nullptr);
 

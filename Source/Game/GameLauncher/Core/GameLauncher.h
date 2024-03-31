@@ -14,6 +14,7 @@ private:
 	GameObject myMesh;
 	GameObject myCustomHandler;
 	Matrix myModelMatrix;
+	float direction = 1.f;
 	std::vector<GameObject> vectorOfGameObjects;
 
 };

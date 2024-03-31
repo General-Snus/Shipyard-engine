@@ -21,13 +21,13 @@ struct hlslPointLight
     float Power; //4
     
     float3 Position; //12
-    float Range; //4
-    
+    float Range; //4  
+
     float4x4 lightView;
     float4x4 projection;
 
-    int1 shadowMapIndex[6];
-    float2 padding;
+    int shadowMapIndex[6];
+
 };
 
 struct hlslSpotLight
@@ -46,16 +46,17 @@ struct hlslSpotLight
     float2 Pad; //12
     
     float4x4 lightView;
-    float4x4 projection; 
+    float4x4 projection;
 };
 struct LightBuffer
 {
-    hlslDirectionalLight myDirectionalLight; //32
     int pointLightAmount;
-    hlslPointLight myPointLight[8]; //32
     int spotLightAmount;
-    hlslSpotLight mySpotLight[8]; //64
     float2 padding;
+
+    hlslDirectionalLight myDirectionalLight; //32
+    hlslPointLight myPointLight[8]; //32
+    hlslSpotLight mySpotLight[8]; //64
 };
 ConstantBuffer<LightBuffer> g_lightBuffer : register(HLSL_REG_LightBuffer);
 

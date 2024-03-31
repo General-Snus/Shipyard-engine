@@ -126,13 +126,13 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 		return false;
 	}
 
-	ComPtr<ID3D12InfoQueue> pInfoQueue;
-	if (SUCCEEDED(m_Device.As(&pInfoQueue)))
-	{
-		pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION,TRUE);
-		pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR,TRUE);
-		pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING,TRUE);
-	}
+	//ComPtr<ID3D12InfoQueue> pInfoQueue;
+	//if (SUCCEEDED(m_Device.As(&pInfoQueue)))
+	//{
+	//	pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION,TRUE);
+	//	pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR,TRUE);
+	//	pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING,TRUE);
+	//}
 
 	m_GraphicsMemory = std::make_shared<DirectX::DX12::GraphicsMemory>(m_Device.Get());
 
@@ -417,8 +417,12 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 	const auto uploadResourcesFinished = resourceUpload.End(m_DirectCommandQueue->GetCommandQueue().Get());
 	uploadResourcesFinished.wait();
 
-	outTexture->m_Width = static_cast<uint32_t>(outTexture->m_Resource->GetDesc().Width);
-	outTexture->m_Height = outTexture->m_Resource->GetDesc().Height;
+	const auto width = outTexture->m_Resource->GetDesc().Width;
+	const auto height = outTexture->m_Resource->GetDesc().Height;
+
+	outTexture->m_Rect = D3D12_RECT(0,0,static_cast<uint32_t>(width),height);
+	outTexture->m_Viewport = D3D12_VIEWPORT(0,0,static_cast<FLOAT>(width),static_cast<FLOAT>(height),0,1);
+
 	outTexture->m_Resource->SetName(aFileName.wstring().c_str());
 
 	outTexture->CheckFeatureSupport();

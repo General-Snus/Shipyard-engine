@@ -20,8 +20,8 @@
             "TextureType": 0
         },
         {
-            "TextureName": "",
-            "TexturePath": "",
+            "TextureName": "Lion_Normal.png",
+            "TexturePath": "Lion_Normal.png",
             "TextureType": 1
         },
         {

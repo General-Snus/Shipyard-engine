@@ -4,15 +4,15 @@
 struct SpotLight
 {
 	Vector3f Color = { 1,1,1 };
-	float Power = 0;
+	float Power = 5;
 
 	Vector3f Position = { 0,0,0 };	//12
-	float Range = 0;		//4
+	float Range = 10;		//4
 
 	Vector3f Direction = { 0,0,1 }; //12
-	float InnerConeAngle = 0; // 4
+	float InnerConeAngle = 15; // 4
 
-	float OuterConeAngle = 0; //4  
+	float OuterConeAngle = 45; //4  
 	int shadowMapIndex;
 	Vector2f padding = { 0,0 };	//12
 
@@ -23,17 +23,15 @@ struct SpotLight
 struct PointLight
 {
 	Vector3f Color = { 1,1,1 };
-	float Power = 0;
+	float Power = 50;
 
 	Vector3f Position = { 0,0,0 };
-	float Range = 0;
+	float Range = 10;
 
-	Matrix lightView;
-	Matrix projection;
-
+	Matrix lightView{};
+	Matrix projection{};
 
 	int shadowMapIndex[6] = { -1 };
-	float padding[2]{};
 };
 
 struct DirectionalLight
@@ -43,9 +41,10 @@ struct DirectionalLight
 
 	Vector4f Direction = { 0,0,1,1 };
 
+
 	Matrix lightView;
 	Matrix projection;
 
 	int shadowMapIndex;
-	float padding[3];
+	Vector3f padding{};
 };

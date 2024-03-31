@@ -355,8 +355,6 @@ void ShadowMapperPSO::WriteShadows(std::shared_ptr<CommandList>& commandList,con
 	std::shared_ptr<Texture> shadowMap = nullptr;
 	const auto graphicCommandList = commandList->GetGraphicsCommandList();
 
-
-
 	const auto& shadowMapper = PSOCache::GetState(PSOCache::ePipelineStateID::ShadowMapper);
 
 	const auto& pipelineState = shadowMapper->GetPipelineState().Get();
@@ -370,6 +368,12 @@ void ShadowMapperPSO::WriteShadows(std::shared_ptr<CommandList>& commandList,con
 			if (light.GetType() == eLightType::Directional && !light.GetIsRendered())
 			{
 				shadowMap = light.GetShadowMap(0);
+
+				graphicCommandList->RSSetViewports(1,&shadowMap->GetViewPort());
+				graphicCommandList->RSSetScissorRects(1,&shadowMap->GetRect());
+
+				commandList->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_DEPTH_WRITE);
+				GPU::ClearDepth(*commandList,shadowMap->GetHandle(ViewType::DSV).cpuPtr);
 				commandList->SetRenderTargets(0,nullptr,shadowMap.get());
 
 				auto frameBuffer = light.GetShadowMapFrameBuffer(0);
@@ -379,29 +383,33 @@ void ShadowMapperPSO::WriteShadows(std::shared_ptr<CommandList>& commandList,con
 				for (const auto& object : objectsToRender)
 				{
 					const auto& transform = object.GetComponent<Transform>();
+					ObjectBuffer objectBuffer;
+					objectBuffer.myTransform = transform.GetRawTransform();
+
+					const auto& alloc1 = GPU::m_GraphicsMemory->AllocateConstant<ObjectBuffer>(objectBuffer);
+					graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::objectBuffer,alloc1.GpuAddress());
+
+
 					for (auto& element : object.GetElements())
 					{
-						ObjectBuffer objectBuffer;
-						objectBuffer.myTransform = transform.GetRawTransform();
-						objectBuffer.MaxExtents = Vector3f(1,1,1);
-						objectBuffer.MinExtents = -Vector3f(1,1,1);
-						objectBuffer.hasBone = false;
-						objectBuffer.isInstanced = false;
-
-						const auto& alloc1 = GPU::m_GraphicsMemory->AllocateConstant<ObjectBuffer>(objectBuffer);
-						graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::objectBuffer,alloc1.GpuAddress());
 						GPU::ConfigureInputAssembler(*commandList,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.VertexBuffer,element.IndexResource);
 						graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
 					}
 				}
 				shadowMap->SetView(ViewType::SRV);
-				commandList->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+				commandList->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_DEPTH_READ | D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 				commandList->TrackResource(*shadowMap);
 			}
 
 			if (light.GetType() == eLightType::Spot && !light.GetIsRendered())
 			{
 				shadowMap = light.GetShadowMap(0);
+
+				graphicCommandList->RSSetViewports(1,&shadowMap->GetViewPort());
+				graphicCommandList->RSSetScissorRects(1,&shadowMap->GetRect());
+
+				commandList->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_DEPTH_WRITE);
+				GPU::ClearDepth(*commandList,shadowMap->GetHandle(ViewType::DSV).cpuPtr);
 				commandList->SetRenderTargets(0,nullptr,shadowMap.get());
 
 				auto frameBuffer = light.GetShadowMapFrameBuffer(0);
@@ -410,24 +418,20 @@ void ShadowMapperPSO::WriteShadows(std::shared_ptr<CommandList>& commandList,con
 
 				for (const auto& object : objectsToRender)
 				{
-					const auto& transform = object.GetComponent<Transform>();
+					const auto& transform = object.GetComponent<Transform>(); ObjectBuffer objectBuffer;
+					objectBuffer.myTransform = transform.GetRawTransform();
+
+					const auto& alloc1 = GPU::m_GraphicsMemory->AllocateConstant<ObjectBuffer>(objectBuffer);
+					graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::objectBuffer,alloc1.GpuAddress());
+
 					for (auto& element : object.GetElements())
 					{
-						ObjectBuffer objectBuffer;
-						objectBuffer.myTransform = transform.GetRawTransform();
-						objectBuffer.MaxExtents = Vector3f(1,1,1);
-						objectBuffer.MinExtents = -Vector3f(1,1,1);
-						objectBuffer.hasBone = false;
-						objectBuffer.isInstanced = false;
-
-						const auto& alloc1 = GPU::m_GraphicsMemory->AllocateConstant<ObjectBuffer>(objectBuffer);
-						graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::objectBuffer,alloc1.GpuAddress());
 						GPU::ConfigureInputAssembler(*commandList,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.VertexBuffer,element.IndexResource);
 						graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
 					}
 				}
 				shadowMap->SetView(ViewType::SRV);
-				commandList->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+				commandList->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_DEPTH_READ | D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 				commandList->TrackResource(*shadowMap);
 			}
 
@@ -436,6 +440,12 @@ void ShadowMapperPSO::WriteShadows(std::shared_ptr<CommandList>& commandList,con
 				for (int j = 0; j < 6; j++)
 				{
 					shadowMap = light.GetShadowMap(j);
+
+					graphicCommandList->RSSetViewports(1,&shadowMap->GetViewPort());
+					graphicCommandList->RSSetScissorRects(1,&shadowMap->GetRect());
+
+					commandList->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_DEPTH_WRITE);
+					GPU::ClearDepth(*commandList,shadowMap->GetHandle(ViewType::DSV).cpuPtr);
 					commandList->SetRenderTargets(0,nullptr,shadowMap.get());
 
 					auto frameBuffer = light.GetShadowMapFrameBuffer(j);
@@ -445,23 +455,22 @@ void ShadowMapperPSO::WriteShadows(std::shared_ptr<CommandList>& commandList,con
 					for (const auto& object : objectsToRender)
 					{
 						const auto& transform = object.GetComponent<Transform>();
+						ObjectBuffer objectBuffer;
+						objectBuffer.myTransform = transform.GetRawTransform();
+
+						const auto& alloc1 = GPU::m_GraphicsMemory->AllocateConstant<ObjectBuffer>(objectBuffer);
+						graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::objectBuffer,alloc1.GpuAddress());
+
 						for (auto& element : object.GetElements())
 						{
-							ObjectBuffer objectBuffer;
-							objectBuffer.myTransform = transform.GetRawTransform();
-							objectBuffer.MaxExtents = Vector3f(1,1,1);
-							objectBuffer.MinExtents = -Vector3f(1,1,1);
-							objectBuffer.hasBone = false;
-							objectBuffer.isInstanced = false;
 
-							const auto& alloc1 = GPU::m_GraphicsMemory->AllocateConstant<ObjectBuffer>(objectBuffer);
-							graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::objectBuffer,alloc1.GpuAddress());
+
 							GPU::ConfigureInputAssembler(*commandList,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.VertexBuffer,element.IndexResource);
 							graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
 						}
 					}
 					shadowMap->SetView(ViewType::SRV);
-					commandList->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+					commandList->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_DEPTH_READ | D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 					commandList->TrackResource(*shadowMap);
 				}
 			}
@@ -514,9 +523,9 @@ Texture* EnvironmentLightPSO::GetRenderTargets()
 }
 LightBuffer EnvironmentLightPSO::CreateLightBuffer()
 {
-	std::vector<std::pair< DirectionalLight*,Texture*>> dirLight;
-	std::vector<std::pair< PointLight*,Texture*>> pointLight;
-	std::vector<std::pair< SpotLight*,Texture*>> spotLight;
+	std::vector<DirectionalLight*> dirLight;
+	std::vector<PointLight*> pointLight;
+	std::vector< SpotLight* > spotLight;
 
 	for (auto& i : GameObjectManager::Get().GetAllComponents<cLight>())
 	{
@@ -524,45 +533,37 @@ LightBuffer EnvironmentLightPSO::CreateLightBuffer()
 		{
 		case eLightType::Directional:
 		{
-			std::pair<DirectionalLight*,Texture*> pair;
-			pair.first = i.GetData<DirectionalLight>().get();
+			auto* data = i.GetData<DirectionalLight>().get();
 			if (i.GetIsShadowCaster())
 			{
-				pair.second = i.GetShadowMap(0).get();
-				pair.first->shadowMapIndex = pair.second->GetHandle(ViewType::SRV).heapOffset;
+				data->shadowMapIndex = i.GetShadowMap(0)->GetHandle(ViewType::SRV).heapOffset;
 			}
 
-			dirLight.push_back(pair);
+			dirLight.push_back(data);
 			break;
 		}
-
+		//REFACTOR
 		case eLightType::Point:
 		{
+			auto* data = i.GetData<PointLight>().get();
 			if (i.GetIsShadowCaster())
 			{
-				for (int j = 0; j < 6; j++)//REFACTOR
+				for (int j = 0; j < 6; j++)
 				{
-					std::pair<PointLight*,Texture*> pair;
-					pair.first = i.GetData<PointLight>().get();
-					pair.first->lightView = i.GetLightViewMatrix(j);
-					pair.second = i.GetShadowMap(j).get();
-					pair.first->shadowMapIndex[j] = pair.second->GetHandle(ViewType::SRV).heapOffset;
-					pointLight.push_back(pair);
+					data->shadowMapIndex[j] = i.GetShadowMap(j)->GetHandle(ViewType::SRV).heapOffset;
 				}
 			}
+			pointLight.push_back(data);
 			break;
 		}
 		case eLightType::Spot:
 		{
-			std::pair< SpotLight*,Texture*> pair;
-			pair.first = i.GetData<SpotLight>().get();
-
+			auto* data = i.GetData<SpotLight>().get();
 			if (i.GetIsShadowCaster())
 			{
-				pair.second = i.GetShadowMap(0).get();
-				pair.first->shadowMapIndex = pair.second->GetHandle(ViewType::SRV).heapOffset;
+				data->shadowMapIndex = i.GetShadowMap(0)->GetHandle(ViewType::SRV).heapOffset;
 			}
-			spotLight.push_back(pair);
+			spotLight.push_back(data);
 			break;
 		}
 
@@ -571,26 +572,25 @@ LightBuffer EnvironmentLightPSO::CreateLightBuffer()
 		}
 	}
 
-	int index = 0;
 	LightBuffer lightBuffer;
-	for (const auto& [light,shadowMap] : dirLight)
-	{
-		lightBuffer.directionalLight = *light;
-	}
-	for (const auto& [light,shadowMap] : pointLight)
-	{
-		lightBuffer.pointLight[index] = *light;
-		index++;
-	}
-	lightBuffer.pointLightAmount = index;
-	index = 0;
 
-	for (const auto& [light,shadowMap] : spotLight)
+	for (int i = 0; i < dirLight.size(); ++i)
 	{
-		lightBuffer.spotLight[index] = *light;
-		index++;
+		lightBuffer.directionalLight = *dirLight[i];
 	}
-	lightBuffer.pointLightAmount = index;
+
+	lightBuffer.pointLightAmount = std::min(static_cast<int>(pointLight.size()),8);
+	for (int i = 0; i < lightBuffer.pointLightAmount; ++i)
+	{
+		lightBuffer.pointLight[i] = *pointLight[i];
+	}
+
+
+	lightBuffer.spotLightAmount = std::min(static_cast<int>(spotLight.size()),8);
+	for (int i = 0; i < lightBuffer.spotLightAmount; ++i)
+	{
+		lightBuffer.spotLight[i] = *spotLight[i];
+	}
 
 	return lightBuffer;
 }

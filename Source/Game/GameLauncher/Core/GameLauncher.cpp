@@ -143,12 +143,12 @@ void GameLauncher::Start()
 		//worldRoot.AddComponent<RenderMode>();
 		//worldRoot.AddComponent<Skybox>();
 		Transform& transform = worldRoot.AddComponent<Transform>();
-		transform.SetRotation(0,45,-45);
+		transform.SetRotation(0,0,0);
 		cLight& pLight = worldRoot.AddComponent<cLight>(eLightType::Directional);
-
+		worldRoot.AddComponent<cMeshRenderer>("Models/Cube.fbx");
 
 		pLight.SetColor(Vector3f(1,1,1));
-		pLight.SetPower(25.0f);
+		pLight.SetPower(10.0f);
 		pLight.BindDirectionToTransform(true);
 		//if(gom.GetAllComponents<BackgroundColor>().empty())
 		//{
@@ -184,11 +184,21 @@ void GameLauncher::Start()
 #endif
 
 	{
+		auto& transform = myCustomHandler.AddComponent<Transform>();
+		auto& light = myCustomHandler.AddComponent<cLight>(eLightType::Point);
+		//myCustomHandler.AddComponent<cMeshRenderer>("Models/Cube.fbx");
+		transform.SetPosition(0,27,0);
+		light.BindDirectionToTransform(true);
+		light.SetColor({ 1,0,0 });
+	}
+	{
 		GameObject buddha = gom.CreateGameObject();
 		buddha.AddComponent<cMeshRenderer>("Models/Buddha.fbx");
 		buddha.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BuddhaMaterial.json");
 		auto& transform = buddha.AddComponent<Transform>();
-		transform.SetPosition(25,25,0);
+		transform.SetPosition(0,25,0);
+		transform.Rotate(0,90,0);
+		transform.SetScale(0.5f,.5f,.5f);
 		transform.SetGizmo(false);
 	}
 	{
@@ -280,6 +290,28 @@ void GameLauncher::Update(float delta)
 		}
 	}
 
+	auto& transform = myCustomHandler.GetComponent<Transform>();
+	auto position = transform.GetPosition();
+	if (position.x > 12.f)
+	{
+		direction = -1.f;
+	}
+	if (position.x < -12.f)
+	{
+		direction = 1.f;
+	}
+
+	transform.Move(10.f * direction * delta,0,0);
+
+
 	Transform& pLight = GameObjectManager::Get().GetWorldRoot().GetComponent<Transform>();
-	pLight.Rotate(0,delta * 10,0);
+	constexpr float rotSpeed = 25.f;
+	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::NUMPAD6))
+	{
+		pLight.Rotate(rotSpeed * delta,0,0);
+	}
+	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::NUMPAD3))
+	{
+		pLight.Rotate(-rotSpeed * delta,0,0);
+	}
 }

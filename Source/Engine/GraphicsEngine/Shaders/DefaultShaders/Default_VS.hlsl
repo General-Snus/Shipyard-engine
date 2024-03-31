@@ -12,8 +12,7 @@ DefaultVertexToPixel main(DefaultVertexInput input)
 { 
     DefaultVertexToPixel result;
     result.UV = input.UV;
-    result.Position = input.Position;
-    result.WorldPosition = input.Position;
+    result.Position = input.Position; 
     
     result.Normal = input.Normal;
     result.Tangent = input.Tangent;

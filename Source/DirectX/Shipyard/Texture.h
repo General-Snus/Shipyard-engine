@@ -51,14 +51,16 @@ public:
 
 	textureHandle  GetHandle() const;
 
-	uint32_t GetWidth() const { return m_Width; }
-	uint32_t GetHeight() const { return m_Height; }
+	uint32_t GetWidth() const { return static_cast<uint32_t>(m_Viewport.Width); }
+	uint32_t GetHeight() const { return static_cast<uint32_t>(m_Viewport.Height); }
+
+	//KEKW
+	const D3D12_RECT& GetRect() const { return m_Rect; };
+	const D3D12_VIEWPORT& GetViewPort() const { return m_Viewport; };
+
 	//-1 is invalid sizet so we need to check that, flinging in max sizet will cause crash making sure we check the value by instantcrashing in case we dont
 	int GetHeapOffset() const;
-
 	virtual bool IsSRV() const override { return true; };
-
-
 
 	bool CheckSRVSupport()
 	{
@@ -89,7 +91,8 @@ protected:
 	std::unordered_map<ViewType,textureHandle> m_DescriptorHandles;
 	ViewType m_RecentBoundType = ViewType::SRV;
 	Vector4f m_ClearColor = { 0,0,0,1 };
-	uint32_t m_Width;
-	uint32_t m_Height;
+
 	DXGI_FORMAT m_Format;
+	D3D12_VIEWPORT m_Viewport;
+	D3D12_RECT m_Rect;
 };

@@ -4,3 +4,4 @@
 #define ActorDecicionTree false  
 #define PHYSX false  
 #define UseScriptGraph false  
+#define ThreadedAssetLoading true

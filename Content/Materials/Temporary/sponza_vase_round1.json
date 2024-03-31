@@ -20,8 +20,8 @@
             "TextureType": 0
         },
         {
-            "TextureName": "",
-            "TexturePath": "",
+            "TextureName": "VaseRound_normal.png",
+            "TexturePath": "VaseRound_normal.png",
             "TextureType": 1
         },
         {

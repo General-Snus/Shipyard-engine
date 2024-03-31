@@ -20,8 +20,8 @@
             "TextureType": 0
         },
         {
-            "TextureName": "",
-            "TexturePath": "",
+            "TextureName": "Background_Normal.png",
+            "TexturePath": "Background_Normal.png",
             "TextureType": 1
         },
         {

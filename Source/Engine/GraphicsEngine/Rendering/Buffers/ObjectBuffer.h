@@ -3,10 +3,10 @@
 
 struct ObjectBuffer
 {
-	Matrix myTransform;
-	Vector3f MinExtents;
+	Matrix myTransform{};
+	Vector3f MinExtents = -Vector3f(1,1,1);;
 	alignas(4) bool hasBone = false;
-	Vector3f MaxExtents;
+	Vector3f MaxExtents = Vector3f(1,1,1);;
 	alignas(4) bool isInstanced = false;
 	//std::array < Matrix,128> myBoneTransforms; // 64 * 128 = 8192 bytes
 };

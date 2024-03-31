@@ -48,10 +48,10 @@ Material::Material(const std::filesystem::path& aFilePath) : AssetBase(aFilePath
 void Material::Init()
 {
 	data.textures.resize(4);
-	data.textures[(int)eTextureType::ColorMap].second = GraphicsEngine::Get().GetDefaultTexture(eTextureType::ColorMap);
-	data.textures[(int)eTextureType::NormalMap].second = GraphicsEngine::Get().GetDefaultTexture(eTextureType::NormalMap);
-	data.textures[(int)eTextureType::MaterialMap].second = GraphicsEngine::Get().GetDefaultTexture(eTextureType::MaterialMap);
-	data.textures[(int)eTextureType::EffectMap].second = GraphicsEngine::Get().GetDefaultTexture(eTextureType::EffectMap);
+	data.textures[static_cast<int>(eTextureType::ColorMap)].second = GraphicsEngine::Get().GetDefaultTexture(eTextureType::ColorMap);
+	data.textures[static_cast<int>(eTextureType::NormalMap)].second = GraphicsEngine::Get().GetDefaultTexture(eTextureType::NormalMap);
+	data.textures[static_cast<int>(eTextureType::MaterialMap)].second = GraphicsEngine::Get().GetDefaultTexture(eTextureType::MaterialMap);
+	data.textures[static_cast<int>(eTextureType::EffectMap)].second = GraphicsEngine::Get().GetDefaultTexture(eTextureType::EffectMap);
 
 	if (GraphicsEngine::Get().GetDefaultMaterial() != nullptr)
 	{
@@ -103,9 +103,19 @@ void Material::Init()
 				{
 					std::shared_ptr<TextureHolder> texture;
 					const std::filesystem::path path = i["TexturePath"];
+
+					if (path.empty())
+					{
+						continue;
+					}
+
 					AssetManager::Get().LoadAsset<TextureHolder>(path,texture);
-					data.textures[(int)i["TextureType"]].first = path;
-					data.textures[(int)i["TextureType"]].second = texture;
+
+					const int type = i["TextureType"];
+					texture->SetTextureType(static_cast<eTextureType>(type));
+
+					data.textures[type].first = path;
+					data.textures[type].second = texture;
 				}
 			}
 			catch (const std::exception&)
