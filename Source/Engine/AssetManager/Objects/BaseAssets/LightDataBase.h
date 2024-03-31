@@ -23,7 +23,7 @@ struct SpotLight
 struct PointLight
 {
 	Vector3f Color = { 1,1,1 };
-	float Power = 50;
+	float Power = 30;
 
 	Vector3f Position = { 0,0,0 };
 	float Range = 10;

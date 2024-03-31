@@ -122,7 +122,6 @@ void GameLauncher::Start()
 	GameObjectManager& gom = GameObjectManager::Get();
 #pragma region BaseSetup
 
-	myCustomHandler = gom.CreateGameObject();
 	myMesh = gom.CreateGameObject();
 
 	{
@@ -131,8 +130,8 @@ void GameLauncher::Start()
 		gom.SetLastGOAsCamera();
 		cameraComponent.SetActive(true);
 		auto& transform = camera.AddComponent<Transform>();
-		transform.SetPosition(0,27,0);
-		transform.SetRotation(0,0,0);
+		transform.SetPosition(-10,27,0);
+		transform.SetRotation(0,90,0);
 	}
 
 	{
@@ -143,12 +142,12 @@ void GameLauncher::Start()
 		//worldRoot.AddComponent<RenderMode>();
 		//worldRoot.AddComponent<Skybox>();
 		Transform& transform = worldRoot.AddComponent<Transform>();
-		transform.SetRotation(0,0,0);
+		transform.SetRotation(80,0,0);
 		cLight& pLight = worldRoot.AddComponent<cLight>(eLightType::Directional);
 		worldRoot.AddComponent<cMeshRenderer>("Models/Cube.fbx");
 
 		pLight.SetColor(Vector3f(1,1,1));
-		pLight.SetPower(10.0f);
+		pLight.SetPower(2.0f);
 		pLight.BindDirectionToTransform(true);
 		//if(gom.GetAllComponents<BackgroundColor>().empty())
 		//{
@@ -175,7 +174,7 @@ void GameLauncher::Start()
 #if WorkingOnPngLoading
 	{
 		GameObject sponza = gom.CreateGameObject();
-		sponza.AddComponent<cMeshRenderer>("Models/Sponza.fbx");
+		sponza.AddComponent<cMeshRenderer>("Models/Sponza/Sponza2.fbx");
 		//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
 		auto& transform = sponza.AddComponent<Transform>();
 		transform.SetPosition(0,25,0);
@@ -184,12 +183,25 @@ void GameLauncher::Start()
 #endif
 
 	{
+		myCustomHandler = gom.CreateGameObject();
 		auto& transform = myCustomHandler.AddComponent<Transform>();
 		auto& light = myCustomHandler.AddComponent<cLight>(eLightType::Point);
-		//myCustomHandler.AddComponent<cMeshRenderer>("Models/Cube.fbx");
-		transform.SetPosition(0,27,0);
+		transform.SetPosition(0,30,-4);
 		light.BindDirectionToTransform(true);
-		light.SetColor({ 1,0,0 });
+		light.SetColor({ .5f,.5f,1 });
+		light.SetPower(10);
+		light.SetRange(4.5f);
+	}
+
+	{
+		myCustomHandler2 = gom.CreateGameObject();
+		auto& transform = myCustomHandler2.AddComponent<Transform>();
+		auto& light = myCustomHandler2.AddComponent<cLight>(eLightType::Point);
+		transform.SetPosition(0,30,4);
+		light.BindDirectionToTransform(true);
+		light.SetColor({ 1,.5f,.5f });
+		light.SetPower(10);
+		light.SetRange(4.5f);
 	}
 	{
 		GameObject buddha = gom.CreateGameObject();
@@ -202,11 +214,11 @@ void GameLauncher::Start()
 		transform.SetGizmo(false);
 	}
 	{
-		//for (int x = 0; x < 2; x++)
+		//for (int x = 0; x < 1; x++)
 		//{
-		//	for (int y = 0; y < 2; y++)
+		//	for (int y = 0; y < 1; y++)
 		//	{
-		//		for (int z = 0; z < 2; z++)
+		//		for (int z = 0; z < 1; z++)
 		//		{
 		//			GameObject p7 = gom.CreateGameObject();
 		//			p7.AddComponent<cMeshRenderer>("Models/L_Main.FBX");
@@ -290,18 +302,34 @@ void GameLauncher::Update(float delta)
 		}
 	}
 
-	auto& transform = myCustomHandler.GetComponent<Transform>();
-	auto position = transform.GetPosition();
-	if (position.x > 12.f)
 	{
-		direction = -1.f;
-	}
-	if (position.x < -12.f)
-	{
-		direction = 1.f;
+		auto& transform = myCustomHandler.GetComponent<Transform>();
+		auto position = transform.GetPosition();
+		if (position.x > 12.f)
+		{
+			direction = -1.f;
+		}
+		if (position.x < -12.f)
+		{
+			direction = 1.f;
+		}
+		transform.Move(5.f * direction * delta,0,0);
 	}
 
-	transform.Move(10.f * direction * delta,0,0);
+	{
+		auto& transform = myCustomHandler2.GetComponent<Transform>();
+		auto position = transform.GetPosition();
+		if (position.x > 12.f)
+		{
+			direction2 = -1.f;
+		}
+		if (position.x < -12.f)
+		{
+			direction2 = 1.f;
+		}
+		transform.Move(5.f * direction * delta,0,0);
+	}
+
 
 
 	Transform& pLight = GameObjectManager::Get().GetWorldRoot().GetComponent<Transform>();

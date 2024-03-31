@@ -526,7 +526,7 @@ void cLight::RedrawDirectionMap()
 	constexpr float radius = 20;//ModelViewer::Get().GetWorldBounds().GetRadius();
 	myDirectionLightData->Direction.Normalize();
 
-	const Vector3f worldCenter = GameObjectManager::Get().GetCamera().GetComponent<Transform>().GetPosition();
+	const Vector3f worldCenter = Vector3f();//GameObjectManager::Get().GetCamera().GetComponent<Transform>().GetPosition();
 	const Vector3f lightPosition = radius * 5.0f * -Vector3f(myDirectionLightData->Direction.x,myDirectionLightData->Direction.y,myDirectionLightData->Direction.z);
 	myDirectionLightData->lightView = Matrix::LookAt(lightPosition,worldCenter,{ 0,1,0 }); // REFACTOR, Magic value up
 

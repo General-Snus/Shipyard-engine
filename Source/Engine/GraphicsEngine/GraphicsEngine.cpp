@@ -670,7 +670,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 
 		for (unsigned i = 0; i < bufferCount; i++)
 		{
-			gBufferTextures[i].SetView(ViewType::SRV,1);
+			gBufferTextures[i].SetView(ViewType::SRV);
 			commandList->TransitionBarrier(gBufferTextures[i],D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 			commandList->TrackResource(gBufferTextures[i]);
 		}
@@ -698,68 +698,6 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 		graphicCommandList->IASetIndexBuffer(nullptr);
 		graphicCommandList->DrawInstanced(6,1,0,0);
 	}
-
-	//	myG_Buffer.SetWriteTargetToBuffer(); //Let all write to textures
-	//	OPTICK_EVENT("Deferred");
-	//	DeferredCommandList.Execute();
-	//	OPTICK_EVENT("Instanced Deferred");
-	//	myInstanceRenderer.Execute(false); 
-	//	//RHI::SetRenderTarget(nullptr,nullptr);
-	//	myG_Buffer.UnsetResources();
-	//	RHI::EndEvent(); 
-	//	decals
-	//	if picking check
-	//	SSAO
-	//	Do ambience pass? Clarit
-	//	Render all lights
-	//	 OPTICK_EVENT("SSAO");
-	//	RHI::BeginEvent(L"SSAO");
-	//	myCamera->GetFrameBuffer();
-	//	GfxCmd_SSAO().ExecuteAndDestroy();
-	//	RHI::EndEvent();
-	//	////Render shadowmaps
-	//	OPTICK_EVENT("ShadowMaps");
-	//	RHI::BeginEvent(L"ShadowMaps");
-	//	myShadowRenderer.Execute();
-	//	RHI::EndEvent();
-	//	OPTICK_EVENT("Lightning");
-	//	RHI::BeginEvent(L"Lightning");
-	//	myCamera->GetFrameBuffer();
-	//	GfxCmd_SetRenderTarget(SceneBuffer.get(),nullptr).ExecuteAndDestroy();
-	//	GfxCmd_SetLightBuffer().ExecuteAndDestroy(); //REFACTOR Change name to fit purpose
-	//	//RHI::EndEvent();
-	//	 //Forward pass for light
-	//	Forbidden
-	//	//Particles
-	//	OPTICK_EVENT("Particles")
-	//		RHI::BeginEvent(L"Particles");
-	//	RHI::SetBlendState(GraphicsEngine::Get().GetAdditiveBlendState());
-	//	GfxCmd_SetRenderTarget(SceneBuffer.get(),myDepthBuffer.get()).ExecuteAndDestroy();
-	//	myParticleRenderer.Execute();
-	//	RHI::EndEvent();
-	//	//Post processing
-	//	OPTICK_EVENT("Postpro")
-	//		RHI::BeginEvent(L"PostPro");
-	//	RHI::SetBlendState(nullptr);
-	//	GfxCmd_LuminancePass().ExecuteAndDestroy(); // Render to IntermediateA
-	//	GfxCmd_GaussianBlur().ExecuteAndDestroy();
-	//	GfxCmd_Bloom().ExecuteAndDestroy();
-	//	GfxCmd_ToneMapPass().ExecuteAndDestroy(); // Render: BackBuffer Read: REG_Target01
-	//	RHI::EndEvent();//
-	//	//Debug layers
-	//	OPTICK_EVENT("DebugLayers")
-	//		RHI::BeginEvent(L"DebugLayers");
-	//	myCamera->GetFrameBuffer();
-	//	GfxCmd_DebugLayer().ExecuteAndDestroy();
-	//#ifdef  _DEBUGDRAW
-	//	if (myGraphicSettings.DebugRenderer_Active)
-	//	{
-	//		RHI::SetRenderTarget(GraphicsEngine::Get().GetTargetTextures(eRenderTargets::BackBuffer).get(),GraphicsEngine::Get().GetTargetTextures(eRenderTargets::DepthBuffer).get());
-	//		DebugDrawer::Get().Render();
-	//	}
-	//	OverlayCommandList.Execute();
-	//#endif //  _DEBUGDRAW
-	//	RHI::EndEvent(); 
 
 	commandQueue->ExecuteCommandList(commandList);
 }

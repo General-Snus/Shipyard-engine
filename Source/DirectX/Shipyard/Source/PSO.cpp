@@ -19,6 +19,7 @@
 #include "Engine/AssetManager/ComponentSystem/GameObjectManager.h"
 #include "Engine/GraphicsEngine/Rendering/Buffers/FrameBuffer.h"
 #include "Engine/GraphicsEngine/Rendering/Buffers/ObjectBuffer.h"
+#include "Shipyard/MIPS/GenerateMipsPSO.h"
 
 void PSOCache::InitAllStates()
 {
@@ -53,10 +54,8 @@ std::unique_ptr<PSO>& PSOCache::GetState(ePipelineStateID id)
 	return pso_map[id];
 }
 
-void PSOCache::InitRootSignature()
+void PSOCache::InitDefaultSignature()
 {
-	m_RootSignature = std::make_shared<GPURootSignature>();
-
 	CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
 	rootSignatureDesc.Init(0,nullptr,0,nullptr,D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
@@ -100,24 +99,82 @@ void PSOCache::InitRootSignature()
 		CD3DX12_STATIC_SAMPLER_DESC(REG_DefaultSampler,D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR),
 
 		CD3DX12_STATIC_SAMPLER_DESC(REG_BRDFSampler,
-		D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT,
-		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
-		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
-		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
-		0,1,D3D12_COMPARISON_FUNC_NEVER,D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE,0,0),
+									D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT,
+									D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+									D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+									D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+									0,1,D3D12_COMPARISON_FUNC_NEVER,D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE,0,0),
 
 		CD3DX12_STATIC_SAMPLER_DESC(REG_shadowCmpSampler,
-		D3D12_FILTER_COMPARISON_MIN_MAG_MIP_POINT,
-		D3D12_TEXTURE_ADDRESS_MODE_BORDER,
-		D3D12_TEXTURE_ADDRESS_MODE_BORDER,
-		D3D12_TEXTURE_ADDRESS_MODE_BORDER,
-		0,1,D3D12_COMPARISON_FUNC_GREATER_EQUAL,D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE,-D3D12_FLOAT32_MAX,D3D12_FLOAT32_MAX)
+									D3D12_FILTER_COMPARISON_MIN_MAG_MIP_POINT,
+									D3D12_TEXTURE_ADDRESS_MODE_BORDER,
+									D3D12_TEXTURE_ADDRESS_MODE_BORDER,
+									D3D12_TEXTURE_ADDRESS_MODE_BORDER,
+									0,1,D3D12_COMPARISON_FUNC_GREATER_EQUAL,D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE,-D3D12_FLOAT32_MAX,D3D12_FLOAT32_MAX)
 	};
 
 	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
 	rootSignatureDescription.Init_1_1(NumRootParameters,rootParameters,(unsigned)std::size(samplers),samplers,rootSignatureFlags);
 
 	m_RootSignature->SetRootSignatureDesc(rootSignatureDescription.Desc_1_1,GPU::m_FeatureData);
+}
+
+void PSOCache::InitMipmapSignature()
+{
+	auto device = GPU::m_Device;
+	D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
+	featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
+	if (FAILED(device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE,&featureData,sizeof(featureData))))
+	{
+		featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
+	}
+
+	{
+		CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
+		rootSignatureDesc.Init(0,nullptr,0,nullptr,D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+		ComPtr<ID3DBlob> signature;
+		ComPtr<ID3DBlob> error;
+		Helpers::ThrowIfFailed(D3D12SerializeRootSignature(&rootSignatureDesc,D3D_ROOT_SIGNATURE_VERSION_1,&signature,&error));
+		Helpers::ThrowIfFailed(GPU::m_Device->CreateRootSignature(
+			0,
+			signature->GetBufferPointer(),
+			signature->GetBufferSize(),
+			IID_PPV_ARGS(&m_MipRootSignature->GetRootSignature())
+		));
+	}
+
+
+	CD3DX12_DESCRIPTOR_RANGE1 srcMip(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,1,0,0,D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
+	CD3DX12_DESCRIPTOR_RANGE1 outMip(D3D12_DESCRIPTOR_RANGE_TYPE_UAV,4,0,0,D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
+
+	CD3DX12_ROOT_PARAMETER1 rootParameters[GenerateMips::NumRootParameters];
+	rootParameters[GenerateMips::GenerateMipsCB].InitAsConstants(sizeof(GenerateMipsCB) / 4,0);
+	rootParameters[GenerateMips::SrcMip].InitAsDescriptorTable(1,&srcMip);
+	rootParameters[GenerateMips::OutMip].InitAsDescriptorTable(1,&outMip);
+
+	CD3DX12_STATIC_SAMPLER_DESC linearClampSampler(
+		0,
+		D3D12_FILTER_MIN_MAG_MIP_LINEAR,
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP
+	);
+
+	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
+	rootSignatureDesc.Init_1_1(GenerateMips::NumRootParameters,rootParameters,1,&linearClampSampler);
+
+	m_MipRootSignature->SetRootSignatureDesc(rootSignatureDesc.Desc_1_1,featureData.HighestVersion);
+}
+
+void PSOCache::InitRootSignature()
+{
+	m_RootSignature = std::make_shared<GPURootSignature>();
+	m_MipRootSignature = std::make_shared<GPURootSignature>();
+
+	InitDefaultSignature();
+	InitMipmapSignature();
+
 }
 
 PSO PSO::CreatePSO(std::filesystem::path vertexShader,std::filesystem::path pixelShader,unsigned renderTargetAmount,
@@ -164,8 +221,8 @@ PSO PSO::CreatePSO(std::filesystem::path vertexShader,std::filesystem::path pixe
 	const D3D12_PIPELINE_STATE_STREAM_DESC psoDescStreamDesc = {
 			sizeof(PipelineStateStream), &stream
 	};
-	Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&psoDescStreamDesc,IID_PPV_ARGS(&pso.m_pipelineState)));
-	pso.m_pipelineState->SetName(L"LowLifetimePSO");
+	Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&psoDescStreamDesc,IID_PPV_ARGS(&pso.m_PipelineState)));
+	pso.m_PipelineState->SetName(L"LowLifetimePSO");
 
 	return pso;
 }
@@ -208,12 +265,12 @@ void PSO::Init(const ComPtr<ID3D12Device2>& dev)
 	const D3D12_PIPELINE_STATE_STREAM_DESC psoDescStreamDesc = {
 			sizeof(PipelineStateStream), &stream
 	};
-	Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&psoDescStreamDesc,IID_PPV_ARGS(&m_pipelineState)));
-	m_pipelineState->SetName(L"Default pipeline state");
+	Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&psoDescStreamDesc,IID_PPV_ARGS(&m_PipelineState)));
+	m_PipelineState->SetName(L"Default pipeline state");
 }
 ComPtr<ID3D12PipelineState> PSO::GetPipelineState() const
 {
-	return m_pipelineState;
+	return m_PipelineState;
 }
 
 
@@ -307,8 +364,8 @@ void GbufferPSO::Init(const ComPtr<ID3D12Device2>& dev)
 	const D3D12_PIPELINE_STATE_STREAM_DESC psoDescStreamDesc = {
 			sizeof(PipelineStateStream), &stream
 	};
-	Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&psoDescStreamDesc,IID_PPV_ARGS(&m_pipelineState)));
-	m_pipelineState->SetName(L"GbufferPSO");
+	Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&psoDescStreamDesc,IID_PPV_ARGS(&m_PipelineState)));
+	m_PipelineState->SetName(L"GbufferPSO");
 }
 Texture* GbufferPSO::GetRenderTargets()
 {
@@ -346,8 +403,8 @@ void ShadowMapperPSO::Init(const ComPtr<ID3D12Device2>& dev)
 	const D3D12_PIPELINE_STATE_STREAM_DESC psoDescStreamDesc = {
 			sizeof(PipelineStateStream), &stream
 	};
-	Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&psoDescStreamDesc,IID_PPV_ARGS(&m_pipelineState)));
-	m_pipelineState->SetName(L"ShadowMapperPSO");
+	Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&psoDescStreamDesc,IID_PPV_ARGS(&m_PipelineState)));
+	m_PipelineState->SetName(L"ShadowMapperPSO");
 }
 
 void ShadowMapperPSO::WriteShadows(std::shared_ptr<CommandList>& commandList,const std::vector<cMeshRenderer>& objectsToRender)
@@ -514,8 +571,8 @@ void EnvironmentLightPSO::Init(const ComPtr<ID3D12Device2>& dev)
 	const D3D12_PIPELINE_STATE_STREAM_DESC psoDescStreamDesc = {
 			sizeof(PipelineStateStream), &stream
 	};
-	Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&psoDescStreamDesc,IID_PPV_ARGS(&m_pipelineState)));
-	m_pipelineState->SetName(L"EnvironmentLightPSO");
+	Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&psoDescStreamDesc,IID_PPV_ARGS(&m_PipelineState)));
+	m_PipelineState->SetName(L"EnvironmentLightPSO");
 }
 Texture* EnvironmentLightPSO::GetRenderTargets()
 {
@@ -628,8 +685,8 @@ void TonemapPSO::Init(const ComPtr<ID3D12Device2>& dev)
 	const D3D12_PIPELINE_STATE_STREAM_DESC psoDescStreamDesc = {
 			sizeof(PipelineStateStream), &stream
 	};
-	Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&psoDescStreamDesc,IID_PPV_ARGS(&m_pipelineState)));
-	m_pipelineState->SetName(L"TonemapPSO");
+	Helpers::ThrowIfFailed(GPU::m_Device->CreatePipelineState(&psoDescStreamDesc,IID_PPV_ARGS(&m_PipelineState)));
+	m_PipelineState->SetName(L"TonemapPSO");
 }
 Texture* TonemapPSO::GetRenderTargets()
 {

@@ -1,6 +1,6 @@
-#include "AssetManager.pch.h" 
 #include <Tools/Utilities/Math.hpp>
 #include "../MeshAsset.h" 
+#include "AssetManager.pch.h" 
 
 #include "DirectX/Shipyard/GPU.h"
 #include "DirectX/Shipyard/Helpers.h"
@@ -50,6 +50,8 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 		matPath = mdf;
 		matPath.replace_extension("json");
 
+
+
 		std::pair<std::filesystem::path,std::shared_ptr<TextureHolder>> holder;
 		if (material->GetTextureCount(aiTextureType_BASE_COLOR))
 		{
@@ -85,6 +87,14 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 		if (material->GetTextureCount(aiTextureType_DIFFUSE_ROUGHNESS))
 		{
 			material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS,0,&str);
+			holder.first = str.C_Str();
+			dataMat.textures[2] = holder;
+			textureLoaded++;
+		}
+
+		if (material->GetTextureCount(aiTextureType_SPECULAR))
+		{
+			material->GetTexture(aiTextureType_SPECULAR,0,&str);
 			holder.first = str.C_Str();
 			dataMat.textures[2] = holder;
 			textureLoaded++;
@@ -343,7 +353,7 @@ void Mesh::Init()
 
 	return;
 #endif // 
-		}
+}
 
 void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 {

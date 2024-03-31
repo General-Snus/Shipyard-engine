@@ -51,6 +51,9 @@
     <ClCompile Include="DirectXHeader.pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Shipyard\MIPS\GenerateMipsPSO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CrashHandler\DXSampleHelper.h">
@@ -111,6 +114,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DirectXHeader.pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shipyard\MIPS\GenerateMipsPSO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shipyard\Gpu_fwd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

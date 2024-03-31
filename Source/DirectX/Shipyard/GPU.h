@@ -16,22 +16,16 @@
 
 #include "CommandList.h"
 #include "CommandQueue.h"
+#include "Gpu_fwd.h"
 #include "RootSignature.h"
 #include "Texture.h"
 
-class IndexResource;
-class VertexResource;
-class GpuResource;
-class Texture;
 namespace DirectX
 {
 	/*class ResourceUploadBatch;
 	class DescriptorHeap;
 	class GraphicsMemory;*/
 }
-class GPUCommandQueue;
-struct IDXGISwapChain4;
-using namespace Microsoft::WRL;
 
 
 class GPUSupport
@@ -49,32 +43,6 @@ public:
 	ComPtr<IDXGISwapChain4> m_SwapChain;
 };
 
-enum class eHeapTypes : int
-{
-	HEAP_TYPE_CBV_SRV_UAV = 0,
-	HEAP_TYPE_SAMPLER,
-	HEAP_TYPE_RTV,
-	HEAP_TYPE_DSV,
-	HEAP_COUNT
-};
-
-enum class eSRVSpace : int
-{
-	Space0 = 0,
-	Space1,
-	Space2,
-	Space3,
-	SPACE_COUNT
-};
-
-enum class ePIPELINE_STAGE
-{
-	PIPELINE_STAGE_INPUTASSEMBLER = 0x1L,
-	PIPELINE_STAGE_VERTEX_SHADER = 0x2L,
-	PIPELINE_STAGE_GEOMETERY_SHADER = 0x4L,
-	PIPELINE_STAGE_RASTERIZER = 0x8L,
-	PIPELINE_STAGE_PIXEL_SHADER = 0x10L
-};
 
 class GPU
 {
@@ -98,6 +66,8 @@ public:
 		CommandList& commandList,D3D_PRIMITIVE_TOPOLOGY topology,
 		VertexResource& vertexResource,IndexResource& indexResource
 	);
+
+	static HeapHandle GetHeapHandle(eHeapTypes type);
 
 	template<typename vertexType>
 	static bool CreateVertexBuffer(
@@ -176,13 +146,7 @@ public:
 	static inline Texture m_renderTargets[m_FrameCount];
 
 
-	//static inline ComPtr<ID3D12DescriptorHeap> m_RtvHeap;
-	//static inline ComPtr<ID3D12DescriptorHeap> m_DsvHeap;
-	//static inline ComPtr<ID3D12DescriptorHeap> m_SrvHeap;
-	static inline UINT m_RtvDescriptorSize;
-
 	static inline uint64_t m_FenceValues[m_FrameCount] = {};
-
 	static inline D3D_ROOT_SIGNATURE_VERSION m_FeatureData;
 
 

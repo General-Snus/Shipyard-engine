@@ -13,8 +13,10 @@ public:
 private:
 	GameObject myMesh;
 	GameObject myCustomHandler;
+	GameObject myCustomHandler2;
 	Matrix myModelMatrix;
 	float direction = 1.f;
+	float direction2 = -1.f;
 	std::vector<GameObject> vectorOfGameObjects;
 
 };

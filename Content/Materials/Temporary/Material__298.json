@@ -1,0 +1,38 @@
+{
+    "MaterialBuffer": {
+        "NormalStrength": 1.0,
+        "Shine": 100.0,
+        "UVTiling": [
+            1.0,
+            1.0
+        ],
+        "albedoColor": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+        ]
+    },
+    "Textures": [
+        {
+            "TextureName": "background_baseColor.png",
+            "TexturePath": "background_baseColor.png",
+            "TextureType": 0
+        },
+        {
+            "TextureName": "",
+            "TexturePath": "",
+            "TextureType": 1
+        },
+        {
+            "TextureName": "background_metallicRoughness.png",
+            "TexturePath": "background_metallicRoughness.png",
+            "TextureType": 2
+        },
+        {
+            "TextureName": "",
+            "TexturePath": "",
+            "TextureType": 3
+        }
+    ]
+}

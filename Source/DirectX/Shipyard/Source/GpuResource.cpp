@@ -71,12 +71,131 @@ void GpuResource::Reset()
 	m_ResourceName.clear();
 	m_FormatSupport = {};
 }
-  
+
+bool GpuResource::CheckSrvSupport() const
+{
+	return CheckFormatSupport(D3D12_FORMAT_SUPPORT1_SHADER_SAMPLE);
+}
+
+bool GpuResource::CheckRTVSupport() const
+{
+	return CheckFormatSupport(D3D12_FORMAT_SUPPORT1_RENDER_TARGET);
+}
+
+bool GpuResource::CheckUAVSupport() const
+{
+	return CheckFormatSupport(D3D12_FORMAT_SUPPORT1_TYPED_UNORDERED_ACCESS_VIEW) &&
+		CheckFormatSupport(D3D12_FORMAT_SUPPORT2_UAV_TYPED_LOAD) &&
+		CheckFormatSupport(D3D12_FORMAT_SUPPORT2_UAV_TYPED_STORE);
+}
+
+bool GpuResource::CheckDSVSupport() const
+{
+	return CheckFormatSupport(D3D12_FORMAT_SUPPORT1_DEPTH_STENCIL);
+}
+
+void GpuResource::SetView(ViewType view)
+{
+	if (!m_Resource ||
+		m_DescriptorHandles.contains(view) && m_DescriptorHandles.at(view).heapOffset != -1)
+	{
+		return;
+	}
+
+	auto device = GPU::m_Device;
+	CheckFeatureSupport();
+	CD3DX12_RESOURCE_DESC desc(m_Resource->GetDesc());
+
+	switch (view)
+	{
+	case ViewType::UAV:
+	{
+		HeapHandle handle = GPU::GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
+		CreateUnorderedAccessView(GPU::m_Device.Get(),m_Resource.Get(),handle.cpuPtr,desc.MipLevels);
+		m_DescriptorHandles[ViewType::UAV] = handle;
+	}
+	break;
+	case ViewType::SRV:
+	{
+		if (CheckDSVSupport())
+		{
+			D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+			SRVDesc.Format = Helpers::GetDepthFormat(m_Format);
+			SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+			SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+			SRVDesc.Texture2D.MipLevels = 1;
+
+			HeapHandle handle = GPU::GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
+			GPU::m_Device->CreateShaderResourceView(m_Resource.Get(),&SRVDesc,handle.cpuPtr);
+			m_DescriptorHandles[ViewType::SRV] = handle;
+		}
+		else
+		{
+			HeapHandle handle = GPU::GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
+			CreateShaderResourceView(GPU::m_Device.Get(),m_Resource.Get(),handle.cpuPtr);
+			m_DescriptorHandles[ViewType::SRV] = handle;
+		}
+	}
+	break;
+	case ViewType::RTV:
+	{
+		HeapHandle handle = GPU::GetHeapHandle(eHeapTypes::HEAP_TYPE_RTV);
+
+		device->CreateRenderTargetView(m_Resource.Get(),nullptr,handle.cpuPtr);
+		m_DescriptorHandles[ViewType::RTV] = handle;
+	}
+	break;
+	case ViewType::DSV:
+	{
+		HeapHandle handle = GPU::GetHeapHandle(eHeapTypes::HEAP_TYPE_DSV);
+
+		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+		dsvDesc.Format = m_Format;
+		dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+		dsvDesc.Texture2D.MipSlice = 0;
+		dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+
+		device->CreateDepthStencilView(m_Resource.Get(),&dsvDesc,handle.cpuPtr);
+		m_DescriptorHandles[ViewType::DSV] = handle;
+	}
+	break;
+	default:
+		assert(false && "Out of range view type");
+		break;
+	}
+	m_RecentBoundType = view;
+}
+
+void GpuResource::ClearView(ViewType view)
+{
+	m_DescriptorHandles.contains(view) ? m_DescriptorHandles.erase(view) : NULL;
+}
+
+HeapHandle GpuResource::GetHandle(ViewType type)
+{
+	if (m_DescriptorHandles.find(type) != m_DescriptorHandles.end() && m_DescriptorHandles.at(type).heapOffset != -1)
+	{
+		return  m_DescriptorHandles.at(type);
+	}
+	SetView(type);
+	return  m_DescriptorHandles.at(type);
+}
+
+HeapHandle GpuResource::GetHandle() const
+{
+	return  m_DescriptorHandles.at(m_RecentBoundType);
+}
+
+int GpuResource::GetHeapOffset() const
+{
+	return m_DescriptorHandles.at(m_RecentBoundType).heapOffset;
+};
+
+
 void GpuResource::SetResource(const ComPtr<ID3D12Resource>& resource)
 {
 	m_Resource = resource;
 	m_Resource->SetName(m_ResourceName.c_str());
-
 	CheckFeatureSupport();
 }
 
@@ -122,6 +241,14 @@ void GpuResource::CheckFeatureSupport()
 	{
 		m_FormatSupport = {};
 	}
+}
+
+void UAVResource::CreateView(size_t numElements)
+{
+	numElements;
+	//size_t end;
+	//m_AllocatedElements = numElements;
+	//GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->AllocateRange(numElements,,end);
 }
 
 IndexResource::IndexResource(std::wstring name)

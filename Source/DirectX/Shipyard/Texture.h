@@ -2,25 +2,11 @@
 #include <DirectX/Shipyard/GpuResource.h> 
 #include <unordered_map> 
 
+#include "Gpu_fwd.h"
 
 using namespace Microsoft::WRL;
 
-enum class ViewType
-{
-	SRV,
-	RTV,
-	UAV,
-	DSV
-};
 
-
-struct textureHandle
-{
-	D3D12_CPU_DESCRIPTOR_HANDLE cpuPtr;;
-	int heapOffset = -1;
-	int space = 0;
-
-};
 
 class Texture : public GpuResource
 {
@@ -35,7 +21,6 @@ public:
 	// The name of this texture, for easy ID.
 	std::string myName;
 
-	void Destroy() override;
 	//Default state is render target
 	bool AllocateTexture(const Vector2ui dimentions,
 		const std::filesystem::path& name = "UnnamedTexture",
@@ -43,13 +28,10 @@ public:
 		D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS,
 		D3D12_RESOURCE_STATES targetResourceState = D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-	void SetView(ViewType view,unsigned space = 0);
-	void ClearView(ViewType view);
-	bool CreateDDSFromMemory(const void* filePtr,size_t fileSize,bool sRGB);
+	void SetView(D3D12_SHADER_RESOURCE_VIEW_DESC view);
+	void SetView(D3D12_UNORDERED_ACCESS_VIEW_DESC view);
+	void SetView(ViewType view) override;
 
-	textureHandle  GetHandle(ViewType type);
-
-	textureHandle  GetHandle() const;
 
 	uint32_t GetWidth() const { return static_cast<uint32_t>(m_Viewport.Width); }
 	uint32_t GetHeight() const { return static_cast<uint32_t>(m_Viewport.Height); }
@@ -58,41 +40,14 @@ public:
 	const D3D12_RECT& GetRect() const { return m_Rect; };
 	const D3D12_VIEWPORT& GetViewPort() const { return m_Viewport; };
 
-	//-1 is invalid sizet so we need to check that, flinging in max sizet will cause crash making sure we check the value by instantcrashing in case we dont
-	int GetHeapOffset() const;
-	virtual bool IsSRV() const override { return true; };
 
-	bool CheckSRVSupport()
-	{
-		return CheckFormatSupport(D3D12_FORMAT_SUPPORT1_SHADER_SAMPLE);
-	}
 
-	bool CheckRTVSupport()
-	{
-		return CheckFormatSupport(D3D12_FORMAT_SUPPORT1_RENDER_TARGET);
-	}
 
-	bool CheckUAVSupport()
-	{
-		return CheckFormatSupport(D3D12_FORMAT_SUPPORT1_TYPED_UNORDERED_ACCESS_VIEW) &&
-			CheckFormatSupport(D3D12_FORMAT_SUPPORT2_UAV_TYPED_LOAD) &&
-			CheckFormatSupport(D3D12_FORMAT_SUPPORT2_UAV_TYPED_STORE);
-	}
-
-	bool CheckDSVSupport()
-	{
-		return CheckFormatSupport(D3D12_FORMAT_SUPPORT1_DEPTH_STENCIL);
-	}
-	static DXGI_FORMAT GetBaseFormat(DXGI_FORMAT defaultFormat);
-	DXGI_FORMAT GetDepthFormat(DXGI_FORMAT defaultFormat);
 
 protected:
 	bool isCubeMap = false;
-	std::unordered_map<ViewType,textureHandle> m_DescriptorHandles;
-	ViewType m_RecentBoundType = ViewType::SRV;
 	Vector4f m_ClearColor = { 0,0,0,1 };
 
-	DXGI_FORMAT m_Format;
 	D3D12_VIEWPORT m_Viewport;
 	D3D12_RECT m_Rect;
 };

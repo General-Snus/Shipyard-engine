@@ -1,12 +1,24 @@
 #pragma once
-#include <DirectX/directx/d3d12.h>
-
+#include <DirectX/directx/d3d12.h> 
+#include <DirectX/Shipyard/Gpu_fwd.h>
+#include <DirectX/Shipyard/Texture.h>
 #include "Engine/GraphicsEngine/Rendering/Buffers/LightBuffer.h"
 
 class cMeshRenderer;
 class ShipyardShader;
 class PSO;
 using namespace Microsoft::WRL;
+
+namespace GenerateMips
+{
+	enum
+	{
+		GenerateMipsCB,
+		SrcMip,
+		OutMip,
+		NumRootParameters
+	};
+}
 
 class PSOCache
 {
@@ -19,14 +31,18 @@ public:
 		Ambient,
 		DeferredLighting,
 		ToneMap,
-		SSAO
+		SSAO,
+		GenerateMips
 	};
 
 	static void InitRootSignature();
 	static void InitAllStates();
 	static std::unique_ptr<PSO>& GetState(ePipelineStateID id);
 	static inline std::shared_ptr<GPURootSignature> m_RootSignature;
+	static inline std::shared_ptr<GPURootSignature> m_MipRootSignature;
 private:
+	static void InitDefaultSignature();
+	static void InitMipmapSignature();
 
 	static inline std::unordered_map<ePipelineStateID,std::unique_ptr<PSO>> pso_map;
 };
@@ -49,7 +65,7 @@ public:
 	virtual ComPtr<ID3D12PipelineState> GetPipelineState() const;
 protected:
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
-	ComPtr<ID3D12PipelineState> m_pipelineState;
+	ComPtr<ID3D12PipelineState> m_PipelineState;
 	std::shared_ptr<ShipyardShader> vs;
 	std::shared_ptr<ShipyardShader> ps;
 	ComPtr<ID3D12Device2> m_Device;

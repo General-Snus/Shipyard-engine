@@ -5,6 +5,8 @@
 #include <XTK/WICTextureLoader.h>
 #include "../GPU.h" 
 
+#include <Tools/ThirdParty/dpp/stringops.h>
+
 #include "../Helpers.h" 
 #include "Engine/GraphicsEngine/Shaders/Registers.h"
 #include "Shipyard/CommandQueue.h"
@@ -137,27 +139,27 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 	m_GraphicsMemory = std::make_shared<DirectX::DX12::GraphicsMemory>(m_Device.Get());
 
 
-	m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV] = std::make_unique<DescriptorPile>(
+	m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)] = std::make_unique<DescriptorPile>(
 		m_Device.Get(),
 		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
 		D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
 		2048
 	);
 
-	m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_SAMPLER] = std::make_unique<DescriptorPile>(
+	m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_SAMPLER)] = std::make_unique<DescriptorPile>(
 		m_Device.Get(),
 		D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
 		D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
 		2048
 	);
 
-	m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_RTV] = std::make_unique<DescriptorPile>(
+	m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_RTV)] = std::make_unique<DescriptorPile>(
 		m_Device.Get(),
 		D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
 		D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
 		2048
 	);
-	m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_DSV] = std::make_unique<DescriptorPile>(
+	m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_DSV)] = std::make_unique<DescriptorPile>(
 		m_Device.Get(),
 		D3D12_DESCRIPTOR_HEAP_TYPE_DSV,
 		D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
@@ -333,6 +335,14 @@ void GPU::ConfigureInputAssembler(
 	commandList.GetGraphicsCommandList()->IASetIndexBuffer(&indexView);
 	commandList.TrackResource(indexResource);
 }
+
+HeapHandle GPU::GetHeapHandle(eHeapTypes type)
+{
+	const int heapOffset = static_cast<int>(m_ResourceDescriptors[static_cast<int>(type)]->Allocate());
+	const auto descriptorHandle = m_ResourceDescriptors[static_cast<int>(type)]->GetCpuHandle(heapOffset);
+	return HeapHandle(descriptorHandle,heapOffset);
+}
+
 bool GPU::CreateIndexBuffer(const std::shared_ptr<CommandList>& commandList,IndexResource& outIndexResource,const std::vector<uint32_t>& aIndexList)
 {
 	const DXGI_FORMAT indexFormat = (sizeof(uint32_t) == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
@@ -419,14 +429,24 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 
 	const auto width = outTexture->m_Resource->GetDesc().Width;
 	const auto height = outTexture->m_Resource->GetDesc().Height;
-
 	outTexture->m_Rect = D3D12_RECT(0,0,static_cast<uint32_t>(width),height);
 	outTexture->m_Viewport = D3D12_VIEWPORT(0,0,static_cast<FLOAT>(width),static_cast<FLOAT>(height),0,1);
-
 	outTexture->m_Resource->SetName(aFileName.wstring().c_str());
 
 	outTexture->CheckFeatureSupport();
 	outTexture->SetView(ViewType::SRV);
+
+
+	//FUUUUCK THAT
+	//if (generateMips) 
+	//{
+	//	auto commandQueue = GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COMPUTE);
+	//	auto list = commandQueue->GetCommandList(L"MipMaker");
+	//	list->GenerateMips(*outTexture);
+	//	commandQueue->ExecuteCommandList(list);
+	//}
+
+
 	return true;
 }
 

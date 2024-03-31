@@ -1,14 +1,17 @@
 #pragma once
-// Reosurce wrapper for GPU resources
+// Resource wrapper for GPU resources
 
 #define D3D12_GPU_VIRTUAL_ADDRESS_NULL      ((D3D12_GPU_VIRTUAL_ADDRESS)0) 
 #define D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN   ((D3D12_GPU_VIRTUAL_ADDRESS)-1)
 
 #include <memory>
 #include <string>
-#include <wrl/client.h> 
+#include <unordered_map>
+#include <wrl/client.h>   
 
+#include "Gpu_fwd.h" 
 using namespace Microsoft::WRL;
+
 
 
 class GpuResource
@@ -23,23 +26,35 @@ public:
 	GpuResource& operator=(GpuResource&& other) noexcept;
 	GpuResource(GpuResource& toCopy);
 
-	inline virtual void Destroy()
+	virtual void Destroy()
 	{
 		m_Resource = nullptr;
-		//Potential resource management here
+		for (auto& [type,pair] : m_DescriptorHandles)
+		{
+			pair.cpuPtr.ptr = 0;
+			pair.heapOffset = -1;
+		}
 	}
 
-
 	virtual void CreateView(size_t numElements,size_t elementSize);
-	void Reset();
+	virtual void SetView(ViewType view);
+	virtual void ClearView(ViewType view);
+
+	virtual HeapHandle GetHandle(ViewType type);
+	virtual HeapHandle GetHandle() const;
+	virtual int GetHeapOffset() const;
 
 	void SetResource(const ComPtr<ID3D12Resource>& resource);
 	ComPtr<ID3D12Resource> GetResource();
 	const ComPtr<ID3D12Resource>& GetResource() const;
-
 	ID3D12Resource** GetAddressOf();
 
-	virtual bool IsSRV() const { return false; };
+	void Reset();
+
+	bool CheckSrvSupport() const;
+	bool CheckRTVSupport() const;
+	bool CheckUAVSupport() const;
+	bool CheckDSVSupport() const;
 
 	bool CheckFormatSupport(D3D12_FORMAT_SUPPORT1 formatSupport) const;
 	bool CheckFormatSupport(D3D12_FORMAT_SUPPORT2 formatSupport) const;
@@ -48,10 +63,39 @@ public:
 protected:
 	D3D12_RESOURCE_STATES m_UsageState;
 	D3D12_RESOURCE_STATES m_TransitioningState;
-	std::wstring m_ResourceName;
 
+
+	DXGI_FORMAT m_Format;
+	ViewType m_RecentBoundType = ViewType::SRV;
+	std::unordered_map<ViewType,HeapHandle> m_DescriptorHandles;
+
+	std::wstring m_ResourceName;
 	ComPtr<ID3D12Resource> m_Resource;
 	D3D12_FEATURE_DATA_FORMAT_SUPPORT m_FormatSupport;
+};
+
+
+
+class UAVResource : public GpuResource
+{
+public:
+	UAVResource() = default;
+	explicit UAVResource(std::wstring name);
+
+	void CreateView(size_t numElements);
+	D3D12_CPU_DESCRIPTOR_HANDLE GetHandle(unsigned offset) const
+	{
+		return { m_Handle.ptr + (bufferSize * offset) };;
+	}
+	unsigned GetAllocatedElements() const
+	{
+		return m_AllocatedElements;
+	}
+
+private:
+	D3D12_CPU_DESCRIPTOR_HANDLE m_Handle;
+	unsigned m_AllocatedElements;
+	const size_t bufferSize;
 };
 
 class IndexResource : public GpuResource

@@ -5,6 +5,7 @@
 #include <vector>
 #include <wrl/client.h> 
 
+enum class eHeapTypes;
 class ResourceStateTracker;
 class GpuResource;
 class Texture;
@@ -18,6 +19,15 @@ public:
 	CommandList(D3D12_COMMAND_LIST_TYPE type,const std::wstring& name = L"NoName");
 
 	void CopyBuffer(GpuResource& buffer,size_t numElements,size_t elementSize,const void* bufferData,D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
+
+	void SetResourseView(
+		eHeapTypes heapType,GpuResource& resource,D3D12_RESOURCE_STATES state = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		UINT firstSubresource = 0,UINT numSubresources = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
+		const D3D12_SHADER_RESOURCE_VIEW_DESC* srv = nullptr
+	);
+
+
+
 	void TransitionBarrier(const ComPtr<ID3D12Resource>& resource,D3D12_RESOURCE_STATES stateAfter,UINT subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,bool flushBarriers = false);
 	void TransitionBarrier(GpuResource& resource,D3D12_RESOURCE_STATES stateAfter,UINT subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,bool flushBarriers = false);
 	void SetDescriptorTable(unsigned slot,Texture* texture);
@@ -28,15 +38,6 @@ public:
 	{
 		return m_CommandList;
 	}
-
-
-	void SetView(uint32_t rootParameterIndex,
-		uint32_t descriptorOffset,
-		const GpuResource& resource,
-		D3D12_RESOURCE_STATES stateAfter,
-		UINT firstSubresource,
-		UINT numSubresources,
-		const D3D12_SHADER_RESOURCE_VIEW_DESC* srv);
 
 	void TrackResource(Microsoft::WRL::ComPtr<ID3D12Object> object);
 	void TrackResource(const GpuResource& res);
@@ -50,7 +51,13 @@ public:
 
 	void Reset();
 
+	template<typename T>
+	void SetConstantBuffer(unsigned slot,const T& constantBuffer);
+	void CopyResource(const ComPtr<ID3D12Resource>& destination,const ComPtr<ID3D12Resource>& source);
+
+	void GenerateMips(Texture& texture);
 private:
+	void GenerateMips_UAV(Texture& texture,DXGI_FORMAT format);
 
 private:
 	std::unique_ptr<ResourceStateTracker> m_ResourceStateTracker;
