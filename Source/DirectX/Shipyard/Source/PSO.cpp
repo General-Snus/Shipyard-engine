@@ -446,7 +446,6 @@ void ShadowMapperPSO::WriteShadows(std::shared_ptr<CommandList>& commandList,con
 					const auto& alloc1 = GPU::m_GraphicsMemory->AllocateConstant<ObjectBuffer>(objectBuffer);
 					graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::objectBuffer,alloc1.GpuAddress());
 
-
 					for (auto& element : object.GetElements())
 					{
 						GPU::ConfigureInputAssembler(*commandList,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.VertexBuffer,element.IndexResource);

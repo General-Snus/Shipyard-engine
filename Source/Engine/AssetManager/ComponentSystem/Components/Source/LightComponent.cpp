@@ -523,7 +523,7 @@ void cLight::RedrawDirectionMap()
 {
 	OPTICK_EVENT();
 	//TODO GET ACTIVE SCENE
-	constexpr float radius = 20;//ModelViewer::Get().GetWorldBounds().GetRadius();
+	constexpr float radius = 50;//ModelViewer::Get().GetWorldBounds().GetRadius();
 	myDirectionLightData->Direction.Normalize();
 
 	const Vector3f worldCenter = Vector3f();//GameObjectManager::Get().GetCamera().GetComponent<Transform>().GetPosition();
