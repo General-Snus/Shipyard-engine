@@ -8,15 +8,18 @@ struct DefaultMaterialBuffer
 
     float2 UVTiling;
     float NormalStrength;
-    float Shine;
-
+    float Shine; 
     float Roughness;
+
     int albedoTexture;
     int normalTexture;
-    int materialTexture;
-
+    int MaterialTexture; 
     int emissiveTexture;
-    float3 padding;
+
+    uint vertexOffset;
+    uint vertexBufferIndex; 
+
+    float1 padding;
 };
 ConstantBuffer<DefaultMaterialBuffer> g_defaultMaterial : register(HLSL_REG_DefaultMaterialBuffer);
 

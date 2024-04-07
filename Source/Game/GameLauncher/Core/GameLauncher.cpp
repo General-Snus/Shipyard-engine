@@ -174,10 +174,11 @@ void GameLauncher::Start()
 #if WorkingOnPngLoading
 	{
 		GameObject sponza = gom.CreateGameObject();
-		sponza.AddComponent<cMeshRenderer>("Models/Sponza/Sponza2.fbx");
+		sponza.AddComponent<cMeshRenderer>("Models/Sponza/Sponza3Intel.fbx");
 		//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
 		auto& transform = sponza.AddComponent<Transform>();
 		transform.SetPosition(0,25,0);
+		transform.SetScale(10);
 		transform.SetGizmo(false);
 	}
 #endif
@@ -190,6 +191,7 @@ void GameLauncher::Start()
 		light.BindDirectionToTransform(true);
 		light.SetColor({ .5f,.5f,1 });
 		light.SetPower(10);
+		light.SetIsShadowCaster(false);
 		light.SetRange(4.5f);
 	}
 
@@ -199,6 +201,7 @@ void GameLauncher::Start()
 		auto& light = myCustomHandler2.AddComponent<cLight>(eLightType::Point);
 		transform.SetPosition(0,30,4);
 		light.BindDirectionToTransform(true);
+		light.SetIsShadowCaster(false);
 		light.SetColor({ 1,.5f,.5f });
 		light.SetPower(10);
 		light.SetRange(4.5f);
@@ -214,17 +217,17 @@ void GameLauncher::Start()
 		transform.SetGizmo(false);
 	}
 	{
-		//for (int x = 0; x < 1; x++)
+		//for (int x = 0; x < 4; x++)
 		//{
 		//	for (int y = 0; y < 1; y++)
 		//	{
-		//		for (int z = 0; z < 1; z++)
+		//		for (int z = 0; z < 4; z++)
 		//		{
 		//			GameObject p7 = gom.CreateGameObject();
 		//			p7.AddComponent<cMeshRenderer>("Models/L_Main.FBX");
 		//			//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
 		//			auto& transform = p7.AddComponent<Transform>();
-		//			transform.SetPosition(500.f * x,500.f * y,500.f * z);
+		//			transform.SetPosition(500.f * x,150.f + 500.f * y,500.f * z);
 		//			transform.SetRotation(90,0,0);
 		//			transform.SetGizmo(false);
 		//		}
@@ -242,7 +245,7 @@ void GameLauncher::Start()
 	else
 	{
 		GenerateNewRandomCubes();
-	}
+}
 #endif
 	Logger::Log("GameLauncher start");
 }
@@ -252,11 +255,20 @@ void GameLauncher::Update(float delta)
 	delta;
 	OPTICK_EVENT();
 	AIEventManager::Instance().Update();
-	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::K))
+	if (InputHandler::GetInstance().IsKeyPressed(static_cast<int>(Keys::K)))
 	{
 		GraphicsEngine::Get().GetSettings().DebugRenderer_Active = !GraphicsEngine::Get().GetSettings().DebugRenderer_Active;
 	}
 
+	if (InputHandler::GetInstance().IsKeyPressed(static_cast<int>(Keys::F5)))
+	{
+		Editor::GetApplicationState().filter = DebugFilter::NoFilter;
+	}
+
+	if (InputHandler::GetInstance().IsKeyPressed(static_cast<int>(Keys::F6)))
+	{
+		Editor::GetApplicationState().filter = static_cast<DebugFilter>((static_cast<int>(Editor::GetApplicationState().filter) + 1) % static_cast<int>(DebugFilter::count));
+	}
 #if PHYSX
 	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::F4))
 	{
@@ -334,11 +346,11 @@ void GameLauncher::Update(float delta)
 
 	Transform& pLight = GameObjectManager::Get().GetWorldRoot().GetComponent<Transform>();
 	constexpr float rotSpeed = 25.f;
-	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::NUMPAD6))
+	if (InputHandler::GetInstance().IsKeyHeld(static_cast<int>(Keys::NUMPAD6)))
 	{
 		pLight.Rotate(rotSpeed * delta,0,0);
 	}
-	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::NUMPAD3))
+	if (InputHandler::GetInstance().IsKeyHeld(static_cast<int>(Keys::NUMPAD3)))
 	{
 		pLight.Rotate(-rotSpeed * delta,0,0);
 	}

@@ -9,11 +9,12 @@ float3 PositionInBound(float3 aMin, float3 aMax, float3 aPosition)
 }
 
 DefaultVertexToPixel main(DefaultVertexInput input)
-{ 
+{
+
+
     DefaultVertexToPixel result;
     result.UV = input.UV;
-    result.Position = input.Position; 
-    
+    result.Position = input.Position;  
     result.Normal = input.Normal;
     result.Tangent = input.Tangent;
     result.BiNormal = cross(input.Normal, input.Tangent);

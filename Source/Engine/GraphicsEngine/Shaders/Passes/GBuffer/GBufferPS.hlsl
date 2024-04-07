@@ -24,7 +24,7 @@ GBufferOutput main(DefaultVertexToPixel input)
         discard;
     }
     
-    const float4 materialComponent = textureHeap[g_defaultMaterial.materialTexture].Sample(defaultSampler, uv);
+    const float4 materialComponent = textureHeap[g_defaultMaterial.MaterialTexture].Sample(defaultSampler, uv);
     const float2 textureNormal = textureHeap[g_defaultMaterial.normalTexture].Sample(defaultSampler, uv).xy;
     const float4 effect = textureHeap[g_defaultMaterial.emissiveTexture].Sample(defaultSampler, uv);
 
