@@ -1,0 +1,38 @@
+{
+    "MaterialBuffer": {
+        "NormalStrength": 1.0,
+        "Shine": 100.0,
+        "UVTiling": [
+            1.0,
+            1.0
+        ],
+        "albedoColor": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+        ]
+    },
+    "Textures": [
+        {
+            "TextureName": "wood_tile_01_BaseColor.png",
+            "TexturePath": "wood_tile_01_BaseColor.png",
+            "TextureType": 0
+        },
+        {
+            "TextureName": "wood_tile_01_Normal.png",
+            "TexturePath": "wood_tile_01_Normal.png",
+            "TextureType": 1
+        },
+        {
+            "TextureName": "",
+            "TexturePath": "",
+            "TextureType": 2
+        },
+        {
+            "TextureName": "",
+            "TexturePath": "",
+            "TextureType": 3
+        }
+    ]
+}
