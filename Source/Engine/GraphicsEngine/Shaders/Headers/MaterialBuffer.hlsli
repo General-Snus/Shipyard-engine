@@ -11,10 +11,10 @@ struct DefaultMaterialBuffer
     float Shine; 
     float Roughness;
 
-    int albedoTexture;
-    int normalTexture;
-    int MaterialTexture; 
-    int emissiveTexture;
+    int AlbedoTextureIndex;
+    int NormalTextureIndex;
+    int MaterialTextureIndex; 
+    int EmissiveTextureIndex;
 
     uint vertexOffset;
     uint vertexBufferIndex; 

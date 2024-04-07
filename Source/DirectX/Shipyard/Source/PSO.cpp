@@ -82,16 +82,16 @@ void PSOCache::InitDefaultSignature()
 	rootParameters[eRootBindings::materialBuffer].InitAsConstantBufferView(REG_DefaultMaterialBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
 	rootParameters[eRootBindings::lightBuffer].InitAsConstantBufferView(REG_LightBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
 
-	const auto descriptorRange = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,127,REG_colorMap,0,D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
+	const auto descriptorRange = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,5000,REG_colorMap,0,D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC_WHILE_SET_AT_EXECUTE);
 	rootParameters[eRootBindings::Textures].InitAsDescriptorTable(1,&descriptorRange,D3D12_SHADER_VISIBILITY_PIXEL);
 
-	const auto GbufferPasses = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,127,REG_colorMap,1,D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
+	const auto GbufferPasses = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,127,REG_colorMap,1,D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC_WHILE_SET_AT_EXECUTE);
 	rootParameters[eRootBindings::GbufferPasses].InitAsDescriptorTable(1,&GbufferPasses,D3D12_SHADER_VISIBILITY_PIXEL);
 
-	const auto TargetTexture = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,127,REG_Target0,2,D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
+	const auto TargetTexture = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,127,REG_Target0,2,D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC_WHILE_SET_AT_EXECUTE);
 	rootParameters[eRootBindings::TargetTexture].InitAsDescriptorTable(1,&TargetTexture,D3D12_SHADER_VISIBILITY_PIXEL);
 
-	const auto PermanentTextures = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,127,REG_enviromentCube,3,D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
+	const auto PermanentTextures = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,127,REG_enviromentCube,3,D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC_WHILE_SET_AT_EXECUTE);
 	rootParameters[eRootBindings::PermanentTextures].InitAsDescriptorTable(1,&PermanentTextures,D3D12_SHADER_VISIBILITY_PIXEL);
 
 	const CD3DX12_STATIC_SAMPLER_DESC samplers[]
@@ -291,9 +291,14 @@ void GbufferPSO::Init(const ComPtr<ID3D12Device2>& dev)
 		CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL_FORMAT DSVFormat;
 		CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS RTVFormats;
 		CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL DepthStencilState;
+		CD3DX12_PIPELINE_STATE_STREAM_BLEND_DESC BlendDesc;
 	}  stream;
 
 	D3D12_RT_FORMAT_ARRAY rtvFormats = {};
+
+	CD3DX12_BLEND_DESC desc = CD3DX12_BLEND_DESC(CD3DX12_DEFAULT());
+	desc.IndependentBlendEnable = true;
+
 
 	renderTargets[0].AllocateTexture(
 		{ GPU::m_Width,GPU::m_Height },
@@ -301,6 +306,10 @@ void GbufferPSO::Init(const ComPtr<ID3D12Device2>& dev)
 		DXGI_FORMAT_R8G8B8A8_UNORM,
 		D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS
 	);
+	desc.RenderTarget[0].BlendEnable = true;
+	desc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	desc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	desc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
 
 	renderTargets[1].AllocateTexture(
 		{ GPU::m_Width,GPU::m_Height },
@@ -348,6 +357,8 @@ void GbufferPSO::Init(const ComPtr<ID3D12Device2>& dev)
 	{
 		rtvFormats.RTFormats[i] = renderTargets[i].GetResource()->GetDesc().Format;
 	}
+
+	stream.BlendDesc = desc;
 
 	stream.pRootSignature = PSOCache::m_RootSignature->GetRootSignature().Get();
 	stream.InputLayout = { Vertex::InputLayoutDefinition , Vertex::InputLayoutDefinitionSize };

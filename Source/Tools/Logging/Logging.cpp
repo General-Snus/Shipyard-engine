@@ -65,17 +65,6 @@ void Logger::Log(const std::string& aString)
 			SetConsoleTextAttribute(myHandle,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 		}
 	}
-	{
-		if (shouldPrintToOutput)
-		{
-			const std::string message = "[" + Timestamp() + "]" + myNamespace + " [   LOG   ] " + aString;
-			OutputDebugStringA(message.c_str());
-		}
-		else
-		{
-			std::cout << aString << std::endl;
-		}
-	}
 }
 
 void Logger::Warn(const std::string& aString)

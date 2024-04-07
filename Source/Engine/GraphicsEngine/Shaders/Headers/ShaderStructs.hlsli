@@ -109,6 +109,7 @@ SamplerState PointSampler : register(HLSL_REG_PointSampler);
 SamplerComparisonState shadowCmpSampler : register(HLSL_REG_shadowCmpSampler);
 
 Texture2D textureHeap[] : register(HLSL_REG_colorMap);
+ByteAddressBuffer meshHeap[] : register(HLSL_REG_colorMap,space4);
 
 Texture2D colorPass : register(HLSL_REG_colorMap, space1);
 Texture2D normalPass : register(HLSL_REG_normalMap, space1);
@@ -126,7 +127,7 @@ Texture2D<float4> Target03_Texture : register(HLSL_REG_Target03, space2);
 Texture2D<float4> Target04_Texture : register(HLSL_REG_Target04, space2);
 Texture2D<float4> shadowMap : register(HLSL_REG_dirLightShadowMap, space2);
 
-TextureCube enviromentCube : register(HLSL_REG_enviromentCube,space3);
+TextureCube environmentCube : register(HLSL_REG_enviromentCube,space3);
 Texture2D<float4> BRDF_LUT_Texture : register(HLSL_REG_BRDF_LUT_Texture, space3);
 Texture2D<float4> Noise_Texture : register(HLSL_REG_Noise_Texture, space3);
 #endif

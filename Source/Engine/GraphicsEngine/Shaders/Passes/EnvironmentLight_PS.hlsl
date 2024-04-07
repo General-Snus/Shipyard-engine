@@ -23,7 +23,7 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
 	const float3 diffuseColor = lerp((float3)0.0f, albedo.rgb, 1 - metallic);
 	const float3 specularColor = lerp((float3)0.04f, albedo.rgb, metallic);
 
-	const float3 enviromentalLight = CalculateIndirectLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, enviromentCube, roughness, occlusion);
+	const float3 enviromentalLight = CalculateIndirectLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, environmentCube, roughness, occlusion);
 	const float3 directLight = CalculateDirectionLight(diffuseColor, specularColor, Normal.xyz, cameraDirection, roughness, worldPosition);
 	const float3 ambientLight = albedo.rgb * .1f;
 

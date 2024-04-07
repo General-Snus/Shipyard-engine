@@ -1,6 +1,6 @@
+#include "AssetManager.pch.h" 
 #include <Tools/Utilities/Math.hpp>
 #include "../MeshAsset.h" 
-#include "AssetManager.pch.h" 
 
 #include "DirectX/Shipyard/GPU.h"
 #include "DirectX/Shipyard/Helpers.h"
@@ -326,31 +326,7 @@ void Mesh::Init()
 	boxSphereBounds = Sphere<float>(center,radius);
 
 	isLoadedComplete = true;
-
 	bufferSize = 0;
-	//vertexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(Matrix) * myInstances.size());
-	//vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	//vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	//vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	//vertexBufferDesc.MiscFlags = 0;
-	//vertexBufferDesc.StructureByteStride = 0;
-	//
-	//if (myInstances.size())
-	//{
-	//	HRESULT result;
-	//	result = RHI::Device->CreateBuffer(
-	//		&vertexBufferDesc,
-	//		nullptr,
-	//		myInstanceBuffer.GetAddressOf()
-	//	);
-	//	bufferSize = static_cast<int>(myInstances.size());
-	//	if (FAILED(result))
-	//	{
-	//		Logger::Log("Failed to create Instance buffer");
-	//		return;
-	//	}
-	//}
-
 	return;
 #endif // 
 }

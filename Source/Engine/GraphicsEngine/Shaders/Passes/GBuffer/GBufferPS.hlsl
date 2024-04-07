@@ -12,21 +12,19 @@ GBufferOutput main(DefaultVertexToPixel input)
     normalize(input.Normal)
     );
     
-    const float3 cameraDirection = g_FrameBuffer.FB_CameraPosition.xyz - input.WorldPosition.xyz;
-    const float3 cameraNormalizedDirection = normalize(cameraDirection);
-   // result.Color.rgb = (input.Normal.rgb + 1) / 2.0f;
+    const float3 cameraDirection = g_FrameBuffer.FB_CameraPosition.xyz - input.WorldPosition.xyz; 
     const float2 uv = input.UV;
     
-    const float4 textureColor = textureHeap[g_defaultMaterial.albedoTexture].Sample(defaultSampler, uv); // * g_defaultMaterial.DefaultMaterial.albedoColor;
+    const float4 textureColor = textureHeap[g_defaultMaterial.AlbedoTextureIndex].Sample(defaultSampler, uv); // * g_defaultMaterial.DefaultMaterial.albedoColor;
     
     if(textureColor.a < 0.1f)
     {
         discard;
     }
     
-    const float4 materialComponent = textureHeap[g_defaultMaterial.MaterialTexture].Sample(defaultSampler, uv);
-    const float2 textureNormal = textureHeap[g_defaultMaterial.normalTexture].Sample(defaultSampler, uv).xy;
-    const float4 effect = textureHeap[g_defaultMaterial.emissiveTexture].Sample(defaultSampler, uv);
+    const float4 materialComponent = textureHeap[g_defaultMaterial.MaterialTextureIndex].Sample(defaultSampler, uv);
+    const float2 textureNormal = textureHeap[g_defaultMaterial.NormalTextureIndex].Sample(defaultSampler, uv).xy;
+    const float4 effect = textureHeap[g_defaultMaterial.EmissiveTextureIndex].Sample(defaultSampler, uv);
 
     //Normals
     float3 pixelNormal;

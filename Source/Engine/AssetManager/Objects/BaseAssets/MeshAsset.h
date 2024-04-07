@@ -1,6 +1,7 @@
 #pragma once
 #include <Tools/Utilities/LinearAlgebra/Sphere.hpp> 
 #include "BaseAsset.h"
+#include "Tools/Utilities/LinearAlgebra/Matrix4x4.h"
 
 struct aiMesh;
 struct aiScene;

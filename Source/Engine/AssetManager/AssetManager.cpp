@@ -57,11 +57,11 @@ void AssetManager::ThreadedLoading()
 				//this->assetCallbackMaster.UpdateStatusOf<T>(working->GetAssetPath(),AssetCallbackMaster::created); 
 				const double timeEnd = Timer::GetInstance().GetTotalTime();
 				const double diff = (timeEnd - timeStart) * 1000.0;
-				std::string str = "Loaded: " + working->GetAssetPath().string() + " in " + std::to_string(diff) + "ms \n";
+				const std::string str = "Loaded: " + working->GetAssetPath().string() + " in " + std::to_string(diff) + "ms \n";
 				Logger::Log(str);
 				return;
 			}
-			std::string str = "Failed to load " + working->GetAssetPath().string();
+			const std::string str = "Failed to load " + working->GetAssetPath().string();
 			Logger::Warn(str);
 		}
 	}

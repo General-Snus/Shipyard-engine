@@ -17,7 +17,7 @@ float4 GetViewPosition(float2 uv)
 
 float4 GetViewNormal(float2 uv)
 {
-	const float4 worldNormal = float4(textureHeap[g_defaultMaterial.normalTexture].Sample(defaultSampler, uv).xyz, 0);
+	const float4 worldNormal = float4(textureHeap[g_defaultMaterial.NormalTextureIndex].Sample(defaultSampler, uv).xyz, 0);
 	const float4 viewNormal = mul(g_FrameBuffer.FB_InvView, worldNormal);
 	return viewNormal;
 }
