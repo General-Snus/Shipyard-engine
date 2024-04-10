@@ -1,8 +1,10 @@
-#pragma once
-#include <d3d11.h>
-#include <Engine/GraphicsEngine/Objects/Shader.h>
-#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
-#include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
+#pragma once  
+#include <Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h>
+
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
+#include <Tools/Utilities/LinearAlgebra/Vectors.hpp> 
+#include  <wrl/client.h>
+
 
 //Credited for work: Daniel Borghammar & Simon Nilsson 
 struct DebugVertex
@@ -11,8 +13,8 @@ struct DebugVertex
 	Vector4f Position = { 0,0,0,0 };
 	Vector4f Color = { 0,0,0,0 };
 
-	static const std::vector<D3D11_INPUT_ELEMENT_DESC> InputLayoutDescription;
-	static ComPtr<ID3D11InputLayout> InputLayout;
+	static const std::vector<D3D12_INPUT_ELEMENT_DESC> InputLayoutDescription;
+	//static ComPtr<ID3D11InputLayout> InputLayout;
 };
 
 class DebugDrawer
@@ -62,11 +64,11 @@ private:
 	std::unordered_map<size_t,float> myDebugLifetime;
 	size_t myNextIndex = 0;
 
-	ComPtr<ID3D11Buffer> myLineVertexBuffer;
-	ComPtr<ID3D11Buffer> myLineIndexBuffer;
+	ComPtr<ID3D12Resource> myLineVertexBuffer;
+	ComPtr<ID3D12Resource> myLineIndexBuffer;
 	size_t myNumLineIndices = 0;
 
-	std::shared_ptr<Shader> myLineVS;
-	std::shared_ptr<Shader> myLinePS;
+	std::shared_ptr<ShipyardShader> myLineVS;
+	std::shared_ptr<ShipyardShader> myLinePS;
 	bool myPrimitiveListDirty = false;
 };

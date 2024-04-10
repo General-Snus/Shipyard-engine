@@ -1,14 +1,16 @@
-#include "PersistentSystems.pch.h" 
+#include "PersistentSystems.pch.h"
+
+#include <Editor/Editor/Defines.h>
 #include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
 #include <pvd/PxPvdTransport.h>
 #include <Tools/Utilities/Math.hpp>
 #include "../PhysXInterpeter.h"
 
 #include "cooking/PxCooking.h"  
+#include "Engine/AssetManager/AssetManager.h"
 #include "geometry\PxTriangleMeshGeometry.h"
 #include "PxPhysics.h"
 #include "PxPhysicsAPI.h" 
-#include "Engine/AssetManager/AssetManager.h"
 
 using namespace physx;
 
@@ -53,7 +55,7 @@ int Shipyard_PhysX::InitializePhysx()
 	gDispatcher = PxDefaultCpuDispatcherCreate(2);
 
 	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
-	sceneDesc.gravity = PxVec3(0.0f,-9.81f,0.0f);
+	sceneDesc.gravity = PxVec3(0.0f,-9.82f,0.0f);
 	sceneDesc.cpuDispatcher = gDispatcher;
 	sceneDesc.filterShader = PxDefaultSimulationFilterShader;
 
@@ -63,8 +65,6 @@ int Shipyard_PhysX::InitializePhysx()
 
 
 	gMaterial = gPhysics->createMaterial(0.5f,0.5f,0.6f);
-	//PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics,PxPlane(0,1,0,0),*gMaterial);
-	//gScene->addActor(*groundPlane);
 
 	gScene->simulate(.1f);
 
@@ -115,8 +115,6 @@ void Shipyard_PhysX::ShutdownPhysx()
 		PX_RELEASE(transport);
 	}
 	PX_RELEASE(gFoundation);
-
-	printf("SnippetHelloWorld done.\n");
 }
 
 PxPhysics* Shipyard_PhysX::GetPhysicsWorld()
@@ -144,11 +142,11 @@ physx::PxTriangleMesh* Shipyard_PhysX::CookMesh<physx::PxTriangleMesh>(std::shar
 		while (myToBeCookedMesh->isLoadedComplete == false)
 		{
 		}
-	} 
+	}
 
 	Element& element = myToBeCookedMesh->Elements[0];
-	const int vertCount = element.NumVertices;
-	const int indexCount = element.NumIndices;
+	const int vertCount = element.VertexBuffer.GetVertexCount();
+	const int indexCount = element.IndexResource.GetIndexCount();
 
 	PxVec3* convexVerts = new PxVec3[vertCount];
 	for (int i = 0; i < vertCount; i++)

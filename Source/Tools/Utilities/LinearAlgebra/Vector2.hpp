@@ -35,7 +35,8 @@ public:
 	~Vector2<T>() = default;
 
 	//Implicit cast operator to any datatype, return initializer list of x, y, z
-	template <class U> operator U() const;
+	template <class U>
+	explicit operator U() const;
 
 	//Returns the negated vector
 	Vector2<T> operator-() const;
@@ -206,14 +207,14 @@ template<class T>
 template<class U>
 inline Vector2<T>::operator U() const
 {
-	return {x,y};
+	return { x,y };
 }
 
 template<class T>
 inline T& Vector2<T>::operator[](int value)
 {
 	assert(value >= 0 && value <= 2);
-	switch(value)
+	switch (value)
 	{
 	case 0:
 	{
@@ -234,7 +235,7 @@ template<class T>
 inline const T& Vector2<T>::operator[](int value) const
 {
 	assert(value >= 0 && value <= 2);
-	switch(value)
+	switch (value)
 	{
 	case 0:
 	{

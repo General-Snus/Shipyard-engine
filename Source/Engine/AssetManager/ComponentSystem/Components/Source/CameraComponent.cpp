@@ -2,10 +2,14 @@
 
 #include <DirectXMath.h>
 #include <Editor/Editor/Core/Editor.h>
-#include <Engine/GraphicsEngine/GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h> 
 #include <Tools/Utilities/Input/InputHandler.hpp> 
 #include "../CameraComponent.h"
 
+#include <ResourceUploadBatch.h>
+
+#include "DirectX/Shipyard/CommandList.h"
+#include "DirectX/Shipyard/GPU.h"
+#include "Engine/GraphicsEngine/GraphicsEngine.h"
 #include "Tools/Utilities/Input/EnumKeys.h"
 
 cCamera::cCamera(const unsigned int anOwnerId) : Component(anOwnerId)
@@ -16,11 +20,14 @@ cCamera::cCamera(const unsigned int anOwnerId) : Component(anOwnerId)
 
 	if (!mySettings.isOrtho)
 	{
-		myClipMatrix = DirectX::XMMatrixPerspectiveFovLH(mySettings.fow,mySettings.APRatio,mySettings.farfield,mySettings.nearField);
+		const auto dxMatrix = XMMatrixPerspectiveFovLH(mySettings.fow,mySettings.APRatio,mySettings.farfield,
+			mySettings.nearField);
+		myClipMatrix = Matrix(&dxMatrix);
 	}
 	else
 	{
-		myClipMatrix = DirectX::XMMatrixOrthographicLH(40,40,1000000,mySettings.nearField);
+		const auto dxMatrix = XMMatrixOrthographicLH(40,40,1000000,mySettings.nearField);
+		myClipMatrix = Matrix(&dxMatrix);
 	}
 
 #ifdef Flashlight
@@ -37,7 +44,7 @@ cCamera::cCamera(const unsigned int anOwnerId) : Component(anOwnerId)
 #endif
 }
 
-cCamera::cCamera(const unsigned int anOwnerId,CameraSettings settings) : Component(anOwnerId)
+cCamera::cCamera(const unsigned int anOwnerId,const CameraSettings& settings) : Component(anOwnerId)
 {
 	GetGameObject().AddComponent<Transform>();
 	GetGameObject().GetComponent<Transform>().SetGizmo(false);
@@ -45,11 +52,14 @@ cCamera::cCamera(const unsigned int anOwnerId,CameraSettings settings) : Compone
 
 	if (!mySettings.isOrtho)
 	{
-		myClipMatrix = DirectX::XMMatrixPerspectiveFovLH(mySettings.fow,mySettings.APRatio,mySettings.farfield,mySettings.nearField);
+		const auto dxMatrix = XMMatrixPerspectiveFovLH(mySettings.fow,mySettings.APRatio,mySettings.farfield,
+			mySettings.nearField);
+		myClipMatrix = Matrix(&dxMatrix);
 	}
 	else
 	{
-		myClipMatrix = DirectX::XMMatrixOrthographicLH(40,40,1000000,mySettings.nearField);
+		const auto dxMatrix = XMMatrixOrthographicLH(40,40,1000000,mySettings.nearField);
+		myClipMatrix = Matrix(&dxMatrix);
 	}
 
 #ifdef Flashlight
@@ -79,7 +89,7 @@ void cCamera::Update()
 	//UpdatePositionVectors();
 	const float mdf = cameraSpeed;
 	const float rotationSpeed = 20000;
-	myScreenSize = Vector2<int>(RHI::GetDeviceSize().Width,RHI::GetDeviceSize().Height);
+	myScreenSize = Editor::GetViewportResolution();
 
 	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::UP))
 	{
@@ -97,8 +107,8 @@ void cCamera::Update()
 			static_cast<float>(InputHandler::GetInstance().GetMousePositionDelta().y),
 			-static_cast<float>(InputHandler::GetInstance().GetMousePositionDelta().x),
 			0.0f
-		}; 
-		myTransform.Rotate(mouseDeltaVector * rotationSpeed  * Timer::GetInstance().GetDeltaTime());
+		};
+		myTransform.Rotate(mouseDeltaVector * rotationSpeed * Timer::GetInstance().GetDeltaTime());
 	}
 
 	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::W))
@@ -172,12 +182,12 @@ std::array<Vector4f,4> cCamera::GetFrustrumCorners() const
 Vector3f cCamera::GetPointerDirection(const Vector2<int> position)
 {
 	Vector4f viewPosition;
-	RHI::DeviceSize size = RHI::GetDeviceSize();
+	auto size = Editor::GetViewportResolution();
 
-	viewPosition.x = ((2.0f * position.x / size.Width) - 1);
+	viewPosition.x = ((2.0f * position.x / size.x) - 1);
 	viewPosition /= myClipMatrix(1,1);
 
-	viewPosition.y = ((-2.0f * position.y / size.Height) - 1);
+	viewPosition.y = ((-2.0f * position.y / size.y) - 1);
 	viewPosition /= myClipMatrix(2,2);
 
 	viewPosition.z = 1;
@@ -197,15 +207,19 @@ Vector3f cCamera::GetPointerDirectionNDC(const Vector2<int> position) const
 
 }
 
-void cCamera::SetCameraToFrameBuffer()
+FrameBuffer cCamera::GetFrameBuffer()
 {
 	OPTICK_EVENT();
-	GfxCmd_SetFrameBuffer(
-		myClipMatrix,
-		Matrix::GetFastInverse(GetComponent<Transform>().GetTransform()),
-		(int)Editor::GetApplicationState().filter, //TODO scene again
-		GetFrustrumCorners()
-	).ExecuteAndDestroy();
+	auto& transform = GetComponent<Transform>();
+	FrameBuffer buffer;
+	buffer.ProjectionMatrix = myClipMatrix;
+	buffer.ViewMatrix = Matrix::GetFastInverse(transform.GetTransform());
+	buffer.Time = Timer::GetInstance().GetDeltaTime();
+	buffer.FB_RenderMode = (int)Editor::GetApplicationState().filter;
+	buffer.FB_CameraPosition = transform.GetPosition();
+	buffer.FB_ScreenResolution = Editor::Get().GetViewportResolution();
+	//buffer.Data.FB_FrustrumCorners = { Vector4f(),Vector4f(),Vector4f(),Vector4f() };;
+	return buffer;
 }
 
 Vector4f cCamera::WoldSpaceToPostProjectionSpace(Vector3f aEntity)

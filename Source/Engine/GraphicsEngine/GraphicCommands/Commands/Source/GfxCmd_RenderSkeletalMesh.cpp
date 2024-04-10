@@ -4,7 +4,7 @@
 #include <Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h>
 #include <Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h>
 
-GfxCmd_RenderSkeletalMesh::GfxCmd_RenderSkeletalMesh(const std::shared_ptr<RenderData> aData,
+GfxCmd_RenderSkeletalMesh::GfxCmd_RenderSkeletalMesh(const std::shared_ptr<RenderData>& aData,
 	const Matrix& aTransform,const Matrix* aBoneTransformList,unsigned int aNumBones) : GfxCmd_RenderMesh(aData,aTransform,false)
 {
 	aNumBones;
@@ -17,18 +17,18 @@ GfxCmd_RenderSkeletalMesh::GfxCmd_RenderSkeletalMesh(const std::shared_ptr<Rende
 void GfxCmd_RenderSkeletalMesh::ExecuteAndDestroy()
 {
 	ObjectBuffer& objectBuffer = GetObjectBuffer();
-	objectBuffer.Data.myTransform = myTransform;
-	objectBuffer.Data.MaxExtents = MaxExtents;
-	objectBuffer.Data.MinExtents = MinExtents;
-	objectBuffer.Data.hasBone = true;
-	objectBuffer.Data.isInstanced = false;
+	objectBuffer.myTransform = myTransform;
+	objectBuffer.MaxExtents = MaxExtents;
+	objectBuffer.MinExtents = MinExtents;
+	objectBuffer.hasBone = true;
+	objectBuffer.isInstanced = false;
 
-	for (int i = 0; i < 128; i++)
-	{
-		objectBuffer.Data.myBoneTransforms[i] = myBoneTransforms[i];
-	}
+	//for (int i = 0; i < 128; i++)
+	//{
+	//	objectBuffer.Data.myBoneTransforms[i] = myBoneTransforms[i];
+	//}
 
-	RHI::UpdateConstantBufferData(objectBuffer);
+	//RHI::UpdateConstantBufferData(objectBuffer);
 	G_Buffer& gBuffer = GetGBuffer();
 	gBuffer.UseGBufferShader();
 	//GetInstanceRenderer().AddInstance( myRenderData);
@@ -37,12 +37,12 @@ void GfxCmd_RenderSkeletalMesh::ExecuteAndDestroy()
 		if (!myRenderData->overrideMaterial.empty())
 		{
 			myRenderData->overrideMaterial[0]->Update();
-		}
-		RHI::ConfigureInputAssembler(aElement.PrimitiveTopology,
+		}aElement;
+		/*RHI::ConfigureInputAssembler(aElement.PrimitiveTopology,
 			aElement.VertexBuffer,
 			aElement.IndexBuffer,
 			aElement.Stride,
 			Vertex::InputLayout);
-		RHI::DrawIndexed(aElement.NumIndices);
+		RHI::DrawIndexed(aElement.NumIndices);*/
 	}
 }

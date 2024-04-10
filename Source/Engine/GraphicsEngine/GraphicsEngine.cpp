@@ -1,106 +1,110 @@
 #include "GraphicsEngine.pch.h"
+
+#include <d3dcompiler.h>
+#include <DirectX/directx/d3dx12_pipeline_state_stream.h>
+#include <DirectX/directx/d3dx12_root_signature.h>
+#include <DirectX/XTK/DDSTextureLoader.h>
 #include <Engine/AssetManager/AssetManager.h>
 #include <Engine/AssetManager/ComponentSystem/Components/CameraComponent.h>
 #include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>
 #include <Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h>
+#include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
 #include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
-#include <Engine/GraphicsEngine/InterOp/DDSTextureLoader11.h>
+#include "DirectX/Shipyard/CommandList.h"
+
 #include <Objects/DataObjects/Default_C.h>
 #include <Objects/DataObjects/Default_FX.h>
 #include <Objects/DataObjects/Default_M.h>
 #include <Objects/DataObjects/Default_N.h>
-#include <Shaders/Include/Bloom_PS.h> 
-#include <Shaders/Include/brdfLUT_PS.h>
-#include <Shaders/Include/CopyPixels_PS.h> 
-#include <Shaders/Include/Default_PS.h>
-#include <Shaders/Include/Default_VS.h>
-#include <Shaders/Include/EdgeBlur.h> 
-#include <Shaders/Include/GaussianBlur_PS.h> 
-#include <Shaders/Include/LineDrawer_PS.h>
-#include <Shaders/Include/LineDrawer_VS.h>
-#include <Shaders/Include/LuminancePass_PS.h>
-#include <Shaders/Include/ParticleShader_GS.h> 
-#include <Shaders/Include/ParticleShader_PS.h> 
-#include <Shaders/Include/ParticleShader_VS.h> 
-#include <Shaders/Include/ScreenspaceQuad_VS.h>
-#include <Shaders/Include/SSAO_PS.h> 
-#include <Shaders/Include/ToneMapping_PS.h>
-#include <Shaders/Registers.h>
-#include <stdexcept> 
-#include <Tools/ImGui/ImGui/imgui.h>
-#include <Tools/Optick/include/optick.h> 
-#include "GraphicCommands/Commands/Headers/GfxCmd_DebugLayer.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_GaussianBlur.h" 
-#include "GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_SetLightBuffer.h" 
-#include "GraphicCommands/Commands/Headers/GfxCmd_SetRenderTarget.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_SSAO.h" 
-#include "GraphicCommands/GraphicCommands.h"
-#include "GraphicsEngine.h"     
-#include "Objects/Shader.h" 
-#include "Rendering/ParticleRenderer/ParticleVertex.h" 
-#include "Rendering/Vertex.h" 
-#include "Shaders/Registers.h" 
+
+#include "DirectX/Shipyard/GPU.h"
+#include "DirectX/Shipyard/Helpers.h"
+#include "DirectX/Shipyard/PSO.h"
+#include "Editor/Editor/Windows/Window.h"
+#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
+#include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
+#include "Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h"
+#include "Tools/ImGui/ImGui/backends/imgui_impl_dx12.h"
 
 
 bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 {
-	GELogger = Logger::Create("GraphicsEngine");
-	DeferredCommandList.Initialize();
-	OverlayCommandList.Initialize();
+#ifdef _DEBUG
+	//try
+	//{
+#endif 
+	myWindowHandle = windowHandle;
+	myBackBuffer = std::make_unique<Texture>();
+	myDepthBuffer = std::make_unique<Texture>();
+	if (!GPU::Initialize(myWindowHandle,
+		enableDeviceDebug,
+		myBackBuffer,
+		myDepthBuffer,
+		Window::Width(),Window::Height()))
+	{
+		Logger::Err("Failed to initialize the DX12 GPU!");
+		return false;
+	}
+
+	/*if (!RHI::Initialize(myWindowHandle,
+		enableDeviceDebug,
+		myBackBuffer.get(),
+		myDepthBuffer.get()))
+	{
+		Logger::Err("Failed to initialize the RHI!");
+		return false;
+	}*/
+
+	m_StateCache = std::make_unique<PSOCache>();
+	m_StateCache->InitAllStates();
+
+	SetupDefaultVariables();
+	SetupSpace3();
+	SetupParticleShaders();
+	SetupPostProcessing();
+	SetupBlendStates();
+	SetupDebugDrawline();
+
+
+
+	/*myLightBuffer.Initialize();
+	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_LightBuffer,myLightBuffer);
+
+	myObjectBuffer.Initialize();
+	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_ObjectBuffer,myObjectBuffer);
+
+	myFrameBuffer.Initialize();
+	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_FrameBuffer,myFrameBuffer);
+
+	myLineBuffer.Initialize();
+	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_LineBuffer,myLineBuffer);
+
+	myGraphicSettingsBuffer.Initialize();
+	RHI::SetConstantBuffer(PIPELINE_STAGE_PIXEL_SHADER,REG_GraphicSettingsBuffer,myGraphicSettingsBuffer);
+
+	myG_Buffer.Init();
+	myShadowRenderer.Init();
+	myParticleRenderer.Init();
+	RHI::SetDepthState(DepthState::DS_Reversed);*/
 
 #ifdef _DEBUG
-	try
-	{
-#endif
-		GELogger.SetPrintToVSOutput(false);
-		myWindowHandle = windowHandle;
-		myBackBuffer = std::make_unique<Texture>();
-		myDepthBuffer = std::make_unique<Texture>();
-
-		if (!RHI::Initialize(myWindowHandle,
-			enableDeviceDebug,
-			myBackBuffer.get(),
-			myDepthBuffer.get()))
-		{
-			GELogger.Err("Failed to initialize the RHI!");
-			return false;
-		}
-
-		SetupDefaultVariables();
-		SetupBRDF();
-		SetupParticleShaders();
-		SetupPostProcessing();
-		SetupBlendStates();
-		SetupDebugDrawline();
-
-		myLightBuffer.Initialize();
-		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_LightBuffer,myLightBuffer);
-
-		myObjectBuffer.Initialize();
-		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_ObjectBuffer,myObjectBuffer);
-
-		myFrameBuffer.Initialize();
-		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_FrameBuffer,myFrameBuffer);
-
-		myLineBuffer.Initialize();
-		RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_LineBuffer,myLineBuffer);
-
-		myGraphicSettingsBuffer.Initialize();
-		RHI::SetConstantBuffer(PIPELINE_STAGE_PIXEL_SHADER,REG_GraphicSettingsBuffer,myGraphicSettingsBuffer);
-
-		myG_Buffer.Init();
-		myShadowRenderer.Init();
-		myParticleRenderer.Init();
-		RHI::SetDepthState(DepthState::DS_Reversed);
-
-#ifdef _DEBUG
-	}
-	catch (const std::exception& e)
-	{
-		GELogger.LogException(e);
-		exit(-1);
-	}
+	//}
+	//catch (const std::exception& e)
+	//{
+	//	GPU::UnInitialize();
+	//	ComPtr<ID3D12DeviceRemovedExtendedData> pDred;
+	//	SUCCEEDED(GPU::m_Device->QueryInterface(IID_PPV_ARGS(&pDred)));
+	//
+	//	D3D12_DRED_AUTO_BREADCRUMBS_OUTPUT DredAutoBreadcrumbsOutput;
+	//	D3D12_DRED_PAGE_FAULT_OUTPUT DredPageFaultOutput;
+	//	SUCCEEDED(pDred->GetAutoBreadcrumbsOutput(&DredAutoBreadcrumbsOutput));
+	//	SUCCEEDED(pDred->GetPageFaultAllocationOutput(&DredPageFaultOutput));
+	//	const D3D12_AUTO_BREADCRUMB_NODE* pBreadcrumbs = DredAutoBreadcrumbsOutput.pHeadAutoBreadcrumbNode;
+	//
+	//	Logger::LogException(e);
+	//	system("pause");
+	//	exit(-1);
+	//}
 #endif 
 	return true;
 }
@@ -114,171 +118,111 @@ bool GraphicsEngine::SetupDebugDrawline()
 
 void GraphicsEngine::SetupDefaultVariables()
 {
-	D3D11_SAMPLER_DESC samplerDesc = {};
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	D3D12_SAMPLER_DESC samplerDesc = {};
+	samplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	samplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	samplerDesc.MipLODBias = 0.f;
 	samplerDesc.MaxAnisotropy = 1;
-	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
 	samplerDesc.BorderColor[0] = 1.f;
 	samplerDesc.BorderColor[1] = 1.f;
 	samplerDesc.BorderColor[2] = 1.f;
 	samplerDesc.BorderColor[3] = 1.f;
-	samplerDesc.MinLOD = -D3D11_FLOAT32_MAX;
-	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	samplerDesc.MinLOD = -D3D12_FLOAT32_MAX;
+	samplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
 
-	if (!RHI::CreateSamplerState(myDefaultSampleState,samplerDesc))
-	{
-		GELogger.Log("Sampler state created");
-		assert(false);
-	}
-	RHI::SetSamplerState(myDefaultSampleState,REG_DefaultSampler);
-
-	D3D11_SAMPLER_DESC shadowSamplerDesc = {};
-	shadowSamplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
-	shadowSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
-	shadowSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
-	shadowSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	D3D12_SAMPLER_DESC shadowSamplerDesc = {};
+	shadowSamplerDesc.Filter = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
+	shadowSamplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	shadowSamplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	shadowSamplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 	shadowSamplerDesc.BorderColor[0] = 1.f;
 	shadowSamplerDesc.BorderColor[1] = 1.f;
 	shadowSamplerDesc.BorderColor[2] = 1.f;
 	shadowSamplerDesc.BorderColor[3] = 1.f;
-	shadowSamplerDesc.ComparisonFunc = D3D11_COMPARISON_GREATER_EQUAL;/*
-	shadowSamplerDesc.MinLOD = -D3D11_FLOAT32_MAX;
-	shadowSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	shadowSamplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+	shadowSamplerDesc.MinLOD = -D3D12_FLOAT32_MAX;
+	shadowSamplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
 	shadowSamplerDesc.MipLODBias = 0.f;
-	shadowSamplerDesc.MaxAnisotropy = 1;*/
+	shadowSamplerDesc.MaxAnisotropy = 1;
 
-	if (!RHI::CreateSamplerState(myShadowSampleState,shadowSamplerDesc))
-	{
-		GELogger.Log("Sampler state created");
-		assert(false);
-	}
-	RHI::SetSamplerState(myShadowSampleState,REG_shadowCmpSampler);
+	D3D12_SAMPLER_DESC pointSamplerDesc = {};
+	pointSamplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
+	pointSamplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	pointSamplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	pointSamplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 
-	D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
-	depthStencilDesc.DepthEnable = true;
-	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-	depthStencilDesc.DepthFunc = D3D11_COMPARISON_GREATER;
-	depthStencilDesc.StencilEnable = false;
-
-	auto result = RHI::Device->CreateDepthStencilState(
-		&depthStencilDesc,
-		&myDepthStencilStates[(int)eDepthStencilStates::DSS_ReadOnly]
-	);
-	if (FAILED(result))
-	{
-		GELogger.Log("Failed to create depth stencil read only state");
-		assert(false);
-	}
-	myDepthStencilStates[(int)eDepthStencilStates::DSS_ReadWrite] = nullptr;
-
-	RHI::CreateVertexShaderAndInputLayout(
-		myVertexShader,
-		Vertex::InputLayout,
-		Vertex::InputLayoutDefinition,
-		BuiltIn_Default_VS_ByteCode,
-		sizeof(BuiltIn_Default_VS_ByteCode)
-	);
-	RHI::CreatePixelShader(
-		myPixelShader,
-		BuiltIn_Default_PS_ByteCode,
-		sizeof(BuiltIn_Default_PS_ByteCode)
-	);
-	RHI::CreateInputLayout(
-		Vertex::InputLayout,
-		Vertex::InputLayoutDefinition,
-		BuiltIn_Default_VS_ByteCode,
-		sizeof(BuiltIn_Default_VS_ByteCode)
-	);
-
-	defaultTexture = std::make_shared<TextureHolder>("",eTextureType::ColorMap);
-
-	if (!RHI::LoadTexture(
-		defaultTexture->GetRawTexture().get(),
-		AssetManager::Get().AssetPath / "Textures/Default/DefaultTile.dds"))
-	{
-		RHI::LoadTextureFromMemory(
-			defaultTexture->GetRawTexture().get(),
-			L"Default Color texture",
-			BuiltIn_Default_C_ByteCode,
-			sizeof(BuiltIn_Default_C_ByteCode)
-		);
-	}
+	//if (!RHI::CreateSamplerState(myShadowSampleState,shadowSamplerDesc))
+	//{
+	//	Logger::Log("Sampler state created");
+	//	assert(false);
+	//}
+	//RHI::SetSamplerState(myShadowSampleState,REG_shadowCmpSampler); 
+	//D3D12_DEPTH_STENCIL_DESC depthStencilDesc = {};
+	//depthStencilDesc.DepthEnable = true;
+	//depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+	//depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_GREATER;
+	//depthStencilDesc.StencilEnable = false;
+	//depthStencilDesc.StencilReadMask = D3D12_DEFAULT_STENCIL_READ_MASK;
+	//depthStencilDesc.StencilWriteMask = D3D12_DEFAULT_STENCIL_WRITE_MASK;   
+	////auto result = RHI::Device->CreateDepthStencilState(
+	////	&depthStencilDesc,
+	////	&myDepthStencilStates[(int)eDepthStencilStates::DSS_ReadOnly]
+	////);
+	//if (GPU::CreateDepthStencil(depthStencilDesc))
+	//{
+	//	Logger::Log("Failed to create depth stencil read only state");
+	//	assert(false);
+	//}
+	//myDepthStencilStates[(int)eDepthStencilStates::DSS_ReadWrite] = nullptr;
 
 
-	defaultNormalTexture = std::make_shared<TextureHolder>("",eTextureType::NormalMap);
-	RHI::LoadTextureFromMemory(
-		defaultNormalTexture->GetRawTexture().get(),
-		L"Default Normal texture",
-		BuiltIn_Default_N_ByteCode,
-		sizeof(BuiltIn_Default_N_ByteCode)
-	);
-
-	defaultMatTexture = std::make_shared<TextureHolder>("",eTextureType::MaterialMap);
-	RHI::LoadTextureFromMemory(
-		defaultMatTexture->GetRawTexture().get(),
-		L"Default material texture",
-		BuiltIn_Default_M_ByteCode,
-		sizeof(BuiltIn_Default_M_ByteCode)
-	);
-
-	defaultEffectTexture = std::make_shared<TextureHolder>("",eTextureType::EffectMap);
-	RHI::LoadTextureFromMemory(
-		defaultEffectTexture->GetRawTexture().get(),
-		L"Default effect texture",
-		BuiltIn_Default_FX_ByteCode,
-		sizeof(BuiltIn_Default_FX_ByteCode)
-	);
-
-	//Particle
-	AssetManager::Get().ForceLoadAsset<TextureHolder>(L"Textures/Default/DefaultParticle_P.dds",defaultParticleTexture);
-	defaultParticleTexture->SetTextureType(eTextureType::ParticleMap);
-
-
-
+	////Particle
+	//AssetManager::Get().ForceLoadAsset<TextureHolder>(L"Textures/Default/DefaultParticle_P.dds",defaultParticleTexture);
+	//defaultParticleTexture->SetTextureType(eTextureType::ParticleMap);
 
 	//NOISE
-	D3D11_SAMPLER_DESC pointSamplerDesc = {};
-	pointSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-	pointSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	pointSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	pointSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 
-	if (!RHI::CreateSamplerState(myPointSampleState,pointSamplerDesc))
-	{
-		GELogger.Log("Sampler state created");
-		assert(false);
-	}
-	RHI::SetSamplerState(myPointSampleState,REG_PointSampler);
+	//if (!RHI::CreateSamplerState(myPointSampleState,pointSamplerDesc))
+	//{
+	//	Logger::Log("Sampler state created");
+	//	assert(false);
+	//}
 
 
-	AssetManager::Get().ForceLoadAsset<TextureHolder>(L"Textures/Default/NoiseTable.dds",NoiseTable);
-	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_Noise_Texture,NoiseTable->GetRawTexture().get()); //Is there guarantee that this holds?
+	//RHI::SetSamplerState(myPointSampleState,REG_PointSampler); 
+	//AssetManager::Get().ForceLoadAsset<TextureHolder>(L"Textures/Default/NoiseTable.dds",NoiseTable);
+	//RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_Noise_Texture,NoiseTable->GetRawTexture().get()); //Is there guarantee that this holds?
 
-	defaultVS = std::make_shared<Shader>();
-	defaultPS = std::make_shared<Shader>();
 
-	defaultVS->SetShader(myVertexShader);
-	defaultVS->myName = L"Default Vertex Shader";
-	defaultPS->SetShader(myPixelShader);
-	defaultPS->myName = L"Default Pixel Shader";
-
+	AssetManager::Get().ForceLoadAsset<ShipyardShader>("Shaders/Default_VS.cso",defaultVS);
+	AssetManager::Get().ForceLoadAsset<ShipyardShader>("Shaders/Default_PS.cso",defaultPS);
 	AssetManager::Get().ForceLoadAsset<Material>("Materials/Default.json",defaultMaterial);
 	defaultMaterial->SetShader(defaultVS,defaultPS);
 
-	AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/skansen_cubemap.dds",defaultCubeMap);
-	defaultCubeMap->SetTextureType(eTextureType::CubeMap);
-	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_enviromentCube,defaultCubeMap->GetRawTexture().get());
+
+	//RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_enviromentCube,defaultCubeMap->GetRawTexture().get()); 
+
+
+
+	AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultTile.dds",defaultTexture);
+	defaultTexture->SetTextureType(eTextureType::ColorMap);
+	AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultNormal.dds",defaultNormalTexture);
+	defaultNormalTexture->SetTextureType(eTextureType::NormalMap);
+	AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultMaterial.dds",defaultMatTexture);
+	defaultMatTexture->SetTextureType(eTextureType::MaterialMap);
+	AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultEffect.dds",defaultEffectTexture);
+	defaultEffectTexture->SetTextureType(eTextureType::EffectMap);
+	//	defaultTexture->GetRawTexture()->SetView(ViewType::SRV);; 
 
 	AssetManager::Get().ForceLoadAsset<Mesh>("default.fbx",defaultMesh);
 }
 
 void GraphicsEngine::SetupBlendStates()
 {
-	D3D11_BLEND_DESC blendDesc = {};
+	/*D3D11_BLEND_DESC blendDesc = {};
 	D3D11_RENDER_TARGET_BLEND_DESC& rtBlendDesc = blendDesc.RenderTarget[0];
 	rtBlendDesc.BlendEnable = TRUE;
 	rtBlendDesc.SrcBlend = D3D11_BLEND_ONE;
@@ -304,209 +248,191 @@ void GraphicsEngine::SetupBlendStates()
 	if (!RHI::CreateBlendState(AdditiveBlendState,blendDesc))
 	{
 		assert(false);
-	}
+	}*/
 }
 
-void GraphicsEngine::SetupBRDF()
+void GraphicsEngine::SetupSpace3()
 {
+
+	auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+	auto commandList = commandQueue->GetCommandList(L"RenderFrame");
+	auto graphicCommandList = commandList->GetGraphicsCommandList();
+
+
 	//Light
+	AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/skansen_cubemap.dds",defaultCubeMap);
+	defaultCubeMap->SetTextureType(eTextureType::CubeMap);
+
+	Vector2ui size = { 512,512 };
 	BRDLookUpTable = std::make_shared<Texture>();
-	RHI::CreateTexture(BRDLookUpTable.get(),L"brdfLUT",512,512,
-		DXGI_FORMAT_R16G16_FLOAT,
-		D3D11_USAGE_DEFAULT,
-		D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET
+	BRDLookUpTable->AllocateTexture(
+		size,
+		L"brdfLUT",
+		DXGI_FORMAT_R16G16_FLOAT
 	);
-	RHI::ClearRenderTarget(BRDLookUpTable.get());
+	BRDLookUpTable->SetView(ViewType::SRV);
+	commandList->SetRenderTargets(1,BRDLookUpTable.get(),nullptr);
+	PSO brdfPSO = PSO::CreatePSO("Shaders/ScreenspaceQuad_VS.cso","Shaders/brdfLUT_PS.cso",1,DXGI_FORMAT_R16G16_FLOAT);
 
-	ComPtr<ID3D11PixelShader> brdfPS;
+	D3D12_VIEWPORT viewPort = { 0.0f, 0.0f, static_cast<float>(size.x), static_cast<float>(size.y), D3D12_MIN_DEPTH, D3D12_MAX_DEPTH };
+	D3D12_RECT rect = { 0, 0, static_cast<LONG>(size.x), static_cast<LONG>(size.y) };
 
-	RHI::CreateVertexShader(
-		myScreenSpaceQuadShader,
-		BuiltIn_ScreenspaceQuad_VS_ByteCode,
-		sizeof(BuiltIn_ScreenspaceQuad_VS_ByteCode)
-	);
+	graphicCommandList->RSSetViewports(1,&viewPort);
+	graphicCommandList->RSSetScissorRects(1,&rect);
 
-	RHI::CreatePixelShader(
-		brdfPS,
-		BuiltIn_brdfLUT_PS_ByteCode,
-		sizeof(BuiltIn_brdfLUT_PS_ByteCode)
-	);
-	RHI::SetVertexShader(myScreenSpaceQuadShader);
-	RHI::SetPixelShader(brdfPS);
+	const auto& rootSignature = PSOCache::m_RootSignature->GetRootSignature();
+	graphicCommandList->SetGraphicsRootSignature(rootSignature.Get());
+	commandList->TrackResource(rootSignature);
 
-	RHI::SetRenderTarget(BRDLookUpTable.get(),nullptr);
+	graphicCommandList->SetPipelineState(brdfPSO.GetPipelineState().Get());
 
-	RHI::ConfigureInputAssembler(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
-		nullptr,nullptr,0,nullptr);
-	RHI::Draw(4);
+	graphicCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	graphicCommandList->IASetVertexBuffers(0,1,nullptr);
+	graphicCommandList->IASetIndexBuffer(nullptr);
+	graphicCommandList->DrawInstanced(6,1,0,0);
 
-	RHI::SetRenderTarget(nullptr,nullptr);
-	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_BRDF_LUT_Texture,BRDLookUpTable.get());
-
-
-	D3D11_SAMPLER_DESC lutsamplerDesc = {};
-	lutsamplerDesc.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
-	lutsamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-	lutsamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-	lutsamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-	lutsamplerDesc.MipLODBias = 0.f;
-	lutsamplerDesc.MaxAnisotropy = 1;
-	lutsamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	lutsamplerDesc.BorderColor[0] = 1.f;
-	lutsamplerDesc.BorderColor[1] = 1.f;
-	lutsamplerDesc.BorderColor[2] = 1.f;
-	lutsamplerDesc.BorderColor[3] = 1.f;
-	lutsamplerDesc.MinLOD = 0;
-	lutsamplerDesc.MaxLOD = 0;
-
-	if (!RHI::CreateSamplerState(myBRDFSampleState,lutsamplerDesc))
-	{
-		GELogger.Log("Sampler state created");
-		assert(false);
-	}
-
-	RHI::SetSamplerState(myBRDFSampleState,REG_BRDFSampler);
-
+	auto fence = commandQueue->ExecuteCommandList(commandList);
+	commandQueue->WaitForFenceValue(fence);
 }
 
 void GraphicsEngine::SetupPostProcessing()
 {
-	D3D11_SAMPLER_DESC normalDepthSampler = {};
-	normalDepthSampler.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
-	normalDepthSampler.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-	normalDepthSampler.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-	normalDepthSampler.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	//D3D11_SAMPLER_DESC normalDepthSampler = {};
+	//normalDepthSampler.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+	//normalDepthSampler.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	//normalDepthSampler.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	//normalDepthSampler.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
 
-	if (!RHI::CreateSamplerState(myNormalDepthSampleState,normalDepthSampler))
-	{
-		GELogger.Log("Sampler state created");
-		assert(false);
-	}
+	//if (!RHI::CreateSamplerState(myNormalDepthSampleState,normalDepthSampler))
+	//{
+	//	Logger::Log("Sampler state created");
+	//	assert(false);
+	//}
 
-	RHI::SetSamplerState(myNormalDepthSampleState,REG_normalDepthSampler);
+	//RHI::SetSamplerState(myNormalDepthSampleState,REG_normalDepthSampler);
 
-	RHI::DeviceSize size = RHI::GetDeviceSize();
-	SceneBuffer = std::make_shared<Texture>();
-	RHI::CreateTexture(
-		SceneBuffer.get(),
-		L"SceneBuffer",
-		size.Width,size.Height,
-		defaultTextureFormat,
-		D3D11_USAGE_DEFAULT,
-		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
-		0
-	);
+	//RHI::DeviceSize size = RHI::GetDeviceSize();
+	//SceneBuffer = std::make_shared<Texture>();
+	//RHI::CreateTexture(
+	//	SceneBuffer.get(),
+	//	L"SceneBuffer",
+	//	size.Width,size.Height,
+	//	defaultTextureFormat,
+	//	D3D11_USAGE_DEFAULT,
+	//	D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+	//	0
+	//);
 
-	halfSceneBuffer = std::make_shared<Texture>();
-	RHI::CreateTexture(
-		halfSceneBuffer.get(),
-		L"halfSceneBuffer",
-		size.Width / 2,size.Height / 2,
-		defaultTextureFormat,
-		D3D11_USAGE_DEFAULT,
-		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
-		0
-	);
-	quaterSceneBuffer1 = std::make_shared<Texture>();
-	RHI::CreateTexture(
-		quaterSceneBuffer1.get(),
-		L"quaterSceneBuffer1",
-		size.Width / 4,size.Height / 4,
-		defaultTextureFormat,
-		D3D11_USAGE_DEFAULT,
-		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
-		0
-	);
-	quaterSceneBuffer2 = std::make_shared<Texture>();
-	RHI::CreateTexture(
-		quaterSceneBuffer2.get(),
-		L"quaterSceneBuffer2",
-		size.Width / 4,size.Height / 4,
-		defaultTextureFormat,
-		D3D11_USAGE_DEFAULT,
-		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
-		0
-	);
-	IntermediateA = std::make_shared<Texture>();
-	RHI::CreateTexture(
-		IntermediateA.get(),
-		L"IntermediateA",
-		size.Width,size.Height,
-		defaultTextureFormat,
-		D3D11_USAGE_DEFAULT,
-		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
-		0
-	);
+	//halfSceneBuffer = std::make_shared<Texture>();
+	//RHI::CreateTexture(
+	//	halfSceneBuffer.get(),
+	//	L"halfSceneBuffer",
+	//	size.Width / 2,size.Height / 2,
+	//	defaultTextureFormat,
+	//	D3D11_USAGE_DEFAULT,
+	//	D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+	//	0
+	//);
+	//quaterSceneBuffer1 = std::make_shared<Texture>();
+	//RHI::CreateTexture(
+	//	quaterSceneBuffer1.get(),
+	//	L"quaterSceneBuffer1",
+	//	size.Width / 4,size.Height / 4,
+	//	defaultTextureFormat,
+	//	D3D11_USAGE_DEFAULT,
+	//	D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+	//	0
+	//);
+	//quaterSceneBuffer2 = std::make_shared<Texture>();
+	//RHI::CreateTexture(
+	//	quaterSceneBuffer2.get(),
+	//	L"quaterSceneBuffer2",
+	//	size.Width / 4,size.Height / 4,
+	//	defaultTextureFormat,
+	//	D3D11_USAGE_DEFAULT,
+	//	D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+	//	0
+	//);
+	//IntermediateA = std::make_shared<Texture>();
+	//RHI::CreateTexture(
+	//	IntermediateA.get(),
+	//	L"IntermediateA",
+	//	size.Width,size.Height,
+	//	defaultTextureFormat,
+	//	D3D11_USAGE_DEFAULT,
+	//	D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+	//	0
+	//);
 
-	IntermediateB = std::make_shared<Texture>();
-	RHI::CreateTexture(
-		IntermediateB.get(),
-		L"IntermediateB",
-		size.Width,size.Height,
-		defaultTextureFormat,
-		D3D11_USAGE_DEFAULT,
-		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
-		0
-	);
+	//IntermediateB = std::make_shared<Texture>();
+	//RHI::CreateTexture(
+	//	IntermediateB.get(),
+	//	L"IntermediateB",
+	//	size.Width,size.Height,
+	//	defaultTextureFormat,
+	//	D3D11_USAGE_DEFAULT,
+	//	D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+	//	0
+	//);
 
-	SSAOTexture = std::make_shared<Texture>();
-	RHI::CreateTexture(
-		SSAOTexture.get(),
-		L"SSAOTexture",
-		size.Width / 2,size.Height / 2,
-		defaultTextureFormat,
-		D3D11_USAGE_DEFAULT,
-		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
-		0
-	);
+	//SSAOTexture = std::make_shared<Texture>();
+	//RHI::CreateTexture(
+	//	SSAOTexture.get(),
+	//	L"SSAOTexture",
+	//	size.Width / 2,size.Height / 2,
+	//	defaultTextureFormat,
+	//	D3D11_USAGE_DEFAULT,
+	//	D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+	//	0
+	//);
 
-	RHI::CreatePixelShader(
-		luminancePass,
-		BuiltIn_LuminancePass_PS_ByteCode,
-		sizeof(BuiltIn_LuminancePass_PS_ByteCode)
-	);
-	RHI::CreatePixelShader(
-		TonemapPass,
-		BuiltIn_ToneMapping_PS_ByteCode,
-		sizeof(BuiltIn_ToneMapping_PS_ByteCode)
-	);
+	//RHI::CreatePixelShader(
+	//	luminancePass,
+	//	BuiltIn_LuminancePass_PS_ByteCode,
+	//	sizeof(BuiltIn_LuminancePass_PS_ByteCode)
+	//);
+	//RHI::CreatePixelShader(
+	//	TonemapPass,
+	//	BuiltIn_ToneMapping_PS_ByteCode,
+	//	sizeof(BuiltIn_ToneMapping_PS_ByteCode)
+	//);
 
-	RHI::CreatePixelShader(
-		copyShader,
-		BuiltIn_CopyPixels_PS_ByteCode,
-		sizeof(BuiltIn_CopyPixels_PS_ByteCode)
-	);
+	//RHI::CreatePixelShader(
+	//	copyShader,
+	//	BuiltIn_CopyPixels_PS_ByteCode,
+	//	sizeof(BuiltIn_CopyPixels_PS_ByteCode)
+	//);
 
-	RHI::CreatePixelShader(
-		gaussShader,
-		BuiltIn_GaussianBlur_PS_ByteCode,
-		sizeof(BuiltIn_GaussianBlur_PS_ByteCode)
-	);
+	//RHI::CreatePixelShader(
+	//	gaussShader,
+	//	BuiltIn_GaussianBlur_PS_ByteCode,
+	//	sizeof(BuiltIn_GaussianBlur_PS_ByteCode)
+	//);
 
-	RHI::CreatePixelShader(
-		bloomShader,
-		BuiltIn_Bloom_PS_ByteCode,
-		sizeof(BuiltIn_Bloom_PS_ByteCode)
-	);
+	//RHI::CreatePixelShader(
+	//	bloomShader,
+	//	BuiltIn_Bloom_PS_ByteCode,
+	//	sizeof(BuiltIn_Bloom_PS_ByteCode)
+	//);
 
-	RHI::CreatePixelShader(
-		ScreenSpaceAmbienceOcclusion,
-		BuiltIn_SSAO_PS_ByteCode,
-		sizeof(BuiltIn_SSAO_PS_ByteCode)
-	);
+	//RHI::CreatePixelShader(
+	//	ScreenSpaceAmbienceOcclusion,
+	//	BuiltIn_SSAO_PS_ByteCode,
+	//	sizeof(BuiltIn_SSAO_PS_ByteCode)
+	//);
 
 
-	RHI::CreatePixelShader(
-		EdgeBlur,
-		BuiltIn_EdgeBlur_ByteCode,
-		sizeof(BuiltIn_EdgeBlur_ByteCode)
-	);
+	//RHI::CreatePixelShader(
+	//	EdgeBlur,
+	//	BuiltIn_EdgeBlur_ByteCode,
+	//	sizeof(BuiltIn_EdgeBlur_ByteCode)
+	//);
 
 }
 
 void GraphicsEngine::SetupParticleShaders()
 {
-	RHI::CreateVertexShaderAndInputLayout(
+	/*RHI::CreateVertexShaderAndInputLayout(
 		particleVertexShader,
 		Particlevertex::InputLayout,
 		Particlevertex::InputLayoutDefinition,
@@ -522,24 +448,39 @@ void GraphicsEngine::SetupParticleShaders()
 		particlePixelShader,
 		BuiltIn_ParticleShader_PS_ByteCode,
 		sizeof(BuiltIn_ParticleShader_PS_ByteCode)
-	);
+	);*/
 }
 
 void GraphicsEngine::UpdateSettings()
 {
-	myGraphicSettingsBuffer.Data.GSB_ToneMap = myGraphicSettings.Tonemaptype;
-	myGraphicSettingsBuffer.Data.GSB_AO_intensity = 0.35f;
-	myGraphicSettingsBuffer.Data.GSB_AO_scale = 0.05f;
-	myGraphicSettingsBuffer.Data.GSB_AO_bias = 0.5f;
-	myGraphicSettingsBuffer.Data.GSB_AO_radius = 0.002f;
-	myGraphicSettingsBuffer.Data.GSB_AO_offset = 0.707f;
+	myGraphicSettingsBuffer.GSB_ToneMap = myGraphicSettings.Tonemaptype;
+	myGraphicSettingsBuffer.GSB_AO_intensity = 0.35f;
+	myGraphicSettingsBuffer.GSB_AO_scale = 0.05f;
+	myGraphicSettingsBuffer.GSB_AO_bias = 0.5f;
+	myGraphicSettingsBuffer.GSB_AO_radius = 0.002f;
+	myGraphicSettingsBuffer.GSB_AO_offset = 0.707f;
+	/*
 	RHI::SetConstantBuffer(PIPELINE_STAGE_PIXEL_SHADER,REG_GraphicSettingsBuffer,myGraphicSettingsBuffer);
 	RHI::UpdateConstantBufferData(myGraphicSettingsBuffer);
+	*/
 }
 
-void GraphicsEngine::SetLoggingWindow(HANDLE aHandle)  const
+void GraphicsEngine::Update()
 {
-	GELogger.SetConsoleHandle(aHandle);
+	myCamera = GameObjectManager::Get().GetCamera().TryGetComponent<cCamera>();
+	if (!myCamera)
+	{
+		Logger::Err("No camera in scene. No render is possible");
+	}
+
+
+
+
+
+
+
+
+
 }
 
 void GraphicsEngine::BeginFrame()
@@ -547,14 +488,13 @@ void GraphicsEngine::BeginFrame()
 	myCamera = GameObjectManager::Get().GetCamera().TryGetComponent<cCamera>();
 	if (!myCamera)
 	{
-		GELogger.Err("No camera in scene. No render is possible");
+		Logger::Err("No camera in scene. No render is possible");
 	}
 	UpdateSettings();
 
 	// Here we should initialize our frame and clean up from the last one.  
-	RHI::ClearRenderTarget(myBackBuffer.get(),myBackgroundColor);
+	/*RHI::ClearRenderTarget(myBackBuffer.get(),myBackgroundColor);
 	RHI::ClearDepthStencil(myDepthBuffer.get());
-
 	RHI::ClearRenderTarget(SceneBuffer.get(),{ 0.0f,0.0f,0.0f,0.0f });
 	RHI::ClearRenderTarget(halfSceneBuffer.get(),{ 0.0f,0.0f,0.0f,0.0f });
 	RHI::ClearRenderTarget(quaterSceneBuffer1.get(),{ 0.0f,0.0f,0.0f,0.0f });
@@ -562,94 +502,214 @@ void GraphicsEngine::BeginFrame()
 	RHI::ClearRenderTarget(IntermediateA.get(),{ 0.0f,0.0f,0.0f,0.0f });
 	RHI::ClearRenderTarget(IntermediateB.get(),{ 0.0f,0.0f,0.0f,0.0f });
 	myG_Buffer.ClearTargets();
-	RHI::SetBlendState(nullptr);
+	RHI::SetBlendState(nullptr);*/
+
+
+
+
 }
 
 void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 {
 	OPTICK_EVENT();
 	aDeltaTime; aTotalTime;
-	RHI::SetVertexShader(myVertexShader);
 
-	OPTICK_EVENT("Gbuffer");
-	RHI::BeginEvent(L"Start writing to gbuffer");
-	myCamera->SetCameraToFrameBuffer();
-	myG_Buffer.SetWriteTargetToBuffer(); //Let all write to textures
-	OPTICK_EVENT("Deferred");
-	DeferredCommandList.Execute();
-	OPTICK_EVENT("Instanced Deferred");
-	myInstanceRenderer.Execute(false);
-	RHI::SetRenderTarget(nullptr,nullptr);
-	myG_Buffer.UnsetResources();
-	RHI::EndEvent();
+	auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+	auto commandList = commandQueue->GetCommandList(L"RenderFrame");
+	auto graphicCommandList = commandList->GetGraphicsCommandList();
+	auto chain = GPU::m_Swapchain->m_SwapChain;
 
-	//decals
-	//if picking check
-	//SSAO
-	//Do ambience pass? Clarit
-	//Render all lights
-	OPTICK_EVENT("SSAO");
-	RHI::BeginEvent(L"SSAO");
-	myCamera->SetCameraToFrameBuffer();
-	GfxCmd_SSAO().ExecuteAndDestroy();
-	RHI::EndEvent();
-
-	////Render shadowmaps
-	OPTICK_EVENT("ShadowMaps")
-		RHI::BeginEvent(L"ShadowMaps");
-	myShadowRenderer.Execute();
-	RHI::EndEvent();
-
-	OPTICK_EVENT("Lightning")
-		RHI::BeginEvent(L"Lightning");
-	myCamera->SetCameraToFrameBuffer();
-	GfxCmd_SetRenderTarget(SceneBuffer.get(),nullptr).ExecuteAndDestroy();
-	GfxCmd_SetLightBuffer().ExecuteAndDestroy(); //REFACTOR Change name to fit purpose
-	RHI::EndEvent();
-	// //Forward pass for light
-	//Forbidden
+	//const UINT currentBackBufferIndex = chain->GetCurrentBackBufferIndex();
+	const auto* backBuffer = GPU::GetCurrentBackBuffer();
+	const auto rtv = GPU::GetCurrentRenderTargetView();
+	const auto dsv = GPU::m_DepthBuffer->GetHandle(ViewType::DSV).cpuPtr;
+	commandList->TransitionBarrier(backBuffer->GetResource(),D3D12_RESOURCE_STATE_RENDER_TARGET);
+	Vector4f clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+	GPU::ClearRTV(*commandList.get(),rtv,clearColor);
+	GPU::ClearDepth(*commandList.get(),GPU::m_DepthBuffer->GetHandle(ViewType::DSV).cpuPtr);
 
 
-	//Particles
-	OPTICK_EVENT("Particles")
-		RHI::BeginEvent(L"Particles");
-	RHI::SetBlendState(GraphicsEngine::Get().GetAdditiveBlendState());
-	GfxCmd_SetRenderTarget(SceneBuffer.get(),myDepthBuffer.get()).ExecuteAndDestroy();
-	myParticleRenderer.Execute();
-	RHI::EndEvent();
 
-	//Post processing
-	OPTICK_EVENT("Postpro")
-		RHI::BeginEvent(L"PostPro");
-	RHI::SetBlendState(nullptr);
-	GfxCmd_LuminancePass().ExecuteAndDestroy(); // Render to IntermediateA
-	GfxCmd_GaussianBlur().ExecuteAndDestroy();
-	GfxCmd_Bloom().ExecuteAndDestroy();
-	GfxCmd_ToneMapPass().ExecuteAndDestroy(); // Render: BackBuffer Read: REG_Target01
-	RHI::EndEvent();
+	const auto& rootSignature = PSOCache::m_RootSignature->GetRootSignature();
+	graphicCommandList->SetGraphicsRootSignature(rootSignature.Get());
+	commandList->TrackResource(rootSignature);
 
-	//Debug layers
-	OPTICK_EVENT("DebugLayers")
-		RHI::BeginEvent(L"DebugLayers");
-	myCamera->SetCameraToFrameBuffer();
-	GfxCmd_DebugLayer().ExecuteAndDestroy();
-#ifdef  _DEBUGDRAW
-	if (myGraphicSettings.DebugRenderer_Active)
+	ID3D12DescriptorHeap* heaps[] =
 	{
-		RHI::SetRenderTarget(GraphicsEngine::Get().GetTargetTextures(eRenderTargets::BackBuffer).get(),GraphicsEngine::Get().GetTargetTextures(eRenderTargets::DepthBuffer).get());
-		DebugDrawer::Get().Render();
+		GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->Heap(),
+		GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_SAMPLER]->Heap()
+	};
+	graphicCommandList->SetDescriptorHeaps(static_cast<UINT>(std::size(heaps)),heaps);
+
+	{
+		LightBuffer lightBuffer = EnvironmentLightPSO::CreateLightBuffer();
+		const auto& alloc = GPU::m_GraphicsMemory->AllocateConstant<LightBuffer>(lightBuffer);
+		graphicCommandList->SetGraphicsRootConstantBufferView(REG_LightBuffer,alloc.GpuAddress());
+
+		auto frameBuffer = myCamera->GetFrameBuffer();
+		const auto& alloc0 = GPU::m_GraphicsMemory->AllocateConstant<FrameBuffer>(frameBuffer);
+		graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::frameBuffer,alloc0.GpuAddress());
+
+		const auto cubeMap = defaultCubeMap->GetRawTexture().get();
+		commandList->SetDescriptorTable(eRootBindings::PermanentTextures,cubeMap);
+		commandList->TrackResource(cubeMap->GetResource());
+
+		graphicCommandList->SetGraphicsRootDescriptorTable(eRootBindings::Textures,GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->GetFirstGpuHandle());
 	}
-	OverlayCommandList.Execute();
-#endif //  _DEBUGDRAW
-	RHI::EndEvent();
+
+	static auto& list = GameObjectManager::Get().GetAllComponents<cMeshRenderer>();
+	ShadowMapperPSO::WriteShadows(commandList,list);
+	commandList->FlushResourceBarriers();
+
+	Texture* gBufferTextures;
+	unsigned bufferCount = 0;
+	{
+
+		graphicCommandList->RSSetViewports(1,&GPU::m_Viewport);
+		graphicCommandList->RSSetScissorRects(1,&GPU::m_ScissorRect);
+
+		const auto& gbufferPSO = PSOCache::GetState(PSOCache::ePipelineStateID::GBuffer);
+		bufferCount = gbufferPSO->GetRenderTargetAmounts();
+		gBufferTextures = gbufferPSO->GetRenderTargets();
+		GPU::ClearRTV(*commandList.get(),gBufferTextures,bufferCount);
+		commandList->SetRenderTargets(bufferCount,gBufferTextures,GPU::m_DepthBuffer.get());
+
+		const auto& pipelineState = gbufferPSO->GetPipelineState().Get();
+		graphicCommandList->SetPipelineState(pipelineState);
+		commandList->TrackResource(pipelineState);
+
+		auto frameBuffer = myCamera->GetFrameBuffer();
+		const auto& alloc0 = GPU::m_GraphicsMemory->AllocateConstant<FrameBuffer>(frameBuffer);
+		graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::frameBuffer,alloc0.GpuAddress());
+	}
+
+	int vertCount = 0;
+	for (auto& meshRenderer : list)
+	{
+		const auto& transform = meshRenderer.GetComponent<Transform>();
+		for (auto& element : meshRenderer.GetElements())
+		{
+			ObjectBuffer objectBuffer;
+			objectBuffer.myTransform = transform.GetRawTransform();
+			objectBuffer.MaxExtents = Vector3f(1,1,1);
+			objectBuffer.MinExtents = -Vector3f(1,1,1);
+			objectBuffer.hasBone = false;
+			objectBuffer.isInstanced = false;
+
+			const auto& alloc1 = GPU::m_GraphicsMemory->AllocateConstant<ObjectBuffer>(objectBuffer);
+			graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::objectBuffer,alloc1.GpuAddress());
+			vertCount += element.VertexBuffer.GetVertexCount();
+			GPU::ConfigureInputAssembler(*commandList,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.VertexBuffer,element.IndexResource);
+
+			const unsigned materialIndex = element.MaterialIndex;
+			MaterialBuffer materialBuffer;
+
+			for (size_t i = 0; i < (int)eTextureType::EffectMap + 1; i++)
+			{
+				if (auto textureAsset = meshRenderer.GetTexture((eTextureType)i,materialIndex))
+				{
+					auto tex = textureAsset->GetRawTexture();
+					tex->SetView(ViewType::SRV);
+					commandList->TrackResource(tex->GetResource());
+
+					switch ((eTextureType)i)
+					{
+					case eTextureType::ColorMap:
+						materialBuffer.albedoTexture = tex->GetHeapOffset();
+						break;
+					case eTextureType::NormalMap:
+						materialBuffer.normalTexture = tex->GetHeapOffset();
+						break;
+					case eTextureType::MaterialMap:
+						materialBuffer.materialTexture = tex->GetHeapOffset();
+						break;
+					case eTextureType::EffectMap:
+						materialBuffer.emissiveTexture = tex->GetHeapOffset();
+						break;
+					default:
+						break;
+					}
+				}
+				else
+				{
+					switch ((eTextureType)i)
+					{
+					case eTextureType::ColorMap:
+						materialBuffer.albedoTexture = defaultTexture->GetRawTexture()->GetHeapOffset();
+						break;
+					case eTextureType::NormalMap:
+						materialBuffer.normalTexture = defaultNormalTexture->GetRawTexture()->GetHeapOffset();
+						break;
+					case eTextureType::MaterialMap:
+						materialBuffer.materialTexture = defaultMatTexture->GetRawTexture()->GetHeapOffset();
+						break;
+					case eTextureType::EffectMap:
+						materialBuffer.emissiveTexture = defaultEffectTexture->GetRawTexture()->GetHeapOffset();
+						break;
+					default:
+						break;
+					}
+				}
+			}
+
+			const auto& alloc2 = GPU::m_GraphicsMemory->AllocateConstant<MaterialBuffer>(materialBuffer);
+			graphicCommandList->SetGraphicsRootConstantBufferView(REG_DefaultMaterialBuffer,alloc2.GpuAddress());
+
+			graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
+		}
+	}
+
+	const auto& enviromentLight = PSOCache::GetState(PSOCache::ePipelineStateID::DeferredLighting);
+	{
+		GPU::ClearRTV(*commandList.get(),enviromentLight->GetRenderTargets(),enviromentLight->GetRenderTargetAmounts());
+		commandList->SetRenderTargets(enviromentLight->GetRenderTargetAmounts(),enviromentLight->GetRenderTargets(),nullptr);
+
+		const auto& pipelineState = enviromentLight->GetPipelineState().Get();
+		graphicCommandList->SetPipelineState(pipelineState);
+		commandList->TrackResource(pipelineState);
+
+		for (unsigned i = 0; i < bufferCount; i++)
+		{
+			gBufferTextures[i].SetView(ViewType::SRV);
+			commandList->TransitionBarrier(gBufferTextures[i],D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			commandList->TrackResource(gBufferTextures[i]);
+		}
+		commandList->FlushResourceBarriers();
+		commandList->SetDescriptorTable(eRootBindings::GbufferPasses,gBufferTextures);
+		graphicCommandList->IASetVertexBuffers(0,1,nullptr);
+		graphicCommandList->IASetIndexBuffer(nullptr);
+		graphicCommandList->DrawInstanced(6,1,0,0);
+	}
+
+	{
+		const auto& toneMapper = PSOCache::GetState(PSOCache::ePipelineStateID::ToneMap);
+
+		const auto& pipelineState = toneMapper->GetPipelineState().Get();
+		graphicCommandList->SetPipelineState(pipelineState);
+		commandList->TrackResource(pipelineState);
+
+		auto* renderTargets = enviromentLight->GetRenderTargets();
+		commandList->SetDescriptorTable(TargetTexture,renderTargets);
+		commandList->FlushResourceBarriers();
+		commandList->SetRenderTargets(1,GPU::GetCurrentBackBuffer(),nullptr);
+
+
+		graphicCommandList->IASetVertexBuffers(0,1,nullptr);
+		graphicCommandList->IASetIndexBuffer(nullptr);
+		graphicCommandList->DrawInstanced(6,1,0,0);
+	}
+
+	commandQueue->ExecuteCommandList(commandList);
 }
 
 void GraphicsEngine::RenderTextureTo(eRenderTargets from,eRenderTargets to)  const
 {
-	const Texture* texture1 = GraphicsEngine::Get().GetTargetTextures(from).get();
-	const Texture* texture2 = GraphicsEngine::Get().GetTargetTextures(to).get();
+	from; to;
 
-	RHI::SetRenderTarget(texture2,nullptr);
+	//const Texture* texture1 = GraphicsEngine::Get().GetTargetTextures(from).get();
+	//const Texture* texture2 = GraphicsEngine::Get().GetTargetTextures(to).get();
+
+	/*RHI::SetRenderTarget(texture2,nullptr);
 	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_Target0,texture1);
 	RHI::ConfigureInputAssembler(
 		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
@@ -659,22 +719,55 @@ void GraphicsEngine::RenderTextureTo(eRenderTargets from,eRenderTargets to)  con
 		nullptr
 	);
 	RHI::Draw(4);
-	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_Target0,nullptr);
+	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_Target0,nullptr);*/
 }
 
 void GraphicsEngine::EndFrame()
 {
-	OPTICK_EVENT()
-		// We finish our frame here and present it on screen. 
-		RHI::Present(0);
-	OPTICK_EVENT("ResetShadowList")
-		myShadowRenderer.ResetShadowList();
-	OPTICK_EVENT("DeferredCommandList")
-		DeferredCommandList.Reset();
-	OPTICK_EVENT("OverlayCommandList")
-		OverlayCommandList.Reset();
-	OPTICK_EVENT("myInstanceRenderer")
-		myInstanceRenderer.Clear();
-	OPTICK_EVENT("ClearedEndFrame")
+	OPTICK_EVENT();
+	auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+	auto commandList = commandQueue->GetCommandList();
+
+	const auto* backBuffer = GPU::GetCurrentBackBuffer();
+	commandList->TransitionBarrier(backBuffer->GetResource(),D3D12_RESOURCE_STATE_PRESENT);
+	commandQueue->ExecuteCommandList(commandList);
+
+	Helpers::ThrowIfFailed(GPU::m_Swapchain->m_SwapChain->Present(1,0));
+	GPU::m_FenceValues[GPU::m_FrameIndex] = commandQueue->Signal();
+	GPU::m_FrameIndex = GPU::m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
+
+	GPU::m_GraphicsMemory->Commit(commandQueue->GetCommandQueue().Get());
+	commandQueue->WaitForFenceValue(GPU::m_FenceValues[GPU::m_FrameIndex]);
+	//ImGui::Render();
+	//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(),commandList->GetGraphicsCommandList().Get());
+	//GPU::Present(); 
 }
 
+FORCEINLINE std::shared_ptr<Texture> GraphicsEngine::GetTargetTextures(eRenderTargets type) const
+{
+	switch (type)
+	{
+	case::eRenderTargets::BackBuffer:
+		return myBackBuffer;
+	case::eRenderTargets::DepthBuffer:
+		return myDepthBuffer;
+	case::eRenderTargets::SceneBuffer:
+		return SceneBuffer;
+	case::eRenderTargets::halfSceneBuffer:
+		return halfSceneBuffer;
+	case::eRenderTargets::quaterSceneBuffer1:
+		return quaterSceneBuffer1;
+	case::eRenderTargets::quaterSceneBuffer2:
+		return quaterSceneBuffer2;
+	case::eRenderTargets::IntermediateA:
+		return IntermediateA;
+	case::eRenderTargets::IntermediateB:
+		return IntermediateB;
+	case::eRenderTargets::SSAO:
+		return SSAOTexture;
+	case::eRenderTargets::NoiseTexture:
+		return NoiseTable->GetRawTexture();
+	default:
+		return nullptr;
+	}
+}

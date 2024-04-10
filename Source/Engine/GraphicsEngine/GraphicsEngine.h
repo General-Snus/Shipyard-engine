@@ -1,19 +1,21 @@
-#pragma once 
-#include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
-#include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
-#include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
+#pragma once  
 #include <Engine/GraphicsEngine/Shaders/Registers.h> 
-#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp> 
-#include "InterOp/RHI.h"
-#include "Rendering/Buffers/ConstantBuffer.h" 
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>  
+
+#include "Engine/AssetManager/Enums.h" 
 #include "Rendering/Buffers/FrameBuffer.h"
 #include "Rendering/Buffers/G_Buffer.h"
 #include "Rendering/Buffers/GraphicSettingsBuffer.h"
+#include "Rendering/Buffers/LightBuffer.h"
 #include "Rendering/Buffers/LineBuffer.h"
-#include "Rendering/Buffers/ObjectBuffer.h" 
-#include "Rendering/ParticleRenderer/ParticleRenderer.h"
-#include "Rendering/ShadowRenderer/ShadowRenderer.h"  
+#include "Rendering/Buffers/ObjectBuffer.h"
+
 #define _DEBUGDRAW
+using namespace Microsoft::WRL;
+
+class Mesh;
+class Material;
+class ShipyardShader;
 
 struct GraphicsSettings
 {
@@ -55,6 +57,9 @@ enum class eShader
 };
 
 class cCamera;
+class Texture;
+class TextureHolder;
+class PSOCache;
 
 class GraphicsEngine
 {
@@ -69,16 +74,18 @@ public:
 		DSS_ReadOnly,
 		DSS_COUNT,
 	};
-private:
 	FrameBuffer myFrameBuffer;
+private:
+
+	std::shared_ptr<PSOCache> m_StateCache;
+
+
 	ObjectBuffer myObjectBuffer;
 	LineBuffer myLineBuffer;
 	LightBuffer myLightBuffer;
 	G_Buffer myG_Buffer;
 	GraphicSettingsBuffer myGraphicSettingsBuffer;
-	//Fill with render data for the deffered pass
-	GraphicsCommandList DeferredCommandList;
-	GraphicsCommandList OverlayCommandList;
+
 
 	SIZE myWindowSize{ 0,0 };
 	HWND myWindowHandle{};
@@ -99,35 +106,35 @@ private:
 
 	//SSAO
 	std::shared_ptr<Texture> SSAOTexture;
-	ComPtr<ID3D11PixelShader> ScreenSpaceAmbienceOcclusion;
-	ComPtr<ID3D11PixelShader> EdgeBlur;
+	ComPtr<ID3DBlob> ScreenSpaceAmbienceOcclusion;
+	Microsoft::WRL::ComPtr<ID3DBlob> EdgeBlur;
 
 	//Defualtl
-	ComPtr<ID3D11VertexShader> myVertexShader;
-	ComPtr<ID3D11PixelShader> myPixelShader;
-	std::shared_ptr<Shader> defaultVS;
-	std::shared_ptr<Shader> defaultPS;
+	ComPtr<ID3DBlob> myVertexShader;
+	ComPtr<ID3DBlob> myPixelShader;
+	std::shared_ptr<ShipyardShader> defaultVS;
+	std::shared_ptr<ShipyardShader> defaultPS;
 
 	//Particle
-	ComPtr<ID3D11VertexShader> particleVertexShader;
-	ComPtr<ID3D11GeometryShader> particleGeometryShader;
-	ComPtr<ID3D11PixelShader> particlePixelShader;
+	ComPtr<ID3DBlob> particleVertexShader;
+	ComPtr<ID3DBlob> particleGeometryShader;
+	ComPtr<ID3DBlob> particlePixelShader;
 
 
 	//Post-pro
-	ComPtr<ID3D11VertexShader> myScreenSpaceQuadShader;
-	ComPtr<ID3D11PixelShader> luminancePass;
-	ComPtr<ID3D11PixelShader> TonemapPass;
-	ComPtr<ID3D11PixelShader> copyShader;
-	ComPtr<ID3D11PixelShader> gaussShader;
-	ComPtr<ID3D11PixelShader> bloomShader;
+	ComPtr<ID3DBlob> myScreenSpaceQuadShader;
+	ComPtr<ID3DBlob> luminancePass;
+	ComPtr<ID3DBlob> TonemapPass;
+	ComPtr<ID3DBlob> copyShader;
+	ComPtr<ID3DBlob> gaussShader;
+	ComPtr<ID3DBlob> bloomShader;
 
 
 	//Debug
-	ComPtr<ID3D11Buffer> myLineVertexBuffer;
-	ComPtr<ID3D11Buffer> myLineIndexBuffer;
-	std::shared_ptr< Shader>  debugLineVS;
-	std::shared_ptr< Shader> debugLinePS;
+	//ComPtr<ID3D12Resource> myLineVertexBuffer;
+	//ComPtr<ID3D12Resource> myLineIndexBuffer;
+	//std::shared_ptr<ShipyardShader>  debugLineVS;
+	//std::shared_ptr<ShipyardShader> debugLinePS;
 
 	std::shared_ptr<Texture> BRDLookUpTable;
 	std::shared_ptr<TextureHolder> NoiseTable;
@@ -140,22 +147,6 @@ private:
 
 	std::shared_ptr<Mesh> defaultMesh;
 	std::shared_ptr<Material> defaultMaterial;
-
-	ComPtr<ID3D11SamplerState> myDefaultSampleState;
-	ComPtr<ID3D11SamplerState> myShadowSampleState;
-	ComPtr<ID3D11SamplerState> myPointSampleState;
-	ComPtr<ID3D11SamplerState> myBRDFSampleState;
-	ComPtr<ID3D11SamplerState> myNormalDepthSampleState;
-
-
-
-	std::array<ComPtr<ID3D11DepthStencilState>,(int)eDepthStencilStates::DSS_COUNT> myDepthStencilStates;
-
-	ComPtr<ID3D11BlendState> AlphaBlendState;
-	ComPtr<ID3D11BlendState> AdditiveBlendState;
-	ShadowRenderer myShadowRenderer;
-	ParticleRenderer myParticleRenderer;
-	InstanceRenderer myInstanceRenderer;
 	GraphicsSettings myGraphicSettings;
 
 	// We're a container singleton, no instancing this outside the class.
@@ -167,12 +158,6 @@ public:
 		static GraphicsEngine myInstance;
 		return myInstance;
 	}
-
-	/**
-	 * Initializes the Graphics Engine with the specified settings.
-	 * @param windowHandle The window that will contain this Graphics Engine.
-	 * @param enableDeviceDebug If DirectX should write debug output in the Output.
-	 */
 	bool Initialize(HWND windowHandle,bool enableDeviceDebug);
 
 	bool SetupDebugDrawline();
@@ -185,25 +170,13 @@ public:
 
 	void UpdateSettings();
 
-	void SetLoggingWindow(HANDLE aHandle) const;
-
-	void SetupBRDF();
+	void SetupSpace3();
 
 	void SetupPostProcessing();
 
-	/**
-	 * Prepares the next frame for rendering by resetting states and clearing all render targets.
-	 */
+	void Update();
 	void BeginFrame();
-
-	/**
-	 * Finishes a rendered frame and swaps the screen buffers to display it on screen.
-	 */
 	void EndFrame();
-
-	/**
-	 * Renders the current scene to the BackBuffer.
-	 */
 	void RenderFrame(float aDeltaTime,double aTotalTime);
 
 	void RenderTextureTo(eRenderTargets from,eRenderTargets to) const;
@@ -211,50 +184,32 @@ public:
 
 	void SetDepthState(eDepthStencilStates state)
 	{
-		RHI::Context->OMSetDepthStencilState(myDepthStencilStates[(int)state].Get(),0);
+		state;
+		//RHI::Context->OMSetDepthStencilState(myDepthStencilStates[(int)state].Get(),0);
 	}
 
 	Vector4f& GetBackgroundColor() { return myBackgroundColor; }
 
-
-	template<typename CommandClass,typename ...Args>
-	FORCEINLINE void ShadowCommands(Args... args)
-	{
-		myShadowRenderer.ShadowCommandList.AddCommand<CommandClass>(args...);
-	}
-
-	template<typename CommandClass,typename ...Args>
-	FORCEINLINE void DeferredCommand(Args... args)
-	{
-		DeferredCommandList.AddCommand<CommandClass>(args ...);
-	}
-
-	template<typename CommandClass,typename ...Args>
-	FORCEINLINE void OverlayCommands(Args... args)
-	{
-		OverlayCommandList.AddCommand<CommandClass>(args ...);
-	}
 
 
 	[[nodiscard]] HWND FORCEINLINE GetWindowHandle() const { return myWindowHandle; }
 	[[nodiscard]] SIZE FORCEINLINE GetWindowSize() const { return myWindowSize; }
 
 
+	FORCEINLINE std::shared_ptr<ShipyardShader> GetDefaultVSShader() const { return defaultVS; }
+	FORCEINLINE std::shared_ptr<ShipyardShader> GetDefaultPSShader() const { return defaultPS; }
 
-	FORCEINLINE std::shared_ptr<Shader> GetDefaultVSShader() const { return defaultVS; }
-	FORCEINLINE std::shared_ptr<Shader> GetDefaultPSShader() const { return defaultPS; }
-
-	FORCEINLINE ComPtr<ID3D11VertexShader> GetQuadShader() const { return myScreenSpaceQuadShader; }
-	FORCEINLINE ComPtr<ID3D11PixelShader> GetLuminanceShader() const { return luminancePass; }
-	FORCEINLINE ComPtr<ID3D11PixelShader> GetSSAOShader() const { return ScreenSpaceAmbienceOcclusion; }
-	FORCEINLINE ComPtr<ID3D11PixelShader> GetEdgeBlurShader() const { return EdgeBlur; }
-	FORCEINLINE ComPtr<ID3D11PixelShader> GetTonemap() const { return TonemapPass; }
-	FORCEINLINE ComPtr<ID3D11PixelShader> GetCopyShader() const { return copyShader; }
-	FORCEINLINE ComPtr<ID3D11PixelShader> GetGaussShader() const { return gaussShader; }
-	FORCEINLINE ComPtr<ID3D11PixelShader> GetBloomShader() const { return bloomShader; }
-	FORCEINLINE ComPtr<ID3D11VertexShader> GetParticleVSShader() const { return particleVertexShader; }
-	FORCEINLINE ComPtr<ID3D11GeometryShader> GetParticleGSShader() const { return particleGeometryShader; }
-	FORCEINLINE ComPtr<ID3D11PixelShader> GetParticlePSShader() const { return particlePixelShader; }
+	FORCEINLINE ComPtr<ID3DBlob> GetQuadShader() const { return myScreenSpaceQuadShader; }
+	FORCEINLINE ComPtr<ID3DBlob> GetLuminanceShader() const { return luminancePass; }
+	FORCEINLINE ComPtr<ID3DBlob> GetSSAOShader() const { return ScreenSpaceAmbienceOcclusion; }
+	FORCEINLINE ComPtr<ID3DBlob> GetEdgeBlurShader() const { return EdgeBlur; }
+	FORCEINLINE ComPtr<ID3DBlob> GetTonemap() const { return TonemapPass; }
+	FORCEINLINE ComPtr<ID3DBlob> GetCopyShader() const { return copyShader; }
+	FORCEINLINE ComPtr<ID3DBlob> GetGaussShader() const { return gaussShader; }
+	FORCEINLINE ComPtr<ID3DBlob> GetBloomShader() const { return bloomShader; }
+	FORCEINLINE ComPtr<ID3DBlob> GetParticleVSShader() const { return particleVertexShader; }
+	FORCEINLINE ComPtr<ID3DBlob> GetParticleGSShader() const { return particleGeometryShader; }
+	FORCEINLINE ComPtr<ID3DBlob> GetParticlePSShader() const { return particlePixelShader; }
 
 	/*FORCEINLINE ComPtr<ID3D11DeviceChild> GetShader(eShader type) const
 	{
@@ -302,42 +257,16 @@ public:
 	}
 	*/
 
-	FORCEINLINE std::shared_ptr<Texture> GetTargetTextures(eRenderTargets type) const
-	{
-		switch (type)
-		{
-		case::eRenderTargets::BackBuffer:
-			return myBackBuffer;
-		case::eRenderTargets::DepthBuffer:
-			return myDepthBuffer;
-		case::eRenderTargets::SceneBuffer:
-			return SceneBuffer;
-		case::eRenderTargets::halfSceneBuffer:
-			return halfSceneBuffer;
-		case::eRenderTargets::quaterSceneBuffer1:
-			return quaterSceneBuffer1;
-		case::eRenderTargets::quaterSceneBuffer2:
-			return quaterSceneBuffer2;
-		case::eRenderTargets::IntermediateA:
-			return IntermediateA;
-		case::eRenderTargets::IntermediateB:
-			return IntermediateB;
-		case::eRenderTargets::SSAO:
-			return SSAOTexture;
-		case::eRenderTargets::NoiseTexture:
-			return NoiseTable->GetRawTexture();
-		default:
-			return nullptr;
-		}
-	}
 
-	FORCEINLINE InstanceRenderer& GetInstanceRenderer() { return myInstanceRenderer; }
+
+	FORCEINLINE std::shared_ptr<Texture> GetTargetTextures(eRenderTargets type) const;
+
 	FORCEINLINE GraphicsSettings& GetSettings() { return myGraphicSettings; }
-	FORCEINLINE std::shared_ptr< Shader> GetDebugLineVS() const { return debugLineVS; }
-	FORCEINLINE std::shared_ptr< Shader> GetDebugLinePS() const { return debugLinePS; }
+	//FORCEINLINE std::shared_ptr<ShipyardShader> GetDebugLineVS() const { return debugLineVS; }
+	//FORCEINLINE std::shared_ptr<ShipyardShader> GetDebugLinePS() const { return debugLinePS; }
 
-	FORCEINLINE ComPtr<ID3D11BlendState> GetAlphaBlendState() const { return AlphaBlendState; }
-	FORCEINLINE ComPtr<ID3D11BlendState> GetAdditiveBlendState() const { return AdditiveBlendState; }
+	//FORCEINLINE ComPtr<ID3D11BlendState> GetAlphaBlendState() const { return AlphaBlendState; }
+	//FORCEINLINE ComPtr<ID3D11BlendState> GetAdditiveBlendState() const { return AdditiveBlendState; }
 
 	FORCEINLINE std::shared_ptr<Material> GetDefaultMaterial() const { return defaultMaterial; }
 	FORCEINLINE std::shared_ptr<TextureHolder> GetDefaultTexture(eTextureType type) const

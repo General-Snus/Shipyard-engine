@@ -1,0 +1,38 @@
+{
+    "MaterialBuffer": {
+        "NormalStrength": 1.0,
+        "Shine": 100.0,
+        "UVTiling": [
+            1.0,
+            1.0
+        ],
+        "albedoColor": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+        ]
+    },
+    "Textures": [
+        {
+            "TextureName": "col_head_1stfloor_BaseColor.png",
+            "TexturePath": "col_head_1stfloor_BaseColor.png",
+            "TextureType": 0
+        },
+        {
+            "TextureName": "col_head_1stfloor_Normal.png",
+            "TexturePath": "col_head_1stfloor_Normal.png",
+            "TextureType": 1
+        },
+        {
+            "TextureName": "",
+            "TexturePath": "",
+            "TextureType": 2
+        },
+        {
+            "TextureName": "",
+            "TexturePath": "",
+            "TextureType": 3
+        }
+    ]
+}

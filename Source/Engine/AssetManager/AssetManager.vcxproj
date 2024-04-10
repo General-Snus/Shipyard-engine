@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.props" Condition="Exists('..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -75,13 +76,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(ProjectDir);$(SolutionDir)\;$(SolutionDir)Tools\Assimp\include;$(IncludePath);$(SolutionDir)Tools\ThirdParty\PhysX\physx\include</IncludePath>
+    <IncludePath>$(ProjectDir);$(SolutionDir);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)DirectX\XTK\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include</IncludePath>
     <LibraryPath>$(Configuration)\;$(LibraryPath);$(SolutionDir)..\Dependencies\$(Configuration)\PhysXLibs;</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
-    <IncludePath>$(ProjectDir);$(SolutionDir)\;$(SolutionDir)Tools\Assimp\include;$(IncludePath);$(SolutionDir)Tools\ThirdParty\PhysX\physx\include</IncludePath>
+    <IncludePath>$(ProjectDir);$(SolutionDir);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)DirectX\XTK\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include</IncludePath>
     <LibraryPath>$(Configuration)\;$(LibraryPath);$(SolutionDir)..\Dependencies\$(Configuration)\PhysXLibs;</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -170,8 +171,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ComponentSystem\Components\ActorSystem\CombatComponent.h" />
+    <ClInclude Include="ComponentSystem\Components\ParticleSystem.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="ComponentSystem\Components\Physics\cPhysXDynamicBody.h" />
     <ClInclude Include="ComponentSystem\Components\Physics\cPhysXStaticBody.h" />
+    <ClInclude Include="Enums.h" />
     <ClInclude Include="Objects\AI\AgentSystem\AIPollingManager.h" />
     <ClInclude Include="AssetManagerUtills.hpp" />
     <ClInclude Include="Objects\BaseAssets\ColliderAsset.h" />
@@ -189,7 +195,6 @@
     <ClInclude Include="Objects\AI\AgentSystem\DecisionTree\DecisionTree.h" />
     <ClInclude Include="Objects\AI\AgentSystem\PollingStations\PollingStation.h" />
     <ClInclude Include="Objects\AI\NavMesh\NavMesh.h" />
-    <ClInclude Include="Objects\BaseAssets\ParticleEmitter.h" />
     <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\RenderMode.h" />
     <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\FrameStatistics.h" />
     <ClInclude Include="ComponentSystem\Components\CameraComponent.h" />
@@ -210,9 +215,12 @@
     <ClInclude Include="ComponentSystem\GameObject.h" />
     <ClInclude Include="ComponentSystem\Components\MeshRenderer.h" />
     <ClInclude Include="ComponentSystem\Components\Transform.h" />
+    <ClInclude Include="Objects\BaseAssets\ParticleEmitter.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="Objects\BaseAssets\TextureAsset.h" />
     <ClInclude Include="ComponentSystem\Components\Skybox.h" />
-    <ClInclude Include="ComponentSystem\Components\ParticleSystem.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\WanderController.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\AIController.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\SeparationController.h" />
@@ -220,11 +228,16 @@
     <ClInclude Include="Objects\AI\AgentSystem\SteeringBehaviour.h" />
     <ClInclude Include="ComponentSystem\Components\TaskSpecific\ProjectileComponent.h" />
     <ClInclude Include="Objects\AI\AgentSystem\StateMachine\StateMachineBase.h" />
+    <ClInclude Include="Objects\BaseAssets\ShipyardShader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\CombatComponent.cpp" />
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysXDynamicBody.cpp" />
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysXStaticBody.cpp" />
+    <ClCompile Include="ComponentSystem\Components\Source\ParticleSystem.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Objects\AI\AgentSystem\Source\AIPollingManager.cpp" />
     <ClCompile Include="AssetManagerUtills.cpp" />
     <ClCompile Include="Objects\BaseAssets\Source\ColliderAsset.cpp" />
@@ -241,7 +254,6 @@
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\Source\PollingController.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\PollingStations\Source\PollingStation.cpp" />
     <ClCompile Include="Objects\AI\NavMesh\Source\NavMesh.cpp" />
-    <ClCompile Include="Objects\BaseAssets\Source\ParticleEmitter.cpp" />
     <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\RenderMode.cpp" />
     <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\FrameStatistics.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\CameraComponent.cpp" />
@@ -266,9 +278,12 @@
     <ClCompile Include="ComponentSystem\Source\GameObject.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\MeshRenderer.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\Transform.cpp" />
+    <ClCompile Include="Objects\BaseAssets\Source\ParticleEmitter.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Objects\BaseAssets\Source\TextureAsset.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\Skybox.cpp" />
-    <ClCompile Include="ComponentSystem\Components\Source\ParticleSystem.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\WanderController.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\AIController.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\SeparationController.cpp" />
@@ -276,8 +291,20 @@
     <ClCompile Include="Objects\AI\AgentSystem\Source\SteeringBehaviour.cpp" />
     <ClCompile Include="ComponentSystem\Components\TaskSpecific\Source\ProjectileComponent.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\StateMachine\Source\StateMachineBase.cpp" />
+    <ClCompile Include="Objects\BaseAssets\Source\ShipyardShader.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.targets" Condition="Exists('..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.props'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.targets'))" />
+  </Target>
 </Project>

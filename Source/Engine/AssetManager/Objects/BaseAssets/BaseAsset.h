@@ -1,8 +1,11 @@
-#pragma once
+#pragma once 
+#include <Engine/AssetManager/Enums.h>
 #include <Engine/GraphicsEngine/Rendering/Vertex.h>
 #include <filesystem>
-#include <functional>
-#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp> 
+#include  <functional>/*
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>*/
+
+#include "DirectX/Shipyard/GpuResource.h"
 class Material;
 class AssetBase
 {
@@ -18,29 +21,27 @@ protected:
 	std::filesystem::path AssetPath;
 };
 
-struct Bone
-{
-	Matrix BindPoseInverse;
-	int ParentIdx = -1;
-	std::string Name;
-	std::vector<unsigned> Children;
-};
-
-
-struct Frame
-{
-	std::unordered_map<std::string,Matrix > myTransforms;
-};
+//struct Bone
+//{
+//	Matrix BindPoseInverse;
+//	int ParentIdx = -1;
+//	std::string Name;
+//	std::vector<unsigned> Children;
+//};
+//
+//
+//struct Frame
+//{
+//	std::unordered_map<std::string,Matrix > myTransforms;
+//};
 
 struct Element
 {
-	ComPtr<ID3D11Buffer> VertexBuffer;
-	ComPtr<ID3D11Buffer> IndexBuffer;
+	VertexResource VertexBuffer;
+	IndexResource IndexResource;
 	std::vector<Vertex> Vertices;
-	std::vector<unsigned int>Indicies;
-	UINT NumVertices = 0;
-	UINT NumIndices = 0;
-	UINT PrimitiveTopology = 0;
+	std::vector<uint32_t> Indicies;
+	D3D_PRIMITIVE_TOPOLOGY PrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	UINT Stride = 0;
 	unsigned int MaterialIndex = 0;
 };

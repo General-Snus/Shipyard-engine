@@ -1,27 +1,27 @@
-#include "../NavMesh.h"
-#include <sstream>
+#include "AssetManager.pch.h"
 #include <fstream>
-#include <string> 
 #include <random>
-
+#include <sstream>
+#include <string> 
+#include <Tools/Utilities/DataStructures/HashMap.hpp> 
 #include <Tools/Utilities/DataStructures/PriorityQueue.hpp>
 #include <Tools/Utilities/DataStructures/Stack.hpp>
-#include <Tools/Utilities/DataStructures/HashMap.hpp> 
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
+#include "../NavMesh.h"
 
 void NavMesh::Triangulate(const std::vector<int>& poly,int index,std::vector<std::vector<int>>& indices)
 {
 	std::vector<int> newPoly;
 	newPoly.resize(3);
 	int newIndex = index - 1;
-	for(int i = index; i < 3 + index; i++)
+	for (int i = index; i < 3 + index; i++)
 	{
 		int a = i % 3;
 		int b = i % poly.size();
 		newPoly[a] = poly[b];
 		newIndex++;
 	}
-	if(newIndex < poly.size())
+	if (newIndex < poly.size())
 	{
 		Triangulate(poly,newIndex,indices);
 	}
@@ -32,17 +32,17 @@ void NavMesh::Initialize(const std::filesystem::path& PathToLoad)
 {
 	std::ifstream InpFStream;
 	InpFStream.open(PathToLoad);
-	if(!InpFStream.is_open()) return;
+	if (!InpFStream.is_open()) return;
 
 	auto readLine = new char[5000];
 	std::vector<std::vector<int>> indices;
 
-	while(!InpFStream.eof())
+	while (!InpFStream.eof())
 	{
 		std::stringstream inputString;
 		InpFStream.getline(readLine,5000);
 
-		if(readLine[0] == 'v')
+		if (readLine[0] == 'v')
 		{
 			Vector4f position;
 			inputString.str(&readLine[2]);
@@ -59,23 +59,23 @@ void NavMesh::Initialize(const std::filesystem::path& PathToLoad)
 
 			position.w = 1;
 			Vector3f newPoint;
-			newPoint = {position.x,position.y,position.z};
+			newPoint = { position.x,position.y,position.z };
 			myPoints.push_back(newPoint);
 		}
-		else if(readLine[0] == 'f')
+		else if (readLine[0] == 'f')
 		{
 			std::string check = readLine;
 
 			inputString.str(&readLine[2]);
 			std::vector<int> poly;
 
-			while(!inputString.eof())
+			while (!inputString.eof())
 			{
 				std::string value;
 				inputString >> value;
 				poly.push_back(std::stoi(value) - 1);
 			}
-			if(poly.size() > 3)
+			if (poly.size() > 3)
 			{
 				Triangulate(poly,0,indices);
 				continue;
@@ -86,7 +86,7 @@ void NavMesh::Initialize(const std::filesystem::path& PathToLoad)
 
 	InpFStream.close();
 
-	for(auto& v : indices)
+	for (auto& v : indices)
 	{
 		Polygon polygon;
 		Edge newEdge{};
@@ -119,17 +119,17 @@ void NavMesh::Initialize(const std::filesystem::path& PathToLoad)
 		myPolygons.push_back(polygon);
 	}
 	auto size = static_cast<int> (myPolygons.size());
-	for(int i = 0; i < size; i++)
+	for (int i = 0; i < size; i++)
 	{
-		for(int j = 0; j < size; j++)
+		for (int j = 0; j < size; j++)
 		{
-			if(i != j)
+			if (i != j)
 			{
-				for(auto& polyAEdges : myPolygons[i].Edges)
+				for (auto& polyAEdges : myPolygons[i].Edges)
 				{
-					for(auto& polyBEdges : myPolygons[j].Edges)
+					for (auto& polyBEdges : myPolygons[j].Edges)
 					{
-						if(myEdges[polyAEdges].Points[0] == myEdges[polyBEdges].Points[1] &&
+						if (myEdges[polyAEdges].Points[0] == myEdges[polyBEdges].Points[1] &&
 							myEdges[polyAEdges].Points[1] == myEdges[polyBEdges].Points[0]
 							)
 						{
@@ -150,7 +150,7 @@ void NavMesh::Initialize(const std::filesystem::path& PathToLoad)
 	//myDrawnMesh.fromPositions = new  Vector3f[myEdges.size()];
 	//myDrawnMesh.toPositions = new  Vector3f[myEdges.size()];
 	int index = 0;
-	for(auto& i : myEdges)
+	for (auto& i : myEdges)
 	{
 		i;
 		//myDrawnMesh.fromPositions[index] = myPoints[i.Points[0]];
@@ -165,13 +165,13 @@ void NavMesh::Initialize(const std::filesystem::path& PathToLoad)
 NavMesh::Path NavMesh::PathFind(Vector3f Start,Vector3f End)
 // Hur fan hittar jag exakt triangel i punkt i 3d space? måste vara i varje triangels space? Du är aldrig rakt på en 2d struktur...
 {
-	if(!IsReady) return Path();
+	if (!IsReady) return Path();
 
 	int startPoly = ClosestTriangleToPoint(Start);
 	int endPoly = ClosestTriangleToPoint(End);
 	std::vector<int> intPath = AStar(startPoly,endPoly);
 
-	if(!intPath.size())
+	if (!intPath.size())
 	{
 		return Path();
 	}
@@ -179,7 +179,7 @@ NavMesh::Path NavMesh::PathFind(Vector3f Start,Vector3f End)
 	Path path;
 	path.myPath.push_back(Start);
 
-	for(auto const& i : intPath)
+	for (auto const& i : intPath)
 	{
 		path.myPath.push_back(myPolygons[i].CenterPosition);
 	}
@@ -196,25 +196,25 @@ bool NavMesh::IsPointInside(Vector3f Point)
 
 void NavMesh::DrawDebug()
 {
-	if(!IsReady) return;
+	if (!IsReady) return;
 	//Tga::Engine::GetInstance()->GetGraphicsEngine().GetCustomShapeDrawer();
 	//Tga::LineDrawer& lineDrawer = Tga::Engine::GetInstance()->GetGraphicsEngine().GetLineDrawer();
 	//lineDrawer.Draw(myDrawnMesh); 
 	//Tga::DebugDrawer& debugDrawer = Tga::Engine::GetInstance()->GetDebugDrawer();
 
-	for(const auto& i : myPolygons)
+	for (const auto& i : myPolygons)
 	{
 		//debugDrawer.DrawCircle({i.CenterPosition.x,i.CenterPosition.y},1);
-		for(auto& edge : i.Edges)
+		for (auto& edge : i.Edges)
 		{
 			int index = myEdges[edge].Neighbors[0];
-			if(index == -1)
+			if (index == -1)
 			{
 				continue;
 			}
-			const Vector2f from = {i.CenterPosition.x,i.CenterPosition.y};
-			const Vector2f to = {myPolygons[index].CenterPosition.x,myPolygons[index].CenterPosition.y};
-			const Vector3f grey = {0.25,0.25,0.25};
+			const Vector2f from = { i.CenterPosition.x,i.CenterPosition.y };
+			const Vector2f to = { myPolygons[index].CenterPosition.x,myPolygons[index].CenterPosition.y };
+			const Vector3f grey = { 0.25,0.25,0.25 };
 
 			//debugDrawer.DrawArrow(from,to,grey,3.0f);
 		}
@@ -223,9 +223,9 @@ void NavMesh::DrawDebug()
 
 bool NavMesh::RayToNavMesh(Vector3f rayOrigin,Vector3f rayVector,Polygon& outTriangle,Vector3f& outIntersectionPoint)
 {
-	for(const auto& i : myPolygons)
+	for (const auto& i : myPolygons)
 	{
-		if(RayIntersectsTriangle(rayOrigin,rayVector,&i,outIntersectionPoint))
+		if (RayIntersectsTriangle(rayOrigin,rayVector,&i,outIntersectionPoint))
 		{
 			outTriangle = i;
 			return true;
@@ -246,11 +246,11 @@ Vector3f NavMesh::RandomPointInNavMesh()
 std::vector<int> NavMesh::GetNeighbors(int aIndex)
 {
 	std::vector<int> allNeighbors;
-	for(auto const& i : myPolygons[aIndex].Edges)
+	for (auto const& i : myPolygons[aIndex].Edges)
 	{
-		for(size_t j = 0; j < 2; j++)
+		for (size_t j = 0; j < 2; j++)
 		{
-			if(myEdges[i].Neighbors[j] != aIndex && myEdges[i].Neighbors[j] != -1)
+			if (myEdges[i].Neighbors[j] != aIndex && myEdges[i].Neighbors[j] != -1)
 			{
 				allNeighbors.push_back(myEdges[i].Neighbors[j]);
 			}
@@ -264,10 +264,10 @@ int NavMesh::ClosestTriangleToPoint(Vector3f point)
 {
 	auto closestDistance = (float)INT32_MAX;
 	int closestPoly = -1;
-	for(int i = 0; i < myPolygons.size(); i++)
+	for (int i = 0; i < myPolygons.size(); i++)
 	{
 		const float newDistance = (myPolygons[i].CenterPosition - point).LengthSqr();
-		if(newDistance < closestDistance)
+		if (newDistance < closestDistance)
 		{
 			closestDistance = newDistance;
 			closestPoly = i;
@@ -297,25 +297,25 @@ bool NavMesh::RayIntersectsTriangle(Vector3f rayOrigin,Vector3f rayVector,const 
 	h = rayVector.Cross(edge2);
 	a = edge1.Dot(h);
 
-	if(a > -EPSILON && a < EPSILON)
+	if (a > -EPSILON && a < EPSILON)
 		return false;    // This ray is parallel to this triangle.
 
 	f = 1.0f / a;
 	s = rayOrigin - vertex0;
 	u = f * s.Dot(h);
 
-	if(u < 0.0 || u > 1.0)
+	if (u < 0.0 || u > 1.0)
 		return false;
 
 	q = s.Cross(edge1);
 	v = f * rayVector.Dot(q);
 
-	if(v < 0.0 || u + v > 1.0)
+	if (v < 0.0 || u + v > 1.0)
 		return false;
 
 	float t = f * edge2.Dot(q);
 
-	if(t > EPSILON)
+	if (t > EPSILON)
 	{
 		outIntersectionPoint = rayOrigin + rayVector * t;
 		return true;
@@ -347,7 +347,7 @@ inline float NavMesh::h(int node1,int nodeGoal)
 
 inline std::vector<int> NavMesh::AStar(int aStartIndex,int anEndIndex)
 {
-	if(aStartIndex == anEndIndex)
+	if (aStartIndex == anEndIndex)
 	{
 		std::vector<int> path;
 		path.push_back(aStartIndex);
@@ -360,7 +360,7 @@ inline std::vector<int> NavMesh::AStar(int aStartIndex,int anEndIndex)
 	HashMap<int,int> previous(static_cast<int>(myPolygons.size()));
 
 
-	for(int i = 0; i < myPolygons.size(); i++)
+	for (int i = 0; i < myPolygons.size(); i++)
 	{
 		gscore.Insert(i,static_cast<float>(INT_MAX));
 		fscore.Insert(i,static_cast<float>(INT_MAX));
@@ -372,14 +372,14 @@ inline std::vector<int> NavMesh::AStar(int aStartIndex,int anEndIndex)
 
 	int current = 0;
 	int counter = 0;
-	while(priorityQ.GetSize() != 0 && counter < INT_MAX)
+	while (priorityQ.GetSize() != 0 && counter < INT_MAX)
 	{
 		counter++;
 		current = -priorityQ.Dequeue();
-		if(current == anEndIndex)
+		if (current == anEndIndex)
 		{
 			Stack<int> pathFromLastToFirst;
-			while(previous.Get(current) != nullptr)
+			while (previous.Get(current) != nullptr)
 			{
 				pathFromLastToFirst.Push(current);
 				current = *previous.Get(current);
@@ -388,24 +388,24 @@ inline std::vector<int> NavMesh::AStar(int aStartIndex,int anEndIndex)
 			pathFromLastToFirst.Push(aStartIndex);
 
 			std::vector<int> outArg;
-			while(pathFromLastToFirst.GetSize())
+			while (pathFromLastToFirst.GetSize())
 			{
 				outArg.push_back(pathFromLastToFirst.Pop());
 			}
 			return outArg;
 		}
 
-		for(auto const& nextPolygon : GetNeighbors(current))
+		for (auto const& nextPolygon : GetNeighbors(current))
 		{
 			const float weight = h(nextPolygon,current);
 			float totalWeightToGetToCurrent = *gscore.Get(current) + weight;
-			if(totalWeightToGetToCurrent < *gscore.Get(nextPolygon))
+			if (totalWeightToGetToCurrent < *gscore.Get(nextPolygon))
 			{
 				previous.Insert(nextPolygon,current);
 				gscore.Insert(nextPolygon,totalWeightToGetToCurrent);
 				fscore.Insert(nextPolygon,totalWeightToGetToCurrent + h(nextPolygon,anEndIndex));
 
-				if(!priorityQ.Contains(-nextPolygon))
+				if (!priorityQ.Contains(-nextPolygon))
 				{
 					priorityQ.Enqueue(-nextPolygon,-*fscore.Get(nextPolygon));
 				}

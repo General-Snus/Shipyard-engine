@@ -1,35 +1,12 @@
-#include "AssetManager.pch.h"
-#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
-
-#include <Editor/Editor/Core/Editor.h>
+#include "AssetManager.pch.h" 
 #include <Tools/Utilities/Math.hpp>
 #include "../MeshAsset.h" 
 
+#include "DirectX/Shipyard/GPU.h"
+#include "DirectX/Shipyard/Helpers.h"
+#include "Engine/GraphicsEngine/GraphicsEngine.h"
 
 
-std::vector<std::string> GetTextureNames(const TGA::FBX::Material& material)
-{
-	std::vector<std::string> textureNames;
-
-	if (material.Diffuse.Name != "")
-	{
-		textureNames.push_back(((std::filesystem::path)material.Diffuse.Name).replace_extension(".dds").string());
-	}
-	if (material.NormalMap.Name != "")
-	{
-		textureNames.push_back(((std::filesystem::path)material.NormalMap.Name).replace_extension(".dds").string());
-	}
-	if (material.Bump.Name != "")
-	{
-		textureNames.push_back(((std::filesystem::path)material.Bump.Name).replace_extension(".dds").string());
-	}
-
-	if (material.Specular.Name != "")
-	{
-		textureNames.push_back(((std::filesystem::path)material.Specular.Name).replace_extension(".dds").string());
-	}
-	return textureNames;
-}
 
 Mesh::Mesh(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)
 {
@@ -39,6 +16,122 @@ Mesh::Mesh(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)
 const std::unordered_map<unsigned int,std::shared_ptr<Material>>& Mesh::GetMaterialList()
 {
 	return materials;
+}
+
+void Mesh::FillMaterialPaths(const aiScene* scene)
+{
+	for (auto& [key,matPath] : idToMaterial)
+	{
+		std::filesystem::path texturePath;
+		int textureLoaded = 0;
+		Vector4f color;
+		auto material = scene->mMaterials[key];
+		material->Get(AI_MATKEY_COLOR_DIFFUSE,color);
+
+		Material::DataMaterial dataMat;
+		//dataMat.materialData.Data.albedoColor = color;
+		dataMat.textures.resize(4);
+
+
+		aiString  str;
+		matPath = "Materials/Temporary/";
+		matPath += material->GetName().C_Str();
+
+		std::wstring mdf = matPath.wstring();
+		std::wstring illegalChars = L":?\"<>|";
+		for (auto& i : mdf)
+		{
+			bool found = illegalChars.find(i) != std::string::npos;
+			if (found)
+			{
+				i = '_';
+			}
+		}
+		matPath = mdf;
+		matPath.replace_extension("json");
+
+
+
+		std::pair<std::filesystem::path,std::shared_ptr<TextureHolder>> holder;
+		if (material->GetTextureCount(aiTextureType_BASE_COLOR))
+		{
+			material->GetTexture(aiTextureType_BASE_COLOR,0,&str);
+			holder.first = str.C_Str();
+			dataMat.textures[0] = holder;
+			textureLoaded++;
+		}
+
+		if (material->GetTextureCount(aiTextureType_DIFFUSE) && !str.length)
+		{
+			material->GetTexture(aiTextureType_DIFFUSE,0,&str);
+			holder.first = str.C_Str();
+			dataMat.textures[0] = holder;
+			textureLoaded++;
+		}
+
+		if (material->GetTextureCount(aiTextureType_HEIGHT))
+		{
+			material->GetTexture(aiTextureType_HEIGHT,0,&str);
+			holder.first = str.C_Str();
+			dataMat.textures[1] = holder;
+			textureLoaded++;
+		}
+
+		if (material->GetTextureCount(aiTextureType_NORMALS))
+		{
+			material->GetTexture(aiTextureType_NORMALS,0,&str);
+			holder.first = str.C_Str();
+			dataMat.textures[1] = holder;
+			textureLoaded++;
+		}
+		if (material->GetTextureCount(aiTextureType_DIFFUSE_ROUGHNESS))
+		{
+			material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS,0,&str);
+			holder.first = str.C_Str();
+			dataMat.textures[2] = holder;
+			textureLoaded++;
+		}
+
+		if (material->GetTextureCount(aiTextureType_SPECULAR))
+		{
+			material->GetTexture(aiTextureType_SPECULAR,0,&str);
+			holder.first = str.C_Str();
+			dataMat.textures[2] = holder;
+			textureLoaded++;
+		}
+
+		if (material->GetTextureCount(aiTextureType_AMBIENT_OCCLUSION))
+		{
+			material->GetTexture(aiTextureType_AMBIENT_OCCLUSION,0,&str);
+			holder.first = str.C_Str();
+			dataMat.textures[2] = holder;
+			textureLoaded++;
+		}
+
+		if (material->GetTextureCount(aiTextureType_METALNESS))
+		{
+			material->GetTexture(aiTextureType_METALNESS,0,&str);
+			holder.first = str.C_Str();
+			dataMat.textures[2] = holder;
+			textureLoaded++;
+		}
+
+		if (material->GetTextureCount(aiTextureType_EMISSIVE))
+		{
+			material->GetTexture(aiTextureType_EMISSIVE,0,&str);
+			holder.first = str.C_Str();
+			dataMat.textures[3] = holder;
+			textureLoaded++;
+		}
+
+		if (!textureLoaded)
+		{
+			materials[key] = GraphicsEngine::Get().GetDefaultMaterial();
+			continue;
+		}
+		Material::CreateJson(dataMat,matPath);
+		AssetManager::Get().LoadAsset<Material>(matPath,materials[key]);
+	}
 }
 
 void Mesh::Init()
@@ -196,122 +289,34 @@ void Mesh::Init()
 	const aiScene* scene = importer.ReadFile(AssetPath.string(),(unsigned int)
 		aiProcess_CalcTangentSpace |
 		aiProcess_Triangulate |
-		aiProcess_JoinIdenticalVertices |
+		aiProcess_ValidateDataStructure |
 		aiProcess_SortByPType |
 		aiProcess_GenBoundingBoxes |
-		aiProcess_GlobalScale |
+		aiProcess_GlobalScale | aiProcessPreset_TargetRealtime_MaxQuality |
 		aiProcess_ConvertToLeftHanded);
 
+	auto  exception = importer.GetErrorString();
+	if (importer.GetException())
+	{
+		Logger::Err(exception);
+		return;
+	}
 	// If the import failed, report it
 	if (nullptr == scene)
 	{
 		std::string message = "Failed to load mesh " + AssetPath.string();
 		std::exception failedMeshLoad(message.c_str());
-		AMLogger.LogException(failedMeshLoad,2);
+		Logger::LogException(failedMeshLoad,2);
 		return;
 	}
-	Editor::Get().ExpandWorldBounds(boxSphereBounds); // TODO Make a scene contain the boxSphereBounds!! 
+	//Editor::Get().ExpandWorldBounds(boxSphereBounds); // TODO Make a scene contain the boxSphereBounds!! 
 
 	for (size_t i = 0; i < scene->mNumMeshes; i++)
 	{
 		processMesh(scene->mMeshes[i],scene);
 	}
 	//FillMatPath   
-	for (auto& [key,matPath] : idToMaterial)
-	{
-		std::filesystem::path texturePath;
-		int textureLoaded = 0;
-		Vector4f color;
-		auto material = scene->mMaterials[key];
-		material->Get(AI_MATKEY_COLOR_DIFFUSE,color);
-
-		Material::DataMaterial dataMat;
-		//dataMat.materialData.Data.albedoColor = color;
-		dataMat.textures.resize(4);
-
-
-		aiString  str;
-		matPath = "Materials/Temporary/";
-		matPath += material->GetName().C_Str();
-
-		std::wstring mdf = matPath.wstring();
-		std::wstring illegalChars = L":?\"<>|";
-		for (auto& i : mdf)
-		{
-			bool found = illegalChars.find(i) != std::string::npos;
-			if (found)
-			{
-				i = '_';
-			}
-		}
-		matPath = mdf;
-		matPath.replace_extension("json");
-
-		std::pair<std::filesystem::path,std::shared_ptr<TextureHolder>> holder;
-		if (material->GetTextureCount(aiTextureType_BASE_COLOR))
-		{
-			material->GetTexture(aiTextureType_BASE_COLOR,0,&str);
-			holder.first = str.C_Str();
-			dataMat.textures[0] = holder;
-			textureLoaded++;
-		}
-
-		if (material->GetTextureCount(aiTextureType_DIFFUSE) && !str.length)
-		{
-			material->GetTexture(aiTextureType_DIFFUSE,0,&str);
-			holder.first = str.C_Str();
-			dataMat.textures[0] = holder;
-			textureLoaded++;
-		}
-
-		if (material->GetTextureCount(aiTextureType_NORMALS))
-		{
-			material->GetTexture(aiTextureType_NORMALS,0,&str);
-			holder.first = str.C_Str();
-			dataMat.textures[1] = holder;
-			textureLoaded++;
-		}
-
-		if (material->GetTextureCount(aiTextureType_DIFFUSE_ROUGHNESS))
-		{
-			material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS,0,&str);
-			holder.first = str.C_Str();
-			dataMat.textures[2] = holder;
-			textureLoaded++;
-		}
-
-		if (material->GetTextureCount(aiTextureType_AMBIENT_OCCLUSION))
-		{
-			material->GetTexture(aiTextureType_AMBIENT_OCCLUSION,0,&str);
-			holder.first = str.C_Str();
-			dataMat.textures[2] = holder;
-			textureLoaded++;
-		}
-
-		if (material->GetTextureCount(aiTextureType_METALNESS))
-		{
-			material->GetTexture(aiTextureType_METALNESS,0,&str);
-			holder.first = str.C_Str();
-			dataMat.textures[2] = holder;
-			textureLoaded++;
-		}
-
-		if (material->GetTextureCount(aiTextureType_EMISSIVE))
-		{
-			material->GetTexture(aiTextureType_EMISSIVE,0,&str);
-			holder.first = str.C_Str();
-			dataMat.textures[3] = holder;
-			textureLoaded++;
-		}
-
-		if (!textureLoaded)
-		{
-			materials[key] = GraphicsEngine::Get().GetDefaultMaterial();
-			continue;
-		}
-		Material::CreateJson(dataMat,matPath);
-		AssetManager::Get().LoadAsset<Material>(matPath,materials[key]);
-	}
+	FillMaterialPaths(scene);
 
 	MaxBox = Vector3f(scene->mMeshes[0]->mAABB.mMax.x,scene->mMeshes[0]->mAABB.mMax.y,scene->mMeshes[0]->mAABB.mMax.z);
 	MinBox = Vector3f(scene->mMeshes[0]->mAABB.mMin.x,scene->mMeshes[0]->mAABB.mMin.y,scene->mMeshes[0]->mAABB.mMin.z);
@@ -321,31 +326,7 @@ void Mesh::Init()
 	boxSphereBounds = Sphere<float>(center,radius);
 
 	isLoadedComplete = true;
-
 	bufferSize = 0;
-	vertexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(Matrix) * myInstances.size());
-	vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	vertexBufferDesc.MiscFlags = 0;
-	vertexBufferDesc.StructureByteStride = 0;
-
-	if (myInstances.size())
-	{
-		HRESULT result;
-		result = RHI::Device->CreateBuffer(
-			&vertexBufferDesc,
-			nullptr,
-			myInstanceBuffer.GetAddressOf()
-		);
-		bufferSize = static_cast<int>(myInstances.size());
-		if (FAILED(result))
-		{
-			AMLogger.Log("Failed to create Instance buffer");
-			return;
-		}
-	}
-
 	return;
 #endif // 
 }
@@ -355,7 +336,12 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 	scene;
 	std::vector<Vertex> mdlVertices;
 	mdlVertices.reserve(mesh->mNumVertices);
-	std::vector<unsigned int> mdlIndicies;
+	std::vector<uint32_t> mdlIndicies;
+	mdlIndicies.reserve(mesh->mNumFaces * 3);
+
+	std::string name = mesh->mName.C_Str();
+	std::wstring wname = Helpers::string_cast<std::wstring>(name).c_str();
+
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 	{
 		auto position = Vector3f(
@@ -398,10 +384,14 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 			0
 		);
 
-		auto UVCoord = Vector2f(
-			mesh->mTextureCoords[0][i].x,
-			mesh->mTextureCoords[0][i].y
-		);
+		auto UVCoord = Vector2f();
+		if (mesh->HasTextureCoords(0))
+		{
+			UVCoord = Vector2f(
+				mesh->mTextureCoords[0][i].x,
+				mesh->mTextureCoords[0][i].y
+			);
+		}
 
 		auto normal = Vector3f();
 		if (mesh->HasNormals())
@@ -413,12 +403,15 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 			);
 		}
 
-		auto tangent = Vector3f(
-			mesh->mTangents[i].x,
-			mesh->mTangents[i].y,
-			mesh->mTangents[i].z
-		);
-
+		auto tangent = Vector3f();
+		if (mesh->HasTangentsAndBitangents())
+		{
+			tangent = Vector3f(
+				mesh->mTangents[i].x,
+				mesh->mTangents[i].y,
+				mesh->mTangents[i].z
+			);
+		}
 		mdlVertices.emplace_back(
 			position,
 			color,
@@ -448,33 +441,40 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 		}
 	}
 
-	ComPtr<ID3D11Buffer> vertexBuffer;
-	if (!RHI::CreateVertexBuffer<Vertex>(vertexBuffer,mdlVertices))
-	{
-		std::cout << "Failed to create vertex buffer" << std::endl;
-		return;
-	}
-	ComPtr<ID3D11Buffer> indexBuffer;
-	if (!RHI::CreateIndexBuffer(indexBuffer,mdlIndicies))
-	{
-		std::cout << "Failed to create vertex buffer" << std::endl;
-		return;
-	}
-	Element toAdd = {
-		vertexBuffer,
-		indexBuffer,
-		mdlVertices,
-		mdlIndicies,
-		AsUINT(mdlVertices.size()),
-		AsUINT(mdlIndicies.size()),
-		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
-		sizeof(Vertex)
-	};
+	auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COPY);
+	auto commandList = commandQueue->GetCommandList();
 
+
+	VertexResource vertexRes(wname);
+	if (!GPU::CreateVertexBuffer<Vertex>(commandList,vertexRes,mdlVertices))
+	{
+		std::cout << "Failed to create vertex buffer" << std::endl;
+		return;
+	}
+
+	IndexResource indexRes(wname);
+	if (!GPU::CreateIndexBuffer(commandList,indexRes,mdlIndicies))
+	{
+		std::cout << "Failed to create vertex buffer" << std::endl;
+		return;
+	}
+
+	auto fenceValue = commandQueue->ExecuteCommandList(commandList);
+	commandQueue->WaitForFenceValue(fenceValue);
+	commandQueue->Flush();
+
+	Element toAdd;
+
+	toAdd.VertexBuffer = vertexRes;
+	toAdd.IndexResource = indexRes;
+	toAdd.Vertices = mdlVertices;
+	toAdd.Indicies = mdlIndicies;
+	toAdd.PrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	toAdd.Stride = sizeof(Vertex);
 	toAdd.MaterialIndex = mesh->mMaterialIndex;
 	idToMaterial.try_emplace(mesh->mMaterialIndex,"");
 
-	Elements.push_back(toAdd);
+	Elements.emplace_back(toAdd);
 	mdlVertices.clear();
 	mdlIndicies.clear();
 
@@ -483,34 +483,34 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 
 void Mesh::ResizeBuffer()
 {
-	D3D11_SUBRESOURCE_DATA vertexSubResourceData{};
-	vertexSubResourceData.pSysMem = myInstances.data();
-	vertexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(Matrix) * myInstances.size());
-	HRESULT result;
-	result = RHI::Device->CreateBuffer(
-		&vertexBufferDesc,
-		&vertexSubResourceData,
-		myInstanceBuffer.GetAddressOf()
-	);
-
-	if (FAILED(result))
-	{
-		AMLogger.Log("Failed to create Instance buffer");
-		return;
-	}
-	bufferSize = static_cast<int>(myInstances.size());
+	//D3D11_SUBRESOURCE_DATA vertexSubResourceData{};
+	//vertexSubResourceData.pSysMem = myInstances.data();
+	//vertexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(Matrix) * myInstances.size());
+	//HRESULT result;
+	//result = RHI::Device->CreateBuffer(
+	//	&vertexBufferDesc,
+	//	&vertexSubResourceData,
+	//	myInstanceBuffer.GetAddressOf()
+	//);
+	//
+	//if (FAILED(result))
+	//{
+	//	Logger::Log("Failed to create Instance buffer");
+	//	return;
+	//}
+	//bufferSize = static_cast<int>(myInstances.size());
 
 }
 
 void Mesh::UpdateInstanceBuffer()
 {
 	OPTICK_EVENT();
-	if (myInstances.size() > bufferSize)
-	{
-		ResizeBuffer();
-	}
-	D3D11_MAPPED_SUBRESOURCE mappedResource{};
-	RHI::Context->Map(myInstanceBuffer.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&mappedResource);
-	memcpy(mappedResource.pData,myInstances.data(),sizeof(Matrix) * myInstances.size());
-	RHI::Context->Unmap(myInstanceBuffer.Get(),0);
+	//if (myInstances.size() > bufferSize)
+	//{
+	//	ResizeBuffer();
+	//}
+	//D3D11_MAPPED_SUBRESOURCE mappedResource{};
+	//RHI::Context->Map(myInstanceBuffer.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&mappedResource);
+	//memcpy(mappedResource.pData,myInstances.data(),sizeof(Matrix) * myInstances.size());
+	//RHI::Context->Unmap(myInstanceBuffer.Get(),0);
 }

@@ -5,7 +5,7 @@
 class DecisionTreeController : public Controller
 {
 public:
-	explicit DecisionTreeController(DecisionTree decicionTree);
+	explicit DecisionTreeController(const DecisionTree& decicionTree);
 	explicit DecisionTreeController();
 	bool Update(GameObject input) override;
 

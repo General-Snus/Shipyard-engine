@@ -2,7 +2,7 @@
 #include "../Headers/GfxCmd_RenderSkeletalMeshShadow.h"
 
 GfxCmd_RenderSkeletalMeshShadow::GfxCmd_RenderSkeletalMeshShadow(
-	const std::shared_ptr<RenderData> aMesh,
+	const std::shared_ptr<RenderData>& aMesh,
 	const Matrix& aTransform,
 	const Matrix* aBoneTransformList,
 	unsigned int aNumBones) :
@@ -13,27 +13,28 @@ GfxCmd_RenderSkeletalMeshShadow::GfxCmd_RenderSkeletalMeshShadow(
 void GfxCmd_RenderSkeletalMeshShadow::ExecuteAndDestroy()
 {
 	ObjectBuffer& objectBuffer = GetObjectBuffer();
-	objectBuffer.Data.myTransform = myTransform;
-	objectBuffer.Data.MaxExtents = MaxExtents;
-	objectBuffer.Data.MinExtents = MinExtents;
-	objectBuffer.Data.hasBone = true;
-	objectBuffer.Data.isInstanced = false;
+	objectBuffer.myTransform = myTransform;
+	objectBuffer.MaxExtents = MaxExtents;
+	objectBuffer.MinExtents = MinExtents;
+	objectBuffer.hasBone = true;
+	objectBuffer.isInstanced = false;
 
-	for(int i = 0; i < 128; i++)
-	{
-		objectBuffer.Data.myBoneTransforms[i] = myBoneTransforms[i];
-	}
-	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER,REG_ObjectBuffer,objectBuffer);
-	RHI::UpdateConstantBufferData(objectBuffer);
+	//for (int i = 0; i < 128; i++)
+	//{
+	//	objectBuffer.Data.myBoneTransforms[i] = myBoneTransforms[i];
+	//}
+	/*RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER,REG_ObjectBuffer,objectBuffer);
+	RHI::UpdateConstantBufferData(objectBuffer);*/
 	//GetInstanceRenderer().AddInstance(myRenderData);
-	for(const auto& aElement :myRenderData->myMesh->Elements)
+	for (const auto& aElement : myRenderData->myMesh->Elements)
 	{
-		RHI::ConfigureInputAssembler(
+		aElement;
+		/*RHI::ConfigureInputAssembler(
 			aElement.PrimitiveTopology,
 			aElement.VertexBuffer,
 			aElement.IndexBuffer,
 			aElement.Stride,
 			Vertex::InputLayout);
-		RHI::DrawIndexed(aElement.NumIndices);
+		RHI::DrawIndexed(aElement.NumIndices);*/
 	}
 }

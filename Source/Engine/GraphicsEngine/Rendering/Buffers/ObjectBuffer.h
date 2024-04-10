@@ -1,15 +1,12 @@
-#pragma once
-#include <Engine/GraphicsEngine/Rendering/Buffers/ConstantBuffer.h>
-#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
+#pragma once 
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
 
-struct ObjectBufferData
+struct ObjectBuffer
 {
-	Matrix myTransform; // 64 bytes
-	Vector3f MinExtents; // 12 bytes
-	alignas(4) bool hasBone = false; //4
-	Vector3f MaxExtents; // 12 bytes
-	alignas(4) bool isInstanced = false;//4
-	std::array < Matrix,128> myBoneTransforms; // 64 * 128 = 8192 bytes
+	Matrix myTransform{};
+	Vector3f MinExtents = -Vector3f(1,1,1);;
+	alignas(4) bool hasBone = false;
+	Vector3f MaxExtents = Vector3f(1,1,1);;
+	alignas(4) bool isInstanced = false;
+	//std::array < Matrix,128> myBoneTransforms; // 64 * 128 = 8192 bytes
 };
-
-using ObjectBuffer = ConstantBuffer<ObjectBufferData>;

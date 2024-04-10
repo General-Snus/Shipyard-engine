@@ -8,21 +8,21 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     DefaultPixelOutput result;
     float2 uv = input.UV;
     
-    const float4 albedo = colorMap.Sample(defaultSampler, uv);
-    const float4 Material = materialMap.Sample(defaultSampler, uv);
-    const float4 Normal = normalMap.Sample(defaultSampler, uv);
-    const float4 Effect = effectMap.Sample(defaultSampler, uv);
-    const float4 vertexNormal = vertexNormalMap.Sample(defaultSampler, uv);
-    const float4 worldPosition = float4(normalize(worldPositionMap.Sample(defaultSampler, uv).xyz), 1);
+    const float4 albedo = colorPass.Sample(defaultSampler, uv);
+    const float4 Material = normalPass.Sample(defaultSampler, uv);
+    const float4 Normal = materialPass.Sample(defaultSampler, uv);
+    const float4 Effect = effectPass.Sample(defaultSampler, uv);
+    const float4 vertexNormal = vertexNormalPass.Sample(defaultSampler, uv);
+    const float4 worldPosition = float4(normalize(worldPositionPass.Sample(defaultSampler, uv).xyz), 1);
     const float metallic = Material.b;
     const float roughness = Material.g;
     const float occlusion = Material.r;
-    const float depth = DepthMap.Sample(defaultSampler, uv).r;
-    const float4 ssao = SSAOMap.Sample(defaultSampler, uv);
+    const float depth = DepthPass.Sample(defaultSampler, uv).r;
+    const float4 ssao = SSAOPass.Sample(defaultSampler, uv);
     
     
     
-    switch(FB_RenderMode)
+    switch(g_FrameBuffer.FB_RenderMode)
     {
         default:
         case 0:
@@ -97,7 +97,7 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
             }
         case 10:
     {
-                result.Color.rgb = depth; 
+                result.Color.rgb = depth;
                 result.Color.a = 1.0f;
                 break;
             }
@@ -119,7 +119,7 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
                 result.Color.rgb = (GetViewNormal(input.UV).rgb + 1.0f) / 2.0f;
                 result.Color.a = 1.0f;
                 break;
-            } 
+            }
 
         case 14:
             {

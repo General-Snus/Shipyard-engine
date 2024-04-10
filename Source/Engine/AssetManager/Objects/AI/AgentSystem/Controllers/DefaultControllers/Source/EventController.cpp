@@ -1,5 +1,5 @@
-#include <Engine/AssetManager/AssetManager.pch.h>
 #include "../EventController.h"
+#include "AssetManager.pch.h"
 
 EventController::EventController()
 {
@@ -10,9 +10,9 @@ bool EventController::Update(GameObject input)
 {
 	auto* transform = input.TryGetComponent<Transform>();
 
-	if(pathToTarget)
+	if (pathToTarget)
 	{
-		if(transform)
+		if (transform)
 		{
 
 			pathToTarget = false;
@@ -25,7 +25,7 @@ bool EventController::Update(GameObject input)
 
 void EventController::Recieve(const AIEvent& aEvent)
 {
-	if(aEvent.type == eAIEvent::playerHacking)
+	if (aEvent.type == eAIEvent::playerHacking)
 	{
 		myPath.myPath.clear();
 		pathToTarget = true;

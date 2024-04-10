@@ -1,5 +1,5 @@
-#include "GraphicsEngine.pch.h"
 #include "../Headers/GfxCmd_Bloom.h"
+#include "GraphicsEngine.pch.h"
 
 
 
@@ -11,7 +11,7 @@ GfxCmd_Bloom::GfxCmd_Bloom()
 void GfxCmd_Bloom::ExecuteAndDestroy()
 {
 
-	RHI::SetVertexShader(GraphicsEngine::Get().GetQuadShader());
+	/*RHI::SetVertexShader(GraphicsEngine::Get().GetQuadShader());
 	RHI::SetPixelShader(GraphicsEngine::Get().GetBloomShader());
 
 	RHI::SetRenderTarget(GraphicsEngine::Get().GetTargetTextures(eRenderTargets::IntermediateB).get(),nullptr);
@@ -26,7 +26,7 @@ void GfxCmd_Bloom::ExecuteAndDestroy()
 	);
 	RHI::Draw(4);
 	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_Target0,nullptr);
-	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_Target01,nullptr);
+	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_Target01,nullptr);*/
 
 
 }

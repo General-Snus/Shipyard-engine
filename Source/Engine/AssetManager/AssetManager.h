@@ -1,14 +1,16 @@
 #pragma once 
 #define AsUINT(v) static_cast<unsigned>(v) 
 
+#include <Engine/AssetManager/ComponentSystem/UUID.h>
+#include <Engine/AssetManager/Objects/BaseAssets/BaseAsset.h>
 #include <Tools/Utilities/DataStructures/Queue.hpp> 
 #include <Tools/Utilities/System/SingletonTemplate.h>
 #include <Tools/Utilities/System/ThreadPool.hpp>
-#include <unordered_map>
-#include "AssetManagerUtills.hpp"
+#include <unordered_map> 
+
 struct Frame;
 struct Element;
-struct MaterialData;
+struct MaterialBuffer;
 struct Bone;
 class Mesh;
 class Animation;
@@ -71,13 +73,14 @@ public:
 
 	bool AdaptPath(std::filesystem::path& path);
 
-	const  std::filesystem::path AssetPath = L"../../Content/";
+	static inline constexpr char exprAssetPath[15] = "../../Content/";
+	static inline std::filesystem::path AssetPath = exprAssetPath;
 private:
 
 	//thread 
 	void ThreadedLoading();
 	Queue<std::shared_ptr<AssetBase>> myAssetQueue;
-
+	std::mutex dequeMutex;
 	//NameToPath
 	void RecursiveNameSave();
 	std::unordered_map<std::filesystem::path,std::filesystem::path> nameToPathMap;
@@ -125,7 +128,7 @@ void AssetManager::ForceLoadAsset(const std::filesystem::path& aFilePath,bool us
 			newObject.second->Init();
 		}
 	}
-	 
+
 	outAsset = ptr;
 }
 
@@ -179,14 +182,23 @@ void AssetManager::LoadAsset(const std::filesystem::path& aFilePath,bool useExac
 			std::pair<std::filesystem::path,std::shared_ptr<T>> newObject(aFilePath,std::make_shared<T>(aFilePath));
 			ptr = library->Add(newObject);
 			myAssetQueue.EnqueueUnique(newObject.second);
+#if ThreadedAssetLoading
 			ThreadPool::Get().SubmitWork(std::bind(&AssetManager::ThreadedLoading,this));
+#else
+			ThreadedLoading();
+#endif
+
 		}
 		else
 		{
 			std::pair<std::filesystem::path,std::shared_ptr<T>> newObject(aFilePath,std::make_shared<T>(AssetPath / aFilePath));
 			ptr = library->Add<T>(newObject);
 			myAssetQueue.EnqueueUnique(newObject.second);
+#if ThreadedAssetLoading
 			ThreadPool::Get().SubmitWork(std::bind(&AssetManager::ThreadedLoading,this));
+#else
+			ThreadedLoading();
+#endif
 		}
 	}
 	outAsset = ptr;

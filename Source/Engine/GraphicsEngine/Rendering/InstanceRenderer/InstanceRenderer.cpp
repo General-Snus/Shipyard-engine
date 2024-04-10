@@ -14,7 +14,7 @@ void InstanceRenderer::Execute(bool isShadowPass)
 	OPTICK_EVENT();
 	if (isShadowPass)
 	{
-		RHI::Context->PSSetShader(nullptr,nullptr,0);
+		//RHI::Context->PSSetShader(nullptr,nullptr,0);
 	}
 	else
 	{
@@ -28,12 +28,12 @@ void InstanceRenderer::Execute(bool isShadowPass)
 		{
 			OPTICK_EVENT("Mesh");
 			ObjectBuffer& objectBuffer = GraphicsEngine::Get().myObjectBuffer;
-			objectBuffer.Data.myTransform = Matrix();
-			objectBuffer.Data.MaxExtents = i->myMesh->MaxBox;
-			objectBuffer.Data.MinExtents = i->myMesh->MinBox;
-			objectBuffer.Data.hasBone = false;
-			objectBuffer.Data.isInstanced = true;
-			RHI::UpdateConstantBufferData(GraphicsEngine::Get().myObjectBuffer);
+			objectBuffer.myTransform = Matrix();
+			objectBuffer.MaxExtents = i->myMesh->MaxBox;
+			objectBuffer.MinExtents = i->myMesh->MinBox;
+			objectBuffer.hasBone = false;
+			objectBuffer.isInstanced = true;
+			//RHI::UpdateConstantBufferData(GraphicsEngine::Get().myObjectBuffer);
 			if (!isShadowPass)
 			{
 				i->myMesh->UpdateInstanceBuffer();
@@ -62,7 +62,7 @@ void InstanceRenderer::Execute(bool isShadowPass)
 					}
 				}
 
-				const std::vector<ComPtr<ID3D11Buffer>> vxBuffers
+				/*const std::vector<ComPtr<ID3D12Resource>> vxBuffers
 				{
 					aElement.VertexBuffer,
 					i->myMesh->myInstanceBuffer
@@ -72,16 +72,16 @@ void InstanceRenderer::Execute(bool isShadowPass)
 				{
 					aElement.Stride,
 					sizeof(Matrix)
-				};
+				};*/
 
-				RHI::ConfigureInputAssembler(
+				/*RHI::ConfigureInputAssembler(
 					aElement.PrimitiveTopology,
 					vxBuffers,
 					aElement.IndexBuffer,
 					vfBufferStrides,
 					Vertex::InputLayout);
 				OPTICK_EVENT("Element");
-				RHI::DrawIndexedInstanced(aElement.NumIndices,static_cast<unsigned>(i->myMesh->myInstances.size()));
+				RHI::DrawIndexedInstanced(aElement.NumIndices,static_cast<unsigned>(i->myMesh->myInstances.size()));*/
 			}
 		}
 	}

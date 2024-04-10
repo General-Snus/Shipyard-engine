@@ -1,11 +1,12 @@
 #pragma once
+#include <Engine/AssetManager/ComponentSystem/Component.h>
 #include <Engine/AssetManager/Objects/BaseAssets/ParticleEmitter.h>
 class ParticleSystem : public Component
 {
 public:
 	ParticleSystem() = delete; // Create a generic cube
 	ParticleSystem(const unsigned int anOwnerId); // Create a generic cube 
-	ParticleSystem(const unsigned int anOwnerId,const std::filesystem::path& aFilePath); 
+	ParticleSystem(const unsigned int anOwnerId,const std::filesystem::path& aFilePath);
 
 	void AddEmitter(const ParticleEmitterTemplate& aTemplate);
 
@@ -14,5 +15,5 @@ public:
 private:
 	std::vector<std::shared_ptr<ParticleEmitter>> myEmitters;
 
-};												
+};
 

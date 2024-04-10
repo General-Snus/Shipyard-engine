@@ -1,31 +1,28 @@
-#include "AssetManager.pch.h"
+#include "AssetManager.pch.h" 
+#include <Engine/GraphicsEngine/Shaders/Registers.h> 
 
-#include <fstream>
-#include "../MaterialAsset.h"
-#include <Tools/ThirdParty/nlohmann/json.hpp>
-#include <Engine/GraphicsEngine/Shaders/Registers.h>
-#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
+#include "Engine/GraphicsEngine/GraphicsEngine.h"
 
 bool Material::CreateJson(const DataMaterial& data,const std::filesystem::path& writePath)
 {
 	nlohmann::json json = nlohmann::json::basic_json();
 	{
-		nlohmann::json& js = json["MaterialData"];
-		js["albedoColor"][0] = data.materialData.Data.albedoColor[0];
-		js["albedoColor"][1] = data.materialData.Data.albedoColor[1];
-		js["albedoColor"][2] = data.materialData.Data.albedoColor[2];
-		js["albedoColor"][3] = data.materialData.Data.albedoColor[3];
+		nlohmann::json& js = json["MaterialBuffer"];
+		js["albedoColor"][0] = data.materialData.albedoColor[0];
+		js["albedoColor"][1] = data.materialData.albedoColor[1];
+		js["albedoColor"][2] = data.materialData.albedoColor[2];
+		js["albedoColor"][3] = data.materialData.albedoColor[3];
 
-		js["UVTiling"][0] = data.materialData.Data.UVTiling[0];
-		js["UVTiling"][1] = data.materialData.Data.UVTiling[1];
+		js["UVTiling"][0] = data.materialData.UVTiling[0];
+		js["UVTiling"][1] = data.materialData.UVTiling[1];
 
-		js["NormalStrength"] = data.materialData.Data.NormalStrength;
-		js["Shine"] = data.materialData.Data.Shine;
+		js["NormalStrength"] = data.materialData.NormalStrength;
+		js["Shine"] = data.materialData.Shine;
 	}
 
 	{
 		int i = 0;
-		for(auto& [path,ptr] : data.textures)
+		for (auto& [path,ptr] : data.textures)
 		{
 			nlohmann::json arr;
 			arr["TextureName"] = path.filename();
@@ -51,18 +48,18 @@ Material::Material(const std::filesystem::path& aFilePath) : AssetBase(aFilePath
 void Material::Init()
 {
 	data.textures.resize(4);
-	data.textures[(int)eTextureType::ColorMap].second = GraphicsEngine::Get().GetDefaultTexture(eTextureType::ColorMap);
-	data.textures[(int)eTextureType::NormalMap].second = GraphicsEngine::Get().GetDefaultTexture(eTextureType::NormalMap);
-	data.textures[(int)eTextureType::MaterialMap].second = GraphicsEngine::Get().GetDefaultTexture(eTextureType::MaterialMap);
-	data.textures[(int)eTextureType::EffectMap].second = GraphicsEngine::Get().GetDefaultTexture(eTextureType::EffectMap);
+	data.textures[static_cast<int>(eTextureType::ColorMap)].second = GraphicsEngine::Get().GetDefaultTexture(eTextureType::ColorMap);
+	data.textures[static_cast<int>(eTextureType::NormalMap)].second = GraphicsEngine::Get().GetDefaultTexture(eTextureType::NormalMap);
+	data.textures[static_cast<int>(eTextureType::MaterialMap)].second = GraphicsEngine::Get().GetDefaultTexture(eTextureType::MaterialMap);
+	data.textures[static_cast<int>(eTextureType::EffectMap)].second = GraphicsEngine::Get().GetDefaultTexture(eTextureType::EffectMap);
 
-	if(GraphicsEngine::Get().GetDefaultMaterial() != nullptr)
+	if (GraphicsEngine::Get().GetDefaultMaterial() != nullptr)
 	{
-		data.materialData.Data = GraphicsEngine::Get().GetDefaultMaterial()->data.materialData.Data; //yo dawg i put some data in your data so you can data while you data
+		data.materialData = GraphicsEngine::Get().GetDefaultMaterial()->data.materialData; //yo dawg i put some data in your data so you can data while you data
 	}
 	else
 	{
-		data.materialData.Data = MaterialData();
+		data.materialData = MaterialBuffer();
 	}
 	data.vertexShader = GraphicsEngine::Get().GetDefaultVSShader();
 	data.pixelShader = GraphicsEngine::Get().GetDefaultPSShader();
@@ -70,7 +67,7 @@ void Material::Init()
 	//std::shared_ptr<TextureHolder> text = AssetManager::GetInstance().LoadAsset<TextureHolder>("",true);
 	//textures[(int)text->textureType] = text;
 
-	if(std::filesystem::exists(AssetPath) && AssetPath.extension() == ".json")
+	if (std::filesystem::exists(AssetPath) && AssetPath.extension() == ".json")
 	{
 		std::ifstream file(AssetPath);
 		assert(file.is_open());
@@ -80,40 +77,50 @@ void Material::Init()
 		{
 			try
 			{
-				nlohmann::json& js = json["MaterialData"];
+				nlohmann::json& js = json["MaterialBuffer"];
 
-				data.materialData.Data.albedoColor[0] = js["albedoColor"][0];
-				data.materialData.Data.albedoColor[1] = js["albedoColor"][1];
-				data.materialData.Data.albedoColor[2] = js["albedoColor"][2];
-				data.materialData.Data.albedoColor[3] = js["albedoColor"][3];
+				data.materialData.albedoColor[0] = js["albedoColor"][0];
+				data.materialData.albedoColor[1] = js["albedoColor"][1];
+				data.materialData.albedoColor[2] = js["albedoColor"][2];
+				data.materialData.albedoColor[3] = js["albedoColor"][3];
 
-				data.materialData.Data.UVTiling[0] = js["UVTiling"][0];
-				data.materialData.Data.UVTiling[1] = js["UVTiling"][1];
+				data.materialData.UVTiling[0] = js["UVTiling"][0];
+				data.materialData.UVTiling[1] = js["UVTiling"][1];
 
-				data.materialData.Data.NormalStrength = js["NormalStrength"];
-				data.materialData.Data.Shine = js["Shine"];
+				data.materialData.NormalStrength = js["NormalStrength"];
+				data.materialData.Shine = js["Shine"];
 			}
-			catch(const std::exception& e)
+			catch (const std::exception& e)
 			{
-				std::cout << "Unsuccessfull loading of material data file at path: " << AssetPath << " " << e.what() << "\n"; 
+				std::cout << "Unsuccessfull loading of material data file at path: " << AssetPath << " " << e.what() << "\n";
 			}
 		}
 		{
 			try
 			{
 				nlohmann::json& js = json["Textures"];
-				for(const auto& i : js)
+				for (const auto& i : js)
 				{
 					std::shared_ptr<TextureHolder> texture;
 					const std::filesystem::path path = i["TexturePath"];
+
+					if (path.empty())
+					{
+						continue;
+					}
+
 					AssetManager::Get().LoadAsset<TextureHolder>(path,texture);
-					data.textures[(int)i["TextureType"]].first = path;
-					data.textures[(int)i["TextureType"]].second = texture;
+
+					const int type = i["TextureType"];
+					texture->SetTextureType(static_cast<eTextureType>(type));
+
+					data.textures[type].first = path;
+					data.textures[type].second = texture;
 				}
 			}
-			catch(const std::exception&)
+			catch (const std::exception&)
 			{
-				std::cout << "Unsuccessfull loading of material texture files at path: " << AssetPath << "\n"; 
+				std::cout << "Unsuccessfull loading of material texture files at path: " << AssetPath << "\n";
 			}
 		}
 	}
@@ -121,20 +128,18 @@ void Material::Init()
 	{
 		isLoadedComplete = false;
 	}
-
-	data.materialData.Initialize();
 	isLoadedComplete = true;
 }
 
-MaterialData& Material::GetMaterialData()
+MaterialBuffer& Material::GetMaterialData()
 {
-	return data.materialData.Data;
+	return data.materialData;
 }
 
 void Material::Update()
 {
 	OPTICK_EVENT();
-	if(!isLoadedComplete)
+	if (!isLoadedComplete)
 	{
 		GraphicsEngine::Get().GetDefaultMaterial()->Update();
 		return;
@@ -142,31 +147,50 @@ void Material::Update()
 		//If default material is not loaded with forced or if it erronous we will end with a overflow here, guess it guarantees defaults works atleast 
 	}
 
-	RHI::UpdateConstantBufferData(data.materialData);
-	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_DefaultMaterialBuffer,data.materialData);
+	/*RHI::UpdateConstantBufferData(data.materialData);
+	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_DefaultMaterialBuffer,data.materialData);*/
 	SetAsResources();
 }
 
-void Material::SetShader(std::shared_ptr<Shader> aVertexShader,std::shared_ptr<Shader> aPixelShader)
+std::shared_ptr<TextureHolder> Material::GetTexture(eTextureType type)
+{
+	if (data.textures.empty())
+	{
+		return nullptr;
+	}
+
+	for (const auto& i : data.textures)
+	{
+		if (!i.second || i.second->textureType != type)
+		{
+			continue;
+		}
+
+		return i.second;
+	}
+	return nullptr;
+}
+
+void Material::SetShader(const std::shared_ptr<ShipyardShader>& aVertexShader,const std::shared_ptr<ShipyardShader>& aPixelShader)
 {
 	data.vertexShader = aVertexShader;
 	data.pixelShader = aPixelShader;
 }
 
 void Material::SetAsResources()
-{ /*
-	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)eTextureType::ColorMap,nullptr);
+{
+	/*RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)eTextureType::ColorMap,nullptr);
 	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)eTextureType::NormalMap,nullptr);
 	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)eTextureType::MaterialMap,nullptr);
-	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)eTextureType::EffectMap,nullptr); */
-	for(const auto& [path,i] : data.textures)
+	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)eTextureType::EffectMap,nullptr);
+	for (const auto& [path,i] : data.textures)
 	{
-		if(!i)
+		if (!i)
 		{
 			continue;
 		}
 
-		if(i->isLoadedComplete)
+		if (i->isLoadedComplete)
 		{
 			RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)i->textureType,i->GetRawTexture().get());
 		}
@@ -174,5 +198,5 @@ void Material::SetAsResources()
 		{
 			RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)i->textureType,GraphicsEngine::Get().GetDefaultTexture(i->textureType)->GetRawTexture().get());
 		}
-	}
+	}*/
 }

@@ -1,15 +1,13 @@
-#include "AssetManager.pch.h"
-#include "../FrameStatistics.h"
-#include <Tools/ImGui/ImGui/imgui.h> 
-#include <psapi.h>
-#include <TCHAR.h> 
-
-#include <windows.h>
+#include "AssetManager.pch.h" 
 #include <conio.h>
-#include <stdio.h>
 #include <pdh.h>
+#include <psapi.h>
+#include <stdio.h>
+#include <TCHAR.h> 
+#include <Tools/ImGui/ImGui/imgui.h> 
 #include <Tools/Utilities/Math.hpp>
-#include <d3d11.h>
+#include <windows.h>
+#include "../FrameStatistics.h"
 
 #pragma comment(lib,"pdh.lib") 
 static ULARGE_INTEGER lastCPU,lastSysCPU,lastUserCPU;
@@ -19,10 +17,10 @@ static HANDLE self;
 double App_CPU_Usage();
 
 void FrameStatistics::Update()
-{ 
+{
 	const float framerate = 1 / Timer::GetInstance().GetDeltaTime();
 
-	if(myDataIndex > MAX_DATA_COUNT - 1)
+	if (myDataIndex > MAX_DATA_COUNT - 1)
 	{
 		myDataIndex = 0;
 	}
@@ -50,7 +48,7 @@ void FrameStatistics::Update()
 
 	myAverageCPUByApp[myDataIndex] = (float)App_CPU_Usage();
 	sum = std::accumulate(myAverageCPUByApp,myAverageCPUByApp + MAX_DATA_COUNT,sum) / MAX_DATA_COUNT;
-	ImGui::Text("Total CPU usage by app: (%f)\n",sum); 
+	ImGui::Text("Total CPU usage by app: (%f)\n",sum);
 
 #endif //  _WIN32
 	ImGui::End();

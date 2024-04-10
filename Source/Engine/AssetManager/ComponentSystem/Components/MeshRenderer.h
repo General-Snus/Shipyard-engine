@@ -1,6 +1,7 @@
 #pragma once
 #include <Engine/AssetManager/Objects/BaseAssets/BaseAsset.h>
 #include "Engine/AssetManager/ComponentSystem/Component.h"
+#include "Engine/AssetManager/Enums.h"
 #define AsUINT(v) static_cast<unsigned>(v)
 
 class Mesh;
@@ -31,9 +32,10 @@ public:
 	void SetMaterialPath(const std::filesystem::path& aFilePath,int elementIndex);
 	~cMeshRenderer() override = default;
 
-	const std::vector<Element>& GetElements() const;
+	std::vector<Element>& GetElements() const;
 	std::shared_ptr<Mesh> GetRawMesh() const;
 
+	std::shared_ptr<TextureHolder> GetTexture(eTextureType type,unsigned materialIndex = 0);
 	bool IsDefaultMesh() const;
 
 	FORCEINLINE bool IsStaticMesh()
@@ -47,8 +49,8 @@ public:
 	}
 
 protected:
-	bool isInstanced = true;
-	bool isStatic = true;
+	bool isInstanced = false;
+	bool isStatic = false;
 	std::shared_ptr<RenderData> myRenderData;
 };
 

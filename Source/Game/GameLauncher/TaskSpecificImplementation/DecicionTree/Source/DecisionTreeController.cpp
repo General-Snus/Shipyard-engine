@@ -1,9 +1,9 @@
-#include "../DecisionTreeController.h" 
 #include <Editor/Editor/Defines.h>
 #include <Engine/AssetManager/AssetManager.pch.h>
 #include <Engine/PersistentSystems/ArtificialInteligence/AICommands/AICommands.h>
+#include "../DecisionTreeController.h" 
 
-DecisionTreeController::DecisionTreeController(DecisionTree decisionTree) : myTree(decisionTree)
+DecisionTreeController::DecisionTreeController(const DecisionTree& decisionTree) : myTree(decisionTree)
 {
 }
 
@@ -60,7 +60,7 @@ bool DecisionTreeController::Update(GameObject input)
 
 bool DecisionTreeController::ComponentRequirement(GameObject input)
 {
-	if(!input.TryGetComponent<cPhysics_Kinematic>())
+	if (!input.TryGetComponent<cPhysics_Kinematic>())
 	{
 		auto& phy = input.AddComponent<cPhysics_Kinematic>();
 		phy.localVelocity = false;
@@ -68,7 +68,7 @@ bool DecisionTreeController::ComponentRequirement(GameObject input)
 		phy.ph_maxAcceleration = 10.0f;
 	}
 
-	if(!input.TryGetComponent<CombatComponent>())
+	if (!input.TryGetComponent<CombatComponent>())
 	{
 		input.AddComponent<CombatComponent>();
 	}

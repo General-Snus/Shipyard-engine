@@ -8,35 +8,28 @@
 #define GRAPHICSENGINE_PCH
 #define NOMINMAX 
 
-// add headers that you want to pre-compile here
-#include <d3d11.h>
-#include <Tools/ThirdParty/DirectXTK/WICTextureLoader.h>
-#include <Windows.h>
+// add headers that you want to pre-compile here  
+#include <filesystem>
+#include <map>
+#include <memory>
+#include <mutex>  
+#include <queue> 
+#include <stdexcept> 
+#include <string> 
+#include <Tools/ImGui/ImGui/imgui.h>
+#include <Tools/Optick/include/optick.h>  
+#include <Tools/Utilities/Game/Timer.h> 
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
+#include <Windows.h>  
 #include "GraphicsEngine.h" 
-#include "InterOp/Helpers.h"
-#include "InterOp/RHI.h"
-#include "Tools/Logging/Logging.h"
-
-#include "GraphicCommands/Commands/Headers/GfxCmd_Bloom.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_DebugLayer.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_DrawDebugPrimitive.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_LuminancePass.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_RenderMesh.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_RenderMeshShadow.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_RenderSkeletalMesh.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_RenderSkeletalMeshShadow.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_RenderSkybox.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_SetDepthState.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_SetFrameBuffer.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_SetLightBuffer.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_SetRenderTarget.h"
-#include "GraphicCommands/Commands/Headers/GfxCmd_ToneMapPass.h"
 #include "Rendering/Buffers/FrameBuffer.h"
 #include "Rendering/Buffers/G_buffer.h"
 #include "Rendering/Buffers/LightBuffer.h"
 #include "Rendering/Buffers/LineBuffer.h"
 #include "Rendering/Buffers/ObjectBuffer.h"
-#include "wrl/client.h"
-
-static inline Logger GELogger;
+#include "Rendering/ParticleRenderer/ParticleVertex.h"
+#include "Rendering/Vertex.h" 
+#include "Shaders/Registers.h" 
+#include "Tools/Logging/Logging.h"
+#include "wrl/client.h" 
 #endif //GRAPHICSENGINE_PCH

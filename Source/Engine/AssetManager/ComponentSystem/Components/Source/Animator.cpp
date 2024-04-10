@@ -1,12 +1,9 @@
 #include "AssetManager.pch.h"
-#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
-#include "../Animator.h" 
-#include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
 
 cAnimator::cAnimator(const unsigned int anOwnerId) : Component(anOwnerId),myCurrentAnimation(0),myAnimationTimer(0)
 {
 	mySkeleton = (this->TryGetComponent<cSkeletalMeshRenderer>())->GetRawSkeleton();
-	if(!mySkeleton)
+	if (!mySkeleton)
 	{
 		std::cout << "cSkeletalMeshRenderer component does not have a skeleton" << std::endl;
 	}
@@ -16,9 +13,9 @@ cAnimator::cAnimator(const unsigned int anOwnerId,const std::filesystem::path& a
 {
 	aFilePath;
 	mySkeleton = (this->TryGetComponent<cSkeletalMeshRenderer>())->GetRawSkeleton();
-	if(!mySkeleton)
+	if (!mySkeleton)
 	{
-		std::cout << "cSkeletalMeshRenderer component does not have a skeleton" << std::endl;
+		Logger::Warn("cSkeletalMeshRenderer component does not have a skeleton");
 	}
 	std::shared_ptr<Animation> animation;
 	AssetManager::Get().LoadAsset<Animation>(aFilePath,animation);
@@ -29,22 +26,22 @@ void cAnimator::Update()
 {
 	OPTICK_EVENT();
 
-	if(myAnimations.size())
+	if (myAnimations.size())
 	{
 		const float TimePerFrame = (1 / myAnimations[myCurrentAnimation]->frameRate);
 		myAnimationTimer += Timer::GetInstance().GetDeltaTime();
-		if(myAnimationTimer >= TimePerFrame)
+		if (myAnimationTimer >= TimePerFrame)
 		{
 			float percentage = myAnimationTimer / TimePerFrame;
 			myAnimationTimer = 0;
 			myCurrentFrame++;
 
-			if(!myAnimations[myCurrentAnimation]->isLoadedComplete)
+			if (!myAnimations[myCurrentAnimation]->isLoadedComplete)
 			{
 				return;
 			}
 
-			if(myCurrentFrame >= myAnimations[myCurrentAnimation]->numFrames)
+			if (myCurrentFrame >= myAnimations[myCurrentAnimation]->numFrames)
 			{
 				myCurrentFrame = 0;
 			}
@@ -53,10 +50,11 @@ void cAnimator::Update()
 	}
 }
 
-void cAnimator::RenderAnimation(const std::shared_ptr<RenderData> aData,const Matrix& aTransform) const
+void cAnimator::RenderAnimation(const std::shared_ptr<RenderData>& aData,const Matrix& aTransform) const
 {
-	GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderSkeletalMeshShadow>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
-	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderSkeletalMesh>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
+	aData; aTransform;
+	//GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderSkeletalMeshShadow>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
+	//GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderSkeletalMesh>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
 }
 
 void cAnimator::AddAnimation(Animation aAnimation)
@@ -77,7 +75,7 @@ void cAnimator::SetHierarchy(unsigned int aBoneID,const Matrix& aParentMatrix)
 
 	Matrix newBoneTransform = myAnimations[myCurrentAnimation]->Frames[myCurrentFrame].myTransforms[boneName] * aParentMatrix;
 
-	for(unsigned int i : mySkeleton->myBones[aBoneID].Children)
+	for (unsigned int i : mySkeleton->myBones[aBoneID].Children)
 	{
 		SetHierarchy(i,newBoneTransform);
 	}
@@ -96,9 +94,9 @@ void cAnimator::SetState(eAnimationState aState)
 
 void cAnimator::SetPlayingAnimation(unsigned int aAnimationIndex)
 {
-	if(aAnimationIndex >= myAnimations.size())
+	if (aAnimationIndex >= myAnimations.size())
 	{
-		std::cout << "Animation index out of range" << std::endl;
+		Logger::Warn("Animation index out of range");
 		return;
 	}
 	myCurrentAnimation = aAnimationIndex;
@@ -107,12 +105,12 @@ void cAnimator::SetPlayingAnimation(unsigned int aAnimationIndex)
 }
 
 void cAnimator::UpdateAnimationHierarcy(float t)
-{ 
+{
 	t;
-	if(mySkeleton->isLoadedComplete)
+	if (mySkeleton->isLoadedComplete)
 	{
 		auto* transform = TryGetComponent<Transform>();
-		if( transform)
+		if (transform)
 		{
 			SetHierarchy(0,Matrix());
 			return;

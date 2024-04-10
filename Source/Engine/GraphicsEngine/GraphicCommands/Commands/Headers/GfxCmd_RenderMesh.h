@@ -1,6 +1,6 @@
 #pragma once 
-#include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
 #include <Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h>
+#include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
 
 class GfxCmd_RenderMesh : public GraphicCommandBase
 {
@@ -12,7 +12,7 @@ protected:
 	bool instanced;
 
 public:
-	GfxCmd_RenderMesh(const std::shared_ptr<RenderData> aData,const Matrix& aTransform,bool instanced);
+	GfxCmd_RenderMesh(const std::shared_ptr<RenderData>& aData,const Matrix& aTransform,bool instanced);
 	void Destroy() override
 	{
 	};

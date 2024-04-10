@@ -1,4 +1,6 @@
- #include "../Headers/ShaderStructs.hlsli"
+#include "../Registers.h"
+#include "../Headers/ShaderStructs.hlsli"  
+ 
 
 float Sine(float aValue)
 {
@@ -16,7 +18,7 @@ float3 PositionInBound(float3 aMin, float3 aMax, float3 aPosition)
 DefaultPixelOutput main(DefaultVertexToPixel input)
 {
     DefaultPixelOutput result; 
-    result.Color.rgb = PositionInBound(OB_MinExtents, OB_MaxExtents, input.Position.xyz);
+    result.Color.rgb = textureHeap[0].Sample(defaultSampler, input.UV).rgb;
     result.Color.a = 1.0f; 
     return result;
 }

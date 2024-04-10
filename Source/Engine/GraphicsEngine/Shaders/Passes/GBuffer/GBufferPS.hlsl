@@ -12,40 +12,33 @@ GBufferOutput main(DefaultVertexToPixel input)
     normalize(input.Normal)
     );
     
-    const float3 cameraDirection = FB_CameraPosition.xyz - input.WorldPosition.xyz;
-    const float3 cameraNormalizedDirection = normalize(cameraDirection);
-   // result.Color.rgb = (input.Normal.rgb + 1) / 2.0f;
-    const float2 uv = input.UV ;
+    const float3 cameraDirection = g_FrameBuffer.FB_CameraPosition.xyz - input.WorldPosition.xyz; 
+    const float2 uv = input.UV;
     
-    const float4 textureColor = colorMap.Sample(defaultSampler, uv) * DefaultMaterial.albedoColor;
+    const float4 textureColor = textureHeap[g_defaultMaterial.AlbedoTextureIndex].Sample(defaultSampler, uv); // * g_defaultMaterial.DefaultMaterial.albedoColor;
     
     if(textureColor.a < 0.1f)
     {
         discard;
     }
     
-    const float4 materialComponent = materialMap.Sample(defaultSampler, uv);
-    const float2 textureNormal = normalMap.Sample(defaultSampler, uv).xy;
-    const float4 effect = effectMap.Sample(defaultSampler, uv);
-    
-    //const float occlusion = materialComponent.r;
-    //const float roughness = materialComponent.g;
-    //const float metallic = materialComponent.b;
-    
-    
+    const float4 materialComponent = textureHeap[g_defaultMaterial.MaterialTextureIndex].Sample(defaultSampler, uv);
+    const float2 textureNormal = textureHeap[g_defaultMaterial.NormalTextureIndex].Sample(defaultSampler, uv).xy;
+    const float4 effect = textureHeap[g_defaultMaterial.EmissiveTextureIndex].Sample(defaultSampler, uv);
+
     //Normals
     float3 pixelNormal;
     pixelNormal.xy = ((2.0f * textureNormal.xy) - 1.0f);
     pixelNormal.z = sqrt(1 - (pow(pixelNormal.x, 2.0f) + pow(pixelNormal.y, 2.0f)));
     pixelNormal = normalize(mul(pixelNormal, TBN));
-    pixelNormal *= DefaultMaterial.NormalStrength; 
+     pixelNormal *= g_defaultMaterial.NormalStrength;
      
     result.Albedo = textureColor;
     
     result.Normal.xyz = pixelNormal;
     result.Normal.w = 1;
     
-    result.Material = materialComponent; 
+    result.Material = materialComponent;
     
     result.Effect = effect;
     
@@ -53,6 +46,6 @@ GBufferOutput main(DefaultVertexToPixel input)
     result.VertexNormal.w = 1;
     
     result.WorldPosition = input.WorldPosition;
-    result.Depth = saturate(length(cameraDirection));
+    result.Depth =  (length(cameraDirection));
     return result;
 }

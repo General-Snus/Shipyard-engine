@@ -1,7 +1,8 @@
 #include "AssetManager.pch.h"
-#include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
-#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>  
-#include <Tools/Utilities/System/ThreadPool.hpp> 
+#include <Tools/Utilities/System/ThreadPool.hpp>
+#include "Engine/GraphicsEngine/GraphicsEngine.h"
+
+class GfxCmd_RenderMesh;
 
 cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId) : Component(anOwnerId)
 {
@@ -46,9 +47,17 @@ bool cMeshRenderer::IsDefaultMesh() const
 	return false;
 }
 
-const std::vector<Element>& cMeshRenderer::GetElements() const
+std::vector<Element>& cMeshRenderer::GetElements() const
 {
-	return myRenderData->myMesh->Elements;
+	if (myRenderData->myMesh->isLoadedComplete)
+	{
+		return myRenderData->myMesh->Elements;
+	}
+	else
+	{
+		static std::vector<Element> empty;
+		return empty;
+	}
 }
 
 std::shared_ptr<Mesh> cMeshRenderer::GetRawMesh() const
@@ -56,28 +65,86 @@ std::shared_ptr<Mesh> cMeshRenderer::GetRawMesh() const
 	return myRenderData->myMesh;
 }
 
+
+std::shared_ptr<TextureHolder> cMeshRenderer::GetTexture(eTextureType type,unsigned materialIndex)
+{
+	assert(materialIndex >= 0);
+
+	if (!myRenderData->overrideMaterial.empty())
+	{
+		if (myRenderData->overrideMaterial.size() > materialIndex)
+		{
+			if (const auto mat = myRenderData->overrideMaterial[materialIndex])
+			{
+				if (const auto tex = mat->GetTexture(type))
+				{
+					return tex;
+				}
+			};
+		}
+
+		for (const auto& material : myRenderData->overrideMaterial)
+		{
+			if (!material)
+			{
+				continue;
+			}
+
+			if (auto tex = material->GetTexture(type))
+			{
+				return tex;
+			}
+		}
+	}
+
+	if (myRenderData->myMesh->materials.size() > materialIndex)
+	{
+		if (const auto mat = myRenderData->myMesh->materials[materialIndex])
+		{
+			if (const auto tex = mat->GetTexture(type))
+			{
+				return tex;
+			}
+		};
+	}
+
+	for (const auto& [value,material] : myRenderData->myMesh->materials)
+	{
+		if (!material)
+		{
+			continue;
+		}
+
+		if (const auto tex = material->GetTexture(type))
+		{
+			return tex;
+		}
+	}
+
+	return nullptr;
+}
 void cMeshRenderer::Render()
 {
 	OPTICK_EVENT();
-	if (auto* myTransform = this->TryGetComponent<Transform>())
-	{
-		if (!isInstanced)
-		{
-			GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),isInstanced);
-			GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform(),isInstanced);
-			return;
-		}
-		myRenderData->myMesh->myInstances.emplace_back(myTransform->GetTransform());
-		GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),isInstanced);
-		return;
-	}
-	if (!isInstanced)
-	{
-		GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),isInstanced);
-		GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,Matrix(),isInstanced);
-	}
-	myRenderData->myMesh->myInstances.emplace_back(Matrix());
-	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),isInstanced);
+	//if (auto* myTransform = this->TryGetComponent<Transform>())
+	//{
+	//	if (!isInstanced)
+	//	{
+	//		GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),isInstanced);
+	//		//GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform(),isInstanced);
+	//		return;
+	//	}
+	//	myRenderData->myMesh->myInstances.emplace_back(myTransform->GetTransform());
+	//	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),isInstanced);
+	//	return;
+	//}
+	//if (!isInstanced)
+	//{
+	//	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),isInstanced);
+	//	//GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,Matrix(),isInstanced);
+	//}
+	//myRenderData->myMesh->myInstances.emplace_back(Matrix());
+	//GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),isInstanced);
 }
 
 cSkeletalMeshRenderer::cSkeletalMeshRenderer(const unsigned int anOwnerId) : cMeshRenderer(anOwnerId)
@@ -106,10 +173,10 @@ void cSkeletalMeshRenderer::Render()
 			myAnimation->RenderAnimation(myRenderData,myTransform->GetTransform());
 			return;
 		}
-		GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform(),false);
-		GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),false);
+		//	GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform(),false);
+		//	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),false);
 		return;
 	}
-	GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,Matrix(),false);
-	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),false);
+	//GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,Matrix(),false);
+	//GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),false);
 }

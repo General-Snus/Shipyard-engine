@@ -1,7 +1,7 @@
 #pragma once 
 #include <Engine/AssetManager/ComponentSystem/Component.h>
 #include <Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h>
-#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
 #include <Tools/Utilities/LinearAlgebra/Quaternions.hpp>
 
 
@@ -19,6 +19,8 @@ public:
 	void Render() override;
 	// Matrix& GetTransform();
 	const Matrix& GetTransform();
+	//not dirty checked
+	const Matrix& GetRawTransform() const;
 	const Quaternionf& GetQuatF();
 
 

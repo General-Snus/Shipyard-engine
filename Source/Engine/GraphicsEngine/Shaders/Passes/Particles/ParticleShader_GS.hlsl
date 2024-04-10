@@ -29,9 +29,9 @@ void main(
 	for	(int i = 0; i < 4; ++i)
     {
         ParticleGeometryToPixel outputData;
-        outputData.Position = mul(FB_InvView, particle.Position); // from world to view space
+        outputData.Position = mul(g_FrameBuffer.FB_InvView, particle.Position); // from world to view space
         outputData.Position.xy += offsets[i] * particle.Scale.xy; // Scale in space that is looking at camera, aka billboard
-		outputData.Position = mul(FB_Proj, outputData.Position);  // apply projection
+		outputData.Position = mul(g_FrameBuffer.FB_Proj, outputData.Position);  // apply projection
 		
 		outputData.Color = particle.Color;
 		outputData.LifeTime = particle.LifeTime;

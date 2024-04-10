@@ -1,15 +1,14 @@
-#include "AssetManager.pch.h"
-#include <Editor/Editor/Core/Editor.h>
-#include <Tools/Utilities/LinearAlgebra/Intersection.hpp>
-#include "../Collider.h"
+#include "AssetManager.pch.h" 
+#include <Editor/Editor/Core/Editor.h> 
 
 cCollider::cCollider(const unsigned int anOwnerId) : Component(anOwnerId)
 {
 	myCollider = std::make_shared<ColliderAssetAABB>();
 }
 
-cCollider::cCollider(const unsigned int anOwnerId,const std::filesystem::path aPath) : Component(anOwnerId)
+cCollider::cCollider(const unsigned int anOwnerId,const std::filesystem::path& aPath) : Component(anOwnerId)
 {
+	aPath;
 	myCollider = std::make_shared<ColliderAssetAABB>();
 }
 
@@ -60,7 +59,7 @@ Vector3f cCollider::GetNormalToward(Vector3f position) const
 void cCollider::Render()
 {
 	OPTICK_EVENT();
-	if (Editor::Get().GetApplicationState().drawDebugLines == false)
+	if (Editor::GetApplicationState().drawDebugLines == false)
 	{
 		return;
 	}

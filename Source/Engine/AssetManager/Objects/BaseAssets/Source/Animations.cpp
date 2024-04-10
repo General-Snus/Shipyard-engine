@@ -1,7 +1,4 @@
 #include "AssetManager.pch.h"
-#include "../Animations.h"
- 
- 
 
 void Animation::Init()
 {
@@ -11,9 +8,7 @@ void Animation::Init()
 	this->numFrames = 0;
 	this->isLoadedComplete = false;
 
-
-
-	if(!std::filesystem::exists(AssetPath))
+	if (!std::filesystem::exists(AssetPath))
 	{
 		assert(false && "Animation file does not exist");
 	}
@@ -22,21 +17,21 @@ void Animation::Init()
 	TGA::FBX::Importer::InitImporter();
 	TGA::FBX::Animation inAnim;
 
-	if(TGA::FBX::Importer::LoadAnimationW(AssetPath,inAnim))
+	if (TGA::FBX::Importer::LoadAnimationW(AssetPath,inAnim))
 	{
 		duration = inAnim.Duration;
 		frameRate = inAnim.FramesPerSecond;
 		numFrames = static_cast<unsigned int>(inAnim.Frames.size());
 
-		for(size_t i = 0; i < inAnim.Frames.size(); i++)
+		for (size_t i = 0; i < inAnim.Frames.size(); i++)
 		{
 			Frames.push_back(Frame());
 			//Frames.back().myTransforms = std::unordered_map<std::string,Matrix4x4<float>>(); 
 
-			for(const auto& ref : inAnim.Frames[i].LocalTransforms)
+			for (const auto& ref : inAnim.Frames[i].LocalTransforms)
 			{
 				Matrix mat;
-				mat.SetFromRaw(ref.second.Data); 
+				mat.SetFromRaw(ref.second.Data);
 				Frames.back().myTransforms.emplace(ref.first,mat);
 			}
 		}
@@ -44,7 +39,7 @@ void Animation::Init()
 	}
 
 #else
-	Assimp::Importer importer; 
+	Assimp::Importer importer;
 	importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS,false);
 	const aiScene* scene = importer.ReadFile(AssetPath.string(),(unsigned int)
 		aiProcess_CalcTangentSpace |
@@ -55,22 +50,22 @@ void Animation::Init()
 		aiProcess_GlobalScale |
 		aiProcess_ConvertToLeftHanded);
 
-	if(scene->HasAnimations())
+	if (scene->HasAnimations())
 	{
-		if(scene->mNumAnimations > 1)
+		if (scene->mNumAnimations > 1)
 		{
-			AMLogger.Warn("Attempt at loading multiple animation in one file in " + AssetPath.string());
+			Logger::Warn("Attempt at loading multiple animation in one file in " + AssetPath.string());
 		}
-		if(scene->mAnimations[0]->mDuration <= 0)
+		if (scene->mAnimations[0]->mDuration <= 0)
 		{
-			AMLogger.Warn("Attempt at loading animation with a duration of zero at " + AssetPath.string());
+			Logger::Warn("Attempt at loading animation with a duration of zero at " + AssetPath.string());
 		}
 		duration = scene->mAnimations[0]->mDuration;
 
 
-		if(scene->mAnimations[0]->mTicksPerSecond == 0)
+		if (scene->mAnimations[0]->mTicksPerSecond == 0)
 		{
-			AMLogger.Warn("Attempt at loading animation with a framerate of zero at " + AssetPath.string());
+			Logger::Warn("Attempt at loading animation with a framerate of zero at " + AssetPath.string());
 		}
 
 		frameRate = static_cast<float>(scene->mAnimations[0]->mTicksPerSecond);
@@ -78,12 +73,12 @@ void Animation::Init()
 		Frames.resize(numFrames);
 
 		const unsigned int numAnimatedBone = scene->mAnimations[0]->mNumChannels;
-		for(unsigned int i = 0; i < numAnimatedBone; i++)
-		{ 
+		for (unsigned int i = 0; i < numAnimatedBone; i++)
+		{
 			const aiNodeAnim* channel = scene->mAnimations[0]->mChannels[i];
 			std::string name = channel->mNodeName.C_Str();
-			for(unsigned int j = 0; j < numFrames; j++)
-			{ 
+			for (unsigned int j = 0; j < numFrames; j++)
+			{
 				Matrix mat;
 				const Vector3f scale = {
 					channel->mScalingKeys[j].mValue.x,
@@ -107,9 +102,9 @@ void Animation::Init()
 				mat *= Matrix::CreateTranslationMatrix(transform);
 				auto frameNumber = static_cast<int>(channel->mPositionKeys[j].mTime);
 
-				if(const size_t pos = name.find_last_of(':'); pos != std::string::npos)
+				if (const size_t pos = name.find_last_of(':'); pos != std::string::npos)
 				{
-					name  = name.substr(pos + 1);
+					name = name.substr(pos + 1);
 				}
 
 				Frames[frameNumber].myTransforms.emplace(name,mat);
@@ -120,7 +115,7 @@ void Animation::Init()
 	}
 	else
 	{
-		AMLogger.Err("Failed to load animation from " + AssetPath.string());
+		Logger::Err("Failed to load animation from " + AssetPath.string());
 	}
 #endif
 
@@ -135,7 +130,7 @@ Animation::Animation(const std::filesystem::path& aFilePath) : AssetBase(aFilePa
 
 void Skeleton::Init()
 {
-	if(!std::filesystem::exists(AssetPath))
+	if (!std::filesystem::exists(AssetPath))
 	{
 		assert(false && "Mesh file does not exist");
 	}
@@ -144,17 +139,17 @@ void Skeleton::Init()
 	TGA::FBX::Mesh inMesh;
 	try
 	{
-		if(TGA::FBX::Importer::LoadMeshW(AssetPath,inMesh))
+		if (TGA::FBX::Importer::LoadMeshW(AssetPath,inMesh))
 		{
 			const bool hasSkeleton = inMesh.Skeleton.GetRoot();
-			if(hasSkeleton)
+			if (hasSkeleton)
 			{
-				for(auto& aBone : inMesh.Skeleton.Bones)
+				for (auto& aBone : inMesh.Skeleton.Bones)
 				{
 					Bone bone;
 					Matrix matrix;
 					matrix.SetFromRaw(aBone.BindPoseInverse.Data);
-					matrix = Matrix::Transpose(matrix); 
+					matrix = Matrix::Transpose(matrix);
 
 					bone.BindPoseInverse = matrix;
 					bone.Children = aBone.Children;
@@ -167,32 +162,32 @@ void Skeleton::Init()
 			isLoadedComplete = true;
 		}
 	}
-	catch(const std::exception& e)
+	catch (const std::exception& e)
 	{
 		std::cout << "Error: Meshloader failed to load: " << AssetPath << "\n" << e.what() << "\n";
 	}
 #else
 	Assimp::Importer importer;
-	importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, false);
+	importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS,false);
 	importer.SetPropertyBool(AI_CONFIG_FBX_USE_SKELETON_BONE_CONTAINER,true);
 	const aiScene* scene = importer.ReadFile(AssetPath.string(),(unsigned int)
 		aiProcess_GlobalScale |
-		aiProcess_PopulateArmatureData | aiProcess_ValidateDataStructure 
+		aiProcess_PopulateArmatureData | aiProcess_ValidateDataStructure
 	);
 
-	if(scene->HasMeshes())
-	{ 
+	if (scene->HasMeshes())
+	{
 		myName = scene->mMeshes[0]->mName.C_Str();
 		//myName = scene->mSkeletons[0]->mName.C_Str();
-		for(unsigned int i = 0; i < scene->mNumMeshes; i++)
+		for (unsigned int i = 0; i < scene->mNumMeshes; i++)
 		{
-			for(unsigned int j = 0; j < scene->mMeshes[i]->mNumBones; j++)
+			for (unsigned int j = 0; j < scene->mMeshes[i]->mNumBones; j++)
 			{
 				unsigned int boneIndex = 0;
 				aiNode* skeletonBone = scene->mMeshes[i]->mBones[j]->mNode;
 				std::string name = skeletonBone->mName.C_Str();
 
-				if(!BoneNameToIndex.contains(name))
+				if (!BoneNameToIndex.contains(name))
 				{
 					boneIndex = static_cast<unsigned int>(myBones.size());
 					Bone bone;
@@ -204,25 +199,25 @@ void Skeleton::Init()
 					boneIndex = BoneNameToIndex[name];
 				}
 				BoneNameToIndex[name] = boneIndex;
-				Matrix matrix(scene->mMeshes[i]->mBones[j]->mOffsetMatrix);
+				Matrix matrix(&scene->mMeshes[i]->mBones[j]->mOffsetMatrix);
 				matrix = Matrix::Transpose(matrix);
 				myBones[boneIndex].BindPoseInverse = matrix;
 			}
 
-			for(unsigned int j = 0; j < scene->mMeshes[i]->mNumBones; j++)
+			for (unsigned int j = 0; j < scene->mMeshes[i]->mNumBones; j++)
 			{
 				aiNode* skeletonBone = scene->mMeshes[i]->mBones[j]->mNode;
 				std::string name = skeletonBone->mName.C_Str();
 
-				if(BoneNameToIndex.contains(skeletonBone->mParent->mName.C_Str())) // hidden nodes sits above the skeleton stopping me from checking if root
+				if (BoneNameToIndex.contains(skeletonBone->mParent->mName.C_Str())) // hidden nodes sits above the skeleton stopping me from checking if root
 				{
 					std::string rootName = skeletonBone->mParent->mName.C_Str();
 					myBones[BoneNameToIndex[name]].ParentIdx = BoneNameToIndex[rootName];
 				}
-				for(unsigned int k = 0; k < skeletonBone->mNumChildren; k++)
+				for (unsigned int k = 0; k < skeletonBone->mNumChildren; k++)
 				{
 					std::string childName = skeletonBone->mChildren[k]->mName.C_Str();
-					if(BoneNameToIndex.contains(childName))
+					if (BoneNameToIndex.contains(childName))
 					{
 						myBones[BoneNameToIndex[name]].Children.push_back(BoneNameToIndex[childName]);
 					}
@@ -234,7 +229,7 @@ void Skeleton::Init()
 	}
 	else
 	{
-		AMLogger.Err("Failed to load skeleton from " + AssetPath.string());
+		Logger::Err("Failed to load skeleton from " + AssetPath.string());
 	}
 #endif
 }

@@ -1,6 +1,5 @@
-#include "AssetManager.pch.h"
-#include "../ColliderAsset.h"
-
+#include "AssetManager.pch.h" 
+#include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 
 ColliderAsset::ColliderAsset(eColliderType type) : type(type),AssetBase(L"")
 {
@@ -26,7 +25,7 @@ void ColliderAsset::Init()
 {
 }
 
-ColliderAssetAABB::ColliderAssetAABB() : myAABB(AABB3D<float>()),ColliderAsset(eColliderType::AABB)
+ColliderAssetAABB::ColliderAssetAABB() :ColliderAsset(eColliderType::AABB),myAABB(AABB3D<float>())
 {
 }
 

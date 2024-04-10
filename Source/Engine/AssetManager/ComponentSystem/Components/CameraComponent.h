@@ -1,6 +1,7 @@
-#pragma once 
-#include <Tools/Utilities/Math.hpp>
-
+#pragma once
+#include <Engine/AssetManager/ComponentSystem/Component.h>
+#include <Tools/Utilities/Math.hpp>  
+#include "Engine/GraphicsEngine/Rendering/Buffers/FrameBuffer.h"
 
 struct CameraSettings
 {
@@ -16,7 +17,7 @@ class cCamera : public Component
 {
 public:
 	explicit cCamera(const unsigned int anOwnerId); // Create a generic cube
-	explicit cCamera(const unsigned int anOwnerId,CameraSettings settings); // Create a generic cube
+	explicit cCamera(const unsigned int anOwnerId,const CameraSettings& settings); // Create a generic cube
 	~cCamera() override;
 
 	//void UpdatePositionVectors();
@@ -26,12 +27,12 @@ public:
 	Vector3f GetPointerDirection(const Vector2<int> position);
 	Vector3f GetPointerDirectionNDC(const Vector2<int> position) const;
 
-	void SetCameraToFrameBuffer(); 
+	FrameBuffer GetFrameBuffer();
 	Vector4f WoldSpaceToPostProjectionSpace(Vector3f aEntity);
 
 private:
 	Matrix myClipMatrix;
-	Vector2<int> myScreenSize;
+	Vector2ui myScreenSize;
 	float cameraSpeed = 10;
 	CameraSettings mySettings;
 };

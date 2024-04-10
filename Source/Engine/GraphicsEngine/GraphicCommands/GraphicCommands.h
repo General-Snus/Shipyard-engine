@@ -1,17 +1,17 @@
 #pragma once
 
-#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp> 
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.h> 
 #include <Tools/Utilities/Math.hpp>
 
 #include <Engine/GraphicsEngine/Rendering/Buffers/FrameBuffer.h>
-#include <Engine/GraphicsEngine/Rendering/Buffers/ObjectBuffer.h>
-#include <Engine/GraphicsEngine/Rendering/Buffers/LightBuffer.h>
-#include <Engine/GraphicsEngine/Rendering/Buffers/LineBuffer.h>
 #include <Engine/GraphicsEngine/Rendering/Buffers/G_buffer.h>
 #include <Engine/GraphicsEngine/Rendering/Buffers/GraphicSettingsBuffer.h>
+#include <Engine/GraphicsEngine/Rendering/Buffers/LightBuffer.h>
+#include <Engine/GraphicsEngine/Rendering/Buffers/LineBuffer.h>
+#include <Engine/GraphicsEngine/Rendering/Buffers/ObjectBuffer.h>
 #include <Engine/GraphicsEngine/Rendering/InstanceRenderer/InstanceRenderer.h>
- 
- 
+
+
 class GraphicCommandBase
 {
 protected:
@@ -36,9 +36,9 @@ class GraphicsCommandList
 public:
 	GraphicsCommandList();
 	~GraphicsCommandList();
-	void Initialize(size_t aSize = 5*MegaByte); //5mb default
+	void Initialize(size_t aSize = 5 * MegaByte); //5mb default
 
-	template<typename CommandClass, typename ...Args>
+	template<typename CommandClass,typename ...Args>
 	void AddCommand(Args ... arguments)
 	{
 		const size_t commandSize = sizeof(CommandClass);
@@ -79,9 +79,9 @@ public:
 	GraphicsCommandListIterator(const GraphicsCommandList& lst);
 	GraphicCommandBase* Next();
 
-	FORCEINLINE bool HasCommand() const 
+	FORCEINLINE bool HasCommand() const
 	{
-		return myPtr; 
+		return myPtr;
 	}
 };
 

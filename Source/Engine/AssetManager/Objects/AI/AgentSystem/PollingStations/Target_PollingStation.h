@@ -1,6 +1,6 @@
 #pragma once
-#include "PollingStation.h"
 #include <Engine/AssetManager/ComponentSystem/GameObject.h>
+#include "PollingStation.h"
 
 class Target_PollingStation : public PollingStation
 {
@@ -21,7 +21,7 @@ public:
 		const SY::UUID sourceObject; // Is here purely to allow for is same check
 	};
 
-	explicit MultipleTargets_PollingStation(const std::vector<GameObject> aTarget);
+	explicit MultipleTargets_PollingStation(const std::vector<GameObject>& aTarget);
 	explicit MultipleTargets_PollingStation(const GameObject aTarget);
 
 	void AddToTargetList(const GameObject aTarget);

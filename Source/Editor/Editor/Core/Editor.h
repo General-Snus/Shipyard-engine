@@ -1,10 +1,10 @@
-#pragma once
+#pragma once  
 #include <Editor/Editor/Defines.h>
 #include <Editor/Editor/Windows/EditorWindows/ChainGraph/GraphTool.h>
 #include <Game/GameLauncher/Core/GameLauncher.h>
 #include <Tools/Logging/Logging.h> 
 #include <Tools/Utilities/LinearAlgebra/Sphere.hpp>
-#include <Tools/Utilities/System/SingletonTemplate.h> 
+#include <Tools/Utilities/System/SingletonTemplate.h>  
 #include "../Windows/SplashWindow.h" 
 #include "ApplicationState.h" 
 
@@ -12,6 +12,7 @@ class GameLauncher;
 
 class Editor : public Singleton<Editor>
 {
+	friend class Singleton<Editor>;
 	enum eMenuLayers
 	{
 		count
@@ -19,7 +20,6 @@ class Editor : public Singleton<Editor>
 private:
 	std::unique_ptr<SplashWindow> mySplashWindow = nullptr;
 	ApplicationState myApplicationState;
-	Logger MVLogger;
 	void ShowSplashScreen();
 	void HideSplashScreen() const;
 
@@ -45,16 +45,10 @@ public:
 		static ApplicationState myApplicationState;
 		return myApplicationState;
 	}
-
-	FORCEINLINE Logger& GetLogger()
-	{
-		return MVLogger;
-	}
-
 	static RECT GetViewportRECT();
-	static Vector2<int> GetViewportResolution();
+	static Vector2<unsigned int> GetViewportResolution();
 
-	void ExpandWorldBounds(Sphere<float> sphere);
+	void ExpandWorldBounds(const Sphere<float>& sphere);
 	const Sphere<float>& GetWorldBounds() const;
 
 	bool GetIsGUIActive() const { return IsGUIActive; };
@@ -73,7 +67,6 @@ private:
 	std::atomic_bool myIsRendering = false;
 	std::atomic_bool myIsRunning = false;
 #endif
-
 
 	Sphere<float> myWorldBounds;
 	GameLauncher myGameLauncher;

@@ -17,18 +17,18 @@
 #include <iostream>
 #include <sstream>
 
+#include "GraphicsEngine.h"
 #include "Input/EnumKeys.h"
 
 using json = nlohmann::json;
 
 void GameLauncher::Init()
 {
-	GLLogger.Log("GameLauncher Init");
 }
 
 bool SaveTest(std::vector<GameObject> gameObjectsToSave,const std::filesystem::path& path)
 {
-	AMLogger.Log("\n\nSaving Gameobjects");
+	Logger::Log("\n\nSaving Gameobjects");
 	std::ofstream file(path.string(),std::ios_base::binary);
 	if (!file.is_open())
 	{
@@ -49,7 +49,7 @@ bool SaveTest(std::vector<GameObject> gameObjectsToSave,const std::filesystem::p
 		file.write((char*)&strLength,sizeof(strLength));
 		file.write(&meshPath[0],strLength);
 
-		AMLogger.Log("Saved: " + std::to_string(id));
+		Logger::Log("Saved: " + std::to_string(id));
 	}
 	file.close();
 	return true;
@@ -67,7 +67,7 @@ std::vector<GameObject> LoadTest(const std::filesystem::path& path)
 	int size = 0;
 	file.read((char*)&size,sizeof(int));
 	gameObjectsToSave.resize(size);
-	AMLogger.Log("\n\nLoading Gameobjects " + std::to_string(size));
+	Logger::Log("\n\nLoading Gameobjects " + std::to_string(size));
 
 	for (auto& i : gameObjectsToSave)
 	{
@@ -90,7 +90,7 @@ std::vector<GameObject> LoadTest(const std::filesystem::path& path)
 		transform.SetPosition(position);
 		i.AddComponent<cMeshRenderer>(meshPath,true);
 		i.AddComponent<cPhysXDynamicBody>();
-		AMLogger.Log("Loaded: " + std::to_string(uuid));
+		Logger::Log("Loaded: " + std::to_string(uuid));
 	}
 	file.close();
 	return gameObjectsToSave;
@@ -98,6 +98,7 @@ std::vector<GameObject> LoadTest(const std::filesystem::path& path)
 
 void GameLauncher::GenerateNewRandomCubes()
 {
+	const float range = 50.f;
 	std::string arr[3] = { "Models/Cube.fbx","Models/CubeHoled.fbx","Models/SteelFloor.fbx" };
 	for (size_t i = 0; i < 10; i++)
 	{
@@ -106,13 +107,13 @@ void GameLauncher::GenerateNewRandomCubes()
 		vectorObject.AddComponent<cMeshRenderer>(arr[rand() % 3]);
 		auto& transform = vectorObject.AddComponent<Transform>();
 
-		Vector3f position = { RandomEngine::RandomInRange(-20.f,20.f),RandomEngine::RandomInRange(0.f,20.f),RandomEngine::RandomInRange(-20.f,20.f) };
+		Vector3f position = { RandomEngine::RandomInRange(-range,range),RandomEngine::RandomInRange(0.f,2 * range),RandomEngine::RandomInRange(-range,range) };
 		transform.SetPosition(position);
 		transform.SetScale(1.f);
 
 		vectorObject.AddComponent<cPhysXDynamicBody>();
 
-		AMLogger.Log("Created: " + std::to_string(vectorObject.GetID()));
+		//Logger::Log("Created: " + std::to_string(vectorObject.GetID()));
 	}
 }
 
@@ -120,33 +121,33 @@ void GameLauncher::Start()
 {
 	GameObjectManager& gom = GameObjectManager::Get();
 #pragma region BaseSetup
-	myCustomHandler = gom.CreateGameObject();
+
 	myMesh = gom.CreateGameObject();
+
 	{
 		GameObject camera = gom.CreateGameObject();
 		auto& cameraComponent = camera.AddComponent<cCamera>();
 		gom.SetLastGOAsCamera();
-		cameraComponent.SetActive(false);
+		cameraComponent.SetActive(true);
 		auto& transform = camera.AddComponent<Transform>();
-		transform.SetPosition(0,0,-5);
-		transform.SetRotation(0,0,0);
+		transform.SetPosition(-10,27,0);
+		transform.SetRotation(0,90,0);
 	}
 
 	{
 		GameObject worldRoot = gom.CreateGameObject();
 		gom.SetLastGOAsWorld();
 
-		worldRoot.AddComponent<FrameStatistics>();
+		//worldRoot.AddComponent<FrameStatistics>();
 		//worldRoot.AddComponent<RenderMode>();
 		//worldRoot.AddComponent<Skybox>();
-		worldRoot.AddComponent<cLight>(eLightType::Directional);
-
 		Transform& transform = worldRoot.AddComponent<Transform>();
-		transform.SetRotation(0,45,-45);
+		transform.SetRotation(80,0,0);
+		cLight& pLight = worldRoot.AddComponent<cLight>(eLightType::Directional);
+		worldRoot.AddComponent<cMeshRenderer>("Models/Cube.fbx");
 
-		cLight& pLight = worldRoot.GetComponent<cLight>();
 		pLight.SetColor(Vector3f(1,1,1));
-		pLight.SetPower(1.0f);
+		pLight.SetPower(2.0f);
 		pLight.BindDirectionToTransform(true);
 		//if(gom.GetAllComponents<BackgroundColor>().empty())
 		//{
@@ -158,42 +159,95 @@ void GameLauncher::Start()
 		GameObject floor = gom.CreateGameObject();
 		auto& transform = floor.AddComponent<Transform>();
 		transform.SetPosition(0,-0.0f,0);
-		transform.SetRotation(90,0.f,0.f);
-		//transform.SetScale(50.f);
+		transform.SetRotation(0,0.f,0.f);
+		transform.SetScale(500.f,20.f,500.f);
 		transform.SetGizmo(false);
-
+		floor.SetActive(false);
 		floor.AddComponent<cMeshRenderer>("Models/Cube.fbx");
 		//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json"); 
 #if PHYSX
 		auto& collider = floor.AddComponent<cCollider>();
-		collider.SetColliderType<ColliderAssetPlanar>("Models/ColliderMesh.fbx");
+		collider.SetColliderType<ColliderAssetAABB>();
 		floor.AddComponent<cPhysXStaticBody>();
 #endif 
 	}
 #if WorkingOnPngLoading
 	{
 		GameObject sponza = gom.CreateGameObject();
-		sponza.AddComponent<cMeshRenderer>("Models/Sponza.fbx");
+		sponza.AddComponent<cMeshRenderer>("Models/Sponza/Sponza3Intel.fbx");
 		//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
 		auto& transform = sponza.AddComponent<Transform>();
-		transform.SetPosition(50,0,0);
+		transform.SetPosition(0,25,0);
+		transform.SetScale(10);
 		transform.SetGizmo(false);
 	}
-#endif 
+#endif
+
+	{
+		myCustomHandler = gom.CreateGameObject();
+		auto& transform = myCustomHandler.AddComponent<Transform>();
+		auto& light = myCustomHandler.AddComponent<cLight>(eLightType::Point);
+		transform.SetPosition(0,30,-4);
+		light.BindDirectionToTransform(true);
+		light.SetColor({ .5f,.5f,1 });
+		light.SetPower(10);
+		light.SetIsShadowCaster(false);
+		light.SetRange(4.5f);
+	}
+
+	{
+		myCustomHandler2 = gom.CreateGameObject();
+		auto& transform = myCustomHandler2.AddComponent<Transform>();
+		auto& light = myCustomHandler2.AddComponent<cLight>(eLightType::Point);
+		transform.SetPosition(0,30,4);
+		light.BindDirectionToTransform(true);
+		light.SetIsShadowCaster(false);
+		light.SetColor({ 1,.5f,.5f });
+		light.SetPower(10);
+		light.SetRange(4.5f);
+	}
+	{
+		GameObject buddha = gom.CreateGameObject();
+		buddha.AddComponent<cMeshRenderer>("Models/Buddha.fbx");
+		buddha.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BuddhaMaterial.json");
+		auto& transform = buddha.AddComponent<Transform>();
+		transform.SetPosition(0,25,0);
+		transform.Rotate(0,90,0);
+		transform.SetScale(0.5f,.5f,.5f);
+		transform.SetGizmo(false);
+	}
+	{
+		//for (int x = 0; x < 4; x++)
+		//{
+		//	for (int y = 0; y < 1; y++)
+		//	{
+		//		for (int z = 0; z < 4; z++)
+		//		{
+		//			GameObject p7 = gom.CreateGameObject();
+		//			p7.AddComponent<cMeshRenderer>("Models/L_Main.FBX");
+		//			//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
+		//			auto& transform = p7.AddComponent<Transform>();
+		//			transform.SetPosition(500.f * x,150.f + 500.f * y,500.f * z);
+		//			transform.SetRotation(90,0,0);
+		//			transform.SetGizmo(false);
+		//		}
+		//	}
+		//}
+	}
+
 #pragma endregion
 
 #if PHYSX 
 	if (std::filesystem::exists("GameObjectSaveFile.SaveFiles"))
 	{
-		vectorOfGameObjects = LoadTest("GameObjectSaveFile.SaveFiles");
+		//vectorOfGameObjects = LoadTest("GameObjectSaveFile.SaveFiles");
 	}
 	else
 	{
 		GenerateNewRandomCubes();
-	}
-#endif 
-
-	GLLogger.Log("GameLauncher start");
+}
+#endif
+	Logger::Log("GameLauncher start");
 }
 
 void GameLauncher::Update(float delta)
@@ -201,11 +255,20 @@ void GameLauncher::Update(float delta)
 	delta;
 	OPTICK_EVENT();
 	AIEventManager::Instance().Update();
-	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::K))
+	if (InputHandler::GetInstance().IsKeyPressed(static_cast<int>(Keys::K)))
 	{
 		GraphicsEngine::Get().GetSettings().DebugRenderer_Active = !GraphicsEngine::Get().GetSettings().DebugRenderer_Active;
 	}
 
+	if (InputHandler::GetInstance().IsKeyPressed(static_cast<int>(Keys::F5)))
+	{
+		Editor::GetApplicationState().filter = DebugFilter::NoFilter;
+	}
+
+	if (InputHandler::GetInstance().IsKeyPressed(static_cast<int>(Keys::F6)))
+	{
+		Editor::GetApplicationState().filter = static_cast<DebugFilter>((static_cast<int>(Editor::GetApplicationState().filter) + 1) % static_cast<int>(DebugFilter::count));
+	}
 #if PHYSX
 	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::F4))
 	{
@@ -251,6 +314,44 @@ void GameLauncher::Update(float delta)
 		}
 	}
 
-	//Transform& pLight = GameObjectManager::GetInstance().GetWorldRoot().GetComponent<Transform>();
-	//pLight.Rotate(0,delta,0);
+	{
+		auto& transform = myCustomHandler.GetComponent<Transform>();
+		auto position = transform.GetPosition();
+		if (position.x > 12.f)
+		{
+			direction = -1.f;
+		}
+		if (position.x < -12.f)
+		{
+			direction = 1.f;
+		}
+		transform.Move(5.f * direction * delta,0,0);
+	}
+
+	{
+		auto& transform = myCustomHandler2.GetComponent<Transform>();
+		auto position = transform.GetPosition();
+		if (position.x > 12.f)
+		{
+			direction2 = -1.f;
+		}
+		if (position.x < -12.f)
+		{
+			direction2 = 1.f;
+		}
+		transform.Move(5.f * direction * delta,0,0);
+	}
+
+
+
+	Transform& pLight = GameObjectManager::Get().GetWorldRoot().GetComponent<Transform>();
+	constexpr float rotSpeed = 25.f;
+	if (InputHandler::GetInstance().IsKeyHeld(static_cast<int>(Keys::NUMPAD6)))
+	{
+		pLight.Rotate(rotSpeed * delta,0,0);
+	}
+	if (InputHandler::GetInstance().IsKeyHeld(static_cast<int>(Keys::NUMPAD3)))
+	{
+		pLight.Rotate(-rotSpeed * delta,0,0);
+	}
 }

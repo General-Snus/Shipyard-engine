@@ -1,6 +1,6 @@
 #pragma once
 #include <Engine/GraphicsEngine/GraphicCommands/GraphicCommands.h>
-
+#include <Engine\GraphicsEngine\GraphicsEngine.h>
 
 enum class GraphicsEngine::eDepthStencilStates : unsigned int;
 

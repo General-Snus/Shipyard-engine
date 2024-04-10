@@ -1,32 +1,35 @@
 #pragma once 
+#include <Engine/GraphicsEngine/Rendering/Buffers/FrameBuffer.h>
+#include "Engine/AssetManager/ComponentSystem/Component.h"
 
 enum class eLightType
 {
 	Directional = 0,
 	Point = 1,
 	Spot = 2,
-	uninitialized = 3 
+	uninitialized = 3
 };
 struct DirectionalLight;
 struct SpotLight;
+class Texture;
 struct PointLight;
 class cLight : public Component
 {
-	
+
 
 	friend class GraphicsEngine;
 	friend class ShadowRenderer;
-	friend class GfxCmd_SetLightBuffer;
+	friend class EnvironmentLightPSO;
 public:
 	cLight() = delete; // Create a generic cube
 	cLight(const unsigned int anOwnerId); // Create a generic cube 
 	cLight(const unsigned int anOwnerId,const eLightType type);
-	 
-	eLightType GetType() const;
-	void SetType(const eLightType aType); 
 
+	eLightType GetType() const;
+	void SetType(const eLightType aType);
+
+	bool GetIsShadowCaster() const;
 	void SetIsShadowCaster(bool active);
-	bool GetIsShadowCaster();
 
 	bool GetIsRendered() const;
 	void SetIsRendered(bool isRendered);
@@ -34,43 +37,45 @@ public:
 	bool GetIsDirty() const;
 	void SetIsDirty(bool dirty);
 
+	float GetPower() const;
 	void SetPower(float power);
-	float GetPower(); 
 
+	Vector3f GetColor() const;
 	void SetColor(Vector3f color);
-	Vector3f GetColor();
 
 	void SetPosition(Vector3f position);
-	Vector3f GetPosition( );
+	Vector3f GetPosition() const;
 
 	void SetDirection(Vector3f direction);
-	Vector3f GetDirection( );
+	Vector3f GetDirection() const;
 
 	void SetRange(float range);
-	float GetRange( );
+	float GetRange() const;
 
 	void SetInnerAngle(float angle);
-	float GetInnerAngle( );
+	float GetInnerAngle() const;
 
 	void SetOuterAngle(float angle);
-	float GetOuterAngle( ); 
+	float GetOuterAngle() const;
 
 	std::shared_ptr<Texture> GetShadowMap(int number) const;
 	void BindDirectionToTransform(bool active);
-	bool GetIsBound();
+	bool GetIsBound() const;
+
+	FrameBuffer GetShadowMapFrameBuffer(const int number = 0) const;
 
 	template<class T>
 	std::shared_ptr<T> GetData();
 
-	void Update() override; 
+	void Update() override;
 	~cLight() = default;
 private:
 	void ConformToTransform();
 	void RedrawShadowMap();
 	void RedrawDirectionMap();
 	void RedrawPointMap();
-	void RedrawSpotMap(); 
-	Matrix GetLightViewMatrix(int number);
+	void RedrawSpotMap();
+	Matrix GetLightViewMatrix(int number) const;
 
 	std::shared_ptr<DirectionalLight> myDirectionLightData;
 	std::shared_ptr<SpotLight> mySpotLightData;
@@ -79,25 +84,25 @@ private:
 
 	eLightType myLightType;
 	bool boundToTransform = false;
-	bool isShadowCaster = true; 
-	bool isDirty = true; 
-	bool isRendered = false; 
+	bool isShadowCaster = true;
+	bool isDirty = true;
+	bool isRendered = false;
 };
 
 template<>
 inline std::shared_ptr<DirectionalLight> cLight::GetData<DirectionalLight>()
-{  
+{
 	return myDirectionLightData;
 }
 
 template<>
 inline std::shared_ptr<SpotLight> cLight::GetData<SpotLight>()
-{ 
+{
 	return mySpotLightData;
 }
 
 template<>
 inline std::shared_ptr<PointLight> cLight::GetData<PointLight>()
-{ 
+{
 	return myPointLightData;
-} 
+}

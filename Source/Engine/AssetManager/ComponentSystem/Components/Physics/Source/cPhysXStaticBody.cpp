@@ -50,6 +50,7 @@ void cPhysXStaticBody::UpdateFromCollider()
 		case eColliderType::AABB:
 		{
 			auto aabb = collider->GetColliderAssetOfType<ColliderAssetAABB>();
+			aabb->UpdateWithTransform(transform.GetTransform());
 			const auto& aabbData = aabb->GetAABB();
 			PxRigidActorExt::createExclusiveShape(*data,PxBoxGeometry(aabbData.GetXSize() / 2,aabbData.GetYSize() / 2,aabbData.GetZSize() / 2),*Shipyard_PhysX::Get().GetDefaultMaterial());
 			break;

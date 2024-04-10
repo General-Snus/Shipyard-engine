@@ -1,15 +1,15 @@
 #pragma once
-#include "Windows.h" 
 #include <functional>
-#include <WinUser.h>
+#include <string>
+#include <Tools/Utilities/LinearAlgebra/Vector2.hpp>
+#include <windows.h>
+
 struct WinInitSettings
 {
-	LPCWSTR windowTitle;
-	SIZE windowSize;
+	std::wstring windowTitle;
+	Vector2ui windowSize;
 	HINSTANCE hInstance;
 };
-
-
 
 class Window
 {
@@ -19,10 +19,13 @@ public:
 	static bool Update();
 	static LRESULT CALLBACK WinProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
 
-	static void SetCallbackFunction(std::function<void(MSG const& msg)> aCallback);
+	static void SetCallbackFunction(const std::function<void(MSG const& msg)>& aCallback);
 	static void Destroy();
-
 	static void MoveConsoleToOtherMonitor();
+
+	static unsigned int Width();
+	static unsigned int Height();
+
 
 	inline static HINSTANCE moduleHandler;
 	inline static HWND windowHandler;

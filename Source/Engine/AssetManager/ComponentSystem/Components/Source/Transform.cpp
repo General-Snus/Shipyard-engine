@@ -1,8 +1,7 @@
-#include "AssetManager.pch.h"
-#include <Engine/GraphicsEngine/GraphicsEngine.pch.h>
+#include "AssetManager.pch.h" 
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
 #include <Tools/Utilities/Math.hpp>
 #include "../Transform.h"
-#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>
 
 Transform::Transform(const unsigned int anOwnerId) : Component(anOwnerId),isDirty(true)
 {
@@ -53,8 +52,8 @@ void Transform::MakeClean()
 
 void Transform::Render()
 {
-	OPTICK_EVENT();
 #ifdef _DEBUGDRAW 
+	OPTICK_EVENT();
 
 #endif // _DEBUGDRAW 
 }
@@ -65,6 +64,11 @@ const Matrix& Transform::GetTransform()
 		MakeClean();
 		this->GetGameObject().OnSiblingChanged(&typeid(Transform));
 	}
+	return myTransform;
+}
+
+const Matrix& Transform::GetRawTransform() const
+{
 	return myTransform;
 }
 

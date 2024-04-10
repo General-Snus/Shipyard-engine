@@ -1,14 +1,10 @@
 #include <AssetManager.pch.h>
-#include "../ParticleEmitter.h"
-#include <cassert>
-#include <cmath>
-#include <iostream>
 #include <Tools/Utilities/Math.hpp>
-#include <d3d11.h>
-#include <random>
+#include "../ParticleEmitter.h"
 
 #include <Tools/ImGui/ImGui/imgui.h>
 
+#include "Engine/GraphicsEngine/GraphicsEngine.h"
 
 
 void ParticleEmitter::InitParticle(Particlevertex& vertex) const
@@ -17,21 +13,18 @@ void ParticleEmitter::InitParticle(Particlevertex& vertex) const
 	vertex.Lifetime = 0;
 	vertex.Position = settings.StartPosition;
 	vertex.Scale = settings.StartSize;
-
-
-
 	vertex.Velocity = settings.StartVelocity;
 }
 
 ParticleEmitter::ParticleEmitter(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)
 {
-	AMLogger.Err("NotImplementedException");
+	Logger::Err("NotImplementedException");
 	assert(false);
 }
 
 ParticleEmitter::ParticleEmitter(const ParticleEmitterTemplate& aTemplate) : AssetBase(aTemplate.Path)
 {
-	if(aTemplate.EmmiterSettings.ParticleTexture.empty())
+	if (aTemplate.EmmiterSettings.ParticleTexture.empty())
 	{
 		texture = GraphicsEngine::Get().GetDefaultTexture(eTextureType::ParticleMap);
 	}
@@ -42,26 +35,25 @@ ParticleEmitter::ParticleEmitter(const ParticleEmitterTemplate& aTemplate) : Ass
 
 	settings = aTemplate.EmmiterSettings;
 	primitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
-	if(settings.MaxParticles == 0 || (int)std::ceil(settings.SpawnRate * settings.LifeTime) < settings.MaxParticles)
+	if (settings.MaxParticles == 0 || (int)std::ceil(settings.SpawnRate * settings.LifeTime) < settings.MaxParticles)
 	{
 		settings.MaxParticles = (int)std::ceil(settings.SpawnRate * settings.LifeTime);
 	}
 
 	particles.resize(settings.MaxParticles);
 
-	for(auto& part : particles)
+	for (auto& part : particles)
 	{
 		InitParticle(part);
 		part.Lifetime = settings.LifeTime + 1;
 	}
 
-	if(!RHI::CreateDynamicVertexBuffer(vertexBuffer,particles.size(),sizeof(Particlevertex)))
+	//if (!RHI::CreateDynamicVertexBuffer(vertexBuffer,particles.size(),sizeof(Particlevertex)))
 	{
 		std::cout << "Failed to create vertex buffer" << std::endl;
 		return;
 	}
-	inputLayout = Particlevertex::InputLayout;
-	stride = sizeof(Particlevertex);
+	//stride = sizeof(Particlevertex);
 }
 
 void ParticleEmitter::Init()
@@ -77,10 +69,10 @@ void ParticleEmitter::Update(float aDeltaTime)
 	spawnedThisFrame = std::floor(secondCounter) + 0.1f;//point exactness
 	secondCounter -= spawnedThisFrame;
 
-	for(auto& aParticle : particles)
+	for (auto& aParticle : particles)
 	{
 		aParticle.Lifetime += aDeltaTime;
-		if(aParticle.Lifetime >= this->settings.LifeTime && spawnedThisFrame > 1)
+		if (aParticle.Lifetime >= this->settings.LifeTime && spawnedThisFrame > 1)
 		{
 			spawnedThisFrame--;
 			InitParticle(aParticle);
@@ -94,56 +86,56 @@ void ParticleEmitter::Update(float aDeltaTime)
 
 		aParticle.Color = Lerp(settings.StartColor,settings.EndColor,aParticle.Lifetime / settings.LifeTime);
 		float scaleAllAxis = Lerp(settings.StartSize,settings.EndSize,aParticle.Lifetime / settings.LifeTime);
-		aParticle.Scale = {scaleAllAxis,scaleAllAxis,scaleAllAxis};
+		aParticle.Scale = { scaleAllAxis,scaleAllAxis,scaleAllAxis };
 	}
 }
 
 void ParticleEmitter::Draw()
 {
 	SetAsResource();
-	RHI::Draw(static_cast<unsigned int>(particles.size()));
+	//RHI::Draw(static_cast<unsigned int>(particles.size()));
 }
 
 void ParticleEmitter::SetAsResource() const
 {
-	auto result = ((HRESULT)1L);
+	//auto result = ((HRESULT)1L);
 
-	D3D11_MAPPED_SUBRESOURCE bufferData;
-	ZeroMemory(&bufferData,sizeof(D3D11_MAPPED_SUBRESOURCE));
+	//D3D11_MAPPED_SUBRESOURCE bufferData;
+	//ZeroMemory(&bufferData,sizeof(D3D11_MAPPED_SUBRESOURCE));
 
-	result = RHI::Context->Map(
-		vertexBuffer.Get(),
-		0,
-		D3D11_MAP_WRITE_DISCARD,
-		0,
-		&bufferData);
+	//result = RHI::Context->Map(
+	//	vertexBuffer.Get(),
+	//	0,
+	//	D3D11_MAP_WRITE_DISCARD,
+	//	0,
+	//	&bufferData);
 
-	if(FAILED(result))
-	{
-		AMLogger.Log("Failed to create vertex buffer for particle emitter");
-		assert(false);
-	}
+	//if (FAILED(result))
+	//{
+	//	Logger::Log("Failed to create vertex buffer for particle emitter");
+	//	assert(false);
+	//}
 
-	memcpy_s(
-		bufferData.pData,
-		sizeof(Particlevertex) * particles.size(),
-		&particles[0],
-		sizeof(Particlevertex) * particles.size()
-	);
+	//memcpy_s(
+	//	bufferData.pData,
+	//	sizeof(Particlevertex) * particles.size(),
+	//	&particles[0],
+	//	sizeof(Particlevertex) * particles.size()
+	//);
 
-	RHI::Context->Unmap(vertexBuffer.Get(),0);
+	//RHI::Context->Unmap(vertexBuffer.Get(),0);
 
-	RHI::ConfigureInputAssembler
-	(
-		primitiveTopology,
-		vertexBuffer,
-		nullptr,
-		stride,
-		Particlevertex::InputLayout
-	);
+	///*RHI::ConfigureInputAssembler
+	//(
+	//	primitiveTopology,
+	//	vertexBuffer,
+	//	nullptr,
+	//	stride,
+	//	Particlevertex::InputLayout
+	//);*/
 
-	if(texture->isLoadedComplete)
-	{
-		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_colorMap,texture->GetRawTexture().get());
-	}
+	//if (texture->isLoadedComplete)
+	//{
+	//	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_colorMap,texture->GetRawTexture().get());
+	//}
 }

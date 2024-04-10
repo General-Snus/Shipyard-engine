@@ -1,7 +1,6 @@
 #pragma once
 #include <functional>
 
-
 class DecisionTree
 {
 private:
@@ -10,7 +9,7 @@ private:
 	class Node
 	{
 	public:
-		explicit Node(std::function<bool(GameObject)> func);
+		explicit Node(const std::function<bool(GameObject)>& func);
 		std::function<bool(GameObject)> myCondition;
 		bool Evaluate(GameObject inp) const;
 	private:
@@ -23,8 +22,8 @@ public:
 	DecisionTree();
 	~DecisionTree();
 
-	void AddNodeAt(int at,std::function<bool(GameObject)>);
-	int AddChildNodeAt(int at,bool atPosetiveAnswer,std::function<bool(GameObject)>);
+	void AddNodeAt(int at,const std::function<bool(GameObject)>&);
+	int AddChildNodeAt(int at,bool atPosetiveAnswer,const std::function<bool(GameObject)>&);
 
 
 	bool RunTree(GameObject input);

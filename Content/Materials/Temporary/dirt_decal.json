@@ -1,0 +1,38 @@
+{
+    "MaterialBuffer": {
+        "NormalStrength": 1.0,
+        "Shine": 100.0,
+        "UVTiling": [
+            1.0,
+            1.0
+        ],
+        "albedoColor": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+        ]
+    },
+    "Textures": [
+        {
+            "TextureName": "dirt_decal_01_dirt_decal_01_mask_gltf_alpha_dirt_decal_Opacity.png",
+            "TexturePath": "dirt_decal_01_dirt_decal_01_mask_gltf_alpha_dirt_decal_Opacity.png",
+            "TextureType": 0
+        },
+        {
+            "TextureName": "",
+            "TexturePath": "",
+            "TextureType": 1
+        },
+        {
+            "TextureName": "",
+            "TexturePath": "",
+            "TextureType": 2
+        },
+        {
+            "TextureName": "",
+            "TexturePath": "",
+            "TextureType": 3
+        }
+    ]
+}

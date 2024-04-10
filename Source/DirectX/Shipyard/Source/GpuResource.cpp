@@ -1,0 +1,269 @@
+#include "DirectXHeader.pch.h"
+
+#include "Shipyard/GpuResource.h"
+
+#include <cassert>
+
+#include "Shipyard/GPU.h"
+
+VertexResource::VertexResource(std::wstring name)
+{
+	m_ResourceName = name;
+}
+
+void VertexResource::CreateView(size_t numElements,size_t elementSize)
+{
+	m_NumVertices = (uint32_t)numElements;
+	m_VertexStride = (uint32_t)elementSize;
+
+	m_VertexBufferView.BufferLocation = m_Resource->GetGPUVirtualAddress();
+	m_VertexBufferView.SizeInBytes = static_cast<UINT>(m_NumVertices * m_VertexStride);
+	m_VertexBufferView.StrideInBytes = static_cast<UINT>(m_VertexStride);
+}
+
+GpuResource::GpuResource() : m_UsageState(D3D12_RESOURCE_STATE_COMMON),
+m_TransitioningState((D3D12_RESOURCE_STATES)-1),
+m_Resource(nullptr),m_FormatSupport()
+{
+	CheckFeatureSupport();
+}
+
+GpuResource::GpuResource(const GpuResource& toCopy) :
+	m_UsageState(toCopy.m_UsageState),
+	m_TransitioningState(toCopy.m_TransitioningState),
+	m_FormatSupport(toCopy.m_FormatSupport),
+	m_Resource(toCopy.m_Resource)
+{
+}
+
+GpuResource& GpuResource::operator=(const GpuResource& other)
+{
+	if (this != &other)
+	{
+		m_Resource = other.m_Resource;
+		m_FormatSupport = other.m_FormatSupport;
+		m_ResourceName = other.m_ResourceName;
+	}
+	return *this;
+}
+
+GpuResource& GpuResource::operator=(GpuResource&& other) noexcept
+{
+	if (this != &other)
+	{
+		m_Resource = std::move(other.m_Resource);
+		m_FormatSupport = other.m_FormatSupport;
+		m_ResourceName = std::move(other.m_ResourceName);
+		other.Reset();
+	}
+	return *this;
+}
+
+void GpuResource::CreateView(size_t numElements,size_t elementSize)
+{
+	UNREFERENCED_PARAMETER(numElements);
+	UNREFERENCED_PARAMETER(elementSize);
+}
+
+void GpuResource::Reset()
+{
+	m_Resource.Reset();
+	m_ResourceName.clear();
+	m_FormatSupport = {};
+}
+
+bool GpuResource::CheckSrvSupport() const
+{
+	return CheckFormatSupport(D3D12_FORMAT_SUPPORT1_SHADER_SAMPLE);
+}
+
+bool GpuResource::CheckRTVSupport() const
+{
+	return CheckFormatSupport(D3D12_FORMAT_SUPPORT1_RENDER_TARGET);
+}
+
+bool GpuResource::CheckUAVSupport() const
+{
+	return CheckFormatSupport(D3D12_FORMAT_SUPPORT1_TYPED_UNORDERED_ACCESS_VIEW) &&
+		CheckFormatSupport(D3D12_FORMAT_SUPPORT2_UAV_TYPED_LOAD) &&
+		CheckFormatSupport(D3D12_FORMAT_SUPPORT2_UAV_TYPED_STORE);
+}
+
+bool GpuResource::CheckDSVSupport() const
+{
+	return CheckFormatSupport(D3D12_FORMAT_SUPPORT1_DEPTH_STENCIL);
+}
+
+void GpuResource::SetView(ViewType view)
+{
+	if (!m_Resource ||
+		m_DescriptorHandles.contains(view) && m_DescriptorHandles.at(view).heapOffset != -1)
+	{
+		return;
+	}
+
+	auto device = GPU::m_Device;
+	CheckFeatureSupport();
+	CD3DX12_RESOURCE_DESC desc(m_Resource->GetDesc());
+
+	switch (view)
+	{
+	case ViewType::UAV:
+	{
+		HeapHandle handle = GPU::GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
+		CreateUnorderedAccessView(GPU::m_Device.Get(),m_Resource.Get(),handle.cpuPtr,desc.MipLevels);
+		m_DescriptorHandles[ViewType::UAV] = handle;
+	}
+	break;
+	case ViewType::SRV:
+	{
+		if (CheckDSVSupport())
+		{
+			D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+			SRVDesc.Format = Helpers::GetDepthFormat(m_Format);
+			SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+			SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+			SRVDesc.Texture2D.MipLevels = 1;
+
+			HeapHandle handle = GPU::GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
+			GPU::m_Device->CreateShaderResourceView(m_Resource.Get(),&SRVDesc,handle.cpuPtr);
+			m_DescriptorHandles[ViewType::SRV] = handle;
+		}
+		else
+		{
+			HeapHandle handle = GPU::GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
+			CreateShaderResourceView(GPU::m_Device.Get(),m_Resource.Get(),handle.cpuPtr);
+			m_DescriptorHandles[ViewType::SRV] = handle;
+		}
+	}
+	break;
+	case ViewType::RTV:
+	{
+		HeapHandle handle = GPU::GetHeapHandle(eHeapTypes::HEAP_TYPE_RTV);
+
+		device->CreateRenderTargetView(m_Resource.Get(),nullptr,handle.cpuPtr);
+		m_DescriptorHandles[ViewType::RTV] = handle;
+	}
+	break;
+	case ViewType::DSV:
+	{
+		HeapHandle handle = GPU::GetHeapHandle(eHeapTypes::HEAP_TYPE_DSV);
+
+		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+		dsvDesc.Format = m_Format;
+		dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+		dsvDesc.Texture2D.MipSlice = 0;
+		dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+
+		device->CreateDepthStencilView(m_Resource.Get(),&dsvDesc,handle.cpuPtr);
+		m_DescriptorHandles[ViewType::DSV] = handle;
+	}
+	break;
+	default:
+		assert(false && "Out of range view type");
+		break;
+	}
+	m_RecentBoundType = view;
+}
+
+void GpuResource::ClearView(ViewType view)
+{
+	m_DescriptorHandles.contains(view) ? m_DescriptorHandles.erase(view) : NULL;
+}
+
+HeapHandle GpuResource::GetHandle(ViewType type)
+{
+	if (m_DescriptorHandles.find(type) != m_DescriptorHandles.end() && m_DescriptorHandles.at(type).heapOffset != -1)
+	{
+		return  m_DescriptorHandles.at(type);
+	}
+	SetView(type);
+	return  m_DescriptorHandles.at(type);
+}
+
+HeapHandle GpuResource::GetHandle() const
+{
+	return  m_DescriptorHandles.at(m_RecentBoundType);
+}
+
+int GpuResource::GetHeapOffset() const
+{
+	return m_DescriptorHandles.at(m_RecentBoundType).heapOffset;
+};
+
+
+void GpuResource::SetResource(const ComPtr<ID3D12Resource>& resource)
+{
+	m_Resource = resource;
+	m_Resource->SetName(m_ResourceName.c_str());
+	CheckFeatureSupport();
+}
+
+ComPtr<ID3D12Resource> GpuResource::GetResource()
+{
+	return m_Resource;
+}
+
+const ComPtr<ID3D12Resource>& GpuResource::GetResource() const
+{
+	return m_Resource;
+}
+
+ID3D12Resource** GpuResource::GetAddressOf()
+{
+	return m_Resource.GetAddressOf();
+}
+
+
+bool GpuResource::CheckFormatSupport(D3D12_FORMAT_SUPPORT1 formatSupport) const
+{
+	return (m_FormatSupport.Support1 & formatSupport) != 0;
+}
+
+bool GpuResource::CheckFormatSupport(D3D12_FORMAT_SUPPORT2 formatSupport) const
+{
+	return (m_FormatSupport.Support2 & formatSupport) != 0;
+}
+
+void GpuResource::CheckFeatureSupport()
+{
+	if (m_Resource)
+	{
+		auto desc = m_Resource->GetDesc();
+
+		m_FormatSupport.Format = desc.Format;
+		Helpers::ThrowIfFailed(GPU::m_Device->CheckFeatureSupport(
+			D3D12_FEATURE_FORMAT_SUPPORT,
+			&m_FormatSupport,
+			sizeof(D3D12_FEATURE_DATA_FORMAT_SUPPORT)));
+	}
+	else
+	{
+		m_FormatSupport = {};
+	}
+}
+
+void UAVResource::CreateView(size_t numElements)
+{
+	numElements;
+	//size_t end;
+	//m_AllocatedElements = numElements;
+	//GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->AllocateRange(numElements,,end);
+}
+
+IndexResource::IndexResource(std::wstring name)
+{
+	m_ResourceName = name;
+}
+
+void IndexResource::CreateView(size_t numElements,size_t elementSize)
+{
+	assert(elementSize == 2 || elementSize == 4 && "Indices must be 16, or 32-bit integers.");
+
+	m_NumIndices = (uint32_t)numElements;
+	m_IndexFormat = (elementSize == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
+
+	m_IndexBufferView.BufferLocation = m_Resource->GetGPUVirtualAddress();
+	m_IndexBufferView.SizeInBytes = static_cast<UINT>(numElements * elementSize);
+	m_IndexBufferView.Format = m_IndexFormat;
+}
