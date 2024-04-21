@@ -13,51 +13,52 @@ VertexResource::VertexResource(std::wstring name)
 
 void VertexResource::CreateView(size_t numElements,size_t elementSize)
 {
-	m_NumVertices = (uint32_t)numElements;
-	m_VertexStride = (uint32_t)elementSize;
+	m_NumVertices = static_cast<uint32_t>(numElements);
+	m_VertexStride = static_cast<uint32_t>(elementSize);
 
-	m_VertexBufferView.BufferLocation = m_Resource->GetGPUVirtualAddress();
-	m_VertexBufferView.SizeInBytes = static_cast<UINT>(m_NumVertices * m_VertexStride);
-	m_VertexBufferView.StrideInBytes = static_cast<UINT>(m_VertexStride);
+	D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+	SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+	SRVDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+	SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	SRVDesc.Buffer.NumElements = (m_NumVertices * m_VertexStride) / 4;
+	SRVDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_RAW;
+
+	const int heapOffset = static_cast<int>(GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->Allocate());
+	const auto descriptorHandle = GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->GetCpuHandle(heapOffset);
+	GPU::m_Device->CreateShaderResourceView(m_Resource.Get(),&SRVDesc,descriptorHandle);
+
+	m_DescriptorHandles[ViewType::SRV] = HeapHandle(descriptorHandle,heapOffset);
 }
 
 GpuResource::GpuResource() : m_UsageState(D3D12_RESOURCE_STATE_COMMON),
-m_TransitioningState((D3D12_RESOURCE_STATES)-1),
+m_TransitioningState(static_cast<D3D12_RESOURCE_STATES>(-1)),
 m_Resource(nullptr),m_FormatSupport()
 {
 	CheckFeatureSupport();
 }
 
-GpuResource::GpuResource(const GpuResource& toCopy) :
-	m_UsageState(toCopy.m_UsageState),
-	m_TransitioningState(toCopy.m_TransitioningState),
-	m_FormatSupport(toCopy.m_FormatSupport),
-	m_Resource(toCopy.m_Resource)
-{
-}
-
-GpuResource& GpuResource::operator=(const GpuResource& other)
-{
-	if (this != &other)
-	{
-		m_Resource = other.m_Resource;
-		m_FormatSupport = other.m_FormatSupport;
-		m_ResourceName = other.m_ResourceName;
-	}
-	return *this;
-}
-
-GpuResource& GpuResource::operator=(GpuResource&& other) noexcept
-{
-	if (this != &other)
-	{
-		m_Resource = std::move(other.m_Resource);
-		m_FormatSupport = other.m_FormatSupport;
-		m_ResourceName = std::move(other.m_ResourceName);
-		other.Reset();
-	}
-	return *this;
-}
+//GpuResource& GpuResource::operator=(const GpuResource& other)
+//{
+//	if (this != &other)
+//	{
+//		m_Resource = other.m_Resource;
+//		m_FormatSupport = other.m_FormatSupport;
+//		m_ResourceName = other.m_ResourceName;
+//	}
+//	return *this;
+//}
+//
+//GpuResource& GpuResource::operator=(GpuResource&& other) noexcept
+//{
+//	if (this != &other)
+//	{
+//		m_Resource = std::move(other.m_Resource);
+//		m_FormatSupport = other.m_FormatSupport;
+//		m_ResourceName = std::move(other.m_ResourceName);
+//		other.Reset();
+//	}
+//	return *this;
+//}
 
 void GpuResource::CreateView(size_t numElements,size_t elementSize)
 {
@@ -260,7 +261,7 @@ void IndexResource::CreateView(size_t numElements,size_t elementSize)
 {
 	assert(elementSize == 2 || elementSize == 4 && "Indices must be 16, or 32-bit integers.");
 
-	m_NumIndices = (uint32_t)numElements;
+	m_NumIndices = static_cast<uint32_t>(numElements);
 	m_IndexFormat = (elementSize == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
 
 	m_IndexBufferView.BufferLocation = m_Resource->GetGPUVirtualAddress();

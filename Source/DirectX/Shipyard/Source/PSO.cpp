@@ -17,6 +17,7 @@
 #include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
 #include "Engine/AssetManager/ComponentSystem/GameObjectManager.h"
+#include "Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h"
 #include "Engine/GraphicsEngine/Rendering/Buffers/FrameBuffer.h"
 #include "Engine/GraphicsEngine/Rendering/Buffers/ObjectBuffer.h"
 #include "Shipyard/MIPS/GenerateMipsPSO.h"
@@ -82,7 +83,7 @@ void PSOCache::InitDefaultSignature()
 	rootParameters[eRootBindings::materialBuffer].InitAsConstantBufferView(REG_DefaultMaterialBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
 	rootParameters[eRootBindings::lightBuffer].InitAsConstantBufferView(REG_LightBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
 
-	const auto descriptorRange = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,5000,REG_colorMap,0,D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC_WHILE_SET_AT_EXECUTE);
+	const auto descriptorRange = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,2048,REG_colorMap,0,D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC_WHILE_SET_AT_EXECUTE);
 	rootParameters[eRootBindings::Textures].InitAsDescriptorTable(1,&descriptorRange,D3D12_SHADER_VISIBILITY_PIXEL);
 
 	const auto GbufferPasses = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,127,REG_colorMap,1,D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC_WHILE_SET_AT_EXECUTE);
@@ -93,6 +94,9 @@ void PSOCache::InitDefaultSignature()
 
 	const auto PermanentTextures = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,127,REG_enviromentCube,3,D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC_WHILE_SET_AT_EXECUTE);
 	rootParameters[eRootBindings::PermanentTextures].InitAsDescriptorTable(1,&PermanentTextures,D3D12_SHADER_VISIBILITY_PIXEL);
+
+	const auto meshBuffer = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,4048,REG_colorMap,4,D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC_WHILE_SET_AT_EXECUTE);
+	rootParameters[eRootBindings::MeshBuffer].InitAsDescriptorTable(1,&meshBuffer,D3D12_SHADER_VISIBILITY_VERTEX);
 
 	const CD3DX12_STATIC_SAMPLER_DESC samplers[]
 	{
@@ -190,7 +194,7 @@ PSO PSO::CreatePSO(std::filesystem::path vertexShader,std::filesystem::path pixe
 	struct PipelineStateStream
 	{
 		CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE pRootSignature;
-		CD3DX12_PIPELINE_STATE_STREAM_INPUT_LAYOUT InputLayout;
+		//CD3DX12_PIPELINE_STATE_STREAM_INPUT_LAYOUT InputLayout;
 		CD3DX12_PIPELINE_STATE_STREAM_PRIMITIVE_TOPOLOGY PrimitiveTopologyType;
 		CD3DX12_PIPELINE_STATE_STREAM_VS VS;
 		CD3DX12_PIPELINE_STATE_STREAM_PS PS;
@@ -207,7 +211,7 @@ PSO PSO::CreatePSO(std::filesystem::path vertexShader,std::filesystem::path pixe
 	rtvFormats.NumRenderTargets = renderTargetAmount;
 
 	stream.pRootSignature = PSOCache::m_RootSignature->GetRootSignature().Get();
-	stream.InputLayout = { Vertex::InputLayoutDefinition , Vertex::InputLayoutDefinitionSize };
+	//stream.InputLayout = { Vertex::InputLayoutDefinition , Vertex::InputLayoutDefinitionSize };
 	stream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	stream.VS = CD3DX12_SHADER_BYTECODE(pso.vs->GetBlob());
 	stream.PS = CD3DX12_SHADER_BYTECODE(pso.ps->GetBlob());
@@ -237,7 +241,7 @@ void PSO::Init(const ComPtr<ID3D12Device2>& dev)
 	struct PipelineStateStream
 	{
 		CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE pRootSignature;
-		CD3DX12_PIPELINE_STATE_STREAM_INPUT_LAYOUT InputLayout;
+		//CD3DX12_PIPELINE_STATE_STREAM_INPUT_LAYOUT InputLayout;
 		CD3DX12_PIPELINE_STATE_STREAM_PRIMITIVE_TOPOLOGY PrimitiveTopologyType;
 		CD3DX12_PIPELINE_STATE_STREAM_VS VS;
 		CD3DX12_PIPELINE_STATE_STREAM_PS PS;
@@ -251,7 +255,7 @@ void PSO::Init(const ComPtr<ID3D12Device2>& dev)
 	rtvFormats.NumRenderTargets = 1;
 
 	stream.pRootSignature = PSOCache::m_RootSignature->GetRootSignature().Get();
-	stream.InputLayout = { Vertex::InputLayoutDefinition , Vertex::InputLayoutDefinitionSize };
+	//stream.InputLayout = { Vertex::InputLayoutDefinition , Vertex::InputLayoutDefinitionSize };
 	stream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	stream.VS = CD3DX12_SHADER_BYTECODE(vs->GetBlob());
 	stream.PS = CD3DX12_SHADER_BYTECODE(ps->GetBlob());
@@ -284,7 +288,7 @@ void GbufferPSO::Init(const ComPtr<ID3D12Device2>& dev)
 	struct PipelineStateStream
 	{
 		CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE pRootSignature;
-		CD3DX12_PIPELINE_STATE_STREAM_INPUT_LAYOUT InputLayout;
+		//CD3DX12_PIPELINE_STATE_STREAM_INPUT_LAYOUT InputLayout;
 		CD3DX12_PIPELINE_STATE_STREAM_PRIMITIVE_TOPOLOGY PrimitiveTopologyType;
 		CD3DX12_PIPELINE_STATE_STREAM_VS VS;
 		CD3DX12_PIPELINE_STATE_STREAM_PS PS;
@@ -361,7 +365,7 @@ void GbufferPSO::Init(const ComPtr<ID3D12Device2>& dev)
 	stream.BlendDesc = desc;
 
 	stream.pRootSignature = PSOCache::m_RootSignature->GetRootSignature().Get();
-	stream.InputLayout = { Vertex::InputLayoutDefinition , Vertex::InputLayoutDefinitionSize };
+	//stream.InputLayout = { Vertex::InputLayoutDefinition , Vertex::InputLayoutDefinitionSize };
 	stream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	stream.VS = CD3DX12_SHADER_BYTECODE(vs->GetBlob());
 	stream.PS = CD3DX12_SHADER_BYTECODE(ps->GetBlob());
@@ -393,7 +397,7 @@ void ShadowMapperPSO::Init(const ComPtr<ID3D12Device2>& dev)
 	struct PipelineStateStream
 	{
 		CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE pRootSignature;
-		CD3DX12_PIPELINE_STATE_STREAM_INPUT_LAYOUT InputLayout;
+		//CD3DX12_PIPELINE_STATE_STREAM_INPUT_LAYOUT InputLayout;
 		CD3DX12_PIPELINE_STATE_STREAM_PRIMITIVE_TOPOLOGY PrimitiveTopologyType;
 		CD3DX12_PIPELINE_STATE_STREAM_VS VS;
 		CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL_FORMAT DSVFormat;
@@ -402,7 +406,7 @@ void ShadowMapperPSO::Init(const ComPtr<ID3D12Device2>& dev)
 
 
 	stream.pRootSignature = PSOCache::m_RootSignature->GetRootSignature().Get();
-	stream.InputLayout = { Vertex::InputLayoutDefinition , Vertex::InputLayoutDefinitionSize };
+	//stream.InputLayout = { Vertex::InputLayoutDefinition , Vertex::InputLayoutDefinitionSize };
 	stream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	stream.VS = CD3DX12_SHADER_BYTECODE(vs->GetBlob());
 	stream.DSVFormat = DXGI_FORMAT_D32_FLOAT;
@@ -428,6 +432,7 @@ void ShadowMapperPSO::WriteShadows(std::shared_ptr<CommandList>& commandList,con
 	const auto& pipelineState = shadowMapper->GetPipelineState().Get();
 	graphicCommandList->SetPipelineState(pipelineState);
 	commandList->TrackResource(pipelineState);
+	MaterialBuffer materialBuffer;
 
 	for (auto& light : GameObjectManager::Get().GetAllComponents<cLight>())
 	{
@@ -460,6 +465,13 @@ void ShadowMapperPSO::WriteShadows(std::shared_ptr<CommandList>& commandList,con
 					for (auto& element : object.GetElements())
 					{
 						GPU::ConfigureInputAssembler(*commandList,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.VertexBuffer,element.IndexResource);
+
+						materialBuffer.vertexBufferIndex = element.VertexBuffer.GetHandle(ViewType::SRV).heapOffset;
+						materialBuffer.vertexOffset = 0; //vertex offset is part of drawcall, if i ever use this i need to set it here 
+
+						const auto& alloc2 = GPU::m_GraphicsMemory->AllocateConstant<MaterialBuffer>(materialBuffer);
+						graphicCommandList->SetGraphicsRootConstantBufferView(REG_DefaultMaterialBuffer,alloc2.GpuAddress());
+
 						graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
 					}
 				}
@@ -494,6 +506,13 @@ void ShadowMapperPSO::WriteShadows(std::shared_ptr<CommandList>& commandList,con
 					for (auto& element : object.GetElements())
 					{
 						GPU::ConfigureInputAssembler(*commandList,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.VertexBuffer,element.IndexResource);
+
+						materialBuffer.vertexBufferIndex = element.VertexBuffer.GetHandle(ViewType::SRV).heapOffset;
+						materialBuffer.vertexOffset = 0; //vertex offset is part of drawcall, if i ever use this i need to set it here 
+
+						const auto& alloc2 = GPU::m_GraphicsMemory->AllocateConstant<MaterialBuffer>(materialBuffer);
+						graphicCommandList->SetGraphicsRootConstantBufferView(REG_DefaultMaterialBuffer,alloc2.GpuAddress());
+
 						graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
 					}
 				}
@@ -530,9 +549,14 @@ void ShadowMapperPSO::WriteShadows(std::shared_ptr<CommandList>& commandList,con
 
 						for (auto& element : object.GetElements())
 						{
-
-
 							GPU::ConfigureInputAssembler(*commandList,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.VertexBuffer,element.IndexResource);
+
+							materialBuffer.vertexBufferIndex = element.VertexBuffer.GetHandle(ViewType::SRV).heapOffset;
+							materialBuffer.vertexOffset = 0; //vertex offset is part of drawcall, if i ever use this i need to set it here 
+
+							const auto& alloc2 = GPU::m_GraphicsMemory->AllocateConstant<MaterialBuffer>(materialBuffer);
+							graphicCommandList->SetGraphicsRootConstantBufferView(REG_DefaultMaterialBuffer,alloc2.GpuAddress());
+
 							graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
 						}
 					}
@@ -555,7 +579,7 @@ void EnvironmentLightPSO::Init(const ComPtr<ID3D12Device2>& dev)
 	struct PipelineStateStream
 	{
 		CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE pRootSignature;
-		CD3DX12_PIPELINE_STATE_STREAM_INPUT_LAYOUT InputLayout;
+		//CD3DX12_PIPELINE_STATE_STREAM_INPUT_LAYOUT InputLayout;
 		CD3DX12_PIPELINE_STATE_STREAM_PRIMITIVE_TOPOLOGY PrimitiveTopologyType;
 		CD3DX12_PIPELINE_STATE_STREAM_VS VS;
 		CD3DX12_PIPELINE_STATE_STREAM_PS PS;

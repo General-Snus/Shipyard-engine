@@ -25,11 +25,7 @@ void CommandList::CopyBuffer(GpuResource& buffer,size_t numElements,size_t eleme
 	const size_t bufferSize = numElements * elementSize;
 
 	ComPtr<ID3D12Resource> d3d12Resource;
-	if (bufferSize == 0)
-	{
-		// This will result in a NULL resource (which may be desired to define a default null resource).
-	}
-	else
+	if (bufferSize != 0)
 	{
 		{
 			const auto var1 = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
@@ -336,35 +332,6 @@ void CommandList::GenerateMips_UAV(Texture& texture,DXGI_FORMAT format)
 	}
 }
 
-void CommandList::SetResourseView(eHeapTypes heapType,GpuResource& resource,D3D12_RESOURCE_STATES state,
-	UINT firstSubresource,UINT numSubresources,const D3D12_SHADER_RESOURCE_VIEW_DESC* srv)
-{
-	srv; heapType;
-	if (numSubresources < D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES)
-	{
-		for (uint32_t i = 0; i < numSubresources; ++i)
-		{
-			TransitionBarrier(resource,state,firstSubresource + i);
-		}
-	}
-	else
-	{
-		TransitionBarrier(resource,state);
-	}
-
-
-	//resource.m_HeapOffset = GPU::m_ResourceDescriptors[(int)heapType]->Allocate();
-	//resource.m_CpuPtr = GPU::m_ResourceDescriptors[(int)heapType]->GetCpuHandle(resource.m_HeapOffset);
-	//CreateShaderResourceView(GPU::m_Device.Get(),resource.GetResource().Get(),descriptorHandle);
-
-
-
-
-
-
-
-	TrackResource(resource);
-}
 
 void CommandList::TransitionBarrier(const ComPtr<ID3D12Resource>& resource,D3D12_RESOURCE_STATES stateAfter,UINT subresource,bool flushBarriers)
 {

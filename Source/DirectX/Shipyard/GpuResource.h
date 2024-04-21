@@ -21,10 +21,9 @@ public:
 	GpuResource();
 	virtual ~GpuResource() { Destroy(); }
 
-	GpuResource(const GpuResource& toCopy);
-	GpuResource& operator=(const GpuResource& other);
-	GpuResource& operator=(GpuResource&& other) noexcept;
-	GpuResource(GpuResource& toCopy);
+	//GpuResource& operator=(const GpuResource& other);
+	//GpuResource& operator=(GpuResource&& other) noexcept;
+	//GpuResource(GpuResource& toCopy);
 
 	virtual void Destroy()
 	{
@@ -126,14 +125,9 @@ public:
 
 	uint32_t GetVertexCount() const { return m_NumVertices; }
 	uint32_t GetVertexStride() const { return m_VertexStride; }
-	D3D12_VERTEX_BUFFER_VIEW  GetVertexBufferView() const
-	{
-		return m_VertexBufferView;
-	}
 	void CreateView(size_t numElements,size_t elementSize) override;
 
 private:
 	uint32_t m_NumVertices;
 	uint32_t m_VertexStride;
-	D3D12_VERTEX_BUFFER_VIEW m_VertexBufferView;
 };

@@ -5,7 +5,6 @@
 #include "BaseAsset.h"
 
 class TextureHolder;
-
 struct MaterialBuffer
 {
 	Vector4f albedoColor = { 1.f,1.f,1.f,1.f };
@@ -20,7 +19,9 @@ struct MaterialBuffer
 	int materialTexture = -1;
 
 	int emissiveTexture = -1;
-	float padding[3]{ -1.f, -1.f, -1.f };
+	unsigned int vertexOffset;
+	unsigned int vertexBufferIndex;
+	float padding;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(MaterialBuffer,
 	albedoColor.x,albedoColor.y,albedoColor.z,albedoColor.w,

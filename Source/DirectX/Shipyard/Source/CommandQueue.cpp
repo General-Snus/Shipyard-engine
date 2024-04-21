@@ -89,7 +89,7 @@ std::shared_ptr<CommandList> GPUCommandQueue::GetCommandList(const std::wstring&
 
 
 	return commandList;
-	}
+}
 
 ComPtr<ID3D12CommandQueue> GPUCommandQueue::GetCommandQueue()
 {

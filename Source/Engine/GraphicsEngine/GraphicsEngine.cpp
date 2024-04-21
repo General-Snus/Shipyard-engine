@@ -25,6 +25,7 @@
 #include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
 #include "Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h"
 #include "Tools/ImGui/ImGui/backends/imgui_impl_dx12.h"
+#include "Tools/Utilities/Input/InputHandler.hpp"
 
 
 bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
@@ -536,8 +537,8 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 
 	ID3D12DescriptorHeap* heaps[] =
 	{
-		GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->Heap(),
-		GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_SAMPLER]->Heap()
+		GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->Heap(),
+		GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_SAMPLER)]->Heap()
 	};
 	graphicCommandList->SetDescriptorHeaps(static_cast<UINT>(std::size(heaps)),heaps);
 
@@ -554,8 +555,10 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 		commandList->SetDescriptorTable(eRootBindings::PermanentTextures,cubeMap);
 		commandList->TrackResource(cubeMap->GetResource());
 
-		graphicCommandList->SetGraphicsRootDescriptorTable(eRootBindings::Textures,GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->GetFirstGpuHandle());
+		graphicCommandList->SetGraphicsRootDescriptorTable(eRootBindings::Textures,GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->GetFirstGpuHandle());
+		graphicCommandList->SetGraphicsRootDescriptorTable(eRootBindings::MeshBuffer,GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->GetFirstGpuHandle());
 	}
+
 
 	static auto& list = GameObjectManager::Get().GetAllComponents<cMeshRenderer>();
 	ShadowMapperPSO::WriteShadows(commandList,list);
@@ -604,15 +607,15 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 			const unsigned materialIndex = element.MaterialIndex;
 			MaterialBuffer materialBuffer;
 
-			for (size_t i = 0; i < (int)eTextureType::EffectMap + 1; i++)
+			for (int i = 0; i < static_cast<int>(eTextureType::EffectMap) + 1; i++)
 			{
-				if (auto textureAsset = meshRenderer.GetTexture((eTextureType)i,materialIndex))
+				if (auto textureAsset = meshRenderer.GetTexture(static_cast<eTextureType>(i),materialIndex))
 				{
 					auto tex = textureAsset->GetRawTexture();
 					tex->SetView(ViewType::SRV);
 					commandList->TrackResource(tex->GetResource());
 
-					switch ((eTextureType)i)
+					switch (static_cast<eTextureType>(i))
 					{
 					case eTextureType::ColorMap:
 						materialBuffer.albedoTexture = tex->GetHeapOffset();
@@ -632,7 +635,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 				}
 				else
 				{
-					switch ((eTextureType)i)
+					switch (static_cast<eTextureType>(i))
 					{
 					case eTextureType::ColorMap:
 						materialBuffer.albedoTexture = defaultTexture->GetRawTexture()->GetHeapOffset();
@@ -652,12 +655,17 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 				}
 			}
 
+			materialBuffer.vertexBufferIndex = element.VertexBuffer.GetHandle(ViewType::SRV).heapOffset;
+			materialBuffer.vertexOffset = 0; //vertex offset is part of drawcall, if i ever use this i need to set it here
+
 			const auto& alloc2 = GPU::m_GraphicsMemory->AllocateConstant<MaterialBuffer>(materialBuffer);
 			graphicCommandList->SetGraphicsRootConstantBufferView(REG_DefaultMaterialBuffer,alloc2.GpuAddress());
 
 			graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
 		}
 	}
+
+
 
 	const auto& enviromentLight = PSOCache::GetState(PSOCache::ePipelineStateID::DeferredLighting);
 	{
@@ -732,7 +740,7 @@ void GraphicsEngine::EndFrame()
 	commandList->TransitionBarrier(backBuffer->GetResource(),D3D12_RESOURCE_STATE_PRESENT);
 	commandQueue->ExecuteCommandList(commandList);
 
-	Helpers::ThrowIfFailed(GPU::m_Swapchain->m_SwapChain->Present(1,0));
+	Helpers::ThrowIfFailed(GPU::m_Swapchain->m_SwapChain->Present(DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_DISCARD,DXGI_PRESENT_ALLOW_TEARING));
 	GPU::m_FenceValues[GPU::m_FrameIndex] = commandQueue->Signal();
 	GPU::m_FrameIndex = GPU::m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
 

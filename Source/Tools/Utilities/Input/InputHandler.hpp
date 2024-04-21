@@ -6,6 +6,7 @@
 #include <WinUser.h>
 #include "../LinearAlgebra/Vector2.hpp"
 #include "Editor/Editor/Core/Editor.h"
+#include "EnumKeys.h"
 
 class InputHandler
 {

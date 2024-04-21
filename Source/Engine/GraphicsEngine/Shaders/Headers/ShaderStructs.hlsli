@@ -23,18 +23,33 @@ struct GBufferOutput
     float4 WorldPosition : SV_TARGET5;
     float4 Depth : SV_TARGET6;
 };
-struct DefaultVertexInput
+
+struct Vertex
 {
     float4 Position : POSITION;
     float4 VxColor : COLOR;
     float2 UV : UV;
     float3 Normal : NORMAL;
     float3 Tangent : TANGENT;
+};
+
+struct DefaultVertexInput
+{
+    //float4 Position : POSITION;
+    //float4 VxColor : COLOR;
+    //float2 UV : UV;
+    //float3 Normal : NORMAL;
+    //float3 Tangent : TANGENT;
     //uint4 BoneIds : BONEIDS;
     //float4 BoneWeights : BONEWEIGHTS;
     
     //float4x4 World : WORLD;
     //uint InstanceID : SV_InstanceID;
+
+    
+    uint vertexID : SV_VertexID;
+    uint instanceID : SV_InstanceID;
+
 };
 struct DefaultVertexToPixel
 {
@@ -80,12 +95,7 @@ struct FrameBuffer
     float1 padding;
     //float4 FB_FrustrumCorners[4];
 };
-ConstantBuffer<FrameBuffer> g_FrameBuffer : register(HLSL_REG_FrameBuffer);
-
-
-
-
-
+ConstantBuffer<FrameBuffer> g_FrameBuffer : register(HLSL_REG_FrameBuffer); 
 
 struct GraphicSettingsBuffer
 {
@@ -110,6 +120,8 @@ SamplerComparisonState shadowCmpSampler : register(HLSL_REG_shadowCmpSampler);
 
 Texture2D textureHeap[] : register(HLSL_REG_colorMap);
 ByteAddressBuffer meshHeap[] : register(HLSL_REG_colorMap,space4);
+ 
+
 
 Texture2D colorPass : register(HLSL_REG_colorMap, space1);
 Texture2D normalPass : register(HLSL_REG_normalMap, space1);

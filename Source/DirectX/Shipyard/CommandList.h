@@ -20,14 +20,6 @@ public:
 
 	void CopyBuffer(GpuResource& buffer,size_t numElements,size_t elementSize,const void* bufferData,D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
 
-	void SetResourseView(
-		eHeapTypes heapType,GpuResource& resource,D3D12_RESOURCE_STATES state = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-		UINT firstSubresource = 0,UINT numSubresources = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
-		const D3D12_SHADER_RESOURCE_VIEW_DESC* srv = nullptr
-	);
-
-
-
 	void TransitionBarrier(const ComPtr<ID3D12Resource>& resource,D3D12_RESOURCE_STATES stateAfter,UINT subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,bool flushBarriers = false);
 	void TransitionBarrier(GpuResource& resource,D3D12_RESOURCE_STATES stateAfter,UINT subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,bool flushBarriers = false);
 	void SetDescriptorTable(unsigned slot,Texture* texture);

@@ -6,6 +6,7 @@ enum eRootBindings
 	objectBuffer,
 	materialBuffer,
 	lightBuffer,
+	MeshBuffer,
 	Textures,
 	GbufferPasses,
 	TargetTexture,

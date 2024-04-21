@@ -171,7 +171,7 @@ void GameLauncher::Start()
 		floor.AddComponent<cPhysXStaticBody>();
 #endif 
 	}
-#if WorkingOnPngLoading
+#if true // Sponza
 	{
 		GameObject sponza = gom.CreateGameObject();
 		sponza.AddComponent<cMeshRenderer>("Models/Sponza/Sponza3Intel.fbx");
@@ -245,13 +245,18 @@ void GameLauncher::Start()
 	else
 	{
 		GenerateNewRandomCubes();
-}
+	}
 #endif
 	Logger::Log("GameLauncher start");
 }
 
 void GameLauncher::Update(float delta)
 {
+
+	if (InputHandler::GetInstance().IsKeyPressed(static_cast<unsigned>(Keys::I)))
+	{
+		Logger::Log(std::to_string(1.f / delta));
+	}
 	delta;
 	OPTICK_EVENT();
 	AIEventManager::Instance().Update();

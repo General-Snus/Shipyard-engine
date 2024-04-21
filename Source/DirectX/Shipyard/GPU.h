@@ -40,7 +40,9 @@ class GPUSwapchain
 {
 public:
 	void Create(HWND hwnd,ComPtr<ID3D12CommandQueue>,UINT Width,UINT Height,UINT bufferCount);
+	void Present();
 	ComPtr<IDXGISwapChain4> m_SwapChain;
+	DXGI_SWAP_CHAIN_DESC1 m_Desc;
 };
 
 

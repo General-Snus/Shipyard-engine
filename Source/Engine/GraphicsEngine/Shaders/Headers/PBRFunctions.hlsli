@@ -131,7 +131,7 @@ float3 CalculateSpotLight(float3 diffuseColor, float3 specularColor, float4 worl
 	//Enable if quality is too low
 	uint2 dim = 0;
 	uint numMips = 0;
-    textureHeap[spotLight.shadowMapIndex].GetDimensions(0, dim.x, dim.y, numMips);
+	textureHeap[spotLight.shadowMapIndex].GetDimensions(0, dim.x, dim.y, numMips);
 	float2 texelSize = 1.0 / dim;
 	
 	float sum = 0;
@@ -162,9 +162,9 @@ float3 CalculatePointLight(float3 diffuseColor, float3 specularColor, float4 wor
 	lightDirection = normalize(lightDirection);
 	const float3 halfAngle = normalize(cameraDirection + lightDirection);
 	
-    const float range = max(pointLightData.Range, 1.f);
-    const float InnerStrength = pow(distance / range, 4);
-    const float falloff = pow(saturate(1 - InnerStrength), 2) / (pow(distance, 2) + 1);
+	const float range = max(pointLightData.Range, 1.f);
+	const float InnerStrength = pow(distance / range, 4);
+	const float falloff = pow(saturate(1 - InnerStrength), 2) / (pow(distance, 2) + 1);
 	
 	//const float3 Attenuation = 1 / (constantAtt + distance * (linearAtt + quadraticAtt * distance));
 	//const float3 Attenuation = 1 / pow(max(distance, pointLightData.Range), 2);
@@ -173,7 +173,7 @@ float3 CalculatePointLight(float3 diffuseColor, float3 specularColor, float4 wor
 	float3 directLightDiffuse = CalculateDiffuseLight(diffuseColor);
 	directLightDiffuse *= (1.0f - directLightSpecular);
 	
-    const float NdotL = max(0.0, dot(lightDirection, normal));
+	const float NdotL = max(0.0, dot(lightDirection, normal));
 	
 	//const float4x4 lightView = pointLightData.lightView;
 	//const float4x4 lightProj = pointLightData.projection;
@@ -191,7 +191,7 @@ float3 CalculatePointLight(float3 diffuseColor, float3 specularColor, float4 wor
 	////Enable if quality is too low
 	//uint2 dim = 0;
 	//uint numMips = 0;
-    //textureHeap[pointLightData.shadowMapIndex[0]].GetDimensions(0, dim.x, dim.y, numMips);
+	//textureHeap[pointLightData.shadowMapIndex[0]].GetDimensions(0, dim.x, dim.y, numMips);
 	//float2 texelSize = 1.0 / dim;
 	//
 	//float sum = 0;

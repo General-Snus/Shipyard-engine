@@ -8,16 +8,18 @@ float3 PositionInBound(float3 aMin, float3 aMax, float3 aPosition)
     return aPosition / boundSize;
 }
 
-DefaultVertexToPixel main(DefaultVertexInput input)
+DefaultVertexToPixel main(uint vertexId : SV_VertexID)
 {
+
+    Vertex vertex = meshHeap[g_defaultMaterial.vertexBufferIndex].Load < Vertex > ((g_defaultMaterial.vertexOffset + vertexId) * sizeof(Vertex));
 
 
     DefaultVertexToPixel result;
-    result.UV = input.UV;
-    result.Position = input.Position;  
-    result.Normal = input.Normal;
-    result.Tangent = input.Tangent;
-    result.BiNormal = cross(input.Normal, input.Tangent);
+    result.UV = vertex.UV;
+    result.Position = vertex.Position;
+    result.Normal = vertex.Normal;
+    result.Tangent = vertex.Tangent;
+    result.BiNormal = cross(vertex.Normal, vertex.Tangent);
     
     //if(g_ObjectBuffer.hasBone)
     //{
@@ -39,7 +41,7 @@ DefaultVertexToPixel main(DefaultVertexInput input)
     float3x3 worldNormalRotation = (float3x3)g_ObjectBuffer.OB_Transform;
     result.WorldPosition = mul(g_ObjectBuffer.OB_Transform, result.Position);
     
-    if (g_ObjectBuffer.OB_Instanced)
+    if(g_ObjectBuffer.OB_Instanced)
     {
     //    worldNormalRotation = (float3x3)input.World;
     //    result.WorldPosition = mul(input.World, result.Position);
@@ -57,7 +59,7 @@ DefaultVertexToPixel main(DefaultVertexInput input)
    //result.Position.z = log2(max(1e-6, 1.0 + result.Position.w)) * Fcoef - 1.0;
     
     float4 vertexColorBasedOnPositionInBox;
-    vertexColorBasedOnPositionInBox.xy = input.UV.xy;
+    vertexColorBasedOnPositionInBox.xy = vertex.UV.xy;
     vertexColorBasedOnPositionInBox.z = 1;
     vertexColorBasedOnPositionInBox.w = 1;
     result.VxColor = vertexColorBasedOnPositionInBox;

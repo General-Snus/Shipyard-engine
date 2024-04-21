@@ -143,7 +143,7 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 		m_Device.Get(),
 		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
 		D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
-		2048
+		4096
 	);
 
 	m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_SAMPLER)] = std::make_unique<DescriptorPile>(
@@ -324,11 +324,11 @@ void GPU::ConfigureInputAssembler(
 	VertexResource& vertexResource,IndexResource& indexResource)
 {
 	commandList.GetGraphicsCommandList()->IASetPrimitiveTopology(topology);
-
-	commandList.TransitionBarrier(vertexResource,D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
-	const auto& vertView = vertexResource.GetVertexBufferView();
-	commandList.GetGraphicsCommandList()->IASetVertexBuffers(0,1,&vertView);
-	commandList.TrackResource(vertexResource);
+	vertexResource;
+	//commandList.TransitionBarrier(vertexResource,D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+	//const auto& vertView = vertexResource.GetVertexBufferView();
+	//commandList.GetGraphicsCommandList()->IASetVertexBuffers(0,1,&vertView);
+	//commandList.TrackResource(vertexResource);
 
 	commandList.TransitionBarrier(indexResource,D3D12_RESOURCE_STATE_INDEX_BUFFER);
 	const auto& indexView = indexResource.GetIndexBufferView();
@@ -669,23 +669,23 @@ void GPUSwapchain::Create(HWND hwnd,ComPtr<ID3D12CommandQueue>,UINT Width,UINT H
 	Helpers::ThrowIfFailed(CreateDXGIFactory2(createFactoryFlags,IID_PPV_ARGS(&dxgiFactory4)));
 
 
-	DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
-	swapChainDesc.Width = Width;
-	swapChainDesc.Height = Height;
-	swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	swapChainDesc.Stereo = FALSE;
-	swapChainDesc.SampleDesc = { 1, 0 };
-	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	swapChainDesc.BufferCount = bufferCount;
-	swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
-	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-	swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
+	m_Desc.Width = Width;
+	m_Desc.Height = Height;
+	m_Desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	m_Desc.Stereo = FALSE;
+	m_Desc.SampleDesc = { 1, 0 };
+	m_Desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	m_Desc.BufferCount = bufferCount;
+	m_Desc.Scaling = DXGI_SCALING_STRETCH;
+	m_Desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+	m_Desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+	m_Desc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 
 	ComPtr<IDXGISwapChain1> swapChain;
 	if (FAILED(dxgiFactory4->CreateSwapChainForHwnd(
 		GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT)->GetCommandQueue().Get(),        // Swap chain needs the queue so that it can force a flush on it.
 		hwnd,
-		&swapChainDesc,
+		&m_Desc,
 		nullptr,
 		nullptr,
 		&swapChain
@@ -694,7 +694,13 @@ void GPUSwapchain::Create(HWND hwnd,ComPtr<ID3D12CommandQueue>,UINT Width,UINT H
 		Logger::Err("Failed to create swapchain from hwnd");
 	}
 	Helpers::ThrowIfFailed(dxgiFactory4->MakeWindowAssociation(hwnd,DXGI_MWA_NO_ALT_ENTER));
+	Helpers::ThrowIfFailed(swapChain->SetFullscreenState(FALSE,NULL));
 	Helpers::ThrowIfFailed(swapChain.As(&m_SwapChain));
+}
+
+void GPUSwapchain::Present()
+{
+	Helpers::ThrowIfFailed(GPU::m_Swapchain->m_SwapChain->Present(m_Desc.SwapEffect,m_Desc.Flags));
 }
 
 
