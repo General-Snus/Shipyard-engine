@@ -167,6 +167,13 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 	);
 
 
+	m_ImGui_Heap = std::make_unique<DescriptorPile>(
+		m_Device.Get(),
+		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+		D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
+		4096
+	);
+
 
 	ComPtr<ID3D12DebugDevice1> pDebugQueue;
 	if (SUCCEEDED(m_Device.As(&pDebugQueue)))

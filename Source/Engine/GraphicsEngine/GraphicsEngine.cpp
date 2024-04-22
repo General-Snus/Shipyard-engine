@@ -68,21 +68,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 
 
 
-	/*myLightBuffer.Initialize();
-	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_LightBuffer,myLightBuffer);
-
-	myObjectBuffer.Initialize();
-	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_ObjectBuffer,myObjectBuffer);
-
-	myFrameBuffer.Initialize();
-	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_FrameBuffer,myFrameBuffer);
-
-	myLineBuffer.Initialize();
-	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER | PIPELINE_STAGE_PIXEL_SHADER,REG_LineBuffer,myLineBuffer);
-
-	myGraphicSettingsBuffer.Initialize();
-	RHI::SetConstantBuffer(PIPELINE_STAGE_PIXEL_SHADER,REG_GraphicSettingsBuffer,myGraphicSettingsBuffer);
-
+	/*
 	myG_Buffer.Init();
 	myShadowRenderer.Init();
 	myParticleRenderer.Init();
@@ -119,65 +105,11 @@ bool GraphicsEngine::SetupDebugDrawline()
 
 void GraphicsEngine::SetupDefaultVariables()
 {
-	D3D12_SAMPLER_DESC samplerDesc = {};
-	samplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
-	samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	samplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	samplerDesc.MipLODBias = 0.f;
-	samplerDesc.MaxAnisotropy = 1;
-	samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
-	samplerDesc.BorderColor[0] = 1.f;
-	samplerDesc.BorderColor[1] = 1.f;
-	samplerDesc.BorderColor[2] = 1.f;
-	samplerDesc.BorderColor[3] = 1.f;
-	samplerDesc.MinLOD = -D3D12_FLOAT32_MAX;
-	samplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
-
-	D3D12_SAMPLER_DESC shadowSamplerDesc = {};
-	shadowSamplerDesc.Filter = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
-	shadowSamplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
-	shadowSamplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
-	shadowSamplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
-	shadowSamplerDesc.BorderColor[0] = 1.f;
-	shadowSamplerDesc.BorderColor[1] = 1.f;
-	shadowSamplerDesc.BorderColor[2] = 1.f;
-	shadowSamplerDesc.BorderColor[3] = 1.f;
-	shadowSamplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_GREATER_EQUAL;
-	shadowSamplerDesc.MinLOD = -D3D12_FLOAT32_MAX;
-	shadowSamplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
-	shadowSamplerDesc.MipLODBias = 0.f;
-	shadowSamplerDesc.MaxAnisotropy = 1;
-
 	D3D12_SAMPLER_DESC pointSamplerDesc = {};
 	pointSamplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
 	pointSamplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	pointSamplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	pointSamplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-
-	//if (!RHI::CreateSamplerState(myShadowSampleState,shadowSamplerDesc))
-	//{
-	//	Logger::Log("Sampler state created");
-	//	assert(false);
-	//}
-	//RHI::SetSamplerState(myShadowSampleState,REG_shadowCmpSampler); 
-	//D3D12_DEPTH_STENCIL_DESC depthStencilDesc = {};
-	//depthStencilDesc.DepthEnable = true;
-	//depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
-	//depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_GREATER;
-	//depthStencilDesc.StencilEnable = false;
-	//depthStencilDesc.StencilReadMask = D3D12_DEFAULT_STENCIL_READ_MASK;
-	//depthStencilDesc.StencilWriteMask = D3D12_DEFAULT_STENCIL_WRITE_MASK;   
-	////auto result = RHI::Device->CreateDepthStencilState(
-	////	&depthStencilDesc,
-	////	&myDepthStencilStates[(int)eDepthStencilStates::DSS_ReadOnly]
-	////);
-	//if (GPU::CreateDepthStencil(depthStencilDesc))
-	//{
-	//	Logger::Log("Failed to create depth stencil read only state");
-	//	assert(false);
-	//}
-	//myDepthStencilStates[(int)eDepthStencilStates::DSS_ReadWrite] = nullptr;
 
 
 	////Particle
@@ -204,10 +136,6 @@ void GraphicsEngine::SetupDefaultVariables()
 	defaultMaterial->SetShader(defaultVS,defaultPS);
 
 
-	//RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_enviromentCube,defaultCubeMap->GetRawTexture().get()); 
-
-
-
 	AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultTile.dds",defaultTexture);
 	defaultTexture->SetTextureType(eTextureType::ColorMap);
 	AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultNormal.dds",defaultNormalTexture);
@@ -216,7 +144,6 @@ void GraphicsEngine::SetupDefaultVariables()
 	defaultMatTexture->SetTextureType(eTextureType::MaterialMap);
 	AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultEffect.dds",defaultEffectTexture);
 	defaultEffectTexture->SetTextureType(eTextureType::EffectMap);
-	//	defaultTexture->GetRawTexture()->SetView(ViewType::SRV);; 
 
 	AssetManager::Get().ForceLoadAsset<Mesh>("default.fbx",defaultMesh);
 }
@@ -529,8 +456,6 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	GPU::ClearRTV(*commandList.get(),rtv,clearColor);
 	GPU::ClearDepth(*commandList.get(),GPU::m_DepthBuffer->GetHandle(ViewType::DSV).cpuPtr);
 
-
-
 	const auto& rootSignature = PSOCache::m_RootSignature->GetRootSignature();
 	graphicCommandList->SetGraphicsRootSignature(rootSignature.Get());
 	commandList->TrackResource(rootSignature);
@@ -707,7 +632,33 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 		graphicCommandList->DrawInstanced(6,1,0,0);
 	}
 
+
+
+	ImGui::Render();
+
+	ID3D12DescriptorHeap* ImGuiHeap[] =
+	{
+		GPU::m_ImGui_Heap->Heap(),nullptr
+	};
+
+	graphicCommandList->SetDescriptorHeaps(1,ImGuiHeap);
+	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(),graphicCommandList.Get());
+
 	commandQueue->ExecuteCommandList(commandList);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 void GraphicsEngine::RenderTextureTo(eRenderTargets from,eRenderTargets to)  const
@@ -746,9 +697,6 @@ void GraphicsEngine::EndFrame()
 
 	GPU::m_GraphicsMemory->Commit(commandQueue->GetCommandQueue().Get());
 	commandQueue->WaitForFenceValue(GPU::m_FenceValues[GPU::m_FrameIndex]);
-	//ImGui::Render();
-	//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(),commandList->GetGraphicsCommandList().Get());
-	//GPU::Present(); 
 }
 
 FORCEINLINE std::shared_ptr<Texture> GraphicsEngine::GetTargetTextures(eRenderTargets type) const

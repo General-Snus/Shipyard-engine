@@ -11,7 +11,7 @@ float3 PositionInBound(float3 aMin, float3 aMax, float3 aPosition)
 DefaultVertexToPixel main(uint vertexId : SV_VertexID)
 {
 
-    Vertex vertex = meshHeap[g_defaultMaterial.vertexBufferIndex].Load < Vertex > ((g_defaultMaterial.vertexOffset + vertexId) * sizeof(Vertex));
+    Vertex vertex = meshHeap[g_defaultMaterial.vertexBufferIndex].Load<Vertex>((g_defaultMaterial.vertexOffset + vertexId) * sizeof(Vertex));
 
 
     DefaultVertexToPixel result;

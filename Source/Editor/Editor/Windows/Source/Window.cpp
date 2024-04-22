@@ -2,6 +2,7 @@
 #include <string>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 #include "../Window.h"
+#include "Tools/Logging/Logging.h"
 #include "Windows.h" 
 
 
@@ -43,6 +44,11 @@ void Window::Init(const WinInitSettings& init)
 		nullptr,nullptr,nullptr,
 		nullptr
 	);
+
+	if (windowHandler == nullptr)
+	{
+		Logger::Err("Failed to create window");
+	}
 
 	HRESULT hr = CoInitializeEx(nullptr,COINIT_MULTITHREADED);
 	if (FAILED(hr))

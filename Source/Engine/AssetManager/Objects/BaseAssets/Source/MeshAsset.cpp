@@ -50,6 +50,15 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 		matPath = mdf;
 		matPath.replace_extension("json");
 
+		for (size_t i = 0; i < AI_TEXTURE_TYPE_MAX; i++)
+		{
+			auto type = static_cast<aiTextureType>(i);
+			std::string textureAmount = std::string(aiTextureTypeToString(type)) + " " + std::to_string(material->GetTextureCount(type));
+			if (material->GetTextureCount(type))
+			{
+				Logger::Log(textureAmount);
+			}
+		}
 
 
 		std::pair<std::filesystem::path,std::shared_ptr<TextureHolder>> holder;

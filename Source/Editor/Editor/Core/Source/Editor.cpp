@@ -83,15 +83,13 @@ bool Editor::Initialize(HWND aHandle)
 	}
 
 	ImGui_ImplWin32_Init(aHandle);
-	//ImGui_ImplDX11_Init(RHI::Device.Get(),RHI::Context.Get());+
-	GPU::guiDescriptorHeap = GPU::CreateDescriptorHeap(GPU::m_Device,D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,30);
-	const D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle = GPU::guiDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
-	const D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle = GPU::guiDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	const D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle = GPU::m_ImGui_Heap->GetFirstGpuHandle();
+	const D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle = GPU::m_ImGui_Heap->GetFirstCpuHandle();
 	ImGui_ImplDX12_Init(
 		GPU::m_Device.Get(),
 		GPU::m_FrameCount,
 		DXGI_FORMAT_R8G8B8A8_UNORM,
-		GPU::guiDescriptorHeap.Get(),
+		GPU::m_ImGui_Heap->Heap(),
 		cpu_handle,gpu_handle);
 
 #if PHYSX
@@ -141,7 +139,7 @@ int	 Editor::Run()
 
 	if (IsGUIActive)
 	{
-		//UpdateImGui();
+		UpdateImGui();
 		Update();
 		Render();
 	}

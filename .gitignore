@@ -411,4 +411,5 @@ FodyWeavers.xsd
 *.sln.iml
 Source/Engine/GraphicsEngine/Shaders/Include/*.h
 
+Content/Materials/Temporary
 !Optick.exe

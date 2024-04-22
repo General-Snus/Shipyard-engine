@@ -31,7 +31,7 @@ GBufferOutput main(DefaultVertexToPixel input)
     pixelNormal.xy = ((2.0f * textureNormal.xy) - 1.0f);
     pixelNormal.z = sqrt(1 - (pow(pixelNormal.x, 2.0f) + pow(pixelNormal.y, 2.0f)));
     pixelNormal = normalize(mul(pixelNormal, TBN));
-     pixelNormal *= g_defaultMaterial.NormalStrength;
+    //pixelNormal *= g_defaultMaterial.NormalStrength;
      
     result.Albedo = textureColor;
     

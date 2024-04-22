@@ -69,8 +69,7 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
 	}
 
 
-
-	//const float3 radiance = ambientLight+ directLight+enviromentalLight;
+	 
 	const float3 radiance = directLight + enviromentalLight + totalPointLightContribution + totalSpotLightContribution;
 	
 	result.Color.rgb = radiance + Effect.r * albedo.rgb;

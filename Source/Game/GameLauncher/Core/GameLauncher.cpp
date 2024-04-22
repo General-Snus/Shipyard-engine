@@ -138,8 +138,8 @@ void GameLauncher::Start()
 		GameObject worldRoot = gom.CreateGameObject();
 		gom.SetLastGOAsWorld();
 
-		//worldRoot.AddComponent<FrameStatistics>();
-		//worldRoot.AddComponent<RenderMode>();
+		worldRoot.AddComponent<FrameStatistics>();
+		worldRoot.AddComponent<RenderMode>();
 		//worldRoot.AddComponent<Skybox>();
 		Transform& transform = worldRoot.AddComponent<Transform>();
 		transform.SetRotation(80,0,0);
@@ -174,7 +174,8 @@ void GameLauncher::Start()
 #if true // Sponza
 	{
 		GameObject sponza = gom.CreateGameObject();
-		sponza.AddComponent<cMeshRenderer>("Models/Sponza/Sponza3Intel.fbx");
+		sponza.AddComponent<cMeshRenderer>("Models/Sponza/Sponza.fbx");
+		//sponza.AddComponent<cMeshRenderer>("Models/Sponza/Sponza3Intel.fbx");
 		//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
 		auto& transform = sponza.AddComponent<Transform>();
 		transform.SetPosition(0,25,0);
@@ -245,7 +246,7 @@ void GameLauncher::Start()
 	else
 	{
 		GenerateNewRandomCubes();
-	}
+}
 #endif
 	Logger::Log("GameLauncher start");
 }

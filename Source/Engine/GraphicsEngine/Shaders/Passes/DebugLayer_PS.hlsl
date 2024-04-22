@@ -8,9 +8,9 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     DefaultPixelOutput result;
     float2 uv = input.UV;
     
-    const float4 albedo = colorPass.Sample(defaultSampler, uv);
-    const float4 Material = normalPass.Sample(defaultSampler, uv);
-    const float4 Normal = materialPass.Sample(defaultSampler, uv);
+    const float4 Albedo = colorPass.Sample(defaultSampler, uv);
+    const float4 Normal = normalPass.Sample(defaultSampler, uv);
+    const float4 Material = materialPass.Sample(defaultSampler, uv);
     const float4 Effect = effectPass.Sample(defaultSampler, uv);
     const float4 vertexNormal = vertexNormalPass.Sample(defaultSampler, uv);
     const float4 worldPosition = float4(normalize(worldPositionPass.Sample(defaultSampler, uv).xyz), 1);
@@ -48,7 +48,7 @@ DefaultPixelOutput main(BRDF_VS_to_PS input)
     
         case 3:
     {
-                result.Color.rgb = albedo.rgb;
+                result.Color.rgb = Albedo.rgb;
                 result.Color.a = 1.0f;
                 break;
             }

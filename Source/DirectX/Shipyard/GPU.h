@@ -170,7 +170,7 @@ public:
 	static inline std::shared_ptr<Texture> m_DepthBuffer;
 	static inline std::shared_ptr<DirectX::GraphicsMemory> m_GraphicsMemory;
 	static inline std::unique_ptr<DirectX::DescriptorPile> m_ResourceDescriptors[(int)eHeapTypes::HEAP_COUNT];
-	static inline ComPtr<ID3D12DescriptorHeap> guiDescriptorHeap;;
+	static inline std::unique_ptr<DirectX::DescriptorPile> m_ImGui_Heap;
 
 private:
 };

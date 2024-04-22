@@ -12,8 +12,8 @@ PostProcessPixelOutput main(BRDF_VS_to_PS input)
 
     const float2 uv = input.UV;
     const float4 albedo = colorPass.Sample(defaultSampler, uv);
-    const float4 Material = normalPass.Sample(defaultSampler, uv);
-    const float4 Normal = materialPass.Sample(defaultSampler, uv);
+    const float4 Normal = normalPass.Sample(defaultSampler, uv);
+    const float4 Material = materialPass.Sample(defaultSampler, uv);
     const float4 Effect = effectPass.Sample(defaultSampler, uv);
     const float4 vertexNormal = vertexNormalPass.Sample(defaultSampler, uv);
     const float4 worldPosition = float4(normalize(worldPositionPass.Sample(defaultSampler, uv).xyz), 1);
