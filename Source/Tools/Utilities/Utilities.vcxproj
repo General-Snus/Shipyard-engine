@@ -201,6 +201,7 @@
     <ClInclude Include="Math.hpp" />
     <ClInclude Include="Navigation\AStar.hpp" />
     <ClInclude Include="Navigation\Dijkstra.hpp" />
+    <ClInclude Include="System\Grid.h" />
     <ClInclude Include="System\SingletonTemplate.h" />
     <ClInclude Include="System\ThreadPool.hpp" />
   </ItemGroup>
@@ -208,6 +209,7 @@
     <ClCompile Include="Game\Camera.cpp" />
     <ClCompile Include="Game\Timer.cpp" />
     <ClCompile Include="LinearAlgebra\Matrix4x4.cpp" />
+    <ClCompile Include="System\Source\Grid.cpp" />
     <ClInclude Include="TemplateHelpers.h" />
   </ItemGroup>
   <ItemGroup>

@@ -27,6 +27,9 @@
     <ClInclude Include="Physics\PhysXInterpeter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="System\SceneGraph\WorldGraph.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PersistentSystems.pch.cpp">
@@ -39,6 +42,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Physics\Source\PhysXInterpeter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="System\SceneGraph\WorldGraph.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

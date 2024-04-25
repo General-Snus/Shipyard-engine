@@ -194,6 +194,7 @@
     <ClInclude Include="PersistentSystems.pch.h" />
     <ClInclude Include="Physics\Raycast.h" />
     <ClInclude Include="Physics\PhysXInterpeter.h" />
+    <ClInclude Include="System\SceneGraph\WorldGraph.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ArtificialInteligence\AICommands\Source\AICommands.cpp" />
@@ -203,6 +204,7 @@
     </ClCompile>
     <ClCompile Include="Physics\Source\Raycast.cpp" />
     <ClCompile Include="Physics\Source\PhysXInterpeter.cpp" />
+    <ClCompile Include="System\SceneGraph\WorldGraph.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

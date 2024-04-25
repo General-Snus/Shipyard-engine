@@ -179,11 +179,10 @@ void GameLauncher::Start()
 		//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
 		auto& transform = sponza.AddComponent<Transform>();
 		transform.SetPosition(0,25,0);
-		transform.SetScale(10);
+		transform.SetScale(.01f);
 		transform.SetGizmo(false);
 	}
-#endif
-
+#endif 
 	{
 		myCustomHandler = gom.CreateGameObject();
 		auto& transform = myCustomHandler.AddComponent<Transform>();
