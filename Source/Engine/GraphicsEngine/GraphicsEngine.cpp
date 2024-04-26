@@ -632,8 +632,6 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 		graphicCommandList->DrawInstanced(6,1,0,0);
 	}
 
-
-
 	ImGui::Render();
 
 	ID3D12DescriptorHeap* ImGuiHeap[] =
@@ -641,23 +639,9 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 		GPU::m_ImGui_Heap->Heap(),nullptr
 	};
 
-	graphicCommandList->SetDescriptorHeaps(1,ImGuiHeap);
-	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(),graphicCommandList.Get());
-
+	commandList->GetGraphicsCommandList()->SetDescriptorHeaps(1,ImGuiHeap);
+	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(),commandList->GetGraphicsCommandList().Get());
 	commandQueue->ExecuteCommandList(commandList);
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }
 

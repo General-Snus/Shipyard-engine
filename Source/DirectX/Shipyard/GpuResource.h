@@ -68,7 +68,7 @@ protected:
 	ViewType m_RecentBoundType = ViewType::SRV;
 	std::unordered_map<ViewType,HeapHandle> m_DescriptorHandles;
 
-	std::wstring m_ResourceName;
+	std::filesystem::path m_ResourceName;
 	ComPtr<ID3D12Resource> m_Resource;
 	D3D12_FEATURE_DATA_FORMAT_SUPPORT m_FormatSupport;
 };
@@ -101,7 +101,7 @@ class IndexResource : public GpuResource
 {
 public:
 	IndexResource() = default;
-	explicit IndexResource(std::wstring name);
+	explicit IndexResource(std::filesystem::path name);
 
 	uint32_t GetIndexCount() const { return m_NumIndices; }
 	DXGI_FORMAT GetFormat() const { return m_IndexFormat; }
@@ -121,7 +121,7 @@ class VertexResource : public GpuResource
 {
 public:
 	VertexResource() = default;
-	explicit VertexResource(std::wstring name);
+	explicit VertexResource(std::filesystem::path name);
 
 	uint32_t GetVertexCount() const { return m_NumVertices; }
 	uint32_t GetVertexStride() const { return m_VertexStride; }

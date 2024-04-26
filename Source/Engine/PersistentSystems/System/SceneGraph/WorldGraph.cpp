@@ -5,5 +5,17 @@
 
 void WorldGraph::InitializeWorld()
 {
-	WorldGrid = new Grid(0, 0, 100);
+	WorldGrid = new Grid(0,0,100);
+}
+
+void WorldGraph::Update()
+{
+	if (ShouldUpdateGrid())
+	{
+		WorldGrid->Update();
+	}
+}
+
+bool WorldGraph::ShouldUpdateGrid()
+{
 }

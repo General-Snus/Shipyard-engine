@@ -30,6 +30,7 @@
 #include "Core/Paths.h"
 #include "DirectX/Shipyard/GPU.h"
 #include "GraphicsEngine.h" 
+#include "System/SceneGraph/WorldGraph.h"
 #include "Windows/SplashWindow.h"
 
 #if PHYSX 
@@ -103,8 +104,10 @@ bool Editor::Initialize(HWND aHandle)
 	GameObjectManager::Get().SetUpdatePriority<cPhysics_Kinematic>(ComponentManagerBase::UpdatePriority::Physics);
 	GameObjectManager::Get().SetUpdatePriority<cPhysXDynamicBody>(ComponentManagerBase::UpdatePriority::Physics);
 	//Force no write to thread after this?
+	WorldGraph::InitializeWorld();
 
 	HideSplashScreen();
+
 #if UseScriptGraph
 	ScriptEditor = Graph::GraphTool::Get().GetScriptingEditor();
 	ScriptEditor->Init();

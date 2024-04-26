@@ -20,6 +20,10 @@ DebugDrawer& DebugDrawer::Get()
 
 bool DebugDrawer::Initialize()
 {
+	vertexBuffer = VertexResource("DebugDrawerVertexBuffer");
+	indexBuffer = IndexResource("DebugDrawerIndexBuffer");
+
+
 	// Load shaders from memory
 	//myLineVS = std::make_shared<Shader>();
 	/*RHI::LoadShaderFromMemory(

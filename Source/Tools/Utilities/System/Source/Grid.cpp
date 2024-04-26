@@ -1,10 +1,10 @@
-#include "../Grid.h" 
 #include <algorithm>
+#include "../Grid.h" 
 
 Grid::Grid(
 	float aStartX,
 	float aStartY,
-	float aGridSize) : myGridSize(aGridSize), myRoot(new GridCell(Vector2f(aStartX, aStartY), aGridSize)), count(0)
+	float aGridSize) : myGridSize(aGridSize),myRoot(new GridCell(Vector2f(aStartX,aStartY),aGridSize)),count(0)
 {
 }
 
@@ -61,7 +61,7 @@ std::vector<GridCell*> Grid::GetCellWithinRadius(const Border& aBoarder) const
 		{
 
 			std::vector<GridCell*> newCells = i->GetCellWithinRadius(aBoarder);
-			cells.insert(cells.begin(), newCells.begin(), newCells.end());
+			cells.insert(cells.begin(),newCells.begin(),newCells.end());
 		}
 	}
 	return cells;
@@ -73,7 +73,7 @@ std::vector<GridObject*> Grid::GetObjectsInCells(const std::vector<GridCell*>& a
 	{
 		for (auto obj : cell->myObjects)
 		{
-			if (std::ranges::find(vector, obj) == vector.end())
+			if (std::ranges::find(vector,obj) == vector.end())
 
 			{
 				vector.push_back(obj);
@@ -84,7 +84,7 @@ std::vector<GridObject*> Grid::GetObjectsInCells(const std::vector<GridCell*>& a
 	return	vector;
 }
 
-GridCell::GridCell(const Vector2<float> position, const  float  size) : myChildren{}
+GridCell::GridCell(const Vector2<float> position,const  float  size) : myChildren{}
 {
 	myPosition = position;
 	myHalfWidth = size / 2.0f;
@@ -143,7 +143,7 @@ std::vector<GridObject*> GridCell::GetAllWithinRadius(const Border& aBoarder)
 		for (const auto& i : myChildren)
 		{
 			std::vector<GridObject*> newCells = i->GetAllWithinRadius(aBoarder);
-			cells.insert(cells.begin(), newCells.begin(), newCells.end());
+			cells.insert(cells.begin(),newCells.begin(),newCells.end());
 		}
 	}
 	return cells;
@@ -161,7 +161,7 @@ std::vector<GridCell*> GridCell::GetCellWithinRadius(const Border& aBoarder)
 		for (const auto& i : myChildren)
 		{
 			std::vector<GridCell*> newCells = i->GetCellWithinRadius(aBoarder);
-			cells.insert(cells.begin(), newCells.begin(), newCells.end());
+			cells.insert(cells.begin(),newCells.begin(),newCells.end());
 		}
 	}
 	return cells;
@@ -202,10 +202,10 @@ bool GridCell::AddObject(GridObject* aObject)
 void GridCell::Subdivide()
 {
 	//Subdvide the area equally into 4 new cells
-	myChildren[0] = new GridCell(myPosition, myHalfWidth);
-	myChildren[1] = new GridCell(Vector2<float>(myPosition.x + myHalfWidth, myPosition.y), myHalfWidth);
-	myChildren[2] = new GridCell(Vector2<float>(myPosition.x, myPosition.y + myHalfWidth), myHalfWidth);
-	myChildren[3] = new GridCell(Vector2<float>(myPosition.x + myHalfWidth, myPosition.y + myHalfWidth), myHalfWidth);
+	myChildren[0] = new GridCell(myPosition,myHalfWidth);
+	myChildren[1] = new GridCell(Vector2<float>(myPosition.x + myHalfWidth,myPosition.y),myHalfWidth);
+	myChildren[2] = new GridCell(Vector2<float>(myPosition.x,myPosition.y + myHalfWidth),myHalfWidth);
+	myChildren[3] = new GridCell(Vector2<float>(myPosition.x + myHalfWidth,myPosition.y + myHalfWidth),myHalfWidth);
 
 
 
@@ -227,7 +227,7 @@ void GridCell::Subdivide()
 		}
 	}
 	//bool lamda = [](GridCell* a) {return a == nullptr}
-	myObjects.erase(std::remove_if(myObjects.begin(), myObjects.end(), [](GridObject* a) { return (a == nullptr); }), myObjects.end());
+	myObjects.erase(std::remove_if(myObjects.begin(),myObjects.end(),[](GridObject* a) { return (a == nullptr); }),myObjects.end());
 	//myObjects.clear();
 }
 //void GridCell::Render(Tga::LineDrawer& aLineDrawer, Tga::SpriteSharedData& sbs, Tga::Sprite2DInstanceData& aInstance, Vector2<float> aCenterOffset)

@@ -6,7 +6,7 @@
 
 #include "Shipyard/GPU.h"
 
-VertexResource::VertexResource(std::wstring name)
+VertexResource::VertexResource(std::filesystem::path name)
 {
 	m_ResourceName = name;
 }
@@ -252,7 +252,7 @@ void UAVResource::CreateView(size_t numElements)
 	//GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->AllocateRange(numElements,,end);
 }
 
-IndexResource::IndexResource(std::wstring name)
+IndexResource::IndexResource(std::filesystem::path name)
 {
 	m_ResourceName = name;
 }

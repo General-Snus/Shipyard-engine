@@ -64,8 +64,8 @@ private:
 	std::unordered_map<size_t,float> myDebugLifetime;
 	size_t myNextIndex = 0;
 
-	ComPtr<ID3D12Resource> myLineVertexBuffer;
-	ComPtr<ID3D12Resource> myLineIndexBuffer;
+	VertexResource vertexBuffer;
+	IndexResource indexBuffer;
 	size_t myNumLineIndices = 0;
 
 	std::shared_ptr<ShipyardShader> myLineVS;
