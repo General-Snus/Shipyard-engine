@@ -114,5 +114,6 @@ public:
 	Texture* GetRenderTargets() override;
 	uint16_t GetRenderTargetAmounts() override { return 1; };
 private:
+	Texture renderTarget;
 };
 

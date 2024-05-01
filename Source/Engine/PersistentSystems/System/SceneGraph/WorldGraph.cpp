@@ -18,4 +18,5 @@ void WorldGraph::Update()
 
 bool WorldGraph::ShouldUpdateGrid()
 {
+	return true;
 }

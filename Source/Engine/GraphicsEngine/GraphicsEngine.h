@@ -1,7 +1,6 @@
-#pragma once  
-#include <Engine/GraphicsEngine/Shaders/Registers.h> 
-#include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>  
+#pragma once    
 
+#include "DirectX/Shipyard/Gpu_fwd.h"
 #include "Engine/AssetManager/Enums.h" 
 #include "Rendering/Buffers/FrameBuffer.h"
 #include "Rendering/Buffers/G_Buffer.h"
@@ -10,9 +9,9 @@
 #include "Rendering/Buffers/LineBuffer.h"
 #include "Rendering/Buffers/ObjectBuffer.h"
 
-#define _DEBUGDRAW
-using namespace Microsoft::WRL;
+#define _DEBUGDRAW 
 
+using namespace Microsoft::WRL;
 class Mesh;
 class Material;
 class ShipyardShader;
@@ -148,7 +147,7 @@ private:
 	std::shared_ptr<Mesh> defaultMesh;
 	std::shared_ptr<Material> defaultMaterial;
 	GraphicsSettings myGraphicSettings;
-
+	HeapHandle ViewPortHeapHandle;
 	// We're a container singleton, no instancing this outside the class.
 	GraphicsEngine() = default;
 

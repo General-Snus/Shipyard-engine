@@ -129,9 +129,9 @@ void GameObjectManager::CustomOrderUpdate()
 
 void GameObjectManager::Update()
 {
+	OPTICK_EVENT();
 	DeleteObjects();
 	AddObjects();
-	OPTICK_EVENT();
 	for (size_t i = 0; i < myUpdateOrder.size(); i++)
 	{
 		myUpdateOrder[i].second->Update();

@@ -1,6 +1,7 @@
 #pragma once
+#include <d3d12.h>
 
-using namespace Microsoft::WRL;
+
 class IndexResource;
 class VertexResource;
 class GpuResource;

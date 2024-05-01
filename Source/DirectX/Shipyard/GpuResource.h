@@ -27,6 +27,7 @@ public:
 
 	virtual void Destroy()
 	{
+		//m_Resource->Release();
 		m_Resource = nullptr;
 		for (auto& [type,pair] : m_DescriptorHandles)
 		{
@@ -37,9 +38,11 @@ public:
 
 	virtual void CreateView(size_t numElements,size_t elementSize);
 	virtual void SetView(ViewType view);
+	virtual void SetView(ViewType view,HeapHandle handle);
 	virtual void ClearView(ViewType view);
 
 	virtual HeapHandle GetHandle(ViewType type);
+	virtual HeapHandle CreateViewWithHandle(ViewType type,HeapHandle handle);
 	virtual HeapHandle GetHandle() const;
 	virtual int GetHeapOffset() const;
 

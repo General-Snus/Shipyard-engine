@@ -86,19 +86,20 @@ bool Editor::Initialize(HWND aHandle)
 	ImGui_ImplWin32_Init(aHandle);
 	const D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle = GPU::m_ImGui_Heap->GetFirstGpuHandle();
 	const D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle = GPU::m_ImGui_Heap->GetFirstCpuHandle();
-	ImGui_ImplDX12_Init(
+	if (!ImGui_ImplDX12_Init(
 		GPU::m_Device.Get(),
 		GPU::m_FrameCount,
 		DXGI_FORMAT_R8G8B8A8_UNORM,
 		GPU::m_ImGui_Heap->Heap(),
-		cpu_handle,gpu_handle);
+		cpu_handle,gpu_handle))
+	{
+		Logger::Err("Failed to init IMGUI Dx12");
+	}
 
 #if PHYSX
 	Shipyard_PhysX::Get().InitializePhysx();
 #endif // PHYSX 0
 
-	myGameLauncher.Init();
-	myGameLauncher.Start();
 
 	GameObjectManager::Get().SetUpdatePriority<Transform>(ComponentManagerBase::UpdatePriority::Transform);
 	GameObjectManager::Get().SetUpdatePriority<cPhysics_Kinematic>(ComponentManagerBase::UpdatePriority::Physics);
@@ -106,6 +107,10 @@ bool Editor::Initialize(HWND aHandle)
 	//Force no write to thread after this?
 	WorldGraph::InitializeWorld();
 
+
+
+	myGameLauncher.Init();
+	myGameLauncher.Start();
 	HideSplashScreen();
 
 #if UseScriptGraph
@@ -178,6 +183,7 @@ void Editor::UpdateImGui()
 	OPTICK_CATEGORY("ImGui_ImplWin32_NewFrame",Optick::Category::UI);
 	ImGui::NewFrame();
 	OPTICK_CATEGORY("ImGui::NewFrame",Optick::Category::UI);
+	ImGui::DockSpaceOverViewport();
 
 #if UseScriptGraph
 	const float delta = Timer::GetInstance().GetDeltaTime();

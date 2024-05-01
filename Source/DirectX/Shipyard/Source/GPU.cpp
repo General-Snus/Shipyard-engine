@@ -174,7 +174,6 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 		4096
 	);
 
-
 	ComPtr<ID3D12DebugDevice1> pDebugQueue;
 	if (SUCCEEDED(m_Device.As(&pDebugQueue)))
 	{
@@ -347,6 +346,13 @@ HeapHandle GPU::GetHeapHandle(eHeapTypes type)
 {
 	const int heapOffset = static_cast<int>(m_ResourceDescriptors[static_cast<int>(type)]->Allocate());
 	const auto descriptorHandle = m_ResourceDescriptors[static_cast<int>(type)]->GetCpuHandle(heapOffset);
+	return HeapHandle(descriptorHandle,heapOffset);
+}
+
+HeapHandle GPU::GetHeapHandle(DescriptorPile& pile)
+{
+	const int heapOffset = static_cast<int>(pile.Allocate());
+	const auto descriptorHandle = pile.GetCpuHandle(heapOffset);
 	return HeapHandle(descriptorHandle,heapOffset);
 }
 

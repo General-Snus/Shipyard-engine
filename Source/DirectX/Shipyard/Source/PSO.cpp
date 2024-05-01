@@ -706,7 +706,8 @@ void TonemapPSO::Init(const ComPtr<ID3D12Device2>& dev)
 	}  stream;
 
 	D3D12_RT_FORMAT_ARRAY rtvFormats = {};
-	rtvFormats.RTFormats[0] = { GPU::m_BackBuffer->GetResource()->GetDesc().Format };
+	renderTarget.AllocateTexture({ Window::Width(),Window::Height() },"Target1");
+	rtvFormats.RTFormats[0] = { renderTarget.GetResource()->GetDesc().Format };
 	rtvFormats.NumRenderTargets = 1;
 
 	stream.pRootSignature = PSOCache::m_RootSignature->GetRootSignature().Get();
@@ -724,5 +725,5 @@ void TonemapPSO::Init(const ComPtr<ID3D12Device2>& dev)
 }
 Texture* TonemapPSO::GetRenderTargets()
 {
-	return GPU::GetCurrentBackBuffer();
+	return &renderTarget;
 }

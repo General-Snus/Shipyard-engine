@@ -70,6 +70,7 @@ public:
 	);
 
 	static HeapHandle GetHeapHandle(eHeapTypes type);
+	static HeapHandle GetHeapHandle(DescriptorPile& pile);
 
 	template<typename vertexType>
 	static bool CreateVertexBuffer(

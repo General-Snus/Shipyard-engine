@@ -167,6 +167,70 @@ void GpuResource::SetView(ViewType view)
 	m_RecentBoundType = view;
 }
 
+void GpuResource::SetView(ViewType view,HeapHandle handle)
+{
+	if (!m_Resource)
+	{
+		return;
+	}
+
+	auto device = GPU::m_Device;
+	CheckFeatureSupport();
+	CD3DX12_RESOURCE_DESC desc(m_Resource->GetDesc());
+
+	switch (view)
+	{
+	case ViewType::UAV:
+	{
+		CreateUnorderedAccessView(GPU::m_Device.Get(),m_Resource.Get(),handle.cpuPtr,desc.MipLevels);
+		m_DescriptorHandles[ViewType::UAV] = handle;
+	}
+	break;
+	case ViewType::SRV:
+	{
+		if (CheckDSVSupport())
+		{
+			D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+			SRVDesc.Format = Helpers::GetDepthFormat(m_Format);
+			SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+			SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+			SRVDesc.Texture2D.MipLevels = 1;
+
+			GPU::m_Device->CreateShaderResourceView(m_Resource.Get(),&SRVDesc,handle.cpuPtr);
+			m_DescriptorHandles[ViewType::SRV] = handle;
+		}
+		else
+		{
+			CreateShaderResourceView(GPU::m_Device.Get(),m_Resource.Get(),handle.cpuPtr);
+			m_DescriptorHandles[ViewType::SRV] = handle;
+		}
+	}
+	break;
+	case ViewType::RTV:
+	{
+		device->CreateRenderTargetView(m_Resource.Get(),nullptr,handle.cpuPtr);
+		m_DescriptorHandles[ViewType::RTV] = handle;
+	}
+	break;
+	case ViewType::DSV:
+	{
+		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+		dsvDesc.Format = m_Format;
+		dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+		dsvDesc.Texture2D.MipSlice = 0;
+		dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+
+		device->CreateDepthStencilView(m_Resource.Get(),&dsvDesc,handle.cpuPtr);
+		m_DescriptorHandles[ViewType::DSV] = handle;
+	}
+	break;
+	default:
+		assert(false && "Out of range view type");
+		break;
+	}
+	m_RecentBoundType = view;
+}
+
 void GpuResource::ClearView(ViewType view)
 {
 	m_DescriptorHandles.contains(view) ? m_DescriptorHandles.erase(view) : NULL;
@@ -179,6 +243,12 @@ HeapHandle GpuResource::GetHandle(ViewType type)
 		return  m_DescriptorHandles.at(type);
 	}
 	SetView(type);
+	return  m_DescriptorHandles.at(type);
+}
+
+HeapHandle GpuResource::CreateViewWithHandle(ViewType type,HeapHandle handle)
+{
+	SetView(type,handle);
 	return  m_DescriptorHandles.at(type);
 }
 

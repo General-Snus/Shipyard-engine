@@ -592,12 +592,13 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 
 
 
-	const auto& enviromentLight = PSOCache::GetState(PSOCache::ePipelineStateID::DeferredLighting);
-	{
-		GPU::ClearRTV(*commandList.get(),enviromentLight->GetRenderTargets(),enviromentLight->GetRenderTargetAmounts());
-		commandList->SetRenderTargets(enviromentLight->GetRenderTargetAmounts(),enviromentLight->GetRenderTargets(),nullptr);
 
-		const auto& pipelineState = enviromentLight->GetPipelineState().Get();
+	const auto& environmentLight = PSOCache::GetState(PSOCache::ePipelineStateID::DeferredLighting);
+	{
+		GPU::ClearRTV(*commandList.get(),environmentLight->GetRenderTargets(),environmentLight->GetRenderTargetAmounts());
+		commandList->SetRenderTargets(environmentLight->GetRenderTargetAmounts(),environmentLight->GetRenderTargets(),nullptr);
+
+		const auto& pipelineState = environmentLight->GetPipelineState().Get();
 		graphicCommandList->SetPipelineState(pipelineState);
 		commandList->TrackResource(pipelineState);
 
@@ -621,17 +622,28 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 		graphicCommandList->SetPipelineState(pipelineState);
 		commandList->TrackResource(pipelineState);
 
-		auto* renderTargets = enviromentLight->GetRenderTargets();
+		auto* renderTargets = environmentLight->GetRenderTargets();
 		commandList->SetDescriptorTable(TargetTexture,renderTargets);
 		commandList->FlushResourceBarriers();
-		commandList->SetRenderTargets(1,GPU::GetCurrentBackBuffer(),nullptr);
+		//commandList->SetRenderTargets(1,GPU::GetCurrentBackBuffer(),nullptr);
 
+		GPU::ClearRTV(*commandList.get(),toneMapper->GetRenderTargets(),toneMapper->GetRenderTargetAmounts());
+		commandList->SetRenderTargets(toneMapper->GetRenderTargetAmounts(),toneMapper->GetRenderTargets(),nullptr);
 
 		graphicCommandList->IASetVertexBuffers(0,1,nullptr);
 		graphicCommandList->IASetIndexBuffer(nullptr);
 		graphicCommandList->DrawInstanced(6,1,0,0);
+
+		const auto handle = toneMapper->GetRenderTargets()->GetHandle(ViewType::SRV);
+		const auto gpuHandle = GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->GetGpuHandle(handle.heapOffset);
+		auto res = Editor::GetViewportResolution();
+		ImGui::Begin("Viewport");
+		ImGui::Image((ImTextureID)gpuHandle.ptr,ImVec2((float)res.x,(float)res.y));
+		ImGui::End();
 	}
 
+
+	commandList->SetRenderTargets(1,GPU::GetCurrentBackBuffer(),nullptr);
 	ImGui::Render();
 
 	ID3D12DescriptorHeap* ImGuiHeap[] =
@@ -641,6 +653,8 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 
 	commandList->GetGraphicsCommandList()->SetDescriptorHeaps(1,ImGuiHeap);
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(),commandList->GetGraphicsCommandList().Get());
+
+
 	commandQueue->ExecuteCommandList(commandList);
 
 }
