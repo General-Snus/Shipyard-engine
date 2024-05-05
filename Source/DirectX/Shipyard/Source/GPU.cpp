@@ -354,15 +354,23 @@ void GPU::ConfigureInputAssembler(
 HeapHandle GPU::GetHeapHandle(eHeapTypes type)
 {
 	const int heapOffset = static_cast<int>(m_ResourceDescriptors[static_cast<int>(type)]->Allocate());
-	const auto descriptorHandle = m_ResourceDescriptors[static_cast<int>(type)]->GetCpuHandle(heapOffset);
-	return HeapHandle(descriptorHandle,heapOffset);
+	const auto descriptorHandleCPU = m_ResourceDescriptors[static_cast<int>(type)]->GetCpuHandle(heapOffset);
+	auto descriptorHandleGPU = D3D12_GPU_DESCRIPTOR_HANDLE();
+
+	if (m_ResourceDescriptors[static_cast<int>(type)]->Flags() & D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE)
+	{
+		descriptorHandleGPU = m_ResourceDescriptors[static_cast<int>(type)]->GetGpuHandle(heapOffset);
+	}
+
+	return HeapHandle(descriptorHandleCPU,descriptorHandleGPU,heapOffset);
 }
 
 HeapHandle GPU::GetHeapHandle(DescriptorPile& pile)
 {
 	const int heapOffset = static_cast<int>(pile.Allocate());
-	const auto descriptorHandle = pile.GetCpuHandle(heapOffset);
-	return HeapHandle(descriptorHandle,heapOffset);
+	const auto descriptorHandleCPU = pile.GetCpuHandle(heapOffset);
+	const auto descriptorHandleGPU = pile.GetGpuHandle(heapOffset);
+	return HeapHandle(descriptorHandleCPU,descriptorHandleGPU,heapOffset);
 }
 
 bool GPU::CreateIndexBuffer(const std::shared_ptr<CommandList>& commandList,IndexResource& outIndexResource,const std::vector<uint32_t>& aIndexList)

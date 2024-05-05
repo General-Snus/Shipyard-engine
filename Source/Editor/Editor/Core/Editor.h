@@ -58,7 +58,7 @@ public:
 private:
 	inline static RECT ViewportRect;
 	std::shared_ptr<ScriptGraphEditor> ScriptEditor;
-
+	std::vector<GameObject> mySelectedGameObjects;
 
 
 #if WorkingOnMultiThread

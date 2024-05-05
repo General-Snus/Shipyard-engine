@@ -25,11 +25,9 @@ void VertexResource::CreateView(size_t numElements,size_t elementSize)
 	SRVDesc.Buffer.NumElements = (m_NumVertices * m_VertexStride) / 4;
 	SRVDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_RAW;
 
-	const int heapOffset = static_cast<int>(GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->Allocate());
-	const auto descriptorHandle = GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->GetCpuHandle(heapOffset);
-	GPU::m_Device->CreateShaderResourceView(m_Resource.Get(),&SRVDesc,descriptorHandle);
-
-	m_DescriptorHandles[ViewType::SRV] = HeapHandle(descriptorHandle,heapOffset);
+	HeapHandle handle = GPU::GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
+	GPU::m_Device->CreateShaderResourceView(m_Resource.Get(),&SRVDesc,handle.cpuPtr);
+	m_DescriptorHandles[ViewType::SRV] = handle;
 }
 
 GpuResource::GpuResource() : m_UsageState(D3D12_RESOURCE_STATE_COMMON),

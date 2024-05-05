@@ -31,6 +31,7 @@
 #include "DirectX/Shipyard/GPU.h"
 #include "GraphicsEngine.h"  
 #include "imgui_internal.h"
+#include "Objects/BaseAssets/TextureAsset.h"
 #include "System/SceneGraph/WorldGraph.h"
 #include "Windows/SplashWindow.h"
 
@@ -241,7 +242,7 @@ void Editor::TopBar()
 		ImGui::Separator();
 
 		const auto& gObjList = GameObjectManager::Get().GetAllGameObjects();
-		ImGui::BeginTable("GameObjectList",1);
+		ImGui::BeginChild("GameObjectList");
 		for (const auto& i : gObjList)
 		{
 			ImGui::PushID(i.first);
@@ -251,13 +252,33 @@ void Editor::TopBar()
 				{
 					GameObjectManager::Get().SetActive(i.first,arg);
 				}
+
 				ImGui::SameLine();
-				ImGui::Text(i.second.Name.c_str());
-				ImGui::TableNextColumn();
+				std::shared_ptr<TextureHolder> tex;
+				AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/GameObject.png",tex);
+				const auto height = ImGui::GetFrameHeight();
+				//const auto width = ImGui::GetColumnWidth();
+
+
+				ImGui::Image(reinterpret_cast<ImTextureID>(tex->GetRawTexture()->GetHandle(ViewType::SRV).gpuPtr.ptr),{ height,height });
+				ImGui::SameLine();
+
+				if (ImGui::IsItemHovered() && ImGui::IsItemClicked())
+				{
+					const auto color = ImVec4(0.0f,1.0f,0.0f,1.0f);
+					ImGui::PushStyleColor(ImGuiCol_Text,color);
+					ImGui::TextWrapped(i.second.Name.c_str());
+					ImGui::PopStyleColor();
+				}
+				else
+				{
+					ImGui::TextWrapped(i.second.Name.c_str());
+				}
+
 			}
 			ImGui::PopID();
 		}
-		ImGui::EndTable();
+		ImGui::EndChild();
 
 
 		ImGui::End();
@@ -281,7 +302,7 @@ void Editor::TopBar()
 		if (ImGui::BeginChild("ScrollingRegion"))
 		{
 			static int size = 0;
-			for (auto& [myColor,message] : Logger::m_LogMsgs)
+			for (const auto& [myColor,message] : Logger::m_LogMsgs)
 			{
 				if (message.empty())
 				{

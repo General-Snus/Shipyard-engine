@@ -639,7 +639,6 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 		graphicCommandList->DrawInstanced(6,1,0,0);
 
 		const auto handle = toneMapper->GetRenderTargets()->GetHandle(ViewType::SRV);
-		const auto gpuHandle = GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->GetGpuHandle(handle.heapOffset);
 		auto res = Editor::GetViewportResolution();
 		ImGuiWindowFlags windowFlags = ImGuiViewportFlags_IsPlatformWindow
 			| ImGuiViewportFlags_NoDecoration
@@ -652,7 +651,7 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 		//const auto aspecRatio = (res.x / res.y);
 		//ImGui::SetNextWindowSizeConstraints(ImVec2(0,0),ImVec2(FLT_MAX,FLT_MAX),CustomConstraints::AspectRatio,(void*)&aspecRatio);   // Aspect ratio
 		ImGui::Begin("Viewport",nullptr,windowFlags);
-		ImGui::Image(reinterpret_cast<ImTextureID>(gpuHandle.ptr),ImVec2(static_cast<float>(res.x),static_cast<float>(res.y)));
+		ImGui::Image(reinterpret_cast<ImTextureID>(handle.gpuPtr.ptr),ImVec2(static_cast<float>(res.x),static_cast<float>(res.y)));
 		ImGui::End();
 	}
 
