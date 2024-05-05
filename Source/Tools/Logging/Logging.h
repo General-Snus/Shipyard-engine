@@ -1,5 +1,6 @@
 #pragma once
 #define NOMINMAX
+#include <mutex>
 #include <source_location> 
 #include <string>
 #include <vector>
@@ -18,7 +19,7 @@ class Logger
 	static inline bool shouldPrintToOutput = false;
 	static inline bool isInitialized = false;
 	static inline std::string myNamespace;
-	static inline std::atomic<bool> readyToWrite;
+	static inline std::mutex readyToWrite;
 	static [[nodiscard]] std::string Timestamp();
 	Logger() = default;
 

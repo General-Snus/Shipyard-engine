@@ -50,7 +50,7 @@ void Logger::Log(const std::string& aString)
 {
 	if (isInitialized)
 	{
-		std::scoped_lock();
+		std::scoped_lock lock(readyToWrite);
 		if (shouldPrintToOutput)
 		{
 			LogMsg msg;
@@ -59,8 +59,6 @@ void Logger::Log(const std::string& aString)
 
 			OutputDebugStringA(msg.message.c_str());
 			m_LogMsgs.emplace_back(msg);
-
-
 		}
 		else
 		{
@@ -80,7 +78,7 @@ void Logger::Warn(const std::string& aString)
 {
 	if (isInitialized)
 	{
-		std::scoped_lock();
+		std::scoped_lock lock(readyToWrite);
 		if (shouldPrintToOutput)
 		{
 			LogMsg msg;
@@ -108,7 +106,7 @@ void Logger::Err(const std::string& aString,const std::source_location& location
 {
 	if (isInitialized)
 	{
-		std::scoped_lock();
+		std::scoped_lock lock(readyToWrite);
 		if (shouldPrintToOutput)
 		{
 			LogMsg msg;
@@ -142,7 +140,7 @@ void Logger::Succ(const std::string& aString)
 {
 	if (isInitialized)
 	{
-		std::scoped_lock();
+		std::scoped_lock lock(readyToWrite);
 		if (shouldPrintToOutput)
 		{
 			LogMsg msg;
@@ -170,7 +168,7 @@ void Logger::LogException(const std::exception& anException,unsigned aLevel,cons
 {
 	if (isInitialized)
 	{
-		std::scoped_lock();
+		std::scoped_lock lock(readyToWrite);
 		if (shouldPrintToOutput)
 		{
 			LogMsg msg;
