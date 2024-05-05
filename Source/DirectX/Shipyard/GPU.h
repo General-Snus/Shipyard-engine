@@ -125,7 +125,7 @@ public:
 	static HANDLE CreateEventHandle();
 
 	static void GetHardwareAdapter(
-		_In_ IDXGIFactory1* pFactory,
+		_In_ IDXGIFactory4* pFactory,
 		_Outptr_result_maybenull_ IDXGIAdapter1** ppAdapter,
 		bool requestHighPerformanceAdapter = false);
 
@@ -137,7 +137,7 @@ public:
 	static inline constexpr bool m_useWarpDevice = false;
 	static inline UINT m_FrameIndex;
 
-	static inline ComPtr<ID3D12Device2> m_Device;
+	static inline ComPtr<ID3D12Device8> m_Device;
 	static inline unsigned m_Width;
 	static inline unsigned m_Height;
 	static inline std::shared_ptr<GPUCommandQueue> m_DirectCommandQueue;

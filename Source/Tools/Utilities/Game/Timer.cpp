@@ -1,12 +1,12 @@
-#include "Timer.h"
 #include <assert.h>
+#include "Timer.h"
 
-Timer::Timer() 
+Timer::Timer()
 {
 	myTimeSinceLastUpdate = std::chrono::high_resolution_clock::now();
 	myStartTime = std::chrono::high_resolution_clock::now();
 	myDeltaTime = 0.0f;
-} 
+}
 
 Timer& Timer::GetInstance()
 {

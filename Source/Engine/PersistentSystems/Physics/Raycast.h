@@ -3,7 +3,7 @@
 #include <Engine/AssetManager/ComponentSystem/Components/Transform.h>
 #include <Engine/AssetManager/ComponentSystem/GameObject.h>
 #include <numbers>
-#include <Tools/Optick/src/optick.h>
+#include <Tools/Optick/include/optick.h>
 #include <Tools/Utilities/LinearAlgebra/Intersection.hpp>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 

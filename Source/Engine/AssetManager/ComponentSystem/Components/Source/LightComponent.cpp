@@ -2,7 +2,7 @@
 #include "../LightComponent.h"
 //#include <Editor/Editor/Core/Editor.h>
 #include <Tools/Utilities/Math.hpp> 
-#include <Tools/Optick/src/optick.h>
+#include <Tools/Optick/include/optick.h>
 
 #include "DirectX/Shipyard/GPU.h"
 #include "DirectX/Shipyard/Texture.h"

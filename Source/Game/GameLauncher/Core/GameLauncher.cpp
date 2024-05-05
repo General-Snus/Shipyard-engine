@@ -5,7 +5,7 @@
 #include <Game/GameLauncher/TaskSpecificImplementation/DecicionTree/DecisionTreeController.h>
 #include <Game/GameLauncher/TaskSpecificImplementation/StateMachine/StateMachineController.h>
 #include <Tools/Logging/Logging.h>
-#include <Tools/Optick/src/optick.h>
+#include <Tools/Optick/include/optick.h>
 #include <Tools/ThirdParty/nlohmann/json.hpp>   
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/Input/InputHandler.hpp>
@@ -123,9 +123,10 @@ void GameLauncher::Start()
 #pragma region BaseSetup
 
 	myMesh = gom.CreateGameObject();
-
+	myMesh.SetName("MyMesh");
 	{
 		GameObject camera = gom.CreateGameObject();
+		camera.SetName("Camera");
 		auto& cameraComponent = camera.AddComponent<cCamera>();
 		gom.SetLastGOAsCamera();
 		cameraComponent.SetActive(true);
@@ -137,7 +138,7 @@ void GameLauncher::Start()
 	{
 		GameObject worldRoot = gom.CreateGameObject();
 		gom.SetLastGOAsWorld();
-
+		worldRoot.SetName("WordRoot");
 		worldRoot.AddComponent<FrameStatistics>();
 		worldRoot.AddComponent<RenderMode>();
 		//worldRoot.AddComponent<Skybox>();
@@ -157,6 +158,8 @@ void GameLauncher::Start()
 
 	{
 		GameObject floor = gom.CreateGameObject();
+		floor.SetName("Floor");
+
 		auto& transform = floor.AddComponent<Transform>();
 		transform.SetPosition(0,-0.0f,0);
 		transform.SetRotation(0,0.f,0.f);
@@ -164,7 +167,6 @@ void GameLauncher::Start()
 		transform.SetGizmo(false);
 		floor.SetActive(false);
 		floor.AddComponent<cMeshRenderer>("Models/Cube.fbx");
-		//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json"); 
 #if PHYSX
 		auto& collider = floor.AddComponent<cCollider>();
 		collider.SetColliderType<ColliderAssetAABB>();
@@ -174,9 +176,10 @@ void GameLauncher::Start()
 #if true // Sponza
 	{
 		GameObject sponza = gom.CreateGameObject();
+		sponza.SetName("Sponza");
+
 		sponza.AddComponent<cMeshRenderer>("Models/Sponza/Sponza.fbx");
 		//sponza.AddComponent<cMeshRenderer>("Models/Sponza/Sponza3Intel.fbx");
-		//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
 		auto& transform = sponza.AddComponent<Transform>();
 		transform.SetPosition(0,25,0);
 		transform.SetScale(.01f);
@@ -185,6 +188,8 @@ void GameLauncher::Start()
 #endif 
 	{
 		myCustomHandler = gom.CreateGameObject();
+		myCustomHandler.SetName("CustomHandler");
+
 		auto& transform = myCustomHandler.AddComponent<Transform>();
 		auto& light = myCustomHandler.AddComponent<cLight>(eLightType::Point);
 		transform.SetPosition(0,30,-4);
@@ -197,6 +202,8 @@ void GameLauncher::Start()
 
 	{
 		myCustomHandler2 = gom.CreateGameObject();
+		myCustomHandler.SetName("CustomHandler2");
+
 		auto& transform = myCustomHandler2.AddComponent<Transform>();
 		auto& light = myCustomHandler2.AddComponent<cLight>(eLightType::Point);
 		transform.SetPosition(0,30,4);
@@ -208,6 +215,8 @@ void GameLauncher::Start()
 	}
 	{
 		GameObject buddha = gom.CreateGameObject();
+		buddha.SetName("buddha");
+
 		buddha.AddComponent<cMeshRenderer>("Models/Buddha.fbx");
 		buddha.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BuddhaMaterial.json");
 		auto& transform = buddha.AddComponent<Transform>();
@@ -245,7 +254,7 @@ void GameLauncher::Start()
 	else
 	{
 		GenerateNewRandomCubes();
-}
+	}
 #endif
 	Logger::Log("GameLauncher start");
 }

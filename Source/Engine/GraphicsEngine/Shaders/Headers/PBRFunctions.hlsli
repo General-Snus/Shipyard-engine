@@ -149,7 +149,7 @@ float3 CalculateSpotLight(float3 diffuseColor, float3 specularColor, float4 worl
 	const float shadow = sum / 16.0;
 	
 	
-	return  shadow * saturate(directLightDiffuse + directLightSpecular) * NdotL * Attenuation * radiantIntensity * normalize(spotLight.Color);
+    return shadow * saturate(directLightDiffuse + directLightSpecular) * NdotL * Attenuation * radiantIntensity * normalize(spotLight.Color);
 	//saturate(directLightDiffuse + directLightSpecular) * NdotL * Attenuation * radiantIntensity * spotLightData.Color;
 }
 
@@ -175,40 +175,40 @@ float3 CalculatePointLight(float3 diffuseColor, float3 specularColor, float4 wor
 	
 	const float NdotL = max(0.0, dot(lightDirection, normal));
 	
-	//const float4x4 lightView = pointLightData.lightView;
-	//const float4x4 lightProj = pointLightData.projection;
-	//
-	//float4 lightSpacePos = mul(lightView, worldPosition);
-	//lightSpacePos = mul(lightProj, lightSpacePos);
-	//
-	//float3 lightSpaceUV = 0;
-	//lightSpaceUV.x = ((lightSpacePos.x / lightSpacePos.w) * .5 + 0.5);
-	//lightSpaceUV.y = 1 - ((lightSpacePos.y / lightSpacePos.w) * .5 + 0.5f);
-	//const float bias = 0.0005;
-	//const float Depth = (lightSpacePos.z / lightSpacePos.w) + bias;
-	////float shadow = shadowMap.SampleCmpLevelZero(shadowCmpSampler, lightSpaceUV.xy, Depth).r;
-	//
-	////Enable if quality is too low
-	//uint2 dim = 0;
-	//uint numMips = 0;
-	//textureHeap[pointLightData.shadowMapIndex[0]].GetDimensions(0, dim.x, dim.y, numMips);
-	//float2 texelSize = 1.0 / dim;
-	//
-	//float sum = 0;
-	//float x, y;
-	//for(y = -1.5; y <= 1.5; y += 1.0)
-	//{
-	//	for(x = -1.5; x <= 1.5; x += 1.0)
-	//	{
-	//		float2 newUV;
-	//		newUV.x = lightSpaceUV.x + x * texelSize.x;
-	//		newUV.y = lightSpaceUV.y + y * texelSize.y;
-	//		sum += textureHeap[pointLightData.shadowMapIndex[0]].SampleCmpLevelZero(shadowCmpSampler, newUV, Depth).r;
-	//	}
-	//}
-	//const float shadow = sum / 16.0;
+    const float4x4 lightView = pointLightData.lightView;
+    const float4x4 lightProj = pointLightData.projection;
+	
+    float4 lightSpacePos = mul(lightView, worldPosition);
+    lightSpacePos = mul(lightProj, lightSpacePos);
+	
+    float3 lightSpaceUV = 0;
+    lightSpaceUV.x = ((lightSpacePos.x / lightSpacePos.w) * .5 + 0.5);
+    lightSpaceUV.y = 1 - ((lightSpacePos.y / lightSpacePos.w) * .5 + 0.5f);
+    const float bias = 0.0005;
+    const float Depth = (lightSpacePos.z / lightSpacePos.w) + bias;
+	//float shadow = shadowMap.SampleCmpLevelZero(shadowCmpSampler, lightSpaceUV.xy, Depth).r;
+	
+	//Enable if quality is too low
+    uint2 dim = 0;
+    uint numMips = 0;
+    textureHeap[pointLightData.shadowMapIndex[0]].GetDimensions(0, dim.x, dim.y, numMips);
+    float2 texelSize = 1.0 / dim;
+	
+    float sum = 0;
+    float x, y;
+    for(y = -1.5; y <= 1.5; y += 1.0)
+    {
+        for(x = -1.5; x <= 1.5; x += 1.0)
+        {
+            float2 newUV;
+            newUV.x = lightSpaceUV.x + x * texelSize.x;
+            newUV.y = lightSpaceUV.y + y * texelSize.y;
+            sum += textureHeap[pointLightData.shadowMapIndex[0]].SampleCmpLevelZero(shadowCmpSampler, newUV, Depth).r;
+        }
+    }
+    const float shadow = sum / 16.0;
 	 
-	return /*shadow **/ saturate(directLightDiffuse + directLightSpecular) * NdotL * falloff * pointLightData.Color * pointLightData.Power;
+    return shadow * saturate(directLightDiffuse + directLightSpecular) * NdotL * falloff * pointLightData.Color * pointLightData.Power;
 }
 
 float3 CalculateIndirectLight(

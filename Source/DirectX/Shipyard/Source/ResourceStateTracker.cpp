@@ -4,6 +4,8 @@
 #include "../GpuResource.h"
 #include "../ResourceStateTracker.h" 
 
+#include <Tools/Optick/include/optick.h>
+
 #include "../CommandList.h"
 
 // Static definitions.
@@ -19,6 +21,7 @@ ResourceStateTracker::~ResourceStateTracker()
 
 void ResourceStateTracker::ResourceBarrier(const D3D12_RESOURCE_BARRIER& barrier)
 {
+	OPTICK_GPU_EVENT("ResourceBarrier");
 	if (barrier.Type == D3D12_RESOURCE_BARRIER_TYPE_TRANSITION)
 	{
 		const D3D12_RESOURCE_TRANSITION_BARRIER& transitionBarrier = barrier.Transition;
@@ -76,6 +79,7 @@ void ResourceStateTracker::ResourceBarrier(const D3D12_RESOURCE_BARRIER& barrier
 
 void ResourceStateTracker::TransitionResource(ID3D12Resource* resource,D3D12_RESOURCE_STATES stateAfter,UINT subResource)
 {
+	OPTICK_GPU_EVENT("TransitionResource");
 	if (resource)
 	{
 		ResourceBarrier(CD3DX12_RESOURCE_BARRIER::Transition(resource,D3D12_RESOURCE_STATE_COMMON,stateAfter,subResource));
@@ -89,6 +93,7 @@ void ResourceStateTracker::TransitionResource(const GpuResource& resource,D3D12_
 
 void ResourceStateTracker::UAVBarrier(const GpuResource* resource)
 {
+	OPTICK_EVENT();
 	ID3D12Resource* pResource = resource != nullptr ? resource->GetResource().Get() : nullptr;
 
 	ResourceBarrier(CD3DX12_RESOURCE_BARRIER::UAV(pResource));
@@ -96,6 +101,7 @@ void ResourceStateTracker::UAVBarrier(const GpuResource* resource)
 
 void ResourceStateTracker::AliasBarrier(const GpuResource* resourceBefore,const GpuResource* resourceAfter)
 {
+	OPTICK_EVENT();
 	ID3D12Resource* pResourceBefore = resourceBefore != nullptr ? resourceBefore->GetResource().Get() : nullptr;
 	ID3D12Resource* pResourceAfter = resourceAfter != nullptr ? resourceAfter->GetResource().Get() : nullptr;
 
@@ -104,6 +110,7 @@ void ResourceStateTracker::AliasBarrier(const GpuResource* resourceBefore,const 
 
 void ResourceStateTracker::FlushResourceBarriers(CommandList& commandList)
 {
+	OPTICK_GPU_EVENT("FlushResourceBarriers");
 	UINT numBarriers = static_cast<UINT>(m_ResourceBarriers.size());
 	if (numBarriers > 0)
 	{
@@ -115,6 +122,7 @@ void ResourceStateTracker::FlushResourceBarriers(CommandList& commandList)
 
 uint32_t ResourceStateTracker::FlushPendingResourceBarriers(CommandList& commandList)
 {
+	OPTICK_EVENT();
 	//assert(ms_IsLocked);
 
 	// Resolve the pending resource barriers by checking the global state of the 
@@ -180,6 +188,7 @@ uint32_t ResourceStateTracker::FlushPendingResourceBarriers(CommandList& command
 
 void ResourceStateTracker::CommitFinalResourceStates()
 {
+	OPTICK_EVENT();
 	//assert(ms_IsLocked);
 
 	for (const auto& resourceState : m_FinalResourceState)
@@ -192,6 +201,7 @@ void ResourceStateTracker::CommitFinalResourceStates()
 
 void ResourceStateTracker::Reset()
 {
+	OPTICK_EVENT();
 	// Reset the pending, current, and final resource states.
 	m_PendingResourceBarriers.clear();
 	m_ResourceBarriers.clear();
@@ -212,6 +222,7 @@ void ResourceStateTracker::Unlock()
 
 void ResourceStateTracker::AddGlobalResourceState(ID3D12Resource* resource,D3D12_RESOURCE_STATES state)
 {
+	OPTICK_GPU_EVENT("AddGlobalResourceState");
 	if (resource != nullptr)
 	{
 		std::lock_guard<std::mutex> lock(ms_GlobalMutex);

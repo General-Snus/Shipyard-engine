@@ -4,8 +4,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <vector>
-#include "UUID.h"
-//Original creation by Simon
+#include "UUID.h" 
 
 class Component;
 class ComponentManagerBase

@@ -1,6 +1,10 @@
 #include "DirectXHeader.pch.h"
 
 #include "../CommandList.h" 
+
+#include <Tools/Optick/include/optick.h>
+#include <XTK/ResourceUploadBatch.h>
+
 #include "../ResourceStateTracker.h"
 #include "Shipyard/GPU.h"
 #include "Shipyard/GpuResource.h"
@@ -22,6 +26,7 @@ CommandList::CommandList(D3D12_COMMAND_LIST_TYPE type,const std::wstring& name) 
 
 void CommandList::CopyBuffer(GpuResource& buffer,size_t numElements,size_t elementSize,const void* bufferData,D3D12_RESOURCE_FLAGS flags)
 {
+	OPTICK_GPU_EVENT("CopyBuffer");
 	const size_t bufferSize = numElements * elementSize;
 
 	ComPtr<ID3D12Resource> d3d12Resource;
@@ -85,6 +90,7 @@ void CommandList::SetConstantBuffer(unsigned slot,const T& constantBuffer)
 
 void CommandList::CopyResource(const ComPtr<ID3D12Resource>& destination,const ComPtr<ID3D12Resource>& source)
 {
+	OPTICK_EVENT();
 	TransitionBarrier(destination,D3D12_RESOURCE_STATE_COPY_DEST);
 	TransitionBarrier(source,D3D12_RESOURCE_STATE_COPY_SOURCE);
 
@@ -335,6 +341,7 @@ void CommandList::GenerateMips_UAV(Texture& texture,DXGI_FORMAT format)
 
 void CommandList::TransitionBarrier(const ComPtr<ID3D12Resource>& resource,D3D12_RESOURCE_STATES stateAfter,UINT subresource,bool flushBarriers)
 {
+	OPTICK_GPU_EVENT("TransitionBarrier");
 	if (resource)
 	{
 		const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(resource.Get(),D3D12_RESOURCE_STATE_COMMON,stateAfter,subresource);
@@ -353,6 +360,7 @@ void CommandList::TransitionBarrier(const ComPtr<ID3D12Resource>& resource,D3D12
 
 void CommandList::TransitionBarrier(GpuResource& resource,D3D12_RESOURCE_STATES stateAfter,UINT subresource,bool flushBarriers)
 {
+	OPTICK_EVENT();
 	resource.m_TransitioningState = stateAfter;
 	TransitionBarrier(resource.GetResource(),stateAfter,subresource,flushBarriers);
 	resource.m_TransitioningState = stateAfter;
@@ -360,6 +368,7 @@ void CommandList::TransitionBarrier(GpuResource& resource,D3D12_RESOURCE_STATES 
 
 void CommandList::SetDescriptorTable(unsigned slot,Texture* texture)
 {
+	OPTICK_EVENT();
 	const size_t offset = texture->GetHandle(ViewType::SRV).heapOffset;
 
 	if (offset == -1)
@@ -380,6 +389,7 @@ void CommandList::SetDescriptorTable(unsigned slot,Texture* texture)
 
 void CommandList::SetRenderTargets(unsigned numberOfTargets,Texture* renderTargets,Texture* depthBuffer)
 {
+	OPTICK_EVENT();
 	assert(numberOfTargets <= D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
 	D3D12_CPU_DESCRIPTOR_HANDLE RTVs[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT] = {};
 	if (renderTargets)

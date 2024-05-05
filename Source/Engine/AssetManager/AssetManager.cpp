@@ -38,19 +38,26 @@ bool AssetManager::AdaptPath(std::filesystem::path& path)
 
 void AssetManager::ThreadedLoading()
 {
+	OPTICK_THREAD("ThreadedLoading");
 	OPTICK_EVENT();
+
 	if (myAssetQueue.GetSize())
 	{
 		const double timeStart = Timer::GetInstance().GetTotalTime();
 		{
 			std::shared_ptr<AssetBase> working;
+
 			{
 				std::scoped_lock deQueueLock(dequeMutex);
 				working = myAssetQueue.Dequeue();
-
 			}
+
 			working->isBeingLoaded = true;
 			working->Init();
+
+			const auto name = working->GetAssetPath().string().c_str();
+			OPTICK_TAG("AssetType",name);
+
 			if (working->isLoadedComplete)
 			{
 				working->isBeingLoaded = false;

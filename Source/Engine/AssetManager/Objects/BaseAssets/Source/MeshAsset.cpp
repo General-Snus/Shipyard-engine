@@ -20,6 +20,7 @@ const std::unordered_map<unsigned int,std::shared_ptr<Material>>& Mesh::GetMater
 
 void Mesh::FillMaterialPaths(const aiScene* scene)
 {
+	OPTICK_EVENT();
 	for (auto& [key,matPath] : idToMaterial)
 	{
 		std::filesystem::path texturePath;
@@ -145,6 +146,7 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 
 void Mesh::Init()
 {
+	OPTICK_EVENT();
 	if (!std::filesystem::exists(AssetPath))
 	{
 		assert(false && "Mesh file does not exist");
@@ -342,7 +344,7 @@ void Mesh::Init()
 
 void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 {
-	scene;
+	scene; OPTICK_EVENT();
 	std::vector<Vertex> mdlVertices;
 	mdlVertices.reserve(mesh->mNumVertices);
 	std::vector<uint32_t> mdlIndicies;
@@ -453,6 +455,7 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 	auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COPY);
 	auto commandList = commandQueue->GetCommandList();
 
+	OPTICK_GPU_CONTEXT(commandList->GetGraphicsCommandList().Get());
 
 	VertexResource vertexRes(wname);
 	if (!GPU::CreateVertexBuffer<Vertex>(commandList,vertexRes,mdlVertices))

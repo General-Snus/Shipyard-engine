@@ -4,6 +4,7 @@
 #include "../GPU.h"
 
 #include <DirectX/CrashHandler/NsightAftermathGpuCrashTracker.h>   
+#include <Tools/Optick/include/optick.h>
 
 #include "Shipyard/ResourceStateTracker.h"
 
@@ -70,6 +71,7 @@ void GPUCommandQueue::WaitForFenceValue(uint64_t fenceValue)
 
 std::shared_ptr<CommandList> GPUCommandQueue::GetCommandList(const std::wstring& name)
 {
+	OPTICK_EVENT();
 	std::shared_ptr<CommandList> commandList;
 
 	// If there is a command list on the queue.
@@ -103,6 +105,7 @@ uint64_t GPUCommandQueue::ExecuteCommandList(std::shared_ptr<CommandList> comman
 
 uint64_t GPUCommandQueue::ExecuteCommandList(const std::vector<std::shared_ptr<CommandList> >& commandLists)
 {
+	OPTICK_GPU_EVENT("ExecuteCommandList");
 	ResourceStateTracker::Lock();
 
 	// Command lists that need to put back on the command list queue.
@@ -141,6 +144,7 @@ uint64_t GPUCommandQueue::ExecuteCommandList(const std::vector<std::shared_ptr<C
 	}
 
 	UINT numCommandLists = static_cast<UINT>(d3d12CommandLists.size());
+	OPTICK_GPU_EVENT("ListExecution");
 	m_CommandQueue->ExecuteCommandLists(numCommandLists,d3d12CommandLists.data());
 	uint64_t fenceValue = Signal();
 

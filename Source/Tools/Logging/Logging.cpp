@@ -4,6 +4,8 @@
 #include <iostream>
 #include <ostream> 
 #include <sstream>
+#include "Editor/Editor/Core/Editor.h"
+#include "Tools/Utilities/DataStructures/Queue.hpp"
 
 std::string Logger::Timestamp()
 {
@@ -48,10 +50,17 @@ void Logger::Log(const std::string& aString)
 {
 	if (isInitialized)
 	{
+		std::scoped_lock();
 		if (shouldPrintToOutput)
 		{
-			const std::string message = "[" + Timestamp() + "]" + myNamespace + " [   LOG   ] " + aString;
-			OutputDebugStringA(message.c_str());
+			LogMsg msg;
+			msg.message = "[" + Timestamp() + "]" + myNamespace + " [   LOG   ] " + aString;
+			msg.myColor = Vector3f(1.0f,1.0f,1.0f);
+
+			OutputDebugStringA(msg.message.c_str());
+			m_LogMsgs.emplace_back(msg);
+
+
 		}
 		else
 		{
@@ -71,10 +80,15 @@ void Logger::Warn(const std::string& aString)
 {
 	if (isInitialized)
 	{
+		std::scoped_lock();
 		if (shouldPrintToOutput)
 		{
-			const std::string message = "[" + Timestamp() + "]" + myNamespace + " [ WARNING ] " + aString;
-			OutputDebugStringA(message.c_str());
+			LogMsg msg;
+			msg.message = "[" + Timestamp() + "]" + myNamespace + " [ WARNING ] " + aString;
+			msg.myColor = Vector3f(1.0f,1.0f,0.0f);
+
+			OutputDebugStringA(msg.message.c_str());
+			m_LogMsgs.emplace_back(msg);
 		}
 		else
 		{
@@ -94,10 +108,15 @@ void Logger::Err(const std::string& aString,const std::source_location& location
 {
 	if (isInitialized)
 	{
+		std::scoped_lock();
 		if (shouldPrintToOutput)
 		{
-			const std::string message = "[" + Timestamp() + "]" + myNamespace + " [  ERROR  ] " + aString;
-			OutputDebugStringA(message.c_str());
+			LogMsg msg;
+			msg.message = "[" + Timestamp() + "]" + myNamespace + " [  ERROR  ] " + aString;
+			msg.myColor = Vector3f(1.0f,0.0f,0.0f);
+
+			OutputDebugStringA(msg.message.c_str());
+			m_LogMsgs.emplace_back(msg);
 		}
 		else
 		{
@@ -123,10 +142,15 @@ void Logger::Succ(const std::string& aString)
 {
 	if (isInitialized)
 	{
+		std::scoped_lock();
 		if (shouldPrintToOutput)
 		{
-			const std::string message = "[" + Timestamp() + "]" + "[ SUCCESS ] " + aString;
-			OutputDebugStringA(message.c_str());
+			LogMsg msg;
+			msg.message = "[" + Timestamp() + "]" + "[ SUCCESS ] " + aString;
+			msg.myColor = Vector3f(0.0f,1.0f,0.0f);
+
+			OutputDebugStringA(msg.message.c_str());
+			m_LogMsgs.emplace_back(msg);
 		}
 		else
 		{
@@ -146,10 +170,15 @@ void Logger::LogException(const std::exception& anException,unsigned aLevel,cons
 {
 	if (isInitialized)
 	{
+		std::scoped_lock();
 		if (shouldPrintToOutput)
 		{
-			const std::string message = "[" + Timestamp() + "]" + std::string(aLevel,' ') + "[  FATAL  ] " + anException.what();
-			OutputDebugStringA(message.c_str());
+			LogMsg msg;
+			msg.message = "[" + Timestamp() + "]" + std::string(aLevel,' ') + "[  FATAL  ] " + anException.what();
+			msg.myColor = Vector3f(1.0f,0.0f,0.0f);
+
+			OutputDebugStringA(msg.message.c_str());
+			m_LogMsgs.emplace_back(msg);
 		}
 		else
 		{

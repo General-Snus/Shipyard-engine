@@ -49,6 +49,7 @@ bool cMeshRenderer::IsDefaultMesh() const
 
 std::vector<Element>& cMeshRenderer::GetElements() const
 {
+	OPTICK_EVENT();
 	if (myRenderData->myMesh->isLoadedComplete)
 	{
 		return myRenderData->myMesh->Elements;
@@ -68,6 +69,7 @@ std::shared_ptr<Mesh> cMeshRenderer::GetRawMesh() const
 
 std::shared_ptr<TextureHolder> cMeshRenderer::GetTexture(eTextureType type,unsigned materialIndex)
 {
+	OPTICK_EVENT();
 	assert(materialIndex >= 0);
 
 	if (!myRenderData->overrideMaterial.empty())

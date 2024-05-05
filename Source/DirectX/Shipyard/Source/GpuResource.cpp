@@ -3,6 +3,7 @@
 #include "Shipyard/GpuResource.h"
 
 #include <cassert>
+#include <Tools/Optick/include/optick.h>
 
 #include "Shipyard/GPU.h"
 
@@ -13,6 +14,7 @@ VertexResource::VertexResource(std::filesystem::path name)
 
 void VertexResource::CreateView(size_t numElements,size_t elementSize)
 {
+	OPTICK_EVENT();
 	m_NumVertices = static_cast<uint32_t>(numElements);
 	m_VertexStride = static_cast<uint32_t>(elementSize);
 
@@ -62,12 +64,14 @@ m_Resource(nullptr),m_FormatSupport()
 
 void GpuResource::CreateView(size_t numElements,size_t elementSize)
 {
+	OPTICK_GPU_EVENT("CreateView");
 	UNREFERENCED_PARAMETER(numElements);
 	UNREFERENCED_PARAMETER(elementSize);
 }
 
 void GpuResource::Reset()
 {
+	OPTICK_EVENT();
 	m_Resource.Reset();
 	m_ResourceName.clear();
 	m_FormatSupport = {};
@@ -97,6 +101,7 @@ bool GpuResource::CheckDSVSupport() const
 
 void GpuResource::SetView(ViewType view)
 {
+	OPTICK_EVENT();
 	if (!m_Resource ||
 		m_DescriptorHandles.contains(view) && m_DescriptorHandles.at(view).heapOffset != -1)
 	{
@@ -169,6 +174,7 @@ void GpuResource::SetView(ViewType view)
 
 void GpuResource::SetView(ViewType view,HeapHandle handle)
 {
+	OPTICK_EVENT();
 	if (!m_Resource)
 	{
 		return;
@@ -233,11 +239,13 @@ void GpuResource::SetView(ViewType view,HeapHandle handle)
 
 void GpuResource::ClearView(ViewType view)
 {
+	OPTICK_EVENT();
 	m_DescriptorHandles.contains(view) ? m_DescriptorHandles.erase(view) : NULL;
 }
 
 HeapHandle GpuResource::GetHandle(ViewType type)
 {
+	OPTICK_EVENT();
 	if (m_DescriptorHandles.find(type) != m_DescriptorHandles.end() && m_DescriptorHandles.at(type).heapOffset != -1)
 	{
 		return  m_DescriptorHandles.at(type);
@@ -248,6 +256,7 @@ HeapHandle GpuResource::GetHandle(ViewType type)
 
 HeapHandle GpuResource::CreateViewWithHandle(ViewType type,HeapHandle handle)
 {
+	OPTICK_EVENT();
 	SetView(type,handle);
 	return  m_DescriptorHandles.at(type);
 }
@@ -259,12 +268,14 @@ HeapHandle GpuResource::GetHandle() const
 
 int GpuResource::GetHeapOffset() const
 {
+	OPTICK_EVENT();
 	return m_DescriptorHandles.at(m_RecentBoundType).heapOffset;
 };
 
 
 void GpuResource::SetResource(const ComPtr<ID3D12Resource>& resource)
 {
+	OPTICK_GPU_EVENT("SetResource");
 	m_Resource = resource;
 	m_Resource->SetName(m_ResourceName.c_str());
 	CheckFeatureSupport();
@@ -298,6 +309,7 @@ bool GpuResource::CheckFormatSupport(D3D12_FORMAT_SUPPORT2 formatSupport) const
 
 void GpuResource::CheckFeatureSupport()
 {
+	OPTICK_EVENT();
 	if (m_Resource)
 	{
 		auto desc = m_Resource->GetDesc();

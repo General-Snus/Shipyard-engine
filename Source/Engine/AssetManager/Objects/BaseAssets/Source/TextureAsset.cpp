@@ -14,10 +14,10 @@ TextureHolder::TextureHolder(const std::filesystem::path& aFilePath,eTextureType
 
 void TextureHolder::Init()
 {
-	int position = (int)AssetPath.filename().string().find_last_of("_");
+	const int position = (int)AssetPath.filename().string().find_last_of("_");
 	if (position > -1)
 	{
-		std::string  typeOfTexture = AssetPath.filename().replace_extension("").string().substr(position);
+		const std::string  typeOfTexture = AssetPath.filename().replace_extension("").string().substr(position);
 
 		if (typeOfTexture == "_C" || typeOfTexture == "_c")
 		{
@@ -47,7 +47,7 @@ void TextureHolder::Init()
 		{
 			if (!AssetManager::Get().AdaptPath(AssetPath))
 			{
-				std::string msg = "Error: Coulnt load texture at " + AssetPath.string();
+				const std::string msg = "Error: Coulnt load texture at " + AssetPath.string();
 				std::cout << msg << " \n";
 				if (GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
 				{
@@ -62,7 +62,7 @@ void TextureHolder::Init()
 
 		if (!GPU::LoadTexture(RawTexture.get(),AssetPath.wstring()))
 		{
-			std::string msg = "Error: Coulnt dds texture at " + AssetPath.string();
+			const std::string msg = "Error: Coulnt dds texture at " + AssetPath.string();
 			std::cout << msg << " \n";
 			if (GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
 			{
@@ -80,7 +80,7 @@ void TextureHolder::Init()
 	}
 	else
 	{
-		std::string msg = "Error: Coulnt load generic texture at " + AssetPath.string();
+		const std::string msg = "Error: Coulnt load generic texture at " + AssetPath.string();
 		std::cout << msg << " \n";
 		if (GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
 		{

@@ -8,6 +8,8 @@
 #include "../GPU.h"
 #include "../PSO.h" 
 
+#include <Tools/Optick/include/optick.h>
+
 #include "Editor/Editor/Core/Editor.h"
 #include "Editor/Editor/Windows/Window.h"
 #include "Engine/AssetManager/AssetManager.h"
@@ -52,6 +54,7 @@ void PSOCache::InitAllStates()
 
 std::unique_ptr<PSO>& PSOCache::GetState(ePipelineStateID id)
 {
+	OPTICK_EVENT();
 	return pso_map[id];
 }
 
@@ -83,19 +86,19 @@ void PSOCache::InitDefaultSignature()
 	rootParameters[eRootBindings::materialBuffer].InitAsConstantBufferView(REG_DefaultMaterialBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
 	rootParameters[eRootBindings::lightBuffer].InitAsConstantBufferView(REG_LightBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_ALL);
 
-	const auto descriptorRange = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,2048,REG_colorMap,0,D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC_WHILE_SET_AT_EXECUTE);
+	const auto descriptorRange = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,2048,REG_colorMap,0,D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
 	rootParameters[eRootBindings::Textures].InitAsDescriptorTable(1,&descriptorRange,D3D12_SHADER_VISIBILITY_PIXEL);
 
-	const auto GbufferPasses = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,127,REG_colorMap,1,D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC_WHILE_SET_AT_EXECUTE);
+	const auto GbufferPasses = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,8,REG_colorMap,1,D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
 	rootParameters[eRootBindings::GbufferPasses].InitAsDescriptorTable(1,&GbufferPasses,D3D12_SHADER_VISIBILITY_PIXEL);
 
-	const auto TargetTexture = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,127,REG_Target0,2,D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC_WHILE_SET_AT_EXECUTE);
+	const auto TargetTexture = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,5,REG_Target0,2,D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
 	rootParameters[eRootBindings::TargetTexture].InitAsDescriptorTable(1,&TargetTexture,D3D12_SHADER_VISIBILITY_PIXEL);
 
-	const auto PermanentTextures = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,127,REG_enviromentCube,3,D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC_WHILE_SET_AT_EXECUTE);
+	const auto PermanentTextures = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,5,REG_enviromentCube,3,D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
 	rootParameters[eRootBindings::PermanentTextures].InitAsDescriptorTable(1,&PermanentTextures,D3D12_SHADER_VISIBILITY_PIXEL);
 
-	const auto meshBuffer = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,4048,REG_colorMap,4,D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC_WHILE_SET_AT_EXECUTE);
+	const auto meshBuffer = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,4048,REG_colorMap,4,D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
 	rootParameters[eRootBindings::MeshBuffer].InitAsDescriptorTable(1,&meshBuffer,D3D12_SHADER_VISIBILITY_VERTEX);
 
 	const CD3DX12_STATIC_SAMPLER_DESC samplers[]
@@ -424,6 +427,7 @@ void ShadowMapperPSO::Init(const ComPtr<ID3D12Device2>& dev)
 
 void ShadowMapperPSO::WriteShadows(std::shared_ptr<CommandList>& commandList,const std::vector<cMeshRenderer>& objectsToRender)
 {
+	OPTICK_EVENT();
 	std::shared_ptr<Texture> shadowMap = nullptr;
 	const auto graphicCommandList = commandList->GetGraphicsCommandList();
 
@@ -436,6 +440,11 @@ void ShadowMapperPSO::WriteShadows(std::shared_ptr<CommandList>& commandList,con
 
 	for (auto& light : GameObjectManager::Get().GetAllComponents<cLight>())
 	{
+		if (!light.IsActive())
+		{
+			continue;
+		}
+
 		if (light.GetIsShadowCaster())
 		{
 			if (light.GetType() == eLightType::Directional && !light.GetIsRendered())
@@ -455,6 +464,11 @@ void ShadowMapperPSO::WriteShadows(std::shared_ptr<CommandList>& commandList,con
 
 				for (const auto& object : objectsToRender)
 				{
+					if (!object.IsActive())
+					{
+						continue;
+					}
+
 					const auto& transform = object.GetComponent<Transform>();
 					ObjectBuffer objectBuffer;
 					objectBuffer.myTransform = transform.GetRawTransform();
@@ -472,6 +486,7 @@ void ShadowMapperPSO::WriteShadows(std::shared_ptr<CommandList>& commandList,con
 						const auto& alloc2 = GPU::m_GraphicsMemory->AllocateConstant<MaterialBuffer>(materialBuffer);
 						graphicCommandList->SetGraphicsRootConstantBufferView(REG_DefaultMaterialBuffer,alloc2.GpuAddress());
 
+						OPTICK_GPU_EVENT("DirectionalShadowDraw");
 						graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
 					}
 				}
@@ -497,6 +512,11 @@ void ShadowMapperPSO::WriteShadows(std::shared_ptr<CommandList>& commandList,con
 
 				for (const auto& object : objectsToRender)
 				{
+					if (!object.IsActive())
+					{
+						continue;
+					}
+
 					const auto& transform = object.GetComponent<Transform>(); ObjectBuffer objectBuffer;
 					objectBuffer.myTransform = transform.GetRawTransform();
 
@@ -513,6 +533,7 @@ void ShadowMapperPSO::WriteShadows(std::shared_ptr<CommandList>& commandList,con
 						const auto& alloc2 = GPU::m_GraphicsMemory->AllocateConstant<MaterialBuffer>(materialBuffer);
 						graphicCommandList->SetGraphicsRootConstantBufferView(REG_DefaultMaterialBuffer,alloc2.GpuAddress());
 
+						OPTICK_GPU_EVENT("SpotlightShadowDraw");
 						graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
 					}
 				}
@@ -540,6 +561,11 @@ void ShadowMapperPSO::WriteShadows(std::shared_ptr<CommandList>& commandList,con
 
 					for (const auto& object : objectsToRender)
 					{
+						if (!object.IsActive())
+						{
+							continue;
+						}
+
 						const auto& transform = object.GetComponent<Transform>();
 						ObjectBuffer objectBuffer;
 						objectBuffer.myTransform = transform.GetRawTransform();
@@ -557,6 +583,7 @@ void ShadowMapperPSO::WriteShadows(std::shared_ptr<CommandList>& commandList,con
 							const auto& alloc2 = GPU::m_GraphicsMemory->AllocateConstant<MaterialBuffer>(materialBuffer);
 							graphicCommandList->SetGraphicsRootConstantBufferView(REG_DefaultMaterialBuffer,alloc2.GpuAddress());
 
+							OPTICK_GPU_EVENT("PointlightShadowDraw");
 							graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
 						}
 					}
@@ -614,6 +641,7 @@ Texture* EnvironmentLightPSO::GetRenderTargets()
 }
 LightBuffer EnvironmentLightPSO::CreateLightBuffer()
 {
+	OPTICK_EVENT();
 	std::vector<DirectionalLight*> dirLight;
 	std::vector<PointLight*> pointLight;
 	std::vector< SpotLight* > spotLight;

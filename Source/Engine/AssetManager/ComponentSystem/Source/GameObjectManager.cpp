@@ -1,10 +1,11 @@
 #include "AssetManager.pch.h"
+
 #include <algorithm>
 #include <string>
 #include "../GameObject.h"
 #include "../GameObjectManager.h"
 
-#include <Tools/Optick/src/optick.h>
+#include <Tools/Optick/include/optick.h>
 
 GameObjectManager::~GameObjectManager()
 {
@@ -17,7 +18,12 @@ GameObjectManager::~GameObjectManager()
 
 const GameObject GameObjectManager::CreateGameObject()
 {
-	myGameObjects.emplace(myLastID,true);
+	GameObjectData data;
+	data.IsActive = true;
+	data.Name = "GameObject(" + std::to_string(myLastID) + ")";
+	data.onLayer = Layer::Default;
+
+	myGameObjects.emplace(myLastID,data);
 	return GameObject(myLastID++,this);
 }
 
@@ -45,7 +51,7 @@ void GameObjectManager::DeleteGameObject(const GameObject aGameObject)
 
 bool GameObjectManager::GetActive(const SY::UUID aGameObjectID)
 {
-	if (myGameObjects.find(aGameObjectID) == myGameObjects.end())
+	if (!myGameObjects.contains(aGameObjectID))
 	{
 		return false;
 	}
@@ -75,7 +81,7 @@ GameObject GameObjectManager::GetCamera()
 
 GameObject GameObjectManager::GetGameObject(SY::UUID anID)
 {
-	if (myGameObjects.find(anID) != myGameObjects.end())
+	if (myGameObjects.contains(anID))
 	{
 		return GameObject(anID,this);
 	}
@@ -86,6 +92,7 @@ GameObject GameObjectManager::GetGameObject(SY::UUID anID)
 
 void GameObjectManager::CollidedWith(const SY::UUID aFirstID,const SY::UUID aTargetID)
 {
+	OPTICK_EVENT();
 	for (auto& cm : myComponentManagers)
 	{
 		cm.second->CollidedWith(aFirstID,aTargetID);
@@ -94,7 +101,8 @@ void GameObjectManager::CollidedWith(const SY::UUID aFirstID,const SY::UUID aTar
 
 void GameObjectManager::SetActive(const SY::UUID aGameObjectID,const bool aState)
 {
-	if (myGameObjects.find(aGameObjectID) != myGameObjects.end())
+	OPTICK_EVENT();
+	if (myGameObjects.contains(aGameObjectID))
 	{
 		myGameObjects[aGameObjectID].IsActive = aState;
 		return;
@@ -127,6 +135,11 @@ void GameObjectManager::CustomOrderUpdate()
 	DeleteObjects();
 }
 
+const std::unordered_map<SY::UUID,GameObjectManager::GameObjectData>& GameObjectManager::GetAllGameObjects()
+{
+	return myGameObjects;
+}
+
 void GameObjectManager::Update()
 {
 	OPTICK_EVENT();
@@ -144,6 +157,7 @@ void GameObjectManager::Update()
 
 void GameObjectManager::SortUpdateOrder()
 {
+	OPTICK_EVENT();
 	myUpdateOrder.clear();
 	for (auto& cm : myComponentManagers)
 	{
@@ -163,7 +177,7 @@ void GameObjectManager::DeleteObjects()
 	OPTICK_EVENT();
 	for (size_t i = 0; i < myObjectsToDelete.size(); i++)
 	{
-		if (myGameObjects.find(myObjectsToDelete[i]) != myGameObjects.end())
+		if (myGameObjects.contains(myObjectsToDelete[i]))
 		{
 			for (auto& cm : myComponentManagers)
 			{
@@ -182,6 +196,7 @@ void GameObjectManager::DeleteObjects()
 
 void GameObjectManager::AddObjects()
 {
+	OPTICK_EVENT();
 	for (auto& i : myObjectsToAdd)
 	{
 
@@ -193,8 +208,29 @@ void GameObjectManager::AddObjects()
 
 void GameObjectManager::OnSiblingChanged(SY::UUID anID,const std::type_info* SourceClass)
 {
+	OPTICK_EVENT();
 	for (auto& cm : myComponentManagers)
 	{
 		cm.second->OnSiblingChanged(anID,SourceClass);
 	}
+}
+
+std::string GameObjectManager::GetName(const SY::UUID aGameObjectID)
+{
+	if (!myGameObjects.contains(aGameObjectID))
+	{
+		return "";
+	}
+
+	return myGameObjects.at(aGameObjectID).Name;
+}
+
+void GameObjectManager::SetName(const std::string& name,const SY::UUID aGameObjectID)
+{
+	if (!myGameObjects.contains(aGameObjectID))
+	{
+		return;
+	}
+
+	myGameObjects.at(aGameObjectID).Name = name;
 }

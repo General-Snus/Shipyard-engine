@@ -5,6 +5,7 @@
 #include <XTK/WICTextureLoader.h>
 #include "../GPU.h" 
 
+#include <Tools/Optick/include/optick.h>
 #include <Tools/ThirdParty/dpp/stringops.h>
 
 #include "../Helpers.h" 
@@ -91,7 +92,7 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 	}
 	else
 	{
-		GetHardwareAdapter(factory.Get(),&hardwareAdapter);
+		GetHardwareAdapter(factory.Get(),hardwareAdapter.GetAddressOf());
 
 		if (FAILED(D3D12CreateDevice(
 			hardwareAdapter.Get(),
@@ -116,17 +117,25 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 		m_Device.Get()));
 #endif
 
-	CD3DX12FeatureSupport featureSupport;
-	featureSupport.Init(m_Device.Get());
-	m_FeatureData = featureSupport.HighestRootSignatureVersion();
-	m_DeviceSupport.targetFeatureLevel = featureSupport.MaxSupportedFeatureLevel();
-	m_DeviceSupport.targetShaderModel = featureSupport.HighestShaderModel();
-
-	if (FAILED(D3D12CreateDevice(hardwareAdapter.Get(),m_DeviceSupport.targetFeatureLevel,IID_PPV_ARGS(m_Device.ReleaseAndGetAddressOf()))))
 	{
-		Logger::Err("Failed to create device");
-		return false;
+		CD3DX12FeatureSupport featureSupport;
+		featureSupport.Init(m_Device.Get());
+		m_FeatureData = featureSupport.HighestRootSignatureVersion();
+		m_DeviceSupport.targetFeatureLevel = featureSupport.MaxSupportedFeatureLevel();
+		m_DeviceSupport.targetShaderModel = featureSupport.HighestShaderModel();
+
+		if (FAILED(D3D12CreateDevice(hardwareAdapter.Get(),m_DeviceSupport.targetFeatureLevel,IID_PPV_ARGS(m_Device.ReleaseAndGetAddressOf()))))
+		{
+			Logger::Err("Failed to create device");
+			return false;
+		}
 	}
+	D3D12_FEATURE_DATA_D3D12_OPTIONS featureSupport{};
+	Helpers::ThrowIfFailed(
+		m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS,&featureSupport,sizeof(featureSupport))
+	);
+
+	featureSupport;
 
 	//ComPtr<ID3D12InfoQueue> pInfoQueue;
 	//if (SUCCEEDED(m_Device.As(&pInfoQueue)))
@@ -433,7 +442,18 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 			CreateWICTextureFromFile(m_Device.Get(),resourceUpload,aFileName.wstring().c_str(),
 				outTexture->m_Resource.ReleaseAndGetAddressOf(),generateMips)
 		);
+	}
 
+	if (generateMips && resourceUpload.IsSupportedForGenerateMips(outTexture->m_Resource->GetDesc().Format))
+	{
+		outTexture->SetView(ViewType::SRV);
+		resourceUpload.Transition(outTexture->m_Resource.Get(),D3D12_RESOURCE_STATE_COPY_DEST,D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		resourceUpload.GenerateMips(outTexture->m_Resource.Get());
+	}
+	else
+	{
+		const std::string msg = "Failed to load mips of shader that wanted a mipmap " + aFileName.filename().string();
+		Logger::Warn(msg);
 	}
 
 	outTexture->isCubeMap = isCubeMap;
@@ -448,17 +468,6 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 
 	outTexture->CheckFeatureSupport();
 	outTexture->SetView(ViewType::SRV);
-
-
-	//FUUUUCK THAT
-	//if (generateMips) 
-	//{
-	//	auto commandQueue = GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COMPUTE);
-	//	auto list = commandQueue->GetCommandList(L"MipMaker");
-	//	list->GenerateMips(*outTexture);
-	//	commandQueue->ExecuteCommandList(list);
-	//}
-
 
 	return true;
 }
@@ -479,6 +488,13 @@ bool GPU::LoadTextureFromMemory(Texture* outTexture,const std::filesystem::path&
 			outTexture->m_Resource.ReleaseAndGetAddressOf(),generateMips)
 	);
 
+
+	if (generateMips && resourceUpload.IsSupportedForGenerateMips(outTexture->m_Resource->GetDesc().Format))
+	{
+		outTexture->SetView(ViewType::SRV);
+		resourceUpload.Transition(outTexture->m_Resource.Get(),D3D12_RESOURCE_STATE_COPY_DEST,D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		resourceUpload.GenerateMips(outTexture->m_Resource.Get());
+	}
 	const auto uploadResourcesFinished = resourceUpload.End(m_DirectCommandQueue->GetCommandQueue().Get());
 	uploadResourcesFinished.wait();
 
@@ -491,6 +507,7 @@ void GPU::TransitionResource(
 	const ComPtr<ID3D12Resource>& resource,D3D12_RESOURCE_STATES beforeState,
 	D3D12_RESOURCE_STATES afterState)
 {
+	OPTICK_EVENT();
 	const CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
 		resource.Get(),
 		beforeState,afterState);
@@ -500,11 +517,13 @@ void GPU::TransitionResource(
 
 void GPU::ClearRTV(const CommandList& commandList,D3D12_CPU_DESCRIPTOR_HANDLE rtv,Vector4f clearColor)
 {
+	OPTICK_EVENT();
 	commandList.GetGraphicsCommandList()->ClearRenderTargetView(rtv,&clearColor.x,0,nullptr);
 }
 
 void GPU::ClearRTV(const CommandList& commandList,Texture* rtv,unsigned textureCount)
 {
+	OPTICK_EVENT();
 	for (unsigned i = 0; i < textureCount; ++i)
 	{
 		commandList.GetGraphicsCommandList()->ClearRenderTargetView(rtv[i].GetHandle(ViewType::RTV).cpuPtr,&rtv->m_ClearColor.x,0,nullptr);
@@ -513,6 +532,7 @@ void GPU::ClearRTV(const CommandList& commandList,Texture* rtv,unsigned textureC
 
 void GPU::ClearDepth(const CommandList& commandList,D3D12_CPU_DESCRIPTOR_HANDLE dsv,FLOAT depth)
 {
+	OPTICK_EVENT();
 	commandList.GetGraphicsCommandList()->ClearDepthStencilView(dsv,D3D12_CLEAR_FLAG_DEPTH,depth,0,0,nullptr);
 }
 
@@ -529,6 +549,7 @@ Texture* GPU::GetCurrentBackBuffer()
 
 ComPtr<ID3D12DescriptorHeap>  GPU::CreateDescriptorHeap(const ComPtr<ID3D12Device>& device,D3D12_DESCRIPTOR_HEAP_TYPE type,uint32_t numDescriptors,D3D12_DESCRIPTOR_HEAP_FLAGS flags)
 {
+	OPTICK_EVENT();
 	ComPtr<ID3D12DescriptorHeap> descriptorHeap;
 
 	D3D12_DESCRIPTOR_HEAP_DESC desc = {};
@@ -543,6 +564,7 @@ ComPtr<ID3D12DescriptorHeap>  GPU::CreateDescriptorHeap(const ComPtr<ID3D12Devic
 
 std::shared_ptr<GPUCommandQueue> GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE type)
 {
+	OPTICK_EVENT();
 	std::shared_ptr<GPUCommandQueue> commandQueue;
 
 	switch (type)
@@ -565,6 +587,7 @@ std::shared_ptr<GPUCommandQueue> GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE ty
 
 ComPtr<ID3D12Fence> GPU::CreateFence(const ComPtr<ID3D12Device>& device)
 {
+	OPTICK_EVENT();
 	ComPtr<ID3D12Fence> fence;
 
 	Helpers::ThrowIfFailed(device->CreateFence(0,D3D12_FENCE_FLAG_NONE,IID_PPV_ARGS(&fence)));
@@ -574,6 +597,7 @@ ComPtr<ID3D12Fence> GPU::CreateFence(const ComPtr<ID3D12Device>& device)
 
 HANDLE GPU::CreateEventHandle()
 {
+	OPTICK_EVENT();
 	HANDLE fenceEvent;
 
 	fenceEvent = ::CreateEvent(nullptr,FALSE,FALSE,nullptr);
@@ -584,6 +608,7 @@ HANDLE GPU::CreateEventHandle()
 
 void GPU::UpdateRenderTargetViews(const ComPtr<ID3D12Device>& device,const ComPtr<IDXGISwapChain4>& swapChain,const ComPtr<ID3D12DescriptorHeap>& descriptorHeap)
 {
+	OPTICK_EVENT();
 	descriptorHeap; device;
 	for (int i = 0; i < m_FrameCount; ++i)
 	{
@@ -608,71 +633,35 @@ void GPU::UpdateRenderTargetViews(const ComPtr<ID3D12Device>& device,const ComPt
 // PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 //
 //*********************************************************
-void GPU::GetHardwareAdapter(IDXGIFactory1* pFactory,IDXGIAdapter1** ppAdapter,bool requestHighPerformanceAdapter)
+void GPU::GetHardwareAdapter(IDXGIFactory4* pFactory,IDXGIAdapter1** ppAdapter,bool requestHighPerformanceAdapter)
 {
+	OPTICK_EVENT();
 	pFactory; ppAdapter; requestHighPerformanceAdapter;
+
 	*ppAdapter = nullptr;
-
-	ComPtr<IDXGIAdapter1> adapter;
-
-	ComPtr<IDXGIFactory6> factory6;
-	if (SUCCEEDED(pFactory->QueryInterface(IID_PPV_ARGS(&factory6))))
+	for (UINT adapterIndex = 0; ; ++adapterIndex)
 	{
-		for (
-			UINT adapterIndex = 0;
-			SUCCEEDED(factory6->EnumAdapterByGpuPreference(
-				adapterIndex,
-				requestHighPerformanceAdapter == true ? DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE : DXGI_GPU_PREFERENCE_UNSPECIFIED,
-				IID_PPV_ARGS(&adapter)));
-				++adapterIndex)
+		IDXGIAdapter1* pAdapter = nullptr;
+		if (DXGI_ERROR_NOT_FOUND == pFactory->EnumAdapters1(adapterIndex,&pAdapter))
 		{
-			DXGI_ADAPTER_DESC1 desc;
-			adapter->GetDesc1(&desc);
-
-			if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
-			{
-				// Don't select the Basic Render Driver adapter.
-				// If you want a software adapter, pass in "/warp" on the command line.
-				continue;
-			}
-
-			// Check to see whether the adapter supports Direct3D 12, but don't create the
-			// actual device yet.
-			if (SUCCEEDED(D3D12CreateDevice(adapter.Get(),D3D_FEATURE_LEVEL_11_0,_uuidof(ID3D12Device),nullptr)))
-			{
-				break;
-			}
+			// No more adapters to enumerate.
+			break;
 		}
-	}
 
-	if (adapter.Get() == nullptr)
-	{
-		for (UINT adapterIndex = 0; SUCCEEDED(pFactory->EnumAdapters1(adapterIndex,&adapter)); ++adapterIndex)
+		// Check to see whether the adapter supports Direct3D 12, but don't create the
+		// actual device yet.
+		if (SUCCEEDED(D3D12CreateDevice(pAdapter,D3D_FEATURE_LEVEL_11_0,_uuidof(ID3D12Device),nullptr)))
 		{
-			DXGI_ADAPTER_DESC1 desc;
-			adapter->GetDesc1(&desc);
-
-			if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
-			{
-				// Don't select the Basic Render Driver adapter.
-				// If you want a software adapter, pass in "/warp" on the command line.
-				continue;
-			}
-
-			// Check to see whether the adapter supports Direct3D 12, but don't create the
-			// actual device yet.
-			if (SUCCEEDED(D3D12CreateDevice(adapter.Get(),D3D_FEATURE_LEVEL_11_0,_uuidof(ID3D12Device),nullptr)))
-			{
-				break;
-			}
+			*ppAdapter = pAdapter;
+			return;
 		}
+		pAdapter->Release();
 	}
-
-	*ppAdapter = adapter.Detach();
 }
 
 void GPUSwapchain::Create(HWND hwnd,ComPtr<ID3D12CommandQueue>,UINT Width,UINT Height,UINT bufferCount)
 {
+	OPTICK_EVENT();
 	ComPtr<IDXGIFactory4> dxgiFactory4;
 	UINT createFactoryFlags = 0;
 #if defined(_DEBUG)

@@ -27,7 +27,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include <Tools/Optick/src/optick.h> 
+#include <Tools/Optick/include/optick.h> 
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>

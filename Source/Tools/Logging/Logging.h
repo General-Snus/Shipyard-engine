@@ -2,17 +2,28 @@
 #define NOMINMAX
 #include <source_location> 
 #include <string>
+#include <vector>
+
+#include "Tools/Utilities/LinearAlgebra/Vector3.hpp"
 #include "Windows.h"
+
 class Logger
 {
+	struct LogMsg
+	{
+		Vector3f myColor;
+		std::string message;
+	};
 	static inline HANDLE myHandle = 0;
 	static inline bool shouldPrintToOutput = false;
 	static inline bool isInitialized = false;
 	static inline std::string myNamespace;
+	static inline std::atomic<bool> readyToWrite;
 	static [[nodiscard]] std::string Timestamp();
 	Logger() = default;
 
 public:
+	static inline std::vector<LogMsg> m_LogMsgs;
 	static bool Create();
 	static void SetConsoleHandle(HANDLE aHandle);
 

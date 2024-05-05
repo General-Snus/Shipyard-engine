@@ -20,7 +20,7 @@ public:
 	T& AddComponent(Args... someParameters);
 
 	template <class T>
-	const bool HasComponent();
+	bool HasComponent() const;
 
 	template <class T>
 	T* TryGetComponent();
@@ -28,77 +28,77 @@ public:
 	template <class T>
 	T& GetComponent();
 
-	bool GetActive();
-	void SetActive(const bool aState);
+	bool GetActive() const;
+	void SetActive(bool aState) const;
 
+	std::string GetName() const { return myManager->GetName(myID); };;
+	void SetName(const std::string& name) const { myManager->SetName(name,myID); };
 
-	void OnSiblingChanged(const std::type_info* SourceClass = nullptr);
+	void OnSiblingChanged(const std::type_info* SourceClass = nullptr) const;
 
-	inline void SetLayer(const Layer aLayer) { myManager->SetLayer(myID,aLayer); };
-	inline Layer GetLayer() const { return myManager->GetLayer(myID); };
+	void SetLayer(const Layer aLayer) const { myManager->SetLayer(myID,aLayer); };
+	Layer GetLayer() const { return myManager->GetLayer(myID); };
 
-	inline const SY::UUID GetID() const { return myID; }
-	const bool IsValid() const { return myID.IsValid(); }
+	SY::UUID GetID() const { return myID; }
+	bool IsValid() const { return myID.IsValid(); }
 
 private:
-	friend class GameObjectManager; //Only the asset manager can create and destroy components
-
-
+	friend class GameObjectManager; //Only the asset manager can create and destroy components 
+	GameObject(const SY::UUID anID,GameObjectManager* aManager) : myID(anID),myManager(aManager) {}
 
 	//DO NOT ADD VARIABLES HERE IT IS INCONSISTENT WITH PHILOSOPHY AND WILL NOT WORK
-	GameObject(const SY::UUID anID,GameObjectManager* aManager) : myID(anID),myManager(aManager) {}
 	SY::UUID myID = UINT_MAX;
 
 	GameObjectManager* myManager = nullptr;
 };
 
 template<class T>
-inline T& GameObject::AddComponent()
+T& GameObject::AddComponent()
 {
 	return myManager->AddComponent<T>(myID);
 }
 
 template<class T>
-inline T& GameObject::AddComponent(const T& aComponent)
+T& GameObject::AddComponent(const T& aComponent)
 {
 	return myManager->AddComponent<T>(myID,aComponent);
 }
 
 template<class T,typename ...Args>
-inline T& GameObject::AddComponent(Args ...someParameters)
+T& GameObject::AddComponent(Args ...someParameters)
 {
 	return myManager->AddComponent<T>(myID,someParameters...);
 }
 
 template<class T>
-inline const bool GameObject::HasComponent()
+bool GameObject::HasComponent() const
 {
 	return myManager->HasComponent<T>(myID);
 }
 
 template<class T>
-inline T* GameObject::TryGetComponent()
+T* GameObject::TryGetComponent()
 {
 	return myManager ? myManager->TryGetComponent<T>(myID) : nullptr;
 }
 
 template<class T>
-inline T& GameObject::GetComponent()
+T& GameObject::GetComponent()
 {
 	return myManager->GetComponent<T>(myID);
 }
 
-inline bool GameObject::GetActive()
+inline bool GameObject::GetActive() const
 {
 	return myManager->GetActive(myID);
 }
 
-inline void GameObject::SetActive(const bool aState)
+inline void GameObject::SetActive(const bool aState) const
 {
 	myManager->SetActive(myID,aState);
 }
 
-inline void GameObject::OnSiblingChanged(const std::type_info* SourceClass)
+inline void GameObject::OnSiblingChanged(const std::type_info* SourceClass) const
 {
 	myManager->OnSiblingChanged(myID,SourceClass);
 }

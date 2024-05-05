@@ -3,6 +3,7 @@
 #include "Shipyard/Texture.h"
 
 #include <DirectXTex/DirectXTex.h>
+#include <Tools/Optick/include/optick.h>
 #include <XTK/ResourceUploadBatch.h>
 
 #include "Shipyard/CommandQueue.h"
@@ -20,6 +21,7 @@ Texture::Texture() : m_Viewport(0,0,0,0,0,1),m_Rect(0,0,0,0)
 
 bool Texture::AllocateTexture(const Vector2ui dimentions,const std::filesystem::path& name,DXGI_FORMAT Format,D3D12_RESOURCE_FLAGS flags,D3D12_RESOURCE_STATES targetResourceState)
 {
+	OPTICK_EVENT();
 	const auto width = dimentions.x;
 	const auto height = dimentions.y;
 
@@ -98,6 +100,7 @@ bool Texture::AllocateTexture(const Vector2ui dimentions,const std::filesystem::
 
 void Texture::SetView(D3D12_SHADER_RESOURCE_VIEW_DESC view)
 {
+	OPTICK_EVENT();
 	if (!m_Resource ||
 		m_DescriptorHandles.contains(ViewType::SRV) && m_DescriptorHandles.at(ViewType::SRV).heapOffset != -1)
 	{
@@ -117,6 +120,7 @@ void Texture::SetView(D3D12_UNORDERED_ACCESS_VIEW_DESC view)
 
 void Texture::SetView(ViewType view)
 {
+	OPTICK_EVENT();
 	if (!m_Resource ||
 		m_DescriptorHandles.contains(view) && m_DescriptorHandles.at(view).heapOffset != -1)
 	{
@@ -146,15 +150,15 @@ void Texture::SetView(ViewType view)
 			SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 			SRVDesc.Texture2D.MipLevels = 1;
 
-			const int heapOffset = (int)GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->Allocate();
-			const auto descriptorHandle = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->GetCpuHandle(heapOffset);
+			const int heapOffset = static_cast<int>(GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->Allocate());
+			const auto descriptorHandle = GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->GetCpuHandle(heapOffset);
 			GPU::m_Device->CreateShaderResourceView(m_Resource.Get(),&SRVDesc,descriptorHandle);
 			m_DescriptorHandles[ViewType::SRV] = HeapHandle(descriptorHandle,heapOffset);
 		}
 		else
 		{
-			const int heapOffset = (int)GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->Allocate();
-			const auto descriptorHandle = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->GetCpuHandle(heapOffset);
+			const int heapOffset = static_cast<int>(GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->Allocate());
+			const auto descriptorHandle = GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->GetCpuHandle(heapOffset);
 			CreateShaderResourceView(GPU::m_Device.Get(),m_Resource.Get(),descriptorHandle,isCubeMap);
 			m_DescriptorHandles[ViewType::SRV] = HeapHandle(descriptorHandle,heapOffset);
 		}
@@ -162,16 +166,16 @@ void Texture::SetView(ViewType view)
 	}
 	case ViewType::RTV:
 	{
-		const int heapOffset = (int)GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_RTV]->Allocate();
-		const auto descriptorHandle = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_RTV]->GetCpuHandle(heapOffset);
+		const int heapOffset = static_cast<int>(GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_RTV)]->Allocate());
+		const auto descriptorHandle = GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_RTV)]->GetCpuHandle(heapOffset);
 		device->CreateRenderTargetView(m_Resource.Get(),nullptr,descriptorHandle);
 		m_DescriptorHandles[ViewType::RTV] = HeapHandle(descriptorHandle,heapOffset);
 		break;
 	}
 	case ViewType::DSV:
 	{
-		const int heapOffset = (int)GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_DSV]->Allocate();
-		const auto descriptorHandle = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_DSV]->GetCpuHandle(heapOffset);
+		const int heapOffset = static_cast<int>(GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_DSV)]->Allocate());
+		const auto descriptorHandle = GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_DSV)]->GetCpuHandle(heapOffset);
 
 		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
 		dsvDesc.Format = m_Format;

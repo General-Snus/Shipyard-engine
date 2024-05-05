@@ -3,6 +3,7 @@
 #include <Editor/Editor/Windows/EditorWindows/ChainGraph/GraphTool.h>
 #include <Game/GameLauncher/Core/GameLauncher.h>
 #include <Tools/Logging/Logging.h> 
+#include <Tools/Utilities/DataStructures/Queue.hpp>
 #include <Tools/Utilities/LinearAlgebra/Sphere.hpp>
 #include <Tools/Utilities/System/SingletonTemplate.h>  
 #include "../Windows/SplashWindow.h" 
@@ -13,6 +14,7 @@ class GameLauncher;
 class Editor : public Singleton<Editor>
 {
 	friend class Singleton<Editor>;
+	friend class Logger;
 	enum eMenuLayers
 	{
 		count

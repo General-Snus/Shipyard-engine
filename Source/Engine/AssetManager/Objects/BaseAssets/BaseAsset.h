@@ -13,8 +13,8 @@ public:
 	AssetBase(const std::filesystem::path& aFilePath);
 	virtual ~AssetBase() = default;
 	virtual void Init() = 0;
-	bool isLoadedComplete = false;
-	bool isBeingLoaded = false;
+	bool  isLoadedComplete = false;
+	bool  isBeingLoaded = false;
 	inline const std::filesystem::path& GetAssetPath()	const { return AssetPath; };
 	std::vector<std::function<void()>> callBackOnFinished;
 protected:

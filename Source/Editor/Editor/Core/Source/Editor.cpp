@@ -14,10 +14,10 @@
 #include <string>
 #include <stringapiset.h>
 #include <Tools/ImGui/ImGui/backends/imgui_impl_dx12.h>
-#include <Tools/ImGUI/ImGUI/imgui.h>
-#include <Tools/ImGUI/ImGUI/imgui_impl_dx11.h>
+#include <Tools/ImGUI/ImGUI/imgui.h> 
 #include <Tools/ImGUI/ImGUI/imgui_impl_win32.h>
-#include <Tools/Optick/src/optick.h>
+#include <Tools/Logging/Logging.h>
+#include <Tools/Optick/include/optick.h>
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/Input/InputHandler.hpp>
 #include <Tools/Utilities/Math.hpp>
@@ -29,7 +29,8 @@
 #include "ComponentSystem/Components/LightComponent.h"
 #include "Core/Paths.h"
 #include "DirectX/Shipyard/GPU.h"
-#include "GraphicsEngine.h" 
+#include "GraphicsEngine.h"  
+#include "imgui_internal.h"
 #include "System/SceneGraph/WorldGraph.h"
 #include "Windows/SplashWindow.h"
 
@@ -41,7 +42,11 @@ using json = nlohmann::json;
 
 bool Editor::Initialize(HWND aHandle)
 {
+	if (constexpr bool profileStartup = true) {
+		OPTICK_START_CAPTURE();
+	}
 	Logger::Create();
+	Logger::SetPrintToVSOutput(true);
 	GetWindowRect(Window::windowHandler,&ViewportRect);
 	ShowSplashScreen();
 	ThreadPool::Get().Init();
@@ -56,16 +61,18 @@ bool Editor::Initialize(HWND aHandle)
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGui::StyleColorsDark();
-
+	//ImGui::StyleColorsDark();
 	ImGuiIO& io = ImGui::GetIO();
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch 
-	// Setup Platform/Renderer backends
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+	io.ConfigFlags |= ImGuiConfigFlags_DpiEnableScaleViewports;
+
+
 
 	ImFontConfig font_config{};
-	std::string font_path = AssetManager::AssetPath.string() + "Fonts/roboto/Roboto-Light.ttf";
+	const std::string font_path = AssetManager::AssetPath.string() + "Fonts/roboto/Roboto-Light.ttf";
 	io.Fonts->AddFontFromFileTTF(font_path.c_str(),16.0f,&font_config);
 	font_config.MergeMode = true;
 
@@ -76,7 +83,7 @@ bool Editor::Initialize(HWND aHandle)
 #define ICON_MAX_FA 0xf8ff
 
 	ImWchar const icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-	std::string icon_path = AssetManager::AssetPath.string() + "Fonts/FontAwesome/" FONT_ICON_FILE_NAME_FAS;
+	const std::string icon_path = AssetManager::AssetPath.string() + "Fonts/FontAwesome/" FONT_ICON_FILE_NAME_FAS;
 	io.Fonts->AddFontFromFileTTF(icon_path.c_str(),15.0f,&font_config,icon_ranges);
 	if (!io.Fonts->Build())
 	{
@@ -95,6 +102,9 @@ bool Editor::Initialize(HWND aHandle)
 	{
 		Logger::Err("Failed to init IMGUI Dx12");
 	}
+
+
+
 
 #if PHYSX
 	Shipyard_PhysX::Get().InitializePhysx();
@@ -177,13 +187,17 @@ void Editor::HideSplashScreen() const
 
 void Editor::UpdateImGui()
 {
+	OPTICK_EVENT();
+
 	ImGui_ImplDX12_NewFrame();
-	OPTICK_CATEGORY("ImGui_ImplDX11_NewFrame",Optick::Category::UI);
+	OPTICK_CATEGORY("ImGui_ImplDX12_NewFrame",Optick::Category::UI);
 	ImGui_ImplWin32_NewFrame();
 	OPTICK_CATEGORY("ImGui_ImplWin32_NewFrame",Optick::Category::UI);
 	ImGui::NewFrame();
 	OPTICK_CATEGORY("ImGui::NewFrame",Optick::Category::UI);
+
 	ImGui::DockSpaceOverViewport();
+	TopBar();
 
 #if UseScriptGraph
 	const float delta = Timer::GetInstance().GetDeltaTime();
@@ -194,7 +208,7 @@ void Editor::UpdateImGui()
 
 void Editor::Update()
 {
-	OPTICK_EVENT();
+	OPTICK_FRAME_EVENT(Optick::FrameType::CPU);
 	Timer::GetInstance().Update();
 	const float delta = Timer::GetInstance().GetDeltaTime();
 
@@ -209,13 +223,85 @@ void Editor::Update()
 
 void Editor::Render()
 {
+	OPTICK_EVENT();
 	GraphicsEngine::Get().BeginFrame();
 	GraphicsEngine::Get().RenderFrame(0,0);
 	GraphicsEngine::Get().EndFrame();
+
+	const float delta = Timer::GetInstance().GetDeltaTime();
+	const auto dur = std::chrono::duration<float,std::milli>(std::max(0.0f,(1 / 60.0f - delta) * 1000.f));
+	Sleep(static_cast<DWORD>((500.f / 60.f) - delta));
 }
 
 void Editor::TopBar()
 {
+	//ImGui::ShowDemoWindow();
+	{
+		ImGui::Begin("Hierarchy");
+		ImGui::Separator();
+
+		const auto& gObjList = GameObjectManager::Get().GetAllGameObjects();
+		ImGui::BeginTable("GameObjectList",1);
+		for (const auto& i : gObjList)
+		{
+			ImGui::PushID(i.first);
+			{
+				bool arg = i.second.IsActive;
+				if (ImGui::Checkbox("",&arg))
+				{
+					GameObjectManager::Get().SetActive(i.first,arg);
+				}
+				ImGui::SameLine();
+				ImGui::Text(i.second.Name.c_str());
+				ImGui::TableNextColumn();
+			}
+			ImGui::PopID();
+		}
+		ImGui::EndTable();
+
+
+		ImGui::End();
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	ImGui::Begin("Console");
+	{
+		if (ImGui::BeginChild("ScrollingRegion"))
+		{
+			static int size = 0;
+			for (auto& [myColor,message] : Logger::m_LogMsgs)
+			{
+				if (message.empty())
+				{
+					break;
+				}
+
+				const auto color = ImVec4(myColor.x,myColor.y,myColor.z,1.0f);
+				ImGui::PushStyleColor(ImGuiCol_Text,color);
+				ImGui::TextWrapped(message.c_str());
+				ImGui::PopStyleColor();
+			}
+			if (size != Logger::m_LogMsgs.size())
+			{
+				ImGui::SetScrollHereY(1.0f);
+				size = (int)Logger::m_LogMsgs.size();
+			}
+		}
+		ImGui::EndChild();
+	}
+	ImGui::End();
 }
 
 RECT Editor::GetViewportRECT()

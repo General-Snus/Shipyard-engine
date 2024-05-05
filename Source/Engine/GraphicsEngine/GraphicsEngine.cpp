@@ -23,7 +23,7 @@
 #include "Editor/Editor/Windows/Window.h"
 #include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
-#include "Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h"
+#include "Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h" 
 #include "Tools/ImGui/ImGui/backends/imgui_impl_dx12.h"
 #include "Tools/Utilities/Input/InputHandler.hpp"
 
@@ -67,7 +67,8 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 	SetupDebugDrawline();
 
 
-
+	const auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+	OPTICK_GPU_INIT_D3D12(GPU::m_Device.Get(),commandQueue->GetCommandQueue().GetAddressOf(),1);
 	/*
 	myG_Buffer.Init();
 	myShadowRenderer.Init();
@@ -181,17 +182,16 @@ void GraphicsEngine::SetupBlendStates()
 
 void GraphicsEngine::SetupSpace3()
 {
-
-	auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
-	auto commandList = commandQueue->GetCommandList(L"RenderFrame");
-	auto graphicCommandList = commandList->GetGraphicsCommandList();
+	const auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+	const auto commandList = commandQueue->GetCommandList(L"RenderFrame");
+	const auto graphicCommandList = commandList->GetGraphicsCommandList();
 
 
 	//Light
 	AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/skansen_cubemap.dds",defaultCubeMap);
 	defaultCubeMap->SetTextureType(eTextureType::CubeMap);
 
-	Vector2ui size = { 512,512 };
+	const Vector2ui size = { 512,512 };
 	BRDLookUpTable = std::make_shared<Texture>();
 	BRDLookUpTable->AllocateTexture(
 		size,
@@ -200,10 +200,10 @@ void GraphicsEngine::SetupSpace3()
 	);
 	BRDLookUpTable->SetView(ViewType::SRV);
 	commandList->SetRenderTargets(1,BRDLookUpTable.get(),nullptr);
-	PSO brdfPSO = PSO::CreatePSO("Shaders/ScreenspaceQuad_VS.cso","Shaders/brdfLUT_PS.cso",1,DXGI_FORMAT_R16G16_FLOAT);
+	const PSO brdfPSO = PSO::CreatePSO("Shaders/ScreenspaceQuad_VS.cso","Shaders/brdfLUT_PS.cso",1,DXGI_FORMAT_R16G16_FLOAT);
 
-	D3D12_VIEWPORT viewPort = { 0.0f, 0.0f, static_cast<float>(size.x), static_cast<float>(size.y), D3D12_MIN_DEPTH, D3D12_MAX_DEPTH };
-	D3D12_RECT rect = { 0, 0, static_cast<LONG>(size.x), static_cast<LONG>(size.y) };
+	const D3D12_VIEWPORT viewPort = { 0.0f, 0.0f, static_cast<float>(size.x), static_cast<float>(size.y), D3D12_MIN_DEPTH, D3D12_MAX_DEPTH };
+	const D3D12_RECT rect = { 0, 0, static_cast<LONG>(size.x), static_cast<LONG>(size.y) };
 
 	graphicCommandList->RSSetViewports(1,&viewPort);
 	graphicCommandList->RSSetScissorRects(1,&rect);
@@ -219,7 +219,7 @@ void GraphicsEngine::SetupSpace3()
 	graphicCommandList->IASetIndexBuffer(nullptr);
 	graphicCommandList->DrawInstanced(6,1,0,0);
 
-	auto fence = commandQueue->ExecuteCommandList(commandList);
+	const auto fence = commandQueue->ExecuteCommandList(commandList);
 	commandQueue->WaitForFenceValue(fence);
 }
 
@@ -445,7 +445,8 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 	auto commandList = commandQueue->GetCommandList(L"RenderFrame");
 	auto graphicCommandList = commandList->GetGraphicsCommandList();
-	auto chain = GPU::m_Swapchain->m_SwapChain;
+
+	OPTICK_GPU_CONTEXT(graphicCommandList.Get());
 
 	//const UINT currentBackBufferIndex = chain->GetCurrentBackBufferIndex();
 	const auto* backBuffer = GPU::GetCurrentBackBuffer();
@@ -514,6 +515,11 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 	int vertCount = 0;
 	for (auto& meshRenderer : list)
 	{
+		if (!meshRenderer.IsActive())
+		{
+			continue;
+		}
+
 		const auto& transform = meshRenderer.GetComponent<Transform>();
 		for (auto& element : meshRenderer.GetElements())
 		{
@@ -586,12 +592,10 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 			const auto& alloc2 = GPU::m_GraphicsMemory->AllocateConstant<MaterialBuffer>(materialBuffer);
 			graphicCommandList->SetGraphicsRootConstantBufferView(REG_DefaultMaterialBuffer,alloc2.GpuAddress());
 
+			OPTICK_GPU_EVENT("Draw");
 			graphicCommandList->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
 		}
 	}
-
-
-
 
 	const auto& environmentLight = PSOCache::GetState(PSOCache::ePipelineStateID::DeferredLighting);
 	{
@@ -637,22 +641,39 @@ void GraphicsEngine::RenderFrame(float aDeltaTime,double aTotalTime)
 		const auto handle = toneMapper->GetRenderTargets()->GetHandle(ViewType::SRV);
 		const auto gpuHandle = GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->GetGpuHandle(handle.heapOffset);
 		auto res = Editor::GetViewportResolution();
-		ImGui::Begin("Viewport");
-		ImGui::Image((ImTextureID)gpuHandle.ptr,ImVec2((float)res.x,(float)res.y));
+		ImGuiWindowFlags windowFlags = ImGuiViewportFlags_IsPlatformWindow
+			| ImGuiViewportFlags_NoDecoration
+			| ImGuiViewportFlags_NoTaskBarIcon
+			| ImGuiViewportFlags_NoAutoMerge
+			| ImGuiViewportFlags_CanHostOtherWindows
+			| ImGuiWindowFlags_MenuBar
+			| ImGuiWindowFlags_NoCollapse
+			| ImGuiWindowFlags_NoResize;
+		//const auto aspecRatio = (res.x / res.y);
+		//ImGui::SetNextWindowSizeConstraints(ImVec2(0,0),ImVec2(FLT_MAX,FLT_MAX),CustomConstraints::AspectRatio,(void*)&aspecRatio);   // Aspect ratio
+		ImGui::Begin("Viewport",nullptr,windowFlags);
+		ImGui::Image(reinterpret_cast<ImTextureID>(gpuHandle.ptr),ImVec2(static_cast<float>(res.x),static_cast<float>(res.y)));
 		ImGui::End();
 	}
 
-
 	commandList->SetRenderTargets(1,GPU::GetCurrentBackBuffer(),nullptr);
-	ImGui::Render();
-
-	ID3D12DescriptorHeap* ImGuiHeap[] =
 	{
-		GPU::m_ImGui_Heap->Heap(),nullptr
-	};
+		OPTICK_GPU_EVENT("ImGui");
+		ImGui::Render();
+		ImGuiIO& io = ImGui::GetIO();
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		{
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+		}
+		ID3D12DescriptorHeap* ImGuiHeap[] =
+		{
+			GPU::m_ImGui_Heap->Heap(),nullptr
+		};
 
-	commandList->GetGraphicsCommandList()->SetDescriptorHeaps(1,ImGuiHeap);
-	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(),commandList->GetGraphicsCommandList().Get());
+		commandList->GetGraphicsCommandList()->SetDescriptorHeaps(1,ImGuiHeap);
+		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(),commandList->GetGraphicsCommandList().Get());
+	}
 
 
 	commandQueue->ExecuteCommandList(commandList);
@@ -682,13 +703,17 @@ void GraphicsEngine::RenderTextureTo(eRenderTargets from,eRenderTargets to)  con
 void GraphicsEngine::EndFrame()
 {
 	OPTICK_EVENT();
-	auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
-	auto commandList = commandQueue->GetCommandList();
+	const auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+	const auto commandList = commandQueue->GetCommandList();
+	OPTICK_GPU_CONTEXT(commandList->GetGraphicsCommandList().Get());
+
 
 	const auto* backBuffer = GPU::GetCurrentBackBuffer();
 	commandList->TransitionBarrier(backBuffer->GetResource(),D3D12_RESOURCE_STATE_PRESENT);
 	commandQueue->ExecuteCommandList(commandList);
 
+	OPTICK_CATEGORY("Present",Optick::Category::Wait);
+	OPTICK_GPU_FLIP(GPU::m_Swapchain->m_SwapChain.Get());
 	Helpers::ThrowIfFailed(GPU::m_Swapchain->m_SwapChain->Present(DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_DISCARD,DXGI_PRESENT_ALLOW_TEARING));
 	GPU::m_FenceValues[GPU::m_FrameIndex] = commandQueue->Signal();
 	GPU::m_FrameIndex = GPU::m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();

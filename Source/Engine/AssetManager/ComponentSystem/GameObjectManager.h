@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <vector>
 #include "ComponentManager.h"
+#include "Tools/Optick/include/optick.h"
 
 
 enum class Layer
@@ -33,7 +34,16 @@ class GameObject;
 
 class GameObjectManager : public Singleton<GameObjectManager>
 {
+private:
+	struct GameObjectData
+	{
+		bool IsActive = true;
+		Layer onLayer = Layer::Default;
+		std::string Name;
+	};
+
 	friend class Singleton<GameObjectManager>;
+	friend class GameObject;
 public:
 	GameObjectManager() = default;
 	~GameObjectManager();
@@ -66,6 +76,8 @@ public:
 	bool GetActive(const SY::UUID aGameObjectID);
 	Layer GetLayer(const SY::UUID aGameObjectID);
 
+
+
 	GameObject GetWorldRoot();
 	GameObject GetPlayer();
 	GameObject GetCamera();
@@ -81,6 +93,7 @@ public:
 
 	//hack used to add and remove same id in same frame
 	void CustomOrderUpdate();
+	const std::unordered_map<SY::UUID,GameObjectData>& GetAllGameObjects();
 
 	template <class T>
 	void SetUpdatePriority(const ComponentManagerBase::UpdatePriority aPriority);
@@ -92,11 +105,9 @@ public:
 
 
 private:
-	struct GameObjectData
-	{
-		bool IsActive = true;
-		Layer onLayer = Layer::Default;
-	};
+	std::string GetName(const SY::UUID aGameObjectID);
+	void SetName(const std::string& name,const SY::UUID aGameObjectID);
+
 
 	template <class T>
 	void AddManager();
@@ -118,6 +129,7 @@ private:
 template<class T>
 T& GameObjectManager::AddComponent(const SY::UUID aGameObjectID)
 {
+	OPTICK_EVENT();
 	if (!myComponentManagers.contains(&typeid(T)))
 	{
 		AddManager<T>();
@@ -128,6 +140,7 @@ T& GameObjectManager::AddComponent(const SY::UUID aGameObjectID)
 template<class T>
 T& GameObjectManager::AddComponent(const SY::UUID aGameObjectID,const T& aComponent)
 {
+	OPTICK_EVENT();
 	if (!myComponentManagers.contains(&typeid(T)))
 	{
 		AddManager<T>();
@@ -138,6 +151,7 @@ T& GameObjectManager::AddComponent(const SY::UUID aGameObjectID,const T& aCompon
 template<class T,typename... Args>
 T& GameObjectManager::AddComponent(const SY::UUID aGameObjectID,Args ...someParameters)
 {
+	OPTICK_EVENT();
 	if (!myComponentManagers.contains(&typeid(T)))
 	{
 		AddManager<T>();
@@ -148,6 +162,7 @@ T& GameObjectManager::AddComponent(const SY::UUID aGameObjectID,Args ...somePara
 template<class T>
 std::vector<T>& GameObjectManager::GetAllComponents()
 {
+	OPTICK_EVENT();
 	if (!myComponentManagers.contains(&typeid(T)))
 	{
 		AddManager<T>();
@@ -158,6 +173,7 @@ std::vector<T>& GameObjectManager::GetAllComponents()
 template<class T>
 T* GameObjectManager::TryGetComponent(const SY::UUID aGameObjectID)
 {
+	OPTICK_EVENT();
 	if (myComponentManagers.contains(&typeid(T)))
 	{
 		return static_cast<ComponentManager<T>*>(myComponentManagers[&typeid(T)])->TryGetComponent(aGameObjectID);
@@ -171,6 +187,7 @@ T* GameObjectManager::TryGetComponent(const SY::UUID aGameObjectID)
 template<class T>
 inline const bool GameObjectManager::HasComponent(const SY::UUID aGameObjectID)
 {
+	OPTICK_EVENT();
 	if (myComponentManagers.contains(&typeid(T)))
 	{
 		return static_cast<const ComponentManager<T>*>(myComponentManagers[&typeid(T)])->HasComponent(aGameObjectID);
@@ -181,6 +198,7 @@ inline const bool GameObjectManager::HasComponent(const SY::UUID aGameObjectID)
 template<class T>
 inline T& GameObjectManager::GetComponent(const SY::UUID aGameObjectID)
 {
+	OPTICK_EVENT();
 	assert(myComponentManagers.contains(&typeid(T)) && "GameObjectManager::GetComponent(...) component manager doesn't exist.");
 	return static_cast<ComponentManager<T>*>(myComponentManagers[&typeid(T)])->GetComponent(aGameObjectID);
 }
@@ -188,6 +206,7 @@ inline T& GameObjectManager::GetComponent(const SY::UUID aGameObjectID)
 template<class T>
 void GameObjectManager::SetUpdatePriority(const ComponentManagerBase::UpdatePriority aPriority)
 {
+	OPTICK_EVENT();
 	if (!myComponentManagers.contains(&typeid(T)))
 	{
 		myComponentManagers[&typeid(T)] = new ComponentManager<T>();
@@ -199,6 +218,7 @@ void GameObjectManager::SetUpdatePriority(const ComponentManagerBase::UpdatePrio
 template<class T>
 void GameObjectManager::AddManager()
 {
+	OPTICK_EVENT();
 	myComponentManagers[&typeid(T)] = new ComponentManager<T>();
 	SortUpdateOrder();
 }
