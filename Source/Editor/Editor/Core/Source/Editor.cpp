@@ -62,9 +62,6 @@ bool Editor::Initialize(HWND aHandle)
 #endif // Release
 
 	AddViewPort();
-	AddViewPort();
-	//AddViewPort();
-	//AddViewPort();
 
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
@@ -265,6 +262,45 @@ void Editor::AddViewPort()
 
 void Editor::TopBar()
 {
+
+	if (ImGui::BeginMainMenuBar())
+	{
+		if (ImGui::BeginMenu("File"))
+		{
+			if (ImGui::Selectable("Open Scene"))
+			{
+
+			}
+			if (ImGui::Selectable("New Scene"))
+			{
+
+			}
+			if (ImGui::Selectable("Save Scene"))
+			{
+
+			}
+
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("Edit"))
+		{
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("Window"))
+		{
+			if (ImGui::Selectable("Add Viewport"))
+			{
+				AddViewPort();
+			}
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("Tools"))
+		{
+			ImGui::EndMenu();
+		}
+		ImGui::EndMainMenuBar();
+	}
+
 	{
 		ImGui::Begin("Hierarchy");
 		ImGui::Separator();

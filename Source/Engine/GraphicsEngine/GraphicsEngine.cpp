@@ -693,7 +693,23 @@ void GraphicsEngine::RenderViewPortWindow(Viewport& renderViewPort)
 
 		if (ImGui::BeginMenuBar())
 		{
-			ImGui::Button("Click me!");
+			if (ImGui::BeginMenu("File"))
+			{
+				if (ImGui::Selectable("Open Scene"))
+				{
+
+				}
+				if (ImGui::Selectable("New Scene"))
+				{
+
+				}
+				if (ImGui::Selectable("Save Scene"))
+				{
+
+				}
+
+				ImGui::EndMenu();
+			}
 			ImGui::EndMenuBar();
 		}
 		float windowWidth = ImGui::GetWindowWidth();
