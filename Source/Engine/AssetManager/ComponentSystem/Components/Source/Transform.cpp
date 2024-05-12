@@ -67,6 +67,11 @@ const Matrix& Transform::GetTransform()
 	return myTransform;
 }
 
+Matrix& Transform::GetMutableTransform()
+{
+	return myTransform;
+}
+
 const Matrix& Transform::GetRawTransform() const
 {
 	return myTransform;

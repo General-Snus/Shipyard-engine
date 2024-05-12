@@ -12,7 +12,7 @@ class aiMatrix4x4t;
 typedef aiMatrix4x4t<float> aiMatrix4x4;
 
 
-template <class T>
+template <class T = float>
 class Matrix4x4
 {
 public:
@@ -23,9 +23,12 @@ public:
 	Matrix4x4<T>(const  Vector4<Vector4<T>> aVector);
 	explicit Matrix4x4(const DirectX::XMMATRIX* aMatrix);
 	explicit Matrix4x4(const aiMatrix4x4* aMatrix);
-	// () operator for accessing element (row, column) for read/write or read,respectively.
+
 	T& operator()(const int aRow,const int aColumn);
 	const T& operator()(const int aRow,const int aColumn) const;
+
+	T* operator & () { return arr; }
+	const T* operator & () const { return arr; }
 
 	// Static functions for creating rotation matrices.
 	static Matrix4x4<T> CreateRotationAroundX(const T aAngleInRadians);
@@ -43,16 +46,21 @@ public:
 	static Matrix4x4<T> LookAt(const Vector3<T>& aFrom,const Vector3<T>& aTarget,const Vector3<T>& anUp);
 	static Matrix4x4<T> CreateOrthographicProjection(float aLeftPlane,float aRightPlane,float aBottomPlane,float aTopPlane,float aNearPlane,float aFarPlane);
 	void SetFromRaw(const T arr[16]);
+
+	void Transpose();
+	void Inverse();
+	Matrix4x4<T> GetTranspose() const;
+	Matrix4x4<T> GetInverse() const;
+
+	//STRANGER DANGER
+	T* GetMatrixPtr();
 private:
-	T arr[4][4];
+	T arr[16];
 };
 template<class T>
 void Matrix4x4<T>::SetFromRaw(const T input[16])
 {
-	for (int i = 0; i < 16; i++)
-	{
-		arr[static_cast<int>(std::floor(i / 4))][i % 4] = input[i];
-	}
+	arr = input;
 }
 
 template<class T>
@@ -62,7 +70,7 @@ inline Matrix4x4<T>::Matrix4x4(const Vector4<Vector4<T>> aVector)
 	{
 		for (int j = 0; j < 4; j++)
 		{
-			arr[i][j] = aVector[i][j];
+			this(i + 1,j + 1) = aVector[i][j];
 		}
 	}
 }
@@ -91,42 +99,41 @@ Matrix4x4<T> Matrix4x4<T>::CreateScaleMatrix(const Vector3<T>& aScale)
 template<class T>
 inline Matrix4x4<T>::Matrix4x4()
 {
-	for (short i = 1; i <= dim4x4; i++)
-	{
-		for (short j = 1; j <= dim4x4; j++)
-		{
-			if (i == j)
-			{
-				arr[i - 1][j - 1] = 1;
-			}
-			else
-			{
-				arr[i - 1][j - 1] = 0;
-			}
-		}
-	}
+	arr[0] = T(1);
+	arr[1] = T(0);
+	arr[2] = T(0);
+	arr[3] = T(0);
+
+	arr[4] = T(0);
+	arr[5] = T(1);
+	arr[6] = T(0);
+	arr[7] = T(0);
+
+	arr[8] = T(0);
+	arr[9] = T(0);
+	arr[10] = T(1);
+	arr[11] = T(0);
+
+	arr[12] = T(0);
+	arr[13] = T(0);
+	arr[14] = T(0);
+	arr[15] = T(1);
 }
 template<class T>
 inline Matrix4x4<T>::Matrix4x4(const Matrix4x4<T>& aMatrix)
 {
-	for (short i = 1; i <= dim4x4; i++)
-	{
-		for (short j = 1; j <= dim4x4; j++)
-		{
-			arr[i - 1][j - 1] = aMatrix(i,j);
-		}
-	}
+	memcpy(arr,aMatrix.arr,sizeof(arr));
 }
 #pragma region Operators
 template <class T>
 inline T& Matrix4x4<T>::operator()(const int aRow,const int aColumn)
 {
-	return arr[aRow - 1][aColumn - 1];
+	return arr[4 * (aRow - 1) + aColumn - 1];
 }
 template <class T>
 inline const T& Matrix4x4<T>::operator()(const int aRow,const int aColumn) const
 {
-	return arr[aRow - 1][aColumn - 1];
+	return arr[4 * (aRow - 1) + aColumn - 1];
 }
 
 template <class T>	Matrix4x4<T> operator-(const Matrix4x4<T>& aMat1,const Matrix4x4<T>& aMat2)
@@ -326,6 +333,39 @@ inline Vector3<T> Matrix4x4<T>::ReadPosition(const Matrix4x4<T>& aMatrix)
 {
 	return Vector3<T>(aMatrix.arr[3][0],aMatrix.arr[3][1],aMatrix.arr[3][2]);
 }
+
+template <class T>
+T* Matrix4x4<T>::GetMatrixPtr()
+{
+	return arr;
+}
+
+
+template <class T>
+void Matrix4x4<T>::Transpose()
+{
+	arr = Matrix4x4<T>::Transpose(*this);
+}
+template <class T>
+Matrix4x4<T> Matrix4x4<T>::GetTranspose() const
+{
+	return Matrix4x4<T>::Transpose(*this);
+}
+
+
+template <class T>
+void Matrix4x4<T>::Inverse()
+{
+	arr = Matrix4x4<T>::GetFastInverse(*this);
+}
+
+template <class T>
+Matrix4x4<T> Matrix4x4<T>::GetInverse() const
+{
+	return Matrix4x4<T>::GetFastInverse(*this);
+}
+
+
 template<class T>
 inline Matrix4x4<T> Matrix4x4<T>::LookAt(const Vector3<T>& aFrom,const Vector3<T>& aTarget,const Vector3<T>& anUp)
 {
@@ -363,25 +403,22 @@ inline Matrix4x4<T> Matrix4x4<T>::CreateOrthographicProjection(float aLeftPlane,
 	const float ViewHeight = std::abs(aTopPlane - aBottomPlane);
 	const float fRange = 1.0f / (aFarPlane - aNearPlane);
 
-	result.arr[0][0] = 2.0f / ViewWidth;
-	result.arr[0][1] = 0.0f;
-	result.arr[0][2] = 0.0f;
-	result.arr[0][3] = 0.0f;
-
-	result.arr[1][0] = 0.0f;
-	result.arr[1][1] = 2.0f / ViewHeight;
-	result.arr[1][2] = 0.0f;
-	result.arr[1][3] = 0.0f;
-
-	result.arr[2][0] = 0.0f;
-	result.arr[2][1] = 0.0f;
-	result.arr[2][2] = fRange;
-	result.arr[2][3] = 0.0f;
-
-	result.arr[3][0] = 0.0f;
-	result.arr[3][1] = 0.0f;
-	result.arr[3][2] = -fRange * aNearPlane;
-	result.arr[3][3] = 1.0f;
+	result(1,1) = 2.0f / ViewWidth;
+	result(1,2) = 0.0f;
+	result(1,3) = 0.0f;
+	result(1,4) = 0.0f;
+	result(2,1) = 0.0f;
+	result(2,2) = 2.0f / ViewHeight;
+	result(2,3) = 0.0f;
+	result(2,4) = 0.0f;
+	result(3,1) = 0.0f;
+	result(3,2) = 0.0f;
+	result(3,3) = fRange;
+	result(3,4) = 0.0f;
+	result(4,1) = 0.0f;
+	result(4,2) = 0.0f;
+	result(4,3) = -fRange * aNearPlane;
+	result(4,4) = 1.0f;
 	return result;
 }
 

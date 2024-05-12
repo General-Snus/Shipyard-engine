@@ -26,11 +26,13 @@
 #include <Windows/EditorWindows/ChainGraph/GraphTool.h>
 #include "../Editor.h"
 #include "AssetManager.h"
+#include "ComponentSystem/Components/CameraComponent.h"
 #include "ComponentSystem/Components/LightComponent.h"
 #include "Core/Paths.h"
 #include "DirectX/Shipyard/GPU.h"
 #include "GraphicsEngine.h"  
 #include "imgui_internal.h"
+#include "ImGuizmo.h"
 #include "Objects/BaseAssets/TextureAsset.h"
 #include "System/SceneGraph/WorldGraph.h"
 #include "Windows/SplashWindow.h"
@@ -52,12 +54,17 @@ bool Editor::Initialize(HWND aHandle)
 	ShowSplashScreen();
 	ThreadPool::Get().Init();
 
+
 #ifdef _DEBUG
 	GraphicsEngine::Get().Initialize(aHandle,true);
 #else
 	GraphicsEngine::Get().Initialize(aHandle,false);
 #endif // Release
 
+	AddViewPort();
+	AddViewPort();
+	//AddViewPort();
+	//AddViewPort();
 
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
@@ -196,6 +203,7 @@ void Editor::UpdateImGui()
 	OPTICK_CATEGORY("ImGui_ImplWin32_NewFrame",Optick::Category::UI);
 	ImGui::NewFrame();
 	OPTICK_CATEGORY("ImGui::NewFrame",Optick::Category::UI);
+	ImGuizmo::BeginFrame();
 
 	ImGui::DockSpaceOverViewport();
 	TopBar();
@@ -225,18 +233,38 @@ void Editor::Update()
 void Editor::Render()
 {
 	OPTICK_EVENT();
-	GraphicsEngine::Get().BeginFrame();
-	GraphicsEngine::Get().RenderFrame(0,0);
-	GraphicsEngine::Get().EndFrame();
+
+	for (auto& viewport : g_EditorViewPorts)
+	{
+		viewport.Update();
+	}
+
+	GraphicsEngine::Get().Render(g_EditorViewPorts);/*
 
 	const float delta = Timer::GetInstance().GetDeltaTime();
-	const auto dur = std::chrono::duration<float,std::milli>(std::max(0.0f,(1 / 60.0f - delta) * 1000.f));
-	Sleep(static_cast<DWORD>((500.f / 60.f) - delta));
+	const unsigned sleepTime = static_cast<unsigned>(((1.f / 60.f) * 1000.f));
+	if (sleepTime > 0 && sleepTime < 17)*/
+	{
+		using namespace std::chrono_literals;
+		std::this_thread::sleep_for(std::chrono::milliseconds(8));
+	}
+}
+
+void Editor::AddViewPort()
+{
+	if (g_EditorViewPorts.empty())
+	{
+		g_EditorViewPorts.emplace_back(Viewport(true));
+	}
+	else
+	{
+		g_EditorViewPorts.emplace_back(Viewport(false));
+	}
+	g_EditorViewPorts.back().ViewportIndex = (int)g_EditorViewPorts.size() - 1;
 }
 
 void Editor::TopBar()
 {
-	//ImGui::ShowDemoWindow();
 	{
 		ImGui::Begin("Hierarchy");
 		ImGui::Separator();
@@ -245,6 +273,10 @@ void Editor::TopBar()
 		ImGui::BeginChild("GameObjectList");
 		for (const auto& i : gObjList)
 		{
+			if (!i.second.IsVisibleInHierarcy)
+			{
+				continue;
+			}
 			ImGui::PushID(i.first);
 			{
 				bool arg = i.second.IsActive;

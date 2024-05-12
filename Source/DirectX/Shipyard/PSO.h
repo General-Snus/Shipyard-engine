@@ -90,7 +90,7 @@ class ShadowMapperPSO : public PSO
 public:
 	ShadowMapperPSO() = default;
 	void Init(const ComPtr<ID3D12Device2>& dev) override;
-	static void WriteShadows(std::shared_ptr<CommandList>& commandList,const std::vector<cMeshRenderer>& objectsToRender);
+	static void WriteShadows(std::shared_ptr<CommandList>& commandList);
 };
 
 class EnvironmentLightPSO : public PSO

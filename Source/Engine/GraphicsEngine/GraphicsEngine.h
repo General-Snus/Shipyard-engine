@@ -1,13 +1,15 @@
 #pragma once    
 
 #include "DirectX/Shipyard/Gpu_fwd.h"
-#include "Engine/AssetManager/Enums.h" 
+#include "DirectX/Shipyard/PSO.h"
+#include "Engine/AssetManager/Enums.h"  
 #include "Rendering/Buffers/FrameBuffer.h"
 #include "Rendering/Buffers/G_Buffer.h"
 #include "Rendering/Buffers/GraphicSettingsBuffer.h"
 #include "Rendering/Buffers/LightBuffer.h"
 #include "Rendering/Buffers/LineBuffer.h"
 #include "Rendering/Buffers/ObjectBuffer.h"
+#include "Rendering/Viewport.h"
 
 #define _DEBUGDRAW 
 
@@ -75,10 +77,6 @@ public:
 	};
 	FrameBuffer myFrameBuffer;
 private:
-
-	std::shared_ptr<PSOCache> m_StateCache;
-
-
 	ObjectBuffer myObjectBuffer;
 	LineBuffer myLineBuffer;
 	LightBuffer myLightBuffer;
@@ -128,29 +126,45 @@ private:
 	ComPtr<ID3DBlob> gaussShader;
 	ComPtr<ID3DBlob> bloomShader;
 
+	static inline std::shared_ptr<Texture> BRDLookUpTable;
+	static inline std::shared_ptr<TextureHolder> NoiseTable;
+	static inline std::shared_ptr<TextureHolder> defaultTexture;
+	static inline std::shared_ptr<TextureHolder> defaultNormalTexture;
+	static inline std::shared_ptr<TextureHolder> defaultMatTexture;
+	static inline std::shared_ptr<TextureHolder> defaultEffectTexture;
+	static inline std::shared_ptr<TextureHolder> defaultParticleTexture;
+	static inline std::shared_ptr<TextureHolder> defaultCubeMap;
+	static inline std::shared_ptr<Mesh> defaultMesh;
+	static inline std::shared_ptr<Material> defaultMaterial;
 
-	//Debug
-	//ComPtr<ID3D12Resource> myLineVertexBuffer;
-	//ComPtr<ID3D12Resource> myLineIndexBuffer;
-	//std::shared_ptr<ShipyardShader>  debugLineVS;
-	//std::shared_ptr<ShipyardShader> debugLinePS;
-
-	std::shared_ptr<Texture> BRDLookUpTable;
-	std::shared_ptr<TextureHolder> NoiseTable;
-	std::shared_ptr<TextureHolder> defaultTexture;
-	std::shared_ptr<TextureHolder> defaultNormalTexture;
-	std::shared_ptr<TextureHolder> defaultMatTexture;
-	std::shared_ptr<TextureHolder> defaultEffectTexture;
-	std::shared_ptr<TextureHolder> defaultParticleTexture;
-	std::shared_ptr<TextureHolder> defaultCubeMap;
-
-	std::shared_ptr<Mesh> defaultMesh;
-	std::shared_ptr<Material> defaultMaterial;
 	GraphicsSettings myGraphicSettings;
 	HeapHandle ViewPortHeapHandle;
 	// We're a container singleton, no instancing this outside the class.
 	GraphicsEngine() = default;
 
+
+private:
+	static bool SetupDebugDrawline();
+	void SetupDefaultVariables();
+	static void SetupBlendStates();
+	void SetupParticleShaders();
+	void UpdateSettings();
+	void SetupSpace3();
+	void SetupPostProcessing();
+
+
+	void BeginFrame();
+	static void RenderFrame(Viewport& renderViewPort);
+	static void EndFrame();
+
+	static void PrepareBuffers(std::shared_ptr<CommandList> commandList,Viewport& renderViewPort);
+	static void DeferredRenderingPass(std::shared_ptr<CommandList> commandList,Texture*& gBufferTextures,Viewport& renderViewPort);
+	static void EnvironmentLightPass(std::shared_ptr<CommandList> commandList,Texture* gBufferTextures);
+	static void ToneMapperPass(std::shared_ptr<CommandList> commandList,Texture& target);
+	static void ImGuiPass(std::shared_ptr<CommandList> commandList);
+	static void RenderViewPortWindow(Viewport& renderViewPort);
+
+	void RenderTextureTo(eRenderTargets from,eRenderTargets to) const;
 public:
 	inline static GraphicsEngine& Get()
 	{
@@ -158,28 +172,7 @@ public:
 		return myInstance;
 	}
 	bool Initialize(HWND windowHandle,bool enableDeviceDebug);
-
-	bool SetupDebugDrawline();
-
-	void SetupDefaultVariables();
-
-	void SetupBlendStates();
-
-	void SetupParticleShaders();
-
-	void UpdateSettings();
-
-	void SetupSpace3();
-
-	void SetupPostProcessing();
-
-	void Update();
-	void BeginFrame();
-	void EndFrame();
-	void RenderFrame(float aDeltaTime,double aTotalTime);
-
-	void RenderTextureTo(eRenderTargets from,eRenderTargets to) const;
-
+	void Render(std::vector<Viewport>& renderViewPorts);
 
 	void SetDepthState(eDepthStencilStates state)
 	{

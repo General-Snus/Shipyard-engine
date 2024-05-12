@@ -22,16 +22,22 @@ public:
 
 	//void UpdatePositionVectors();
 	void Update() override;
+	void Update(Transform& transform);
 	void Render() override;
+
+	void SetSettings(const CameraSettings& settings);
+	CameraSettings GetSettings() const { return mySettings; };
+
 	std::array<Vector4f,4> GetFrustrumCorners() const;
 	Vector3f GetPointerDirection(const Vector2<int> position);
 	Vector3f GetPointerDirectionNDC(const Vector2<int> position) const;
 
+	Matrix GetProjection() { return m_Projection; };
 	FrameBuffer GetFrameBuffer();
 	Vector4f WoldSpaceToPostProjectionSpace(Vector3f aEntity);
 
 private:
-	Matrix myClipMatrix;
+	Matrix m_Projection;
 	Vector2ui myScreenSize;
 	float cameraSpeed = 10;
 	CameraSettings mySettings;

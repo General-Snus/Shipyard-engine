@@ -1,6 +1,7 @@
 #pragma once  
 #include <Editor/Editor/Defines.h>
 #include <Editor/Editor/Windows/EditorWindows/ChainGraph/GraphTool.h>
+#include <Engine/GraphicsEngine/Rendering/Viewport.h>
 #include <Game/GameLauncher/Core/GameLauncher.h>
 #include <Tools/Logging/Logging.h> 
 #include <Tools/Utilities/DataStructures/Queue.hpp>
@@ -29,6 +30,8 @@ private:
 	void Update();
 	void Render();
 
+	void AddViewPort();
+
 
 #pragma region IMGUI
 	void TopBar();
@@ -55,8 +58,10 @@ public:
 
 	bool GetIsGUIActive() const { return IsGUIActive; };
 	void SetIsGUIActive(bool set) { IsGUIActive = set; };
+	static inline std::vector<Viewport> g_EditorViewPorts;
 private:
 	inline static RECT ViewportRect;
+
 	std::shared_ptr<ScriptGraphEditor> ScriptEditor;
 	std::vector<GameObject> mySelectedGameObjects;
 

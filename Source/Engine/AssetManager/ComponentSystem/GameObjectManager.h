@@ -38,6 +38,7 @@ private:
 	struct GameObjectData
 	{
 		bool IsActive = true;
+		bool IsVisibleInHierarcy = true;
 		Layer onLayer = Layer::Default;
 		std::string Name;
 	};

@@ -22,12 +22,12 @@ cCamera::cCamera(const unsigned int anOwnerId) : Component(anOwnerId)
 	{
 		const auto dxMatrix = XMMatrixPerspectiveFovLH(mySettings.fow,mySettings.APRatio,mySettings.farfield,
 			mySettings.nearField);
-		myClipMatrix = Matrix(&dxMatrix);
+		m_Projection = Matrix(&dxMatrix);
 	}
 	else
 	{
 		const auto dxMatrix = XMMatrixOrthographicLH(40,40,1000000,mySettings.nearField);
-		myClipMatrix = Matrix(&dxMatrix);
+		m_Projection = Matrix(&dxMatrix);
 	}
 
 #ifdef Flashlight
@@ -54,12 +54,12 @@ cCamera::cCamera(const unsigned int anOwnerId,const CameraSettings& settings) : 
 	{
 		const auto dxMatrix = XMMatrixPerspectiveFovLH(mySettings.fow,mySettings.APRatio,mySettings.farfield,
 			mySettings.nearField);
-		myClipMatrix = Matrix(&dxMatrix);
+		m_Projection = Matrix(&dxMatrix);
 	}
 	else
 	{
 		const auto dxMatrix = XMMatrixOrthographicLH(40,40,1000000,mySettings.nearField);
-		myClipMatrix = Matrix(&dxMatrix);
+		m_Projection = Matrix(&dxMatrix);
 	}
 
 #ifdef Flashlight
@@ -84,6 +84,11 @@ void cCamera::Update()
 {
 	OPTICK_EVENT();
 	Transform& myTransform = this->GetGameObject().GetComponent<Transform>();
+	Update(myTransform);
+}
+
+void cCamera::Update(Transform& aTransform)
+{
 	float aTimeDelta = Timer::GetInstance().GetDeltaTime();
 
 	//UpdatePositionVectors();
@@ -108,31 +113,31 @@ void cCamera::Update()
 			-static_cast<float>(InputHandler::GetInstance().GetMousePositionDelta().x),
 			0.0f
 		};
-		myTransform.Rotate(mouseDeltaVector * rotationSpeed * Timer::GetInstance().GetDeltaTime());
+		aTransform.Rotate(mouseDeltaVector * rotationSpeed * Timer::GetInstance().GetDeltaTime());
 	}
 
 	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::W))
 	{
-		myTransform.Move(myTransform.GetForward() * aTimeDelta * mdf);
+		aTransform.Move(aTransform.GetForward() * aTimeDelta * mdf);
 	}
 
 	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::S))
 	{
-		myTransform.Move(-myTransform.GetForward() * aTimeDelta * mdf);
+		aTransform.Move(-aTransform.GetForward() * aTimeDelta * mdf);
 	}
 
 	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::D))
 	{
-		myTransform.Move(myTransform.GetRight() * aTimeDelta * mdf);
+		aTransform.Move(aTransform.GetRight() * aTimeDelta * mdf);
 	}
 
 	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::A))
 	{
-		myTransform.Move(-myTransform.GetRight() * aTimeDelta * mdf);
+		aTransform.Move(-aTransform.GetRight() * aTimeDelta * mdf);
 	}
 	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::E))
 	{
-		myTransform.Rotate({ 0,200.f * aTimeDelta });
+		aTransform.Rotate({ 0,200.f * aTimeDelta });
 	}
 #ifdef Flashlight
 	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::F))
@@ -142,24 +147,41 @@ void cCamera::Update()
 #endif
 	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::Q))
 	{
-		myTransform.Rotate({ 0,-200.f * aTimeDelta });
+		aTransform.Rotate({ 0,-200.f * aTimeDelta });
 	}
 
 	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::SPACE))
 	{
-		myTransform.Move(myTransform.GetUp() * aTimeDelta * mdf);
+		aTransform.Move(aTransform.GetUp() * aTimeDelta * mdf);
 	}
 
 	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::SHIFT))
 	{
-		myTransform.Move(-myTransform.GetUp() * aTimeDelta * mdf);
+		aTransform.Move(-aTransform.GetUp() * aTimeDelta * mdf);
 	}
 }
 
 void cCamera::Render()
 {
-	//GraphicsEngine::Get().DeferredCommand<GfxCmd_SetFrameBuffer>(myClipMatrix, this->GetGameObject().GetComponent<Transform>(), (int)ModelViewer::GetApplicationState().filter);
 }
+
+void cCamera::SetSettings(const CameraSettings& settings)
+{
+	mySettings = settings;
+
+	if (!mySettings.isOrtho)
+	{
+		const auto dxMatrix = XMMatrixPerspectiveFovLH(mySettings.fow,mySettings.APRatio,mySettings.farfield,
+			mySettings.nearField);
+		m_Projection = Matrix(&dxMatrix);
+	}
+	else
+	{
+		const auto dxMatrix = XMMatrixOrthographicLH(40,40,1000000,mySettings.nearField);
+		m_Projection = Matrix(&dxMatrix);
+	}
+}
+
 std::array<Vector4f,4> cCamera::GetFrustrumCorners() const
 {
 	const float farplane = 10000; // I dont use farplanes but some effect wants them anyway
@@ -185,10 +207,10 @@ Vector3f cCamera::GetPointerDirection(const Vector2<int> position)
 	auto size = Editor::GetViewportResolution();
 
 	viewPosition.x = ((2.0f * position.x / size.x) - 1);
-	viewPosition /= myClipMatrix(1,1);
+	viewPosition /= m_Projection(1,1);
 
 	viewPosition.y = ((-2.0f * position.y / size.y) - 1);
-	viewPosition /= myClipMatrix(2,2);
+	viewPosition /= m_Projection(2,2);
 
 	viewPosition.z = 1;
 	viewPosition.w = 0;
@@ -212,7 +234,7 @@ FrameBuffer cCamera::GetFrameBuffer()
 	OPTICK_EVENT();
 	auto& transform = GetComponent<Transform>();
 	FrameBuffer buffer;
-	buffer.ProjectionMatrix = myClipMatrix;
+	buffer.ProjectionMatrix = m_Projection;
 	buffer.ViewMatrix = Matrix::GetFastInverse(transform.GetTransform());
 	buffer.Time = Timer::GetInstance().GetDeltaTime();
 	buffer.FB_RenderMode = (int)Editor::GetApplicationState().filter;
@@ -233,7 +255,7 @@ Vector4f cCamera::WoldSpaceToPostProjectionSpace(Vector3f aEntity)
 	outPosition = outPosition * Matrix::GetFastInverse(myTransform.GetTransform());
 
 	//Camera space -> ClipSpace
-	outPosition = outPosition * myClipMatrix;
+	outPosition = outPosition * m_Projection;
 
 	outPosition.x /= outPosition.w;
 	outPosition.y /= outPosition.w;

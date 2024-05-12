@@ -4,6 +4,7 @@
 #define D3D12_GPU_VIRTUAL_ADDRESS_NULL      ((D3D12_GPU_VIRTUAL_ADDRESS)0) 
 #define D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN   ((D3D12_GPU_VIRTUAL_ADDRESS)-1)
 
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -11,8 +12,6 @@
 
 #include "Gpu_fwd.h" 
 using namespace Microsoft::WRL;
-
-
 
 class GpuResource
 {

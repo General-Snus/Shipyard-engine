@@ -17,7 +17,8 @@ public:
 	void Init() override;
 	void Update() override;
 	void Render() override;
-	// Matrix& GetTransform();
+	//Be ware, the matrix is built by the transform, changes wont carry but you can use this to avoid making copies of the orignal matrix
+	Matrix& GetMutableTransform();
 	const Matrix& GetTransform();
 	//not dirty checked
 	const Matrix& GetRawTransform() const;

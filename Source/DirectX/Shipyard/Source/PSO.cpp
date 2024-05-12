@@ -425,9 +425,14 @@ void ShadowMapperPSO::Init(const ComPtr<ID3D12Device2>& dev)
 	m_PipelineState->SetName(L"ShadowMapperPSO");
 }
 
-void ShadowMapperPSO::WriteShadows(std::shared_ptr<CommandList>& commandList,const std::vector<cMeshRenderer>& objectsToRender)
+void ShadowMapperPSO::WriteShadows(std::shared_ptr<CommandList>& commandList)
 {
 	OPTICK_EVENT();
+
+
+	static auto& objectsToRender = GameObjectManager::Get().GetAllComponents<cMeshRenderer>();
+
+
 	std::shared_ptr<Texture> shadowMap = nullptr;
 	const auto graphicCommandList = commandList->GetGraphicsCommandList();
 

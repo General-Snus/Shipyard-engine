@@ -22,8 +22,12 @@
   <ItemGroup>
     <ClInclude Include="backends\imgui_impl_dx12.h" />
     <ClInclude Include="crude_json.h" />
+    <ClInclude Include="GraphEditor.h" />
     <ClInclude Include="imconfig.h" />
+    <ClInclude Include="ImCurveEdit.h" />
+    <ClInclude Include="ImGradient.h" />
     <ClInclude Include="imgui.h" />
+    <ClInclude Include="ImGuizmo.h" />
     <ClInclude Include="imgui_bezier_math.h" />
     <ClInclude Include="imgui_canvas.h" />
     <ClInclude Include="imgui_extra_math.h" />
@@ -34,16 +38,22 @@
     <ClInclude Include="imgui_node_editor_internal.h" />
     <ClInclude Include="implot.h" />
     <ClInclude Include="implot_internal.h" />
+    <ClInclude Include="ImSequencer.h" />
     <ClInclude Include="imstb_rectpack.h" />
     <ClInclude Include="imstb_textedit.h" />
     <ClInclude Include="imstb_truetype.h" />
+    <ClInclude Include="ImZoomSlider.h" />
     <ClInclude Include="misc\cpp\imgui_stdlib.h" />
     <ClInclude Include="misc\single_file\imgui_single_file.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="backends\imgui_impl_dx12.cpp" />
     <ClCompile Include="crude_json.cpp" />
+    <ClCompile Include="GraphEditor.cpp" />
+    <ClCompile Include="ImCurveEdit.cpp" />
+    <ClCompile Include="ImGradient.cpp" />
     <ClCompile Include="imgui.cpp" />
+    <ClCompile Include="ImGuizmo.cpp" />
     <ClCompile Include="imgui_canvas.cpp" />
     <ClCompile Include="imgui_demo.cpp" />
     <ClCompile Include="imgui_draw.cpp" />
@@ -56,6 +66,7 @@
     <ClCompile Include="implot.cpp" />
     <ClCompile Include="implot_demo.cpp" />
     <ClCompile Include="implot_items.cpp" />
+    <ClCompile Include="ImSequencer.cpp" />
     <ClCompile Include="misc\cpp\imgui_stdlib.cpp" />
     <ClCompile Include="misc\fonts\binary_to_compressed_c.cpp" />
   </ItemGroup>
@@ -183,7 +194,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions);PX_PHYSX_STATIC_LIB;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
@@ -202,7 +213,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>

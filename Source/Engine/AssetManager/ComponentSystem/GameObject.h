@@ -7,6 +7,7 @@
 class GameObject
 {
 public:
+	//Todo REMOVE
 	GameObject() = default; // It's dangerous to create a gameobject without the manager!
 	~GameObject() = default;
 
@@ -48,7 +49,6 @@ private:
 
 	//DO NOT ADD VARIABLES HERE IT IS INCONSISTENT WITH PHILOSOPHY AND WILL NOT WORK
 	SY::UUID myID = UINT_MAX;
-
 	GameObjectManager* myManager = nullptr;
 };
 

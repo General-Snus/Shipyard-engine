@@ -233,6 +233,7 @@
     <ClInclude Include="Shaders\Include\PointLightShadow_PS.h" />
     <ClInclude Include="Shaders\Include\PointLightShadow_VS.h" />
     <ClInclude Include="Shaders\Registers.h" />
+    <ClInclude Include="Rendering\Viewport.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="InterOp\Source\GPUBuffer.cpp" />
@@ -263,6 +264,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Rendering\Vertex.cpp" />
+    <ClCompile Include="Rendering\Viewport.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
