@@ -27,6 +27,7 @@
     <ClInclude Include="ImCurveEdit.h" />
     <ClInclude Include="ImGradient.h" />
     <ClInclude Include="imgui.h" />
+    <ClInclude Include="ImGuiHepers.hpp" />
     <ClInclude Include="ImGuizmo.h" />
     <ClInclude Include="imgui_bezier_math.h" />
     <ClInclude Include="imgui_canvas.h" />

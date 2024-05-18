@@ -31,6 +31,13 @@ public:
 	// Tells the logger to output to the Visual Studio output window instead
 	// of a console.
 	static void SetPrintToVSOutput(bool bNewValue);
+	static void Log(const char* aString);
+
+	template<typename T>
+	static void  Log(const T& aString)
+	{
+		Log(std::to_string(aString));
+	}
 
 	// Log a message.
 	static void Log(const std::string& aString);

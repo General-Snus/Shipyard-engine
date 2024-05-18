@@ -1,42 +1,39 @@
 #define NOMINMAX 
 
 #include <assert.h>
+#include <filesystem>
+#include <fstream>
+#include <string>
+#include <Windows.h>
+
 #include <Editor/Editor/Windows/Window.h>
 #include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h> 
 #include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXDynamicBody.h> 
-#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXStaticBody.h> 
 #include <Engine/AssetManager/ComponentSystem/Components/Transform.h> 
-#include <Engine/AssetManager/ComponentSystem/GameObject.h> 
-#include <filesystem>
-#include <fstream>
-#include <functional>
-#include <streambuf> 
-#include <string>
-#include <stringapiset.h>
+
 #include <Tools/ImGui/ImGui/backends/imgui_impl_dx12.h>
-#include <Tools/ImGUI/ImGUI/imgui.h> 
+#include <Tools/ImGUI/ImGUI/imgui.h>  
 #include <Tools/ImGUI/ImGUI/imgui_impl_win32.h>
+#include "ImGuizmo.h"
+
+
 #include <Tools/Logging/Logging.h>
 #include <Tools/Optick/include/optick.h>
 #include <Tools/Utilities/Game/Timer.h>
-#include <Tools/Utilities/Input/InputHandler.hpp>
-#include <Tools/Utilities/Math.hpp>
+#include <Tools/Utilities/Input/Input.hpp>
 #include <Tools/Utilities/System/ThreadPool.hpp>
-#include <Windows.h>
-#include <Windows/EditorWindows/ChainGraph/GraphTool.h>
 #include "../Editor.h"
 #include "AssetManager.h"
-#include "ComponentSystem/Components/CameraComponent.h"
 #include "ComponentSystem/Components/LightComponent.h"
-#include "Core/Paths.h"
 #include "DirectX/Shipyard/GPU.h"
-#include "GraphicsEngine.h"  
-#include "imgui_internal.h"
-#include "ImGuizmo.h"
-#include "Objects/BaseAssets/TextureAsset.h"
+#include "GraphicsEngine.h"   
 #include "System/SceneGraph/WorldGraph.h"
-#include "Windows/SplashWindow.h"
-
+#include "Windows/EditorWindows/Console.h"
+#include "Windows/EditorWindows/ContentDirectory.h"
+#include "Windows/EditorWindows/Hierarchy.h"
+#include "Windows/EditorWindows/Inspector.h"
+#include "Windows/EditorWindows/Viewport.h"
+#include "Windows/SplashWindow.h" 
 #if PHYSX 
 #include <Engine/PersistentSystems/Physics/PhysXInterpeter.h>
 #endif // PHYSX 0
@@ -151,14 +148,14 @@ void Editor::DoWinProc(const MSG& aMessage)
 		return;
 	}
 
-	InputHandler::GetInstance().UpdateEvents(aMessage.message,aMessage.wParam,aMessage.lParam);
-	InputHandler::GetInstance().UpdateMouseInput(aMessage.message);
+	Input::UpdateEvents(aMessage.message,aMessage.wParam,aMessage.lParam);
+	Input::UpdateMouseInput(aMessage.message);
 }
 
 int	 Editor::Run()
 {
 	OPTICK_FRAME("MainThread");
-	InputHandler::GetInstance().Update();
+	Input::Update();
 
 	if (IsGUIActive)
 	{
@@ -231,12 +228,11 @@ void Editor::Render()
 {
 	OPTICK_EVENT();
 
-	for (auto& viewport : g_EditorViewPorts)
+	for (auto& viewport : m_Viewports)
 	{
-		viewport.Update();
+		viewport->Update();
 	}
-
-	GraphicsEngine::Get().Render(g_EditorViewPorts);/*
+	GraphicsEngine::Get().Render(m_Viewports);/*
 
 	const float delta = Timer::GetInstance().GetDeltaTime();
 	const unsigned sleepTime = static_cast<unsigned>(((1.f / 60.f) * 1000.f));
@@ -249,20 +245,16 @@ void Editor::Render()
 
 void Editor::AddViewPort()
 {
-	if (g_EditorViewPorts.empty())
-	{
-		g_EditorViewPorts.emplace_back(Viewport(true));
-	}
-	else
-	{
-		g_EditorViewPorts.emplace_back(Viewport(false));
-	}
-	g_EditorViewPorts.back().ViewportIndex = (int)g_EditorViewPorts.size() - 1;
+	static int ViewportIndex = 0;
+	auto viewport = std::make_shared<Viewport>(!static_cast<bool>(ViewportIndex));
+	viewport->ViewportIndex = ViewportIndex;
+	ViewportIndex++;
+	m_Viewports.emplace_back(viewport);
+	g_EditorWindows.emplace_back(viewport);
 }
 
 void Editor::TopBar()
 {
-
 	if (ImGui::BeginMainMenuBar())
 	{
 		if (ImGui::BeginMenu("File"))
@@ -288,9 +280,29 @@ void Editor::TopBar()
 		}
 		if (ImGui::BeginMenu("Window"))
 		{
-			if (ImGui::Selectable("Add Viewport"))
+			if (ImGui::Selectable("Viewport"))
 			{
 				AddViewPort();
+			}
+
+			if (ImGui::Selectable("Inspector"))
+			{
+				g_EditorWindows.emplace_back(std::make_shared<Inspector>());
+			}
+
+			if (ImGui::Selectable("Hierarchy"))
+			{
+				g_EditorWindows.emplace_back(std::make_shared<Hierarchy>());
+			}
+
+			if (ImGui::Selectable("Content Browser"))
+			{
+				g_EditorWindows.emplace_back(std::make_shared<ContentDirectory>());
+			}
+
+			if (ImGui::Selectable("Console"))
+			{
+				g_EditorWindows.emplace_back(std::make_shared<Console>());
 			}
 			ImGui::EndMenu();
 		}
@@ -301,96 +313,10 @@ void Editor::TopBar()
 		ImGui::EndMainMenuBar();
 	}
 
+	for (const auto& windows : g_EditorWindows)
 	{
-		ImGui::Begin("Hierarchy");
-		ImGui::Separator();
-
-		const auto& gObjList = GameObjectManager::Get().GetAllGameObjects();
-		ImGui::BeginChild("GameObjectList");
-		for (const auto& i : gObjList)
-		{
-			if (!i.second.IsVisibleInHierarcy)
-			{
-				continue;
-			}
-			ImGui::PushID(i.first);
-			{
-				bool arg = i.second.IsActive;
-				if (ImGui::Checkbox("",&arg))
-				{
-					GameObjectManager::Get().SetActive(i.first,arg);
-				}
-
-				ImGui::SameLine();
-				std::shared_ptr<TextureHolder> tex;
-				AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/GameObject.png",tex);
-				const auto height = ImGui::GetFrameHeight();
-				//const auto width = ImGui::GetColumnWidth();
-
-
-				ImGui::Image(reinterpret_cast<ImTextureID>(tex->GetRawTexture()->GetHandle(ViewType::SRV).gpuPtr.ptr),{ height,height });
-				ImGui::SameLine();
-
-				if (ImGui::IsItemHovered() && ImGui::IsItemClicked())
-				{
-					const auto color = ImVec4(0.0f,1.0f,0.0f,1.0f);
-					ImGui::PushStyleColor(ImGuiCol_Text,color);
-					ImGui::TextWrapped(i.second.Name.c_str());
-					ImGui::PopStyleColor();
-				}
-				else
-				{
-					ImGui::TextWrapped(i.second.Name.c_str());
-				}
-
-			}
-			ImGui::PopID();
-		}
-		ImGui::EndChild();
-
-
-		ImGui::End();
+		windows->RenderImGUi();
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	ImGui::Begin("Console");
-	{
-		if (ImGui::BeginChild("ScrollingRegion"))
-		{
-			static int size = 0;
-			for (const auto& [myColor,message] : Logger::m_LogMsgs)
-			{
-				if (message.empty())
-				{
-					break;
-				}
-
-				const auto color = ImVec4(myColor.x,myColor.y,myColor.z,1.0f);
-				ImGui::PushStyleColor(ImGuiCol_Text,color);
-				ImGui::TextWrapped(message.c_str());
-				ImGui::PopStyleColor();
-			}
-			if (size != Logger::m_LogMsgs.size())
-			{
-				ImGui::SetScrollHereY(1.0f);
-				size = (int)Logger::m_LogMsgs.size();
-			}
-		}
-		ImGui::EndChild();
-	}
-	ImGui::End();
 }
 
 RECT Editor::GetViewportRECT()

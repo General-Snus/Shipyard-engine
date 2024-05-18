@@ -252,6 +252,16 @@ HeapHandle GpuResource::GetHandle(ViewType type)
 	return  m_DescriptorHandles.at(type);
 }
 
+HeapHandle GpuResource::GetHandle(ViewType type) const
+{
+	OPTICK_EVENT();
+	if (m_DescriptorHandles.find(type) != m_DescriptorHandles.end() && m_DescriptorHandles.at(type).heapOffset != -1)
+	{
+		return  m_DescriptorHandles.at(type);
+	}
+	return  HeapHandle();
+}
+
 HeapHandle GpuResource::CreateViewWithHandle(ViewType type,HeapHandle handle)
 {
 	OPTICK_EVENT();

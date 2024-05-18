@@ -82,6 +82,13 @@ const Quaternionf& Transform::GetQuatF()
 	return myQuaternion;
 }
 
+void Transform::SetQuatF(const Quaternionf& a_Rotator)
+{
+	myQuaternion = a_Rotator;
+	myRotation = myQuaternion.GetEulerAngles();
+	isDirty = true;
+}
+
 Vector3f Transform::GetForward() const
 {
 	return Vector3f(myTransform(3,1),myTransform(3,2),myTransform(3,3)).GetNormalized();
@@ -137,7 +144,6 @@ Vector3f Transform::GetPosition() const
 {
 	return myPosition;
 };
-
 void Transform::MakeSaneRotation()
 {
 	for (int i = 0; i < 3; i++)

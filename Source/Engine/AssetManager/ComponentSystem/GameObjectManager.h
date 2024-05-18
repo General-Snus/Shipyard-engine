@@ -7,7 +7,6 @@
 #include "ComponentManager.h"
 #include "Tools/Optick/include/optick.h"
 
-
 enum class Layer
 {
 	None = 0,

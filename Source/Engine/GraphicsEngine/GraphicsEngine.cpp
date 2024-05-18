@@ -12,6 +12,7 @@
 #include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
 #include "DirectX/Shipyard/CommandList.h" 
 
+#include <Editor/Editor/Windows/EditorWindows/Viewport.h>
 #include "DirectX/Shipyard/GPU.h"
 #include "DirectX/Shipyard/Helpers.h"
 #include "DirectX/Shipyard/PSO.h"
@@ -22,15 +23,11 @@
 #include "imgui_internal.h"
 #include "ImGuizmo.h"
 #include "Tools/ImGui/ImGui/backends/imgui_impl_dx12.h"
-#include "Tools/Utilities/Input/InputHandler.hpp"
+#include "Tools/Utilities/Input/Input.hpp"
 
 
 bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 {
-#ifdef _DEBUG
-	//try
-	//{
-#endif 
 	myWindowHandle = windowHandle;
 	myBackBuffer = std::make_unique<Texture>();
 	myDepthBuffer = std::make_unique<Texture>();
@@ -56,31 +53,6 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 
 	const auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 	OPTICK_GPU_INIT_D3D12(GPU::m_Device.Get(),commandQueue->GetCommandQueue().GetAddressOf(),1);
-	/*
-	myG_Buffer.Init();
-	myShadowRenderer.Init();
-	myParticleRenderer.Init();
-	RHI::SetDepthState(DepthState::DS_Reversed);*/
-
-#ifdef _DEBUG
-	//}
-	//catch (const std::exception& e)
-	//{
-	//	GPU::UnInitialize();
-	//	ComPtr<ID3D12DeviceRemovedExtendedData> pDred;
-	//	SUCCEEDED(GPU::m_Device->QueryInterface(IID_PPV_ARGS(&pDred)));
-	//
-	//	D3D12_DRED_AUTO_BREADCRUMBS_OUTPUT DredAutoBreadcrumbsOutput;
-	//	D3D12_DRED_PAGE_FAULT_OUTPUT DredPageFaultOutput;
-	//	SUCCEEDED(pDred->GetAutoBreadcrumbsOutput(&DredAutoBreadcrumbsOutput));
-	//	SUCCEEDED(pDred->GetPageFaultAllocationOutput(&DredPageFaultOutput));
-	//	const D3D12_AUTO_BREADCRUMB_NODE* pBreadcrumbs = DredAutoBreadcrumbsOutput.pHeadAutoBreadcrumbNode;
-	//
-	//	Logger::LogException(e);
-	//	system("pause");
-	//	exit(-1);
-	//}
-#endif 
 	return true;
 }
 
@@ -376,12 +348,12 @@ void GraphicsEngine::UpdateSettings()
 
 
 
-void GraphicsEngine::Render(std::vector<Viewport>& renderViewPorts)
+void GraphicsEngine::Render(std::vector<std::shared_ptr<Viewport>>& renderViewPorts)
 {
 	BeginFrame();
 	for (auto& viewport : renderViewPorts)
 	{
-		RenderFrame(viewport);
+		RenderFrame(*viewport);
 	}
 	EndFrame();
 }
@@ -435,7 +407,6 @@ void GraphicsEngine::RenderFrame(Viewport& renderViewPort)
 		GPU::ClearRTV(*commandList,&renderViewPort.myRenderTexture);
 		commandQueue->ExecuteCommandList(commandList);
 	}
-	RenderViewPortWindow(renderViewPort);
 }
 
 void GraphicsEngine::EndFrame()
@@ -660,126 +631,7 @@ void GraphicsEngine::ToneMapperPass(std::shared_ptr<CommandList> commandList,Tex
 	commandList->GetGraphicsCommandList()->IASetIndexBuffer(nullptr);
 	commandList->GetGraphicsCommandList()->DrawInstanced(6,1,0,0);
 }
-void GraphicsEngine::RenderViewPortWindow(Viewport& renderViewPort)
-{
-	const auto handle = renderViewPort.myRenderTexture.GetHandle(ViewType::SRV);
-	/*ImGuiWindowFlags windowFlags = ImGuiViewportFlags_IsPlatformWindow
-		| ImGuiViewportFlags_NoDecoration
-		| ImGuiViewportFlags_NoTaskBarIcon
-		| ImGuiViewportFlags_NoAutoMerge
-		| ImGuiViewportFlags_CanHostOtherWindows
-		| ImGuiWindowFlags_MenuBar
-		| ImGuiWindowFlags_NoCollapse
-		| ImGuiWindowFlags_NoResize;*/
-		//const auto aspecRatio = (res.x / res.y);
-		//ImGui::SetNextWindowSizeConstraints(ImVec2(0,0),ImVec2(FLT_MAX,FLT_MAX),CustomConstraints::AspectRatio,(void*)&aspecRatio);   // Aspect ratio
 
-	std::string title = "Viewport";
-	if (renderViewPort.IsMainViewport())
-	{
-		title = "MainCameraViewport";
-	}
-	else
-	{
-		title += std::to_string(renderViewPort.ViewportIndex);
-
-	}
-
-	auto style = ImGui::GetStyle();
-	if (ImGui::Begin(title.c_str(),nullptr))
-	{
-		renderViewPort.IsUsed = ImGui::IsWindowFocused();
-		renderViewPort.IsVisible = ImGui::IsItemVisible();
-
-		if (ImGui::BeginMenuBar())
-		{
-			if (ImGui::BeginMenu("File"))
-			{
-				if (ImGui::Selectable("Open Scene"))
-				{
-
-				}
-				if (ImGui::Selectable("New Scene"))
-				{
-
-				}
-				if (ImGui::Selectable("Save Scene"))
-				{
-
-				}
-
-				ImGui::EndMenu();
-			}
-			ImGui::EndMenuBar();
-		}
-		float windowWidth = ImGui::GetWindowWidth();
-		float windowHeight = ImGui::GetWindowHeight();
-		ImGui::Image(reinterpret_cast<ImTextureID>(handle.gpuPtr.ptr),ImVec2(windowWidth,windowHeight));
-
-		renderViewPort.ViewportResolution = { windowWidth,windowHeight };
-
-
-		{
-			ImGuizmo::SetDrawlist();
-			ImGuizmo::SetRect(ImGui::GetWindowPos().x,ImGui::GetWindowPos().y,windowWidth,windowHeight);
-			auto cameraView = renderViewPort.ViewInverse();
-			auto cameraProjection = renderViewPort.Projection();
-
-			ImGuizmo::DrawCubes(&cameraView,&cameraProjection,Matrix::CreateScaleMatrix(Vector3f(10,10,10)).GetMatrixPtr(),1);
-			ImGuizmo::DrawGrid(&cameraView,&cameraProjection,Matrix().GetMatrixPtr(),10.f);
-		}
-
-		if (renderViewPort.IsUsed)
-		{
-			float textHeight = ImGui::CalcTextSize("A").y;
-			int   toolbarItems = 10;
-			// style.FramePadding can also be used here
-			ImVec2 toolbarItemSize = ImVec2{ textHeight * 2.0f, textHeight * 2.0f };
-			ImVec2 toolbarPos = ImGui::GetWindowPos() + ImVec2(2.0f * style.WindowPadding.x,8.0f * style.WindowPadding.y);
-			ImVec2 toolbarSize = { toolbarItemSize.x + style.WindowPadding.x * 2.0f, //
-									toolbarItemSize.y * toolbarItems + style.WindowPadding.y * 2.0f };
-
-			ImGui::SetNextWindowPos(toolbarPos);
-			ImGui::SetNextWindowSize(toolbarSize);
-
-			ImGuiWindowFlags toolbarFlags = ImGuiWindowFlags_NoDecoration |      //
-				ImGuiWindowFlags_NoMove |            //
-				ImGuiWindowFlags_NoScrollWithMouse | //
-				ImGuiWindowFlags_NoSavedSettings |   //
-				ImGuiWindowFlags_NoBringToFrontOnFocus;
-
-			ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_NoPadWithHalfSpacing;
-			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing,{ 0.0f, 0.0f });
-
-
-			if (ImGui::Begin("##ViewportToolbar",nullptr,toolbarFlags)) {
-				// Bring the toolbar window always on top.
-				ImGui::BringWindowToDisplayFront(ImGui::GetCurrentWindow());
-
-				ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign,ImVec2(0.5f,0.5f));
-				if (ImGui::Selectable("Move",false,selectableFlags,toolbarItemSize)) {
-				}
-				if (ImGui::Selectable("Rotate",false,selectableFlags,toolbarItemSize)) {
-				}
-				ImGui::Separator();
-				if (ImGui::Selectable("Scale",false,selectableFlags,toolbarItemSize)) {
-				}
-				if (ImGui::Selectable("Align",false,selectableFlags,toolbarItemSize)) {
-				}
-				ImGui::PopStyleVar();
-			}
-			ImGui::PopStyleVar();
-			ImGui::End();
-		}
-	}
-	else
-	{
-
-		renderViewPort.IsUsed = false;
-		renderViewPort.IsVisible = false;
-	}
-	ImGui::End();
-}
 void GraphicsEngine::ImGuiPass(std::shared_ptr<CommandList> commandList)
 {
 	OPTICK_GPU_EVENT("ImGui");

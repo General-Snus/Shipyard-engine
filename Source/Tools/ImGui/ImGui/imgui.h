@@ -3224,7 +3224,7 @@ struct CustomConstraints
 	}
 	static void Square(ImGuiSizeCallbackData* data)
 	{
-		data->DesiredSize.x = data->DesiredSize.y = std::max(data->DesiredSize.x,data->DesiredSize.y);
+		data->DesiredSize.x = data->DesiredSize.y = (std::max)(data->DesiredSize.x,data->DesiredSize.y);
 	}
 	static void Step(ImGuiSizeCallbackData* data)
 	{

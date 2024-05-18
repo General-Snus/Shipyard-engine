@@ -1,8 +1,9 @@
 #pragma once 
+#include <DirectX/Shipyard/Gpu_fwd.h>
 #include <Engine/GraphicsEngine/InterOp/ShaderInfo.h>
 #include "BaseAsset.h" // fuck you for bad naming
 
-struct ID3D10Blob;
+
 class ShipyardShader : public AssetBase  // <--- 
 {
 public:

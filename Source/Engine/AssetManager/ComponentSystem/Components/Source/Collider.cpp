@@ -59,7 +59,7 @@ Vector3f cCollider::GetNormalToward(Vector3f position) const
 void cCollider::Render()
 {
 	OPTICK_EVENT();
-	if (Editor::GetApplicationState().drawDebugLines == false)
+	if (ApplicationState::drawDebugLines == false)
 	{
 		return;
 	}

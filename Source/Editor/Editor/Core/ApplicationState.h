@@ -32,10 +32,10 @@ enum class DebugFilter
 
 struct ApplicationState
 {
-	float CameraSpeed = 1000.0f;
-	float CameraRotationSpeed = 50.0f;
-	DebugFilter filter = DebugFilter::NoFilter;
-	bool drawDebugLines = false;
+	static inline float CameraSpeed = 1000.0f;
+	static inline float CameraRotationSpeed = 50.0f;
+	static inline DebugFilter filter = DebugFilter::NoFilter;
+	static inline bool drawDebugLines = false;
 
 	static inline std::string layerNames[(int)DebugFilter::count] = {
 		"NoFilter ",

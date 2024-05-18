@@ -46,6 +46,11 @@ void Logger::SetPrintToVSOutput(bool bNewValue)
 	shouldPrintToOutput = bNewValue;
 }
 
+void Logger::Log(const char* aString)
+{
+	Log(std::string(aString));
+}
+
 void Logger::Log(const std::string& aString)
 {
 	if (isInitialized)

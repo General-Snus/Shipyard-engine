@@ -8,11 +8,11 @@
 #include "Rendering/Buffers/GraphicSettingsBuffer.h"
 #include "Rendering/Buffers/LightBuffer.h"
 #include "Rendering/Buffers/LineBuffer.h"
-#include "Rendering/Buffers/ObjectBuffer.h"
-#include "Rendering/Viewport.h"
+#include "Rendering/Buffers/ObjectBuffer.h" 
 
 #define _DEBUGDRAW 
 
+class Viewport;
 using namespace Microsoft::WRL;
 class Mesh;
 class Material;
@@ -162,7 +162,6 @@ private:
 	static void EnvironmentLightPass(std::shared_ptr<CommandList> commandList,Texture* gBufferTextures);
 	static void ToneMapperPass(std::shared_ptr<CommandList> commandList,Texture& target);
 	static void ImGuiPass(std::shared_ptr<CommandList> commandList);
-	static void RenderViewPortWindow(Viewport& renderViewPort);
 
 	void RenderTextureTo(eRenderTargets from,eRenderTargets to) const;
 public:
@@ -172,7 +171,7 @@ public:
 		return myInstance;
 	}
 	bool Initialize(HWND windowHandle,bool enableDeviceDebug);
-	void Render(std::vector<Viewport>& renderViewPorts);
+	void Render(std::vector<std::shared_ptr<Viewport>>& renderViewPorts);
 
 	void SetDepthState(eDepthStencilStates state)
 	{

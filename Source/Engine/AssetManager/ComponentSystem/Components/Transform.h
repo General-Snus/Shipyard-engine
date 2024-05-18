@@ -23,6 +23,7 @@ public:
 	//not dirty checked
 	const Matrix& GetRawTransform() const;
 	const Quaternionf& GetQuatF();
+	void SetQuatF(const Quaternionf&);
 
 
 	// TODO

@@ -2,10 +2,9 @@
 #include <Engine/AssetManager/Enums.h>
 #include <Engine/GraphicsEngine/Rendering/Vertex.h>
 #include <filesystem>
-#include  <functional>/*
-#include <Tools/Utilities/LinearAlgebra/Matrix4x4.hpp>*/
-
+#include  <functional>
 #include "DirectX/Shipyard/GpuResource.h"
+
 class Material;
 class AssetBase
 {

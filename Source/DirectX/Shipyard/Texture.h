@@ -1,11 +1,10 @@
 #pragma once
 #include <DirectX/Shipyard/GpuResource.h> 
+#include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 #include <unordered_map> 
-
 #include "Gpu_fwd.h"
 
 using namespace Microsoft::WRL;
-
 
 
 class Texture : public GpuResource
@@ -39,9 +38,6 @@ public:
 	//KEKW
 	const D3D12_RECT& GetRect() const { return m_Rect; };
 	const D3D12_VIEWPORT& GetViewPort() const { return m_Viewport; };
-
-
-
 
 
 protected:

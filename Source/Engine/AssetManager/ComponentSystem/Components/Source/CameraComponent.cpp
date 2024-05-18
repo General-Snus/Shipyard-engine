@@ -2,7 +2,7 @@
 
 #include <DirectXMath.h>
 #include <Editor/Editor/Core/Editor.h>
-#include <Tools/Utilities/Input/InputHandler.hpp> 
+#include <Tools/Utilities/Input/Input.hpp> 
 #include "../CameraComponent.h"
 
 #include <ResourceUploadBatch.h>
@@ -83,79 +83,82 @@ cCamera::~cCamera()
 void cCamera::Update()
 {
 	OPTICK_EVENT();
-	Transform& myTransform = this->GetGameObject().GetComponent<Transform>();
-	Update(myTransform);
-}
 
-void cCamera::Update(Transform& aTransform)
-{
+	if (!mySettings.IsInControll)
+	{
+		return;
+	}
+
+
+
+	Transform& aTransform = this->GetGameObject().GetComponent<Transform>();
 	float aTimeDelta = Timer::GetInstance().GetDeltaTime();
-
-	//UpdatePositionVectors();
 	const float mdf = cameraSpeed;
 	const float rotationSpeed = 20000;
+
+
 	myScreenSize = Editor::GetViewportResolution();
 
-	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::UP))
+	if (Input::IsKeyHeld((int)Keys::UP))
 	{
 		cameraSpeed = cameraSpeed * 1.01f;
 	}
-	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::DOWN))
+	if (Input::IsKeyHeld((int)Keys::DOWN))
 	{
 		cameraSpeed = std::clamp(cameraSpeed * 0.99f,.5f,(float)INT_MAX);
 	}
 
-	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::MOUSERBUTTON))
+	if (Input::IsKeyHeld((int)Keys::MOUSERBUTTON))
 	{
 		const Vector3f mouseDeltaVector =
 		{
-			static_cast<float>(InputHandler::GetInstance().GetMousePositionDelta().y),
-			-static_cast<float>(InputHandler::GetInstance().GetMousePositionDelta().x),
+			static_cast<float>(Input::GetMousePositionDelta().y),
+			-static_cast<float>(Input::GetMousePositionDelta().x),
 			0.0f
 		};
 		aTransform.Rotate(mouseDeltaVector * rotationSpeed * Timer::GetInstance().GetDeltaTime());
 	}
 
-	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::W))
+	if (Input::IsKeyHeld((int)Keys::W))
 	{
 		aTransform.Move(aTransform.GetForward() * aTimeDelta * mdf);
 	}
 
-	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::S))
+	if (Input::IsKeyHeld((int)Keys::S))
 	{
 		aTransform.Move(-aTransform.GetForward() * aTimeDelta * mdf);
 	}
 
-	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::D))
+	if (Input::IsKeyHeld((int)Keys::D))
 	{
 		aTransform.Move(aTransform.GetRight() * aTimeDelta * mdf);
 	}
 
-	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::A))
+	if (Input::IsKeyHeld((int)Keys::A))
 	{
 		aTransform.Move(-aTransform.GetRight() * aTimeDelta * mdf);
 	}
-	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::E))
+	if (Input::IsKeyHeld((int)Keys::E))
 	{
 		aTransform.Rotate({ 0,200.f * aTimeDelta });
 	}
 #ifdef Flashlight
-	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::F))
+	if (Input::GetInstance().IsKeyPressed((int)Keys::F))
 	{
 		GetComponent<cLight>().BindDirectionToTransform(!GetComponent<cLight>().GetIsBound());
 	}
 #endif
-	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::Q))
+	if (Input::IsKeyHeld((int)Keys::Q))
 	{
 		aTransform.Rotate({ 0,-200.f * aTimeDelta });
 	}
 
-	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::SPACE))
+	if (Input::IsKeyHeld((int)Keys::SPACE))
 	{
 		aTransform.Move(aTransform.GetUp() * aTimeDelta * mdf);
 	}
 
-	if (InputHandler::GetInstance().IsKeyHeld((int)Keys::SHIFT))
+	if (Input::IsKeyHeld((int)Keys::SHIFT))
 	{
 		aTransform.Move(-aTransform.GetUp() * aTimeDelta * mdf);
 	}
@@ -237,7 +240,7 @@ FrameBuffer cCamera::GetFrameBuffer()
 	buffer.ProjectionMatrix = m_Projection;
 	buffer.ViewMatrix = Matrix::GetFastInverse(transform.GetTransform());
 	buffer.Time = Timer::GetInstance().GetDeltaTime();
-	buffer.FB_RenderMode = (int)Editor::GetApplicationState().filter;
+	buffer.FB_RenderMode = static_cast<int>(ApplicationState::filter);
 	buffer.FB_CameraPosition = transform.GetPosition();
 	buffer.FB_ScreenResolution = Editor::Get().GetViewportResolution();
 	//buffer.Data.FB_FrustrumCorners = { Vector4f(),Vector4f(),Vector4f(),Vector4f() };;

@@ -20,18 +20,24 @@ public:
 	Quaternion<T>(const Quaternion<T>& Q);
 	Quaternion<T>& operator=(const Quaternion<T>& Q);
 
+	template <class U> operator U() const;
+
+	T* operator&();
 
 	//Base functions
 	Quaternion<T> operator-();
 	Quaternion<T> Conjugate();
 	T GetNormalizedSquared();
 	void Normalize();
+	Quaternion<T> GetNormalized();
 
 	//Usability functions
 	void RotateAroundX(T aAngle);
 	void RotateAroundY(T aAngle);
 	void RotateAroundZ(T aAngle);
 	void RotateAroundAxis(T aAngle,Vector3<T> aAxis);
+
+
 
 	Vector3f GetEulerAngles() const;
 	void SetEulerAngles(const Vector3<T>& aRotation);
@@ -160,6 +166,19 @@ inline Quaternion<T>::Quaternion(const Quaternion<T>& Q)
 	y = Q.y;
 	z = Q.z;
 	w = Q.w;
+}
+
+template <typename T>
+template <class U>
+Quaternion<T>::operator U() const
+{
+	return { x,y,z ,w };
+}
+
+template <typename T>
+T* Quaternion<T>::operator&()
+{
+	return &x;
 }
 
 template<typename T>
@@ -428,6 +447,18 @@ inline void Quaternion<T>::Normalize()
 		return;
 	}
 	*this = (*this * (1 / sqrtf(n)));
+}
+
+template<typename T>
+inline Quaternion<T> Quaternion<T>::GetNormalized()
+{
+	const float n = x * x + y * y + z * z + w * w;
+
+	if (n == 1)
+	{
+		return *this;
+	}
+	return Quaternion<T>(*this * (T(1) / sqrtf(n)));
 }
 
 #pragma region Operators

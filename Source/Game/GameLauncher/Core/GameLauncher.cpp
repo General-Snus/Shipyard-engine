@@ -8,7 +8,7 @@
 #include <Tools/Optick/include/optick.h>
 #include <Tools/ThirdParty/nlohmann/json.hpp>   
 #include <Tools/Utilities/Game/Timer.h>
-#include <Tools/Utilities/Input/InputHandler.hpp>
+#include <Tools/Utilities/Input/Input.hpp>
 #include <Tools/Utilities/Math.hpp>
 #include "GameLauncher.h"
 
@@ -28,7 +28,7 @@ void GameLauncher::Init()
 
 bool SaveTest(std::vector<GameObject> gameObjectsToSave,const std::filesystem::path& path)
 {
-	Logger::Log("\n\nSaving Gameobjects");
+	Logger::Log("Saving Gameobjects");
 	std::ofstream file(path.string(),std::ios_base::binary);
 	if (!file.is_open())
 	{
@@ -262,29 +262,29 @@ void GameLauncher::Start()
 void GameLauncher::Update(float delta)
 {
 
-	if (InputHandler::GetInstance().IsKeyPressed(static_cast<unsigned>(Keys::I)))
+	if (Input::IsKeyPressed(static_cast<unsigned>(Keys::I)))
 	{
 		Logger::Log(std::to_string(1.f / delta));
 	}
 	delta;
 	OPTICK_EVENT();
 	AIEventManager::Instance().Update();
-	if (InputHandler::GetInstance().IsKeyPressed(static_cast<int>(Keys::K)))
+	if (Input::IsKeyPressed(static_cast<int>(Keys::K)))
 	{
 		GraphicsEngine::Get().GetSettings().DebugRenderer_Active = !GraphicsEngine::Get().GetSettings().DebugRenderer_Active;
 	}
 
-	if (InputHandler::GetInstance().IsKeyPressed(static_cast<int>(Keys::F5)))
+	if (Input::IsKeyPressed(static_cast<int>(Keys::F5)))
 	{
-		Editor::GetApplicationState().filter = DebugFilter::NoFilter;
+		ApplicationState::filter = DebugFilter::NoFilter;
 	}
 
-	if (InputHandler::GetInstance().IsKeyPressed(static_cast<int>(Keys::F6)))
+	if (Input::IsKeyPressed(static_cast<int>(Keys::F6)))
 	{
-		Editor::GetApplicationState().filter = static_cast<DebugFilter>((static_cast<int>(Editor::GetApplicationState().filter) + 1) % static_cast<int>(DebugFilter::count));
+		ApplicationState::filter = static_cast<DebugFilter>((static_cast<int>(ApplicationState::filter) + 1) % static_cast<int>(DebugFilter::count));
 	}
 #if PHYSX
-	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::F4))
+	/*if (Input::IsKeyPressed((int)Keys::F4))
 	{
 		while (vectorOfGameObjects.size())
 		{
@@ -294,12 +294,12 @@ void GameLauncher::Update(float delta)
 		GameObjectManager::Get().CustomOrderUpdate();
 	}
 
-	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::F5))
+	if (Input::IsKeyPressed((int)Keys::F5))
 	{
 		SaveTest(vectorOfGameObjects,"GameObjectSaveFile.SaveFiles");
 	}
 
-	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::F6))
+	if (Input::IsKeyPressed((int)Keys::F6))
 	{
 		if (std::filesystem::exists("GameObjectSaveFile.SaveFiles"))
 		{
@@ -313,10 +313,10 @@ void GameLauncher::Update(float delta)
 		}
 	}
 
-	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::R))
+	if (Input::IsKeyPressed((int)Keys::R))
 	{
 		GenerateNewRandomCubes();
-	}
+	}*/
 #endif
 
 	//Other
@@ -360,11 +360,11 @@ void GameLauncher::Update(float delta)
 
 	Transform& pLight = GameObjectManager::Get().GetWorldRoot().GetComponent<Transform>();
 	constexpr float rotSpeed = 25.f;
-	if (InputHandler::GetInstance().IsKeyHeld(static_cast<int>(Keys::NUMPAD6)))
+	if (Input::IsKeyHeld(static_cast<int>(Keys::NUMPAD6)))
 	{
 		pLight.Rotate(rotSpeed * delta,0,0);
 	}
-	if (InputHandler::GetInstance().IsKeyHeld(static_cast<int>(Keys::NUMPAD3)))
+	if (Input::IsKeyHeld(static_cast<int>(Keys::NUMPAD3)))
 	{
 		pLight.Rotate(-rotSpeed * delta,0,0);
 	}

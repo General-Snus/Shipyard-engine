@@ -39,7 +39,7 @@
     <ClInclude Include="Defines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Windows\EditorWindow.h">
+    <ClInclude Include="Windows\EditorWindows\EditorWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\Event_Icon.h">
@@ -75,6 +75,21 @@
     <ClInclude Include="Core\Paths.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Windows\EditorWindows\Hierarchy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\EditorWindows\Inspector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\EditorWindows\ContentDirectory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\EditorWindows\Viewport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\EditorWindows\Console.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Source\Editor.cpp">
@@ -95,7 +110,7 @@
     <ClCompile Include="TheHole\SaveLoad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Windows\Source\EditorWindow.cpp">
+    <ClCompile Include="Windows\EditorWindows\Source\EditorWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\RegisterExternalNodes.cpp">
@@ -111,6 +126,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Core\Source\Paths.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\EditorWindows\Source\Hierarchy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\EditorWindows\Source\Inspector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\EditorWindows\Source\ContentDirectory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\EditorWindows\Source\Viewport.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\EditorWindows\Source\Console.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

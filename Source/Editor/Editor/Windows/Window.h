@@ -1,7 +1,7 @@
 #pragma once
 #include <functional>
 #include <string>
-#include <Tools/Utilities/LinearAlgebra/Vector2.hpp>
+#include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 #include <windows.h>
 
 struct WinInitSettings

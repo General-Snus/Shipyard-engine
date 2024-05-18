@@ -114,7 +114,7 @@
     <ClInclude Include="DataStructures\VectorOnStack.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Input\InputHandler.hpp">
+    <ClInclude Include="Input\Input.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="System\ThreadPool.hpp">

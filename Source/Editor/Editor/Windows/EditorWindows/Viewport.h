@@ -1,20 +1,22 @@
 #pragma once
-#include <Tools/Utilities/LinearAlgebra/Matrix4x4.h> 
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>  
 #include "DirectX/Shipyard/Texture.h"
+#include "EditorWindow.h"
 #include "Engine/AssetManager/ComponentSystem/GameObject.h"
+
 
 class cCamera;
 class Transform;
 
 
-class Viewport
+class Viewport : public EditorWindow
 {
 	//New rule! Always give reason for friending in comment
 	//Reason: ImGui Only knows the bounding and status of the viewport when rendering so all configuration here will be one frame delayed
-	friend class GraphicsEngine;
+	friend class Editor;
 public:
 	//MainViewport is will render from the MainCamera and if no such camera exist it will be black
-	Viewport(bool IsMainViewPort);
+	explicit Viewport(bool IsMainViewPort);
 	bool IsSelected();
 	bool IsRenderReady();
 	bool IsMainViewport();
@@ -25,6 +27,9 @@ public:
 
 	Matrix Projection();
 	Matrix ViewInverse();
+	void RenderImGUi() override;
+
+
 	Texture myRenderTexture;
 	Vector2f ViewportResolution;
 	int ViewportIndex = 0;

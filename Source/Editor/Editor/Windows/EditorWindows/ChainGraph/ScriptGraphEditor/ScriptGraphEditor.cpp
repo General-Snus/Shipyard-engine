@@ -15,7 +15,8 @@
 #include <ScriptGraph/Nodes/SGNode_DebugText.h>
 #include <ScriptGraph/Nodes/SGNode_FloatToString.h>
 #include <ScriptGraph/Nodes/SGNode_Variable.h>
-#include <ScriptGraph/ScriptGraphTypes.h> 
+#include <ScriptGraph/ScriptGraphTypes.h>  
+#include "DirectX/Shipyard/Gpu_fwd.h"
 #include "DirectX/Shipyard/Texture.h"
 #include "Function_Icon.h"
 #include "GetGradient.h"

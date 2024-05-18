@@ -1,16 +1,15 @@
 #pragma once  
-#include <Editor/Editor/Defines.h>
-#include <Editor/Editor/Windows/EditorWindows/ChainGraph/GraphTool.h>
-#include <Engine/GraphicsEngine/Rendering/Viewport.h>
-#include <Game/GameLauncher/Core/GameLauncher.h>
-#include <Tools/Logging/Logging.h> 
+#include <Editor/Editor/Defines.h> 
+#include <Game/GameLauncher/Core/GameLauncher.h> 
 #include <Tools/Utilities/DataStructures/Queue.hpp>
 #include <Tools/Utilities/LinearAlgebra/Sphere.hpp>
-#include <Tools/Utilities/System/SingletonTemplate.h>  
-#include "../Windows/SplashWindow.h" 
-#include "ApplicationState.h" 
-
+#include <Tools/Utilities/System/SingletonTemplate.h>   
+#include "../Windows/SplashWindow.h"  
+class Viewport;
 class GameLauncher;
+struct ImGuizmoOp;
+class EditorWindow;
+class ScriptGraphEditor;
 
 class Editor : public Singleton<Editor>
 {
@@ -22,7 +21,6 @@ class Editor : public Singleton<Editor>
 	};
 private:
 	std::unique_ptr<SplashWindow> mySplashWindow = nullptr;
-	ApplicationState myApplicationState;
 	void ShowSplashScreen();
 	void HideSplashScreen() const;
 
@@ -31,11 +29,7 @@ private:
 	void Render();
 
 	void AddViewPort();
-
-
-#pragma region IMGUI
 	void TopBar();
-#pragma endregion
 
 
 public:
@@ -43,13 +37,6 @@ public:
 	bool Initialize(HWND aHandle);
 	void DoWinProc(const MSG& msg);
 	int Run();
-
-	// Acceleration Getters for components.
-	static ApplicationState& GetApplicationState()
-	{
-		static ApplicationState myApplicationState;
-		return myApplicationState;
-	}
 	static RECT GetViewportRECT();
 	static Vector2<unsigned int> GetViewportResolution();
 
@@ -58,13 +45,17 @@ public:
 
 	bool GetIsGUIActive() const { return IsGUIActive; };
 	void SetIsGUIActive(bool set) { IsGUIActive = set; };
-	static inline std::vector<Viewport> g_EditorViewPorts;
+
+
+	static inline std::vector<std::shared_ptr<EditorWindow>> g_EditorWindows;
+	static std::vector<GameObject>& GetSelectedGameObjects() { return m_SelectedGameObjects; }
+	static inline bool IsPlaying = false;
 private:
 	inline static RECT ViewportRect;
-
 	std::shared_ptr<ScriptGraphEditor> ScriptEditor;
-	std::vector<GameObject> mySelectedGameObjects;
+	inline static std::vector<GameObject> m_SelectedGameObjects;
 
+	std::vector<std::shared_ptr<Viewport>> m_Viewports;
 
 #if WorkingOnMultiThread
 	std::thread myLogicThread;
@@ -78,5 +69,4 @@ private:
 	Sphere<float> myWorldBounds;
 	GameLauncher myGameLauncher;
 	bool IsGUIActive = true;
-	std::array<bool,count> activeWindows = { false };
 };

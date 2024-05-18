@@ -1,0 +1,70 @@
+#include "../Hierarchy.h"
+
+#include "AssetManager.h"
+#include "ComponentSystem/GameObjectManager.h"
+#include "Core/Editor.h"
+#include "imgui.h"
+#include "ImGuiHepers.hpp"
+#include "Input/Input.hpp"
+#include "Objects/BaseAssets/TextureAsset.h"
+
+void Hierarchy::RenderImGUi()
+{
+	{
+		const auto& gObjList = GameObjectManager::Get().GetAllGameObjects();
+		ImGui::Begin("Hierarchy");
+		ImGui::Separator();
+		ImGui::BeginChild("GameObjectList");
+		for (const auto& i : gObjList)
+		{
+			if (!i.second.IsVisibleInHierarcy)
+			{
+				continue;
+			}
+			ImGui::PushID(i.first);
+			{
+				bool arg = i.second.IsActive;
+				if (ImGui::TreeNodeEx(i.second.Name.c_str()))
+				{
+					std::shared_ptr<TextureHolder> tex;
+					AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/GameObject.png",tex);
+					const auto height = ImGui::GetFrameHeight();
+					ImGui::Image(tex,{ height,height });
+					ImGui::SameLine();
+
+					auto color = ImVec4(1.0f,1.0f,1.0f,1.0f);
+					if (ImGui::IsItemHovered())
+					{
+						color = ImVec4(0.0f,1.0f,0.0f,1.0f);
+
+						if (ImGui::IsItemClicked())
+						{
+							auto& refSelected = Editor::GetSelectedGameObjects();
+							!Input::IsKeyHeld(Keys::SHIFT) ? refSelected.clear() : __nop();
+							refSelected.push_back(GameObjectManager::Get().GetGameObject(i.first));
+						}
+
+					}
+
+					if (!arg)
+					{
+						color.x *= .5f;
+						color.y *= .5f;
+						color.z *= .5f;
+					}
+
+					ImGui::PushStyleColor(ImGuiCol_Text,color);
+					ImGui::TextWrapped(i.second.Name.c_str());
+					ImGui::PopStyleColor();
+					ImGui::TreePop();
+
+				}
+			}
+			ImGui::PopID();
+		}
+		ImGui::EndChild();
+
+
+		ImGui::End();
+	}
+}

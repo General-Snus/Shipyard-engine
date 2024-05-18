@@ -21,6 +21,9 @@ public:
 	//Assignment operator (compiler generated)
 	Vector3<T>& operator=(const Vector3<T>& aVector3) = default;
 	Vector3<T>& operator=(const T& aTypeT);
+	T* operator&();
+
+
 	//Destructor (compiler generated)
 	~Vector3<T>() = default;
 
@@ -180,6 +183,12 @@ inline Vector3<T>& Vector3<T>::operator=(const T& aTypeT)
 {
 	x,y,z = aTypeT;
 	return *this;
+}
+
+template <class T>
+T* Vector3<T>::operator&()
+{
+	return &x;
 }
 #pragma endregion
 

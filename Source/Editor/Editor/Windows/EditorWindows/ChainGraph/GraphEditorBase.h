@@ -82,7 +82,7 @@ protected:
 	std::enable_if_t<std::is_same_v<T,std::string> || std::is_same_v<T,std::wstring>,typename T::size_type>
 		LevenshteinDistance(const T& aString,const T& aSearchString)
 	{
-		if(aString.size() > aSearchString.size())
+		if (aString.size() > aSearchString.size())
 		{
 			return LevenshteinDistance(aSearchString,aString);
 		}
@@ -92,20 +92,20 @@ protected:
 		const TSize maxSize = aSearchString.size();
 		std::vector<TSize> levenDistance(minSize + 1);
 
-		for(TSize s = 0; s <= minSize; ++s)
+		for (TSize s = 0; s <= minSize; ++s)
 		{
 			levenDistance[s] = s;
 		}
 
-		for(TSize s = 1; s <= maxSize; ++s)
+		for (TSize s = 1; s <= maxSize; ++s)
 		{
 			TSize lastDiag = levenDistance[0],lastDiagMem;
 			++levenDistance[0];
 
-			for(TSize t = 1; t <= minSize; ++t)
+			for (TSize t = 1; t <= minSize; ++t)
 			{
 				lastDiagMem = levenDistance[t];
-				if(aString[t - 1] == aSearchString[s - 1])
+				if (aString[t - 1] == aSearchString[s - 1])
 				{
 					levenDistance[t] = lastDiag;
 				}
@@ -144,24 +144,24 @@ public:
 template<typename GraphType,typename GraphNodeType,typename GraphEdgeType,typename GraphPinType,typename SchemaType>
 void GraphEditorBase<GraphType,GraphNodeType,GraphEdgeType,GraphPinType,SchemaType>::HandleImNodeCreateNode()
 {
-	if(ImNodeEd::BeginCreate())
+	if (ImNodeEd::BeginCreate())
 	{
 		ImNodeEd::PinId startLinkId,endLinkId;
 
 		// This returns True constantly while trying to create a link, even before we've selected an end pin.
-		if(ImNodeEd::QueryNewLink(&startLinkId,&endLinkId))
+		if (ImNodeEd::QueryNewLink(&startLinkId,&endLinkId))
 		{
-			if(startLinkId && endLinkId)
+			if (startLinkId && endLinkId)
 			{
 
 				std::string canCreateEdgeFeedback;
-				if(!mySchema->CanCreateEdge(startLinkId.Get(),endLinkId.Get(),canCreateEdgeFeedback))
+				if (!mySchema->CanCreateEdge(startLinkId.Get(),endLinkId.Get(),canCreateEdgeFeedback))
 				{
 					ImNodeEd::RejectNewItem(ImColor(255,0,0,255));
 				}
 
 				// This is true if we've made a link between two pins. I.e. when we release LMB to make a link.
-				if(ImNodeEd::AcceptNewItem())
+				if (ImNodeEd::AcceptNewItem())
 				{
 					mySchema->CreateEdge(startLinkId.Get(),endLinkId.Get());
 				}
@@ -174,21 +174,21 @@ void GraphEditorBase<GraphType,GraphNodeType,GraphEdgeType,GraphPinType,SchemaTy
 template<typename GraphType,typename GraphNodeType,typename GraphEdgeType,typename GraphPinType,typename SchemaType>
 void GraphEditorBase<GraphType,GraphNodeType,GraphEdgeType,GraphPinType,SchemaType>::HandleImNodeDeleteNode()
 {
-	if(ImNodeEd::BeginDelete())
+	if (ImNodeEd::BeginDelete())
 	{
 		ImNodeEd::LinkId deletedLinkId;
-		while(ImNodeEd::QueryDeletedLink(&deletedLinkId))
+		while (ImNodeEd::QueryDeletedLink(&deletedLinkId))
 		{
-			if(ImNodeEd::AcceptDeletedItem())
+			if (ImNodeEd::AcceptDeletedItem())
 			{
 				mySchema->RemoveEdge(deletedLinkId.Get());
 			}
 		}
 
 		ImNodeEd::NodeId deletedNodeId = 0;
-		while(ImNodeEd::QueryDeletedNode(&deletedNodeId))
+		while (ImNodeEd::QueryDeletedNode(&deletedNodeId))
 		{
-			if(ImNodeEd::AcceptDeletedItem())
+			if (ImNodeEd::AcceptDeletedItem())
 			{
 				mySchema->RemoveNode(deletedNodeId.Get());
 			}
@@ -215,7 +215,7 @@ template<typename GraphType,typename GraphNodeType,typename GraphEdgeType,typena
 void GraphEditorBase<GraphType,GraphNodeType,GraphEdgeType,GraphPinType,SchemaType>::RenderEdge(const GraphEdgeType& anEdge)
 {
 	const GraphColor typeColor = anEdge.Color.AsNormalized();
-	ImNodeEd::Link(anEdge.EdgeId,anEdge.FromUID,anEdge.ToUID,{typeColor.R, typeColor.G, typeColor.B, typeColor.A},anEdge.Thickness);
+	ImNodeEd::Link(anEdge.EdgeId,anEdge.FromUID,anEdge.ToUID,{ typeColor.R, typeColor.G, typeColor.B, typeColor.A },anEdge.Thickness);
 }
 
 template<typename GraphType,typename GraphNodeType,typename GraphEdgeType,typename GraphPinType,typename SchemaType>
@@ -223,7 +223,7 @@ void GraphEditorBase<GraphType,GraphNodeType,GraphEdgeType,GraphPinType,SchemaTy
 {
 	ImNodeEd::PushStyleVar(ax::NodeEditor::StyleVar_SnapLinkToPinDir,1.0f);
 	ImNodeEd::PushStyleVar(ax::NodeEditor::StyleVar_LinkStrength,0.0f);
-	for(const auto& [nodeUID,node] : myGraph->GetNodes())
+	for (const auto& [nodeUID,node] : myGraph->GetNodes())
 	{
 		RenderNode(node);
 		// Cache node positions, sigh.
@@ -236,7 +236,7 @@ void GraphEditorBase<GraphType,GraphNodeType,GraphEdgeType,GraphPinType,SchemaTy
 	}
 
 
-	for(const auto& [edgeId,edge] : myGraph->GetEdges())
+	for (const auto& [edgeId,edge] : myGraph->GetEdges())
 	{
 		RenderEdge(edge);
 	}
@@ -248,12 +248,12 @@ void GraphEditorBase<GraphType,GraphNodeType,GraphEdgeType,GraphPinType,SchemaTy
 
 	ImNodeEd::Suspend();
 
-	if(ImNodeEd::ShowBackgroundContextMenu())
+	if (ImNodeEd::ShowBackgroundContextMenu())
 	{
 		myEditorState.Search.bgCtxtSearchFocus = true;
 		ImGui::OpenPopup("BackgroundContextMenu");
 	}
-	else if(ImNodeEd::NodeId nodeId; ImNodeEd::ShowNodeContextMenu(&nodeId))
+	else if (ImNodeEd::NodeId nodeId; ImNodeEd::ShowNodeContextMenu(&nodeId))
 	{
 		ImGui::OpenPopup("NodeContextMenu");
 	}
@@ -262,7 +262,7 @@ void GraphEditorBase<GraphType,GraphNodeType,GraphEdgeType,GraphPinType,SchemaTy
 
 	ImNodeEd::Resume();
 
-	if(myEditorState.initNavToContent)
+	if (myEditorState.initNavToContent)
 	{
 		ImNodeEd::NavigateToContent();
 		myEditorState.initNavToContent = false;
@@ -274,29 +274,29 @@ template <typename GraphType,typename GraphNodeType,typename GraphEdgeType,typen
 void GraphEditorBase<GraphType,GraphNodeType,GraphEdgeType,GraphPinType,SchemaType>::RenderBackgroundContextMenu()
 {
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding,ImVec2(8,8));
-	if(ImGui::BeginPopup("BackgroundContextMenu"))
+	if (ImGui::BeginPopup("BackgroundContextMenu"))
 	{
 		//ImGui::PushItemWidth(100.0f);
 		myEditorState.Search.bgCtxtSearchFieldChanged = ImGui::InputText("##nodeSearch",&myEditorState.Search.bgCtxtSearchField);
-		if(myEditorState.Search.bgCtxtSearchFocus)
+		if (myEditorState.Search.bgCtxtSearchFocus)
 		{
 			ImGui::SetKeyboardFocusHere(0);
 			myEditorState.Search.bgCtxtSearchFocus = false;
 		}
 		//ImGui::PopItemWidth();
 
-		if(myEditorState.Search.bgCtxtSearchField.empty())
+		if (myEditorState.Search.bgCtxtSearchField.empty())
 		{
-			for(const std::string& catName : myBgContextCategoryNamesList)
+			for (const std::string& catName : myBgContextCategoryNamesList)
 			{
 				const auto catIt = myBgContextCategories.find(catName);
-				if(ImGui::TreeNodeEx(catName.c_str(),ImGuiTreeNodeFlags_SpanAvailWidth))
+				if (ImGui::TreeNodeEx(catName.c_str(),ImGuiTreeNodeFlags_SpanAvailWidth))
 				{
-					for(const auto& item : catIt->second.Items)
+					for (const auto& item : catIt->second.Items)
 					{
-						if(ImGui::TreeNodeEx(item.Title.c_str(),ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanAvailWidth))
+						if (ImGui::TreeNodeEx(item.Title.c_str(),ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanAvailWidth))
 						{
-							if(ImGui::IsItemClicked(ImGuiMouseButton_Left))
+							if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
 							{
 								const typename GraphType::SupportedNodeClass& type = GraphType::GetSupportedNodeTypes().find(item.Value)->second;
 								std::shared_ptr<GraphNodeType> newNode;
@@ -315,11 +315,11 @@ void GraphEditorBase<GraphType,GraphNodeType,GraphEdgeType,GraphPinType,SchemaTy
 		}
 		else
 		{
-			if(myEditorState.Search.bgCtxtSearchFieldChanged)
+			if (myEditorState.Search.bgCtxtSearchFieldChanged)
 			{
 				myEditorState.Search.bgCtxtSearchFieldResults.clear();
 				const auto supportedNodeTypes = GraphType::GetSupportedNodeTypes();
-				for(const auto& [nodeName,nodeType] : supportedNodeTypes)
+				for (const auto& [nodeName,nodeType] : supportedNodeTypes)
 				{
 					myEditorState.Search.bgCtxtSearchFieldResults.push_back({
 						nodeType.NodeTitle,
@@ -338,11 +338,11 @@ void GraphEditorBase<GraphType,GraphNodeType,GraphEdgeType,GraphPinType,SchemaTy
 					});
 			}
 
-			for(auto& item : myEditorState.Search.bgCtxtSearchFieldResults)
+			for (auto& item : myEditorState.Search.bgCtxtSearchFieldResults)
 			{
-				if(ImGui::TreeNodeEx(item.Title.c_str(),ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanAvailWidth))
+				if (ImGui::TreeNodeEx(item.Title.c_str(),ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanAvailWidth))
 				{
-					if(ImGui::IsItemClicked(ImGuiMouseButton_Left))
+					if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
 					{
 						const typename GraphType::SupportedNodeClass& type = GraphType::GetSupportedNodeTypes().find(item.Value)->second;
 						std::shared_ptr<GraphNodeType> newNode = CreateNode(type);
@@ -368,7 +368,7 @@ void GraphEditorBase<GraphType,GraphNodeType,GraphEdgeType,GraphPinType,SchemaTy
 template<typename GraphType,typename GraphNodeType,typename GraphEdgeType,typename GraphPinType,typename SchemaType>
 GraphEditorBase<GraphType,GraphNodeType,GraphEdgeType,GraphPinType,SchemaType>::~GraphEditorBase()
 {
-	if(myEditorContext)
+	if (myEditorContext)
 	{
 		ImNodeEd::DestroyEditor(myEditorContext);
 	}
@@ -382,39 +382,39 @@ void GraphEditorBase<GraphType,GraphNodeType,GraphEdgeType,GraphPinType,SchemaTy
 	std::transform(myEditorToken.begin(),myEditorToken.end(),myEditorToken.begin(),toupper);
 
 	const ImGuiIO& imGuiIO = ImGui::GetIO();
-	if(!ourNodeTitleFont)
+	if (!ourNodeTitleFont)
 	{
 		ourNodeTitleFont = imGuiIO.Fonts->AddFontFromFileTTF("Content/fonts/Roboto/Roboto-Bold.ttf",32);
 	}
 
-	if(!ourNodeBodyFont)
+	if (!ourNodeBodyFont)
 	{
 		ourNodeBodyFont = imGuiIO.Fonts->AddFontFromFileTTF("Content/fonts/Roboto/Roboto-Regular.ttf",18);
 	}
 
-	if(!ourEditorTokenFont)
+	if (!ourEditorTokenFont)
 	{
 		ourEditorTokenFont = imGuiIO.Fonts->AddFontFromFileTTF("Content/fonts/Roboto/Roboto-Bold.ttf",64);
 	}
 
 	myEditorContext = ImNodeEd::CreateEditor();
 
-	if(myBgContextCategories.empty())
+	if (myBgContextCategories.empty())
 	{
 		const auto supportedNodeTypes = GraphType::GetSupportedNodeTypes();
-		for(const auto& [nodeName,nodeType] : supportedNodeTypes)
+		for (const auto& [nodeName,nodeType] : supportedNodeTypes)
 		{
-			if(nodeType.NodeFlags & NODECLASS_FLAG_INTERNALONLY)
+			if (nodeType.NodeFlags & NODECLASS_FLAG_INTERNALONLY)
 				continue;
 
 			const std::string nodeCategory = nodeType.NodeCategory;
-			if(auto catIt = myBgContextCategories.find(nodeCategory); catIt != myBgContextCategories.end())
+			if (auto catIt = myBgContextCategories.find(nodeCategory); catIt != myBgContextCategories.end())
 			{
-				catIt->second.Items.push_back({nodeType.NodeTitle, nodeType.TypeName, ""});
+				catIt->second.Items.push_back({ nodeType.NodeTitle, nodeType.TypeName, "" });
 			}
 			else
 			{
-				myBgContextCategories.insert({nodeCategory, {nodeCategory, {{ nodeType.NodeTitle, nodeType.TypeName }} }});
+				myBgContextCategories.insert({ nodeCategory, {nodeCategory, {{ nodeType.NodeTitle, nodeType.TypeName }} } });
 				myBgContextCategoryNamesList.push_back(nodeCategory);
 			}
 		}
@@ -430,18 +430,18 @@ template<typename GraphType,typename GraphNodeType,typename GraphEdgeType,typena
 void GraphEditorBase<GraphType,GraphNodeType,GraphEdgeType,GraphPinType,SchemaType>::Render()
 {
 	ImNodeEd::SetCurrentEditor(myEditorContext);
-	ImGui::SetNextWindowSize({1280, 720},ImGuiCond_FirstUseEver);
-	if(ImGui::Begin(myEditorState.editorTitle.c_str()))
+	ImGui::SetNextWindowSize({ 1280, 720 },ImGuiCond_FirstUseEver);
+	if (ImGui::Begin(myEditorState.editorTitle.c_str()))
 	{
 		RenderWindow();
-		if(ImNodeEd::Begin("EditorContainer"))
+		if (ImNodeEd::Begin("EditorContainer"))
 		{
 			RenderGraphEditor();
 			ImNodeEd::End();
 			ImVec2 tokenPos = ImGui::GetWindowContentRegionMax();
 			ImGui::PushFont(ourEditorTokenFont);
 			const ImVec2 tokenSize = ImGui::CalcTextSize(myEditorToken.c_str());
-			tokenPos = {tokenPos.x - tokenSize.x - 24, tokenPos.y - tokenSize.y - 12};
+			tokenPos = { tokenPos.x - tokenSize.x - 24, tokenPos.y - tokenSize.y - 12 };
 
 			ImGui::SetCursorPos(tokenPos);
 			ImGui::PushStyleColor(ImGuiCol_Text,IM_COL32(255,255,255,128));

@@ -21,7 +21,7 @@ class Material;
 template<class T>
 struct LoadTask
 {
-	LoadTask(const std::filesystem::path& aPath,bool useExact,std::shared_ptr<T>& outAsset)
+	LoadTask(const std::filesystem::path& aPath,const bool useExact,std::shared_ptr<T>& outAsset)
 		: path(aPath),ExactPath(useExact),asset(outAsset)
 	{
 	}
@@ -69,7 +69,7 @@ public:
 	template<class T>
 	void ForceLoadAsset(const std::filesystem::path& aFilePath,bool useExact,std::shared_ptr<T>& outAsset);
 
-	void SubscribeToChanges(const std::filesystem::path& aFilePath,const SY::UUID gameobjectID);
+	void SubscribeToChanges(const std::filesystem::path& aFilePath,SY::UUID gameobjectID);
 
 	bool AdaptPath(std::filesystem::path& path);
 
@@ -84,7 +84,6 @@ private:
 	//NameToPath
 	void RecursiveNameSave();
 	std::unordered_map<std::filesystem::path,std::filesystem::path> nameToPathMap;
-	//AssetCallbackMaster assetCallbackMaster;
 
 	//Libraries
 	template<class T>
@@ -100,7 +99,7 @@ void AssetManager::ForceLoadAsset(const std::filesystem::path& aFilePath,std::sh
 }
 
 template<class T>
-void AssetManager::ForceLoadAsset(const std::filesystem::path& aFilePath,bool useExact,std::shared_ptr<T>& outAsset)
+void AssetManager::ForceLoadAsset(const std::filesystem::path& aFilePath,const bool useExact,std::shared_ptr<T>& outAsset)
 {
 	const std::type_info* typeInfo = &typeid(T);
 	std::shared_ptr<Library> library = GetLibraryOfType<T>();
@@ -162,7 +161,7 @@ void AssetManager::LoadAsset(const std::filesystem::path& aFilePath,std::shared_
 /// Holds the current thread until the asset is loaded
 /// </summary> 
 template<class T>
-void AssetManager::LoadAsset(const std::filesystem::path& aFilePath,bool useExact,std::shared_ptr<T>& outAsset)
+void AssetManager::LoadAsset(const std::filesystem::path& aFilePath,const bool useExact,std::shared_ptr<T>& outAsset)
 {
 	const std::type_info* typeInfo = &typeid(T);
 	std::shared_ptr<Library> library = GetLibraryOfType<T>();
@@ -205,7 +204,7 @@ void AssetManager::LoadAsset(const std::filesystem::path& aFilePath,bool useExac
 }
 
 template<class T>
-inline void AssetManager::HasAsset(const std::filesystem::path& aFilePath,bool useExact) const
+void AssetManager::HasAsset(const std::filesystem::path& aFilePath,const bool useExact) const
 {
 	aFilePath; useExact;
 	//AMLogger.Err("NotImplementedException");
@@ -213,20 +212,20 @@ inline void AssetManager::HasAsset(const std::filesystem::path& aFilePath,bool u
 }
 
 template<class T>
-inline std::shared_ptr<T> Library::Add(const std::pair<std::filesystem::path,std::shared_ptr<T>>& pair)
+std::shared_ptr<T> Library::Add(const std::pair<std::filesystem::path,std::shared_ptr<T>>& pair)
 {
 	content[pair.first] = std::static_pointer_cast<AssetBase>(pair.second);
 	return std::static_pointer_cast<T>(pair.second);
 }
 
 template<class T>
-inline std::shared_ptr<T> Library::Get(const std::filesystem::path& aFilePath)
+std::shared_ptr<T> Library::Get(const std::filesystem::path& aFilePath)
 {
 	return  std::dynamic_pointer_cast<T>(content[aFilePath]);
 }
 
 template<class T>
-inline std::unordered_map<std::filesystem::path,std::shared_ptr<T>> Library::GetContentCatalogue()
+std::unordered_map<std::filesystem::path,std::shared_ptr<T>> Library::GetContentCatalogue()
 {
 	std::unordered_map<std::filesystem::path,std::shared_ptr<T>> newOutMap;
 	for (auto& i : content)

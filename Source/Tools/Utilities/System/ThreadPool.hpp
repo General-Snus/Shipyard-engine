@@ -1,4 +1,5 @@
 #pragma once
+#define  NOMINMAX
 #include <condition_variable>
 #include <functional>
 #include <future>
@@ -16,7 +17,7 @@ public:
 	void Init(unsigned int pool_size = std::thread::hardware_concurrency() - 1)
 	{
 		static const unsigned int max_threads = std::thread::hardware_concurrency();
-		unsigned int const num_threads = pool_size == 0 ? max_threads - 1 : std::min(max_threads - 1,pool_size);
+		unsigned int const num_threads = pool_size == 0 ? max_threads - 1 : (std::min)(max_threads - 1,pool_size);
 
 		threads.reserve(num_threads);
 		for (unsigned int i = 0; i < num_threads; ++i)

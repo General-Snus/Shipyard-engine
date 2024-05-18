@@ -46,7 +46,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <EnableUnitySupport>true</EnableUnitySupport>
+    <EnableUnitySupport>false</EnableUnitySupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -54,7 +54,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <EnableUnitySupport>true</EnableUnitySupport>
+    <EnableUnitySupport>false</EnableUnitySupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -230,11 +230,15 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Windows\EditorWindows\Console.h" />
+    <ClInclude Include="Windows\EditorWindows\ContentDirectory.h" />
     <ClInclude Include="Core\Editor.h" />
     <ClInclude Include="Core\ApplicationState.h" />
     <ClInclude Include="Defines.h" />
     <ClInclude Include="Core\Paths.h" />
-    <ClInclude Include="Windows\EditorWindow.h" />
+    <ClInclude Include="Windows\EditorWindows\Hierarchy.h" />
+    <ClInclude Include="Windows\EditorWindows\Inspector.h" />
+    <ClInclude Include="Windows\EditorWindows\EditorWindow.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Windows\EditorWindows\ChainGraph\GraphEditorBase.h" />
     <ClInclude Include="Windows\EditorWindows\ChainGraph\GraphTool.h" />
@@ -246,21 +250,27 @@
     <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\RegisterExternalTypes.h" />
     <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\ScriptGraphEditor.h" />
     <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\ScriptGraphNodeGradient.h" />
+    <ClInclude Include="Windows\EditorWindows\Viewport.h" />
     <ClInclude Include="Windows\Window.h" />
     <ClInclude Include="Windows\SplashWindow.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Windows\EditorWindows\Source\Console.cpp" />
+    <ClCompile Include="Windows\EditorWindows\Source\ContentDirectory.cpp" />
     <ClCompile Include="Core\Source\ApplicationState.cpp" />
     <ClCompile Include="Core\Source\Paths.cpp" />
+    <ClCompile Include="Windows\EditorWindows\Source\Hierarchy.cpp" />
+    <ClCompile Include="Windows\EditorWindows\Source\Inspector.cpp" />
     <ClCompile Include="Windows\EditorWindows\ChainGraph\GraphEditorBase.cpp" />
     <ClCompile Include="Windows\EditorWindows\ChainGraph\GraphTool.cpp" />
     <ClCompile Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\RegisterExternalNodes.cpp" />
     <ClCompile Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\ScriptGraphEditor.cpp" />
-    <ClCompile Include="Windows\Source\EditorWindow.cpp" />
+    <ClCompile Include="Windows\EditorWindows\Source\EditorWindow.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Core\Source\Editor.cpp" />
     <ClCompile Include="TheHole\SaveLoad.cpp" />
+    <ClCompile Include="Windows\EditorWindows\Source\Viewport.cpp" />
     <ClCompile Include="Windows\Source\Window.cpp" />
     <ClCompile Include="Windows\Source\SplashWindow.cpp" />
   </ItemGroup>

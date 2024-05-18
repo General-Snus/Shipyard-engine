@@ -1,7 +1,5 @@
-#pragma once
+#pragma once 
 #include <d3d12.h>
-
-
 class IndexResource;
 class VertexResource;
 class GpuResource;
@@ -9,6 +7,10 @@ class Texture;
 class GPUCommandQueue;
 class GPURootSignature;
 struct IDXGISwapChain4;
+struct D3D12_CPU_DESCRIPTOR_HANDLE;
+struct D3D12_GPU_DESCRIPTOR_HANDLE;
+struct ID3D10Blob;
+typedef ID3D10Blob ID3DBlob;
 
 enum class	eHeapTypes : int
 {
@@ -29,8 +31,8 @@ enum class ViewType
 
 struct HeapHandle
 {
-	D3D12_CPU_DESCRIPTOR_HANDLE cpuPtr;;
-	D3D12_GPU_DESCRIPTOR_HANDLE gpuPtr;;
+	D3D12_CPU_DESCRIPTOR_HANDLE cpuPtr;
+	D3D12_GPU_DESCRIPTOR_HANDLE gpuPtr;
 	int heapOffset = -1;
 };
 

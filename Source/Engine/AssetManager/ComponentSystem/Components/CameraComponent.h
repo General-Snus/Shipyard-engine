@@ -10,6 +10,7 @@ struct CameraSettings
 	float farfield = 1000000.0f;
 	float nearField = 0.01f;
 	bool isOrtho = false;
+	bool IsInControll = false;
 };
 
 //#define Flashlight
@@ -22,11 +23,10 @@ public:
 
 	//void UpdatePositionVectors();
 	void Update() override;
-	void Update(Transform& transform);
 	void Render() override;
 
 	void SetSettings(const CameraSettings& settings);
-	CameraSettings GetSettings() const { return mySettings; };
+	CameraSettings& GetSettings() { return mySettings; };
 
 	std::array<Vector4f,4> GetFrustrumCorners() const;
 	Vector3f GetPointerDirection(const Vector2<int> position);
@@ -35,6 +35,8 @@ public:
 	Matrix GetProjection() { return m_Projection; };
 	FrameBuffer GetFrameBuffer();
 	Vector4f WoldSpaceToPostProjectionSpace(Vector3f aEntity);
+
+
 
 private:
 	Matrix m_Projection;

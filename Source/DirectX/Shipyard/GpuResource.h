@@ -4,13 +4,12 @@
 #define D3D12_GPU_VIRTUAL_ADDRESS_NULL      ((D3D12_GPU_VIRTUAL_ADDRESS)0) 
 #define D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN   ((D3D12_GPU_VIRTUAL_ADDRESS)-1)
 
-#include <filesystem>
-#include <memory>
+#include <filesystem> 
 #include <string>
 #include <unordered_map>
-#include <wrl/client.h>   
+#include <wrl/client.h>
+#include "Gpu_fwd.h"
 
-#include "Gpu_fwd.h" 
 using namespace Microsoft::WRL;
 
 class GpuResource
@@ -41,6 +40,7 @@ public:
 	virtual void ClearView(ViewType view);
 
 	virtual HeapHandle GetHandle(ViewType type);
+	virtual HeapHandle GetHandle(ViewType type) const;
 	virtual HeapHandle CreateViewWithHandle(ViewType type,HeapHandle handle);
 	virtual HeapHandle GetHandle() const;
 	virtual int GetHeapOffset() const;

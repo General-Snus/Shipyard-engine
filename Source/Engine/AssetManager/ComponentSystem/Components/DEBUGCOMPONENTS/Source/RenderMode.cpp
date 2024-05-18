@@ -1,7 +1,6 @@
-#include <Editor/Editor/Core/Editor.h> 
+#include "AssetManager.pch.h"
 #include <Tools/ImGui/ImGui/imgui.h> 
 #include "../RenderMode.h"
-#include "AssetManager.pch.h"
 
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 
@@ -29,7 +28,7 @@ void RenderMode::Update()
 			if (ImGui::RadioButton(ApplicationState::layerNames[i].c_str(),false))
 			{
 				currentlyActiveLayer = i;
-				Editor::GetApplicationState().filter = (DebugFilter)i;
+				ApplicationState::filter = static_cast<DebugFilter>(i);
 			}
 		}
 	}
