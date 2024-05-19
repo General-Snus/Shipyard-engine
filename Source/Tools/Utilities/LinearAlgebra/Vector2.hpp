@@ -34,6 +34,7 @@ public:
 	//Destructor (compiler generated)
 	~Vector2<T>() = default;
 
+	T* operator&();
 	//Implicit cast operator to any datatype, return initializer list of x, y, z
 	template <class U>
 	explicit operator U() const;
@@ -201,6 +202,12 @@ inline Vector2<T>::Vector2(const T& aX,const T& aY)
 {
 	x = aX;
 	y = aY;
+}
+
+template <class T>
+T* Vector2<T>::operator&()
+{
+	return &x;
 }
 
 template<class T>

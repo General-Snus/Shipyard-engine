@@ -6,7 +6,7 @@ class cPhysics_Kinematic : public Component
 {
 public:
 	cPhysics_Kinematic(const SY::UUID anOwnerID);
-	~cPhysics_Kinematic();
+	~cPhysics_Kinematic() override;
 	void Init() override;
 	void UpdatePrimitive();
 	void Update() override;
@@ -25,3 +25,4 @@ private:
 	std::vector<DebugDrawer::PrimitiveHandle> myHandles;
 };
 
+REFL_AUTO(type(cPhysics_Kinematic))

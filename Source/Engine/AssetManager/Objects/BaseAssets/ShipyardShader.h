@@ -7,6 +7,7 @@
 class ShipyardShader : public AssetBase  // <--- 
 {
 public:
+	MYLIB_REFLECTABLE();
 	ShipyardShader(const std::filesystem::path& aFilePath);
 	void Init() override;
 
@@ -22,3 +23,5 @@ private:
 	ShaderInfo myShaderInfo{};
 };
 
+
+REFL_AUTO(type(ShipyardShader))

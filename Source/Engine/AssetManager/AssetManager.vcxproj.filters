@@ -39,9 +39,6 @@
     <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\BackgroundColor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\ImGuiComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ComponentSystem\Components\Animator.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -131,6 +131,40 @@ void Material::Init()
 	isLoadedComplete = true;
 }
 
+void Material::InspectorView()
+{
+	AssetBase::InspectorView();
+
+	if (ImGui::TreeNodeEx(AssetPath.filename().string().c_str()))
+	{
+		ImGui::Text("Shader data");
+		data.vertexShader.lock()->InspectorView();
+		data.pixelShader.lock()->InspectorView();
+
+		ImGui::Text("Material Data");
+		ImGui::ColorEdit4("Albedo Color",&data.materialData.albedoColor);
+		ImGui::InputFloat2("UV scaling",&data.materialData.UVTiling);
+		ImGui::InputFloat("Normal Strength",&data.materialData.NormalStrength);
+		ImGui::InputFloat("Shine Strength",&data.materialData.Shine);
+		ImGui::InputFloat("Roughness Strength",&data.materialData.Roughness);
+
+
+		if (ImGui::TreeNodeEx("Textures"))
+		{
+			for (const auto& texture : data.textures)
+			{
+				if (ImGui::TreeNodeEx(texture.first.filename().string().c_str()))
+				{
+					texture.second->InspectorView();
+					ImGui::TreePop();
+				}
+			}
+			ImGui::TreePop();
+		}
+		ImGui::TreePop();
+	}
+}
+
 MaterialBuffer& Material::GetMaterialData()
 {
 	return data.materialData;

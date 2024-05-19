@@ -4,6 +4,7 @@
 class ParticleSystem : public Component
 {
 public:
+	MYLIB_REFLECTABLE();
 	ParticleSystem() = delete; // Create a generic cube
 	ParticleSystem(const unsigned int anOwnerId); // Create a generic cube 
 	ParticleSystem(const unsigned int anOwnerId,const std::filesystem::path& aFilePath);
@@ -17,3 +18,4 @@ private:
 
 };
 
+REFL_AUTO(type(ParticleSystem))

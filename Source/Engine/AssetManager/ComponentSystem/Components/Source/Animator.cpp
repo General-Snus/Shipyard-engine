@@ -117,5 +117,9 @@ void cAnimator::UpdateAnimationHierarcy(float t)
 		}
 		SetHierarchy(0,Matrix());
 	}
+}
 
+void cAnimator::InspectorView()
+{
+	ImGui::Text("cAnimator");
 }

@@ -73,6 +73,8 @@ public:
 	template <class T>
 	T& GetComponent(const SY::UUID aGameObjectID);
 
+	std::vector<Component*> GetAllAttachedComponents(SY::UUID aGameObjectID);
+
 	bool GetActive(const SY::UUID aGameObjectID);
 	Layer GetLayer(const SY::UUID aGameObjectID);
 
@@ -201,6 +203,20 @@ inline T& GameObjectManager::GetComponent(const SY::UUID aGameObjectID)
 	OPTICK_EVENT();
 	assert(myComponentManagers.contains(&typeid(T)) && "GameObjectManager::GetComponent(...) component manager doesn't exist.");
 	return static_cast<ComponentManager<T>*>(myComponentManagers[&typeid(T)])->GetComponent(aGameObjectID);
+}
+
+inline std::vector<Component*> GameObjectManager::GetAllAttachedComponents(const SY::UUID aGameObjectID)
+{
+	std::vector<Component*> components;
+	for (auto& [type,manager] : myComponentManagers)
+	{
+		auto* cmp = manager->TryGetComponent(aGameObjectID);
+		if (cmp)
+		{
+			components.emplace_back(cmp);
+		}
+	}
+	return components;
 }
 
 template<class T>

@@ -94,3 +94,7 @@ void cCollider::OnSiblingChanged(const std::type_info* SourceClass)
 		GetGameObject().OnSiblingChanged(&typeid(cCollider));
 	}
 }
+void cCollider::InspectorView()
+{
+	ImGui::Text("cCollider");
+}

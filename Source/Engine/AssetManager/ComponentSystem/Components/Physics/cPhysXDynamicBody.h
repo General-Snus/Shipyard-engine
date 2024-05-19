@@ -18,3 +18,4 @@ private:
 	physx::PxRigidDynamic* data;
 };
 
+REFL_AUTO(type(cPhysXDynamicBody))

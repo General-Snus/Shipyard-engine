@@ -4,21 +4,33 @@
 #include <filesystem>
 #include  <functional>
 #include "DirectX/Shipyard/GpuResource.h"
+#include "Tools/Reflection/refl.hpp"
+#include "Tools/Reflection/ReflectionTemplate.h"
 
 class Material;
-class AssetBase
+class AssetBase : public Reflectable
 {
 public:
+	MYLIB_REFLECTABLE();
 	AssetBase(const std::filesystem::path& aFilePath);
 	virtual ~AssetBase() = default;
 	virtual void Init() = 0;
 	bool  isLoadedComplete = false;
 	bool  isBeingLoaded = false;
-	inline const std::filesystem::path& GetAssetPath()	const { return AssetPath; };
+	const std::filesystem::path& GetAssetPath()	const { return AssetPath; };
 	std::vector<std::function<void()>> callBackOnFinished;
-protected:
+
+
+	virtual void InspectorView();
 	std::filesystem::path AssetPath;
+protected:
 };
+
+REFL_AUTO(type(AssetBase),
+	field(AssetPath),
+	field(isLoadedComplete),
+	field(isBeingLoaded)
+)
 
 //struct Bone
 //{

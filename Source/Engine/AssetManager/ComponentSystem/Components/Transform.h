@@ -10,6 +10,7 @@
 class Transform : public Component
 {
 public:
+	MYLIB_REFLECTABLE();
 	Transform() = delete; // Create a generic cube
 	Transform(const unsigned int anOwnerId); // Create a generic cube 
 	//Transform(const unsigned int anOwnerId,const Matrix& aMatrix);
@@ -67,9 +68,11 @@ public:
 	bool GetIsRecentlyUpdated() const;
 	bool GetIsDirty() const;
 
-	~Transform() = default;
+	~Transform() override = default;
 	void SetGizmo(bool enabled);
 	void InitPrimitive();
+
+	void InspectorView() override;
 private:
 
 	bool IsRecentlyUpdated;
@@ -116,3 +119,5 @@ void ChangeMeterScale(set);
 
 };
 
+
+REFL_AUTO(type(Transform,bases<Component>))

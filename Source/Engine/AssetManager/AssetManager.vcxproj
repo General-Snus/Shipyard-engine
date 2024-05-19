@@ -207,7 +207,6 @@
     <ClInclude Include="ComponentSystem\Components\Animator.h" />
     <ClInclude Include="AssetManager.h" />
     <ClInclude Include="AssetManager.pch.h" />
-    <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\ImGuiComponent.h" />
     <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\BackgroundColor.h" />
     <ClInclude Include="ComponentSystem\ComponentManager.h" />
     <ClInclude Include="ComponentSystem\GameObjectManager.h" />

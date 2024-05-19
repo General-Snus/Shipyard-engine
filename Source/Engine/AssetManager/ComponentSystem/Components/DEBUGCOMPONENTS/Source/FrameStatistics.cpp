@@ -16,6 +16,25 @@ static HANDLE self;
 
 double App_CPU_Usage();
 
+FrameStatistics::FrameStatistics(const SY::UUID anOwnerId) : Component(anOwnerId)
+{
+#ifdef  _WIN32   
+	SYSTEM_INFO sysInfo;
+	FILETIME ftime,fsys,fuser;
+
+	GetSystemInfo(&sysInfo);
+	numProcessors = sysInfo.dwNumberOfProcessors;
+
+	GetSystemTimeAsFileTime(&ftime);
+	memcpy(&lastCPU,&ftime,sizeof(FILETIME));
+
+	self = GetCurrentProcess();
+	GetProcessTimes(self,&ftime,&ftime,&fsys,&fuser);
+	memcpy(&lastSysCPU,&fsys,sizeof(FILETIME));
+	memcpy(&lastUserCPU,&fuser,sizeof(FILETIME));
+#endif
+}
+
 void FrameStatistics::Update()
 {
 	const float framerate = 1 / Timer::GetInstance().GetDeltaTime();
@@ -76,27 +95,4 @@ double App_CPU_Usage()
 	lastSysCPU = sys;
 
 	return percent * 100;
-}
-
-void FrameStatistics::OnExit()
-{
-}
-
-void FrameStatistics::OnStart()
-{
-#ifdef  _WIN32   
-	SYSTEM_INFO sysInfo;
-	FILETIME ftime,fsys,fuser;
-
-	GetSystemInfo(&sysInfo);
-	numProcessors = sysInfo.dwNumberOfProcessors;
-
-	GetSystemTimeAsFileTime(&ftime);
-	memcpy(&lastCPU,&ftime,sizeof(FILETIME));
-
-	self = GetCurrentProcess();
-	GetProcessTimes(self,&ftime,&ftime,&fsys,&fuser);
-	memcpy(&lastSysCPU,&fsys,sizeof(FILETIME));
-	memcpy(&lastUserCPU,&fuser,sizeof(FILETIME));
-#endif
 }

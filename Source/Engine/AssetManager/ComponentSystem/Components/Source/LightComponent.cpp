@@ -655,3 +655,8 @@ FrameBuffer cLight::GetShadowMapFrameBuffer(const int number) const
 
 	return fb;
 }
+
+void cLight::InspectorView()
+{
+	ImGui::Text("cLight");
+}

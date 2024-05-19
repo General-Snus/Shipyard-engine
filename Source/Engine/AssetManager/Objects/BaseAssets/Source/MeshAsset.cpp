@@ -144,6 +144,31 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 	}
 }
 
+void Mesh::InspectorView()
+{
+	ImGui::PushID(this);
+	AssetBase::InspectorView();
+	if (ImGui::TreeNodeEx("Elements")) // Replace with element name
+	{
+		ImGui::Separator();
+		for (auto element : Elements)
+		{
+			ImGui::Text("Element");
+			ImGui::Text("Vertex count: " + element.Vertices.size());
+			ImGui::Text("Index count: " + element.Indicies.size());
+
+			if (materials.contains(element.MaterialIndex))
+			{
+				materials.at(element.MaterialIndex)->InspectorView();
+			}
+			ImGui::Separator();
+		}
+
+		ImGui::TreePop();
+	}
+	ImGui::PopID();
+}
+
 void Mesh::Init()
 {
 	OPTICK_EVENT();

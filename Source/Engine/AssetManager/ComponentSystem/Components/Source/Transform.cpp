@@ -3,6 +3,8 @@
 #include <Tools/Utilities/Math.hpp>
 #include "../Transform.h"
 
+#include "Tools/ImGui/ImGui/imgui.h"
+
 Transform::Transform(const unsigned int anOwnerId) : Component(anOwnerId),isDirty(true)
 {
 	myTransform = Matrix();
@@ -223,6 +225,14 @@ void Transform::SetGizmo(bool enabled)
 	{
 		DebugDrawer::Get().RemoveDebugPrimitive(primitive);
 	}
+}
+
+void Transform::InspectorView()
+{
+	isDirty |= ImGui::DragFloat3("Position",&myPosition);
+	isDirty |= ImGui::DragFloat3("Euler angles",&myRotation);
+	ImGui::DragFloat4("Quaternion",&myQuaternion,1,0,0,"%.4f",ImGuiSliderFlags_NoInput);
+	isDirty |= ImGui::DragFloat3("Scale",&myScale);
 }
 
 void Transform::SetRotation(float X,float Y,float Z)

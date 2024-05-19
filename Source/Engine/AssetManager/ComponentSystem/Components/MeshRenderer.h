@@ -22,6 +22,7 @@ struct RenderData
 class cMeshRenderer : public Component
 {
 public:
+	MYLIB_REFLECTABLE();
 	cMeshRenderer() = delete; // Create a generic cube
 	cMeshRenderer(const unsigned int anOwnerId); // Create a generic cube  
 	cMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath,bool useExact = false);
@@ -34,6 +35,7 @@ public:
 
 	std::vector<Element>& GetElements() const;
 	std::shared_ptr<Mesh> GetRawMesh() const;
+	void InspectorView() override;
 
 	std::shared_ptr<TextureHolder> GetTexture(eTextureType type,unsigned materialIndex = 0);
 	bool IsDefaultMesh() const;
@@ -54,6 +56,7 @@ protected:
 	std::shared_ptr<RenderData> myRenderData;
 };
 
+REFL_AUTO(type(cMeshRenderer))
 
 class cSkeletalMeshRenderer : public cMeshRenderer
 {
@@ -63,8 +66,9 @@ public:
 	cSkeletalMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath);
 	void SetNewMesh(const std::filesystem::path& aFilePath);
 	void Render() override;
+	void InspectorView() override;
 
-	~cSkeletalMeshRenderer() = default;
+	~cSkeletalMeshRenderer() override = default;
 private:
 
 	FORCEINLINE const std::shared_ptr<Skeleton> GetRawSkeleton() const
@@ -74,3 +78,5 @@ private:
 	friend class cAnimator;
 	std::shared_ptr<Skeleton> mySkeleton;
 };
+
+REFL_AUTO(type(cSkeletalMeshRenderer))

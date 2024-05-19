@@ -2,6 +2,8 @@
 #include <memory>
 #include "GameObject.h"
 #include "GameObjectManager.h"
+#include "Tools/Reflection/refl.hpp"
+#include "Tools/Reflection/ReflectionTemplate.h"
 
 enum class eComponentType
 {
@@ -9,14 +11,14 @@ enum class eComponentType
 	backgroundColor,
 };
 
-
-
-class Component : public std::enable_shared_from_this<Component>
+class Component : public Reflectable
 {
 public:
-	Component(const SY::UUID anOwnerID) : myOwnerID(anOwnerID),myIsActive(true),myComponentType(eComponentType::base) {}
-	Component(const SY::UUID anOwnerID,eComponentType aComponentType) : myOwnerID(anOwnerID),myIsActive(true),myComponentType(aComponentType) {}
-	virtual ~Component() = default;
+	MYLIB_REFLECTABLE();
+
+	Component(const SY::UUID anOwnerID) : myOwnerID(anOwnerID),m_IsActive(true),myComponentType(eComponentType::base) {}
+	Component(const SY::UUID anOwnerID,eComponentType aComponentType) : myOwnerID(anOwnerID),m_IsActive(true),myComponentType(aComponentType) {}
+	virtual ~Component() noexcept = default;
 
 	virtual void Init() {}
 	virtual void Update() {}
@@ -45,34 +47,43 @@ public:
 	const T* TryGetAddComponent() const;
 
 
-	inline bool IsActive() const { return myIsActive && GameObjectManager::Get().GetActive(myOwnerID); }
-	inline void SetActive(const bool aState) { myIsActive = aState; }
+	inline bool IsActive() const { return m_IsActive && GameObjectManager::Get().GetActive(myOwnerID); }
+	inline void SetActive(const bool aState) { m_IsActive = aState; }
 
 	virtual void CollidedWith(const SY::UUID /*aGameObjectID*/) {}
 
 	bool IsAdopted() { return IsInherited; };
 	void Adopt() { IsInherited++; }
 	void Abandon();
-protected:
+
+	virtual void InspectorView();
+
+
 	SY::UUID myOwnerID;
 	eComponentType myComponentType;
 
 	//IsInherited is a new system that allows a component to remove an other component from the update loop and promise to take care of it themselves
 	int IsInherited = 0;
-
+	bool m_IsActive = true;
 private:
 	Component() = default;
 
 	template <class T>
 	friend class ComponentManager;
 
-	bool myIsActive = true;
 
 	inline void SetOwnerID(const SY::UUID anOwnerID)
 	{
 		myOwnerID = anOwnerID;
 	}
 };
+
+
+REFL_AUTO(type(Component))
+
+
+
+
 
 template <class T>
 bool Component::HasComponent() const

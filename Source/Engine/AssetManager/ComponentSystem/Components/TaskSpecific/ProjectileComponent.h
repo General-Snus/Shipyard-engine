@@ -5,7 +5,7 @@ class ProjectileComponent : public Component
 {
 public:
 	ProjectileComponent(const SY::UUID anOwnerID);
-	~ProjectileComponent() = default;
+	~ProjectileComponent() override = default;
 	void Init() override;
 	void Update() override;
 
@@ -18,3 +18,5 @@ private:
 	GameObject Creator;
 };
 
+
+REFL_AUTO(type(ProjectileComponent))

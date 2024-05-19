@@ -17,6 +17,7 @@ struct Frame
 class Skeleton : public AssetBase
 {
 public:
+	MYLIB_REFLECTABLE();
 	void Init() override;
 	Skeleton(const std::filesystem::path& aFilePath);
 	std::vector<Bone> myBones;
@@ -24,10 +25,12 @@ public:
 	std::unordered_map<std::string,unsigned int> BoneNameToIndex;
 	const Bone* GetRoot() const { if (!myBones.empty()) { return &myBones[0]; } return nullptr; }
 };
+REFL_AUTO(type(Skeleton))
 
 class Animation : public AssetBase
 {
 public:
+	MYLIB_REFLECTABLE();
 	void Init() override;
 	Animation(const std::filesystem::path& aFilePath);
 	Animation() = delete; // Create a generic cube 
@@ -38,3 +41,4 @@ private:
 	unsigned int numFrames;
 	std::vector<Frame> Frames;
 };
+REFL_AUTO(type(Animation))

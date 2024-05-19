@@ -266,3 +266,8 @@ Vector4f cCamera::WoldSpaceToPostProjectionSpace(Vector3f aEntity)
 
 	return outPosition;
 }
+
+void cCamera::InspectorView()
+{
+	ImGui::Text("cCamera");
+}

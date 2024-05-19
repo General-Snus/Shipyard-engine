@@ -11,3 +11,5 @@ private:
 	double ph_mass;
 };
 
+
+REFL_AUTO(type(cPhysics_Newtonian))

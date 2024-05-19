@@ -21,6 +21,7 @@ class cLight : public Component
 	friend class ShadowRenderer;
 	friend class EnvironmentLightPSO;
 public:
+	MYLIB_REFLECTABLE();
 	cLight() = delete; // Create a generic cube
 	cLight(const unsigned int anOwnerId); // Create a generic cube 
 	cLight(const unsigned int anOwnerId,const eLightType type);
@@ -63,12 +64,12 @@ public:
 	bool GetIsBound() const;
 
 	FrameBuffer GetShadowMapFrameBuffer(const int number = 0) const;
-
+	void InspectorView() override;
 	template<class T>
 	std::shared_ptr<T> GetData();
 
 	void Update() override;
-	~cLight() = default;
+	~cLight() override = default;
 private:
 	void ConformToTransform();
 	void RedrawShadowMap();
@@ -89,6 +90,7 @@ private:
 	bool isRendered = false;
 };
 
+REFL_AUTO(type(cLight))
 template<>
 inline std::shared_ptr<DirectionalLight> cLight::GetData<DirectionalLight>()
 {

@@ -17,6 +17,7 @@ struct CameraSettings
 class cCamera : public Component
 {
 public:
+	MYLIB_REFLECTABLE();
 	explicit cCamera(const unsigned int anOwnerId); // Create a generic cube
 	explicit cCamera(const unsigned int anOwnerId,const CameraSettings& settings); // Create a generic cube
 	~cCamera() override;
@@ -35,8 +36,7 @@ public:
 	Matrix GetProjection() { return m_Projection; };
 	FrameBuffer GetFrameBuffer();
 	Vector4f WoldSpaceToPostProjectionSpace(Vector3f aEntity);
-
-
+	void InspectorView() override;
 
 private:
 	Matrix m_Projection;
@@ -44,3 +44,5 @@ private:
 	float cameraSpeed = 10;
 	CameraSettings mySettings;
 };
+
+REFL_AUTO(type(cCamera))

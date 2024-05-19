@@ -32,6 +32,7 @@ class Material : public AssetBase
 {
 	friend class cMeshRenderer;
 public:
+	MYLIB_REFLECTABLE();
 	struct DataMaterial
 	{
 		std::weak_ptr<ShipyardShader> vertexShader;
@@ -46,6 +47,9 @@ public:
 	void Init() override;
 	//void AddTexture(const std::filesystem::path& aFilePath);
 	//void AddTexture(const std::shared_ptr<TextureHolder> text);
+
+	void  InspectorView() override;
+
 	MaterialBuffer& GetMaterialData();
 	void Update();
 	void SetShader(const std::shared_ptr<ShipyardShader>& aVertexShader,const std::shared_ptr<ShipyardShader>& aPixelShader);
@@ -54,3 +58,4 @@ private:
 	std::shared_ptr<TextureHolder> GetTexture(eTextureType);
 	DataMaterial data;
 };
+REFL_AUTO(type(Material))

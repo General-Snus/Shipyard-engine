@@ -10,6 +10,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AssetManager", "Engine\Asse
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{F691C6F0-CCCA-4376-A4F9-FB06F002C99E}"
+	ProjectSection(SolutionItems) = preProject
+		Tools\Reflection\refl.hpp = Tools\Reflection\refl.hpp
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Game", "Game", "{A4DB8E53-DC91-406A-80C8-637BB750D60D}"
 EndProject
@@ -66,6 +69,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectXLibrary", "DirectX\D
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectXTex", "DirectX\DirectXTex\DirectXTex_Desktop_2022.vcxproj", "{371B9FA9-4C90-4AC6-A123-ACED756D6C77}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Reflection", "Reflection", "{6ED5BFB3-CC85-4C15-8F88-900545D5E388}"
+	ProjectSection(SolutionItems) = preProject
+		Tools\Reflection\refl.hpp = Tools\Reflection\refl.hpp
+		Tools\Reflection\ReflectionTemplate.h = Tools\Reflection\ReflectionTemplate.h
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -272,6 +281,7 @@ Global
 		{1B302653-82CC-40DB-920E-C979D3CFC23D} = {2B5F3E65-614C-4109-8B62-895AC1F17CD2}
 		{A2B85F25-5933-41EF-A8FD-B3D9AF534090} = {45B176AB-3175-4F4D-88E5-EDC49D47D143}
 		{371B9FA9-4C90-4AC6-A123-ACED756D6C77} = {45B176AB-3175-4F4D-88E5-EDC49D47D143}
+		{6ED5BFB3-CC85-4C15-8F88-900545D5E388} = {F691C6F0-CCCA-4376-A4F9-FB06F002C99E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6291F018-61C1-4285-ACFA-72300622B6CB}

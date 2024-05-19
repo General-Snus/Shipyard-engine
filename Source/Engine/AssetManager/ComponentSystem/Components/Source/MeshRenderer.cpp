@@ -1,5 +1,6 @@
 #include "AssetManager.pch.h"
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
+#include "Tools/ImGui/ImGui/imgui.h"
 
 class GfxCmd_RenderMesh;
 
@@ -65,6 +66,18 @@ std::shared_ptr<Mesh> cMeshRenderer::GetRawMesh() const
 	return myRenderData->myMesh;
 }
 
+void cMeshRenderer::InspectorView()
+{
+	ImGui::Text("cMeshRenderer");
+
+	myRenderData->myMesh->InspectorView();
+	ImGui::Text("overrideMaterial");
+	for (auto& mat : myRenderData->overrideMaterial)
+	{
+		mat->InspectorView();
+
+	}
+}
 
 std::shared_ptr<TextureHolder> cMeshRenderer::GetTexture(eTextureType type,unsigned materialIndex)
 {
@@ -180,4 +193,9 @@ void cSkeletalMeshRenderer::Render()
 	}
 	//GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,Matrix(),false);
 	//GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),false);
+}
+
+void cSkeletalMeshRenderer::InspectorView()
+{
+	ImGui::Text("cSkeletalMeshRenderer");
 }

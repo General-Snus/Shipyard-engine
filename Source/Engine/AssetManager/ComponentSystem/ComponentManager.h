@@ -30,6 +30,11 @@ public:
 	void SetUpdatePriority(const UpdatePriority aPriority) { myUpdatePriority = aPriority; }
 	const UpdatePriority GetUpdatePriority() const { return myUpdatePriority; }
 
+
+	virtual Component* TryGetComponent(const SY::UUID aGameObjectID) = 0;
+protected:
+
+
 private:
 	UpdatePriority myUpdatePriority = ComponentManagerBase::UpdatePriority::Normal;
 };
@@ -57,7 +62,7 @@ public:
 
 	T& GetComponent(const SY::UUID aGameObjectID);
 
-	T* TryGetComponent(const SY::UUID aGameObjectID);
+	T* TryGetComponent(const SY::UUID aGameObjectID) override;
 
 	void Update() override;
 	void Render() override;

@@ -55,10 +55,3 @@ void RenderMode::Update()
 	ImGui::End();
 }
 
-void RenderMode::OnExit()
-{
-}
-
-void RenderMode::OnStart()
-{
-}

@@ -7,6 +7,7 @@ class TextureHolder : public AssetBase
 {
 	friend class Material;
 public:
+	MYLIB_REFLECTABLE();
 	void Init() override;
 	TextureHolder(const std::filesystem::path& aFilePath);
 	TextureHolder(const std::filesystem::path& aFilePath,eTextureType atextureType);
@@ -24,3 +25,5 @@ private:
 	eTextureType textureType;
 	std::shared_ptr<Texture> RawTexture;
 };
+
+REFL_AUTO(type(TextureHolder))

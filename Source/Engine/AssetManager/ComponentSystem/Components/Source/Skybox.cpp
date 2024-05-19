@@ -2,6 +2,8 @@
 #include <Engine/GraphicsEngine/GraphicsEngine.h>
 #include "../Skybox.h"
 
+#include "Tools/ImGui/ImGui/imgui.h"
+
 Skybox::Skybox(const unsigned int anOwnerId) : Component(anOwnerId)
 {
 	myCubeMap = GraphicsEngine::Get().GetDefaultTexture(eTextureType::CubeMap);
@@ -23,6 +25,14 @@ Skybox::Skybox(const unsigned int anOwnerId,const std::filesystem::path& aPath) 
 
 void Skybox::Update()
 {
+}
+
+
+void Skybox::InspectorView()
+{
+	ImGui::Text("Skybox");
+	ImGui::DragFloat("Radius",&m_Radius);
+	myCubeMap->InspectorView();
 }
 
 void Skybox::Render()

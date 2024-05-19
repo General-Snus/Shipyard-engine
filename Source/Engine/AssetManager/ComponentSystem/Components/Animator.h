@@ -22,10 +22,11 @@ struct RenderData;
 class cAnimator : public Component
 {
 public:
+	MYLIB_REFLECTABLE();
 	cAnimator() = delete; // Create a generic cube
 	cAnimator(const unsigned int anOwnerId); // Create a generic cube 
 	cAnimator(const unsigned int anOwnerId,const std::filesystem::path& aFilePath);
-	~cAnimator() = default;
+	~cAnimator() override = default;
 
 	void Update() override;
 
@@ -35,6 +36,7 @@ public:
 	eAnimationState GetState() const;
 	void SetState(eAnimationState aState);
 	void SetPlayingAnimation(unsigned int aAnimationIndex);
+	void InspectorView() override;
 private:
 	void SetHierarchy(unsigned int aBoneID,const  Matrix& aParentMatrix);
 	void UpdateAnimationHierarcy(float t);
@@ -47,3 +49,4 @@ private:
 	std::shared_ptr<Skeleton> mySkeleton;
 };
 
+REFL_AUTO(type(cAnimator))

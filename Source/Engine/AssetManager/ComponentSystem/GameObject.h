@@ -29,6 +29,8 @@ public:
 	template <class T>
 	T& GetComponent();
 
+	std::vector<Component*> GetAllComponents() const;
+
 	bool GetActive() const;
 	void SetActive(bool aState) const;
 
@@ -86,6 +88,11 @@ template<class T>
 T& GameObject::GetComponent()
 {
 	return myManager->GetComponent<T>(myID);
+}
+
+inline std::vector<Component*> GameObject::GetAllComponents() const
+{
+	return myManager->GetAllAttachedComponents(myID);
 }
 
 inline bool GameObject::GetActive() const

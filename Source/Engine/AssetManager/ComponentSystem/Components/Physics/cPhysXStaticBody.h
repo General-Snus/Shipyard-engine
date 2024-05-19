@@ -17,3 +17,5 @@ public:
 private:
 	physx::PxRigidStatic* data;
 };
+
+REFL_AUTO(type(cPhysXStaticBody))

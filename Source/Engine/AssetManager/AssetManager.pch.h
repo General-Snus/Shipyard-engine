@@ -22,6 +22,8 @@
 #include <memory>
 #include <random>
 #include <ranges>
+#include <Tools/Reflection/refl.hpp>
+#include <Tools/Reflection/ReflectionTemplate.h>
 #include <Tools/ThirdParty/nlohmann/json.hpp>
 #include <typeinfo> 
 #include <unordered_map>
@@ -32,6 +34,7 @@
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 #include <Tools/Utilities/Math.hpp>
+#include "Tools/ImGui/ImGui/imgui.h"
 #include "Tools/Logging/Logging.h"
 
 #include "Objects/AI/AgentSystem/AIEventManager.h"

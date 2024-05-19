@@ -29,6 +29,7 @@ public:
 	//Implicit cast operator to any datatype, return initializer list of x, y, z
 	template <class U> operator U() const;
 
+	T* operator&();
 	//Returns the negated vector
 	Vector4<T> operator-() const;
 
@@ -260,14 +261,20 @@ template<class T>
 template<class U>
 inline Vector4<T>::operator U() const
 {
-	return  {x,y,z,w};
+	return  { x,y,z,w };
+}
+
+template <class T>
+T* Vector4<T>::operator&()
+{
+	return &x;
 }
 
 template<class T>
 inline T& Vector4<T>::operator[](int value)
 {
 	assert(value >= 0 && value <= 4);
-	switch(value)
+	switch (value)
 	{
 	case 0:
 	{
@@ -296,7 +303,7 @@ template<class T>
 inline const T& Vector4<T>::operator[](int value) const
 {
 	assert(value >= 0 && value <= 4);
-	switch(value)
+	switch (value)
 	{
 	case 0:
 	{
