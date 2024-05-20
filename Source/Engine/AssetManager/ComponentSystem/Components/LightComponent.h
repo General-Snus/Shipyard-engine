@@ -65,6 +65,7 @@ public:
 
 	FrameBuffer GetShadowMapFrameBuffer(const int number = 0) const;
 	void InspectorView() override;
+
 	template<class T>
 	std::shared_ptr<T> GetData();
 
@@ -90,7 +91,22 @@ private:
 	bool isRendered = false;
 };
 
-REFL_AUTO(type(cLight))
+REFL_AUTO(
+	type(cLight),
+	func(GetIsShadowCaster,property("Shadowcaster")),
+	func(GetIsRendered,property("Rendering")),
+	func(GetIsDirty,property("Dirty")),
+	func(GetPower,property("Power")),
+	func(GetColor,property("Color")),
+	func(GetPosition,property("Position")),
+	func(GetDirection,property("Direction")),
+	func(GetRange,property("Range")),
+	func(GetInnerAngle,property("Inner angle")),
+	func(GetOuterAngle,property("Outer angle")),
+	func(GetIsBound,property("Bound to transform"))
+)
+
+
 template<>
 inline std::shared_ptr<DirectionalLight> cLight::GetData<DirectionalLight>()
 {

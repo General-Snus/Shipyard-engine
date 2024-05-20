@@ -4,16 +4,18 @@
 
 class GfxCmd_RenderMesh;
 
-cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId) : Component(anOwnerId)
+cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId) : Component(anOwnerId),m_Mesh("")
 {
 	myRenderData = std::make_shared<RenderData>();
-	AssetManager::Get().LoadAsset<Mesh>("default.fbx",myRenderData->myMesh);
+	AssetManager::Get().LoadAsset<Mesh>("default.fbx",myRenderData->myMesh);;
+	m_Mesh = *myRenderData->myMesh;
 }
 
-inline cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath,bool useExact) : Component(anOwnerId)
+inline cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath,bool useExact) : Component(anOwnerId),m_Mesh(aFilePath)
 {
 	myRenderData = std::make_shared<RenderData>();
 	AssetManager::Get().LoadAsset<Mesh>(aFilePath,useExact,myRenderData->myMesh);
+	m_Mesh = *myRenderData->myMesh;
 	//ThreadPool::Get().SubmitWork(std::bind(&waitForLoad,myRenderData->myMesh,myOwnerID));
 }
 
@@ -68,7 +70,36 @@ std::shared_ptr<Mesh> cMeshRenderer::GetRawMesh() const
 
 void cMeshRenderer::InspectorView()
 {
-	ImGui::Text("cMeshRenderer");
+	Component::InspectorView();
+
+
+	auto TypeReflector = [&] <typename T>(this auto self)
+	{
+		auto imp = [&] <typename U>(U member)
+		{
+			std::string arg = std::string(get_display_name(member)) + ": ";
+			arg += refl::runtime::debug_str(member(*this));
+			ImGui::Text(arg.c_str());
+
+			if constexpr (std::is_base_of_v<AssetBase,U>)
+			{
+				dynamic_cast<AssetBase*>(member(*this))->InspectorView();
+			}
+
+			if constexpr (refl::trait::is_reflectable_v<U>)
+			{
+				self.template operator() < U > ();
+			}
+		};
+		refl::util::for_each(refl::reflect<T>().members,imp);
+	};
+
+
+	TypeReflector.template operator() < cMeshRenderer > ();
+
+
+
+	ImGui::Separator();
 
 	myRenderData->myMesh->InspectorView();
 	ImGui::Text("overrideMaterial");

@@ -229,6 +229,7 @@ void Transform::SetGizmo(bool enabled)
 
 void Transform::InspectorView()
 {
+	Component::InspectorView();
 	isDirty |= ImGui::DragFloat3("Position",&myPosition);
 	isDirty |= ImGui::DragFloat3("Euler angles",&myRotation);
 	ImGui::DragFloat4("Quaternion",&myQuaternion,1,0,0,"%.4f",ImGuiSliderFlags_NoInput);

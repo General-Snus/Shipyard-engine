@@ -2,6 +2,7 @@
 #include <Engine/AssetManager/Objects/BaseAssets/BaseAsset.h>
 #include "Engine/AssetManager/ComponentSystem/Component.h"
 #include "Engine/AssetManager/Enums.h"
+#include "Engine/AssetManager/Objects/BaseAssets/MeshAsset.h"
 #define AsUINT(v) static_cast<unsigned>(v)
 
 class Mesh;
@@ -18,6 +19,12 @@ struct RenderData
 	std::shared_ptr<Mesh> myMesh;
 	std::vector<std::shared_ptr<Material>> overrideMaterial; //if this exist it will override the material on the mesh
 };
+REFL_AUTO(
+	type(RenderData),
+	field(myMesh),
+	field(overrideMaterial)
+)
+
 
 class cMeshRenderer : public Component
 {
@@ -50,13 +57,33 @@ public:
 		isStatic = aBool;
 	}
 
-protected:
+	Mesh  m_Mesh;
 	bool isInstanced = false;
 	bool isStatic = false;
 	std::shared_ptr<RenderData> myRenderData;
 };
 
-REFL_AUTO(type(cMeshRenderer))
+REFL_AUTO(
+	type(cMeshRenderer),
+	func(GetRawMesh),
+	field(m_Mesh),
+	field(isInstanced),
+	field(isStatic),
+	field(myRenderData)
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class cSkeletalMeshRenderer : public cMeshRenderer
 {

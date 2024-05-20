@@ -658,5 +658,18 @@ FrameBuffer cLight::GetShadowMapFrameBuffer(const int number) const
 
 void cLight::InspectorView()
 {
-	ImGui::Text("cLight");
+	Component::InspectorView();
+	refl::util::for_each(refl::reflect<cLight>().members,[&]<typename T>(T member) {
+		std::string arg = std::string(get_display_name(member)) + ": ";
+		arg += refl::runtime::debug_str(member(*this));
+
+
+		if constexpr (std::derived_from<T,AssetBase>)
+		{
+			static_cast<AssetBase*>(member)->InspectorView();
+		}
+
+
+		ImGui::Text(arg.c_str());
+	});
 }
