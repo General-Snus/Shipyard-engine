@@ -148,6 +148,9 @@ void Mesh::InspectorView()
 {
 	ImGui::PushID(this);
 	AssetBase::InspectorView();
+	Reflect<Mesh>();
+
+
 	if (ImGui::TreeNodeEx("Elements")) // Replace with element name
 	{
 		ImGui::Separator();
@@ -319,7 +322,7 @@ void Mesh::Init()
 	{
 		AMLogger.Log("Failed to create Instance buffer");
 		return;
-	}
+}
 #else 
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(AssetPath.string(),(unsigned int)

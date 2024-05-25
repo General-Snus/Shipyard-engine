@@ -4,24 +4,19 @@
 
 class GfxCmd_RenderMesh;
 
-cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId) : Component(anOwnerId),m_Mesh("")
+cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId) : Component(anOwnerId)
 {
-	myRenderData = std::make_shared<RenderData>();
-	AssetManager::Get().LoadAsset<Mesh>("default.fbx",myRenderData->myMesh);;
-	m_Mesh = *myRenderData->myMesh;
+	AssetManager::Get().LoadAsset<Mesh>("default.fbx",m_Mesh);
 }
 
-inline cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath,bool useExact) : Component(anOwnerId),m_Mesh(aFilePath)
+inline cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath,bool useExact) : Component(anOwnerId)
 {
-	myRenderData = std::make_shared<RenderData>();
-	AssetManager::Get().LoadAsset<Mesh>(aFilePath,useExact,myRenderData->myMesh);
-	m_Mesh = *myRenderData->myMesh;
-	//ThreadPool::Get().SubmitWork(std::bind(&waitForLoad,myRenderData->myMesh,myOwnerID));
+	AssetManager::Get().LoadAsset<Mesh>(aFilePath,useExact,m_Mesh);
 }
 
 void cMeshRenderer::SetNewMesh(const std::filesystem::path& aFilePath)
 {
-	AssetManager::Get().LoadAsset<Mesh>(aFilePath,myRenderData->myMesh);
+	AssetManager::Get().LoadAsset<Mesh>(aFilePath,m_Mesh);
 }
 
 void cMeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath)
@@ -33,16 +28,16 @@ void cMeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath,int e
 {
 	std::shared_ptr<Material> mat;
 	AssetManager::Get().LoadAsset<Material>(aFilePath,mat);
-	if (myRenderData->overrideMaterial.size() <= elementIndex)
+	if (m_OverrideMaterial.size() <= elementIndex)
 	{
-		myRenderData->overrideMaterial.resize(elementIndex + 1);
+		m_OverrideMaterial.resize(elementIndex + 1);
 	}
-	myRenderData->overrideMaterial[elementIndex] = mat;
+	m_OverrideMaterial[elementIndex] = mat;
 }
 
 bool cMeshRenderer::IsDefaultMesh() const
 {
-	if (myRenderData->myMesh->AssetPath == L"../../Content/default.fbx") // What am i doing with my life
+	if (m_Mesh->AssetPath == L"../../Content/default.fbx") // What am i doing with my life
 	{
 		return true;
 	}
@@ -52,9 +47,9 @@ bool cMeshRenderer::IsDefaultMesh() const
 std::vector<Element>& cMeshRenderer::GetElements() const
 {
 	OPTICK_EVENT();
-	if (myRenderData->myMesh->isLoadedComplete)
+	if (m_Mesh->isLoadedComplete)
 	{
-		return myRenderData->myMesh->Elements;
+		return m_Mesh->Elements;
 	}
 	else
 	{
@@ -65,49 +60,13 @@ std::vector<Element>& cMeshRenderer::GetElements() const
 
 std::shared_ptr<Mesh> cMeshRenderer::GetRawMesh() const
 {
-	return myRenderData->myMesh;
+	return m_Mesh;
 }
 
 void cMeshRenderer::InspectorView()
 {
 	Component::InspectorView();
-
-
-	auto TypeReflector = [&] <typename T>(this auto self)
-	{
-		auto imp = [&] <typename U>(U member)
-		{
-			std::string arg = std::string(get_display_name(member)) + ": ";
-			arg += refl::runtime::debug_str(member(*this));
-			ImGui::Text(arg.c_str());
-
-			if constexpr (std::is_base_of_v<AssetBase,U>)
-			{
-				dynamic_cast<AssetBase*>(member(*this))->InspectorView();
-			}
-
-			if constexpr (refl::trait::is_reflectable_v<U>)
-			{
-				self.template operator() < U > ();
-			}
-		};
-		refl::util::for_each(refl::reflect<T>().members,imp);
-	};
-
-
-	TypeReflector.template operator() < cMeshRenderer > ();
-
-
-
-	ImGui::Separator();
-
-	myRenderData->myMesh->InspectorView();
-	ImGui::Text("overrideMaterial");
-	for (auto& mat : myRenderData->overrideMaterial)
-	{
-		mat->InspectorView();
-
-	}
+	Reflect<cMeshRenderer>();
 }
 
 std::shared_ptr<TextureHolder> cMeshRenderer::GetTexture(eTextureType type,unsigned materialIndex)
@@ -115,11 +74,11 @@ std::shared_ptr<TextureHolder> cMeshRenderer::GetTexture(eTextureType type,unsig
 	OPTICK_EVENT();
 	assert(materialIndex >= 0);
 
-	if (!myRenderData->overrideMaterial.empty())
+	if (!m_OverrideMaterial.empty())
 	{
-		if (myRenderData->overrideMaterial.size() > materialIndex)
+		if (m_OverrideMaterial.size() > materialIndex)
 		{
-			if (const auto mat = myRenderData->overrideMaterial[materialIndex])
+			if (const auto mat = m_OverrideMaterial[materialIndex])
 			{
 				if (const auto tex = mat->GetTexture(type))
 				{
@@ -128,7 +87,7 @@ std::shared_ptr<TextureHolder> cMeshRenderer::GetTexture(eTextureType type,unsig
 			};
 		}
 
-		for (const auto& material : myRenderData->overrideMaterial)
+		for (const auto& material : m_OverrideMaterial)
 		{
 			if (!material)
 			{
@@ -142,9 +101,9 @@ std::shared_ptr<TextureHolder> cMeshRenderer::GetTexture(eTextureType type,unsig
 		}
 	}
 
-	if (myRenderData->myMesh->materials.size() > materialIndex)
+	if (m_Mesh->materials.size() > materialIndex)
 	{
-		if (const auto mat = myRenderData->myMesh->materials[materialIndex])
+		if (const auto mat = m_Mesh->materials[materialIndex])
 		{
 			if (const auto tex = mat->GetTexture(type))
 			{
@@ -153,7 +112,7 @@ std::shared_ptr<TextureHolder> cMeshRenderer::GetTexture(eTextureType type,unsig
 		};
 	}
 
-	for (const auto& [value,material] : myRenderData->myMesh->materials)
+	for (const auto& [value,material] : m_Mesh->materials)
 	{
 		if (!material)
 		{
@@ -204,7 +163,7 @@ cSkeletalMeshRenderer::cSkeletalMeshRenderer(const unsigned int anOwnerId,const 
 
 void cSkeletalMeshRenderer::SetNewMesh(const std::filesystem::path& aFilePath)
 {
-	AssetManager::Get().LoadAsset<Mesh>(aFilePath,myRenderData->myMesh);
+	AssetManager::Get().LoadAsset<Mesh>(aFilePath,m_Mesh);
 	AssetManager::Get().LoadAsset<Skeleton>(aFilePath,mySkeleton);
 }
 
@@ -215,7 +174,7 @@ void cSkeletalMeshRenderer::Render()
 	{
 		if (const auto* myAnimation = this->TryGetComponent<cAnimator>())
 		{
-			myAnimation->RenderAnimation(myRenderData,myTransform->GetTransform());
+			myAnimation->RenderAnimation(m_Mesh,myTransform->GetTransform());
 			return;
 		}
 		//	GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform(),false);
@@ -228,5 +187,6 @@ void cSkeletalMeshRenderer::Render()
 
 void cSkeletalMeshRenderer::InspectorView()
 {
-	ImGui::Text("cSkeletalMeshRenderer");
+	Component::InspectorView();
+	Reflect<cSkeletalMeshRenderer>();
 }

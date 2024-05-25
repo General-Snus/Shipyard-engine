@@ -1,5 +1,5 @@
-#include "AssetManager.pch.h" 
 #include <Editor/Editor/Core/Editor.h> 
+#include "AssetManager.pch.h" 
 
 cCollider::cCollider(const unsigned int anOwnerId) : Component(anOwnerId)
 {
@@ -96,5 +96,6 @@ void cCollider::OnSiblingChanged(const std::type_info* SourceClass)
 }
 void cCollider::InspectorView()
 {
-	ImGui::Text("cCollider");
+	Component::InspectorView();
+	Reflect<cCollider>();
 }

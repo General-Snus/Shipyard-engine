@@ -1,6 +1,6 @@
-#include "AssetManager.pch.h" 
 #include <Engine/GraphicsEngine/GraphicsEngine.h>
 #include "../Skybox.h"
+#include "AssetManager.pch.h" 
 
 #include "Tools/ImGui/ImGui/imgui.h"
 
@@ -30,9 +30,8 @@ void Skybox::Update()
 
 void Skybox::InspectorView()
 {
-	ImGui::Text("Skybox");
-	ImGui::DragFloat("Radius",&m_Radius);
-	myCubeMap->InspectorView();
+	Component::InspectorView();
+	Reflect<Skybox>();
 }
 
 void Skybox::Render()

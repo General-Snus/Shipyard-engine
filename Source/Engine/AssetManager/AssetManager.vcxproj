@@ -228,6 +228,7 @@
     <ClInclude Include="ComponentSystem\Components\TaskSpecific\ProjectileComponent.h" />
     <ClInclude Include="Objects\AI\AgentSystem\StateMachine\StateMachineBase.h" />
     <ClInclude Include="Objects\BaseAssets\ShipyardShader.h" />
+    <ClInclude Include="Reflection\ReflectionTemplate.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\CombatComponent.cpp" />
@@ -291,6 +292,7 @@
     <ClCompile Include="ComponentSystem\Components\TaskSpecific\Source\ProjectileComponent.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\StateMachine\Source\StateMachineBase.cpp" />
     <ClCompile Include="Objects\BaseAssets\Source\ShipyardShader.cpp" />
+    <ClCompile Include="Reflection\ReflectionTemplate.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

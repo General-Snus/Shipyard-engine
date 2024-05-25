@@ -11,7 +11,7 @@ AssetBase::AssetBase(const std::filesystem::path& aFilePath) : AssetPath(aFilePa
 {
 }
 
-void AssetBase::InspectorView()
+inline void AssetBase::InspectorView()
 {
 	Vector4f color; //Color asset status indicator
 	if (isLoadedComplete)
@@ -34,4 +34,5 @@ void AssetBase::InspectorView()
 	ImGui::SameLine();
 	ImGui::Text(typeInfo.Name().c_str());
 	ImGui::Text((std::string("AssetPath: ") + AssetPath.string()).c_str());
+
 }

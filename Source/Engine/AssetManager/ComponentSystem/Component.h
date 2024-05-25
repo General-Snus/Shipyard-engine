@@ -1,9 +1,9 @@
 #pragma once
 #include <memory>
+#include "Engine/AssetManager/Reflection/ReflectionTemplate.h"
 #include "GameObject.h"
 #include "GameObjectManager.h"
 #include "Tools/Reflection/refl.hpp"
-#include "Tools/Reflection/ReflectionTemplate.h"
 
 enum class eComponentType
 {
@@ -45,7 +45,7 @@ public:
 	const T* TryGetComponent() const;
 	template <class T>
 	const T* TryGetAddComponent() const;
-
+	void InspectorView() override;
 
 	inline bool IsActive() const { return m_IsActive && GameObjectManager::Get().GetActive(myOwnerID); }
 	inline void SetActive(const bool aState) { m_IsActive = aState; }
@@ -56,7 +56,6 @@ public:
 	void Adopt() { IsInherited++; }
 	void Abandon();
 
-	virtual void InspectorView();
 
 
 	SY::UUID myOwnerID;

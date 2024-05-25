@@ -9,21 +9,7 @@ class Mesh;
 class Material;
 class Skeleton;
 
-struct RenderData
-{
-	//Equal operator
-	inline bool operator==(const RenderData& aOther) const
-	{
-		return myMesh == aOther.myMesh;
-	}
-	std::shared_ptr<Mesh> myMesh;
-	std::vector<std::shared_ptr<Material>> overrideMaterial; //if this exist it will override the material on the mesh
-};
-REFL_AUTO(
-	type(RenderData),
-	field(myMesh),
-	field(overrideMaterial)
-)
+
 
 
 class cMeshRenderer : public Component
@@ -57,19 +43,18 @@ public:
 		isStatic = aBool;
 	}
 
-	Mesh  m_Mesh;
 	bool isInstanced = false;
 	bool isStatic = false;
-	std::shared_ptr<RenderData> myRenderData;
+	std::shared_ptr<Mesh> m_Mesh;
+	std::vector<std::shared_ptr<Material>> m_OverrideMaterial;
 };
 
 REFL_AUTO(
 	type(cMeshRenderer),
-	func(GetRawMesh),
-	field(m_Mesh),
 	field(isInstanced),
 	field(isStatic),
-	field(myRenderData)
+	field(m_Mesh),
+	field(m_OverrideMaterial)
 )
 
 

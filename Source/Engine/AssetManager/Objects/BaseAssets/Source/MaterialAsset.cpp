@@ -134,7 +134,7 @@ void Material::Init()
 void Material::InspectorView()
 {
 	AssetBase::InspectorView();
-
+	Reflect<Material>();
 	if (ImGui::TreeNodeEx(AssetPath.filename().string().c_str()))
 	{
 		ImGui::Text("Shader data");

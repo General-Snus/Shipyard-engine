@@ -23,11 +23,11 @@
 #include <random>
 #include <ranges>
 #include <Tools/Reflection/refl.hpp>
-#include <Tools/Reflection/ReflectionTemplate.h>
 #include <Tools/ThirdParty/nlohmann/json.hpp>
 #include <typeinfo> 
 #include <unordered_map>
 #include <vector>
+#include "Engine/AssetManager/Reflection/ReflectionTemplate.h"
 
 #include <Tools/Optick/include/optick.h> 
 #include <Tools/Utilities/Game/Timer.h>

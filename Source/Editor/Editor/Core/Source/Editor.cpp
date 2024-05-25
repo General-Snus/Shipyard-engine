@@ -129,6 +129,10 @@ bool Editor::Initialize(HWND aHandle)
 	ScriptEditor = Graph::GraphTool::Get().GetScriptingEditor();
 	ScriptEditor->Init();
 #endif
+
+
+	g_EditorWindows.emplace_back(std::make_shared<Inspector>());
+	g_EditorWindows.emplace_back(std::make_shared<Hierarchy>());
 	return true;
 }
 void Editor::DoWinProc(const MSG& aMessage)

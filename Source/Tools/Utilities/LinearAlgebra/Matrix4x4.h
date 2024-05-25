@@ -356,7 +356,7 @@ Matrix4x4<T> Matrix4x4<T>::GetTranspose() const
 template <class T>
 void Matrix4x4<T>::Inverse()
 {
-	arr = Matrix4x4<T>::GetFastInverse(*this);
+	*this = Matrix4x4<T>::GetFastInverse(*this);
 }
 
 template <class T>

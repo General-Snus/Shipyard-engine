@@ -73,7 +73,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Reflection", "Reflection", "{6ED5BFB3-CC85-4C15-8F88-900545D5E388}"
 	ProjectSection(SolutionItems) = preProject
 		Tools\Reflection\refl.hpp = Tools\Reflection\refl.hpp
-		Tools\Reflection\ReflectionTemplate.h = Tools\Reflection\ReflectionTemplate.h
 	EndProjectSection
 EndProject
 Global

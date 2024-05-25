@@ -269,5 +269,6 @@ Vector4f cCamera::WoldSpaceToPostProjectionSpace(Vector3f aEntity)
 
 void cCamera::InspectorView()
 {
-	ImGui::Text("cCamera");
+	Component::InspectorView();
+	Reflect<cCamera>();
 }

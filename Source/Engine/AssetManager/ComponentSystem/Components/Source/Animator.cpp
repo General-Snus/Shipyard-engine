@@ -50,7 +50,7 @@ void cAnimator::Update()
 	}
 }
 
-void cAnimator::RenderAnimation(const std::shared_ptr<RenderData>& aData,const Matrix& aTransform) const
+void cAnimator::RenderAnimation(const std::shared_ptr<Mesh>& aData,const Matrix& aTransform) const
 {
 	aData; aTransform;
 	//GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderSkeletalMeshShadow>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
@@ -121,5 +121,6 @@ void cAnimator::UpdateAnimationHierarcy(float t)
 
 void cAnimator::InspectorView()
 {
-	ImGui::Text("cAnimator");
+	Component::InspectorView();
+	Reflect<cAnimator>();
 }

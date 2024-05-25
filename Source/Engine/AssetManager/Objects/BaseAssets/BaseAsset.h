@@ -4,8 +4,8 @@
 #include <filesystem>
 #include  <functional>
 #include "DirectX/Shipyard/GpuResource.h"
+#include "Engine/AssetManager/Reflection/ReflectionTemplate.h"
 #include "Tools/Reflection/refl.hpp"
-#include "Tools/Reflection/ReflectionTemplate.h"
 
 class Material;
 class AssetBase : public Reflectable
@@ -21,7 +21,7 @@ public:
 	std::vector<std::function<void()>> callBackOnFinished;
 
 
-	virtual void InspectorView();
+	void InspectorView() override;
 	std::filesystem::path AssetPath;
 protected:
 };
