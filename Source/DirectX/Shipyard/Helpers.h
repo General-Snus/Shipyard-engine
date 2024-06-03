@@ -8,6 +8,7 @@
 #include <exception>
 #include "Tools/Logging/Logging.h" 
 
+#include <Tools/Utilities/Error.hpp>
 
 
 namespace Helpers
@@ -141,18 +142,17 @@ namespace Helpers
 		};
 	}
 
-
 	template<typename T,typename U>
 	inline static T string_cast(const U& someString)
 	{
 		someString;
-		return nullptr;
+		throw NotImplemented();
 	}
 
 	template<>
 	inline std::wstring string_cast<std::wstring>(const std::string& someString)
 	{
-		const int sLength = static_cast<int>(someString.length());
+		const auto sLength = static_cast<int>(someString.length());
 		const int len = MultiByteToWideChar(CP_ACP,0,someString.c_str(),sLength,nullptr,0);
 		std::wstring result(len,L'\0');
 		MultiByteToWideChar(CP_ACP,0,someString.c_str(),sLength,&result[0],len);
@@ -162,7 +162,7 @@ namespace Helpers
 	template<>
 	inline std::string string_cast<std::string>(const std::wstring& someString)
 	{
-		const int sLength = static_cast<int>(someString.length());
+		const auto sLength = static_cast<int>(someString.length());
 		const int len = WideCharToMultiByte(CP_ACP,0,someString.c_str(),sLength,nullptr,0,nullptr,nullptr);
 		std::string result(len,L'\0');
 		WideCharToMultiByte(CP_ACP,0,someString.c_str(),sLength,&result[0],len,nullptr,nullptr);
@@ -179,6 +179,7 @@ namespace Helpers
 			throw std::exception(string_cast<std::string>(errMsg).c_str());
 		}
 	}
+
 	inline void ThrowIfSucceded(HRESULT hr) noexcept(false)
 	{
 		if (!FAILED(hr))
@@ -246,6 +247,6 @@ namespace Helpers
 	{
 		static_assert((sizeof(T) & 3) == 0 && alignof(T) >= 4,"State object is not word-aligned");
 		return HashRange((uint32_t*)StateDesc,(uint32_t*)(StateDesc + Count),Hash);
-	}
+	} 
 
 }

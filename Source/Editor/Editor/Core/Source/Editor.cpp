@@ -41,6 +41,7 @@
 using json = nlohmann::json;
 void SetupImGuiStyle()
 {
+	ImGuizmo::AllowAxisFlip(false);
 	// Rounded Visual Studio style by RedNicStone from ImThemes
 	ImGuiStyle& style = ImGui::GetStyle();
 
@@ -129,6 +130,7 @@ void SetupImGuiStyle()
 	style.Colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.800000011920929f,0.800000011920929f,0.800000011920929f,0.2000000029802322f);
 	style.Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.1450980454683304f,0.1450980454683304f,0.1490196138620377f,1.0f);
 }
+
 bool Editor::Initialize(HWND aHandle)
 {
 	if (constexpr bool profileStartup = true) {

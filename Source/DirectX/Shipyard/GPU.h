@@ -1,4 +1,5 @@
 #pragma once
+
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"DirectXTK12.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -20,14 +21,10 @@
 #include "RootSignature.h"
 #include "Texture.h"
 
-namespace DirectX
-{
-	/*class ResourceUploadBatch;
-	class DescriptorHeap;
-	class GraphicsMemory;*/
-}
 
-
+#ifndef incGPU
+#define incGPU
+ 
 class GPUSupport
 {
 public:
@@ -65,8 +62,7 @@ public:
 	static void CopyBuffer(const CommandList& aCommandList,GpuResource& buffer,size_t numElements,size_t elementSize,const void* bufferData,D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
 
 	static void ConfigureInputAssembler(
-		CommandList& commandList,D3D_PRIMITIVE_TOPOLOGY topology,
-		VertexResource& vertexResource,IndexResource& indexResource
+		CommandList& commandList,D3D_PRIMITIVE_TOPOLOGY topology, IndexResource& indexResource
 	);
 
 	static HeapHandle GetHeapHandle(eHeapTypes type);
@@ -173,7 +169,6 @@ public:
 	static inline std::unique_ptr<DirectX::DescriptorPile> m_ResourceDescriptors[(int)eHeapTypes::HEAP_COUNT];
 	static inline std::unique_ptr<DirectX::DescriptorPile> m_ImGui_Heap;
 
-private:
 };
 
 template<typename vertexType>
@@ -189,6 +184,5 @@ inline bool GPU::CreateVertexBuffer(
 	);
 
 	return true;
-}
-
-
+} 
+#endif

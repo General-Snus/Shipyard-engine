@@ -273,7 +273,7 @@ void Viewport::RenderImGUi()
 			// style.FramePadding can also be used here
 			ImVec2 toolbarItemSize = ImVec2{ textHeight * 4.0f, textHeight * 2.0f };
 			ImVec2 toolbarPos = ImGui::GetWindowPos() + ImVec2(2.0f * style.WindowPadding.x,8.0f * style.WindowPadding.y);
-
+			ImGui::SetNextWindowSize(toolbarItemSize);
 			ImGui::SetNextWindowPos(toolbarPos);
 
 			ImGuiWindowFlags toolbarFlags = ImGuiWindowFlags_NoDecoration |      //
@@ -286,8 +286,7 @@ void Viewport::RenderImGUi()
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing,{ 0.0f, 0.0f });
 
 
-				ImGui::PushItemWidth(100);
-			if (ImGui::BeginChild("##ViewportToolbar",ImVec2(),0,toolbarFlags)) {
+			if (ImGui::BeginChild("##ViewportToolbar",ImVec2(0,0),0,toolbarFlags)) {
 				// Bring the toolbar window always on top.
 				ImGui::BringWindowToDisplayFront(ImGui::GetCurrentWindow());
 				ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign,ImVec2(0.5f,0.5f)); 

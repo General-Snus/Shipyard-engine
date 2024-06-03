@@ -3,6 +3,11 @@
 #include "DirectX/CrashHandler/GFSDK_Aftermath.h"
 #include "ThreadSafeQueue.h"
 
+
+#ifndef incGPUCommandQueue
+#define incGPUCommandQueue
+
+
 class GPUCommandQueue
 {
 public:
@@ -33,8 +38,7 @@ private:
 
 	ThreadSafeQueue<CommandListEntry> m_InFlightCommandLists;
 	ThreadSafeQueue<std::shared_ptr<CommandList>> m_AvailableCommandLists;
-
-	// A thread to process in-flight command lists.
+	 
 	std::thread m_ProcessInFlightCommandListsThread;
 	std::atomic_bool m_bProcessInFlightCommandLists;
 	std::mutex m_ProcessInFlightCommandListsThreadMutex;
@@ -44,3 +48,4 @@ private:
 	GFSDK_Aftermath_ContextHandle m_hAftermathCommandListContext;
 #endif
 };
+#endif // !incGPUCommandQueue

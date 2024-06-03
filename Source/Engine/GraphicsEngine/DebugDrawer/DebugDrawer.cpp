@@ -1,8 +1,6 @@
 #include "GraphicsEngine.pch.h"
 #include "DebugDrawer.h"
-
-#include "../Shaders/Include/LineDrawer_PS.h"
-#include "../Shaders/Include/LineDrawer_VS.h"  
+ 
 #include "DirectX/Shipyard/GPU.h"
 
 DebugDrawer& DebugDrawer::Get()

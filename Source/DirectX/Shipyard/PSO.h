@@ -1,8 +1,13 @@
 #pragma once
+#include <span> 
+#include <DirectX/Shipyard/Helpers.h>
+#include <source_location> 
 #include <DirectX/directx/d3d12.h> 
+#include <DirectX/directx/d3dx12_core.h> 
 #include <DirectX/Shipyard/Gpu_fwd.h>
 #include <DirectX/Shipyard/Texture.h>
 #include "Engine/GraphicsEngine/Rendering/Buffers/LightBuffer.h"
+#include <Tools/Utilities/Error.hpp>
 
 class cMeshRenderer;
 class ShipyardShader;
@@ -51,69 +56,37 @@ private:
 class PSO
 {
 public:
-	static PSO CreatePSO(
-		std::filesystem::path vertexShader,
-		std::filesystem::path pixelShader,
-		unsigned renderTargetAmount,
-		DXGI_FORMAT renderTargetFormat,
-		DXGI_FORMAT depthStencilFormat = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN
+	static std::unique_ptr<PSO> CreatePSO(
+		const std::filesystem::path& vertexShader,
+		const std::filesystem::path& pixelShader,
+		const std::span<const DXGI_FORMAT> renderTargetFormat,
+		DXGI_FORMAT depthStencilFormat = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN,
+		const CD3DX12_BLEND_DESC& desc = CD3DX12_BLEND_DESC(CD3DX12_DEFAULT()),
+		std::wstring_view name = std::format(
+			L"LowLifetime PSO from {}",
+			Helpers::string_cast<std::wstring> (std::string(std::source_location::current().function_name()))
+		)
 	);
-	PSO() = default;
-	virtual void Init(const ComPtr<ID3D12Device2>& dev);
-	virtual Texture* GetRenderTargets() { return nullptr; };
-	virtual uint16_t GetRenderTargetAmounts() { return 0; };
-	virtual ComPtr<ID3D12PipelineState> GetPipelineState() const;
-protected:
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
+
+	Texture* RenderTargets() { return m_renderTargets.data(); };
+	uint32_t GetNumberOfTargets() const { return m_numRenderTargets; };
+	ComPtr<ID3D12PipelineState> GetPipelineState() const;
+
+private:
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC m_psoDescription = {};
 	ComPtr<ID3D12PipelineState> m_PipelineState;
-	std::shared_ptr<ShipyardShader> vs;
-	std::shared_ptr<ShipyardShader> ps;
+
+	unsigned int m_numRenderTargets = 0;
+	std::vector<Texture> m_renderTargets;
+	std::shared_ptr<ShipyardShader> m_vs;
+	std::shared_ptr<ShipyardShader> m_ps;
 	ComPtr<ID3D12Device2> m_Device;
 };
 
-class GbufferPSO : public PSO
+
+class Passes
 {
 public:
-	GbufferPSO() = default;
-	void Init(const ComPtr<ID3D12Device2>& dev) override;
-	Texture* GetRenderTargets() override;
-	uint16_t GetRenderTargetAmounts() override { return numRenderTargets; };
-
-private:
-
-	static inline constexpr uint16_t numRenderTargets = 7;
-	Texture renderTargets[numRenderTargets];
-};
-
-class ShadowMapperPSO : public PSO
-{
-public:
-	ShadowMapperPSO() = default;
-	void Init(const ComPtr<ID3D12Device2>& dev) override;
 	static void WriteShadows(std::shared_ptr<CommandList>& commandList);
-};
-
-class EnvironmentLightPSO : public PSO
-{
-public:
-	EnvironmentLightPSO() = default;
-	void Init(const ComPtr<ID3D12Device2>& dev) override;
-	Texture* GetRenderTargets() override;
-	uint16_t GetRenderTargetAmounts() override { return 1; };
-
 	static LightBuffer CreateLightBuffer();
-private:
-	Texture renderTarget;
-};
-
-class TonemapPSO : public PSO
-{
-public:
-	TonemapPSO() = default;
-	void Init(const ComPtr<ID3D12Device2>& dev) override;
-	Texture* GetRenderTargets() override;
-	uint16_t GetRenderTargetAmounts() override { return 1; };
-private:
-	Texture renderTarget;
-};
-
+}; 

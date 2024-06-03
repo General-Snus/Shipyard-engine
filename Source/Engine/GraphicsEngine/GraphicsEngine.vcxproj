@@ -149,10 +149,11 @@
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
-      <ObjectFileOutput>
-      </ObjectFileOutput>
-      <VariableName>BuiltIn_%(Filename)_ByteCode</VariableName>
-      <HeaderFileOutput>$(ProjectDir)\Shaders\Include\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput>$(SolutionDir)..\Content\Shaders\%(Filename).cso</ObjectFileOutput>
+      <VariableName>
+      </VariableName>
+      <HeaderFileOutput>
+      </HeaderFileOutput>
       <PreprocessorDefinitions>_HLSL;_DEBUG</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
     </FxCompile>
@@ -187,10 +188,11 @@
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
-      <ObjectFileOutput>
-      </ObjectFileOutput>
-      <VariableName>BuiltIn_%(Filename)_ByteCode</VariableName>
-      <HeaderFileOutput>$(ProjectDir)\Shaders\Include\%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput>$(SolutionDir)..\Content\Shaders\%(Filename).cso</ObjectFileOutput>
+      <VariableName>
+      </VariableName>
+      <HeaderFileOutput>
+      </HeaderFileOutput>
       <PreprocessorDefinitions>_HLSL;</PreprocessorDefinitions>
     </FxCompile>
     <Lib>

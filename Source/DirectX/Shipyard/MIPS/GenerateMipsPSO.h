@@ -38,31 +38,31 @@
 #include "Shipyard/PSO.h"
 #include "Shipyard/RootSignature.h"
 
-  //alignas(16)
-struct  GenerateMipsCB
-{
-	uint32_t SrcMipLevel;           // Texture level of source mip
-	uint32_t NumMipLevels;          // Number of OutMips to write: [1-4]
-	uint32_t SrcDimension;          // Width and height of the source texture are even or odd.
-	uint32_t IsSRGB;                // Must apply gamma correction to sRGB textures.
-	DirectX::XMFLOAT2 TexelSize;    // 1.0 / OutMip1.Dimensions
-};
-
-class GenerateMipsPSO : public PSO
-{
-public:
-	GenerateMipsPSO() = default;
-
-	void Init(const ComPtr<ID3D12Device2>& dev) override;
-	/*
-	D3D12_CPU_DESCRIPTOR_HANDLE GetDefaultUAV() const
-	{
-		return m_DefaultUAV.GetHandle();
-	}*/
-
-private:
-	// Default (no resource) UAV's to pad the unused UAV descriptors.
-	// If generating less than 4 mip map levels, the unused mip maps
-	// need to be padded with default UAVs (to keep the DX12 runtime happy).
-	UAVResource m_DefaultUAV;
-};
+//  //alignas(16)
+//struct  GenerateMipsCB
+//{
+//	uint32_t SrcMipLevel;           // Texture level of source mip
+//	uint32_t NumMipLevels;          // Number of OutMips to write: [1-4]
+//	uint32_t SrcDimension;          // Width and height of the source texture are even or odd.
+//	uint32_t IsSRGB;                // Must apply gamma correction to sRGB textures.
+//	DirectX::XMFLOAT2 TexelSize;    // 1.0 / OutMip1.Dimensions
+//};
+//
+//class GenerateMipsPSO : public PSO
+//{
+//public:
+//	GenerateMipsPSO() = default;
+//
+//	void Init(const ComPtr<ID3D12Device2>& dev) override;
+//	/*
+//	D3D12_CPU_DESCRIPTOR_HANDLE GetDefaultUAV() const
+//	{
+//		return m_DefaultUAV.GetHandle();
+//	}*/
+//
+//private:
+//	// Default (no resource) UAV's to pad the unused UAV descriptors.
+//	// If generating less than 4 mip map levels, the unused mip maps
+//	// need to be padded with default UAVs (to keep the DX12 runtime happy).
+//	UAVResource m_DefaultUAV;
+//};

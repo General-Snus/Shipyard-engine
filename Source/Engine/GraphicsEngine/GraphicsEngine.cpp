@@ -138,7 +138,12 @@ void GraphicsEngine::SetupSpace3()
 	);
 	BRDLookUpTable->SetView(ViewType::SRV);
 	commandList->SetRenderTargets(1,BRDLookUpTable.get(),nullptr);
-	const PSO brdfPSO = PSO::CreatePSO("Shaders/ScreenspaceQuad_VS.cso","Shaders/brdfLUT_PS.cso",1,DXGI_FORMAT_R16G16_FLOAT);
+
+	constexpr std::array rt = { DXGI_FORMAT_R16G16_FLOAT };
+	const auto brdfPSO = PSO::CreatePSO(
+		"Shaders/ScreenspaceQuad_VS.cso",
+		"Shaders/brdfLUT_PS.cso",rt
+		);
 
 	const D3D12_VIEWPORT viewPort = { 0.0f, 0.0f, static_cast<float>(size.x), static_cast<float>(size.y), D3D12_MIN_DEPTH, D3D12_MAX_DEPTH };
 	const D3D12_RECT rect = { 0, 0, static_cast<LONG>(size.x), static_cast<LONG>(size.y) };
@@ -150,7 +155,7 @@ void GraphicsEngine::SetupSpace3()
 	graphicCommandList->SetGraphicsRootSignature(rootSignature.Get());
 	commandList->TrackResource(rootSignature);
 
-	graphicCommandList->SetPipelineState(brdfPSO.GetPipelineState().Get());
+	graphicCommandList->SetPipelineState(brdfPSO->GetPipelineState().Get());
 
 	graphicCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	graphicCommandList->IASetVertexBuffers(0,1,nullptr);
@@ -315,7 +320,7 @@ void GraphicsEngine::RenderFrame(Viewport& renderViewPort)
 		auto commandList = commandQueue->GetCommandList(L"RenderFrame");
 		PrepareBuffers(commandList,renderViewPort);
 
-		ShadowMapperPSO::WriteShadows(commandList); // When rendering mutiple viewports we neccicarily do not need to render the shadows mutiple times
+		Passes::WriteShadows(commandList); // When rendering mutiple viewports we neccicarily do not need to render the shadows mutiple times
 		commandList->FlushResourceBarriers();
 
 		Texture* gBufferTextures;
@@ -384,7 +389,7 @@ void GraphicsEngine::PrepareBuffers(std::shared_ptr<CommandList> commandList,Vie
 	commandList->GetGraphicsCommandList()->SetDescriptorHeaps((UINT)std::size(heaps),heaps);
 
 	{
-		const LightBuffer lightBuffer = EnvironmentLightPSO::CreateLightBuffer();
+		const LightBuffer lightBuffer = Passes::CreateLightBuffer();
 		const GraphicsResource& alloc = GPU::m_GraphicsMemory->AllocateConstant<LightBuffer>(lightBuffer);
 		commandList->GetGraphicsCommandList()->SetGraphicsRootConstantBufferView(REG_LightBuffer,alloc.GpuAddress());
 
@@ -410,7 +415,7 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
 		commandList->GetGraphicsCommandList()->RSSetScissorRects(1,&GPU::m_ScissorRect);
 
 		const auto& gbufferPSO = PSOCache::GetState(PSOCache::ePipelineStateID::GBuffer);
-		gBufferTextures = gbufferPSO->GetRenderTargets();
+		gBufferTextures = gbufferPSO->RenderTargets();
 		GPU::ClearRTV(*commandList.get(),gBufferTextures,bufferCount);
 		commandList->SetRenderTargets(bufferCount,gBufferTextures,GPU::m_DepthBuffer.get());
 
@@ -440,11 +445,10 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
 			objectBuffer.MinExtents = -Vector3f(1,1,1);
 			objectBuffer.hasBone = false;
 			objectBuffer.isInstanced = false;
+			commandList->AllocateBuffer(eRootBindings::objectBuffer,objectBuffer); 
 
-			const auto& alloc1 = GPU::m_GraphicsMemory->AllocateConstant<ObjectBuffer>(objectBuffer);
-			commandList->GetGraphicsCommandList()->SetGraphicsRootConstantBufferView(eRootBindings::objectBuffer,alloc1.GpuAddress());
 			vertCount += element.VertexBuffer.GetVertexCount();
-			GPU::ConfigureInputAssembler(*commandList,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.VertexBuffer,element.IndexResource);
+			GPU::ConfigureInputAssembler(*commandList,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.IndexResource);
 
 			const unsigned materialIndex = element.MaterialIndex;
 			MaterialBuffer materialBuffer;
@@ -514,8 +518,8 @@ void GraphicsEngine::EnvironmentLightPass(std::shared_ptr<CommandList> commandLi
 
 
 	{
-		GPU::ClearRTV(*commandList.get(),environmentLight->GetRenderTargets(),environmentLight->GetRenderTargetAmounts());
-		commandList->SetRenderTargets(environmentLight->GetRenderTargetAmounts(),environmentLight->GetRenderTargets(),nullptr);
+		GPU::ClearRTV(*commandList.get(),environmentLight->RenderTargets(),environmentLight->GetNumberOfTargets());
+		commandList->SetRenderTargets(environmentLight->GetNumberOfTargets(),environmentLight->RenderTargets(),nullptr);
 
 		const auto& pipelineState = environmentLight->GetPipelineState().Get();
 		commandList->GetGraphicsCommandList()->SetPipelineState(pipelineState);
@@ -542,12 +546,11 @@ void GraphicsEngine::ToneMapperPass(std::shared_ptr<CommandList> commandList,Tex
 	commandList->GetGraphicsCommandList()->SetPipelineState(pipelineState);
 	commandList->TrackResource(pipelineState);
 
-	auto* renderTargets = PSOCache::GetState(PSOCache::ePipelineStateID::DeferredLighting)->GetRenderTargets();
+	auto* renderTargets = PSOCache::GetState(PSOCache::ePipelineStateID::DeferredLighting)->RenderTargets();
 	commandList->SetDescriptorTable(TargetTexture,renderTargets);
-	commandList->FlushResourceBarriers();
-	//commandList->SetRenderTargets(1,GPU::GetCurrentBackBuffer(),nullptr);
+	commandList->FlushResourceBarriers(); 
 
-	GPU::ClearRTV(*commandList.get(),toneMapper->GetRenderTargets(),toneMapper->GetRenderTargetAmounts());
+	GPU::ClearRTV(*commandList.get(),toneMapper->RenderTargets(),toneMapper->GetNumberOfTargets());
 	commandList->SetRenderTargets(1,&target,nullptr);
 
 	commandList->GetGraphicsCommandList()->IASetVertexBuffers(0,1,nullptr);

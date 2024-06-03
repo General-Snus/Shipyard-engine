@@ -12,12 +12,12 @@ ShipyardShader::ShipyardShader(const std::filesystem::path& aFilePath) : AssetBa
 void ShipyardShader::Init()
 {
 	isBeingLoaded = true;
-
-	if (!std::filesystem::exists(AssetPath))
+	 
+	if (!std::filesystem::is_regular_file(AssetPath))
 	{
 		Logger::Warn("Failed to load shader at: " + AssetPath.string());
 		isBeingLoaded = false;
-		isLoadedComplete = true;
+		isLoadedComplete = false;
 		return;
 	}
 

@@ -335,15 +335,9 @@ void GPU::UpdateBufferResource(
 }
 
 void GPU::ConfigureInputAssembler(
-	CommandList& commandList,D3D_PRIMITIVE_TOPOLOGY topology,
-	VertexResource& vertexResource,IndexResource& indexResource)
-{
-	commandList.GetGraphicsCommandList()->IASetPrimitiveTopology(topology);
-	vertexResource;
-	//commandList.TransitionBarrier(vertexResource,D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
-	//const auto& vertView = vertexResource.GetVertexBufferView();
-	//commandList.GetGraphicsCommandList()->IASetVertexBuffers(0,1,&vertView);
-	//commandList.TrackResource(vertexResource);
+	CommandList& commandList,D3D_PRIMITIVE_TOPOLOGY topology,IndexResource& indexResource)
+{ 
+	commandList.GetGraphicsCommandList()->IASetPrimitiveTopology(topology); 
 
 	commandList.TransitionBarrier(indexResource,D3D12_RESOURCE_STATE_INDEX_BUFFER);
 	const auto& indexView = indexResource.GetIndexBufferView();
@@ -424,19 +418,19 @@ void GPU::ResizeDepthBuffer(unsigned width,unsigned height)
 }
 
 bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName,bool generateMips)
-{
-	outTexture; aFileName;
-
-	if (!std::filesystem::exists(aFileName) || aFileName.extension() != ".dds" && aFileName.extension() != ".png")
+{ 
+	if (!std::filesystem::is_regular_file(aFileName) || aFileName.extension() != ".dds" && aFileName.extension() != ".png")
 	{
 		const std::string error = "Failed to load texture: " + aFileName.string() + " does not exist!";
 		std::cout << error << std::endl;
 		return false;
 	}
+
 	outTexture->myName = aFileName.filename().string();
 	ResourceUploadBatch resourceUpload(m_Device.Get());
 	resourceUpload.Begin();
 	bool isCubeMap = false;
+
 	if (aFileName.extension() == ".dds")
 	{
 		Helpers::ThrowIfFailed(
@@ -455,14 +449,14 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 	if (generateMips && resourceUpload.IsSupportedForGenerateMips(outTexture->m_Resource->GetDesc().Format))
 	{
 		outTexture->SetView(ViewType::SRV);
-		resourceUpload.Transition(outTexture->m_Resource.Get(),D3D12_RESOURCE_STATE_COPY_DEST,D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		//resourceUpload.Transition(outTexture->m_Resource.Get(),D3D12_RESOURCE_STATE_COMMON,D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		resourceUpload.GenerateMips(outTexture->m_Resource.Get());
 	}
 	else
 	{
 		const std::string msg = "Failed to load mips of shader that wanted a mipmap " + aFileName.filename().string();
 		Logger::Warn(msg);
-	}
+	} 
 
 	outTexture->isCubeMap = isCubeMap;
 	const auto uploadResourcesFinished = resourceUpload.End(m_DirectCommandQueue->GetCommandQueue().Get());

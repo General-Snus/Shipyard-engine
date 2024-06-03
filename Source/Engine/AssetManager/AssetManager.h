@@ -65,9 +65,9 @@ public:
 	template<class T>
 	void HasAsset(const std::filesystem::path& aFilePath,bool useExact) const;
 	template<class T>
-	void ForceLoadAsset(const std::filesystem::path& aFilePath,std::shared_ptr<T>& outAsset);
+	bool ForceLoadAsset(const std::filesystem::path& aFilePath,std::shared_ptr<T>& outAsset);
 	template<class T>
-	void ForceLoadAsset(const std::filesystem::path& aFilePath,bool useExact,std::shared_ptr<T>& outAsset);
+	bool ForceLoadAsset(const std::filesystem::path& aFilePath,bool useExact,std::shared_ptr<T>& outAsset);
 
 	void SubscribeToChanges(const std::filesystem::path& aFilePath,SY::UUID gameobjectID);
 
@@ -93,13 +93,13 @@ private:
 
 
 template<class T>
-void AssetManager::ForceLoadAsset(const std::filesystem::path& aFilePath,std::shared_ptr<T>& outAsset)
+bool AssetManager::ForceLoadAsset(const std::filesystem::path& aFilePath,std::shared_ptr<T>& outAsset)
 {
-	ForceLoadAsset<T>(aFilePath,false,outAsset);
+	return ForceLoadAsset<T>(aFilePath,false,outAsset);
 }
 
 template<class T>
-void AssetManager::ForceLoadAsset(const std::filesystem::path& aFilePath,const bool useExact,std::shared_ptr<T>& outAsset)
+bool AssetManager::ForceLoadAsset(const std::filesystem::path& aFilePath,const bool useExact,std::shared_ptr<T>& outAsset)
 {
 	const std::type_info* typeInfo = &typeid(T);
 	std::shared_ptr<Library> library = GetLibraryOfType<T>();
@@ -129,6 +129,8 @@ void AssetManager::ForceLoadAsset(const std::filesystem::path& aFilePath,const b
 	}
 
 	outAsset = ptr;
+
+	return outAsset->isLoadedComplete;
 }
 
 //Runs function F, get asset send function f asset 
