@@ -647,9 +647,8 @@ Texture* EnvironmentLightPSO::GetRenderTargets()
 LightBuffer EnvironmentLightPSO::CreateLightBuffer()
 {
 	OPTICK_EVENT();
-	std::vector<DirectionalLight*> dirLight;
-	std::vector<PointLight*> pointLight;
-	std::vector< SpotLight* > spotLight;
+	LightBuffer lightBuffer; 
+	lightBuffer.NullifyMemory();
 
 	for (auto& i : GameObjectManager::Get().GetAllComponents<cLight>())
 	{
@@ -661,9 +660,9 @@ LightBuffer EnvironmentLightPSO::CreateLightBuffer()
 			if (i.GetIsShadowCaster())
 			{
 				data->shadowMapIndex = i.GetShadowMap(0)->GetHandle(ViewType::SRV).heapOffset;
-			}
-
-			dirLight.push_back(data);
+			} 
+			auto& directionalLight = lightBuffer.directionalLight;
+			directionalLight = *data; 
 			break;
 		}
 		//REFACTOR
@@ -677,45 +676,28 @@ LightBuffer EnvironmentLightPSO::CreateLightBuffer()
 					data->shadowMapIndex[j] = i.GetShadowMap(j)->GetHandle(ViewType::SRV).heapOffset;
 				}
 			}
-			pointLight.push_back(data);
+			auto& pointlight = lightBuffer.pointLight[lightBuffer.pointLightAmount];
+			pointlight = *data;  
+			lightBuffer.pointLightAmount = ((lightBuffer.pointLightAmount + 1) % 8);
 			break;
 		}
 		case eLightType::Spot:
-		{
+		{ 
 			auto* data = i.GetData<SpotLight>().get();
 			if (i.GetIsShadowCaster())
 			{
 				data->shadowMapIndex = i.GetShadowMap(0)->GetHandle(ViewType::SRV).heapOffset;
-			}
-			spotLight.push_back(data);
+			} 
+			auto& spotLight = lightBuffer.spotLight[lightBuffer.spotLightAmount];
+			spotLight = *data;
+			lightBuffer.spotLightAmount = ((lightBuffer.spotLightAmount + 1) % 8);
 			break;
 		}
 
 		default:
 			break;
 		}
-	}
-
-	LightBuffer lightBuffer;
-
-	for (int i = 0; i < dirLight.size(); ++i)
-	{
-		lightBuffer.directionalLight = *dirLight[i];
-	}
-
-	lightBuffer.pointLightAmount = std::min(static_cast<int>(pointLight.size()),8);
-	for (int i = 0; i < lightBuffer.pointLightAmount; ++i)
-	{
-		lightBuffer.pointLight[i] = *pointLight[i];
-	}
-
-
-	lightBuffer.spotLightAmount = std::min(static_cast<int>(spotLight.size()),8);
-	for (int i = 0; i < lightBuffer.spotLightAmount; ++i)
-	{
-		lightBuffer.spotLight[i] = *spotLight[i];
-	}
-
+	} 
 	return lightBuffer;
 }
 

@@ -110,12 +110,15 @@ void cLight::SetIsShadowCaster(const bool active)
 			{
 				using enum eLightType;
 			case Directional:
+				myDirectionLightData->castShadow = true;
 				myDirectionLightData->shadowMapIndex = shadowMap[i]->GetHandle(ViewType::SRV).heapOffset;
 				break;
 			case Point:
+				myPointLightData->castShadow = true;
 				myPointLightData->shadowMapIndex[i] = shadowMap[i]->GetHandle(ViewType::SRV).heapOffset;
 				break;
 			case Spot:
+				mySpotLightData->castShadow = true;
 				mySpotLightData->shadowMapIndex = shadowMap[i]->GetHandle(ViewType::SRV).heapOffset;
 				break;
 			case uninitialized:
@@ -551,17 +554,19 @@ void cLight::RedrawDirectionMap()
 
 void cLight::RedrawPointMap()
 {
-	OPTICK_EVENT();
-	Vector3f lightPosition = myPointLightData->Position;
-	myPointLightData->lightView = Matrix::LookAt(lightPosition,lightPosition + GlobalFwd,{ 0,1,0 }); // REFACTOR, Magic value up
-
-	constexpr float fow = 90.0f * DEG_TO_RAD;
-	const float farfield = myPointLightData->Range * 5;
-	constexpr float nearField = .01f;
+	OPTICK_EVENT();  
+	constexpr float fow = 90.0f * DEG_TO_RAD; 
+	constexpr float nearField = .01f; 
+	const float farfield = std::max(myPointLightData->Range * 5,nearField + 0.0001f);
 
 	const auto dxMatrix = XMMatrixPerspectiveFovLH(fow,1,farfield,nearField);
 	myPointLightData->projection = Matrix(&dxMatrix);
-	myPointLightData->lightView = Matrix::GetFastInverse(myPointLightData->lightView);
+
+	for (int i = 0; i < 6; i++)
+	{ 
+		myPointLightData->lightView[i] = GetLightViewMatrix(i);
+	}
+
 }
 
 void cLight::RedrawSpotMap()
@@ -660,4 +665,18 @@ void cLight::InspectorView()
 {
 	Component::InspectorView();
 	Reflect<cLight>();
+
+	switch (myLightType) {
+	case eLightType::Directional:
+		Reflect<DirectionalLight>(*myDirectionLightData);
+		break;
+	case eLightType::Point:
+		Reflect<PointLight>(*myPointLightData);
+		break;
+	case eLightType::Spot:
+		Reflect<SpotLight>(*mySpotLightData);
+		break;
+	case eLightType::uninitialized:
+		break;
+	}
 }

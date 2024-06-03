@@ -58,4 +58,6 @@ private:
 	std::shared_ptr<TextureHolder> GetTexture(eTextureType);
 	DataMaterial data;
 };
-REFL_AUTO(type(Material))
+REFL_AUTO(
+	type(Material)
+)

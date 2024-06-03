@@ -1,7 +1,8 @@
 #pragma once
 #include "Tools/ImGui/ImGui/imgui.h"
+#include "Tools/ImGui/ImGui/imgui_internal.h"
 #include "Tools/Reflection/refl.hpp"
-#include "Tools/Utilities/LinearAlgebra/Vector3.hpp"
+#include "Tools/Utilities/LinearAlgebra/Vectors.hpp"
 
 class AssetBase;
 
@@ -11,26 +12,42 @@ namespace Reflection
 {
 
 	template <typename T>
-	void ImGuiReflect(T& ref)
+	void ImGuiReflect(T& ref,const std::string& identifier)
 	{
+		identifier;
 		ImGui::TextWrapped(refl::runtime::debug_str(ref).c_str());
 	}
 
 	template <typename T>
-	void ImGuiReflect(const T& ref)
+	void ImGuiReflect(const T& ref,const std::string& identifier)
 	{
+		identifier;
 		ImGui::TextWrapped(refl::runtime::debug_str(ref).c_str());
 	}
 
-	inline void ImGuiReflect(bool& ref)
+	inline void ImGuiReflect(bool& ref,const std::string& identifier)
 	{
-		ImGui::Checkbox(refl::runtime::debug_str(ref).c_str(),&ref);
+		ImGui::Checkbox(std::format("##{}",identifier).c_str(),&ref);
 	}
 
-	template <typename T>
-	void ImGuiReflect(Vector3<T>& ref)
+	inline void ImGuiReflect(Vector2<float>& ref,const std::string& identifier)
 	{
-		ImGui::DragFloat3("##wat",&ref.x);
+		ImGui::DragFloat2(std::format("##{}",identifier).c_str(),&ref.x);
+	}
+
+	inline void ImGuiReflect(Vector3<float>& ref,const std::string& identifier)
+	{
+		ImGui::DragFloat3(std::format("##{}",identifier).c_str(),&ref.x);
+	}
+
+	inline void ImGuiReflect(Vector4<float>& ref,const std::string& identifier)
+	{
+		ImGui::DragFloat4(std::format("##{}",identifier).c_str(),&ref.x);
+	}
+
+	inline void ImGuiReflect(float& ref,const std::string& identifier)
+	{
+		ImGui::DragFloat(std::format("##{}",identifier).c_str(),&ref);
 	}
 
 
@@ -155,6 +172,8 @@ public:
 	virtual void InspectorView();
 	template<typename TypeToReflect>
 	void Reflect(this auto& aReflectedObject);
+	template <typename TypeToReflect>
+	void Reflect(TypeToReflect& aReflectedObject);
 };
 
 
@@ -173,16 +192,20 @@ inline void Reflectable::InspectorView()
 template <typename TypeToReflect>
 inline void Reflectable::Reflect(this auto& aReflectedObject)
 {
-	const TypeInfo& typeInfo = aReflectedObject.GetTypeInfo();
-	ImGui::Text(typeInfo.Name().c_str());
 	auto TypeReflector = [&] <typename T>(this auto & self)
 	{
 		auto imp = [&]<typename T0>(T0 member)
 		{
-			std::string arg = std::string(get_display_name(member)) + ": ";
-			ImGui::TextWrapped(arg.data());
-			ImGui::SameLine();
-			Reflection::ImGuiReflect(member(aReflectedObject));
+			const std::string arg = std::string(get_display_name(member)) + ": ";
+			ImGui::PushID(arg.c_str());
+			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0,200);
+			ImGui::Text(arg.data());
+			ImGui::NextColumn(); 
+			
+			Reflection::ImGuiReflect(member(aReflectedObject),arg);
+			ImGui::Columns(1);
+			ImGui::PopID();
 
 			ImGui::Indent(16.f);
 			if constexpr (Reflection::InspectorSyntaxPtr<decltype(member(aReflectedObject))>)
@@ -195,11 +218,37 @@ inline void Reflectable::Reflect(this auto& aReflectedObject)
 			}
 
 			ImGui::Unindent(16.0f);
-			//Logger::Log("member_t: " + typeid(T0).name()); 
-			//else
-			//{
-			//	self.template operator() < decltype(member(*this)) > ();
-			//}
+
+		};
+		refl::util::for_each(refl::reflect<T>().members,imp);
+	};
+	TypeReflector.template operator() < TypeToReflect > ();
+	ImGui::Separator();
+}
+
+template <typename TypeToReflect>
+inline void Reflectable::Reflect(TypeToReflect& aReflectedObject)
+{
+	auto TypeReflector = [&] <typename T>(this auto & self)
+	{
+		auto imp = [&]<typename T0>(T0 member)
+		{
+			const std::string arg = std::string(get_display_name(member)) + ": ";
+			ImGui::TextWrapped(arg.data());
+			ImGui::SameLine();
+			Reflection::ImGuiReflect(member(aReflectedObject),arg);
+
+			ImGui::Indent(16.f);
+			if constexpr (Reflection::InspectorSyntaxPtr<decltype(member(aReflectedObject))>)
+			{
+				member(aReflectedObject)->InspectorView();
+			}
+			if constexpr (Reflection::InspectorSyntax<decltype(member(aReflectedObject))>)
+			{
+				member(aReflectedObject).InspectorView();
+			}
+
+			ImGui::Unindent(16.0f);
 
 		};
 		refl::util::for_each(refl::reflect<T>().members,imp);

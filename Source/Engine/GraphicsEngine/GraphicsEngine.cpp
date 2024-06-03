@@ -64,30 +64,12 @@ bool GraphicsEngine::SetupDebugDrawline()
 }
 void GraphicsEngine::SetupDefaultVariables()
 {
-	D3D12_SAMPLER_DESC pointSamplerDesc = {};
-	pointSamplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
-	pointSamplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	pointSamplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	pointSamplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-
 
 	////Particle
-	//AssetManager::Get().ForceLoadAsset<TextureHolder>(L"Textures/Default/DefaultParticle_P.dds",defaultParticleTexture);
-	//defaultParticleTexture->SetTextureType(eTextureType::ParticleMap);
+	AssetManager::Get().ForceLoadAsset<TextureHolder>(L"Textures/Default/DefaultParticle_P.dds",defaultParticleTexture);
+	defaultParticleTexture->SetTextureType(eTextureType::ParticleMap);
 
-	//NOISE
-
-	//if (!RHI::CreateSamplerState(myPointSampleState,pointSamplerDesc))
-	//{
-	//	Logger::Log("Sampler state created");
-	//	assert(false);
-	//}
-
-
-	//RHI::SetSamplerState(myPointSampleState,REG_PointSampler); 
-	//AssetManager::Get().ForceLoadAsset<TextureHolder>(L"Textures/Default/NoiseTable.dds",NoiseTable);
-	//RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_Noise_Texture,NoiseTable->GetRawTexture().get()); //Is there guarantee that this holds?
-
+	AssetManager::Get().ForceLoadAsset<TextureHolder>(L"Textures/Default/NoiseTable.dds",NoiseTable);
 
 	AssetManager::Get().ForceLoadAsset<ShipyardShader>("Shaders/Default_VS.cso",defaultVS);
 	AssetManager::Get().ForceLoadAsset<ShipyardShader>("Shaders/Default_PS.cso",defaultPS);
@@ -267,50 +249,7 @@ void GraphicsEngine::SetupPostProcessing()
 	//	D3D11_USAGE_DEFAULT,
 	//	D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
 	//	0
-	//);
-
-	//RHI::CreatePixelShader(
-	//	luminancePass,
-	//	BuiltIn_LuminancePass_PS_ByteCode,
-	//	sizeof(BuiltIn_LuminancePass_PS_ByteCode)
-	//);
-	//RHI::CreatePixelShader(
-	//	TonemapPass,
-	//	BuiltIn_ToneMapping_PS_ByteCode,
-	//	sizeof(BuiltIn_ToneMapping_PS_ByteCode)
-	//);
-
-	//RHI::CreatePixelShader(
-	//	copyShader,
-	//	BuiltIn_CopyPixels_PS_ByteCode,
-	//	sizeof(BuiltIn_CopyPixels_PS_ByteCode)
-	//);
-
-	//RHI::CreatePixelShader(
-	//	gaussShader,
-	//	BuiltIn_GaussianBlur_PS_ByteCode,
-	//	sizeof(BuiltIn_GaussianBlur_PS_ByteCode)
-	//);
-
-	//RHI::CreatePixelShader(
-	//	bloomShader,
-	//	BuiltIn_Bloom_PS_ByteCode,
-	//	sizeof(BuiltIn_Bloom_PS_ByteCode)
-	//);
-
-	//RHI::CreatePixelShader(
-	//	ScreenSpaceAmbienceOcclusion,
-	//	BuiltIn_SSAO_PS_ByteCode,
-	//	sizeof(BuiltIn_SSAO_PS_ByteCode)
-	//);
-
-
-	//RHI::CreatePixelShader(
-	//	EdgeBlur,
-	//	BuiltIn_EdgeBlur_ByteCode,
-	//	sizeof(BuiltIn_EdgeBlur_ByteCode)
-	//);
-
+	//); 
 }
 void GraphicsEngine::SetupParticleShaders()
 {
@@ -365,21 +304,6 @@ void GraphicsEngine::BeginFrame()
 		Logger::Err("No camera in scene. No render is possible");
 	}
 	UpdateSettings();
-	// Here we should initialize our frame and clean up from the last one.  
-	/*RHI::ClearRenderTarget(myBackBuffer.get(),myBackgroundColor);
-	RHI::ClearDepthStencil(myDepthBuffer.get());
-	RHI::ClearRenderTarget(SceneBuffer.get(),{ 0.0f,0.0f,0.0f,0.0f });
-	RHI::ClearRenderTarget(halfSceneBuffer.get(),{ 0.0f,0.0f,0.0f,0.0f });
-	RHI::ClearRenderTarget(quaterSceneBuffer1.get(),{ 0.0f,0.0f,0.0f,0.0f });
-	RHI::ClearRenderTarget(quaterSceneBuffer2.get(),{ 0.0f,0.0f,0.0f,0.0f });
-	RHI::ClearRenderTarget(IntermediateA.get(),{ 0.0f,0.0f,0.0f,0.0f });
-	RHI::ClearRenderTarget(IntermediateB.get(),{ 0.0f,0.0f,0.0f,0.0f });
-	myG_Buffer.ClearTargets();
-	RHI::SetBlendState(nullptr);*/
-
-
-
-
 }
 void GraphicsEngine::RenderFrame(Viewport& renderViewPort)
 {
@@ -436,8 +360,7 @@ void GraphicsEngine::EndFrame()
 }
 
 void GraphicsEngine::PrepareBuffers(std::shared_ptr<CommandList> commandList,Viewport& renderViewPort)
-{
-
+{ 
 	OPTICK_GPU_CONTEXT(commandList->GetGraphicsCommandList().Get());
 
 	//const UINT currentBackBufferIndex = chain->GetCurrentBackBufferIndex();
@@ -445,7 +368,7 @@ void GraphicsEngine::PrepareBuffers(std::shared_ptr<CommandList> commandList,Vie
 	const auto rtv = GPU::GetCurrentRenderTargetView();
 	const auto dsv = GPU::m_DepthBuffer->GetHandle(ViewType::DSV).cpuPtr;
 	commandList->TransitionBarrier(backBuffer->GetResource(),D3D12_RESOURCE_STATE_RENDER_TARGET);
-	Vector4f clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+	const Vector4f clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
 	GPU::ClearRTV(*commandList.get(),rtv,clearColor);
 	GPU::ClearDepth(*commandList.get(),GPU::m_DepthBuffer->GetHandle(ViewType::DSV).cpuPtr);
 
@@ -461,11 +384,11 @@ void GraphicsEngine::PrepareBuffers(std::shared_ptr<CommandList> commandList,Vie
 	commandList->GetGraphicsCommandList()->SetDescriptorHeaps((UINT)std::size(heaps),heaps);
 
 	{
-		LightBuffer lightBuffer = EnvironmentLightPSO::CreateLightBuffer();
-		const auto& alloc = GPU::m_GraphicsMemory->AllocateConstant<LightBuffer>(lightBuffer);
+		const LightBuffer lightBuffer = EnvironmentLightPSO::CreateLightBuffer();
+		const GraphicsResource& alloc = GPU::m_GraphicsMemory->AllocateConstant<LightBuffer>(lightBuffer);
 		commandList->GetGraphicsCommandList()->SetGraphicsRootConstantBufferView(REG_LightBuffer,alloc.GpuAddress());
 
-		auto frameBuffer = renderViewPort.GetCamera().GetFrameBuffer();
+		const auto frameBuffer = renderViewPort.GetCamera().GetFrameBuffer();
 		const auto& alloc0 = GPU::m_GraphicsMemory->AllocateConstant<FrameBuffer>(frameBuffer);
 		commandList->GetGraphicsCommandList()->SetGraphicsRootConstantBufferView(eRootBindings::frameBuffer,alloc0.GpuAddress());
 

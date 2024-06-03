@@ -131,7 +131,7 @@ void GameLauncher::Start()
 		gom.SetLastGOAsCamera();
 		cameraComponent.SetActive(true);
 		auto& transform = camera.AddComponent<Transform>();
-		transform.SetPosition(-10,27,0);
+		transform.SetPosition(-10,3,0);
 		transform.SetRotation(0,90,0);
 	}
 
@@ -144,6 +144,7 @@ void GameLauncher::Start()
 		//worldRoot.AddComponent<Skybox>();
 		Transform& transform = worldRoot.AddComponent<Transform>();
 		transform.SetRotation(80,0,0);
+		transform.SetPosition(0,5,0);
 		cLight& pLight = worldRoot.AddComponent<cLight>(eLightType::Directional);
 		worldRoot.AddComponent<cMeshRenderer>("Models/Cube.fbx");
 
@@ -181,7 +182,7 @@ void GameLauncher::Start()
 		sponza.AddComponent<cMeshRenderer>("Models/Sponza/Sponza.fbx");
 		//sponza.AddComponent<cMeshRenderer>("Models/Sponza/Sponza3Intel.fbx");
 		auto& transform = sponza.AddComponent<Transform>();
-		transform.SetPosition(0,25,0);
+		transform.SetPosition(0,0,0);
 		transform.SetScale(.01f);
 		transform.SetGizmo(false);
 	}
@@ -192,7 +193,7 @@ void GameLauncher::Start()
 
 		auto& transform = myCustomHandler.AddComponent<Transform>();
 		auto& light = myCustomHandler.AddComponent<cLight>(eLightType::Point);
-		transform.SetPosition(0,30,-4);
+		transform.SetPosition(0,5,-4);
 		light.BindDirectionToTransform(true);
 		light.SetColor({ .5f,.5f,1 });
 		light.SetPower(10);
@@ -220,11 +221,26 @@ void GameLauncher::Start()
 		buddha.AddComponent<cMeshRenderer>("Models/Buddha.fbx");
 		buddha.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BuddhaMaterial.json");
 		auto& transform = buddha.AddComponent<Transform>();
-		transform.SetPosition(0,25,0);
+		transform.SetPosition(0,0,0);
 		transform.Rotate(0,90,0);
 		transform.SetScale(0.5f,.5f,.5f);
 		transform.SetGizmo(false);
 	}
+
+	{
+		GameObject pointLight = gom.CreateGameObject();
+		pointLight.SetName("pointLight");
+		auto& transform =  pointLight.AddComponent<Transform>();
+		transform.SetPosition(-5,1,0);
+		pointLight.AddComponent<cLight>(eLightType::Point);
+	}
+	{
+		GameObject spotLight = gom.CreateGameObject();
+		spotLight.SetName("spotLight");
+		 spotLight.AddComponent<Transform>();
+		spotLight.AddComponent<cLight>(eLightType::Spot);
+	}
+
 	{
 		//for (int x = 0; x < 4; x++)
 		//{

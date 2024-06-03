@@ -78,8 +78,7 @@ public:
 	FrameBuffer myFrameBuffer;
 private:
 	ObjectBuffer myObjectBuffer;
-	LineBuffer myLineBuffer;
-	LightBuffer myLightBuffer;
+	LineBuffer myLineBuffer; 
 	G_Buffer myG_Buffer;
 	GraphicSettingsBuffer myGraphicSettingsBuffer;
 

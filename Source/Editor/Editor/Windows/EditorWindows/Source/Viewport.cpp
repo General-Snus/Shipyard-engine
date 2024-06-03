@@ -286,12 +286,11 @@ void Viewport::RenderImGUi()
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing,{ 0.0f, 0.0f });
 
 
+				ImGui::PushItemWidth(100);
 			if (ImGui::BeginChild("##ViewportToolbar",ImVec2(),0,toolbarFlags)) {
 				// Bring the toolbar window always on top.
 				ImGui::BringWindowToDisplayFront(ImGui::GetCurrentWindow());
-
-				ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign,ImVec2(0.5f,0.5f));
-
+				ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign,ImVec2(0.5f,0.5f)); 
 				if (ImGui::Selectable("Universal",m_CurrentGizmoOperation == ImGuizmo::OPERATION::UNIVERSAL,selectableFlags,toolbarItemSize))
 				{
 					m_CurrentGizmoOperation = ImGuizmo::OPERATION::UNIVERSAL;

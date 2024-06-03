@@ -12,6 +12,12 @@ TextureHolder::TextureHolder(const std::filesystem::path& aFilePath,eTextureType
 	RawTexture = std::make_shared<Texture>();
 }
 
+void TextureHolder::InspectorView()
+{
+	AssetBase::InspectorView();
+
+}
+
 void TextureHolder::Init()
 {
 	const int position = (int)AssetPath.filename().string().find_last_of("_");

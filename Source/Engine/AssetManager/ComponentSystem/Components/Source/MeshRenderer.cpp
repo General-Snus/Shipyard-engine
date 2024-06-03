@@ -69,7 +69,7 @@ void cMeshRenderer::InspectorView()
 	Reflect<cMeshRenderer>();
 }
 
-std::shared_ptr<TextureHolder> cMeshRenderer::GetTexture(eTextureType type,unsigned materialIndex)
+std::shared_ptr<TextureHolder> cMeshRenderer::GetTexture(eTextureType type,unsigned materialIndex) const
 {
 	OPTICK_EVENT();
 	assert(materialIndex >= 0);

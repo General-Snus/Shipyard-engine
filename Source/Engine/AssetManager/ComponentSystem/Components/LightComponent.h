@@ -2,7 +2,7 @@
 #include <Engine/GraphicsEngine/Rendering/Buffers/FrameBuffer.h>
 #include "Engine/AssetManager/ComponentSystem/Component.h"
 
-enum class eLightType
+enum class eLightType : unsigned int
 {
 	Directional = 0,
 	Point = 1,
@@ -71,6 +71,12 @@ public:
 
 	void Update() override;
 	~cLight() override = default;
+
+	bool boundToTransform = true;
+	bool isShadowCaster = true;
+	bool isDirty = true;
+	bool isRendered = false;
+
 private:
 	void ConformToTransform();
 	void RedrawShadowMap();
@@ -79,31 +85,21 @@ private:
 	void RedrawSpotMap();
 	Matrix GetLightViewMatrix(int number) const;
 
+
+	eLightType myLightType;
 	std::shared_ptr<DirectionalLight> myDirectionLightData;
 	std::shared_ptr<SpotLight> mySpotLightData;
 	std::shared_ptr<PointLight> myPointLightData;
 	std::shared_ptr<Texture> shadowMap[6];
 
-	eLightType myLightType;
-	bool boundToTransform = false;
-	bool isShadowCaster = true;
-	bool isDirty = true;
-	bool isRendered = false;
 };
 
 REFL_AUTO(
 	type(cLight),
-	func(GetIsShadowCaster,property("Shadowcaster")),
-	func(GetIsRendered,property("Rendering")),
-	func(GetIsDirty,property("Dirty")),
-	func(GetPower,property("Power")),
-	func(GetColor,property("Color")),
-	func(GetPosition,property("Position")),
-	func(GetDirection,property("Direction")),
-	func(GetRange,property("Range")),
-	func(GetInnerAngle,property("Inner angle")),
-	func(GetOuterAngle,property("Outer angle")),
-	func(GetIsBound,property("Bound to transform"))
+	field(isRendered),
+	field(isDirty),
+	field(isShadowCaster),
+	field(boundToTransform)
 )
 
 

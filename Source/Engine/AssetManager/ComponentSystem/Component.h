@@ -81,7 +81,6 @@ private:
 REFL_AUTO(type(Component)
 	,field(myOwnerID)
 	,field(m_IsActive)
-	,field(IsInherited)
 )
 
 

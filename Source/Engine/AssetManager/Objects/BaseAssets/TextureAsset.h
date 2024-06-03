@@ -18,6 +18,9 @@ public:
 		RawTexture->isCubeMap = (aTextureType == eTextureType::CubeMap);
 		textureType = aTextureType;
 	}
+
+
+	void InspectorView() override;
 private:
 #if WorkingOnPngLoading
 	bool LoadPngTexture(Texture* outTexture,const std::filesystem::path& aFileName);

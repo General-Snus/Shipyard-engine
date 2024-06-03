@@ -32,6 +32,7 @@ public:
 	void SetView(ViewType view) override;
 
 
+
 	uint32_t GetWidth() const { return static_cast<uint32_t>(m_Viewport.Width); }
 	uint32_t GetHeight() const { return static_cast<uint32_t>(m_Viewport.Height); }
 

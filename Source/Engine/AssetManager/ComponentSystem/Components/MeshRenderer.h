@@ -9,9 +9,6 @@ class Mesh;
 class Material;
 class Skeleton;
 
-
-
-
 class cMeshRenderer : public Component
 {
 public:
@@ -30,21 +27,10 @@ public:
 	std::shared_ptr<Mesh> GetRawMesh() const;
 	void InspectorView() override;
 
-	std::shared_ptr<TextureHolder> GetTexture(eTextureType type,unsigned materialIndex = 0);
+	std::shared_ptr<TextureHolder> GetTexture(eTextureType type,unsigned materialIndex = 0) const;
 	bool IsDefaultMesh() const;
-
-	FORCEINLINE bool IsStaticMesh()
-	{
-		return isStatic;
-	}
-
-	FORCEINLINE void SetIsStaticMesh(bool aBool)
-	{
-		isStatic = aBool;
-	}
-
 	bool isInstanced = false;
-	bool isStatic = false;
+
 	std::shared_ptr<Mesh> m_Mesh;
 	std::vector<std::shared_ptr<Material>> m_OverrideMaterial;
 };
@@ -52,43 +38,32 @@ public:
 REFL_AUTO(
 	type(cMeshRenderer),
 	field(isInstanced),
-	field(isStatic),
 	field(m_Mesh),
 	field(m_OverrideMaterial)
 )
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 class cSkeletalMeshRenderer : public cMeshRenderer
 {
+	friend class cAnimator;
 public:
 	cSkeletalMeshRenderer() = delete;
 	cSkeletalMeshRenderer(const unsigned int anOwnerId);
 	cSkeletalMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath);
+	~cSkeletalMeshRenderer() override = default;
+
 	void SetNewMesh(const std::filesystem::path& aFilePath);
 	void Render() override;
 	void InspectorView() override;
-
-	~cSkeletalMeshRenderer() override = default;
-private:
 
 	FORCEINLINE const std::shared_ptr<Skeleton> GetRawSkeleton() const
 	{
 		return (mySkeleton);
 	}
-	friend class cAnimator;
+
 	std::shared_ptr<Skeleton> mySkeleton;
 };
 
-REFL_AUTO(type(cSkeletalMeshRenderer))
+REFL_AUTO(
+	type(cSkeletalMeshRenderer),
+	field(mySkeleton)
+)
