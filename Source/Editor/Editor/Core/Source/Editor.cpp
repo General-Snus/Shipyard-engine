@@ -175,23 +175,22 @@ bool Editor::Initialize(HWND aHandle)
 #define ICON_MAX_16_FA 0xf8ff
 #define ICON_MAX_FA 0xf8ff
 
-	ImWchar const icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-	const std::string icon_path = AssetManager::AssetPath.string() + "Fonts/FontAwesome/" FONT_ICON_FILE_NAME_FAS;
-	io.Fonts->AddFontFromFileTTF(icon_path.c_str(),15.0f,&font_config,icon_ranges);
+	//ImWchar const icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+	//const std::string icon_path = AssetManager::AssetPath.string() + "Fonts/FontAwesome/" FONT_ICON_FILE_NAME_FAS;
+	//io.Fonts->AddFontFromFileTTF(icon_path.c_str(),15.0f,&font_config,icon_ranges);
 	if (!io.Fonts->Build())
 	{
 		std::cout << "fucked up font load";
 	}
 
 	ImGui_ImplWin32_Init(aHandle);
-	const D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle = GPU::m_ImGui_Heap->GetFirstGpuHandle();
-	const D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle = GPU::m_ImGui_Heap->GetFirstCpuHandle();
-	if (!ImGui_ImplDX12_Init(
+	if (const auto& heap = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]; 
+		!ImGui_ImplDX12_Init(
 		GPU::m_Device.Get(),
 		GPU::m_FrameCount,
 		DXGI_FORMAT_R8G8B8A8_UNORM,
-		GPU::m_ImGui_Heap->Heap(),
-		cpu_handle,gpu_handle))
+		heap->Heap(),
+		heap->GetCpuHandle(2000),heap->GetGpuHandle(2000)))
 	{
 		Logger::Err("Failed to init IMGUI Dx12");
 	}

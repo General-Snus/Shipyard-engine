@@ -404,7 +404,7 @@ void cLight::SetOuterAngle(const float angle)
 	case Point:
 		break;
 	case Spot:
-		mySpotLightData->OuterConeAngle = angle * DEG_TO_RAD;
+		mySpotLightData->OuterConeAngle = angle;
 		break;
 	case uninitialized:
 		break;
@@ -424,7 +424,7 @@ float cLight::GetOuterAngle()const
 		return 0.0f;
 		break;
 	case Spot:
-		return mySpotLightData->OuterConeAngle * RAD_TO_DEG;
+		return mySpotLightData->OuterConeAngle;
 		break;
 	case uninitialized:
 		break;
@@ -452,13 +452,20 @@ void cLight::Update()
 		{
 			using enum eLightType;
 		case Directional:
-			RedrawDirectionMap();
+			RedrawDirectionMap(); 
+			myDirectionLightData->Power = std::max(0.0f,myDirectionLightData->Power);
 			break;
 		case Point:
-			RedrawPointMap();
+			RedrawPointMap(); 
+			myPointLightData->Power = std::max(0.0f,myPointLightData->Power);
+			myPointLightData->Range = std::max(0.0f,myPointLightData->Range);
 			break;
 		case Spot:
 			RedrawSpotMap();
+			mySpotLightData->InnerConeAngle = std::clamp(mySpotLightData->InnerConeAngle,0.f,mySpotLightData->OuterConeAngle);
+			mySpotLightData->OuterConeAngle = std::clamp(mySpotLightData->OuterConeAngle,mySpotLightData->InnerConeAngle,360.f);
+			mySpotLightData->Power = std::max(0.0f,mySpotLightData->Power);
+			mySpotLightData->Range = std::max(0.0f,mySpotLightData->Range); 
 			break;
 		case uninitialized:
 			break;
@@ -554,16 +561,16 @@ void cLight::RedrawDirectionMap()
 
 void cLight::RedrawPointMap()
 {
-	OPTICK_EVENT();  
-	constexpr float fow = 90.0f * DEG_TO_RAD; 
-	constexpr float nearField = .01f; 
+	OPTICK_EVENT();
+	constexpr float fow = 90.0f * DEG_TO_RAD;
+	constexpr float nearField = .01f;
 	const float farfield = std::max(myPointLightData->Range * 5,nearField + 0.0001f);
 
 	const auto dxMatrix = XMMatrixPerspectiveFovLH(fow,1,farfield,nearField);
 	myPointLightData->projection = Matrix(&dxMatrix);
 
 	for (int i = 0; i < 6; i++)
-	{ 
+	{
 		myPointLightData->lightView[i] = GetLightViewMatrix(i);
 	}
 
@@ -580,7 +587,7 @@ void cLight::RedrawSpotMap()
 	constexpr float nearField = 0.01f;
 
 
-	const auto dxMatrix = XMMatrixPerspectiveFovLH(fow,1,farfield,nearField);
+	const auto dxMatrix = XMMatrixPerspectiveFovLH(fow * DEG_TO_RAD,1,farfield,nearField);
 	mySpotLightData->projection = Matrix(&dxMatrix);
 	mySpotLightData->lightView = Matrix::GetFastInverse(mySpotLightData->lightView);
 }

@@ -127,6 +127,7 @@ void GameLauncher::Start()
 	{
 		GameObject camera = gom.CreateGameObject();
 		camera.SetName("Camera");
+		camera.AddComponent<cMeshRenderer>("Models/Camera/Camera.fbx");
 		auto& cameraComponent = camera.AddComponent<cCamera>();
 		gom.SetLastGOAsCamera();
 		cameraComponent.SetActive(true);
@@ -230,14 +231,14 @@ void GameLauncher::Start()
 	{
 		GameObject pointLight = gom.CreateGameObject();
 		pointLight.SetName("pointLight");
-		auto& transform =  pointLight.AddComponent<Transform>();
+		auto& transform = pointLight.AddComponent<Transform>();
 		transform.SetPosition(-5,1,0);
 		pointLight.AddComponent<cLight>(eLightType::Point);
 	}
 	{
 		GameObject spotLight = gom.CreateGameObject();
 		spotLight.SetName("spotLight");
-		 spotLight.AddComponent<Transform>();
+		spotLight.AddComponent<Transform>();
 		spotLight.AddComponent<cLight>(eLightType::Spot);
 	}
 

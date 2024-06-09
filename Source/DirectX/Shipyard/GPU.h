@@ -166,8 +166,11 @@ public:
 	static inline std::shared_ptr<Texture> m_BackBuffer;
 	static inline std::shared_ptr<Texture> m_DepthBuffer;
 	static inline std::shared_ptr<DirectX::GraphicsMemory> m_GraphicsMemory;
-	static inline std::unique_ptr<DirectX::DescriptorPile> m_ResourceDescriptors[(int)eHeapTypes::HEAP_COUNT];
-	static inline std::unique_ptr<DirectX::DescriptorPile> m_ImGui_Heap;
+
+
+
+	static inline std::unique_ptr<DirectX::DescriptorPile> m_ResourceDescriptors[(int)eHeapTypes::HEAP_COUNT]; 
+	static inline std::array<size_t,(int)eHeapTypes::HEAP_COUNT> m_HeapSizes;
 
 };
 

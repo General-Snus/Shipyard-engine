@@ -3,9 +3,9 @@
 #include "Shipyard/GpuResource.h"
 
 #include <cassert>
-#include <Tools/Optick/include/optick.h>
-
+#include <Tools/Optick/include/optick.h> 
 #include "Shipyard/GPU.h"
+#include <Tools/Utilities/Error.hpp>
 
 VertexResource::VertexResource(std::filesystem::path name)
 {
@@ -24,7 +24,6 @@ void VertexResource::CreateView(size_t numElements,size_t elementSize)
 	SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	SRVDesc.Buffer.NumElements = (m_NumVertices * m_VertexStride) / 4;
 	SRVDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_RAW;
-
 	HeapHandle handle = GPU::GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
 	GPU::m_Device->CreateShaderResourceView(m_Resource.Get(),&SRVDesc,handle.cpuPtr);
 	m_DescriptorHandles[ViewType::SRV] = handle;
@@ -277,6 +276,10 @@ HeapHandle GpuResource::GetHandle() const
 int GpuResource::GetHeapOffset() const
 {
 	OPTICK_EVENT();
+	if (m_DescriptorHandles.at(m_RecentBoundType).heapOffset != -1 && m_DescriptorHandles.at(m_RecentBoundType).heapOffset > GPU::m_HeapSizes[(int)m_RecentBoundType])
+	{
+		throw InternalGPUError("HeapOffset was out of range of heap"); 
+	}
 	return m_DescriptorHandles.at(m_RecentBoundType).heapOffset;
 };
 

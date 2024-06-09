@@ -164,7 +164,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Error.hpp" />
     <ClInclude Include="DataStructures\BSTSet.hpp" />
     <ClInclude Include="DataStructures\DoublyLinkedList.hpp" />
     <ClInclude Include="DataStructures\HashMap.hpp" />
@@ -174,6 +173,7 @@
     <ClInclude Include="DataStructures\Sort.hpp" />
     <ClInclude Include="DataStructures\Stack.hpp" />
     <ClInclude Include="DataStructures\VectorOnStack.hpp" />
+    <ClInclude Include="Error.hpp" />
     <ClInclude Include="Files\Images\stb_image.h" />
     <ClInclude Include="Files\Images\stb_image_resize2.h" />
     <ClInclude Include="Files\Images\stb_image_write.h" />

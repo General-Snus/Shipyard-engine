@@ -30,7 +30,7 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 		material->Get(AI_MATKEY_COLOR_DIFFUSE,color);
 
 		Material::DataMaterial dataMat;
-		//dataMat.materialData.Data.albedoColor = color;
+		dataMat.materialData.albedoColor = color;
 		dataMat.textures.resize(4);
 
 

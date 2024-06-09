@@ -301,16 +301,13 @@ ComPtr<ID3D12PipelineState> PSO::GetPipelineState() const
 	return m_PipelineState;
 }
 
-
+#pragma optimize("",off)
 void Passes::WriteShadows(std::shared_ptr<CommandList>& commandList)
 {
 	OPTICK_EVENT();
 
 
-	static auto& meshRendererList = GameObjectManager::Get().GetAllComponents<cMeshRenderer>();
-
-
-	std::shared_ptr<Texture> shadowMap = nullptr;
+	static auto& meshRendererList = GameObjectManager::Get().GetAllComponents<cMeshRenderer>(); 
 	const auto graphicCommandList = commandList->GetGraphicsCommandList();
 
 	const auto& shadowMapper = PSOCache::GetState(PSOCache::ePipelineStateID::ShadowMapper);
@@ -319,99 +316,87 @@ void Passes::WriteShadows(std::shared_ptr<CommandList>& commandList)
 	graphicCommandList->SetPipelineState(pipelineState);
 	commandList->TrackResource(pipelineState);
 
-	auto renderShadows = [](const std::vector<cMeshRenderer>& objectsToRender,std::shared_ptr<CommandList>& list,const std::string_view debugName) -> void
+	auto renderShadows = [](const std::vector<cMeshRenderer>& objectsToRender,const std::shared_ptr<CommandList>& list,const std::string_view debugName)
 		{
-			MaterialBuffer materialBuffer; 
+			MaterialBuffer materialBuffer;
 			for (const auto& object : objectsToRender)
 			{
-				if (!object.IsActive())	{ continue; }
+				if (!object.IsActive()) { continue; }
 				const auto& transform = object.GetComponent<Transform>();
-				list->AllocateBuffer< ObjectBuffer>(eRootBindings::objectBuffer,{ transform.GetRawTransform() }); 
+				list->AllocateBuffer< ObjectBuffer>(eRootBindings::objectBuffer,{ transform.GetRawTransform() });
 				for (auto& element : object.GetElements())
-				{ 
+				{
 					GPU::ConfigureInputAssembler(*list,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.IndexResource);
-					materialBuffer.vertexBufferIndex = element.VertexBuffer.GetHandle(ViewType::SRV).heapOffset; 
+					materialBuffer.vertexBufferIndex = element.VertexBuffer.GetHandle(ViewType::SRV).heapOffset;
 					list->AllocateBuffer <MaterialBuffer>(eRootBindings::materialBuffer,materialBuffer);
 					OPTICK_GPU_EVENT(debugName.data());
 					list->GetGraphicsCommandList()->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
 				}
 			}
 		};
+	auto setShadowPrerequisite = [](const cLight& light,int map,std::shared_ptr<CommandList> const& list) -> std::shared_ptr<Texture>
+		{
+			const auto& shadowMap = light.GetShadowMap(map);
+			list->GetGraphicsCommandList()->RSSetViewports(1,&shadowMap->GetViewPort());
+			list->GetGraphicsCommandList()->RSSetScissorRects(1,&shadowMap->GetRect());
+
+			list->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_DEPTH_WRITE);
+			GPU::ClearDepth(*list,shadowMap->GetHandle(ViewType::DSV).cpuPtr);
+			list->SetRenderTargets(0,nullptr,shadowMap.get());
+			list->AllocateBuffer<FrameBuffer>(eRootBindings::frameBuffer,light.GetShadowMapFrameBuffer(map));
+
+			return shadowMap;
+		};
 
 	for (auto& light : GameObjectManager::Get().GetAllComponents<cLight>())
 	{
-		if (!light.IsActive())
+		if (!light.IsActive() || !light.GetIsShadowCaster() || light.GetIsRendered())
 		{
 			continue;
 		}
 
-		if (light.GetIsShadowCaster())
+		switch (light.GetType())
 		{
-			if (light.GetType() == eLightType::Directional && !light.GetIsRendered())
+		case eLightType::Directional:
+		{
+
+			const std::shared_ptr<Texture>& shadowMap = setShadowPrerequisite(light,0,commandList);
+			renderShadows(meshRendererList,commandList,"DirectionalLight");
+			shadowMap->SetView(ViewType::SRV);
+
+			commandList->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_DEPTH_READ | D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			commandList->TrackResource(*shadowMap);
+		}
+		break;
+		case eLightType::Point:
+		{
+			for (int j = 0; j < 6; j++)
 			{
-				shadowMap = light.GetShadowMap(0);
-
-				graphicCommandList->RSSetViewports(1,&shadowMap->GetViewPort());
-				graphicCommandList->RSSetScissorRects(1,&shadowMap->GetRect());
-
-				commandList->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_DEPTH_WRITE);
-				GPU::ClearDepth(*commandList,shadowMap->GetHandle(ViewType::DSV).cpuPtr);
-				commandList->SetRenderTargets(0,nullptr,shadowMap.get());
-
-				auto frameBuffer = light.GetShadowMapFrameBuffer(0);
-				const auto& alloc0 = GPU::m_GraphicsMemory->AllocateConstant<FrameBuffer>(frameBuffer);
-				graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::frameBuffer,alloc0.GpuAddress());
-
-				renderShadows(meshRendererList,commandList,"DirectionalLight");
-
+				const std::shared_ptr<Texture>& shadowMap = setShadowPrerequisite(light,j,commandList);
+				renderShadows(meshRendererList,commandList,"PointlightShadowDraw");
 				shadowMap->SetView(ViewType::SRV);
+
 				commandList->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_DEPTH_READ | D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 				commandList->TrackResource(*shadowMap);
 			}
+		}
+		break;
+		case eLightType::Spot:
+		{
+			const std::shared_ptr<Texture>& shadowMap = setShadowPrerequisite(light,0,commandList);
+			renderShadows(meshRendererList,commandList,"SpotlightShadowDraw");
+			shadowMap->SetView(ViewType::SRV);
 
-			if (light.GetType() == eLightType::Spot && !light.GetIsRendered())
-			{
-				shadowMap = light.GetShadowMap(0);
-
-				graphicCommandList->RSSetViewports(1,&shadowMap->GetViewPort());
-				graphicCommandList->RSSetScissorRects(1,&shadowMap->GetRect());
-
-				commandList->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_DEPTH_WRITE);
-				GPU::ClearDepth(*commandList,shadowMap->GetHandle(ViewType::DSV).cpuPtr);
-				commandList->SetRenderTargets(0,nullptr,shadowMap.get());
-
-				auto frameBuffer = light.GetShadowMapFrameBuffer(0);
-				const auto& alloc0 = GPU::m_GraphicsMemory->AllocateConstant<FrameBuffer>(frameBuffer);
-				graphicCommandList->SetGraphicsRootConstantBufferView(eRootBindings::frameBuffer,alloc0.GpuAddress());
-
-				renderShadows(meshRendererList,commandList,"SpotlightShadowDraw");
-				shadowMap->SetView(ViewType::SRV);
-				commandList->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_DEPTH_READ | D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-				commandList->TrackResource(*shadowMap);
-			}
-
-			if (light.GetType() == eLightType::Point && !light.GetIsRendered())
-			{
-				for (int j = 0; j < 6; j++)
-				{
-					shadowMap = light.GetShadowMap(j);
-
-					graphicCommandList->RSSetViewports(1,&shadowMap->GetViewPort());
-					graphicCommandList->RSSetScissorRects(1,&shadowMap->GetRect());
-
-					commandList->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_DEPTH_WRITE);
-					GPU::ClearDepth(*commandList,shadowMap->GetHandle(ViewType::DSV).cpuPtr);
-					commandList->SetRenderTargets(0,nullptr,shadowMap.get());
-
-					auto frameBuffer = light.GetShadowMapFrameBuffer(j);
-					commandList->AllocateBuffer<FrameBuffer>(eRootBindings::frameBuffer,frameBuffer);
-
-					renderShadows(meshRendererList,commandList,"PointlightShadowDraw");
-					shadowMap->SetView(ViewType::SRV);
-					commandList->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_DEPTH_READ | D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-					commandList->TrackResource(*shadowMap);
-				}
-			}
+			commandList->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_DEPTH_READ | D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			commandList->TrackResource(*shadowMap);
+		}
+		break;
+		case eLightType::uninitialized:
+			std::unreachable();
+			break;
+		default:
+			std::unreachable();
+			break;
 		}
 		light.SetIsRendered(true);
 	}

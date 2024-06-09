@@ -8,18 +8,18 @@
 
 void Window::Init(const WinInitSettings& init)
 {
-	FILE* consoleOut;
-	AllocConsole();
-	freopen_s(&consoleOut,"CONOUT$","w",stdout);
+	//FILE* consoleOut;
+	//AllocConsole();
+	//freopen_s(&consoleOut,"CONOUT$","w",stdout);
 	//freopen_s(&consoleOut, "CONOUT$", "w",stderr);
-	setvbuf(consoleOut,nullptr,_IONBF,1024);
+	//setvbuf(consoleOut,nullptr,_IONBF,1024);
 
-	HWND consoleWindow = GetConsoleWindow();
-	RECT consoleSize;
-	GetWindowRect(consoleWindow,&consoleSize);
-	MoveWindow(consoleWindow,consoleSize.left,consoleSize.top,1280,720,true);
-
-	MoveConsoleToOtherMonitor();
+	//HWND consoleWindow = GetConsoleWindow();
+	//RECT consoleSize;
+	//GetWindowRect(consoleWindow,&consoleSize);
+	//MoveWindow(consoleWindow,consoleSize.left,consoleSize.top,1280,720,true);
+	//
+	//MoveConsoleToOtherMonitor();
 	moduleHandler = init.hInstance;
 
 	constexpr LPCWSTR windowClassName = L"ShipyardEditorWindow";

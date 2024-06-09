@@ -148,6 +148,7 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 	m_GraphicsMemory = std::make_shared<DirectX::DX12::GraphicsMemory>(m_Device.Get());
 
 
+	m_HeapSizes[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)] = 4096;
 	m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)] = std::make_unique<DescriptorPile>(
 		m_Device.Get(),
 		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
@@ -155,6 +156,7 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 		4096
 	);
 
+	m_HeapSizes[static_cast<int>(eHeapTypes::HEAP_TYPE_SAMPLER)] = 2048;
 	m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_SAMPLER)] = std::make_unique<DescriptorPile>(
 		m_Device.Get(),
 		D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
@@ -162,26 +164,21 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 		2048
 	);
 
+	m_HeapSizes[static_cast<int>(eHeapTypes::HEAP_TYPE_RTV)] = 2048;
 	m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_RTV)] = std::make_unique<DescriptorPile>(
 		m_Device.Get(),
 		D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
 		D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
 		2048
 	);
+	
+	m_HeapSizes[static_cast<int>(eHeapTypes::HEAP_TYPE_DSV)] = 2048;
 	m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_DSV)] = std::make_unique<DescriptorPile>(
 		m_Device.Get(),
 		D3D12_DESCRIPTOR_HEAP_TYPE_DSV,
 		D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
 		2048
-	);
-
-
-	m_ImGui_Heap = std::make_unique<DescriptorPile>(
-		m_Device.Get(),
-		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-		D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
-		4096
-	);
+	); 
 
 	ComPtr<ID3D12DebugDevice1> pDebugQueue;
 	if (SUCCEEDED(m_Device.As(&pDebugQueue)))
@@ -337,8 +334,7 @@ void GPU::UpdateBufferResource(
 void GPU::ConfigureInputAssembler(
 	CommandList& commandList,D3D_PRIMITIVE_TOPOLOGY topology,IndexResource& indexResource)
 { 
-	commandList.GetGraphicsCommandList()->IASetPrimitiveTopology(topology); 
-
+	commandList.GetGraphicsCommandList()->IASetPrimitiveTopology(topology);
 	commandList.TransitionBarrier(indexResource,D3D12_RESOURCE_STATE_INDEX_BUFFER);
 	const auto& indexView = indexResource.GetIndexBufferView();
 	commandList.GetGraphicsCommandList()->IASetIndexBuffer(&indexView);
