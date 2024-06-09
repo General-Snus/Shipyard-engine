@@ -169,18 +169,12 @@ class Reflectable
 {
 public:
 	virtual const TypeInfo& GetTypeInfo() const = 0;
-	virtual void InspectorView();
+	virtual void InspectorView() {};
 	template<typename TypeToReflect>
 	void Reflect(this auto& aReflectedObject);
 	template <typename TypeToReflect>
-	void Reflect(TypeToReflect& aReflectedObject);
+	void Reflect(TypeToReflect& aReflectedObject); 
 };
-
-
-
-inline void Reflectable::InspectorView()
-{
-}
 
 // define a convenience macro to autoimplement GetTypeInfo()
 #define MYLIB_REFLECTABLE() \
@@ -188,43 +182,45 @@ inline void Reflectable::InspectorView()
 	{ \
 		return TypeInfo::Get<::refl::trait::remove_qualifiers_t<decltype(*this)>>(); \
 	} 
-
-template <typename TypeToReflect>
+template <typename TypeToReflect>//Make sure only reflected objects can get here
 inline void Reflectable::Reflect(this auto& aReflectedObject)
 {
-	auto TypeReflector = [&] <typename T>(this auto & self)
+	if (ImGui::TreeNodeEx("##test"))
 	{
-		auto imp = [&]<typename T0>(T0 member)
+		auto TypeReflector = [&] <typename T>(this auto & self)
 		{
-			const std::string arg = std::string(get_display_name(member)) + ": ";
-			ImGui::PushID(arg.c_str());
-			ImGui::Columns(2);
-			ImGui::SetColumnWidth(0,200);
-			ImGui::Text(arg.data());
-			ImGui::NextColumn(); 
-			
-			Reflection::ImGuiReflect(member(aReflectedObject),arg);
-			ImGui::Columns(1);
-			ImGui::PopID();
-
-			ImGui::Indent(16.f);
-			if constexpr (Reflection::InspectorSyntaxPtr<decltype(member(aReflectedObject))>)
+			auto imp = [&]<typename T0>(T0 member)
 			{
-				member(aReflectedObject)->InspectorView();
-			}
-			if constexpr (Reflection::InspectorSyntax<decltype(member(aReflectedObject))>)
-			{
-				member(aReflectedObject).InspectorView();
-			}
+				if constexpr (Reflection::InspectorSyntaxPtr<decltype(member(aReflectedObject))>)
+				{
+					member(aReflectedObject)->InspectorView();
+					return;
+				}
+				if constexpr (Reflection::InspectorSyntax<decltype(member(aReflectedObject))>)
+				{
+					member(aReflectedObject).InspectorView();
+					return;
+				}
 
-			ImGui::Unindent(16.0f);
-
+				const std::string arg = std::string(get_display_name(member)) + ": ";
+				ImGui::PushID(arg.c_str());
+				ImGui::Columns(2);
+				ImGui::SetColumnWidth(0,200);
+				ImGui::Text(arg.data());
+				ImGui::NextColumn();
+				Reflection::ImGuiReflect(member(aReflectedObject),arg);
+				ImGui::Columns(1);
+				ImGui::PopID();
+				ImGui::Indent(16.f);
+				ImGui::Unindent(16.0f);
+			};
+			refl::util::for_each(refl::reflect<T>().members,imp);
 		};
-		refl::util::for_each(refl::reflect<T>().members,imp);
-	};
-	TypeReflector.template operator() < TypeToReflect > ();
-	ImGui::Separator();
-}
+		TypeReflector.template operator() < TypeToReflect > ();
+		ImGui::Separator();
+		ImGui::TreePop();
+	}
+};
 
 template <typename TypeToReflect>
 inline void Reflectable::Reflect(TypeToReflect& aReflectedObject)

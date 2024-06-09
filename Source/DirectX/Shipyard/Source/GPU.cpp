@@ -528,6 +528,10 @@ void GPU::ClearRTV(const CommandList& commandList,Texture* rtv,unsigned textureC
 	}
 }
 
+void GPU::ClearDepth(const CommandList& commandList,Texture* texture)
+{ 
+	GPU::ClearDepth(commandList,texture->GetHandle(ViewType::DSV).cpuPtr);
+}
 void GPU::ClearDepth(const CommandList& commandList,D3D12_CPU_DESCRIPTOR_HANDLE dsv,FLOAT depth)
 {
 	OPTICK_EVENT();

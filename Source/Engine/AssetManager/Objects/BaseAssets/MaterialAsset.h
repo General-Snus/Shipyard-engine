@@ -13,14 +13,16 @@ struct MaterialBuffer
 	float NormalStrength = 1.0f;
 	float Shine = 100.f;
 
+
+	//why default -1? Because debug layer will flip out and give us warning and thats a good thing
 	float Roughness = 1.f;
 	int albedoTexture = -1;
 	int normalTexture = -1;
 	int materialTexture = -1;
 
 	int emissiveTexture = -1;
-	unsigned int vertexOffset;
-	unsigned int vertexBufferIndex;
+	unsigned int vertexOffset = 0;
+	unsigned int vertexBufferIndex = 0;
 	float padding;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(MaterialBuffer,
@@ -40,15 +42,10 @@ public:
 		MaterialBuffer materialData;
 		std::vector<std::pair<std::filesystem::path,std::shared_ptr<TextureHolder>>> textures;
 	};
-	static bool CreateJson(const DataMaterial& data,const std::filesystem::path& pth);
-
-
+	static bool CreateJson(const DataMaterial& data,const std::filesystem::path& pth); 
 	Material(const std::filesystem::path& aFilePath); // Json path
 	void Init() override;
-	//void AddTexture(const std::filesystem::path& aFilePath);
-	//void AddTexture(const std::shared_ptr<TextureHolder> text);
-
-	void  InspectorView() override;
+	void InspectorView() override;
 
 	MaterialBuffer& GetMaterialData();
 	void Update();

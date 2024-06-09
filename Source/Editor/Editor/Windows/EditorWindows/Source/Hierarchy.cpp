@@ -7,6 +7,7 @@
 #include "ImGuiHepers.hpp"
 #include "Input/Input.hpp"
 #include "Objects/BaseAssets/TextureAsset.h"
+#include <Engine/AssetManager/ComponentSystem/Components/Transform.h>
 
 void Hierarchy::RenderImGUi()
 {
@@ -15,17 +16,26 @@ void Hierarchy::RenderImGUi()
 		ImGui::Begin("Hierarchy");
 		ImGui::Separator();
 		ImGui::BeginChild("GameObjectList");
-		for (const auto& i : gObjList)
+		for (const auto& [id,data] : gObjList)
 		{
-			if (!i.second.IsVisibleInHierarcy)
+			if (!data.IsVisibleInHierarcy)
 			{
 				continue;
 			}
-			ImGui::PushID(i.first);
+			ImGui::PushID(id);
+			auto flags = ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_OpenOnDoubleClick;
+			const auto& transform = GameObjectManager::Get().GetComponent<Transform>(id);
+
+			if (!transform.HasChildren())
 			{
-				bool arg = i.second.IsActive;
-				if (ImGui::TreeNodeEx(i.second.Name.c_str()))
+				flags |= ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_Leaf;
+			}
+
+			{
+				bool arg = data.IsActive;
+				if (ImGui::TreeNodeEx(std::format("##{}",data.Name).c_str(),flags))
 				{
+					ImGui::SameLine();
 					std::shared_ptr<TextureHolder> tex;
 					AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/GameObject.png",tex);
 					const auto height = ImGui::GetFrameHeight();
@@ -41,7 +51,7 @@ void Hierarchy::RenderImGUi()
 						{
 							auto& refSelected = Editor::GetSelectedGameObjects();
 							!Input::IsKeyHeld(Keys::SHIFT) ? refSelected.clear() : __nop();
-							refSelected.push_back(GameObjectManager::Get().GetGameObject(i.first));
+							refSelected.push_back(GameObjectManager::Get().GetGameObject(id));
 						}
 
 					}
@@ -54,7 +64,7 @@ void Hierarchy::RenderImGUi()
 					}
 
 					ImGui::PushStyleColor(ImGuiCol_Text,color);
-					ImGui::TextWrapped(i.second.Name.c_str());
+					ImGui::TextWrapped(data.Name.c_str());
 					ImGui::PopStyleColor();
 					ImGui::TreePop();
 

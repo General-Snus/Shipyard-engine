@@ -13,9 +13,9 @@ GBufferOutput main(DefaultVertexToPixel input)
 	);
 
 	const float3 cameraDirection = g_FrameBuffer.FB_CameraPosition.xyz - input.WorldPosition.xyz;
-	const float2 uv = input.UV;
+	const float2 uv = input.UV * g_defaultMaterial.UVTiling;
 
-	const float4 textureColor = textureHeap[g_defaultMaterial.AlbedoTextureIndex].Sample(defaultSampler,uv); // * g_defaultMaterial.DefaultMaterial.albedoColor;
+	const float4 textureColor = textureHeap[g_defaultMaterial.AlbedoTextureIndex].Sample(defaultSampler,uv) * g_defaultMaterial.albedoColor;
 
 	if (textureColor.a < 0.1f)
 	{
@@ -31,7 +31,7 @@ GBufferOutput main(DefaultVertexToPixel input)
 	pixelNormal.xy = ((2.0f * textureNormal.xy) - 1.0f);
 	pixelNormal.z = sqrt(1 - (pow(pixelNormal.x,2.0f) + pow(pixelNormal.y,2.0f)));
 	pixelNormal = normalize(mul(pixelNormal,TBN));
-	//pixelNormal *= g_defaultMaterial.NormalStrength;
+	pixelNormal *= g_defaultMaterial.NormalStrength;
 
 	result.Albedo = textureColor;
 

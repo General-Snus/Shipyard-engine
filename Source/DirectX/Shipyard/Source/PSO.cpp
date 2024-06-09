@@ -306,8 +306,7 @@ void Passes::WriteShadows(std::shared_ptr<CommandList>& commandList)
 {
 	OPTICK_EVENT();
 
-
-	static auto& meshRendererList = GameObjectManager::Get().GetAllComponents<cMeshRenderer>(); 
+	const auto& meshRendererList = GameObjectManager::Get().GetAllComponents<cMeshRenderer>(); 
 	const auto graphicCommandList = commandList->GetGraphicsCommandList();
 
 	const auto& shadowMapper = PSOCache::GetState(PSOCache::ePipelineStateID::ShadowMapper);
@@ -323,12 +322,12 @@ void Passes::WriteShadows(std::shared_ptr<CommandList>& commandList)
 			{
 				if (!object.IsActive()) { continue; }
 				const auto& transform = object.GetComponent<Transform>();
-				list->AllocateBuffer< ObjectBuffer>(eRootBindings::objectBuffer,{ transform.GetRawTransform() });
+				list->AllocateBuffer<ObjectBuffer>(eRootBindings::objectBuffer,{ transform.GetRawTransform() });
 				for (auto& element : object.GetElements())
 				{
 					GPU::ConfigureInputAssembler(*list,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.IndexResource);
-					materialBuffer.vertexBufferIndex = element.VertexBuffer.GetHandle(ViewType::SRV).heapOffset;
-					list->AllocateBuffer <MaterialBuffer>(eRootBindings::materialBuffer,materialBuffer);
+					materialBuffer.vertexBufferIndex = element.VertexBuffer.GetHandle(ViewType::SRV).heapOffset; 
+					list->AllocateBuffer<MaterialBuffer>(eRootBindings::materialBuffer,materialBuffer);
 					OPTICK_GPU_EVENT(debugName.data());
 					list->GetGraphicsCommandList()->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
 				}
@@ -341,7 +340,7 @@ void Passes::WriteShadows(std::shared_ptr<CommandList>& commandList)
 			list->GetGraphicsCommandList()->RSSetScissorRects(1,&shadowMap->GetRect());
 
 			list->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_DEPTH_WRITE);
-			GPU::ClearDepth(*list,shadowMap->GetHandle(ViewType::DSV).cpuPtr);
+			GPU::ClearDepth(*list,shadowMap.get());
 			list->SetRenderTargets(0,nullptr,shadowMap.get());
 			list->AllocateBuffer<FrameBuffer>(eRootBindings::frameBuffer,light.GetShadowMapFrameBuffer(map));
 

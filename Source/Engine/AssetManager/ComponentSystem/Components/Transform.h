@@ -70,16 +70,56 @@ public:
 
 	~Transform() override = default;
 	void SetGizmo(bool enabled);
-	void InitPrimitive();
-
+	void InitPrimitive(); 
 	void InspectorView() override;
+
+
+
+
+
+
+
+	//TODO All this crapp
+
+
+	std::string& GetParentName()  const;
+	void SetParent(Transform& parent);
+	void SetParent(Transform& parent,bool worldPositionStays);
+	Transform& Root() const;
+	Transform& GetParent() const;
+	Transform& Find(const std::string& nameOfChild) const;
+	Transform& FindRecursive(const std::string& nameOfChild) const; 
+	Transform& GetChild(int index) const;
+	bool HasChildren() const;
+	unsigned int GetChildCount() const;
+	std::vector<Transform&> GetAllChildren() const;
+	std::vector<Transform&> GetAllDirectChildren() const;
+
+	//Will be called from upstairs because gameobjects will also be able to create/destroy children
+	void AddChild(Transform& child);
+	void AddChildren(std::vector<Transform&>& childs);
+	void RemoveChild(Transform& child);
+	void SetChildrenActive(bool isActive) const;
+	void SetChildrenActiveRecursive(bool isActive) const;
+
+
+	bool IsChildOf(Transform& parent) const;
+	void DetachChildren() const;
+	void DetachChildren(int index) const;
+
+	//Detach from parent
+	void Detach(); 
+
 private:
+	GameObject m_Parent;
+	std::vector<GameObject> m_Children;
 
 	bool IsRecentlyUpdated;
-	bool isDirty;
-	bool isDebugGizmoEnabled;
+	bool IsDirty;
+	bool IsDebugGizmoEnabled;
 	void MakeClean();
 	void MakeSaneRotation();
+
 	Vector3<float> myPosition;
 	Vector3<float> myRotation;
 	Quaternionf myQuaternion;

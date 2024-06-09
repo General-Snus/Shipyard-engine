@@ -147,18 +147,16 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 void Mesh::InspectorView()
 {
 	ImGui::PushID(this);
-	AssetBase::InspectorView();
-	Reflect<Mesh>();
-
-
-	if (ImGui::TreeNodeEx("Elements")) // Replace with element name
+	AssetBase::InspectorView(); 
+	 
+	if (ImGui::TreeNodeEx("Material slots")) // Replace with element name
 	{
 		ImGui::Separator();
-		for (auto element : Elements)
+		for (const auto& element : Elements)
 		{
-			ImGui::Text("Element");
-			ImGui::Text("Vertex count: " + element.Vertices.size());
-			ImGui::Text("Index count: " + element.Indicies.size());
+			//ImGui::Text("Elements");
+			//ImGui::Text(std::format("Vertex count: {}",element.Vertices.size()).c_str());
+			//ImGui::Text(std::format("Index count: {}",element.Indicies.size()).c_str());
 
 			if (materials.contains(element.MaterialIndex))
 			{

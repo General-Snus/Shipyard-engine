@@ -39,5 +39,6 @@ private:
 REFL_AUTO(
 	type(Mesh,bases<AssetBase>),
 	field(MaxBox),
-	field(MinBox)
+	field(MinBox) 
+
 )

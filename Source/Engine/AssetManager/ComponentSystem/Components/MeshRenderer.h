@@ -32,6 +32,7 @@ public:
 	bool isInstanced = false;
 
 	std::shared_ptr<Mesh> m_Mesh;
+	//Meshes can have defaulted materials but the meshrenderer has the capacity to override them.
 	std::vector<std::shared_ptr<Material>> m_OverrideMaterial;
 };
 

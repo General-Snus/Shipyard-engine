@@ -154,11 +154,11 @@ void Material::InspectorView()
 
 		if (ImGui::TreeNodeEx("Textures"))
 		{
-			for (const auto& texture : data.textures)
+			for (const auto& [path,texture] : data.textures)
 			{
-				if (ImGui::TreeNodeEx(texture.first.filename().string().c_str()))
+				if (texture && ImGui::TreeNodeEx(path.filename().string().c_str()))
 				{
-					texture.second->InspectorView();
+					texture->InspectorView();
 					ImGui::TreePop();
 				}
 			}

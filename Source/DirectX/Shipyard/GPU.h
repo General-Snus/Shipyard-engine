@@ -99,6 +99,8 @@ public:
 	static void ClearRTV(const CommandList& commandList,
 		Texture* rtv,unsigned textureCount = 1);
 
+	static void ClearDepth(const CommandList& commandList,Texture* texture);
+
 	static void ClearDepth(const CommandList& commandList,
 		D3D12_CPU_DESCRIPTOR_HANDLE dsv,FLOAT depth = 0);
 

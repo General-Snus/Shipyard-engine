@@ -33,6 +33,5 @@ inline void AssetBase::InspectorView()
 	ImGui::Image(GraphicsEngine::Get().GetDefaultTexture(eTextureType::ColorMap),ImVec2(size,size),ImVec2(0,0),ImVec2(1,1),color);
 	ImGui::SameLine();
 	ImGui::Text(typeInfo.Name().c_str());
-	ImGui::Text((std::string("AssetPath: ") + AssetPath.string()).c_str());
-
+	ImGui::SameLine();
 }

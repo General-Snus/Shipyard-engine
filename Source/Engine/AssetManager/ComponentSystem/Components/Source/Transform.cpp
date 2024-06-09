@@ -5,13 +5,13 @@
 
 #include "Tools/ImGui/ImGui/imgui.h"
 
-Transform::Transform(const unsigned int anOwnerId) : Component(anOwnerId),isDirty(true)
+Transform::Transform(const unsigned int anOwnerId) : Component(anOwnerId),IsDirty(true)
 {
 	myTransform = Matrix();
 	myPosition = Vector3f();
 	myRotation = Vector3f();
 	myScale = Vector3f(1,1,1);
-	isDebugGizmoEnabled = false;
+	IsDebugGizmoEnabled = false;
 }
 
 void Transform::Init()
@@ -28,7 +28,7 @@ void Transform::Update()
 {
 	OPTICK_EVENT();
 	IsRecentlyUpdated = false;
-	if (isDirty)
+	if (IsDirty)
 	{
 		MakeClean();
 		this->GetGameObject().OnSiblingChanged(&typeid(Transform));
@@ -45,7 +45,7 @@ void Transform::MakeClean()
 		Matrix::CreateRotationAroundY(myRotation.y * DEG_TO_RAD) *
 		Matrix::CreateRotationAroundZ(myRotation.z * DEG_TO_RAD) *
 		Matrix::CreateTranslationMatrix(myPosition);
-	isDirty = false;
+	IsDirty = false;
 
 #ifdef _DEBUGDRAW 
 	DebugDrawer::Get().SetDebugPrimitiveTransform(primitive,myTransform);
@@ -61,7 +61,7 @@ void Transform::Render()
 }
 const Matrix& Transform::GetTransform()
 {
-	if (isDirty)
+	if (IsDirty)
 	{
 		MakeClean();
 		this->GetGameObject().OnSiblingChanged(&typeid(Transform));
@@ -88,7 +88,7 @@ void Transform::SetQuatF(const Quaternionf& a_Rotator)
 {
 	myQuaternion = a_Rotator;
 	myRotation = myQuaternion.GetEulerAngles();
-	isDirty = true;
+	IsDirty = true;
 }
 
 Vector3f Transform::GetForward() const
@@ -110,17 +110,17 @@ void Transform::Move(Vector2f translation)
 {
 	myPosition.x += translation.x;
 	myPosition.y += translation.y;
-	isDirty = true;
+	IsDirty = true;
 }
 void Transform::Move(Vector3f translation)
 {
 	myPosition += translation;
-	isDirty = true;
+	IsDirty = true;
 }
 void Transform::Move(float X,float Y,float Z)
 {
 	myPosition += {X,Y,Z};
-	isDirty = true;
+	IsDirty = true;
 }
 
 void Transform::SetPosition(Vector2f position)
@@ -129,17 +129,17 @@ void Transform::SetPosition(Vector2f position)
 	//myTransform(4,2) = position.y;
 	myPosition.x = position.x;
 	myPosition.y = position.y;
-	isDirty = true;
+	IsDirty = true;
 }
 void Transform::SetPosition(Vector3f position)
 {
 	myPosition = position;
-	isDirty = true;
+	IsDirty = true;
 }
 void Transform::SetPosition(float X,float Y,float Z)
 {
 	myPosition = { X,Y,Z };
-	isDirty = true;
+	IsDirty = true;
 }
 
 Vector3f Transform::GetPosition() const
@@ -159,13 +159,13 @@ void Transform::MakeSaneRotation()
 void Transform::Rotate(float X,float Y,float Z)
 {
 	myRotation += {X,Y,Z};
-	isDirty = true;
+	IsDirty = true;
 }
 void Transform::Rotate(Vector2f angularRotation)
 {
 	myRotation.x += angularRotation.x;
 	myRotation.y += angularRotation.y;
-	isDirty = true;
+	IsDirty = true;
 
 	//if(worldSpace)
 	//{
@@ -181,7 +181,7 @@ void Transform::Rotate(Vector2f angularRotation)
 void Transform::Rotate(Vector3f angularRotation)
 {
 	myRotation += angularRotation;
-	isDirty = true;
+	IsDirty = true;
 }
 
 /*
@@ -194,7 +194,7 @@ void Transform::ApplyTransformation(Matrix transformationMatrix)
 void Transform::SetScale(Vector3f scale)
 {
 	myScale = scale;
-	isDirty = true;
+	IsDirty = true;
 	//ApplyTransformation(Matrix::CreateScaleMatrix(scale));
 }
 
@@ -210,12 +210,12 @@ bool Transform::GetIsRecentlyUpdated() const
 
 bool Transform::GetIsDirty() const
 {
-	return isDirty;
+	return IsDirty;
 }
 
 void Transform::SetGizmo(bool enabled)
 {
-	isDebugGizmoEnabled = enabled;
+	IsDebugGizmoEnabled = enabled;
 	if (enabled)
 	{
 		primitive = DebugDrawer::Get().AddDebugGizmo(Vector3f(),1.0f);
@@ -230,10 +230,10 @@ void Transform::SetGizmo(bool enabled)
 void Transform::InspectorView()
 {
 	Component::InspectorView();
-	isDirty |= ImGui::DragFloat3("Position",&myPosition);
-	isDirty |= ImGui::DragFloat3("Euler angles",&myRotation);
+	IsDirty |= ImGui::DragFloat3("Position",&myPosition);
+	IsDirty |= ImGui::DragFloat3("Euler angles",&myRotation);
 	ImGui::DragFloat4("Quaternion",&myQuaternion,1,0,0,"%.4f",ImGuiSliderFlags_NoInput);
-	isDirty |= ImGui::DragFloat3("Scale",&myScale);
+	IsDirty |= ImGui::DragFloat3("Scale",&myScale);
 }
 
 void Transform::SetRotation(float X,float Y,float Z)
@@ -241,7 +241,7 @@ void Transform::SetRotation(float X,float Y,float Z)
 	myRotation = { X,Y,Z };
 
 	myQuaternion.SetEulerAngles(myRotation);
-	isDirty = true;
+	IsDirty = true;
 }
 
 void Transform::SetRotation(Vector2f angularRotation)
@@ -249,14 +249,14 @@ void Transform::SetRotation(Vector2f angularRotation)
 	myRotation.x = angularRotation.x;
 	myRotation.y = angularRotation.y;
 	myQuaternion.SetEulerAngles(myRotation);
-	isDirty = true;
+	IsDirty = true;
 }
 
 void Transform::SetRotation(Vector3f angularRotation)
 {
 	myRotation = angularRotation;
 	myQuaternion.SetEulerAngles(myRotation);
-	isDirty = true;
+	IsDirty = true;
 }
 
 void Transform::LookAt(Vector3f target)
@@ -282,14 +282,14 @@ void Transform::SetScale(float X,float Y,float Z)
 	myScale.x = X;
 	myScale.y = Y;
 	myScale.z = Z;
-	isDirty = true;
+	IsDirty = true;
 }
 
 void Transform::SetScale(Vector2f scale)
 {
 	myScale.x = scale.x;
 	myScale.y = scale.y;
-	isDirty = true;
+	IsDirty = true;
 }
 
 void Transform::SetScale(float scale)
@@ -297,6 +297,11 @@ void Transform::SetScale(float scale)
 	myScale.x = scale;
 	myScale.y = scale;
 	myScale.z = scale;
-	isDirty = true;
+	IsDirty = true;
 	//ApplyTransformation(Matrix::CreateScaleMatrix({scale,scale,scale}));
+}
+
+bool Transform::HasChildren() const
+{
+	return !m_Children.empty();
 }
