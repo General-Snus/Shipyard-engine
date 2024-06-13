@@ -3,7 +3,8 @@
 #include <iostream>
 #include <unordered_map>
 #include <vector>
-#include "UUID.h" 
+#include "UUID.h"
+#include <Tools/Logging/Logging.h>
 
 class Component;
 class ComponentManagerBase
@@ -187,13 +188,12 @@ void ComponentManager<T>::DeleteGameObject(const SY::UUID aGameObjectID)
 	//std::swap(myComponents[index],myComponents[myComponents.size() - 1]); // Swap the last component with the component to remove (cyclic remove)
 
 
-	std::cout << "Removed " << typeid(T).name() << " at id: " << std::to_string(id) + "\n";
+	Logger::Log(std::format("Removed {} at id: {}\n",typeid(T).name(),id));
 	myComponents.pop_back();										// Remove the newly last component (the component to remove)
 
 	myGameObjectIDtoVectorIndex[id] = index;						// Change the previously last game object to refer to the new component index
 	myVectorIndexToGameObjectID[index] = id;						// Change the index to refer to the game object
-
-	// TODO: vvv THESE
+	 
 	myVectorIndexToGameObjectID.erase(myVectorIndexToGameObjectID.at(static_cast<unsigned int>(myComponents.size())));// Remove the removed component from the game object id list
 	myGameObjectIDtoVectorIndex.erase(it->first);					// Remove the removed game object id from the component list
 }

@@ -19,7 +19,7 @@
 bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared_ptr<Texture>& aBackBuffer,const std::shared_ptr<Texture>& aDepthBuffer
 	,uint32_t width,uint32_t height)
 {
-	aWindowHandle; enableDeviceDebug; m_BackBuffer = aBackBuffer; m_DepthBuffer = aDepthBuffer;
+	m_BackBuffer = aBackBuffer; m_DepthBuffer = aDepthBuffer;
 
 	m_Height = height;
 	m_Width = width;
@@ -74,8 +74,7 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 
 	ComPtr<IDXGIAdapter1> hardwareAdapter;
 	if (m_useWarpDevice)
-	{/*
-		ComPtr<IDXGIAdapter> warpAdapter;*/
+	{
 		if (FAILED(factory->EnumWarpAdapter(IID_PPV_ARGS(&hardwareAdapter))))
 		{
 			Logger::Err("Failed to get warp adapter");
@@ -130,21 +129,12 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 			return false;
 		}
 	}
+
 	D3D12_FEATURE_DATA_D3D12_OPTIONS featureSupport{};
 	Helpers::ThrowIfFailed(
 		m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS,&featureSupport,sizeof(featureSupport))
 	);
-
-	featureSupport;
-
-	//ComPtr<ID3D12InfoQueue> pInfoQueue;
-	//if (SUCCEEDED(m_Device.As(&pInfoQueue)))
-	//{
-	//	pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION,TRUE);
-	//	pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR,TRUE);
-	//	pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING,TRUE);
-	//}
-
+	 
 	m_GraphicsMemory = std::make_shared<DirectX::DX12::GraphicsMemory>(m_Device.Get());
 
 
@@ -171,20 +161,15 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 		D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
 		2048
 	);
-	
+
 	m_HeapSizes[static_cast<int>(eHeapTypes::HEAP_TYPE_DSV)] = 2048;
 	m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_DSV)] = std::make_unique<DescriptorPile>(
 		m_Device.Get(),
 		D3D12_DESCRIPTOR_HEAP_TYPE_DSV,
 		D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
 		2048
-	); 
-
-	ComPtr<ID3D12DebugDevice1> pDebugQueue;
-	if (SUCCEEDED(m_Device.As(&pDebugQueue)))
-	{
-	}
-
+	);
+	 
 	m_DirectCommandQueue->Create(m_Device,D3D12_COMMAND_LIST_TYPE_DIRECT);
 	m_CopyCommandQueue->Create(m_Device,D3D12_COMMAND_LIST_TYPE_COPY);
 	m_ComputeCommandQueue->Create(m_Device,D3D12_COMMAND_LIST_TYPE_COMPUTE);
@@ -333,7 +318,7 @@ void GPU::UpdateBufferResource(
 
 void GPU::ConfigureInputAssembler(
 	CommandList& commandList,D3D_PRIMITIVE_TOPOLOGY topology,IndexResource& indexResource)
-{ 
+{
 	commandList.GetGraphicsCommandList()->IASetPrimitiveTopology(topology);
 	commandList.TransitionBarrier(indexResource,D3D12_RESOURCE_STATE_INDEX_BUFFER);
 	const auto& indexView = indexResource.GetIndexBufferView();
@@ -343,7 +328,7 @@ void GPU::ConfigureInputAssembler(
 
 HeapHandle GPU::GetHeapHandle(eHeapTypes type)
 {
-	const int heapOffset = static_cast<int>(m_ResourceDescriptors[static_cast<int>(type)]->Allocate());
+	const auto heapOffset = static_cast<int>(m_ResourceDescriptors[static_cast<int>(type)]->Allocate());
 	const auto descriptorHandleCPU = m_ResourceDescriptors[static_cast<int>(type)]->GetCpuHandle(heapOffset);
 	auto descriptorHandleGPU = D3D12_GPU_DESCRIPTOR_HANDLE();
 
@@ -368,13 +353,6 @@ bool GPU::CreateIndexBuffer(const std::shared_ptr<CommandList>& commandList,Inde
 	const DXGI_FORMAT indexFormat = (sizeof(uint32_t) == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
 	const size_t indexSizeInBytes = indexFormat == DXGI_FORMAT_R16_UINT ? 2 : 4;
 	commandList->CopyBuffer(outIndexResource,aIndexList.size(),indexSizeInBytes,aIndexList.data());
-	return true;
-}
-
-
-bool GPU::CreateDepthStencil(const D3D12_DEPTH_STENCIL_DESC& depthStencilDesc)
-{
-	depthStencilDesc;
 	return true;
 }
 
@@ -414,7 +392,7 @@ void GPU::ResizeDepthBuffer(unsigned width,unsigned height)
 }
 
 bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName,bool generateMips)
-{ 
+{
 	if (!std::filesystem::is_regular_file(aFileName) || aFileName.extension() != ".dds" && aFileName.extension() != ".png")
 	{
 		const std::string error = "Failed to load texture: " + aFileName.string() + " does not exist!";
@@ -452,7 +430,7 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 	{
 		const std::string msg = "Failed to load mips of shader that wanted a mipmap " + aFileName.filename().string();
 		Logger::Warn(msg);
-	} 
+	}
 
 	outTexture->isCubeMap = isCubeMap;
 	const auto uploadResourcesFinished = resourceUpload.End(m_DirectCommandQueue->GetCommandQueue().Get());
@@ -529,7 +507,7 @@ void GPU::ClearRTV(const CommandList& commandList,Texture* rtv,unsigned textureC
 }
 
 void GPU::ClearDepth(const CommandList& commandList,Texture* texture)
-{ 
+{
 	GPU::ClearDepth(commandList,texture->GetHandle(ViewType::DSV).cpuPtr);
 }
 void GPU::ClearDepth(const CommandList& commandList,D3D12_CPU_DESCRIPTOR_HANDLE dsv,FLOAT depth)
@@ -546,7 +524,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE GPU::GetCurrentRenderTargetView()
 
 Texture* GPU::GetCurrentBackBuffer()
 {
-	return &m_renderTargets[m_FrameIndex];//todo fix fixed
+	return &m_renderTargets[m_FrameIndex];
 }
 
 ComPtr<ID3D12DescriptorHeap>  GPU::CreateDescriptorHeap(const ComPtr<ID3D12Device>& device,D3D12_DESCRIPTOR_HEAP_TYPE type,uint32_t numDescriptors,D3D12_DESCRIPTOR_HEAP_FLAGS flags)
@@ -638,7 +616,7 @@ void GPU::UpdateRenderTargetViews(const ComPtr<ID3D12Device>& device,const ComPt
 void GPU::GetHardwareAdapter(IDXGIFactory4* pFactory,IDXGIAdapter1** ppAdapter,bool requestHighPerformanceAdapter)
 {
 	OPTICK_EVENT();
-	pFactory; ppAdapter; requestHighPerformanceAdapter;
+	requestHighPerformanceAdapter;
 
 	*ppAdapter = nullptr;
 	for (UINT adapterIndex = 0; ; ++adapterIndex)
@@ -646,12 +624,9 @@ void GPU::GetHardwareAdapter(IDXGIFactory4* pFactory,IDXGIAdapter1** ppAdapter,b
 		IDXGIAdapter1* pAdapter = nullptr;
 		if (DXGI_ERROR_NOT_FOUND == pFactory->EnumAdapters1(adapterIndex,&pAdapter))
 		{
-			// No more adapters to enumerate.
 			break;
 		}
 
-		// Check to see whether the adapter supports Direct3D 12, but don't create the
-		// actual device yet.
 		if (SUCCEEDED(D3D12CreateDevice(pAdapter,D3D_FEATURE_LEVEL_11_0,_uuidof(ID3D12Device),nullptr)))
 		{
 			*ppAdapter = pAdapter;

@@ -11,9 +11,8 @@ class Transform : public Component
 {
 public:
 	MYLIB_REFLECTABLE();
-	Transform() = delete; // Create a generic cube
-	Transform(const unsigned int anOwnerId); // Create a generic cube 
-	//Transform(const unsigned int anOwnerId,const Matrix& aMatrix);
+	Transform() = delete;
+	Transform(const unsigned int anOwnerId);
 
 	void Init() override;
 	void Update() override;
@@ -128,35 +127,6 @@ private:
 	Matrix4x4<float> myTransform;
 	Matrix4x4<float> myWorldSpaceTransform;
 	DebugDrawer::PrimitiveHandle primitive;
-
-	/*
-
-*  ALL IN RADIANS FOR NOW, HEADER FOR CONVERTIONS CONST
-
-void LookAt
-void GetEulerAxis
-void SetRotatation
-void
-
-void SetPosition
-GetPosition
-
-
-GetScale
-//Rotate aroundpoint
-void SetParent(Transform)
-GetParent
-void SetChild(Transform)
-GetChild
-GetChilds
-GetLocalToWorldMatrix
-GetWorldToLocalMatrix
-
-void ChangePrecision(base10)
-void ChangeMeterScale(set);
-
-*/
-
 };
 
 

@@ -8,16 +8,15 @@
 #include "DirectX/Shipyard/Texture.h"
 
 
-cLight::cLight(const unsigned int anOwnerId) : Component(anOwnerId),isDirty(true)
+cLight::cLight(const unsigned int anOwnerId) : Component(anOwnerId)
 {
 	myLightType = eLightType::uninitialized;
 	shadowMap[0] = std::make_shared<Texture>();
 	SetIsShadowCaster(true);
 }
 
-cLight::cLight(const unsigned int anOwnerId,const eLightType type) : Component(anOwnerId)
+cLight::cLight(const unsigned int anOwnerId,const eLightType type) : Component(anOwnerId),myLightType(type)
 {
-	myLightType = type;
 	shadowMap[0] = std::make_shared<Texture>();
 	switch (myLightType)
 	{
@@ -452,11 +451,11 @@ void cLight::Update()
 		{
 			using enum eLightType;
 		case Directional:
-			RedrawDirectionMap(); 
+			RedrawDirectionMap();
 			myDirectionLightData->Power = std::max(0.0f,myDirectionLightData->Power);
 			break;
 		case Point:
-			RedrawPointMap(); 
+			RedrawPointMap();
 			myPointLightData->Power = std::max(0.0f,myPointLightData->Power);
 			myPointLightData->Range = std::max(0.0f,myPointLightData->Range);
 			break;
@@ -465,7 +464,7 @@ void cLight::Update()
 			mySpotLightData->InnerConeAngle = std::clamp(mySpotLightData->InnerConeAngle,0.f,mySpotLightData->OuterConeAngle);
 			mySpotLightData->OuterConeAngle = std::clamp(mySpotLightData->OuterConeAngle,mySpotLightData->InnerConeAngle,360.f);
 			mySpotLightData->Power = std::max(0.0f,mySpotLightData->Power);
-			mySpotLightData->Range = std::max(0.0f,mySpotLightData->Range); 
+			mySpotLightData->Range = std::max(0.0f,mySpotLightData->Range);
 			break;
 		case uninitialized:
 			break;
@@ -532,11 +531,10 @@ void cLight::RedrawShadowMap()
 void cLight::RedrawDirectionMap()
 {
 	OPTICK_EVENT();
-	//TODO GET ACTIVE SCENE
-	constexpr float radius = 50;//ModelViewer::Get().GetWorldBounds().GetRadius();
+	constexpr float radius = 50;
 	myDirectionLightData->Direction.Normalize();
 
-	const Vector3f worldCenter = Vector3f();//GameObjectManager::Get().GetCamera().GetComponent<Transform>().GetPosition();
+	const Vector3f worldCenter = {};
 	const Vector3f lightPosition = radius * 5.0f * -Vector3f(myDirectionLightData->Direction.x,myDirectionLightData->Direction.y,myDirectionLightData->Direction.z);
 	myDirectionLightData->lightView = Matrix::LookAt(lightPosition,worldCenter,{ 0,1,0 }); // REFACTOR, Magic value up
 
@@ -672,18 +670,19 @@ void cLight::InspectorView()
 {
 	Component::InspectorView();
 	Reflect<cLight>();
-
-	switch (myLightType) {
-	case eLightType::Directional:
+	using enum eLightType;
+	switch (myLightType)
+	{
+	case Directional:
 		Reflect<DirectionalLight>(*myDirectionLightData);
 		break;
-	case eLightType::Point:
+	case Point:
 		Reflect<PointLight>(*myPointLightData);
 		break;
-	case eLightType::Spot:
+	case Spot:
 		Reflect<SpotLight>(*mySpotLightData);
 		break;
-	case eLightType::uninitialized:
+	case uninitialized:
 		break;
 	}
 }

@@ -9,14 +9,15 @@
 
 GameObjectManager::~GameObjectManager()
 {
-	for (auto& cm : myComponentManagers)
+	for (auto& [key,cm] : myComponentManagers  )
 	{
-		cm.second->Destroy();
-		delete cm.second;
+		cm->Destroy();
+		delete cm;
+		myComponentManagers.erase(key);
 	}
 }
 
-const GameObject GameObjectManager::CreateGameObject()
+GameObject GameObjectManager::CreateGameObject()
 {
 	GameObjectData data;
 	data.IsActive = true;
@@ -28,7 +29,7 @@ const GameObject GameObjectManager::CreateGameObject()
 }
 
 //ILLEGAL
-const GameObject GameObjectManager::CreateGameObjectAt(const SY::UUID aGameObjectID)
+GameObject GameObjectManager::CreateGameObjectAt(const SY::UUID aGameObjectID)
 {
 	if (aGameObjectID > myLastID)
 	{
@@ -66,16 +67,19 @@ Layer GameObjectManager::GetLayer(const SY::UUID aGameObjectID)
 
 GameObject GameObjectManager::GetPlayer()
 {
+	assert(myPlayer != 0 && "GameObjectManager: Player not set yet!");
 	return GameObject(myPlayer,this);
 }
 
 GameObject GameObjectManager::GetWorldRoot()
 {
+	assert(myWorldRoot != 0 && "GameObjectManager: WorldRoot not set yet!");
 	return GameObject(myWorldRoot,this);
 }
 
 GameObject GameObjectManager::GetCamera()
 {
+	assert(myCamera != 0 && "GameObjectManager: Camera not set yet!");
 	return GameObject(myCamera,this);
 }
 
@@ -86,16 +90,16 @@ GameObject GameObjectManager::GetGameObject(SY::UUID anID)
 		return GameObject(anID,this);
 	}
 
-	//assert(false && "GameObjectManager tried to get a GameObject that doesn't exist yet! Create your GameObject first before trying to get it.");
+	assert(false && "GameObjectManager tried to get a GameObject that doesn't exist yet! Create your GameObject first before trying to get it."); 
 	return GameObject();
 }
 
 void GameObjectManager::CollidedWith(const SY::UUID aFirstID,const SY::UUID aTargetID)
 {
 	OPTICK_EVENT();
-	for (auto& cm : myComponentManagers)
+	for (auto& cm : myComponentManagers | std::views::values)
 	{
-		cm.second->CollidedWith(aFirstID,aTargetID);
+		cm->CollidedWith(aFirstID,aTargetID);
 	}
 }
 

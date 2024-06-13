@@ -661,7 +661,7 @@ void ScriptGraphEditor::RenderNode(const ScriptGraphNode* aNode)
 
 		ImDrawList* nodeDrawList = ImNodeEd::GetNodeBackgroundDrawList(uidAwareBase->GetUID());
 
-		const ImTextureID nodeTextureId = (void*)myNodeHeaderTexture->GetHandle(ViewType::SRV).cpuPtr.ptr;
+		const auto nodeTextureId = (void*)myNodeHeaderTexture->GetHandle(ViewType::SRV).cpuPtr.ptr;
 		nodeDrawList->AddImageRounded(nodeTextureId,
 			nodeHeader.Min,
 			nodeHeader.Max,

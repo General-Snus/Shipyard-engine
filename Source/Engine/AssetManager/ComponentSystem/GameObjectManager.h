@@ -47,8 +47,8 @@ private:
 public:
 	GameObjectManager() = default;
 	~GameObjectManager();
-	const GameObject CreateGameObject();
-	const GameObject CreateGameObjectAt(const SY::UUID aGameObjectID);
+	GameObject CreateGameObject();
+	GameObject CreateGameObjectAt(const SY::UUID aGameObjectID);
 	void DeleteGameObject(const SY::UUID aGameObjectID);
 	void DeleteGameObject(const GameObject aGameObject);
 
@@ -122,10 +122,10 @@ private:
 	std::vector<std::pair<const std::type_info*,ComponentManagerBase*>> myUpdateOrder = { };
 	std::vector<SY::UUID> myObjectsToDelete = { };
 	std::vector<SY::UUID> myObjectsToAdd = { };
-	unsigned int myLastID = 0;
-	unsigned int myWorldRoot;
-	unsigned int myPlayer;
-	unsigned int myCamera;
+	unsigned int myLastID = 1;
+	unsigned int myWorldRoot{};
+	unsigned int myPlayer{};
+	unsigned int myCamera{};
 };
 
 template<class T>

@@ -74,36 +74,13 @@ protected:
 	ComPtr<ID3D12Resource> m_Resource;
 	D3D12_FEATURE_DATA_FORMAT_SUPPORT m_FormatSupport;
 };
-
-
-
-class UAVResource : public GpuResource
-{
-public:
-	UAVResource() = default;
-	explicit UAVResource(std::wstring name);
-
-	void CreateView(size_t numElements);
-	D3D12_CPU_DESCRIPTOR_HANDLE GetHandle(unsigned offset) const
-	{
-		return { m_Handle.ptr + (bufferSize * offset) };;
-	}
-	unsigned GetAllocatedElements() const
-	{
-		return m_AllocatedElements;
-	}
-
-private:
-	D3D12_CPU_DESCRIPTOR_HANDLE m_Handle;
-	unsigned m_AllocatedElements;
-	const size_t bufferSize;
-};
+ 
 
 class IndexResource : public GpuResource
 {
 public:
-	IndexResource() = default;
-	explicit IndexResource(std::filesystem::path name);
+	IndexResource();
+	explicit IndexResource(const std::filesystem::path& name);
 
 	uint32_t GetIndexCount() const { return m_NumIndices; }
 	DXGI_FORMAT GetFormat() const { return m_IndexFormat; }

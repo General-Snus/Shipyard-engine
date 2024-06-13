@@ -1,5 +1,4 @@
 #pragma once
-
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"DirectXTK12.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -39,7 +38,7 @@ public:
 	void Create(HWND hwnd,ComPtr<ID3D12CommandQueue>,UINT Width,UINT Height,UINT bufferCount);
 	void Present();
 	ComPtr<IDXGISwapChain4> m_SwapChain;
-	DXGI_SWAP_CHAIN_DESC1 m_Desc;
+	DXGI_SWAP_CHAIN_DESC1 m_Desc{};
 };
 
 
@@ -78,8 +77,7 @@ public:
 		const std::shared_ptr<CommandList>& commandList,
 		IndexResource& outIndexResource,
 		const std::vector<uint32_t>& aIndexList
-	);
-	static bool CreateDepthStencil(const D3D12_DEPTH_STENCIL_DESC& depthStencilDesc);
+	); 
 
 	static void ResizeDepthBuffer(unsigned width,unsigned height);
 
@@ -131,7 +129,7 @@ public:
 	static void  setAftermathEventMarker(const std::string& markerData,bool appManagedMarker);
 	static std::string  createMarkerStringForFrame(const char* markerString);
 #endif
-	static inline constexpr UINT m_FrameCount = 2;
+	static constexpr UINT m_FrameCount = 2;
 	static inline constexpr bool m_useWarpDevice = false;
 	static inline UINT m_FrameIndex;
 
@@ -143,7 +141,7 @@ public:
 	static inline std::shared_ptr<GPUCommandQueue> m_ComputeCommandQueue;
 
 	static inline std::unique_ptr<GPUSwapchain> m_Swapchain;
-	static inline ComPtr<ID3D12CommandAllocator> m_CommandAllocators[m_FrameCount];
+	static inline std::array<ComPtr<ID3D12CommandAllocator>,m_FrameCount> m_CommandAllocators;
 	static inline Texture m_renderTargets[m_FrameCount];
 
 

@@ -6,8 +6,7 @@
 
 class GameObject
 {
-public:
-	//Todo REMOVE
+public: 
 	GameObject() = default; // It's dangerous to create a gameobject without the manager!
 	~GameObject() = default;
 

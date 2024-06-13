@@ -24,13 +24,13 @@ public:
 	void ProccessInFlightCommandLists();
 	void Flush();
 
-	void Wait(const GPUCommandQueue& other);
+	void Wait(const GPUCommandQueue& other) const;
 
 private:
 	using CommandListEntry = std::tuple<uint64_t,std::shared_ptr<CommandList> >;
 
 	ComPtr<ID3D12Device> m_Device;
-	D3D12_COMMAND_LIST_TYPE m_CommandListType;
+	D3D12_COMMAND_LIST_TYPE m_CommandListType{};
 	ComPtr<ID3D12CommandQueue> m_CommandQueue;
 	ComPtr<ID3D12Fence> m_Fence;
 	std::atomic_uint64_t m_FenceValue;
@@ -39,7 +39,7 @@ private:
 	ThreadSafeQueue<CommandListEntry> m_InFlightCommandLists;
 	ThreadSafeQueue<std::shared_ptr<CommandList>> m_AvailableCommandLists;
 	 
-	std::thread m_ProcessInFlightCommandListsThread;
+	std::jthread m_ProcessInFlightCommandListsThread;
 	std::atomic_bool m_bProcessInFlightCommandLists;
 	std::mutex m_ProcessInFlightCommandListsThreadMutex;
 	std::condition_variable m_ProcessInFlightCommandListsThreadCV;

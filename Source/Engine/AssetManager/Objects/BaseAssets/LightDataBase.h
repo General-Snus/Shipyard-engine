@@ -7,7 +7,7 @@ struct alignas(16) SpotLight : Reflectable
 {
 private:
 	MYLIB_REFLECTABLE();
-	int64_t alignment;
+	int64_t alignment{};
 public:
 	Vector3f Color = { 1,1,1 };
 	float Power = 15;
@@ -22,10 +22,10 @@ public:
 	int shadowMapIndex = -1;
 
 	alignas(4) bool castShadow = true;;
-	int32_t padding8bytes;
+	int32_t padding8bytes{};
 
-	Matrix lightView;
-	Matrix projection; 
+	Matrix lightView{};
+	Matrix projection{};
 };
 
 REFL_AUTO(
@@ -58,7 +58,7 @@ struct alignas(16) PointLight : Reflectable
 { 
 private:
 	MYLIB_REFLECTABLE();	
-	int64_t alignment;
+	int64_t alignment{};
 public:
 	Vector3f Color = { 1,1,1 };
 	float Power = 10;
@@ -71,8 +71,8 @@ public:
 
 	alignas(4) bool castShadow = true; 
 private:
-	int32_t alignment8;
-	int64_t alignment16;
+	int32_t alignment8{};
+	int64_t alignment16{};
 public:
 	aligned_int shadowMapIndex[6] = {-1,-1 ,-1 ,-1 ,-1 ,-1 };
 
@@ -90,18 +90,18 @@ struct alignas(16) DirectionalLight : Reflectable
 {
 private:
 	MYLIB_REFLECTABLE();
-	int64_t alignment;
+	int64_t alignment{};
 public:
 	Vector3f Color = { 1,1,1 };
 	float Power = 5; // watt 
 	Vector4f Direction = { 0,0,1,1 }; 
-	Matrix lightView;
-	Matrix projection; 
+	Matrix lightView{};
+	Matrix projection{}; 
 
 	int shadowMapIndex = -1;
 	alignas(4) bool castShadow = true;
 private: 
-	int64_t alignment8;
+	int64_t alignment8{};
 };
 
 REFL_AUTO(

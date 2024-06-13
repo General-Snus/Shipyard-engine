@@ -5,7 +5,7 @@
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 
 //TODO FIX THIS WITH EDITOR SETTINGS??
-static inline std::string tonemaps[5] = {
+static inline std::array<std::string,5> tonemaps = {
 	"No tonemap",
 	"Tonemap_Reinhard2",
 	"Tonemap_UnrealEngine",

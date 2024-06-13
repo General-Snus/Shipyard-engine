@@ -8,18 +8,22 @@
 
 void Window::Init(const WinInitSettings& init)
 {
-	//FILE* consoleOut;
-	//AllocConsole();
-	//freopen_s(&consoleOut,"CONOUT$","w",stdout);
-	//freopen_s(&consoleOut, "CONOUT$", "w",stderr);
-	//setvbuf(consoleOut,nullptr,_IONBF,1024);
 
-	//HWND consoleWindow = GetConsoleWindow();
-	//RECT consoleSize;
-	//GetWindowRect(consoleWindow,&consoleSize);
-	//MoveWindow(consoleWindow,consoleSize.left,consoleSize.top,1280,720,true);
-	//
-	//MoveConsoleToOtherMonitor();
+#if false // Allocate console  
+	FILE* consoleOut;
+	AllocConsole();
+	freopen_s(&consoleOut,"CONOUT$","w",stdout);
+	freopen_s(&consoleOut, "CONOUT$", "w",stderr);
+	setvbuf(consoleOut,nullptr,_IONBF,1024);
+
+	HWND consoleWindow = GetConsoleWindow();
+	RECT consoleSize;
+	GetWindowRect(consoleWindow,&consoleSize);
+	MoveWindow(consoleWindow,consoleSize.left,consoleSize.top,1280,720,true);
+	
+	MoveConsoleToOtherMonitor();
+#endif 
+
 	moduleHandler = init.hInstance;
 
 	constexpr LPCWSTR windowClassName = L"ShipyardEditorWindow";
@@ -53,9 +57,9 @@ void Window::Init(const WinInitSettings& init)
 	HRESULT hr = CoInitializeEx(nullptr,COINIT_MULTITHREADED);
 	if (FAILED(hr))
 	{
+		Logger::Err("Failed to initialize COM");
 		return;
-	}
-	//TODO error repport on fail
+	} 
 }
 
 bool Window::Update()

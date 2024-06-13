@@ -9,7 +9,7 @@
 //Credited for work: Daniel Borghammar & Simon Nilsson 
 struct DebugVertex
 {
-	DebugVertex() : Position(0,0,0,0),Color(0,0,0,0) {};
+	DebugVertex() {};
 	DebugVertex(Vector3f aPosition,Vector4f aColor = { 1.f,0.f,0.f,1.0f }) : Position(aPosition.x,aPosition.y,aPosition.z,1),Color(aColor.x,aColor.y,aColor.z,aColor.w) {};
 	Vector4f Position = { 0,0,0,0 };
 	Vector4f Color = { 0,0,0,0 };

@@ -27,10 +27,9 @@ private:
 	std::unordered_map<unsigned int,std::shared_ptr<Material>> materials;
 	std::unordered_map<unsigned int,std::filesystem::path> idToMaterial;
 
-	ComPtr<ID3D12Resource> myInstanceBuffer;//TODO unique id meshrender if dirty remake? 
-	//D3D12_vertexBUFFER_DESC vertexBufferDesc{};
-	std::vector<Matrix> myInstances;
-	int bufferSize;
+	ComPtr<ID3D12Resource> myInstanceBuffer{};
+	std::vector<Matrix> myInstances{};
+	int bufferSize{};
 	void processMesh(aiMesh* mesh,const aiScene* scene);
 	void ResizeBuffer();
 	void UpdateInstanceBuffer();

@@ -62,15 +62,15 @@ public:
 };
 
 inline std::mt19937_64& RandomEngine::engineInstance()
-{/*
-	std::seed_seq seed(
+{ 
+	/*std::seed_seq seed(
 		{
 			Timer::GetInstance().GetTotalTime(),
 			Timer::GetInstance().GetTotalTime()
 		}
-	);*/
+	); */
 
-	static std::mt19937_64 engine = std::mt19937_64();
+	static auto engine = std::mt19937_64();
 	return engine;
 }
 template<class T>
@@ -298,9 +298,9 @@ INLINE XMVECTOR SetWToOne(FXMVECTOR vec) { return XMVectorSelect(g_XMIdentityR3,
 
 #endif
 
-enum EZeroTag { kZero,kOrigin };
-enum EIdentityTag { kOne,kIdentity };
-enum EXUnitVector { kXUnitVector };
-enum EYUnitVector { kYUnitVector };
-enum EZUnitVector { kZUnitVector };
-enum EWUnitVector { kWUnitVector };
+enum class EZeroTag { kZero,kOrigin };
+enum class EIdentityTag { kOne,kIdentity };
+enum class EXUnitVector { kXUnitVector };
+enum class EYUnitVector { kYUnitVector };
+enum class EZUnitVector { kZUnitVector };
+enum class EWUnitVector { kWUnitVector };

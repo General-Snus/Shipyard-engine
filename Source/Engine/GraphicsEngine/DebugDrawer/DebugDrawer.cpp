@@ -543,9 +543,9 @@ DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugGrid(const Vector3f& aCenter,c
 
 	DebugVertex vertex(Vector3f(),Vector4f(aColor,1.0f));
 
-	float offset = (anExtent * 2.f) / someNumCells;
+	float offset = (anExtent * 2.f) / static_cast<float>(someNumCells);
 
-	Vector4f aStartPos = Vector4f(aCenter.x,aCenter.y,aCenter.z,1.0f);
+	auto aStartPos = Vector4f(aCenter.x,aCenter.y,aCenter.z,1.0f);
 	aStartPos.x -= anExtent;
 	aStartPos.z -= anExtent;
 	Vector4f anEndPos = aStartPos;

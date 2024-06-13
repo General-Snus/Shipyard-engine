@@ -36,9 +36,12 @@ bool GPUCommandQueue::Create(const ComPtr<ID3D12Device>& device,D3D12_COMMAND_LI
 	case D3D12_COMMAND_LIST_TYPE_DIRECT:
 		m_CommandQueue->SetName(L"Direct Command Queue");
 		break;
+	default:
+		assert(false && "Invalid command list type.");
+		break;
 	}
 
-	m_ProcessInFlightCommandListsThread = std::thread(&GPUCommandQueue::ProccessInFlightCommandLists,this);
+	m_ProcessInFlightCommandListsThread = std::jthread(&GPUCommandQueue::ProccessInFlightCommandLists,this);
 	return true;
 }
 
@@ -207,7 +210,7 @@ void GPUCommandQueue::Flush()
 	WaitForFenceValue(m_FenceValue);
 }
 
-void GPUCommandQueue::Wait(const GPUCommandQueue& other)
+void GPUCommandQueue::Wait(const GPUCommandQueue& other) const
 {
 	m_CommandQueue->Wait(other.m_Fence.Get(),other.m_FenceValue);
 }

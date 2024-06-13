@@ -243,7 +243,7 @@ void GpuResource::ClearView(ViewType view)
 HeapHandle GpuResource::GetHandle(ViewType type)
 {
 	OPTICK_EVENT();
-	if (m_DescriptorHandles.find(type) != m_DescriptorHandles.end() && m_DescriptorHandles.at(type).heapOffset != -1)
+	if (m_DescriptorHandles.contains(type) && m_DescriptorHandles.at(type).heapOffset != -1)
 	{
 		return  m_DescriptorHandles.at(type);
 	}
@@ -254,7 +254,7 @@ HeapHandle GpuResource::GetHandle(ViewType type)
 HeapHandle GpuResource::GetHandle(ViewType type) const
 {
 	OPTICK_EVENT();
-	if (m_DescriptorHandles.find(type) != m_DescriptorHandles.end() && m_DescriptorHandles.at(type).heapOffset != -1)
+	if (m_DescriptorHandles.contains(type) && m_DescriptorHandles.at(type).heapOffset != -1)
 	{
 		return  m_DescriptorHandles.at(type);
 	}
@@ -337,15 +337,11 @@ void GpuResource::CheckFeatureSupport()
 	}
 }
 
-void UAVResource::CreateView(size_t numElements)
+IndexResource::IndexResource() : GpuResource(),m_NumIndices(0),m_IndexFormat(DXGI_FORMAT_UNKNOWN)
 {
-	numElements;
-	//size_t end;
-	//m_AllocatedElements = numElements;
-	//GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->AllocateRange(numElements,,end);
 }
 
-IndexResource::IndexResource(std::filesystem::path name)
+IndexResource::IndexResource(const std::filesystem::path& name) : GpuResource(),m_NumIndices(0),m_IndexFormat(DXGI_FORMAT_UNKNOWN) 
 {
 	m_ResourceName = name;
 }

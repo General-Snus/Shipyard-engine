@@ -8,11 +8,9 @@
 
 
 
-Mesh::Mesh(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)
+Mesh::Mesh(const std::filesystem::path& aFilePath) : AssetBase(aFilePath),bufferSize(0)
 {
-
 }
-
 const std::unordered_map<unsigned int,std::shared_ptr<Material>>& Mesh::GetMaterialList()
 {
 	return materials;
@@ -147,17 +145,13 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 void Mesh::InspectorView()
 {
 	ImGui::PushID(this);
-	AssetBase::InspectorView(); 
-	 
+	AssetBase::InspectorView();
+
 	if (ImGui::TreeNodeEx("Material slots")) // Replace with element name
 	{
 		ImGui::Separator();
 		for (const auto& element : Elements)
-		{
-			//ImGui::Text("Elements");
-			//ImGui::Text(std::format("Vertex count: {}",element.Vertices.size()).c_str());
-			//ImGui::Text(std::format("Index count: {}",element.Indicies.size()).c_str());
-
+		{ 
 			if (materials.contains(element.MaterialIndex))
 			{
 				materials.at(element.MaterialIndex)->InspectorView();
@@ -177,151 +171,7 @@ void Mesh::Init()
 	{
 		assert(false && "Mesh file does not exist");
 	}
-#if UseTGAImporter == 1
 
-	TGA::FBX::Importer::InitImporter();
-	TGA::FBX::Mesh inMesh;
-
-	if (TGA::FBX::Importer::LoadMeshW(AssetPath,inMesh))
-	{
-		float scalar = 0.01f;//TODO Scaling
-		Vector3f greatestExtent = {
-			std::abs(inMesh.BoxSphereBounds.Center[0] - inMesh.BoxSphereBounds.BoxExtents[0]) * scalar,//TODO Scaling
-			std::abs(inMesh.BoxSphereBounds.Center[1] - inMesh.BoxSphereBounds.BoxExtents[1]) * scalar,
-			std::abs(inMesh.BoxSphereBounds.Center[2] - inMesh.BoxSphereBounds.BoxExtents[2]) * scalar
-		};
-
-		float radius = 0;
-		for (int i = 0; i < 3; ++i)
-		{
-			if (radius < greatestExtent[i])
-			{
-				radius = greatestExtent[i];
-			}
-		}
-
-		boxSphereBounds = Sphere<float>(
-			{
-				inMesh.BoxSphereBounds.Center[0] * scalar,
-				inMesh.BoxSphereBounds.Center[1] * scalar,//TODO Scaling
-				inMesh.BoxSphereBounds.Center[2] * scalar
-			},
-			radius * scalar
-		);
-
-		Editor::GetEditor().ExpandWorldBounds(boxSphereBounds); // TODO Make a scene contain the boxSphereBounds!!
-		std::vector<Vertex> mdlVertices;
-		std::vector<unsigned int> mdlIndicies;
-
-		for (const auto& element : inMesh.Elements)
-		{
-			for (const auto& vert : element.Vertices)
-			{
-				auto position = Vector3f(
-					vert.Position[0] * scalar,
-					vert.Position[1] * scalar,
-					vert.Position[2] * scalar
-				);
-				auto color = Vector4f(
-					RandomInRange<float>(0,1),
-					RandomInRange<float>(0,1),
-					RandomInRange<float>(0,1),
-					1.0f
-				);
-
-				auto boneId = Vector4<unsigned int>(
-					vert.BoneIDs[0],
-					vert.BoneIDs[1],
-					vert.BoneIDs[2],
-					vert.BoneIDs[3]
-				);
-
-				auto boneWeight = Vector4f(
-					vert.BoneWeights[0],
-					vert.BoneWeights[1],
-					vert.BoneWeights[2],
-					vert.BoneWeights[3]
-				);
-
-				auto UVCoord = Vector2f(
-					vert.UVs[0][0],
-					vert.UVs[0][1]
-				);
-
-				auto normal = Vector3f(
-					vert.Normal[0],
-					vert.Normal[1],
-					vert.Normal[2]
-				);
-
-				auto tangent = Vector3f(
-					vert.Tangent[0],
-					vert.Tangent[1],
-					vert.Tangent[2]
-				);
-
-				mdlVertices.emplace_back(
-					position,
-					color,
-					UVCoord,
-					normal,
-					tangent,
-					boneId,
-					boneWeight
-				);
-			}
-			mdlIndicies = element.Indices;
-			ComPtr<ID3D11Buffer> vertexBuffer;
-			if (!RHI::CreateVertexBuffer<Vertex>(vertexBuffer,mdlVertices))
-			{
-				std::cout << "Failed to create vertex buffer" << std::endl;
-				return;
-			}
-			ComPtr<ID3D11Buffer> indexBuffer;
-			if (!RHI::CreateIndexBuffer(indexBuffer,mdlIndicies))
-			{
-				std::cout << "Failed to create vertex buffer" << std::endl;
-				return;
-			}
-			Element toAdd = {
-				vertexBuffer,
-				indexBuffer,
-				AsUINT(mdlVertices.size()),
-				AsUINT(mdlIndicies.size()),
-				D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
-				sizeof(Vertex)
-			};
-
-			Elements.push_back(toAdd);
-			mdlVertices.clear();
-			mdlIndicies.clear();
-		}
-	}
-	MaxBox = Vector3f(inMesh.BoxBounds.Max[0],inMesh.BoxBounds.Max[1],inMesh.BoxBounds.Max[2]);
-	MinBox = Vector3f(inMesh.BoxBounds.Min[0],inMesh.BoxBounds.Min[1],inMesh.BoxBounds.Min[2]);
-	isLoadedComplete = true;
-
-	vertexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(Matrix) * myInstances.size());
-	vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	vertexBufferDesc.MiscFlags = 0;
-	vertexBufferDesc.StructureByteStride = 0;
-
-
-	HRESULT result;
-	result = RHI::Device->CreateBuffer(
-		&vertexBufferDesc,
-		nullptr,
-		myInstanceBuffer.GetAddressOf()
-	);
-	bufferSize = 0;
-	if (FAILED(result))
-	{
-		AMLogger.Log("Failed to create Instance buffer");
-		return;
-}
-#else 
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(AssetPath.string(),(unsigned int)
 		aiProcess_CalcTangentSpace |
@@ -346,26 +196,25 @@ void Mesh::Init()
 		Logger::LogException(failedMeshLoad,2);
 		return;
 	}
-	//Editor::Get().ExpandWorldBounds(boxSphereBounds); // TODO Make a scene contain the boxSphereBounds!! 
 
 	for (size_t i = 0; i < scene->mNumMeshes; i++)
 	{
 		processMesh(scene->mMeshes[i],scene);
 	}
+
 	//FillMatPath   
 	FillMaterialPaths(scene);
 
 	MaxBox = Vector3f(scene->mMeshes[0]->mAABB.mMax.x,scene->mMeshes[0]->mAABB.mMax.y,scene->mMeshes[0]->mAABB.mMax.z);
 	MinBox = Vector3f(scene->mMeshes[0]->mAABB.mMin.x,scene->mMeshes[0]->mAABB.mMin.y,scene->mMeshes[0]->mAABB.mMin.z);
-	float radius = (MaxBox - MinBox).Length();
+	const float radius = (MaxBox - MinBox).Length();
 
-	Vector3f center = Vector3f((MaxBox.x - MinBox.x) / 2,(MaxBox.y - MinBox.y) / 2,(MaxBox.z - MinBox.z) / 2);
+	const auto center = Vector3f((MaxBox.x - MinBox.x) / 2,(MaxBox.y - MinBox.y) / 2,(MaxBox.z - MinBox.z) / 2);
 	boxSphereBounds = Sphere<float>(center,radius);
 
 	isLoadedComplete = true;
 	bufferSize = 0;
 	return;
-#endif // 
 }
 
 void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
