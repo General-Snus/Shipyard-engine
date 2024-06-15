@@ -109,7 +109,7 @@ void Material::Init()
 						continue;
 					}
 
-					AssetManager::Get().LoadAsset<TextureHolder>(path,texture);
+					texture = AssetManager::Get().LoadAsset<TextureHolder>(path);
 
 					const int type = i["TextureType"];
 					texture->SetTextureType(static_cast<eTextureType>(type));

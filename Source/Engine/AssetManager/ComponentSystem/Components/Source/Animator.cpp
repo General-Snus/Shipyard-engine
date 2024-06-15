@@ -16,10 +16,8 @@ cAnimator::cAnimator(const unsigned int anOwnerId,const std::filesystem::path& a
 	if (!mySkeleton)
 	{
 		Logger::Warn("cSkeletalMeshRenderer component does not have a skeleton");
-	}
-	std::shared_ptr<Animation> animation;
-	AssetManager::Get().LoadAsset<Animation>(aFilePath,animation);
-	myAnimations.push_back(animation);
+	}  
+	myAnimations.push_back(AssetManager::Get().LoadAsset<Animation>(aFilePath));
 }
 
 void cAnimator::Update()
@@ -64,9 +62,7 @@ void cAnimator::AddAnimation(Animation aAnimation)
 
 void cAnimator::AddAnimation(const std::filesystem::path& aFilePath)
 {
-	std::shared_ptr<Animation> animation;
-	AssetManager::Get().LoadAsset<Animation>(aFilePath,animation);
-	myAnimations.push_back(animation);
+	myAnimations.push_back(AssetManager::Get().LoadAsset<Animation>(aFilePath));
 }
 
 void cAnimator::SetHierarchy(unsigned int aBoneID,const Matrix& aParentMatrix)

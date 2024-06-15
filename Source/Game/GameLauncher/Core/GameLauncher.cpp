@@ -24,6 +24,18 @@ using json = nlohmann::json;
 
 void GameLauncher::Init()
 {
+	GameObjectManager& gom = GameObjectManager::Get();
+	{
+		GameObject camera = gom.CreateGameObject();
+		camera.SetName("Camera");
+		camera.AddComponent<cMeshRenderer>("Models/Camera/Camera.fbx");
+		auto& cameraComponent = camera.AddComponent<cCamera>();
+		gom.SetLastGOAsCamera();
+		cameraComponent.SetActive(true);
+		auto& transform = camera.AddComponent<Transform>();
+		transform.SetPosition(-10,3,0);
+		transform.SetRotation(0,90,0);
+	}
 }
 
 bool SaveTest(std::vector<GameObject> gameObjectsToSave,const std::filesystem::path& path)
@@ -120,22 +132,7 @@ void GameLauncher::GenerateNewRandomCubes()
 void GameLauncher::Start()
 {
 	GameObjectManager& gom = GameObjectManager::Get();
-#pragma region BaseSetup
-
-	myMesh = gom.CreateGameObject();
-	myMesh.SetName("MyMesh");
-	{
-		GameObject camera = gom.CreateGameObject();
-		camera.SetName("Camera");
-		camera.AddComponent<cMeshRenderer>("Models/Camera/Camera.fbx");
-		auto& cameraComponent = camera.AddComponent<cCamera>();
-		gom.SetLastGOAsCamera();
-		cameraComponent.SetActive(true);
-		auto& transform = camera.AddComponent<Transform>();
-		transform.SetPosition(-10,3,0);
-		transform.SetRotation(0,90,0);
-	}
-
+#pragma region BaseSetup 
 	{
 		GameObject worldRoot = gom.CreateGameObject();
 		gom.SetLastGOAsWorld();

@@ -2,21 +2,19 @@
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 #include "Tools/ImGui/ImGui/imgui.h"
 
-class GfxCmd_RenderMesh;
-
 cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId) : Component(anOwnerId)
 {
-	AssetManager::Get().LoadAsset<Mesh>("default.fbx",m_Mesh);
+	m_Mesh = AssetManager::Get().LoadAsset<Mesh>("default.fbx"); 
 }
 
 inline cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath,bool useExact) : Component(anOwnerId)
 {
-	AssetManager::Get().LoadAsset<Mesh>(aFilePath,useExact,m_Mesh);
+	m_Mesh = AssetManager::Get().LoadAsset<Mesh>(aFilePath,useExact); 
 }
 
 void cMeshRenderer::SetNewMesh(const std::filesystem::path& aFilePath)
 {
-	AssetManager::Get().LoadAsset<Mesh>(aFilePath,m_Mesh);
+	m_Mesh = AssetManager::Get().LoadAsset<Mesh>(aFilePath); 
 }
 
 void cMeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath)
@@ -25,14 +23,12 @@ void cMeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath)
 }
 
 void cMeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath,int elementIndex)
-{
-	std::shared_ptr<Material> mat;
-	AssetManager::Get().LoadAsset<Material>(aFilePath,mat);
+{ 
 	if (m_OverrideMaterial.size() <= elementIndex)
 	{
 		m_OverrideMaterial.resize(elementIndex + 1);
 	}
-	m_OverrideMaterial[elementIndex] = mat;
+	m_OverrideMaterial[elementIndex] = AssetManager::Get().LoadAsset<Material>(aFilePath); 
 }
 
 bool cMeshRenderer::IsDefaultMesh() const
@@ -158,13 +154,14 @@ cSkeletalMeshRenderer::cSkeletalMeshRenderer(const unsigned int anOwnerId) : cMe
 
 cSkeletalMeshRenderer::cSkeletalMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath) : cMeshRenderer(anOwnerId,aFilePath)
 {
-	AssetManager::Get().LoadAsset<Skeleton>(aFilePath,mySkeleton);
+	mySkeleton = AssetManager::Get().LoadAsset<Skeleton>(aFilePath);
+	assert(mySkeleton);
 }
 
 void cSkeletalMeshRenderer::SetNewMesh(const std::filesystem::path& aFilePath)
 {
-	AssetManager::Get().LoadAsset<Mesh>(aFilePath,m_Mesh);
-	AssetManager::Get().LoadAsset<Skeleton>(aFilePath,mySkeleton);
+	m_Mesh = AssetManager::Get().LoadAsset<Mesh>(aFilePath);
+	mySkeleton = AssetManager::Get().LoadAsset<Skeleton>(aFilePath); 
 }
 
 void cSkeletalMeshRenderer::Render()
@@ -176,13 +173,9 @@ void cSkeletalMeshRenderer::Render()
 		{
 			myAnimation->RenderAnimation(m_Mesh,myTransform->GetTransform());
 			return;
-		}
-		//	GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform(),false);
-		//	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),false);
+		} 
 		return;
-	}
-	//GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,Matrix(),false);
-	//GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),false);
+	} 
 }
 
 void cSkeletalMeshRenderer::InspectorView()

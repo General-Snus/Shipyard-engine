@@ -10,8 +10,7 @@ public:
 	void GenerateNewRandomCubes();
 	void Start();
 	void Update(float delta);
-private:
-	GameObject myMesh;
+private: 
 	GameObject myCustomHandler;
 	GameObject myCustomHandler2;
 	Matrix myModelMatrix;

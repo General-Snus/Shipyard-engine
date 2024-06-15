@@ -7,7 +7,7 @@
 #include <Tools/Utilities/System/SingletonTemplate.h>
 #include <Tools/Utilities/System/ThreadPool.hpp>
 #include <unordered_map> 
-
+#include <Editor/Editor/Defines.h>
 struct Frame;
 struct Element;
 struct MaterialBuffer;
@@ -56,11 +56,9 @@ public:
 	~AssetManager() = default;
 
 	template<class T>
-	void LoadAsset(const std::filesystem::path& aFilePath);
+	std::shared_ptr<T> LoadAsset(const std::filesystem::path& aFilePath);  
 	template<class T>
-	void LoadAsset(const std::filesystem::path& aFilePath,std::shared_ptr<T>& outAsset);
-	template<class T>
-	void LoadAsset(const std::filesystem::path& aFilePath,bool useExact,std::shared_ptr<T>& outAsset);
+	std::shared_ptr<T> LoadAsset(const std::filesystem::path& aFilePath,bool useExact); 
 
 	template<class T>
 	void HasAsset(const std::filesystem::path& aFilePath,bool useExact) const;
@@ -73,7 +71,7 @@ public:
 
 	bool AdaptPath(std::filesystem::path& path);
 
-	static inline constexpr char exprAssetPath[15] = "../../Content/";
+	static inline constexpr char exprAssetPath[15] = "../../Content";
 	static inline std::filesystem::path AssetPath = exprAssetPath;
 private:
 
@@ -141,29 +139,22 @@ inline void AssetManager::SubscribeToChanges(const std::filesystem::path& aFileP
 	//arg.subscribed = gameobjectID;
 	//
 	//assetCallbackMaster.callbacks.try_emplace(aFilePath,arg);
-}
+} 
 
+/// <summary>
+/// Holds the current thread until the asset is loaded
+/// </summary> 
 template<class T>
-void AssetManager::LoadAsset(const std::filesystem::path& aFilePath)
+std::shared_ptr<T> AssetManager::LoadAsset(const std::filesystem::path& aFilePath)
 {
-	std::shared_ptr<T> ptr;
-	LoadAsset<T>(aFilePath,false,ptr);
+	return LoadAsset<T>(aFilePath,false);
 }
 
 /// <summary>
 /// Holds the current thread until the asset is loaded
 /// </summary> 
 template<class T>
-void AssetManager::LoadAsset(const std::filesystem::path& aFilePath,std::shared_ptr<T>& outAsset)
-{
-	LoadAsset<T>(aFilePath,false,outAsset);
-}
-
-/// <summary>
-/// Holds the current thread until the asset is loaded
-/// </summary> 
-template<class T>
-void AssetManager::LoadAsset(const std::filesystem::path& aFilePath,const bool useExact,std::shared_ptr<T>& outAsset)
+std::shared_ptr<T> AssetManager::LoadAsset(const std::filesystem::path& aFilePath,const bool useExact)
 {
 	const std::type_info* typeInfo = &typeid(T);
 	std::shared_ptr<Library> library = GetLibraryOfType<T>();
@@ -187,12 +178,12 @@ void AssetManager::LoadAsset(const std::filesystem::path& aFilePath,const bool u
 			ThreadPool::Get().SubmitWork(std::bind(&AssetManager::ThreadedLoading,this));
 #else
 			ThreadedLoading();
-#endif
-
+#endif 
 		}
 		else
 		{
-			std::pair<std::filesystem::path,std::shared_ptr<T>> newObject(aFilePath,std::make_shared<T>(AssetPath / aFilePath));
+			auto loadPath = AssetPath  / aFilePath;
+			std::pair<std::filesystem::path,std::shared_ptr<T>> newObject(aFilePath,std::make_shared<T>(loadPath));
 			ptr = library->Add<T>(newObject);
 			myAssetQueue.EnqueueUnique(newObject.second);
 #if ThreadedAssetLoading
@@ -202,7 +193,7 @@ void AssetManager::LoadAsset(const std::filesystem::path& aFilePath,const bool u
 #endif
 		}
 	}
-	outAsset = ptr;
+	return ptr;
 }
 
 template<class T>

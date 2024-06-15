@@ -35,11 +35,10 @@ void Hierarchy::RenderImGUi()
 				bool arg = data.IsActive;
 				if (ImGui::TreeNodeEx(std::format("##{}",data.Name).c_str(),flags))
 				{
-					ImGui::SameLine();
-					std::shared_ptr<TextureHolder> tex;
-					AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/GameObject.png",tex);
+					ImGui::SameLine(); 
+					auto gameObjectWidget = AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/GameObject.png");
 					const auto height = ImGui::GetFrameHeight();
-					ImGui::Image(tex,{ height,height });
+					ImGui::Image(gameObjectWidget,{ height,height });
 					ImGui::SameLine();
 
 					auto color = ImVec4(1.0f,1.0f,1.0f,1.0f);

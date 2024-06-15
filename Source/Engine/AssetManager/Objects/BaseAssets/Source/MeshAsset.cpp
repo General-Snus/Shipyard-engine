@@ -138,7 +138,7 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 			continue;
 		}
 		Material::CreateJson(dataMat,matPath);
-		AssetManager::Get().LoadAsset<Material>(matPath,materials[key]);
+		materials[key] = AssetManager::Get().LoadAsset<Material>(matPath);
 	}
 }
 

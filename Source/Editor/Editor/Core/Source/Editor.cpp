@@ -149,7 +149,6 @@ bool Editor::Initialize(HWND aHandle)
 	GraphicsEngine::Get().Initialize(aHandle,false);
 #endif // Release
 
-	AddViewPort();
 
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
@@ -165,7 +164,7 @@ bool Editor::Initialize(HWND aHandle)
 
 
 	ImFontConfig font_config{};
-	const std::string font_path = AssetManager::AssetPath.string() + "Fonts/roboto/Roboto-Light.ttf";
+	const std::string font_path = AssetManager::AssetPath.string() + "/Fonts/roboto/Roboto-Light.ttf";
 	io.Fonts->AddFontFromFileTTF(font_path.c_str(),16.0f,&font_config);
 	font_config.MergeMode = true;
 
@@ -218,11 +217,12 @@ bool Editor::Initialize(HWND aHandle)
 #if UseScriptGraph
 	ScriptEditor = Graph::GraphTool::Get().GetScriptingEditor();
 	ScriptEditor->Init();
-#endif
+#endif 
 
-
+	AddViewPort();
 	g_EditorWindows.emplace_back(std::make_shared<Inspector>());
 	g_EditorWindows.emplace_back(std::make_shared<Hierarchy>());
+	g_EditorWindows.emplace_back(std::make_shared<ContentDirectory>());
 	return true;
 }
 void Editor::DoWinProc(const MSG& aMessage)
@@ -292,7 +292,7 @@ void Editor::UpdateImGui()
 	ImGui::NewFrame();
 	OPTICK_CATEGORY("ImGui::NewFrame",Optick::Category::UI);
 	ImGuizmo::BeginFrame();
-
+	 
 	ImGui::DockSpaceOverViewport();
 	TopBar();
 

@@ -182,6 +182,13 @@ public:
 	{ \
 		return TypeInfo::Get<::refl::trait::remove_qualifiers_t<decltype(*this)>>(); \
 	} 
+
+
+#pragma warning( push )
+#pragma warning( disable : 4702) 
+
+
+
 template <typename TypeToReflect>//Make sure only reflected objects can get here
 inline void Reflectable::Reflect(this auto& aReflectedObject)
 {
@@ -253,3 +260,4 @@ inline void Reflectable::Reflect(TypeToReflect& aReflectedObject)
 	ImGui::Separator();
 }
 
+#pragma warning( pop ) 
