@@ -4,7 +4,7 @@
 class CombatComponent : public Component
 {
 public:
-	CombatComponent(const SY::UUID anOwnerID);
+	CombatComponent(const SY::UUID anOwnerID,GameObjectManager* aManager);
 	~CombatComponent() override = default;
 	void Init() override;
 	void Update() override;

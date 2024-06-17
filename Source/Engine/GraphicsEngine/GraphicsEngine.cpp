@@ -143,7 +143,7 @@ void GraphicsEngine::SetupSpace3()
 	const auto brdfPSO = PSO::CreatePSO(
 		"Shaders/ScreenspaceQuad_VS.cso",
 		"Shaders/brdfLUT_PS.cso",rt
-		);
+	);
 
 	const D3D12_VIEWPORT viewPort = { 0.0f, 0.0f, static_cast<float>(size.x), static_cast<float>(size.y), D3D12_MIN_DEPTH, D3D12_MAX_DEPTH };
 	const D3D12_RECT rect = { 0, 0, static_cast<LONG>(size.x), static_cast<LONG>(size.y) };
@@ -295,12 +295,58 @@ void GraphicsEngine::UpdateSettings()
 void GraphicsEngine::Render(std::vector<std::shared_ptr<Viewport>>& renderViewPorts)
 {
 	BeginFrame();
+
 	for (auto& viewport : renderViewPorts)
 	{
-		RenderFrame(*viewport);
+		RenderFrame(*viewport,GameObjectManager::Get());
 	}
 	EndFrame();
 }
+void GraphicsEngine::RenderMRToTexture(std::shared_ptr<Mesh> meshAsset,std::shared_ptr<TextureHolder> renderTarget)
+{
+	GameObjectManager newScene;
+
+	{
+		GameObject worldRoot = newScene.CreateGameObject();
+		worldRoot.SetName("WordRoot");
+		Transform& transform = worldRoot.AddComponent<Transform>();
+		transform.SetRotation(80,0,0);
+		transform.SetPosition(0,5,0);
+		cLight& pLight = worldRoot.AddComponent<cLight>(eLightType::Directional);
+
+		pLight.SetColor(Vector3f(1,1,1));
+		pLight.SetPower(2.0f);
+		pLight.BindDirectionToTransform(true);
+	}
+	{
+		auto renderObject = newScene.CreateGameObject();
+		renderObject.AddComponent<Transform>();
+		renderObject.AddComponent<cMeshRenderer>(meshAsset->AssetPath);
+	}
+	{
+		{
+			GameObject camera = newScene.CreateGameObject();
+			camera.SetName("Camera"); 
+			auto& cameraComponent = camera.AddComponent<cCamera>();
+			newScene.SetLastGOAsCamera();
+			cameraComponent.SetActive(true);
+			auto& transform = camera.AddComponent<Transform>();
+			transform.SetPosition(0,1,-2);
+			transform.SetRotation(0,90,0);
+		}
+	}
+
+	Viewport newViewport(true,{ 512,512 },newScene,renderTarget);
+	auto fence = (RenderFrame(newViewport,newScene)); 
+
+	const auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+	const auto commandList = commandQueue->GetCommandList();
+	commandQueue->WaitForFenceValue(fence);
+	renderTarget->isLoadedComplete = true;
+}
+
+
+
 void GraphicsEngine::BeginFrame()
 {
 	myCamera = GameObjectManager::Get().GetCamera().TryGetComponent<cCamera>();
@@ -310,31 +356,28 @@ void GraphicsEngine::BeginFrame()
 	}
 	UpdateSettings();
 }
-void GraphicsEngine::RenderFrame(Viewport& renderViewPort)
+uint64_t GraphicsEngine::RenderFrame(Viewport& renderViewPort,GameObjectManager& scene)
 {
 	OPTICK_EVENT();
-
 	if (renderViewPort.IsRenderReady())
 	{
 		auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 		auto commandList = commandQueue->GetCommandList(L"RenderFrame");
-		PrepareBuffers(commandList,renderViewPort);
-
-		Passes::WriteShadows(commandList); // When rendering mutiple viewports we neccicarily do not need to render the shadows mutiple times
+		PrepareBuffers(commandList,renderViewPort,scene);
+		Passes::WriteShadows(commandList,scene);
 		commandList->FlushResourceBarriers();
-
-		Texture* gBufferTextures;
-		DeferredRenderingPass(commandList,gBufferTextures,renderViewPort);
-		EnvironmentLightPass(commandList,gBufferTextures);
-		ToneMapperPass(commandList,renderViewPort.myRenderTexture);
-		commandQueue->ExecuteCommandList(commandList);
+		 
+		DeferredRenderingPass(commandList,renderViewPort,scene);
+		EnvironmentLightPass(commandList);
+		ToneMapperPass(commandList,renderViewPort.GetTarget());
+		return commandQueue->ExecuteCommandList(commandList);
 	}
 	else
 	{
 		auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 		auto commandList = commandQueue->GetCommandList(L"RenderFrame");
-		GPU::ClearRTV(*commandList,&renderViewPort.myRenderTexture);
-		commandQueue->ExecuteCommandList(commandList);
+		GPU::ClearRTV(*commandList,renderViewPort.GetTarget());
+		return commandQueue->ExecuteCommandList(commandList);
 	}
 }
 
@@ -364,8 +407,8 @@ void GraphicsEngine::EndFrame()
 	commandQueue->WaitForFenceValue(GPU::m_FenceValues[GPU::m_FrameIndex]);
 }
 
-void GraphicsEngine::PrepareBuffers(std::shared_ptr<CommandList> commandList,Viewport& renderViewPort)
-{ 
+void GraphicsEngine::PrepareBuffers(std::shared_ptr<CommandList> commandList,Viewport& renderViewPort,GameObjectManager& scene)
+{
 	OPTICK_GPU_CONTEXT(commandList->GetGraphicsCommandList().Get());
 
 	//const UINT currentBackBufferIndex = chain->GetCurrentBackBufferIndex();
@@ -389,7 +432,7 @@ void GraphicsEngine::PrepareBuffers(std::shared_ptr<CommandList> commandList,Vie
 	commandList->GetGraphicsCommandList()->SetDescriptorHeaps((UINT)std::size(heaps),heaps);
 
 	{
-		const LightBuffer lightBuffer = Passes::CreateLightBuffer();
+		const LightBuffer lightBuffer = Passes::CreateLightBuffer(scene);
 		const GraphicsResource& alloc = GPU::m_GraphicsMemory->AllocateConstant<LightBuffer>(lightBuffer);
 		commandList->GetGraphicsCommandList()->SetGraphicsRootConstantBufferView(REG_LightBuffer,alloc.GpuAddress());
 
@@ -405,9 +448,9 @@ void GraphicsEngine::PrepareBuffers(std::shared_ptr<CommandList> commandList,Vie
 		commandList->GetGraphicsCommandList()->SetGraphicsRootDescriptorTable(MeshBuffer,GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->GetFirstGpuHandle());
 	}
 }
-void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandList,Texture*& gBufferTextures,Viewport& renderViewPort)
+void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandList,Viewport& renderViewPort,GameObjectManager& scene)
 {
-	auto& list = GameObjectManager::Get().GetAllComponents<cMeshRenderer>();
+	auto& list = scene.GetAllComponents<cMeshRenderer>();
 	{
 		constexpr uint32_t bufferCount = 7;
 
@@ -415,7 +458,7 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
 		commandList->GetGraphicsCommandList()->RSSetScissorRects(1,&GPU::m_ScissorRect);
 
 		const auto& gbufferPSO = PSOCache::GetState(PSOCache::ePipelineStateID::GBuffer);
-		gBufferTextures = gbufferPSO->RenderTargets();
+		const auto& gBufferTextures = gbufferPSO->RenderTargets();
 		GPU::ClearRTV(*commandList.get(),gBufferTextures,bufferCount);
 		commandList->SetRenderTargets(bufferCount,gBufferTextures,GPU::m_DepthBuffer.get());
 
@@ -445,7 +488,7 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
 			objectBuffer.MinExtents = -Vector3f(1,1,1);
 			objectBuffer.hasBone = false;
 			objectBuffer.isInstanced = false;
-			commandList->AllocateBuffer(eRootBindings::objectBuffer,objectBuffer); 
+			commandList->AllocateBuffer(eRootBindings::objectBuffer,objectBuffer);
 
 			vertCount += element.VertexBuffer.GetVertexCount();
 			GPU::ConfigureInputAssembler(*commandList,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.IndexResource);
@@ -511,11 +554,11 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
 		}
 	}
 }
-void GraphicsEngine::EnvironmentLightPass(std::shared_ptr<CommandList> commandList,Texture* gBufferTextures)
+void GraphicsEngine::EnvironmentLightPass(std::shared_ptr<CommandList> commandList)
 {
 	auto& environmentLight = PSOCache::GetState(PSOCache::ePipelineStateID::DeferredLighting);
 	constexpr uint32_t bufferCount = 7;
-
+	const auto& gBufferTextures = PSOCache::GetState(PSOCache::ePipelineStateID::GBuffer)->RenderTargets();
 
 	{
 		GPU::ClearRTV(*commandList.get(),environmentLight->RenderTargets(),environmentLight->GetNumberOfTargets());
@@ -533,12 +576,14 @@ void GraphicsEngine::EnvironmentLightPass(std::shared_ptr<CommandList> commandLi
 		}
 		commandList->FlushResourceBarriers();
 		commandList->SetDescriptorTable(GbufferPasses,gBufferTextures);
+
+		commandList->GetGraphicsCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		commandList->GetGraphicsCommandList()->IASetVertexBuffers(0,1,nullptr);
 		commandList->GetGraphicsCommandList()->IASetIndexBuffer(nullptr);
 		commandList->GetGraphicsCommandList()->DrawInstanced(6,1,0,0);
 	}
 }
-void GraphicsEngine::ToneMapperPass(std::shared_ptr<CommandList> commandList,Texture& target)
+void GraphicsEngine::ToneMapperPass(std::shared_ptr<CommandList> commandList,Texture* target)
 {
 	const auto& toneMapper = PSOCache::GetState(PSOCache::ePipelineStateID::ToneMap);
 
@@ -548,10 +593,10 @@ void GraphicsEngine::ToneMapperPass(std::shared_ptr<CommandList> commandList,Tex
 
 	auto* renderTargets = PSOCache::GetState(PSOCache::ePipelineStateID::DeferredLighting)->RenderTargets();
 	commandList->SetDescriptorTable(TargetTexture,renderTargets);
-	commandList->FlushResourceBarriers(); 
+	commandList->FlushResourceBarriers();
 
 	GPU::ClearRTV(*commandList.get(),toneMapper->RenderTargets(),toneMapper->GetNumberOfTargets());
-	commandList->SetRenderTargets(1,&target,nullptr);
+	commandList->SetRenderTargets(1,target,nullptr);
 
 	commandList->GetGraphicsCommandList()->IASetVertexBuffers(0,1,nullptr);
 	commandList->GetGraphicsCommandList()->IASetIndexBuffer(nullptr);

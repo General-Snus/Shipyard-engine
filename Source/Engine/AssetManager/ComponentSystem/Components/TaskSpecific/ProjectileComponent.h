@@ -4,7 +4,7 @@
 class ProjectileComponent : public Component
 {
 public:
-	ProjectileComponent(const SY::UUID anOwnerID);
+	ProjectileComponent(const SY::UUID anOwnerID,GameObjectManager* aManager);
 	~ProjectileComponent() override = default;
 	void Init() override;
 	void Update() override;

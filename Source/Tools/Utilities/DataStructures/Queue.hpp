@@ -1,6 +1,7 @@
 #pragma once
 #include <assert.h>
 #include <vector>
+#include <mutex>
 
 template <class T>
 class Queue
@@ -28,6 +29,7 @@ private:
 
 	int mySize;
 	int myAllocated;
+	std::mutex dequeMutex;
 };
 template<class T>
 inline Queue<T>::Queue()
@@ -77,6 +79,8 @@ inline void Queue<T>::Enqueue(const T& aValue)
 {
 	if (mySize == myAllocated) // array is full, allocate more memory
 	{
+		std::scoped_lock deQueueLock(dequeMutex);
+
 		T* newArray = new T[myAllocated * 2];
 		//std::copy(ptrmyFront,ptrBack +1,newArray); 
 		for (int i = 0; i < mySize; i++)
@@ -95,6 +99,7 @@ inline void Queue<T>::Enqueue(const T& aValue)
 template<class T>
 inline T Queue<T>::Dequeue()
 {
+	std::scoped_lock deQueueLock(dequeMutex); 
 	assert(mySize > 0 && "Queue is empty, can not dequeue");
 	int returnValue = myFront;
 	myFront = (myFront + 1) % myAllocated;

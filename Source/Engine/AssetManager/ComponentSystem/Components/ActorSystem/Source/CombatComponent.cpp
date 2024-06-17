@@ -2,7 +2,7 @@
 #include "../CombatComponent.h"
 #include <Engine/AssetManager/ComponentSystem/Components/TaskSpecific/ProjectileComponent.h>
 
-CombatComponent::CombatComponent(const SY::UUID anOwnerID) : Component(anOwnerID)
+CombatComponent::CombatComponent(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager)
 {
 }
 
@@ -23,13 +23,13 @@ void CombatComponent::Init()
 
 void CombatComponent::Update()
 {
-	myAttackTimer += Timer::GetInstance().GetDeltaTime();
+	myAttackTimer += Timer::GetDeltaTime();
 
 	if(myHealth <= 0)
 	{
 		//'John is kill'
 		//'No' 
-		myDeathTimer += Timer::GetInstance().GetDeltaTime();
+		myDeathTimer += Timer::GetDeltaTime();
 		if(myDeathTimer > respawnTime)
 		{
 			myDeathTimer = 0.f;
@@ -80,7 +80,7 @@ void CombatComponent::FireProjectile()
 }
 void CombatComponent::Healing()
 {
-	decimalHPGeneration += 2.f * Timer::GetInstance().GetDeltaTime();
+	decimalHPGeneration += 2.f * Timer:: GetDeltaTime();
 
 	//KEKW
 	const int hpAdd = static_cast<int>(std::roundf(decimalHPGeneration));

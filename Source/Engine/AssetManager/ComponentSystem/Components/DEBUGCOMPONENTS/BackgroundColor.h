@@ -8,8 +8,8 @@ class BackgroundColor : public Component
 {
 public:
 	BackgroundColor() = delete; // Create a generic cube
-	BackgroundColor(const SY::UUID anOwnerId); // Create a generic cube   
-	BackgroundColor(const SY::UUID anOwnerId,Vector4f aColor); // Create a generic cube   
+	BackgroundColor(const SY::UUID anOwnerId,GameObjectManager* aManager); // Create a generic cube   
+	BackgroundColor(const SY::UUID anOwnerId,GameObjectManager* aManager,Vector4f aColor); // Create a generic cube   
 	~BackgroundColor() override = default;
 	void Update() override;
 	void SetColor(Vector4f aColor);

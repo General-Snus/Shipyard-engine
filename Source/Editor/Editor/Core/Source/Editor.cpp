@@ -179,17 +179,17 @@ bool Editor::Initialize(HWND aHandle)
 	//io.Fonts->AddFontFromFileTTF(icon_path.c_str(),15.0f,&font_config,icon_ranges);
 	if (!io.Fonts->Build())
 	{
-		std::cout << "fucked up font load";
+		Logger::Err("fucked up font load");
 	}
 
 	ImGui_ImplWin32_Init(aHandle);
-	if (const auto& heap = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]; 
+	if (const auto& heap = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV];
 		!ImGui_ImplDX12_Init(
-		GPU::m_Device.Get(),
-		GPU::m_FrameCount,
-		DXGI_FORMAT_R8G8B8A8_UNORM,
-		heap->Heap(),
-		heap->GetCpuHandle(2000),heap->GetGpuHandle(2000)))
+			GPU::m_Device.Get(),
+			GPU::m_FrameCount,
+			DXGI_FORMAT_R8G8B8A8_UNORM,
+			heap->Heap(),
+			heap->GetCpuHandle(2000),heap->GetGpuHandle(2000)))
 	{
 		Logger::Err("Failed to init IMGUI Dx12");
 	}
@@ -223,6 +223,7 @@ bool Editor::Initialize(HWND aHandle)
 	g_EditorWindows.emplace_back(std::make_shared<Inspector>());
 	g_EditorWindows.emplace_back(std::make_shared<Hierarchy>());
 	g_EditorWindows.emplace_back(std::make_shared<ContentDirectory>());
+	g_EditorWindows.emplace_back(std::make_shared<Console>());
 	return true;
 }
 void Editor::DoWinProc(const MSG& aMessage)
@@ -243,13 +244,12 @@ void Editor::DoWinProc(const MSG& aMessage)
 	}
 
 	Input::UpdateEvents(aMessage.message,aMessage.wParam,aMessage.lParam);
-	Input::UpdateMouseInput(aMessage.message);
+	Input::UpdateMouseInput(aMessage.message,aMessage.wParam);
 }
 
 int	 Editor::Run()
 {
 	OPTICK_FRAME("MainThread");
-	Input::Update();
 
 	if (IsGUIActive)
 	{
@@ -262,6 +262,7 @@ int	 Editor::Run()
 		Update();
 		Render();
 	}
+	Input::Update();
 	return 0;
 }
 
@@ -292,7 +293,7 @@ void Editor::UpdateImGui()
 	ImGui::NewFrame();
 	OPTICK_CATEGORY("ImGui::NewFrame",Optick::Category::UI);
 	ImGuizmo::BeginFrame();
-	 
+
 	ImGui::DockSpaceOverViewport();
 	TopBar();
 
@@ -306,8 +307,8 @@ void Editor::UpdateImGui()
 void Editor::Update()
 {
 	OPTICK_FRAME_EVENT(Optick::FrameType::CPU);
-	Timer::GetInstance().Update();
-	const float delta = Timer::GetInstance().GetDeltaTime();
+	Timer::Update();
+	const float delta = Timer::GetDeltaTime();
 
 	Shipyard_PhysX::Get().StartRead();
 	GameObjectManager::Get().Update();

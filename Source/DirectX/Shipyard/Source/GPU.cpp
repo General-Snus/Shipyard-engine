@@ -396,7 +396,7 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 	if (!std::filesystem::is_regular_file(aFileName) || aFileName.extension() != ".dds" && aFileName.extension() != ".png")
 	{
 		const std::string error = "Failed to load texture: " + aFileName.string() + " does not exist!";
-		std::cout << error << std::endl;
+		Logger::Err(error); 
 		return false;
 	}
 

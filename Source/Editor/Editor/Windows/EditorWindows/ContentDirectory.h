@@ -9,4 +9,5 @@ public:
 	void RenderImGUi() override;
 private:
 	std::filesystem::path m_CurrentPath;
+	float cellSize = 128.f;
 };

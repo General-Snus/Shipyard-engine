@@ -14,11 +14,12 @@ class cMeshRenderer : public Component
 public:
 	MYLIB_REFLECTABLE();
 	cMeshRenderer() = delete; // Create a generic cube
-	cMeshRenderer(const unsigned int anOwnerId); // Create a generic cube  
-	cMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath,bool useExact = false);
+	cMeshRenderer(const SY::UUID anOwnerId,GameObjectManager* aManager); // Create a generic cube  
+	cMeshRenderer(const SY::UUID anOwnerId,GameObjectManager* aManager,const std::filesystem::path& aFilePath,bool useExact = false);
 	void Render() override;
 
 	void SetNewMesh(const std::filesystem::path& aFilePath);
+	void SetNewMesh(const std::shared_ptr<Mesh> aMesh);
 	void SetMaterialPath(const std::filesystem::path& aFilePath);
 	void SetMaterialPath(const std::filesystem::path& aFilePath,int elementIndex);
 	~cMeshRenderer() override = default;
@@ -48,8 +49,8 @@ class cSkeletalMeshRenderer : public cMeshRenderer
 	friend class cAnimator;
 public:
 	cSkeletalMeshRenderer() = delete;
-	cSkeletalMeshRenderer(const unsigned int anOwnerId);
-	cSkeletalMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath);
+	cSkeletalMeshRenderer(const SY::UUID anOwnerId,GameObjectManager* aManager);
+	cSkeletalMeshRenderer(const SY::UUID anOwnerId,GameObjectManager* aManager,const std::filesystem::path& aFilePath);
 	~cSkeletalMeshRenderer() override = default;
 
 	void SetNewMesh(const std::filesystem::path& aFilePath);

@@ -123,7 +123,7 @@ void ResourceStateTracker::FlushResourceBarriers(CommandList& commandList)
 uint32_t ResourceStateTracker::FlushPendingResourceBarriers(CommandList& commandList)
 {
 	OPTICK_EVENT();
-	//assert(ms_IsLocked);
+	 assert(ms_IsLocked);
 
 	// Resolve the pending resource barriers by checking the global state of the 
 	// (sub)resources. Add barriers if the pending state and the global state do

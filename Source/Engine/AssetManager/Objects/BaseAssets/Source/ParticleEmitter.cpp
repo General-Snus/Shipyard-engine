@@ -50,7 +50,7 @@ ParticleEmitter::ParticleEmitter(const ParticleEmitterTemplate& aTemplate) : Ass
 
 	//if (!RHI::CreateDynamicVertexBuffer(vertexBuffer,particles.size(),sizeof(Particlevertex)))
 	{
-		std::cout << "Failed to create vertex buffer" << std::endl;
+		Logger::Err("Failed to create vertex buffer");
 		return;
 	}
 	//stride = sizeof(Particlevertex);

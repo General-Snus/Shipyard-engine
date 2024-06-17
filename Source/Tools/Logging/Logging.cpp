@@ -51,6 +51,32 @@ void Logger::Log(const char* aString)
 	Log(std::string(aString));
 }
 
+Vector3f Logger::GetColor(LogType type)
+{
+	switch (type)
+	{
+	using enum Logger::LogType;
+	case message:
+		return Vector3f(1.0f,1.0f,1.0f);
+		break;
+	case warning:
+		return Vector3f(1.0f,1.0f,0.0f);
+		break;
+	case error:
+		return Vector3f(1.0f,0.0f,0.0f);
+		break;
+	case critical:
+		return Vector3f(1.0f,0.0f,0.0f);
+		break; 
+	case success:
+		return Vector3f(0.0f,1.0f,0.0f);
+		break;
+	default:
+		std::unreachable();
+		break;
+	} 
+}
+
 void Logger::Log(const std::string& aString)
 {
 	if (isInitialized)
@@ -59,11 +85,10 @@ void Logger::Log(const std::string& aString)
 		if (shouldPrintToOutput)
 		{
 			LogMsg msg;
-			msg.message = "[" + Timestamp() + "]" + myNamespace + " [   LOG   ] " + aString;
-			msg.myColor = Vector3f(1.0f,1.0f,1.0f);
-
+			msg.messageType = LogType::message;
+			msg.message = "[" + Timestamp() + "]" + myNamespace + " [   LOG   ] " + aString;  
 			OutputDebugStringA(msg.message.c_str());
-			m_LogMsgs.emplace_back(msg);
+			m_Buffer.Add(msg);
 		}
 		else
 		{
@@ -88,10 +113,10 @@ void Logger::Warn(const std::string& aString)
 		{
 			LogMsg msg;
 			msg.message = "[" + Timestamp() + "]" + myNamespace + " [ WARNING ] " + aString;
-			msg.myColor = Vector3f(1.0f,1.0f,0.0f);
+			msg.messageType = LogType::warning;
 
 			OutputDebugStringA(msg.message.c_str());
-			m_LogMsgs.emplace_back(msg);
+			m_Buffer.Add(msg);
 		}
 		else
 		{
@@ -116,10 +141,10 @@ void Logger::Err(const std::string& aString,const std::source_location& location
 		{
 			LogMsg msg;
 			msg.message = "[" + Timestamp() + "]" + myNamespace + " [  ERROR  ] " + aString;
-			msg.myColor = Vector3f(1.0f,0.0f,0.0f);
+			msg.messageType = LogType::error;
 
 			OutputDebugStringA(msg.message.c_str());
-			m_LogMsgs.emplace_back(msg);
+			m_Buffer.Add(msg);
 		}
 		else
 		{
@@ -150,10 +175,9 @@ void Logger::Succ(const std::string& aString)
 		{
 			LogMsg msg;
 			msg.message = "[" + Timestamp() + "]" + "[ SUCCESS ] " + aString;
-			msg.myColor = Vector3f(0.0f,1.0f,0.0f);
-
+			msg.messageType = LogType::success; 
 			OutputDebugStringA(msg.message.c_str());
-			m_LogMsgs.emplace_back(msg);
+			m_Buffer.Add(msg);
 		}
 		else
 		{
@@ -169,7 +193,7 @@ void Logger::Succ(const std::string& aString)
 	}
 }
 
-void Logger::LogException(const std::exception& anException,unsigned aLevel,const std::source_location& location)
+void Logger::Critical(const std::exception& anException,unsigned aLevel,const std::source_location& location)
 {
 	if (isInitialized)
 	{
@@ -178,10 +202,9 @@ void Logger::LogException(const std::exception& anException,unsigned aLevel,cons
 		{
 			LogMsg msg;
 			msg.message = "[" + Timestamp() + "]" + std::string(aLevel,' ') + "[  FATAL  ] " + anException.what();
-			msg.myColor = Vector3f(1.0f,0.0f,0.0f);
-
+			msg.messageType = LogType::critical; 
 			OutputDebugStringA(msg.message.c_str());
-			m_LogMsgs.emplace_back(msg);
+			m_Buffer.Add(msg);
 		}
 		else
 		{
@@ -208,9 +231,45 @@ void Logger::LogException(const std::exception& anException,unsigned aLevel,cons
 		}
 		catch (const std::exception& nestedException)
 		{
-			LogException(nestedException,aLevel + 1);
+			Critical(nestedException,aLevel + 1);
 		}
 		catch (...) {} // Catch all other cases.
+	}
+}
+
+void Logger::Critical(const std::string& anExceptionText,unsigned aLevel,const std::source_location& location)
+{
+	if (isInitialized)
+	{
+		std::scoped_lock lock(readyToWrite);
+		if (shouldPrintToOutput)
+		{
+			LogMsg msg;
+			msg.message = "[" + Timestamp() + "]" + std::string(aLevel,' ') + "[  FATAL  ] " + anExceptionText;
+			msg.messageType = LogType::critical;
+			OutputDebugStringA(msg.message.c_str());
+			m_Buffer.Add(msg);
+		}
+		else
+		{
+			std::cout << "[" << Timestamp() << "] ";
+			SetConsoleTextAttribute(myHandle,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+			std::cout << myNamespace << " ";
+			SetConsoleTextAttribute(myHandle,BACKGROUND_RED);
+			std::wcout << "[  FATAL  ]";
+			std::wcout << std::string(aLevel,' ').c_str();
+			SetConsoleTextAttribute(myHandle,FOREGROUND_RED | FOREGROUND_INTENSITY);
+			std::wcout << " " << anExceptionText.c_str() << "\n";
+			SetConsoleTextAttribute(myHandle,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+		}
+
+		std::wcout << "file: "
+			<< location.file_name() << '('
+			<< location.line() << ':'
+			<< location.column() << ") `"
+			<< location.function_name() << std::endl;
+
+		throw anExceptionText;
 	}
 }
 

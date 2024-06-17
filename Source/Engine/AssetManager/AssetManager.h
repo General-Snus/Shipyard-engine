@@ -56,9 +56,9 @@ public:
 	~AssetManager() = default;
 
 	template<class T>
-	std::shared_ptr<T> LoadAsset(const std::filesystem::path& aFilePath);  
+	std::shared_ptr<T> LoadAsset(const std::filesystem::path& aFilePath);
 	template<class T>
-	std::shared_ptr<T> LoadAsset(const std::filesystem::path& aFilePath,bool useExact); 
+	std::shared_ptr<T> LoadAsset(const std::filesystem::path& aFilePath,bool useExact);
 
 	template<class T>
 	void HasAsset(const std::filesystem::path& aFilePath,bool useExact) const;
@@ -78,7 +78,6 @@ private:
 	//thread 
 	void ThreadedLoading();
 	Queue<std::shared_ptr<AssetBase>> myAssetQueue;
-	std::mutex dequeMutex;
 	//NameToPath
 	void RecursiveNameSave();
 	std::unordered_map<std::filesystem::path,std::filesystem::path> nameToPathMap;
@@ -139,7 +138,7 @@ inline void AssetManager::SubscribeToChanges(const std::filesystem::path& aFileP
 	//arg.subscribed = gameobjectID;
 	//
 	//assetCallbackMaster.callbacks.try_emplace(aFilePath,arg);
-} 
+}
 
 /// <summary>
 /// Holds the current thread until the asset is loaded
@@ -156,6 +155,7 @@ std::shared_ptr<T> AssetManager::LoadAsset(const std::filesystem::path& aFilePat
 template<class T>
 std::shared_ptr<T> AssetManager::LoadAsset(const std::filesystem::path& aFilePath,const bool useExact)
 {
+
 	const std::type_info* typeInfo = &typeid(T);
 	std::shared_ptr<Library> library = GetLibraryOfType<T>();
 
@@ -182,7 +182,7 @@ std::shared_ptr<T> AssetManager::LoadAsset(const std::filesystem::path& aFilePat
 		}
 		else
 		{
-			auto loadPath = AssetPath  / aFilePath;
+			auto loadPath = AssetPath / aFilePath;
 			std::pair<std::filesystem::path,std::shared_ptr<T>> newObject(aFilePath,std::make_shared<T>(loadPath));
 			ptr = library->Add<T>(newObject);
 			myAssetQueue.EnqueueUnique(newObject.second);
@@ -214,6 +214,7 @@ std::shared_ptr<T> Library::Add(const std::pair<std::filesystem::path,std::share
 template<class T>
 std::shared_ptr<T> Library::Get(const std::filesystem::path& aFilePath)
 {
+
 	return  std::dynamic_pointer_cast<T>(content[aFilePath]);
 }
 

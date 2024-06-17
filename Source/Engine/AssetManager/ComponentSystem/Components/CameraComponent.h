@@ -18,11 +18,10 @@ class cCamera : public Component
 {
 public:
 	MYLIB_REFLECTABLE();
-	explicit cCamera(const unsigned int anOwnerId); // Create a generic cube
-	explicit cCamera(const unsigned int anOwnerId,const CameraSettings& settings); // Create a generic cube
+	explicit cCamera(const SY::UUID anOwnerId,GameObjectManager* aManager);
+	explicit cCamera(const SY::UUID anOwnerId,GameObjectManager* aManager,const CameraSettings& settings);
 	~cCamera() override;
 
-	//void UpdatePositionVectors();
 	void Update() override;
 	void Render() override;
 

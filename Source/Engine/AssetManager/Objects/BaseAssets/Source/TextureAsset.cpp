@@ -54,7 +54,7 @@ void TextureHolder::Init()
 			if (!AssetManager::Get().AdaptPath(AssetPath))
 			{
 				const std::string msg = "Error: Coulnt load texture at " + AssetPath.string();
-				std::cout << msg << " \n";
+				Logger::Err(msg);
 				if (GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
 				{
 					RawTexture = GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture();
@@ -69,15 +69,16 @@ void TextureHolder::Init()
 		if (!GPU::LoadTexture(RawTexture.get(),AssetPath.wstring()))
 		{
 			const std::string msg = "Error: Coulnt dds texture at " + AssetPath.string();
-			std::cout << msg << " \n";
+			Logger::Err(msg);
 			if (GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
 			{
 				RawTexture = GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture();
 				isLoadedComplete = true;
 				RawTexture->SetView(ViewType::SRV);
 				return;
-			}
-			std::cout << "Error: Default texture was not found" << " \n";
+			} 
+			Logger::Err("Error: Default texture was not found");
+
 			isLoadedComplete = false;
 			return;
 		}
@@ -87,15 +88,16 @@ void TextureHolder::Init()
 	else
 	{
 		const std::string msg = "Error: Coulnt load generic texture at " + AssetPath.string();
-		std::cout << msg << " \n";
-		if (GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
-		{
-			RawTexture = GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture();
-			isLoadedComplete = true;
-			RawTexture->SetView(ViewType::SRV);
-			return;
-		}
-		std::cout << "Error: Default texture was not found" << " \n";
+		Logger::Err(msg);
+
+		//if (GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
+		//{
+		//	RawTexture = GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture();
+		//	isLoadedComplete = true;
+		//	RawTexture->SetView(ViewType::SRV);
+		//	return;
+		//}
+		//Logger::Err("Error: Default texture was not found");
 		isLoadedComplete = false;
 		return;
 	}

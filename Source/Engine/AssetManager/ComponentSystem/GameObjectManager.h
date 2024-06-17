@@ -7,6 +7,12 @@
 #include "ComponentManager.h"
 #include "Tools/Optick/include/optick.h"
 
+
+
+
+#ifndef GameObjectManagerDef 
+#define GameObjectManagerDef 
+
 enum class Layer
 {
 	None = 0,
@@ -49,8 +55,8 @@ public:
 	~GameObjectManager();
 	GameObject CreateGameObject();
 	GameObject CreateGameObjectAt(const SY::UUID aGameObjectID);
-	void DeleteGameObject(const SY::UUID aGameObjectID);
-	void DeleteGameObject(const GameObject aGameObject);
+	void DeleteGameObject(const SY::UUID aGameObjectID,bool force = false);
+	void DeleteGameObject(const GameObject aGameObject,bool force = false);
 
 	template <class T>
 	T& AddComponent(const SY::UUID aGameObjectID);
@@ -76,9 +82,7 @@ public:
 	std::vector<Component*> GetAllAttachedComponents(SY::UUID aGameObjectID);
 
 	bool GetActive(const SY::UUID aGameObjectID);
-	Layer GetLayer(const SY::UUID aGameObjectID);
-
-
+	Layer GetLayer(const SY::UUID aGameObjectID); 
 
 	GameObject GetWorldRoot();
 	GameObject GetPlayer();
@@ -117,9 +121,9 @@ private:
 	void DeleteObjects();
 	void AddObjects();
 
-	std::unordered_map<const std::type_info*,ComponentManagerBase*> myComponentManagers = { };
+	std::unordered_map<const std::type_info*,std::shared_ptr<ComponentManagerBase>> myComponentManagers = { };
 	std::unordered_map<SY::UUID,GameObjectData> myGameObjects = { };
-	std::vector<std::pair<const std::type_info*,ComponentManagerBase*>> myUpdateOrder = { };
+	std::vector<std::pair<const std::type_info*,std::shared_ptr<ComponentManagerBase>>> myUpdateOrder = { };
 	std::vector<SY::UUID> myObjectsToDelete = { };
 	std::vector<SY::UUID> myObjectsToAdd = { };
 	unsigned int myLastID = 1;
@@ -136,7 +140,7 @@ T& GameObjectManager::AddComponent(const SY::UUID aGameObjectID)
 	{
 		AddManager<T>();
 	}
-	return static_cast<ComponentManager<T>*>(myComponentManagers[&typeid(T)])->AddComponent(aGameObjectID);
+	return std::static_pointer_cast<ComponentManager<T>>(myComponentManagers[&typeid(T)])->AddComponent(aGameObjectID);
 }
 
 template<class T>
@@ -147,7 +151,7 @@ T& GameObjectManager::AddComponent(const SY::UUID aGameObjectID,const T& aCompon
 	{
 		AddManager<T>();
 	}
-	return static_cast<ComponentManager<T>*>(myComponentManagers[&typeid(T)])->AddComponent(aGameObjectID,aComponent);
+	return std::static_pointer_cast<ComponentManager<T>>(myComponentManagers[&typeid(T)])->AddComponent(aGameObjectID,aComponent);
 }
 
 template<class T,typename... Args>
@@ -158,7 +162,7 @@ T& GameObjectManager::AddComponent(const SY::UUID aGameObjectID,Args ...somePara
 	{
 		AddManager<T>();
 	}
-	return static_cast<ComponentManager<T>*>(myComponentManagers[&typeid(T)])->AddComponent(aGameObjectID,someParameters...);
+	return std::static_pointer_cast<ComponentManager<T>>(myComponentManagers[&typeid(T)])->AddComponent(aGameObjectID,someParameters...);
 }
 
 template<class T>
@@ -169,7 +173,7 @@ std::vector<T>& GameObjectManager::GetAllComponents()
 	{
 		AddManager<T>();
 	}
-	return static_cast<ComponentManager<T>*>(myComponentManagers[&typeid(T)])->GetAllComponents();
+	return std::static_pointer_cast<ComponentManager<T>>(myComponentManagers[&typeid(T)])->GetAllComponents();
 }
 
 template<class T>
@@ -178,9 +182,9 @@ T* GameObjectManager::TryGetComponent(const SY::UUID aGameObjectID)
 	OPTICK_EVENT();
 	if (myComponentManagers.contains(&typeid(T)))
 	{
-		return static_cast<ComponentManager<T>*>(myComponentManagers[&typeid(T)])->TryGetComponent(aGameObjectID);
+		return std::static_pointer_cast<ComponentManager<T>>(myComponentManagers[&typeid(T)])->TryGetComponent(aGameObjectID);
 	}
-	std::cout << "GameObjectManager: Tried to get a component which was not present on GameObjectID : " << aGameObjectID << std::endl;
+	//std::cout << "GameObjectManager: Tried to get a component which was not present on GameObjectID : " << aGameObjectID << std::endl;
 	//assert(false && "GameObjectManager::TryGetComponent(...) component manager doesn't exist.");
 	//ERROR_PRINT("GameObjectManager: Tried to get a component which was not present on GameObjectID: " + aGameObjectID);
 	return nullptr;
@@ -192,7 +196,7 @@ inline const bool GameObjectManager::HasComponent(const SY::UUID aGameObjectID)
 	OPTICK_EVENT();
 	if (myComponentManagers.contains(&typeid(T)))
 	{
-		return static_cast<const ComponentManager<T>*>(myComponentManagers[&typeid(T)])->HasComponent(aGameObjectID);
+		return std::static_pointer_cast<const ComponentManager<T>>(myComponentManagers[&typeid(T)])->HasComponent(aGameObjectID);
 	}
 	return false;
 }
@@ -202,7 +206,7 @@ inline T& GameObjectManager::GetComponent(const SY::UUID aGameObjectID)
 {
 	OPTICK_EVENT();
 	assert(myComponentManagers.contains(&typeid(T)) && "GameObjectManager::GetComponent(...) component manager doesn't exist.");
-	return static_cast<ComponentManager<T>*>(myComponentManagers[&typeid(T)])->GetComponent(aGameObjectID);
+	return std::static_pointer_cast<ComponentManager<T>>(myComponentManagers[&typeid(T)])->GetComponent(aGameObjectID);
 }
 
 inline std::vector<Component*> GameObjectManager::GetAllAttachedComponents(const SY::UUID aGameObjectID)
@@ -225,7 +229,7 @@ void GameObjectManager::SetUpdatePriority(const ComponentManagerBase::UpdatePrio
 	OPTICK_EVENT();
 	if (!myComponentManagers.contains(&typeid(T)))
 	{
-		myComponentManagers[&typeid(T)] = new ComponentManager<T>();
+		myComponentManagers[&typeid(T)] = std::make_shared<ComponentManager<T>>(this);
 	}
 	myComponentManagers[&typeid(T)]->SetUpdatePriority(aPriority);
 	SortUpdateOrder();
@@ -235,6 +239,7 @@ template<class T>
 void GameObjectManager::AddManager()
 {
 	OPTICK_EVENT();
-	myComponentManagers[&typeid(T)] = new ComponentManager<T>();
+	myComponentManagers[&typeid(T)] = std::make_shared<ComponentManager<T>>(this);
 	SortUpdateOrder();
 }
+#endif	

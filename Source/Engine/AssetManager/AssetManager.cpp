@@ -43,14 +43,10 @@ void AssetManager::ThreadedLoading()
 
 	if (myAssetQueue.GetSize())
 	{
-		const double timeStart = Timer::GetInstance().GetTotalTime();
+		const double timeStart = Timer::GetTotalTime();
 		{
 			std::shared_ptr<AssetBase> working;
-
-			{
-				std::scoped_lock deQueueLock(dequeMutex);
-				working = myAssetQueue.Dequeue();
-			}
+			working = myAssetQueue.Dequeue();
 
 			working->isBeingLoaded = true;
 			working->Init();
@@ -62,7 +58,7 @@ void AssetManager::ThreadedLoading()
 			{
 				working->isBeingLoaded = false;
 				//this->assetCallbackMaster.UpdateStatusOf<T>(working->GetAssetPath(),AssetCallbackMaster::created); 
-				const double timeEnd = Timer::GetInstance().GetTotalTime();
+				const double timeEnd = Timer::GetTotalTime();
 				const double diff = (timeEnd - timeStart) * 1000.0;
 				const std::string str = "Loaded: " + working->GetAssetPath().string() + " in " + std::to_string(diff) + "ms \n";
 				Logger::Log(str);

@@ -3,11 +3,11 @@
 #include <Tools/ImGui/ImGui/imgui.h>
 #include "../BackgroundColor.h"
 
-BackgroundColor::BackgroundColor(const SY::UUID  anOwnerId) : Component(anOwnerId,eComponentType::backgroundColor)
+BackgroundColor::BackgroundColor(const SY::UUID  anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager,eComponentType::backgroundColor)
 {
 }
 
-BackgroundColor::BackgroundColor(const SY::UUID anOwnerId,Vector4f aColor) : Component(anOwnerId,eComponentType::backgroundColor),myColor(aColor)
+BackgroundColor::BackgroundColor(const SY::UUID anOwnerId,GameObjectManager* aManager,Vector4f aColor) : Component(anOwnerId,aManager,eComponentType::backgroundColor),myColor(aColor)
 {
 }
 

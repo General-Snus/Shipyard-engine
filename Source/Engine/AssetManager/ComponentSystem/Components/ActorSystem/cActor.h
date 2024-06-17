@@ -6,7 +6,7 @@
 class cActor : public Component
 {
 public:
-	cActor(const SY::UUID anOwnerID);
+	cActor(const SY::UUID anOwnerId,GameObjectManager* aManager);
 	~cActor() override = default;
 	void Init() override;
 	void Update() override;

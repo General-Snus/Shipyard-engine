@@ -5,7 +5,7 @@
 
 #include "Tools/ImGui/ImGui/imgui.h"
 
-Transform::Transform(const unsigned int anOwnerId) : Component(anOwnerId),IsDirty(true)
+Transform::Transform(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager),IsDirty(true)
 {
 	myTransform = Matrix();
 	myPosition = Vector3f();
@@ -17,13 +17,7 @@ Transform::Transform(const unsigned int anOwnerId) : Component(anOwnerId),IsDirt
 void Transform::Init()
 {
 }
-/*
-Transform::Transform(const unsigned int anOwnerId,const Matrix& aMatrix) : Component(anOwnerId),isDirty(true)
-{
-	myTransform = aMatrix;
-	InitPrimitive();
-}
-*/
+
 void Transform::Update()
 {
 	OPTICK_EVENT();

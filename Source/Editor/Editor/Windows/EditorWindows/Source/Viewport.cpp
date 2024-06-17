@@ -15,19 +15,47 @@
 ImGuizmo::OPERATION m_CurrentGizmoOperation = ImGuizmo::OPERATION::UNIVERSAL;
 ImGuizmo::MODE m_CurrentGizmoMode = ImGuizmo::MODE::WORLD;
 
-Viewport::Viewport(bool IsMainViewPort) : IsMainViewPort(IsMainViewPort)
+Viewport::Viewport(bool IsMainViewPort,Vector2ui ViewportResolution,
+	GameObjectManager& sceneToRender,std::shared_ptr<TextureHolder> RenderTexture) :
+	ViewportResolution((float)ViewportResolution.x,(float)ViewportResolution.y),sceneToRender(sceneToRender),
+	IsMainViewPort(IsMainViewPort),m_RenderTarget(RenderTexture)
 {
-	myRenderTexture.AllocateTexture({ Window::Width(),Window::Height() },"Target1");
+	if (!m_RenderTarget)
+	{
+		m_RenderTarget = std::make_shared<TextureHolder>("ViewportTargetTexture");
+	}
+	m_RenderTarget->GetRawTexture()->AllocateTexture(ViewportResolution,"Target1");
+
 	if (IsMainViewPort)
 	{
-		myVirtualCamera = GameObjectManager::Get().GetCamera();
+		myVirtualCamera = sceneToRender.GetCamera();
 	}
 	else
 	{
-		myVirtualCamera = GameObjectManager::Get().CreateGameObject();
+		myVirtualCamera = sceneToRender.CreateGameObject();
 		myVirtualCamera.AddComponent<cCamera>();
 		myVirtualCamera.AddComponent<Transform>();
 	}
+}
+
+Viewport::~Viewport()
+{
+	if (!IsMainViewPort)
+	{
+		sceneToRender.DeleteGameObject(myVirtualCamera,true);
+	}
+	else
+	{
+		Logger::Critical(std::logic_error("You cant destroy the main viewport!"));
+	}
+
+}
+
+
+
+Texture* Viewport::GetTarget()
+{
+	return m_RenderTarget->GetRawTexture().get();
 }
 
 bool Viewport::IsSelected()
@@ -57,10 +85,10 @@ void Viewport::Update()
 {
 	if (IsMainViewPort)
 	{
-		myVirtualCamera = GameObjectManager::Get().GetCamera();
+		myVirtualCamera = sceneToRender.GetCamera();
 		if (auto* camera = myVirtualCamera.TryGetComponent<cCamera>())
 		{
-			camera->GetSettings().APRatio = ViewportResolution.x / ViewportResolution.y;
+			camera->GetSettings().APRatio = static_cast<float>(ViewportResolution.x) / ViewportResolution.y;
 			camera->GetSettings().IsInControll = Editor::IsPlaying;
 		}
 	}
@@ -237,7 +265,7 @@ void Viewport::RenderImGUi()
 		}
 		float windowWidth = ImGui::GetWindowWidth();
 		float windowHeight = ImGui::GetWindowHeight();
-		ImGui::Image(myRenderTexture,ImVec2(windowWidth,windowHeight));
+		ImGui::Image(m_RenderTarget,ImVec2(windowWidth,windowHeight));
 
 		ViewportResolution = { windowWidth,windowHeight };
 		if (!IsMainViewport())
@@ -289,7 +317,7 @@ void Viewport::RenderImGUi()
 			if (ImGui::BeginChild("##ViewportToolbar",ImVec2(0,0),0,toolbarFlags)) {
 				// Bring the toolbar window always on top.
 				ImGui::BringWindowToDisplayFront(ImGui::GetCurrentWindow());
-				ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign,ImVec2(0.5f,0.5f)); 
+				ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign,ImVec2(0.5f,0.5f));
 				if (ImGui::Selectable("Universal",m_CurrentGizmoOperation == ImGuizmo::OPERATION::UNIVERSAL,selectableFlags,toolbarItemSize))
 				{
 					m_CurrentGizmoOperation = ImGuizmo::OPERATION::UNIVERSAL;

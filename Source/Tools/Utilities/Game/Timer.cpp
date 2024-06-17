@@ -6,13 +6,7 @@ Timer::Timer()
 	myTimeSinceLastUpdate = std::chrono::high_resolution_clock::now();
 	myStartTime = std::chrono::high_resolution_clock::now();
 	myDeltaTime = 0.0f;
-}
-
-Timer& Timer::GetInstance()
-{
-	static Timer instance;
-	return  instance;
-}
+} 
 
 void Timer::Update()
 {
@@ -20,24 +14,24 @@ void Timer::Update()
 	myTimeSinceLastUpdate = std::chrono::high_resolution_clock::now();
 }
 
-float Timer::GetDeltaTime() const
+float Timer::GetDeltaTime()  
 {
 	return myDeltaTime;
 }
 
-float Timer::GetUnscaledDeltaTime() const
+float Timer::GetUnscaledDeltaTime()  
 {
 	assert(false && "Not implemented");
 	return 0.0f;
 }
 
 //Nano seconds
-double Timer::GetTotalTime() const
+double Timer::GetTotalTime()  
 {
 	return std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - myStartTime).count();
 }
 
-double Timer::GetUnscaledTotalTime() const
+double Timer::GetUnscaledTotalTime()  
 {
 	assert(false && "Not implemented");
 	return 0.0;

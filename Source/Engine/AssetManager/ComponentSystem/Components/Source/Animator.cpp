@@ -1,21 +1,22 @@
 #include "AssetManager.pch.h"
 
-cAnimator::cAnimator(const unsigned int anOwnerId) : Component(anOwnerId),myCurrentAnimation(0),myAnimationTimer(0)
+cAnimator::cAnimator(const SY::UUID anOwnerId,GameObjectManager* aManager)  
+	: Component(anOwnerId,aManager),myCurrentAnimation(0),myAnimationTimer(0)
 {
 	mySkeleton = (this->TryGetComponent<cSkeletalMeshRenderer>())->GetRawSkeleton();
 	if (!mySkeleton)
 	{
-		std::cout << "cSkeletalMeshRenderer component does not have a skeleton" << std::endl;
+		Logger::Err("cSkeletalMeshRenderer component does not have a skeleton"); 
 	}
 }
 
-cAnimator::cAnimator(const unsigned int anOwnerId,const std::filesystem::path& aFilePath) : Component(anOwnerId),myCurrentAnimation(0),myAnimationTimer(0),myCurrentFrame(0)
+cAnimator::cAnimator(const SY::UUID anOwnerId,GameObjectManager* aManager,const std::filesystem::path& aFilePath) : Component(anOwnerId,aManager),myCurrentAnimation(0),myAnimationTimer(0),myCurrentFrame(0)
 {
 	aFilePath;
 	mySkeleton = (this->TryGetComponent<cSkeletalMeshRenderer>())->GetRawSkeleton();
 	if (!mySkeleton)
 	{
-		Logger::Warn("cSkeletalMeshRenderer component does not have a skeleton");
+		Logger::Err("cSkeletalMeshRenderer component does not have a skeleton");
 	}  
 	myAnimations.push_back(AssetManager::Get().LoadAsset<Animation>(aFilePath));
 }
@@ -27,7 +28,7 @@ void cAnimator::Update()
 	if (myAnimations.size())
 	{
 		const float TimePerFrame = (1 / myAnimations[myCurrentAnimation]->frameRate);
-		myAnimationTimer += Timer::GetInstance().GetDeltaTime();
+		myAnimationTimer += Timer::GetDeltaTime();
 		if (myAnimationTimer >= TimePerFrame)
 		{
 			float percentage = myAnimationTimer / TimePerFrame;

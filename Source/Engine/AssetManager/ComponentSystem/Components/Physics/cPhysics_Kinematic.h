@@ -5,7 +5,7 @@
 class cPhysics_Kinematic : public Component
 {
 public:
-	cPhysics_Kinematic(const SY::UUID anOwnerID);
+	cPhysics_Kinematic(const SY::UUID anOwnerId,GameObjectManager* aManager);
 	~cPhysics_Kinematic() override;
 	void Init() override;
 	void UpdatePrimitive();

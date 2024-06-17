@@ -10,8 +10,8 @@ class cCollider : public Component
 public:
 	MYLIB_REFLECTABLE();
 	cCollider() = delete; // Create a generic cube
-	cCollider(const unsigned int anOwnerId); // Create a generic cube 
-	cCollider(const unsigned int anOwnerId,const std::filesystem::path& aPath);
+	cCollider(const SY::UUID anOwnerId,GameObjectManager* aManager);
+	cCollider(const SY::UUID anOwnerId,GameObjectManager* aManager,const std::filesystem::path& aPath);
 	void Update() override;
 	Vector3f GetClosestPosition(Vector3f position) const;
 	Vector3f GetNormalToward(Vector3f position) const;

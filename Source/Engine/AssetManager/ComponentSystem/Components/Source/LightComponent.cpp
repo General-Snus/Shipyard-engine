@@ -8,14 +8,14 @@
 #include "DirectX/Shipyard/Texture.h"
 
 
-cLight::cLight(const unsigned int anOwnerId) : Component(anOwnerId)
+cLight::cLight(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager)
 {
 	myLightType = eLightType::uninitialized;
 	shadowMap[0] = std::make_shared<Texture>();
 	SetIsShadowCaster(true);
 }
 
-cLight::cLight(const unsigned int anOwnerId,const eLightType type) : Component(anOwnerId),myLightType(type)
+cLight::cLight(const SY::UUID anOwnerId,GameObjectManager* aManager,const eLightType type) : Component(anOwnerId,aManager),myLightType(type)
 {
 	shadowMap[0] = std::make_shared<Texture>();
 	switch (myLightType)

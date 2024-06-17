@@ -7,14 +7,91 @@
 
 #include "Tools/Utilities/LinearAlgebra/Vector3.hpp"
 #include "Windows.h"
-
+#include <Tools/Utilities/TemplateHelpers.h>
 class Logger
 {
+public:
+	enum class LogType : int32_t
+	{
+		none = 0,
+		message = 1 << 0,
+		warning = 1 << 1,
+		error = 1 << 2,
+		critical = 1 << 3,
+		success = 1 << 4,
+		All = INT32_MAX
+	};
+
+	 
+private:
 	struct LogMsg
 	{
-		Vector3f myColor;
+		LogType messageType;
 		std::string message;
 	};
+	struct logBuffer
+	{
+		std::vector<LogMsg> LoggedMessages;
+
+		void Add(LogMsg msg)
+		{
+			switch (msg.messageType)
+			{
+				using enum Logger::LogType;
+			case message:
+				messagesCount++;
+				break;
+			case warning:
+				warnCount++;
+				break;
+			case error:
+				errCount++;
+				break;
+			case critical:
+				criticalCount++;
+				break;
+			case success:
+				successCount++;
+				break;
+			default:
+				std::unreachable();
+				break;
+			}
+			LoggedMessages.emplace_back(msg);
+		}
+
+		int messagesCount;
+		int warnCount;
+		int errCount;
+		int criticalCount;
+		int successCount;
+	};
+public:
+	static inline logBuffer m_Buffer;
+	static bool Create();
+	static void SetConsoleHandle(HANDLE aHandle);
+	static void SetPrintToVSOutput(bool bNewValue);
+	static void Log(const char* aString);
+	static Vector3f GetColor(LogType type);
+
+	template<typename T>
+	static void  Log(const T& aString)
+	{
+		Log(std::to_string(aString));
+	}
+
+	static void Log(const std::string& aString);
+	static void Warn(const std::string& aString);
+	static void Err(const std::string& aString,const std::source_location& location =
+		std::source_location::current());
+	static void Succ(const std::string& aString);
+	static void Critical(const std::exception& anException,unsigned aLevel = 0,const std::source_location& location =
+		std::source_location::current());
+	static void Critical(const std::string& anExceptionText,unsigned aLevel = 0,const std::source_location& location =
+		std::source_location::current());
+	static void NewLine();
+	FORCEINLINE HANDLE GetHandle() const { return myHandle; }
+private:
 	static inline HANDLE myHandle = 0;
 	static inline bool shouldPrintToOutput = false;
 	static inline bool isInitialized = false;
@@ -23,41 +100,7 @@ class Logger
 	static [[nodiscard]] std::string Timestamp();
 	Logger() = default;
 
-public:
-	static inline std::vector<LogMsg> m_LogMsgs;
-	static bool Create();
-	static void SetConsoleHandle(HANDLE aHandle);
-
-	// Tells the logger to output to the Visual Studio output window instead
-	// of a console.
-	static void SetPrintToVSOutput(bool bNewValue);
-	static void Log(const char* aString);
-
-	template<typename T>
-	static void  Log(const T& aString)
-	{
-		Log(std::to_string(aString));
-	}
-
-	// Log a message.
-	static void Log(const std::string& aString);
-
-	// Log a warning message.
-	static void Warn(const std::string& aString);
-
-	// Log an error.
-	static void Err(const std::string& aString,const std::source_location& location =
-		std::source_location::current());
-
-	// Log a success message.
-	static void Succ(const std::string& aString);
-
-	// Log an exception. Will step through nested exceptions if there are any.
-	static void LogException(const std::exception& anException,unsigned aLevel = 0,const std::source_location& location =
-		std::source_location::current());
-
-	// Just force the log to go to next line.
-	static void NewLine();
-
-	FORCEINLINE HANDLE GetHandle() const { return myHandle; }
 };
+
+
+ENABLE_ENUM_BITWISE_OPERATORS(Logger::LogType)

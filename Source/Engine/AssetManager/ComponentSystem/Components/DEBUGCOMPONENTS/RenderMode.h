@@ -6,7 +6,7 @@ class RenderMode : public Component
 {
 public:
 	RenderMode() = delete;
-	RenderMode(const SY::UUID anOwnerId) : Component(anOwnerId) {  };
+	RenderMode(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager) {  };
 	void Update() override;
 	~RenderMode() override {   };
 

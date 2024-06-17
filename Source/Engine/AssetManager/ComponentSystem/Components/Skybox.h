@@ -4,9 +4,9 @@ class Skybox : public Component
 {
 public:
 	MYLIB_REFLECTABLE();
-	Skybox() = delete; // Create a generic cube
-	Skybox(const unsigned int anOwnerId); // Create a generic cube 
-	Skybox(const unsigned int anOwnerId,const std::filesystem::path& aPath);
+	Skybox() = delete;
+	Skybox(const SY::UUID anOwnerId,GameObjectManager* aManager);
+	Skybox(const SY::UUID anOwnerId,GameObjectManager* aManager,const std::filesystem::path& aPath);
 
 	void Update() override;
 	void InspectorView()override;

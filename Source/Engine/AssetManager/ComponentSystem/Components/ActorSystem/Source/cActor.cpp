@@ -1,7 +1,7 @@
 #include "AssetManager.pch.h"
 #include "../cActor.h"   
 
-cActor::cActor(const SY::UUID anOwnerID) : Component(anOwnerID)
+cActor::cActor(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager)
 {
 }
 

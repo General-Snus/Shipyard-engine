@@ -8,6 +8,7 @@
 #include <DirectX/Shipyard/Texture.h>
 #include "Engine/GraphicsEngine/Rendering/Buffers/LightBuffer.h"
 #include <Tools/Utilities/Error.hpp>
+#include <Engine/AssetManager/ComponentSystem/GameObjectManager.h>
 
 class cMeshRenderer;
 class ShipyardShader;
@@ -87,6 +88,6 @@ private:
 class Passes
 {
 public:
-	static void WriteShadows(std::shared_ptr<CommandList>& commandList);
-	static LightBuffer CreateLightBuffer();
-}; 
+	static void WriteShadows(std::shared_ptr<CommandList>& commandList,GameObjectManager& scene);
+	static LightBuffer CreateLightBuffer(GameObjectManager& scene);
+};

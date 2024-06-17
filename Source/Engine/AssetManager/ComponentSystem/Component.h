@@ -15,9 +15,9 @@ class Component : public Reflectable
 {
 public:
 	MYLIB_REFLECTABLE();
-
-	Component(const SY::UUID anOwnerID) : myOwnerID(anOwnerID),m_IsActive(true),myComponentType(eComponentType::base) {}
-	Component(const SY::UUID anOwnerID,eComponentType aComponentType) : myOwnerID(anOwnerID),m_IsActive(true),myComponentType(aComponentType) {}
+	 
+	Component(const SY::UUID anOwnerID,GameObjectManager* aManager) : myOwnerID(anOwnerID),myManager(aManager),m_IsActive(true),myComponentType(eComponentType::base) {}
+	Component(const SY::UUID anOwnerID,GameObjectManager* aManager,eComponentType aComponentType) : myOwnerID(anOwnerID),myManager(aManager),m_IsActive(true),myComponentType(aComponentType) {}
 	virtual ~Component() noexcept = default;
 
 	virtual void Init() {}
@@ -30,7 +30,7 @@ public:
 	bool HasComponent() const;
 
 	inline const SY::UUID GetOwner()  const { return myOwnerID; }
-	inline GameObject GetGameObject() const { return GameObjectManager::Get().GetGameObject(myOwnerID); }
+	inline GameObject GetGameObject() const { return myManager->GetGameObject(myOwnerID); }
 
 	template <class T>
 	T& GetComponent();
@@ -47,7 +47,7 @@ public:
 	const T* TryGetAddComponent() const;
 	void InspectorView() override;
 
-	inline bool IsActive() const { return m_IsActive && GameObjectManager::Get().GetActive(myOwnerID); }
+	inline bool IsActive() const { return m_IsActive && myManager->GetActive(myOwnerID); }
 	inline void SetActive(const bool aState) { m_IsActive = aState; }
 
 	virtual void CollidedWith(const SY::UUID /*aGameObjectID*/) {}
@@ -59,6 +59,7 @@ public:
 
 
 	SY::UUID myOwnerID;
+	GameObjectManager* myManager = nullptr;
 	eComponentType myComponentType;
 
 	//IsInherited is a new system that allows a component to remove an other component from the update loop and promise to take care of it themselves
@@ -74,6 +75,11 @@ private:
 	inline void SetOwnerID(const SY::UUID anOwnerID)
 	{
 		myOwnerID = anOwnerID;
+	}
+
+	inline void SetManager(GameObjectManager* aManager)
+	{
+		myManager = aManager;
 	}
 };
 

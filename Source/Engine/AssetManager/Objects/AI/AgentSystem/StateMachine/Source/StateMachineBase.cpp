@@ -5,7 +5,7 @@ void StateMachineBase::Update(GameObject input)
 {
 	if(myCurrentState != -1)
 	{
-		mySavedStates.at(myCurrentState)->Update(Timer::GetInstance().GetDeltaTime(),input);
+		mySavedStates.at(myCurrentState)->Update(Timer::GetDeltaTime(),input);
 	}
 }
 

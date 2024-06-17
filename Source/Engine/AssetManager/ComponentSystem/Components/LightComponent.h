@@ -23,8 +23,8 @@ class cLight : public Component
 public:
 	MYLIB_REFLECTABLE();
 	cLight() = delete; // Create a generic cube
-	cLight(const unsigned int anOwnerId); // Create a generic cube 
-	cLight(const unsigned int anOwnerId,const eLightType type);
+	cLight(const SY::UUID anOwnerId,GameObjectManager* aManager); // Create a generic cube 
+	cLight(const SY::UUID anOwnerId,GameObjectManager* aManager,const eLightType type);
 
 	eLightType GetType() const;
 	void SetType(const eLightType aType);

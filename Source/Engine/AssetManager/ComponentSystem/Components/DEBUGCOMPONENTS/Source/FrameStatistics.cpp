@@ -16,7 +16,7 @@ static HANDLE self;
 
 double App_CPU_Usage();
 
-FrameStatistics::FrameStatistics(const SY::UUID anOwnerId) : Component(anOwnerId)
+FrameStatistics::FrameStatistics(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager)
 {
 #ifdef  _WIN32   
 	SYSTEM_INFO sysInfo;
@@ -37,7 +37,7 @@ FrameStatistics::FrameStatistics(const SY::UUID anOwnerId) : Component(anOwnerId
 
 void FrameStatistics::Update()
 {
-	const float framerate = 1 / Timer::GetInstance().GetDeltaTime();
+	const float framerate = 1 / Timer::GetDeltaTime();
 
 	if (myDataIndex > MAX_DATA_COUNT - 1)
 	{

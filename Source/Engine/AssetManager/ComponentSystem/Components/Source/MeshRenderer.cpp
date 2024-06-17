@@ -2,12 +2,12 @@
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 #include "Tools/ImGui/ImGui/imgui.h"
 
-cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId) : Component(anOwnerId)
+cMeshRenderer::cMeshRenderer(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager)
 {
 	m_Mesh = AssetManager::Get().LoadAsset<Mesh>("default.fbx"); 
 }
 
-inline cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath,bool useExact) : Component(anOwnerId)
+inline cMeshRenderer::cMeshRenderer(const SY::UUID anOwnerId,GameObjectManager* aManager,const std::filesystem::path& aFilePath,bool useExact) : Component(anOwnerId,aManager)
 {
 	m_Mesh = AssetManager::Get().LoadAsset<Mesh>(aFilePath,useExact); 
 }
@@ -15,6 +15,11 @@ inline cMeshRenderer::cMeshRenderer(const unsigned int anOwnerId,const std::file
 void cMeshRenderer::SetNewMesh(const std::filesystem::path& aFilePath)
 {
 	m_Mesh = AssetManager::Get().LoadAsset<Mesh>(aFilePath); 
+}
+
+void cMeshRenderer::SetNewMesh(std::shared_ptr<Mesh> aMesh)
+{
+	m_Mesh = aMesh;
 }
 
 void cMeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath)
@@ -147,12 +152,12 @@ void cMeshRenderer::Render()
 	//GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),isInstanced);
 }
 
-cSkeletalMeshRenderer::cSkeletalMeshRenderer(const unsigned int anOwnerId) : cMeshRenderer(anOwnerId)
+cSkeletalMeshRenderer::cSkeletalMeshRenderer(const SY::UUID anOwnerId,GameObjectManager* aManager) : cMeshRenderer(anOwnerId,aManager)
 {
 	//cMeshRenderer creates default mesh
 }
 
-cSkeletalMeshRenderer::cSkeletalMeshRenderer(const unsigned int anOwnerId,const std::filesystem::path& aFilePath) : cMeshRenderer(anOwnerId,aFilePath)
+cSkeletalMeshRenderer::cSkeletalMeshRenderer(const SY::UUID anOwnerId,GameObjectManager* aManager,const std::filesystem::path& aFilePath) : cMeshRenderer(anOwnerId,aManager,aFilePath)
 {
 	mySkeleton = AssetManager::Get().LoadAsset<Skeleton>(aFilePath);
 	assert(mySkeleton);

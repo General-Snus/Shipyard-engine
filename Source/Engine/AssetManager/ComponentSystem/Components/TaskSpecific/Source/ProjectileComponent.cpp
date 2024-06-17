@@ -1,6 +1,6 @@
 #include "AssetManager.pch.h"
 
-ProjectileComponent::ProjectileComponent(const SY::UUID anOwnerID) : Component(anOwnerID)
+ProjectileComponent::ProjectileComponent(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager)
 {
 }
 
@@ -11,7 +11,7 @@ void ProjectileComponent::Init()
 
 void ProjectileComponent::Update()
 {
-	lifetime -= Timer::GetInstance().GetDeltaTime();
+	lifetime -= Timer::GetDeltaTime();
 	if (lifetime <= 0)
 	{
 		GameObjectManager::Get().DeleteGameObject(myOwnerID);

@@ -232,9 +232,7 @@ std::unique_ptr<PSO> PSO::CreatePSO(
 {
 	auto pso = std::make_unique<PSO>();
 	pso->m_Device = GPU::m_Device;
-	pso->m_numRenderTargets = static_cast<int>(renderTargetFormat.size());
-
-
+	pso->m_numRenderTargets = static_cast<int>(renderTargetFormat.size()); 
 
 	struct PipelineStateStream
 	{
@@ -301,12 +299,13 @@ ComPtr<ID3D12PipelineState> PSO::GetPipelineState() const
 	return m_PipelineState;
 }
 
-#pragma optimize("",off)
-void Passes::WriteShadows(std::shared_ptr<CommandList>& commandList)
+void Passes::WriteShadows(std::shared_ptr<CommandList>& commandList,GameObjectManager& scene)
 {
 	OPTICK_EVENT();
 
-	const auto& meshRendererList = GameObjectManager::Get().GetAllComponents<cMeshRenderer>(); 
+
+
+	const auto& meshRendererList = scene.GetAllComponents<cMeshRenderer>();
 	const auto graphicCommandList = commandList->GetGraphicsCommandList();
 
 	const auto& shadowMapper = PSOCache::GetState(PSOCache::ePipelineStateID::ShadowMapper);
@@ -326,7 +325,7 @@ void Passes::WriteShadows(std::shared_ptr<CommandList>& commandList)
 				for (auto& element : object.GetElements())
 				{
 					GPU::ConfigureInputAssembler(*list,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.IndexResource);
-					materialBuffer.vertexBufferIndex = element.VertexBuffer.GetHandle(ViewType::SRV).heapOffset; 
+					materialBuffer.vertexBufferIndex = element.VertexBuffer.GetHandle(ViewType::SRV).heapOffset;
 					list->AllocateBuffer<MaterialBuffer>(eRootBindings::materialBuffer,materialBuffer);
 					OPTICK_GPU_EVENT(debugName.data());
 					list->GetGraphicsCommandList()->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,0);
@@ -340,6 +339,7 @@ void Passes::WriteShadows(std::shared_ptr<CommandList>& commandList)
 			list->GetGraphicsCommandList()->RSSetScissorRects(1,&shadowMap->GetRect());
 
 			list->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_DEPTH_WRITE);
+			list->TrackResource(*shadowMap);
 			GPU::ClearDepth(*list,shadowMap.get());
 			list->SetRenderTargets(0,nullptr,shadowMap.get());
 			list->AllocateBuffer<FrameBuffer>(eRootBindings::frameBuffer,light.GetShadowMapFrameBuffer(map));
@@ -347,7 +347,7 @@ void Passes::WriteShadows(std::shared_ptr<CommandList>& commandList)
 			return shadowMap;
 		};
 
-	for (auto& light : GameObjectManager::Get().GetAllComponents<cLight>())
+	for (auto& light : scene.GetAllComponents<cLight>())
 	{
 		if (!light.IsActive() || !light.GetIsShadowCaster() || light.GetIsRendered())
 		{
@@ -358,7 +358,6 @@ void Passes::WriteShadows(std::shared_ptr<CommandList>& commandList)
 		{
 		case eLightType::Directional:
 		{
-
 			const std::shared_ptr<Texture>& shadowMap = setShadowPrerequisite(light,0,commandList);
 			renderShadows(meshRendererList,commandList,"DirectionalLight");
 			shadowMap->SetView(ViewType::SRV);
@@ -374,7 +373,7 @@ void Passes::WriteShadows(std::shared_ptr<CommandList>& commandList)
 				const std::shared_ptr<Texture>& shadowMap = setShadowPrerequisite(light,j,commandList);
 				renderShadows(meshRendererList,commandList,"PointlightShadowDraw");
 				shadowMap->SetView(ViewType::SRV);
-
+				 
 				commandList->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_DEPTH_READ | D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 				commandList->TrackResource(*shadowMap);
 			}
@@ -401,13 +400,13 @@ void Passes::WriteShadows(std::shared_ptr<CommandList>& commandList)
 	}
 }
 
-LightBuffer Passes::CreateLightBuffer()
+LightBuffer Passes::CreateLightBuffer(GameObjectManager& scene)
 {
 	OPTICK_EVENT();
 	LightBuffer lightBuffer;
 	lightBuffer.NullifyMemory();
 
-	for (auto& i : GameObjectManager::Get().GetAllComponents<cLight>())
+	for (auto& i : scene.GetAllComponents<cLight>())
 	{
 		switch (i.GetType())
 		{

@@ -6,7 +6,7 @@
 class cPhysXStaticBody : public Component
 {
 public:
-	cPhysXStaticBody(const SY::UUID anOwnerID);
+	cPhysXStaticBody(const SY::UUID anOwnerId,GameObjectManager* aManager);
 
 	void Init() override;
 	void UpdateFromCollider();

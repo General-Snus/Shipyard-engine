@@ -5,8 +5,13 @@
 #include <vector>
 #include "UUID.h"
 #include <Tools/Logging/Logging.h>
+#include <Engine/AssetManager/ComponentSystem/GameObjectManager.h>
 
+
+#ifndef ComponentManagerDef 
+#define ComponentManagerDef 
 class Component;
+class GameObjectManager;
 class ComponentManagerBase
 {
 public:
@@ -19,7 +24,7 @@ public:
 		Render
 	};
 
-	ComponentManagerBase() = default;
+	ComponentManagerBase(GameObjectManager* manager) : myManager(manager){ };
 	virtual ~ComponentManagerBase() = default;
 	virtual void Destroy() = 0;
 	virtual void Update() = 0;
@@ -33,8 +38,8 @@ public:
 
 
 	virtual Component* TryGetComponent(const SY::UUID aGameObjectID) = 0;
-protected:
-
+protected: 
+	GameObjectManager* myManager = nullptr;
 
 private:
 	UpdatePriority myUpdatePriority = ComponentManagerBase::UpdatePriority::Normal;
@@ -45,7 +50,7 @@ template <class T>
 class ComponentManager : public ComponentManagerBase
 {
 public:
-	ComponentManager() = default;
+	ComponentManager(GameObjectManager* manager) : ComponentManagerBase(manager) { };
 	~ComponentManager() = default;
 
 	void Destroy() override;
@@ -89,7 +94,8 @@ T& ComponentManager<T>::AddComponent(const SY::UUID aGameObjectID)
 {
 	myGameObjectIDtoVectorIndex[aGameObjectID] = static_cast<unsigned int>(myComponents.size());
 	myVectorIndexToGameObjectID[static_cast<unsigned int>(myComponents.size())] = aGameObjectID;
-	myComponents.push_back(T(aGameObjectID));
+	myComponents.push_back(T(aGameObjectID,myManager));
+	static_cast<Component*>(&myComponents.back())->SetManager(myManager);
 	static_cast<Component*>(&myComponents.back())->Init();
 	return myComponents.back();
 }
@@ -101,6 +107,7 @@ inline T& ComponentManager<T>::AddComponent(const SY::UUID aGameObjectID,const T
 	myVectorIndexToGameObjectID[static_cast<unsigned int>(myComponents.size())] = aGameObjectID;
 	myComponents.push_back(aComponent);
 	static_cast<Component*>(&myComponents.back())->SetOwnerID(aGameObjectID);
+	static_cast<Component*>(&myComponents.back())->SetManager(myManager);
 	static_cast<Component*>(&myComponents.back())->Init();
 	return myComponents.back();
 }
@@ -111,7 +118,8 @@ inline T& ComponentManager<T>::AddComponent(const SY::UUID aGameObjectID,Args...
 {
 	myGameObjectIDtoVectorIndex[aGameObjectID] = static_cast<unsigned int>(myComponents.size());
 	myVectorIndexToGameObjectID[static_cast<unsigned int>(myComponents.size())] = aGameObjectID;
-	myComponents.push_back(T(aGameObjectID,someParameters...));
+	myComponents.push_back(T(aGameObjectID,myManager,someParameters...));
+	static_cast<Component*>(&myComponents.back())->SetManager(myManager);
 	static_cast<Component*>(&myComponents.back())->Init();
 	return myComponents.back();
 }
@@ -226,3 +234,5 @@ inline void ComponentManager<T>::OnSiblingChanged(const SY::UUID aGameObjectID,c
 		myComponents[myGameObjectIDtoVectorIndex[aGameObjectID]].OnSiblingChanged(SourceClass);
 	}
 }
+
+#endif

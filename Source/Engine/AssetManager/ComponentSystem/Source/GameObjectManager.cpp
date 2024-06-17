@@ -11,19 +11,19 @@ GameObjectManager::~GameObjectManager()
 {
 	for (auto& [key,cm] : myComponentManagers  )
 	{
-		cm->Destroy();
-		delete cm;
-		myComponentManagers.erase(key);
+		cm->Destroy(); 
 	}
 }
 
 GameObject GameObjectManager::CreateGameObject()
 {
 	GameObjectData data;
+
 	data.IsActive = true;
 	data.Name = "GameObject(" + std::to_string(myLastID) + ")";
 	data.onLayer = Layer::Default;
 
+	//Force add transform?
 	myGameObjects.emplace(myLastID,data);
 	return GameObject(myLastID++,this);
 }
@@ -40,14 +40,33 @@ GameObject GameObjectManager::CreateGameObjectAt(const SY::UUID aGameObjectID)
 	return GameObject(aGameObjectID,this);
 }
 
-void GameObjectManager::DeleteGameObject(const SY::UUID aGameObjectID)
+void GameObjectManager::DeleteGameObject(const SY::UUID aGameObjectID,bool force)
 {
+	if (force)
+	{
+		if (myGameObjects.contains(aGameObjectID))
+		{
+			for (auto& cm : myComponentManagers)
+			{
+				cm.second->DeleteGameObject(aGameObjectID);
+			}
+
+			 myGameObjects.erase(aGameObjectID);
+		}
+		else
+		{
+			std::string err = "GameObjectManager::DeleteGameObject(): Tried to get delete a missing GameObject. ID: " + std::to_string(aGameObjectID);
+			assert(false && err.c_str());
+		}
+		return;
+	}
+
 	myObjectsToDelete.push_back(aGameObjectID);
 }
 
-void GameObjectManager::DeleteGameObject(const GameObject aGameObject)
+void GameObjectManager::DeleteGameObject(const GameObject aGameObject,bool force)
 {
-	myObjectsToDelete.push_back(aGameObject.myID);
+	DeleteGameObject(aGameObject.myID,force);
 }
 
 bool GameObjectManager::GetActive(const SY::UUID aGameObjectID)
@@ -187,6 +206,7 @@ void GameObjectManager::DeleteObjects()
 			{
 				cm.second->DeleteGameObject(myObjectsToDelete[i]);
 			}
+			myGameObjects.erase(myObjectsToDelete[i]);
 		}
 		else
 		{

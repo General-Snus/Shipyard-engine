@@ -9,6 +9,7 @@
 #include "Rendering/Buffers/LightBuffer.h"
 #include "Rendering/Buffers/LineBuffer.h"
 #include "Rendering/Buffers/ObjectBuffer.h" 
+#include <Engine/AssetManager/ComponentSystem/GameObjectManager.h>
 
 #define _DEBUGDRAW 
 
@@ -78,7 +79,7 @@ public:
 	FrameBuffer myFrameBuffer;
 private:
 	ObjectBuffer myObjectBuffer;
-	LineBuffer myLineBuffer; 
+	LineBuffer myLineBuffer;
 	G_Buffer myG_Buffer;
 	GraphicSettingsBuffer myGraphicSettingsBuffer;
 
@@ -134,8 +135,7 @@ private:
 	static inline std::shared_ptr<TextureHolder> defaultParticleTexture;
 	static inline std::shared_ptr<TextureHolder> defaultCubeMap;
 	static inline std::shared_ptr<Mesh> defaultMesh;
-	static inline std::shared_ptr<Material> defaultMaterial;
-
+	static inline std::shared_ptr<Material> defaultMaterial; 
 	GraphicsSettings myGraphicSettings;
 	HeapHandle ViewPortHeapHandle;
 	// We're a container singleton, no instancing this outside the class.
@@ -153,13 +153,13 @@ private:
 
 
 	void BeginFrame();
-	static void RenderFrame(Viewport& renderViewPort);
+	static uint64_t RenderFrame(Viewport& renderViewPort,GameObjectManager& scene);
 	static void EndFrame();
 
-	static void PrepareBuffers(std::shared_ptr<CommandList> commandList,Viewport& renderViewPort);
-	static void DeferredRenderingPass(std::shared_ptr<CommandList> commandList,Texture*& gBufferTextures,Viewport& renderViewPort);
-	static void EnvironmentLightPass(std::shared_ptr<CommandList> commandList,Texture* gBufferTextures);
-	static void ToneMapperPass(std::shared_ptr<CommandList> commandList,Texture& target);
+	static void PrepareBuffers(std::shared_ptr<CommandList> commandList,Viewport& renderViewPort,GameObjectManager& scene);
+	static void DeferredRenderingPass(std::shared_ptr<CommandList> commandList,Viewport& renderViewPort,GameObjectManager& scene);
+	static void EnvironmentLightPass(std::shared_ptr<CommandList> commandList);
+	static void ToneMapperPass(std::shared_ptr<CommandList> commandList,Texture* target);
 	static void ImGuiPass(std::shared_ptr<CommandList> commandList);
 
 	void RenderTextureTo(eRenderTargets from,eRenderTargets to) const;
@@ -171,6 +171,9 @@ public:
 	}
 	bool Initialize(HWND windowHandle,bool enableDeviceDebug);
 	void Render(std::vector<std::shared_ptr<Viewport>>& renderViewPorts);
+
+
+	void RenderMRToTexture(std::shared_ptr<Mesh> meshAsset,std::shared_ptr<TextureHolder> renderTarget);
 
 	void SetDepthState(eDepthStencilStates state)
 	{

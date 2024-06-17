@@ -20,7 +20,9 @@ public:
 	static bool IsKeyReleased(Keys aKeyCode);
 	static Vector2<float> GetMousePosition();
 	static Vector2<float> GetMousePositionDelta();
-	static bool UpdateMouseInput(UINT message);
+	static bool UpdateMouseInput(UINT message,WPARAM wParam);
+	//Positive is forward away from user
+	static float GetMouseWheelDelta();
 	static unsigned int GetLastPressedKey();
 	static bool UpdateEvents(UINT message,WPARAM wParam,LPARAM lParam);
 	static void Update();
@@ -30,6 +32,7 @@ private:
 	inline static std::bitset<256> liveKeyUpdate;
 	inline static std::bitset<256> lastFrameUpdate;
 	inline static unsigned int lastPressedKey;
+	inline static float myMouseWheelDelta;
 	inline static Vector2<float> myMousePosition;
 	inline static Vector2<float> myLastMousePosition;
 
@@ -74,8 +77,12 @@ inline Vector2<float> Input::GetMousePositionDelta()
 {
 	return  (myMousePosition - myLastMousePosition);
 }
+inline float Input::GetMouseWheelDelta()
+{
+	return myMouseWheelDelta;
+}
 
-inline bool Input::UpdateMouseInput(UINT message)
+inline bool Input::UpdateMouseInput(UINT message,WPARAM wParam)
 {
 	myLastMousePosition = myMousePosition;
 	POINT pt = { 0, 0 };
@@ -111,6 +118,10 @@ inline bool Input::UpdateMouseInput(UINT message)
 		liveKeyUpdate[0x04] = false;
 		return true;
 
+	case WM_MOUSEWHEEL:
+		myMouseWheelDelta = static_cast<float>(GET_WHEEL_DELTA_WPARAM(wParam));
+		return true; 
+
 	case WM_MOUSEMOVE:
 		return true;
 	default:
@@ -144,4 +155,5 @@ inline void Input::Update()
 {
 	lastFrameUpdate = currentFrameUpdate;
 	currentFrameUpdate = liveKeyUpdate;
+	myMouseWheelDelta = 0.0f;
 }

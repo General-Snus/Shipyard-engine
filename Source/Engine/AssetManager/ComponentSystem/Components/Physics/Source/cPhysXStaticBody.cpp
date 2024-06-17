@@ -14,7 +14,7 @@ physx::PxMat33 ConvertMatrix(const Matrix& myMatrix)
 	return returnMatrix;
 };
 
-cPhysXStaticBody::cPhysXStaticBody(const SY::UUID anOwnerID) : Component(anOwnerID)
+cPhysXStaticBody::cPhysXStaticBody(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager)
 {
 }
 

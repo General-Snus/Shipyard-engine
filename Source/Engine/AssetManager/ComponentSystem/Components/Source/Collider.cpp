@@ -1,12 +1,12 @@
 #include <Editor/Editor/Core/Editor.h> 
 #include "AssetManager.pch.h" 
 
-cCollider::cCollider(const unsigned int anOwnerId) : Component(anOwnerId)
+cCollider::cCollider(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager)
 {
 	myCollider = std::make_shared<ColliderAssetAABB>();
 }
 
-cCollider::cCollider(const unsigned int anOwnerId,const std::filesystem::path& aPath) : Component(anOwnerId)
+cCollider::cCollider(const SY::UUID anOwnerId,GameObjectManager* aManager ,const std::filesystem::path& aPath) : Component(anOwnerId,aManager)
 {
 	aPath;
 	myCollider = std::make_shared<ColliderAssetAABB>();

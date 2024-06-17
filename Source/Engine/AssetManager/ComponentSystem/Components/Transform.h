@@ -12,7 +12,7 @@ class Transform : public Component
 public:
 	MYLIB_REFLECTABLE();
 	Transform() = delete;
-	Transform(const unsigned int anOwnerId);
+	Transform(const SY::UUID anOwnerId,GameObjectManager* aManager);
 
 	void Init() override;
 	void Update() override;

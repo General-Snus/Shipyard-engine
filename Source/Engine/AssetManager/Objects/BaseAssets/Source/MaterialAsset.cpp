@@ -92,7 +92,8 @@ void Material::Init()
 			}
 			catch (const std::exception& e)
 			{
-				std::cout << "Unsuccessfull loading of material data file at path: " << AssetPath << " " << e.what() << "\n";
+				std::string msg = "Unsuccessfull loading of material data file at path: " + AssetPath.string() + " " + e.what();
+				Logger::Warn(msg);				
 			}
 		}
 		{
@@ -118,9 +119,10 @@ void Material::Init()
 					data.textures[type].second = texture;
 				}
 			}
-			catch (const std::exception&)
-			{
-				std::cout << "Unsuccessfull loading of material texture files at path: " << AssetPath << "\n";
+			catch (const std::exception& e)
+			{ 
+				std::string msg = "Unsuccessfull loading of material texture file at path: " + AssetPath.string() + " " + e.what();
+				Logger::Warn(msg);
 			}
 		}
 	}

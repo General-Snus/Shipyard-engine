@@ -5,7 +5,7 @@ class FrameStatistics : public Component
 {
 public:
 	FrameStatistics() = delete;
-	FrameStatistics(const SY::UUID anOwnerId);
+	FrameStatistics(const SY::UUID anOwnerId,GameObjectManager* aManager);
 	void Update() override;
 
 	~FrameStatistics() override {  };

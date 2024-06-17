@@ -49,15 +49,15 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 		matPath = mdf;
 		matPath.replace_extension("json");
 
-		for (size_t i = 0; i < AI_TEXTURE_TYPE_MAX; i++)
-		{
-			auto type = static_cast<aiTextureType>(i);
-			std::string textureAmount = std::string(aiTextureTypeToString(type)) + " " + std::to_string(material->GetTextureCount(type));
-			if (material->GetTextureCount(type))
-			{
-				Logger::Log(textureAmount);
-			}
-		}
+		//for (size_t i = 0; i < AI_TEXTURE_TYPE_MAX; i++)
+		//{
+		//	auto type = static_cast<aiTextureType>(i);
+		//	std::string textureAmount = std::string(aiTextureTypeToString(type)) + " " + std::to_string(material->GetTextureCount(type));
+		//	if (material->GetTextureCount(type))
+		//	{
+		//		Logger::Log(textureAmount);
+		//	}
+		//}
 
 
 		std::pair<std::filesystem::path,std::shared_ptr<TextureHolder>> holder;
@@ -169,7 +169,8 @@ void Mesh::Init()
 	OPTICK_EVENT();
 	if (!std::filesystem::exists(AssetPath))
 	{
-		assert(false && "Mesh file does not exist");
+		Logger::Warn("Failed to load mesh at: " + AssetPath.string());
+		return  ;
 	}
 
 	Assimp::Importer importer;
@@ -193,7 +194,7 @@ void Mesh::Init()
 	{
 		std::string message = "Failed to load mesh " + AssetPath.string();
 		std::exception failedMeshLoad(message.c_str());
-		Logger::LogException(failedMeshLoad,2);
+		Logger::Critical(failedMeshLoad,2);
 		return;
 	}
 
@@ -335,14 +336,14 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 	VertexResource vertexRes(wname);
 	if (!GPU::CreateVertexBuffer<Vertex>(commandList,vertexRes,mdlVertices))
 	{
-		std::cout << "Failed to create vertex buffer" << std::endl;
+		Logger::Err("Failed to create vertex buffer"); 
 		return;
 	}
 
 	IndexResource indexRes(wname);
 	if (!GPU::CreateIndexBuffer(commandList,indexRes,mdlIndicies))
 	{
-		std::cout << "Failed to create vertex buffer" << std::endl;
+		Logger::Err("Failed to create index buffer");
 		return;
 	}
 

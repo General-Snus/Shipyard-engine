@@ -21,9 +21,9 @@ class cAnimator : public Component
 {
 public:
 	MYLIB_REFLECTABLE();
-	cAnimator() = delete; // Create a generic cube
-	cAnimator(const unsigned int anOwnerId); // Create a generic cube 
-	cAnimator(const unsigned int anOwnerId,const std::filesystem::path& aFilePath);
+	cAnimator() = delete; 
+	cAnimator(const SY::UUID anOwnerId,GameObjectManager* aManager); 
+	cAnimator(const SY::UUID anOwnerId,GameObjectManager* aManager,const std::filesystem::path& aFilePath);
 	~cAnimator() override = default;
 
 	void Update() override;

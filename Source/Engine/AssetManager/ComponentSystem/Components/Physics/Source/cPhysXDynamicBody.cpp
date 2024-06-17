@@ -5,7 +5,7 @@
 #include <Tools/ThirdParty/PhysX/physx/include/foundation/PxMat33.h> 
 
 using namespace physx;
-cPhysXDynamicBody::cPhysXDynamicBody(const SY::UUID anOwnerID) : Component(anOwnerID)
+cPhysXDynamicBody::cPhysXDynamicBody(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager)
 {
 }
 

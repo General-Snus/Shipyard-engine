@@ -3,6 +3,39 @@
 #include <utility>
 
 
+#define ENABLE_ENUM_BITWISE_OPERATORS(_ENUM_TYPE) \
+inline _ENUM_TYPE operator|(const _ENUM_TYPE& a,const _ENUM_TYPE& b) \
+{ \
+	return static_cast<_ENUM_TYPE>(static_cast<std::underlying_type<_ENUM_TYPE>::type>(a) | static_cast<std::underlying_type<_ENUM_TYPE>::type>(b)); \
+} \
+inline _ENUM_TYPE operator&(const _ENUM_TYPE& a,const _ENUM_TYPE& b) \
+{ \
+	return static_cast<_ENUM_TYPE>(static_cast<std::underlying_type<_ENUM_TYPE>::type>(a) & static_cast<std::underlying_type<_ENUM_TYPE>::type>(b)); \
+} \
+inline _ENUM_TYPE operator^(const _ENUM_TYPE& a,const  _ENUM_TYPE& b) \
+{ \
+	return static_cast<_ENUM_TYPE>(static_cast<std::underlying_type<_ENUM_TYPE>::type>(a) ^ static_cast<std::underlying_type<_ENUM_TYPE>::type>(b)); \
+} \
+inline _ENUM_TYPE operator~(const _ENUM_TYPE& a) \
+{ \
+	return static_cast<_ENUM_TYPE>(~static_cast<std::underlying_type<_ENUM_TYPE>::type>(a)); \
+} \
+inline _ENUM_TYPE& operator|=(_ENUM_TYPE& a, const _ENUM_TYPE& b) \
+{ \
+	a = a | b; \
+	return a; \
+} \
+inline _ENUM_TYPE& operator&=(_ENUM_TYPE& a, const _ENUM_TYPE& b) \
+{ \
+	a = a & b; \
+	return a; \
+} \
+inline _ENUM_TYPE& operator^=(_ENUM_TYPE& a, const _ENUM_TYPE& b) \
+{ \
+	a = a ^ b; \
+	return a; \
+};
+
 
 template <typename ... Trest>
 struct unique_types;

@@ -12,7 +12,7 @@
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 #include "Tools/Utilities/Input/EnumKeys.h"
 
-cCamera::cCamera(const unsigned int anOwnerId) : Component(anOwnerId)
+cCamera::cCamera(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager)
 {
 	GetGameObject().AddComponent<Transform>();
 	GetGameObject().GetComponent<Transform>().SetGizmo(false);
@@ -44,7 +44,7 @@ cCamera::cCamera(const unsigned int anOwnerId) : Component(anOwnerId)
 #endif
 }
 
-cCamera::cCamera(const unsigned int anOwnerId,const CameraSettings& settings) : Component(anOwnerId)
+cCamera::cCamera(const SY::UUID anOwnerId,GameObjectManager* aManager,const CameraSettings& settings) : Component(anOwnerId,aManager)
 {
 	GetGameObject().AddComponent<Transform>();
 	GetGameObject().GetComponent<Transform>().SetGizmo(false);
@@ -92,7 +92,7 @@ void cCamera::Update()
 
 
 	Transform& aTransform = this->GetGameObject().GetComponent<Transform>();
-	float aTimeDelta = Timer::GetInstance().GetDeltaTime();
+	float aTimeDelta = Timer:: GetDeltaTime();
 	const float mdf = cameraSpeed;
 	const float rotationSpeed = 20000;
 
@@ -116,7 +116,7 @@ void cCamera::Update()
 			-static_cast<float>(Input::GetMousePositionDelta().x),
 			0.0f
 		};
-		aTransform.Rotate(mouseDeltaVector * rotationSpeed * Timer::GetInstance().GetDeltaTime());
+		aTransform.Rotate(mouseDeltaVector * rotationSpeed * Timer:: GetDeltaTime());
 	}
 
 	if (Input::IsKeyHeld((int)Keys::W))
@@ -239,7 +239,7 @@ FrameBuffer cCamera::GetFrameBuffer()
 	FrameBuffer buffer;
 	buffer.ProjectionMatrix = m_Projection;
 	buffer.ViewMatrix = Matrix::GetFastInverse(transform.GetTransform());
-	buffer.Time = Timer::GetInstance().GetDeltaTime();
+	buffer.Time = Timer:: GetDeltaTime();
 	buffer.FB_RenderMode = static_cast<int>(ApplicationState::filter);
 	buffer.FB_CameraPosition = transform.GetPosition();
 	buffer.FB_ScreenResolution = Editor::Get().GetViewportResolution();
