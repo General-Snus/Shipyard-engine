@@ -3,6 +3,7 @@
 #include "BaseAsset.h"
 #include "Tools/Utilities/LinearAlgebra/Matrix4x4.h"
 
+class Material;
 struct aiMesh;
 struct aiScene;
 class Mesh : public AssetBase

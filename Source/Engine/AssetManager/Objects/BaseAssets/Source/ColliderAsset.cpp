@@ -1,5 +1,10 @@
-#include "AssetManager.pch.h" 
+#include "Engine/AssetManager/AssetManager.pch.h" 
+#include "Engine/AssetManager/Objects/BaseAssets/ColliderAsset.h"
+#include "Engine/AssetManager/Objects/BaseAssets/MeshAsset.h"
+
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
+#include <Tools/Utilities/LinearAlgebra/AABB3D.hpp>
 
 ColliderAsset::ColliderAsset(eColliderType type) : type(type),AssetBase(L"")
 {
@@ -47,7 +52,7 @@ void ColliderAssetAABB::RenderDebugLines(Transform& data)
 	myHandles.push_back(handle);
 }
 
-inline void ColliderAssetAABB::UpdateWithTransform(const Matrix& matrix)
+  void ColliderAssetAABB::UpdateWithTransform(const Matrix& matrix)
 {
 	Vector4f minPoint = Vector4f(myOriginalAABB.GetMin(),1) * matrix;
 	Vector4f maxPoint = Vector4f(myOriginalAABB.GetMax(),1) * matrix;
@@ -55,7 +60,7 @@ inline void ColliderAssetAABB::UpdateWithTransform(const Matrix& matrix)
 	const Vector3f minV3 = Vector3f(minPoint.x,minPoint.y,minPoint.z);
 	const Vector3f maxV3 = Vector3f(maxPoint.x,maxPoint.y,maxPoint.z);
 
-	myAABB = AABB3D<float>(MinVector(minV3,maxV3),MaxVector(minV3,maxV3));
+	myAABB = AABB3D(MinVector(minV3,maxV3),MaxVector(minV3,maxV3));
 }
 
 ColliderAssetSphere::ColliderAssetSphere() : mySphere(Sphere<float>()),ColliderAsset(eColliderType::SPHERE)

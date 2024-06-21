@@ -1,8 +1,8 @@
-#include "AssetManager.pch.h"  
+#include "Engine/AssetManager/AssetManager.pch.h"  
 
 #define STB_IMAGE_IMPLEMENTATION	
-#include <Tools/Utilities/Files/Images/stb_image.h>
-
+#include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
+ 
 #include "DirectX/Shipyard/Texture.h" 
 #include "DirectX/Shipyard/GPU.h" 
 #include "Engine/GraphicsEngine/GraphicsEngine.h" 
@@ -14,8 +14,13 @@ TextureHolder::TextureHolder(const std::filesystem::path& aFilePath,eTextureType
 
 void TextureHolder::InspectorView()
 {
-	AssetBase::InspectorView();
+	AssetBase::InspectorView(); 
+}
 
+void TextureHolder::SetTextureType(eTextureType aTextureType)
+{
+	RawTexture->isCubeMap = (aTextureType == eTextureType::CubeMap);
+	textureType = aTextureType;
 }
 
 void TextureHolder::Init()

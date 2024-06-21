@@ -1,7 +1,7 @@
 #include <Editor/Editor/Core/Editor.h>
 #include <Tools/Reflection/refl.hpp>
 #include "../Inspector.h"
-#include "ComponentSystem/Components/Transform.h"
+#include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
 #include "imgui.h" 
 void Inspector::RenderImGUi()
 {

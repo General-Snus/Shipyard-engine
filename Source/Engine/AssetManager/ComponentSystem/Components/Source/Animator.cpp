@@ -1,4 +1,8 @@
-#include "AssetManager.pch.h"
+#include "Engine/AssetManager/AssetManager.pch.h"
+#include "Engine/AssetManager/ComponentSystem/Components/Animator.h"
+
+#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
+#include "Engine/AssetManager/Objects/BaseAssets/Animations.h"
 
 cAnimator::cAnimator(const SY::UUID anOwnerId,GameObjectManager* aManager)  
 	: Component(anOwnerId,aManager),myCurrentAnimation(0),myAnimationTimer(0)
@@ -56,9 +60,9 @@ void cAnimator::RenderAnimation(const std::shared_ptr<Mesh>& aData,const Matrix&
 	//GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderSkeletalMesh>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
 }
 
-void cAnimator::AddAnimation(Animation aAnimation)
+void cAnimator::AddAnimation(std::shared_ptr<Animation> aAnimation)
 {
-	myAnimations.push_back(std::make_shared<Animation>(aAnimation));
+	myAnimations.push_back(aAnimation);
 }
 
 void cAnimator::AddAnimation(const std::filesystem::path& aFilePath)

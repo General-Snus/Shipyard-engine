@@ -1,15 +1,11 @@
-#include "DirectXHeader.pch.h"
+#include "DirectX/DirectXHeader.pch.h"
 
-#include "Shipyard/Texture.h"
-
-#include <DirectXTex/DirectXTex.h>
-#include <Tools/Optick/include/optick.h>
-#include <XTK/ResourceUploadBatch.h>
-
-#include "Shipyard/CommandQueue.h"
-#include "Shipyard/eDescriptors.h"
-#include "Shipyard/GPU.h"
-#include "Shipyard/Helpers.h"
+#include "DirectX/Shipyard/Texture.h" 
+#include <DirectX/DirectXTex/DirectXTex.h> 
+#include <DirectX/XTK/ResourceUploadBatch.h> 
+#include "DirectX/Shipyard/CommandQueue.h"
+#include "DirectX/Shipyard/eDescriptors.h"
+#include "DirectX/Shipyard/GPU.h" 
 
 
 Texture::Texture() : m_Viewport(0,0,0,0,0,1),m_Rect(0,0,0,0)

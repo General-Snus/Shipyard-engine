@@ -1,14 +1,16 @@
-#pragma once
+#pragma once  
+#include "Engine/AssetManager/ComponentSystem/GameObjectManager.h"  
 
-#include "GameObjectManager.h"
-#define AsUINT(v) static_cast<unsigned>(v)   
-
+class Scene;
 
 class GameObject
 {
-public: 
-	GameObject() = default; // It's dangerous to create a gameobject without the manager!
+public:
+	//If no default argument is provided, the function will create a new GameObject in the active scene
+	static GameObject Create(std::shared_ptr<Scene> ref = nullptr);  // why not set scene to active scene by default? INCLUDE HELL
+	GameObject() = default;
 	~GameObject() = default;
+
 
 	template <class T>
 	T& AddComponent();
@@ -16,7 +18,7 @@ public:
 	template <class T>
 	T& AddComponent(const T& aComponent);
 
-	template <class T,typename... Args>
+	template <class T, typename... Args>
 	T& AddComponent(Args... someParameters);
 
 	template <class T>
@@ -34,11 +36,11 @@ public:
 	void SetActive(bool aState) const;
 
 	std::string GetName() const { return myManager->GetName(myID); };;
-	void SetName(const std::string& name) const { myManager->SetName(name,myID); };
+	void SetName(const std::string& name) const { myManager->SetName(name, myID); };
 
 	void OnSiblingChanged(const std::type_info* SourceClass = nullptr) const;
 
-	void SetLayer(const Layer aLayer) const { myManager->SetLayer(myID,aLayer); };
+	void SetLayer(const Layer aLayer) const { myManager->SetLayer(myID, aLayer); };
 	Layer GetLayer() const { return myManager->GetLayer(myID); };
 
 	SY::UUID GetID() const { return myID; }
@@ -46,66 +48,85 @@ public:
 
 private:
 	friend class GameObjectManager; //Only the asset manager can create and destroy components 
-	GameObject(const SY::UUID anID,GameObjectManager* aManager) : myID(anID),myManager(aManager) {}
+	GameObject(const SY::UUID anID, GameObjectManager* aManager) : myID(anID), myManager(aManager) {}
 
 	//DO NOT ADD VARIABLES HERE IT IS INCONSISTENT WITH PHILOSOPHY AND WILL NOT WORK
-	SY::UUID myID = UINT_MAX;
+	SY::UUID myID = UINT_MAX; // this could be upped to 8 bytes without loss because of alignment
 	GameObjectManager* myManager = nullptr;
 };
 
 template<class T>
 T& GameObject::AddComponent()
 {
+	assert(myManager != nullptr && "GameObject has no manager");
+	assert(myID.IsValid() && "GameObject has no ID");
 	return myManager->AddComponent<T>(myID);
 }
 
 template<class T>
 T& GameObject::AddComponent(const T& aComponent)
 {
-	return myManager->AddComponent<T>(myID,aComponent);
+	assert(myManager != nullptr && "GameObject has no manager");
+	assert(myID.IsValid() && "GameObject has no ID");
+	return myManager->AddComponent<T>(myID, aComponent);
 }
 
-template<class T,typename ...Args>
+template<class T, typename ...Args>
 T& GameObject::AddComponent(Args ...someParameters)
 {
-	return myManager->AddComponent<T>(myID,someParameters...);
+	assert(myManager != nullptr && "GameObject has no manager");
+	assert(myID.IsValid() && "GameObject has no ID");
+	return myManager->AddComponent<T>(myID, someParameters...);
 }
 
 template<class T>
 bool GameObject::HasComponent() const
 {
+	assert(myManager != nullptr && "GameObject has no manager");
+	assert(myID.IsValid() && "GameObject has no ID");
 	return myManager->HasComponent<T>(myID);
 }
 
 template<class T>
 T* GameObject::TryGetComponent()
 {
+	assert(myManager != nullptr && "GameObject has no manager");
+	assert(myID.IsValid() && "GameObject has no ID");
 	return myManager ? myManager->TryGetComponent<T>(myID) : nullptr;
 }
 
 template<class T>
 T& GameObject::GetComponent()
 {
+	assert(myManager != nullptr && "GameObject has no manager");
+	assert(myID.IsValid() && "GameObject has no ID");
 	return myManager->GetComponent<T>(myID);
 }
 
 inline std::vector<Component*> GameObject::GetAllComponents() const
 {
+	assert(myManager != nullptr && "GameObject has no manager");
+	assert(myID.IsValid() && "GameObject has no ID");
 	return myManager->GetAllAttachedComponents(myID);
 }
 
 inline bool GameObject::GetActive() const
 {
+	assert(myManager != nullptr && "GameObject has no manager");
+	assert(myID.IsValid() && "GameObject has no ID");
 	return myManager->GetActive(myID);
 }
 
 inline void GameObject::SetActive(const bool aState) const
 {
-	myManager->SetActive(myID,aState);
+	assert(myManager != nullptr && "GameObject has no manager");
+	assert(myID.IsValid() && "GameObject has no ID");
+	myManager->SetActive(myID, aState);
 }
 
 inline void GameObject::OnSiblingChanged(const std::type_info* SourceClass) const
 {
-	myManager->OnSiblingChanged(myID,SourceClass);
+	assert(myManager != nullptr && "GameObject has no manager");
+	assert(myID.IsValid() && "GameObject has no ID");
+	myManager->OnSiblingChanged(myID, SourceClass);
 }
-

@@ -1,4 +1,4 @@
-#include "AssetManager.pch.h"
+#include "Engine/AssetManager/AssetManager.pch.h"
 #include "../LightComponent.h"
 //#include <Editor/Editor/Core/Editor.h>
 #include <Tools/Utilities/Math.hpp> 
@@ -6,6 +6,7 @@
 
 #include "DirectX/Shipyard/GPU.h"
 #include "DirectX/Shipyard/Texture.h"
+#include "Engine/AssetManager/Objects/BaseAssets/LightDataBase.h"
 
 
 cLight::cLight(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager)

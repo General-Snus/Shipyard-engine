@@ -1,13 +1,11 @@
 #pragma once 
 #include <Engine/AssetManager/Enums.h>
-#include <Engine/GraphicsEngine/Rendering/Vertex.h>
-#include <filesystem>
-#include  <functional>
 #include "DirectX/Shipyard/GpuResource.h"
 #include "Engine/AssetManager/Reflection/ReflectionTemplate.h"
 #include "Tools/Reflection/refl.hpp"
-
-class Material;
+#include "Engine/GraphicsEngine/Rendering/Vertex.h"
+#include <functional> 
+ 
 class AssetBase : public Reflectable
 {
 public:
@@ -18,8 +16,7 @@ public:
 	bool  isLoadedComplete = false;
 	bool  isBeingLoaded = false;
 	const std::filesystem::path& GetAssetPath()	const { return AssetPath; };
-	std::vector<std::function<void()>> callBackOnFinished;
-
+	std::vector<std::function<void()>> callBackOnFinished; 
 
 	void InspectorView() override;
 	std::filesystem::path AssetPath;

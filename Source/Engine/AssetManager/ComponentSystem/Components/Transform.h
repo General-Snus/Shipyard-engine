@@ -2,6 +2,7 @@
 #include <Engine/AssetManager/ComponentSystem/Component.h>
 #include <Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h>
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
+#include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 #include <Tools/Utilities/LinearAlgebra/Quaternions.hpp>
 
 

@@ -160,8 +160,7 @@ private:
 	static void DeferredRenderingPass(std::shared_ptr<CommandList> commandList,Viewport& renderViewPort,GameObjectManager& scene);
 	static void EnvironmentLightPass(std::shared_ptr<CommandList> commandList);
 	static void ToneMapperPass(std::shared_ptr<CommandList> commandList,Texture* target);
-	static void ImGuiPass(std::shared_ptr<CommandList> commandList);
-
+	static void ImGuiPass(std::shared_ptr<CommandList> commandList); 
 	void RenderTextureTo(eRenderTargets from,eRenderTargets to) const;
 public:
 	inline static GraphicsEngine& Get()
@@ -172,8 +171,7 @@ public:
 	bool Initialize(HWND windowHandle,bool enableDeviceDebug);
 	void Render(std::vector<std::shared_ptr<Viewport>>& renderViewPorts);
 
-
-	void RenderMRToTexture(std::shared_ptr<Mesh> meshAsset,std::shared_ptr<TextureHolder> renderTarget);
+	 
 
 	void SetDepthState(eDepthStencilStates state)
 	{
@@ -202,55 +200,7 @@ public:
 	FORCEINLINE ComPtr<ID3DBlob> GetBloomShader() const { return bloomShader; }
 	FORCEINLINE ComPtr<ID3DBlob> GetParticleVSShader() const { return particleVertexShader; }
 	FORCEINLINE ComPtr<ID3DBlob> GetParticleGSShader() const { return particleGeometryShader; }
-	FORCEINLINE ComPtr<ID3DBlob> GetParticlePSShader() const { return particlePixelShader; }
-
-	/*FORCEINLINE ComPtr<ID3D11DeviceChild> GetShader(eShader type) const
-	{
-		switch(type)
-		{
-		case eShader::defaultVS:
-			return myVertexShader.As<ID3D11DeviceChild>();
-
-		case eShader::defaultPS:
-			return myPixelShader.Get();
-
-		case eShader::particleVS:
-			return particleVertexShader.Get();
-
-		case eShader::particleGS:
-			return particleGeometryShader.Get();
-
-		case eShader::particlePS:
-			return particlePixelShader.Get();
-
-		case eShader::screenSpaceQuad:
-			return myScreenSpaceQuadShader.Get();
-
-		case eShader::luminancePass:
-			return luminancePass;
-
-		case eShader::linearGammaPass:
-			return linearGammaPass.Get();
-
-		case eShader::copyShader:
-			return copyShader.Get();
-
-		case eShader::gaussShader:
-			return gaussShader.Get();
-
-		case eShader::bloomShader:
-			return bloomShader.Get();
-
-		case eShader::debugLineVS:
-			return debugLineVS.Get();
-
-		case eShader::debugLinePS:
-			return debugLinePS.Get();
-		}
-	}
-	*/
-
-
+	FORCEINLINE ComPtr<ID3DBlob> GetParticlePSShader() const { return particlePixelShader; }  
 
 	FORCEINLINE std::shared_ptr<Texture> GetTargetTextures(eRenderTargets type) const;
 

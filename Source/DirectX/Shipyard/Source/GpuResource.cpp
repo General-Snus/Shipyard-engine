@@ -1,11 +1,7 @@
-#include "DirectXHeader.pch.h"
+#include "DirectX/DirectXHeader.pch.h"
 
-#include "Shipyard/GpuResource.h"
-
-#include <cassert>
-#include <Tools/Optick/include/optick.h> 
-#include "Shipyard/GPU.h"
-#include <Tools/Utilities/Error.hpp>
+#include "DirectX/Shipyard/GpuResource.h" 
+#include "DirectX/Shipyard/GPU.h"
 
 VertexResource::VertexResource(std::filesystem::path name)
 {

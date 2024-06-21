@@ -1,18 +1,20 @@
 #include "../Hierarchy.h"
 
-#include "AssetManager.h"
-#include "ComponentSystem/GameObjectManager.h"
-#include "Core/Editor.h"
-#include "imgui.h"
+#include "Engine/AssetManager/AssetManager.h"
+#include "Engine/AssetManager/ComponentSystem/GameObjectManager.h"
+#include "Editor/Editor/Core/Editor.h" 
+#include  <format>
 #include "ImGuiHepers.hpp"
-#include "Input/Input.hpp"
-#include "Objects/BaseAssets/TextureAsset.h"
+#include "Tools/Utilities/Input/Input.hpp"
+#include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
 #include <Engine/AssetManager/ComponentSystem/Components/Transform.h>
+
+#include "Engine/PersistentSystems/Scene.h"
 
 void Hierarchy::RenderImGUi()
 {
 	{
-		const auto& gObjList = GameObjectManager::Get().GetAllGameObjects();
+		const auto& gObjList = Scene::ActiveManager().GetAllGameObjects();
 		ImGui::Begin("Hierarchy");
 		ImGui::Separator();
 		ImGui::BeginChild("GameObjectList");
@@ -24,7 +26,7 @@ void Hierarchy::RenderImGUi()
 			}
 			ImGui::PushID(id);
 			auto flags = ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_OpenOnDoubleClick;
-			const auto& transform = GameObjectManager::Get().GetComponent<Transform>(id);
+			const auto& transform = Scene::ActiveManager().GetComponent<Transform>(id);
 
 			if (!transform.HasChildren())
 			{
@@ -50,7 +52,7 @@ void Hierarchy::RenderImGUi()
 						{
 							auto& refSelected = Editor::GetSelectedGameObjects();
 							!Input::IsKeyHeld(Keys::SHIFT) ? refSelected.clear() : __nop();
-							refSelected.push_back(GameObjectManager::Get().GetGameObject(id));
+							refSelected.push_back(Scene::ActiveManager().GetGameObject(id));
 						}
 
 					}

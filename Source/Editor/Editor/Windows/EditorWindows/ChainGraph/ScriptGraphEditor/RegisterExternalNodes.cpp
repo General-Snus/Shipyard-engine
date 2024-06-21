@@ -1,11 +1,13 @@
-﻿#include <Tools/Utilities/Input/EnumKeys.h>
+﻿#include "Engine/PersistentSystems/PersistentSystems.pch.h"
+
+#include <Tools/Utilities/Input/EnumKeys.h>
 #include <Tools/Utilities/Input/Input.hpp>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
-#include "PersistentSystems.pch.h"
-#include "RegisterExternalNodes.h"
-
-#include "ComponentSystem/Components/CameraComponent.h"
-#include "GraphicsEngine.h"
+#include "RegisterExternalNodes.h" 
+#include "Engine/AssetManager/ComponentSystem/Components/CameraComponent.h"
+#include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
+#include "Engine/GraphicsEngine/GraphicsEngine.h"
+#include "Engine/PersistentSystems/Scene.h"
 //
 //void MVNode_TestNode::Init()
 //{
@@ -156,7 +158,7 @@ size_t MVNode_GetGameObject::DoOperation()
 	unsigned int ID;
 	if (GetPinData("ID",ID))
 	{
-		auto arg = GameObjectManager::Get().GetGameObject(ID);
+		auto arg = Scene::ActiveManager().GetGameObject(ID);
 		if (arg.IsValid())
 		{
 			SetPinData("GameObject",arg);
@@ -352,7 +354,7 @@ size_t MVNode_ScreenSpacePosition::DoOperation()
 	Vector3f vector;
 	if (GetPinData("World position",vector))
 	{
-		auto& camera = GameObjectManager::Get().GetCamera().GetComponent<cCamera>();
+		auto& camera = Scene::ActiveManager().GetCamera().GetComponent<cCamera>();
 		Vector4f screenspacePos = camera.WoldSpaceToPostProjectionSpace(vector);
 		SetPinData("Screen position",Vector3f(screenspacePos.x,screenspacePos.y,screenspacePos.z));
 		return ExitViaPin("Out");

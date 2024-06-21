@@ -7,6 +7,7 @@
 
 class Mesh;
 class Material;
+class TextureHolder;
 class Skeleton;
 
 class cMeshRenderer : public Component
@@ -16,14 +17,14 @@ public:
 	cMeshRenderer() = delete; // Create a generic cube
 	cMeshRenderer(const SY::UUID anOwnerId,GameObjectManager* aManager); // Create a generic cube  
 	cMeshRenderer(const SY::UUID anOwnerId,GameObjectManager* aManager,const std::filesystem::path& aFilePath,bool useExact = false);
+	~cMeshRenderer() override = default;
 	void Render() override;
 
 	void SetNewMesh(const std::filesystem::path& aFilePath);
 	void SetNewMesh(const std::shared_ptr<Mesh> aMesh);
 	void SetMaterialPath(const std::filesystem::path& aFilePath);
 	void SetMaterialPath(const std::filesystem::path& aFilePath,int elementIndex);
-	~cMeshRenderer() override = default;
-
+	std::shared_ptr<Material> GetMaterial(int materialIndex = 0) const;
 	std::vector<Element>& GetElements() const;
 	std::shared_ptr<Mesh> GetRawMesh() const;
 	void InspectorView() override;

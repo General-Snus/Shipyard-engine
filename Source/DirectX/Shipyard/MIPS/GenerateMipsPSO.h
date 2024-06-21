@@ -34,9 +34,9 @@
 #include <DirectXMath.h>
 #include <wrl.h>
 
-#include "Shipyard/GpuResource.h"
-#include "Shipyard/PSO.h"
-#include "Shipyard/RootSignature.h"
+#include "DirectX/Shipyard/GpuResource.h"
+#include "DirectX/Shipyard/PSO.h"
+#include "DirectX/Shipyard/RootSignature.h"
 
 //  //alignas(16)
 //struct  GenerateMipsCB

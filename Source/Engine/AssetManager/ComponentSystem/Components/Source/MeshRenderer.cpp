@@ -1,20 +1,25 @@
-#include "AssetManager.pch.h"
+#include "Engine/AssetManager/AssetManager.pch.h"
+#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
+
+#include "Engine/AssetManager/ComponentSystem/Components/Animator.h"
+#include "Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h"
+#include "Engine/AssetManager/Objects/BaseAssets/Animations.h"
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 #include "Tools/ImGui/ImGui/imgui.h"
 
-cMeshRenderer::cMeshRenderer(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager)
+cMeshRenderer::cMeshRenderer(const SY::UUID anOwnerId, GameObjectManager* aManager) : Component(anOwnerId, aManager)
 {
-	m_Mesh = AssetManager::Get().LoadAsset<Mesh>("default.fbx"); 
+	m_Mesh = AssetManager::Get().LoadAsset<Mesh>("default.fbx");
 }
 
-inline cMeshRenderer::cMeshRenderer(const SY::UUID anOwnerId,GameObjectManager* aManager,const std::filesystem::path& aFilePath,bool useExact) : Component(anOwnerId,aManager)
+inline cMeshRenderer::cMeshRenderer(const SY::UUID anOwnerId, GameObjectManager* aManager, const std::filesystem::path& aFilePath, bool useExact) : Component(anOwnerId, aManager)
 {
-	m_Mesh = AssetManager::Get().LoadAsset<Mesh>(aFilePath,useExact); 
+	m_Mesh = AssetManager::Get().LoadAsset<Mesh>(aFilePath, useExact);
 }
 
 void cMeshRenderer::SetNewMesh(const std::filesystem::path& aFilePath)
 {
-	m_Mesh = AssetManager::Get().LoadAsset<Mesh>(aFilePath); 
+	m_Mesh = AssetManager::Get().LoadAsset<Mesh>(aFilePath);
 }
 
 void cMeshRenderer::SetNewMesh(std::shared_ptr<Mesh> aMesh)
@@ -24,16 +29,39 @@ void cMeshRenderer::SetNewMesh(std::shared_ptr<Mesh> aMesh)
 
 void cMeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath)
 {
-	SetMaterialPath(aFilePath,0);
+	SetMaterialPath(aFilePath, 0);
 }
 
-void cMeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath,int elementIndex)
-{ 
+void cMeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath, int elementIndex)
+{
 	if (m_OverrideMaterial.size() <= elementIndex)
 	{
 		m_OverrideMaterial.resize(elementIndex + 1);
 	}
-	m_OverrideMaterial[elementIndex] = AssetManager::Get().LoadAsset<Material>(aFilePath); 
+	m_OverrideMaterial[elementIndex] = AssetManager::Get().LoadAsset<Material>(aFilePath);
+}
+
+std::shared_ptr<Material> cMeshRenderer::GetMaterial(int materialIndex) const
+{ 
+	assert(materialIndex >= 0);
+
+	if (!m_OverrideMaterial.empty() && m_OverrideMaterial.size() > materialIndex)
+	{
+		if (const auto mat = m_OverrideMaterial[materialIndex])
+		{
+			return mat;
+		};
+	} 
+
+	if (m_Mesh->materials.contains(materialIndex))
+	{
+		if (const auto mat = m_Mesh->materials[materialIndex])
+		{
+			return mat;
+		};
+	} 
+
+	return nullptr;
 }
 
 bool cMeshRenderer::IsDefaultMesh() const
@@ -70,7 +98,7 @@ void cMeshRenderer::InspectorView()
 	Reflect<cMeshRenderer>();
 }
 
-std::shared_ptr<TextureHolder> cMeshRenderer::GetTexture(eTextureType type,unsigned materialIndex) const
+std::shared_ptr<TextureHolder> cMeshRenderer::GetTexture(eTextureType type, unsigned materialIndex) const
 {
 	OPTICK_EVENT();
 	assert(materialIndex >= 0);
@@ -85,7 +113,7 @@ std::shared_ptr<TextureHolder> cMeshRenderer::GetTexture(eTextureType type,unsig
 				{
 					return tex;
 				}
-			};
+			}
 		}
 
 		for (const auto& material : m_OverrideMaterial)
@@ -113,7 +141,7 @@ std::shared_ptr<TextureHolder> cMeshRenderer::GetTexture(eTextureType type,unsig
 		};
 	}
 
-	for (const auto& [value,material] : m_Mesh->materials)
+	for (const auto& [value, material] : m_Mesh->materials)
 	{
 		if (!material)
 		{
@@ -152,12 +180,12 @@ void cMeshRenderer::Render()
 	//GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),isInstanced);
 }
 
-cSkeletalMeshRenderer::cSkeletalMeshRenderer(const SY::UUID anOwnerId,GameObjectManager* aManager) : cMeshRenderer(anOwnerId,aManager)
+cSkeletalMeshRenderer::cSkeletalMeshRenderer(const SY::UUID anOwnerId, GameObjectManager* aManager) : cMeshRenderer(anOwnerId, aManager)
 {
 	//cMeshRenderer creates default mesh
 }
 
-cSkeletalMeshRenderer::cSkeletalMeshRenderer(const SY::UUID anOwnerId,GameObjectManager* aManager,const std::filesystem::path& aFilePath) : cMeshRenderer(anOwnerId,aManager,aFilePath)
+cSkeletalMeshRenderer::cSkeletalMeshRenderer(const SY::UUID anOwnerId, GameObjectManager* aManager, const std::filesystem::path& aFilePath) : cMeshRenderer(anOwnerId, aManager, aFilePath)
 {
 	mySkeleton = AssetManager::Get().LoadAsset<Skeleton>(aFilePath);
 	assert(mySkeleton);
@@ -166,7 +194,7 @@ cSkeletalMeshRenderer::cSkeletalMeshRenderer(const SY::UUID anOwnerId,GameObject
 void cSkeletalMeshRenderer::SetNewMesh(const std::filesystem::path& aFilePath)
 {
 	m_Mesh = AssetManager::Get().LoadAsset<Mesh>(aFilePath);
-	mySkeleton = AssetManager::Get().LoadAsset<Skeleton>(aFilePath); 
+	mySkeleton = AssetManager::Get().LoadAsset<Skeleton>(aFilePath);
 }
 
 void cSkeletalMeshRenderer::Render()
@@ -176,11 +204,11 @@ void cSkeletalMeshRenderer::Render()
 	{
 		if (const auto* myAnimation = this->TryGetComponent<cAnimator>())
 		{
-			myAnimation->RenderAnimation(m_Mesh,myTransform->GetTransform());
+			myAnimation->RenderAnimation(m_Mesh, myTransform->GetTransform());
 			return;
-		} 
+		}
 		return;
-	} 
+	}
 }
 
 void cSkeletalMeshRenderer::InspectorView()

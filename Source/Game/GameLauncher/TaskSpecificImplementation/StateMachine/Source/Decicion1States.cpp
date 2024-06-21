@@ -2,6 +2,10 @@
 #include <Engine/PersistentSystems/ArtificialInteligence/AICommands/AICommands.h>
 
 #include <Engine/AssetManager/AssetManager.pch.h> 
+
+#include "Engine/AssetManager/Objects/AI/AgentSystem/AIPollingManager.h"
+#include "Engine/AssetManager/Objects/AI/AgentSystem/PollingStations/Target_PollingStation.h"
+
 void MovementState::Enter()
 {
 	std::cout << "Entering MovementState" << std::endl;
@@ -63,7 +67,6 @@ void DeadState::Update(float deltaTime,GameObject input)
 	else
 	{
 		myStateMachine->ChangeState((int)eStates::Movement);
-		return;
 	}
 }
 
@@ -100,13 +103,11 @@ void FightingState::Update(float deltaTime,GameObject input)
 		if(!GeneralizedAICommands::IsTargetAlive(input) || !GeneralizedAICommands::IsTargetInRange(input))
 		{
 			myStateMachine->ChangeState((int)eStates::Movement);
-			return;
 		}
 	}
 	else
 	{
 		myStateMachine->ChangeState((int)eStates::Fleeing);
-		return;
 	}
 }
 void FightingState::Exit()
@@ -137,7 +138,6 @@ void FleeingState::Update(float deltaTime,GameObject input)
 	if((closestWell - position).Length() < 1.0f)
 	{
 		myStateMachine->ChangeState((int)eStates::Healing);
-		return;
 	}
 }
 

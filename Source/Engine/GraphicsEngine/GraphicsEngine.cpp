@@ -1,4 +1,4 @@
-#include "GraphicsEngine.pch.h"
+#include "Engine/GraphicsEngine/GraphicsEngine.pch.h"
 
 #include <d3dcompiler.h>
 #include <DirectX/directx/d3dx12_pipeline_state_stream.h>
@@ -20,8 +20,10 @@
 #include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
 #include "Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h" 
-#include "imgui_internal.h"
-#include "ImGuizmo.h"
+#include "Engine/PersistentSystems/Scene.h"
+#include "Rendering/Passes.h"
+#include "Tools/ImGui/ImGui/imgui_internal.h"
+#include "Tools/ImGui/ImGui/ImGuizmo.h"
 #include "Tools/ImGui/ImGui/backends/imgui_impl_dx12.h"
 #include "Tools/Utilities/Input/Input.hpp"
 
@@ -292,64 +294,24 @@ void GraphicsEngine::UpdateSettings()
 
 
 
-void GraphicsEngine::Render(std::vector<std::shared_ptr<Viewport>>& renderViewPorts)
+#pragma optimize("",off) 
+
+void GraphicsEngine::Render(std::vector< std::shared_ptr<Viewport>>& renderViewPorts)
 {
 	BeginFrame();
 
 	for (auto& viewport : renderViewPorts)
 	{
-		RenderFrame(*viewport,GameObjectManager::Get());
+		RenderFrame(*viewport, viewport->sceneToRender->GetGOM());
 	}
 	EndFrame();
 }
-void GraphicsEngine::RenderMRToTexture(std::shared_ptr<Mesh> meshAsset,std::shared_ptr<TextureHolder> renderTarget)
-{
-	GameObjectManager newScene;
-
-	{
-		GameObject worldRoot = newScene.CreateGameObject();
-		worldRoot.SetName("WordRoot");
-		Transform& transform = worldRoot.AddComponent<Transform>();
-		transform.SetRotation(80,0,0);
-		transform.SetPosition(0,5,0);
-		cLight& pLight = worldRoot.AddComponent<cLight>(eLightType::Directional);
-
-		pLight.SetColor(Vector3f(1,1,1));
-		pLight.SetPower(2.0f);
-		pLight.BindDirectionToTransform(true);
-	}
-	{
-		auto renderObject = newScene.CreateGameObject();
-		renderObject.AddComponent<Transform>();
-		renderObject.AddComponent<cMeshRenderer>(meshAsset->AssetPath);
-	}
-	{
-		{
-			GameObject camera = newScene.CreateGameObject();
-			camera.SetName("Camera"); 
-			auto& cameraComponent = camera.AddComponent<cCamera>();
-			newScene.SetLastGOAsCamera();
-			cameraComponent.SetActive(true);
-			auto& transform = camera.AddComponent<Transform>();
-			transform.SetPosition(0,1,-2);
-			transform.SetRotation(0,90,0);
-		}
-	}
-
-	Viewport newViewport(true,{ 512,512 },newScene,renderTarget);
-	auto fence = (RenderFrame(newViewport,newScene)); 
-
-	const auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
-	const auto commandList = commandQueue->GetCommandList();
-	commandQueue->WaitForFenceValue(fence);
-	renderTarget->isLoadedComplete = true;
-}
-
+ 
 
 
 void GraphicsEngine::BeginFrame()
 {
-	myCamera = GameObjectManager::Get().GetCamera().TryGetComponent<cCamera>();
+	myCamera = Scene::ActiveManager().GetCamera().TryGetComponent<cCamera>();
 	if (!myCamera)
 	{
 		Logger::Err("No camera in scene. No render is possible");
@@ -488,13 +450,12 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
 			objectBuffer.MinExtents = -Vector3f(1,1,1);
 			objectBuffer.hasBone = false;
 			objectBuffer.isInstanced = false;
-			commandList->AllocateBuffer(eRootBindings::objectBuffer,objectBuffer);
-
+			commandList->AllocateBuffer(eRootBindings::objectBuffer,objectBuffer); 
 			vertCount += element.VertexBuffer.GetVertexCount();
 			GPU::ConfigureInputAssembler(*commandList,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.IndexResource);
 
 			const unsigned materialIndex = element.MaterialIndex;
-			MaterialBuffer materialBuffer;
+			MaterialBuffer materialBuffer = meshRenderer.GetMaterial(materialIndex)->GetMaterialData();
 
 			for (int i = 0; i < static_cast<int>(eTextureType::EffectMap) + 1; i++)
 			{
@@ -597,6 +558,7 @@ void GraphicsEngine::ToneMapperPass(std::shared_ptr<CommandList> commandList,Tex
 
 	GPU::ClearRTV(*commandList.get(),toneMapper->RenderTargets(),toneMapper->GetNumberOfTargets());
 	commandList->SetRenderTargets(1,target,nullptr);
+	commandList->TrackResource(*target);
 
 	commandList->GetGraphicsCommandList()->IASetVertexBuffers(0,1,nullptr);
 	commandList->GetGraphicsCommandList()->IASetIndexBuffer(nullptr);

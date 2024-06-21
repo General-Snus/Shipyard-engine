@@ -1,8 +1,12 @@
-#include "AssetManager.pch.h" 
+#include "Engine/AssetManager/AssetManager.pch.h"
+
 #include <extensions\PxRigidActorExt.h>
 #include <Tools/ThirdParty/PhysX/physx/include/foundation/PxMat33.h> 
 #include <Tools/ThirdParty/PhysX/physx/include/PxPhysicsAPI.h>
 #include "../cPhysXStaticBody.h"
+
+#include "Engine/AssetManager/ComponentSystem/Components/Collider.h"
+#include "Engine/AssetManager/Objects/BaseAssets/ColliderAsset.h"
 
 
 physx::PxMat33 ConvertMatrix(const Matrix& myMatrix)

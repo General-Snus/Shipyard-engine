@@ -3,15 +3,14 @@
 #include <iostream>
 #include <unordered_map>
 #include <vector>
-#include "UUID.h"
-#include <Tools/Logging/Logging.h>
-#include <Engine/AssetManager/ComponentSystem/GameObjectManager.h>
+#include "UUID.h" 
 
 
 #ifndef ComponentManagerDef 
 #define ComponentManagerDef 
 class Component;
 class GameObjectManager;
+
 class ComponentManagerBase
 {
 public:
@@ -24,7 +23,7 @@ public:
 		Render
 	};
 
-	ComponentManagerBase(GameObjectManager* manager) : myManager(manager){ };
+	ComponentManagerBase(GameObjectManager* manager);
 	virtual ~ComponentManagerBase() = default;
 	virtual void Destroy() = 0;
 	virtual void Update() = 0;
@@ -35,8 +34,7 @@ public:
 
 	void SetUpdatePriority(const UpdatePriority aPriority) { myUpdatePriority = aPriority; }
 	const UpdatePriority GetUpdatePriority() const { return myUpdatePriority; }
-
-
+ 
 	virtual Component* TryGetComponent(const SY::UUID aGameObjectID) = 0;
 protected: 
 	GameObjectManager* myManager = nullptr;
@@ -193,10 +191,7 @@ void ComponentManager<T>::DeleteGameObject(const SY::UUID aGameObjectID)
 	unsigned int id = myVectorIndexToGameObjectID[static_cast<unsigned int>(myComponents.size() - 1)]; // Get the id of the game object with the last component 
 	myComponents[index].Destroy(); // Call custom destructor 
 	myComponents[index] = myComponents[myComponents.size() - 1]; // Swap the last component with the component to remove (cyclic remove)
-	//std::swap(myComponents[index],myComponents[myComponents.size() - 1]); // Swap the last component with the component to remove (cyclic remove)
-
-
-	Logger::Log(std::format("Removed {} at id: {}\n",typeid(T).name(),id));
+	//std::swap(myComponents[index],myComponents[myComponents.size() - 1]); // Swap the last component with the component to remove (cyclic remove) 
 	myComponents.pop_back();										// Remove the newly last component (the component to remove)
 
 	myGameObjectIDtoVectorIndex[id] = index;						// Change the previously last game object to refer to the new component index

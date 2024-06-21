@@ -1,9 +1,10 @@
-#include "AssetManager.pch.h" 
+#include "Engine/AssetManager/AssetManager.pch.h" 
 #include <Tools/Utilities/Math.hpp>
 #include "../MeshAsset.h" 
 
 #include "DirectX/Shipyard/GPU.h"
 #include "DirectX/Shipyard/Helpers.h"
+#include "Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h"
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 
 

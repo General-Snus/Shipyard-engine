@@ -8,17 +8,21 @@
 #include "imgui_internal.h"
 #include "ImGuiHepers.hpp" 
 
-#include <Tools/ImGui/ImGui/ImGuizmo.h>
+#include <Tools/ImGui/ImGui/ImGuizmo.h> 
 
-#include "Input/Input.hpp"
+#include "Engine/PersistentSystems/Scene.h"
+#include "Tools/Logging/Logging.h"
+#include "Tools/Utilities/Input/Input.hpp"
 
 ImGuizmo::OPERATION m_CurrentGizmoOperation = ImGuizmo::OPERATION::UNIVERSAL;
 ImGuizmo::MODE m_CurrentGizmoMode = ImGuizmo::MODE::WORLD;
 
+#pragma optimize("",off) 
 Viewport::Viewport(bool IsMainViewPort,Vector2ui ViewportResolution,
-	GameObjectManager& sceneToRender,std::shared_ptr<TextureHolder> RenderTexture) :
-	ViewportResolution((float)ViewportResolution.x,(float)ViewportResolution.y),sceneToRender(sceneToRender),
-	IsMainViewPort(IsMainViewPort),m_RenderTarget(RenderTexture)
+	std::shared_ptr<Scene> aScene,std::shared_ptr<TextureHolder> RenderTexture) :
+	m_RenderTarget(RenderTexture),
+	ViewportResolution(static_cast<float>(ViewportResolution.x),static_cast<float>(ViewportResolution.y)),
+	sceneToRender(aScene),IsMainViewPort(IsMainViewPort)
 {
 	if (!m_RenderTarget)
 	{
@@ -28,13 +32,15 @@ Viewport::Viewport(bool IsMainViewPort,Vector2ui ViewportResolution,
 
 	if (IsMainViewPort)
 	{
-		myVirtualCamera = sceneToRender.GetCamera();
+		myVirtualCamera = sceneToRender->GetGOM().GetCamera();
 	}
 	else
 	{
-		myVirtualCamera = sceneToRender.CreateGameObject();
-		myVirtualCamera.AddComponent<cCamera>();
+		CameraSettings settings;
+		settings.APRatio = static_cast<float>(ViewportResolution.x) / ViewportResolution.y; 
+		myVirtualCamera = sceneToRender->ActiveManager().CreateGameObject();
 		myVirtualCamera.AddComponent<Transform>();
+		myVirtualCamera.AddComponent<cCamera>(settings);
 	}
 }
 
@@ -42,7 +48,7 @@ Viewport::~Viewport()
 {
 	if (!IsMainViewPort)
 	{
-		sceneToRender.DeleteGameObject(myVirtualCamera,true);
+		sceneToRender->GetGOM().DeleteGameObject(myVirtualCamera,true);
 	}
 	else
 	{
@@ -53,12 +59,12 @@ Viewport::~Viewport()
 
 
 
-Texture* Viewport::GetTarget()
+Texture* Viewport::GetTarget() const
 {
 	return m_RenderTarget->GetRawTexture().get();
 }
 
-bool Viewport::IsSelected()
+bool Viewport::IsSelected() const
 {
 	return IsUsed;
 }
@@ -76,7 +82,7 @@ bool Viewport::IsRenderReady()
 	return IsVisible;
 }
 
-bool Viewport::IsMainViewport()
+bool Viewport::IsMainViewport() const
 {
 	return IsMainViewPort;
 }
@@ -85,7 +91,7 @@ void Viewport::Update()
 {
 	if (IsMainViewPort)
 	{
-		myVirtualCamera = sceneToRender.GetCamera();
+		myVirtualCamera = sceneToRender->GetGOM().GetCamera();
 		if (auto* camera = myVirtualCamera.TryGetComponent<cCamera>())
 		{
 			camera->GetSettings().APRatio = static_cast<float>(ViewportResolution.x) / ViewportResolution.y;
@@ -116,11 +122,11 @@ Matrix Viewport::Projection()
 	if (!ViewportCamera)
 	{
 		CameraSettings settings;
-		const auto dxMatrix = XMMatrixPerspectiveFovLH(settings.fow,settings.APRatio,settings.nearField,settings.farfield);
+		const auto dxMatrix = XMMatrixPerspectiveFovLH(settings.FowInRad(),settings.APRatio,settings.nearField,settings.farfield);
 		return Matrix(&dxMatrix);
 	}
-	auto settings = ViewportCamera->GetSettings();
-	const auto dxMatrix = XMMatrixPerspectiveFovLH(settings.fow,settings.APRatio,settings.nearField,settings.farfield);
+	auto& settings = ViewportCamera->GetSettings();
+	const auto dxMatrix = XMMatrixPerspectiveFovLH(settings.FowInRad(),settings.APRatio,settings.nearField,settings.farfield);
 	return Matrix(&dxMatrix);
 }
 
@@ -236,7 +242,7 @@ void Viewport::RenderImGUi()
 
 	}
 
-	auto style = ImGui::GetStyle();
+	auto& style = ImGui::GetStyle();
 	if (ImGui::Begin(title.c_str(),nullptr))
 	{
 		IsUsed = ImGui::IsWindowFocused();
@@ -275,7 +281,7 @@ void Viewport::RenderImGUi()
 			auto cameraView = ViewInverse();
 			auto cameraProjection = Projection();
 
-			for (auto gameObject : selectedObjects)
+			for (auto& gameObject : selectedObjects)
 			{
 				auto& transform = gameObject.GetComponent<Transform>();
 				bool transfomed = ImGuizmo::Manipulate(&cameraView,&cameraProjection,m_CurrentGizmoOperation,m_CurrentGizmoMode,

@@ -1,4 +1,4 @@
-#include "AssetManager.pch.h"
+#include "Engine/AssetManager/AssetManager.pch.h"
 
 #include <d3dcompiler.h>
 #include "../ShipyardShader.h"
@@ -31,11 +31,7 @@ void ShipyardShader::SetShader(const ComPtr<ID3DBlob>& aShader)
 {
 	myBlob = aShader;
 }
-
-ShaderType ShipyardShader::GetShaderType() const
-{
-	return myShaderInfo.Type;
-}
+ 
 ID3DBlob* ShipyardShader::GetBlob() const
 {
 	return myBlob.Get();
@@ -47,8 +43,4 @@ LPVOID ShipyardShader::GetBufferPtr()
 size_t ShipyardShader::GetBlobSize() const
 {
 	return myBlob->GetBufferSize();
-}
-const ShaderInfo& ShipyardShader::GetShaderInfo() const
-{
-	return myShaderInfo;
-}
+} 

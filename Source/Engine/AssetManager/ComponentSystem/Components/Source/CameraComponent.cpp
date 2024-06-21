@@ -1,4 +1,4 @@
-#include "AssetManager.pch.h"
+#include "Engine/AssetManager/AssetManager.pch.h"
 
 #include <DirectXMath.h>
 #include <Editor/Editor/Core/Editor.h>
@@ -9,6 +9,7 @@
 
 #include "DirectX/Shipyard/CommandList.h"
 #include "DirectX/Shipyard/GPU.h"
+#include "Editor/Editor/Core/ApplicationState.h"
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 #include "Tools/Utilities/Input/EnumKeys.h"
 
@@ -20,7 +21,7 @@ cCamera::cCamera(const SY::UUID anOwnerId,GameObjectManager* aManager) : Compone
 
 	if (!mySettings.isOrtho)
 	{
-		const auto dxMatrix = XMMatrixPerspectiveFovLH(mySettings.fow,mySettings.APRatio,mySettings.farfield,
+		const auto dxMatrix = XMMatrixPerspectiveFovLH(mySettings.FowInRad(), mySettings.APRatio, mySettings.farfield,
 			mySettings.nearField);
 		m_Projection = Matrix(&dxMatrix);
 	}
@@ -52,13 +53,13 @@ cCamera::cCamera(const SY::UUID anOwnerId,GameObjectManager* aManager,const Came
 
 	if (!mySettings.isOrtho)
 	{
-		const auto dxMatrix = XMMatrixPerspectiveFovLH(mySettings.fow,mySettings.APRatio,mySettings.farfield,
+		const auto dxMatrix = XMMatrixPerspectiveFovLH(mySettings.FowInRad(),mySettings.APRatio,mySettings.farfield,
 			mySettings.nearField);
 		m_Projection = Matrix(&dxMatrix);
 	}
 	else
 	{
-		const auto dxMatrix = XMMatrixOrthographicLH(40,40,1000000,mySettings.nearField);
+		const auto dxMatrix = XMMatrixOrthographicLH(static_cast<float>(mySettings.resolution.x), static_cast<float>(mySettings.resolution.y),1000000,mySettings.nearField);
 		m_Projection = Matrix(&dxMatrix);
 	}
 
@@ -83,6 +84,7 @@ cCamera::~cCamera()
 void cCamera::Update()
 {
 	OPTICK_EVENT();
+	mySettings.fow = std::clamp(mySettings.fow, 5.f, 360.f);
 
 	if (!mySettings.IsInControll)
 	{
@@ -94,21 +96,18 @@ void cCamera::Update()
 	Transform& aTransform = this->GetGameObject().GetComponent<Transform>();
 	float aTimeDelta = Timer:: GetDeltaTime();
 	const float mdf = cameraSpeed;
-	const float rotationSpeed = 20000;
+	const float rotationSpeed = 20000; 
 
-
-	myScreenSize = Editor::GetViewportResolution();
-
-	if (Input::IsKeyHeld((int)Keys::UP))
+	if (Input::IsKeyHeld(static_cast<int>(Keys::UP)))
 	{
 		cameraSpeed = cameraSpeed * 1.01f;
 	}
-	if (Input::IsKeyHeld((int)Keys::DOWN))
+	if (Input::IsKeyHeld(static_cast<int>(Keys::DOWN)))
 	{
-		cameraSpeed = std::clamp(cameraSpeed * 0.99f,.5f,(float)INT_MAX);
+		cameraSpeed = std::clamp(cameraSpeed * 0.99f,.5f,static_cast<float>(INT_MAX));
 	}
 
-	if (Input::IsKeyHeld((int)Keys::MOUSERBUTTON))
+	if (Input::IsKeyHeld(static_cast<int>(Keys::MOUSERBUTTON)))
 	{
 		const Vector3f mouseDeltaVector =
 		{
@@ -119,26 +118,26 @@ void cCamera::Update()
 		aTransform.Rotate(mouseDeltaVector * rotationSpeed * Timer:: GetDeltaTime());
 	}
 
-	if (Input::IsKeyHeld((int)Keys::W))
+	if (Input::IsKeyHeld(static_cast<int>(Keys::W)))
 	{
 		aTransform.Move(aTransform.GetForward() * aTimeDelta * mdf);
 	}
 
-	if (Input::IsKeyHeld((int)Keys::S))
+	if (Input::IsKeyHeld(static_cast<int>(Keys::S)))
 	{
 		aTransform.Move(-aTransform.GetForward() * aTimeDelta * mdf);
 	}
 
-	if (Input::IsKeyHeld((int)Keys::D))
+	if (Input::IsKeyHeld(static_cast<int>(Keys::D)))
 	{
 		aTransform.Move(aTransform.GetRight() * aTimeDelta * mdf);
 	}
 
-	if (Input::IsKeyHeld((int)Keys::A))
+	if (Input::IsKeyHeld(static_cast<int>(Keys::A)))
 	{
 		aTransform.Move(-aTransform.GetRight() * aTimeDelta * mdf);
 	}
-	if (Input::IsKeyHeld((int)Keys::E))
+	if (Input::IsKeyHeld(static_cast<int>(Keys::E)))
 	{
 		aTransform.Rotate({ 0,200.f * aTimeDelta });
 	}
@@ -148,17 +147,17 @@ void cCamera::Update()
 		GetComponent<cLight>().BindDirectionToTransform(!GetComponent<cLight>().GetIsBound());
 	}
 #endif
-	if (Input::IsKeyHeld((int)Keys::Q))
+	if (Input::IsKeyHeld(static_cast<int>(Keys::Q)))
 	{
 		aTransform.Rotate({ 0,-200.f * aTimeDelta });
 	}
 
-	if (Input::IsKeyHeld((int)Keys::SPACE))
+	if (Input::IsKeyHeld(static_cast<int>(Keys::SPACE)))
 	{
 		aTransform.Move(aTransform.GetUp() * aTimeDelta * mdf);
 	}
 
-	if (Input::IsKeyHeld((int)Keys::SHIFT))
+	if (Input::IsKeyHeld(static_cast<int>(Keys::SHIFT)))
 	{
 		aTransform.Move(-aTransform.GetUp() * aTimeDelta * mdf);
 	}
@@ -174,7 +173,7 @@ void cCamera::SetSettings(const CameraSettings& settings)
 
 	if (!mySettings.isOrtho)
 	{
-		const auto dxMatrix = XMMatrixPerspectiveFovLH(mySettings.fow,mySettings.APRatio,mySettings.farfield,
+		const auto dxMatrix = XMMatrixPerspectiveFovLH(mySettings.FowInRad(),mySettings.APRatio,mySettings.farfield,
 			mySettings.nearField);
 		m_Projection = Matrix(&dxMatrix);
 	}
@@ -188,8 +187,8 @@ void cCamera::SetSettings(const CameraSettings& settings)
 std::array<Vector4f,4> cCamera::GetFrustrumCorners() const
 {
 	const float farplane = 10000; // I dont use farplanes but some effect wants them anyway
-	const float aspectRatio = std::bit_cast<float>(myScreenSize.x) / std::bit_cast<float>(myScreenSize.y);
-	const float halfHeight = farplane * tanf(0.25f * mySettings.fow);
+	const float aspectRatio = std::bit_cast<float>(mySettings.resolution.x) / std::bit_cast<float>(mySettings.resolution.y);
+	const float halfHeight = farplane * tanf(0.25f * mySettings.FowInRad());
 	const float halfWidth = aspectRatio * halfHeight;
 	std::array<Vector4f,4> corners;
 	corners[0] = { -halfWidth, -halfHeight, farplane, 0.0f };
@@ -239,10 +238,10 @@ FrameBuffer cCamera::GetFrameBuffer()
 	FrameBuffer buffer;
 	buffer.ProjectionMatrix = m_Projection;
 	buffer.ViewMatrix = Matrix::GetFastInverse(transform.GetTransform());
-	buffer.Time = Timer:: GetDeltaTime();
+	buffer.Time = Timer::GetDeltaTime();
 	buffer.FB_RenderMode = static_cast<int>(ApplicationState::filter);
 	buffer.FB_CameraPosition = transform.GetPosition();
-	buffer.FB_ScreenResolution = Editor::Get().GetViewportResolution();
+	buffer.FB_ScreenResolution = mySettings.resolution;
 	//buffer.Data.FB_FrustrumCorners = { Vector4f(),Vector4f(),Vector4f(),Vector4f() };;
 	return buffer;
 }

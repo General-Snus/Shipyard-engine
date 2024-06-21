@@ -1,4 +1,7 @@
-#include <AssetManager.pch.h>
+#include "Engine/AssetManager/AssetManager.pch.h"
+#include "Engine/AssetManager/Objects/AI/AgentSystem/AIEventManager.h"
+
+#include "Engine/AssetManager/Objects/AI/AgentSystem/Controllers/Controller.h"
 
 AIEventManager::AIEventManager()
 { 

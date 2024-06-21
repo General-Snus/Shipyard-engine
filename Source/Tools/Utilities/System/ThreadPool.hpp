@@ -17,10 +17,10 @@ public:
 	void Init(unsigned int pool_size = std::thread::hardware_concurrency() - 1)
 	{
 		static const unsigned int max_threads = std::thread::hardware_concurrency();
-		unsigned int const num_threads = pool_size == 0 ? max_threads - 1 : (std::min)(max_threads - 1,pool_size);
+		numThreads = pool_size == 0 ? max_threads - 1 : (std::min)(max_threads - 1,pool_size);
 
-		threads.reserve(num_threads);
-		for (unsigned int i = 0; i < num_threads; ++i)
+		threads.reserve(numThreads);
+		for (unsigned int i = 0; i < numThreads; ++i)
 		{
 			threads.emplace_back(std::bind(ThreadWorker(this)));
 		}
@@ -84,8 +84,8 @@ private:
 	std::queue<std::move_only_function<void()>> workerQueue;
 	std::condition_variable conditional_var;
 	std::mutex conditional_mutex;
-	int numThreads;
-	int activeThreads;
+	unsigned numThreads{};
+	unsigned activeThreads = 0;
 
 	class ThreadWorker
 	{

@@ -1,6 +1,7 @@
 #pragma once
 #include <Engine/AssetManager/ComponentSystem/Component.h>
-#include <Engine/AssetManager/Objects/BaseAssets/ParticleEmitter.h>
+#include <Engine/AssetManager/Objects/BaseAssets/ParticleEmitter.h> 
+
 class ParticleSystem : public Component
 {
 public:

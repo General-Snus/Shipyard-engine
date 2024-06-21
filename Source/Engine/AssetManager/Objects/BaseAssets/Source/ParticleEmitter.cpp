@@ -1,10 +1,11 @@
-#include <AssetManager.pch.h>
+#include "Engine/AssetManager/AssetManager.pch.h"
+
 #include <Tools/Utilities/Math.hpp>
 #include "../ParticleEmitter.h"
-
-#include <Tools/ImGui/ImGui/imgui.h>
-
+#include <Tools/ImGui/ImGui/imgui.h> 
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
+#include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
+
 
 
 void ParticleEmitter::InitParticle(Particlevertex& vertex) const

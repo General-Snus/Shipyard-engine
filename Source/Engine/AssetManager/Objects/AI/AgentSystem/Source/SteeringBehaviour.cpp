@@ -1,7 +1,10 @@
-#include "AssetManager.pch.h"
+#include "Engine/AssetManager/AssetManager.pch.h"
 #include "../SteeringBehaviour.h"
 #include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h>
 #include <Tools/Utilities/LinearAlgebra/Quaternions.hpp>
+
+#include "Engine/AssetManager/ComponentSystem/Components/Collider.h"
+#include "Engine/PersistentSystems/Scene.h"
 
 
 void SteeringBehaviour::LookAt(cPhysics_Kinematic* kinematic,Vector3f TargetDirection,Vector3f forward,float strength)
@@ -120,7 +123,7 @@ void SteeringBehaviour::Separation(const std::vector<MultipleTargets_PollingStat
 		float distance = direction.Length();
 
 		//Try closest AABB point
-		if(auto collider = GameObjectManager::Get().TryGetComponent<cCollider>(i.sourceObject))
+		if(auto collider = Scene::ActiveManager().TryGetComponent<cCollider>(i.sourceObject))
 		{
 
 		}

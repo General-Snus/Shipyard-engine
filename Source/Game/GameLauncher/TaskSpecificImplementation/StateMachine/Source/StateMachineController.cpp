@@ -1,10 +1,16 @@
-#include "../Decicion1States.h"
-#include "../StateMachineController.h"
 #include <Editor/Editor/Defines.h>
 #include <Engine/AssetManager/AssetManager.pch.h>
 #include <Engine/AssetManager/Objects/AI/AgentSystem/StateMachine/StateMachineBase.h>
 #include <Engine/PersistentSystems/ArtificialInteligence/AICommands/AICommands.h>
 #include <memory>
+#include "../Decicion1States.h"
+#include "../StateMachineController.h"
+
+#include "Engine/AssetManager/ComponentSystem/Components/ActorSystem/CombatComponent.h"
+#include "Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h"
+#include "Engine/AssetManager/Objects/AI/AgentSystem/AIPollingManager.h"
+#include "Engine/AssetManager/Objects/AI/AgentSystem/PollingStations/Target_PollingStation.h"
+#include "Engine/AssetManager/Objects/AI/AgentSystem/SteeringBehaviour.h"
 
 StateMachineController::StateMachineController(StateMachineBase decicionTree)
 {
@@ -23,7 +29,7 @@ StateMachineController::StateMachineController()
 
 bool StateMachineController::Update(GameObject input)
 {
-	myMachine.Update(input);
+	myMachine.Update(std::move(input));
 
 	auto& physicsComponent = input.GetComponent<cPhysics_Kinematic>();
 	auto& transform = input.GetComponent<Transform>();

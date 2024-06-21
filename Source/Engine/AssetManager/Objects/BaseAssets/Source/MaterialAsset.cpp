@@ -1,7 +1,11 @@
-#include "AssetManager.pch.h" 
+#include "Engine/AssetManager/AssetManager.pch.h"
+
 #include <Engine/GraphicsEngine/Shaders/Registers.h> 
 
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
+#include <Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h>
+
+#include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
 
 bool Material::CreateJson(const DataMaterial& data,const std::filesystem::path& writePath)
 {

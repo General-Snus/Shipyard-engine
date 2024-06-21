@@ -12,8 +12,7 @@ public:
 	BackgroundColor(const SY::UUID anOwnerId,GameObjectManager* aManager,Vector4f aColor); // Create a generic cube   
 	~BackgroundColor() override = default;
 	void Update() override;
-	void SetColor(Vector4f aColor);
-	NLOHMANN_DEFINE_TYPE_INTRUSIVE(BackgroundColor,myOwnerID,myComponentType,myColor.x,myColor.y,myColor.z,myColor.w);
+	void SetColor(Vector4f aColor); 
 
 private:
 	Vector4f myColor;

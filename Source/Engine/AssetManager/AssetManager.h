@@ -8,15 +8,7 @@
 #include <Tools/Utilities/System/ThreadPool.hpp>
 #include <unordered_map> 
 #include <Editor/Editor/Defines.h>
-struct Frame;
-struct Element;
-struct MaterialBuffer;
-struct Bone;
-class Mesh;
-class Animation;
-class Skeleton;
-class Material;
-
+ 
 
 template<class T>
 struct LoadTask

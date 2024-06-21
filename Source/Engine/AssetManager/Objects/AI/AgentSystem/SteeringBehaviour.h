@@ -1,6 +1,7 @@
 #pragma once
+#include "PollingStations/Target_PollingStation.h"
 
-class cPhysics_Kinematic;
+class cPhysics_Kinematic; 
 class SteeringBehaviour
 {
 public:

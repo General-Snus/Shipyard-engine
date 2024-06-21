@@ -1,19 +1,13 @@
-#include "DirectXHeader.pch.h"
+#include "DirectX/DirectXHeader.pch.h"
 
-#include <XTK/DDSTextureLoader.h>
-#include <XTK/ResourceUploadBatch.h>
-#include <XTK/WICTextureLoader.h>
+#include <DirectX/XTK/DDSTextureLoader.h>
+#include <DirectX/XTK/ResourceUploadBatch.h>
+#include <DirectX/XTK/WICTextureLoader.h>
 #include "../GPU.h" 
-
-#include <Tools/Optick/include/optick.h>
-#include <Tools/ThirdParty/dpp/stringops.h>
-
-#include "../Helpers.h" 
-#include "Engine/GraphicsEngine/Shaders/Registers.h"
-#include "Shipyard/CommandQueue.h"
-#include "Shipyard/eDescriptors.h"
-#include "Shipyard/ResourceStateTracker.h"
-#include "Shipyard/Texture.h"
+#include "DirectX/Shipyard/CommandQueue.h"
+#include "DirectX/Shipyard/eDescriptors.h"
+#include "DirectX/Shipyard/ResourceStateTracker.h"
+#include "DirectX/Shipyard/Texture.h"
 
 
 bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared_ptr<Texture>& aBackBuffer,const std::shared_ptr<Texture>& aDepthBuffer

@@ -1,17 +1,29 @@
 #pragma once
 #include <Engine/AssetManager/ComponentSystem/Component.h>
 #include <Tools/Utilities/Math.hpp>  
+
+#include "Editor/Editor/Windows/Window.h"
 #include "Engine/GraphicsEngine/Rendering/Buffers/FrameBuffer.h"
 
 struct CameraSettings
 {
-	float fow = PI * (90.0f / 180.0f);;
+	float fow = 90.0f;
 	float APRatio = 16.0f / 9.0f;;
 	float farfield = 1000000.0f;
 	float nearField = 0.01f;
+	Vector2ui resolution = {  (Window::Width()), (Window::Height()) };
 	bool isOrtho = false;
 	bool IsInControll = false;
+	float FowInRad() const { return DEG_TO_RAD * fow; };
 };
+
+REFL_AUTO(type(CameraSettings)
+	, field(fow)
+	, field(APRatio)
+	, field(farfield)
+	, field(nearField)
+	, field(isOrtho) 
+)
 
 //#define Flashlight
 class cCamera : public Component
@@ -37,11 +49,12 @@ public:
 	Vector4f WoldSpaceToPostProjectionSpace(Vector3f aEntity);
 	void InspectorView() override;
 
-private:
-	Matrix m_Projection;
-	Vector2ui myScreenSize;
-	float cameraSpeed = 10;
 	CameraSettings mySettings;
+private:
+	Matrix m_Projection; 
+	float cameraSpeed = 10;
 };
 
-REFL_AUTO(type(cCamera))
+REFL_AUTO(type(cCamera)
+	, field(mySettings) 
+)

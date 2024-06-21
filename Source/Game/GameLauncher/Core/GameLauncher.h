@@ -1,7 +1,6 @@
 #pragma once 
-#include  <Engine/AssetManager/ComponentSystem/GameObject.h>
-#include <Tools/Logging/Logging.h>
-#include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
+#include "Engine/AssetManager/ComponentSystem/GameObject.h"  
+ 
 class GameLauncher
 {
 public:
@@ -10,10 +9,10 @@ public:
 	void GenerateNewRandomCubes();
 	void Start();
 	void Update(float delta);
-private: 
+private:
+
 	GameObject myCustomHandler;
-	GameObject myCustomHandler2;
-	Matrix myModelMatrix;
+	GameObject myCustomHandler2; 
 	float direction = 1.f;
 	float direction2 = -1.f;
 	std::vector<GameObject> vectorOfGameObjects;

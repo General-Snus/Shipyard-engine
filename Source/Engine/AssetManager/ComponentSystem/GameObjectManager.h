@@ -1,17 +1,13 @@
 #pragma once
-#include <iostream>
-#include <Tools/Utilities/System/SingletonTemplate.h>
-#include <typeinfo>
+#include <memory>
+#include <string>
 #include <unordered_map>
-#include <vector>
+
 #include "ComponentManager.h"
+#include "UUID.h"
 #include "Tools/Optick/include/optick.h"
 
-
-
-
-#ifndef GameObjectManagerDef 
-#define GameObjectManagerDef 
+class Component;
 
 enum class Layer
 {
@@ -35,9 +31,11 @@ template<class T> inline Layer& operator&= (Layer a,Layer b) { return (Layer&)((
 template<class T> inline Layer& operator^= (Layer a,Layer b) { return (Layer&)((int&)a ^= (int)b); }
 
 
+class ComponentManagerBase;
 class GameObject;
-
-class GameObjectManager : public Singleton<GameObjectManager>
+// Singleton for main scene but can also be handeled as a separate scene, will split later
+//TODO URGENT
+class GameObjectManager
 {
 private:
 	struct GameObjectData
@@ -46,15 +44,14 @@ private:
 		bool IsVisibleInHierarcy = true;
 		Layer onLayer = Layer::Default;
 		std::string Name;
-	};
-
-	friend class Singleton<GameObjectManager>;
+	}; 
 	friend class GameObject;
-public:
-	GameObjectManager() = default;
+public: 
+	GameObjectManager() = default; 
+	GameObjectManager(GameObjectManager const&) = default;
+	GameObjectManager(GameObjectManager&&) = default;
 	~GameObjectManager();
-	GameObject CreateGameObject();
-	GameObject CreateGameObjectAt(const SY::UUID aGameObjectID);
+	GameObject CreateGameObject(); 
 	void DeleteGameObject(const SY::UUID aGameObjectID,bool force = false);
 	void DeleteGameObject(const GameObject aGameObject,bool force = false);
 
@@ -107,9 +104,7 @@ public:
 
 
 	//Please dont call this for an other object than your own
-	void OnSiblingChanged(SY::UUID anID,const std::type_info* SourceClass = nullptr);
-
-
+	void OnSiblingChanged(SY::UUID anID,const std::type_info* SourceClass = nullptr); 
 private:
 	std::string GetName(const SY::UUID aGameObjectID);
 	void SetName(const std::string& name,const SY::UUID aGameObjectID);
@@ -124,6 +119,9 @@ private:
 	std::unordered_map<const std::type_info*,std::shared_ptr<ComponentManagerBase>> myComponentManagers = { };
 	std::unordered_map<SY::UUID,GameObjectData> myGameObjects = { };
 	std::vector<std::pair<const std::type_info*,std::shared_ptr<ComponentManagerBase>>> myUpdateOrder = { };
+
+
+
 	std::vector<SY::UUID> myObjectsToDelete = { };
 	std::vector<SY::UUID> myObjectsToAdd = { };
 	unsigned int myLastID = 1;
@@ -241,5 +239,4 @@ void GameObjectManager::AddManager()
 	OPTICK_EVENT();
 	myComponentManagers[&typeid(T)] = std::make_shared<ComponentManager<T>>(this);
 	SortUpdateOrder();
-}
-#endif	
+} 	

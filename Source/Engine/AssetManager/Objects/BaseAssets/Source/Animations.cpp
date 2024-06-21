@@ -1,4 +1,6 @@
-#include "AssetManager.pch.h"
+#include "Engine/AssetManager/AssetManager.pch.h"
+
+#include "Engine/AssetManager/Objects/BaseAssets/Animations.h"
 
 void Animation::Init()
 {

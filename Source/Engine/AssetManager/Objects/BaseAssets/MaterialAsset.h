@@ -24,11 +24,7 @@ struct MaterialBuffer
 	unsigned int vertexOffset = 0;
 	unsigned int vertexBufferIndex = 0;
 	float padding;
-};
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(MaterialBuffer,
-	albedoColor.x,albedoColor.y,albedoColor.z,albedoColor.w,
-	UVTiling.x,UVTiling.y,NormalStrength,Shine
-);
+}; 
 
 class Material : public AssetBase
 {

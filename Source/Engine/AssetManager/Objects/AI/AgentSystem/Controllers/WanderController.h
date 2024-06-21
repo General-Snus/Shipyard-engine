@@ -1,4 +1,6 @@
 #pragma once
+#include "Controller.h"
+#include "Engine/AssetManager/Objects/AI/AgentSystem/AIEventManager.h"
 
 class WanderController : public Controller
 {

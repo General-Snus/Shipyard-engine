@@ -1,4 +1,4 @@
-#include "PersistentSystems.pch.h"
+#include "Engine\PersistentSystems\PersistentSystems.pch.h"
 
 #include <Editor/Editor/Defines.h>
 #include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
@@ -11,6 +11,7 @@
 #include "geometry\PxTriangleMeshGeometry.h"
 #include "PxPhysics.h"
 #include "PxPhysicsAPI.h" 
+#include "Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h"
 
 using namespace physx;
 

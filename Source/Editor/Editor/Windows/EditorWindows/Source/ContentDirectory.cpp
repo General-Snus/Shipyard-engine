@@ -2,14 +2,65 @@
 #include "../ContentDirectory.h"
 #include <Engine/AssetManager/AssetManager.h>
 #include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
-#include <Engine/GraphicsEngine/GraphicsEngine.h>
-#include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
+#include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h> 
 #include <Tools/ImGui/ImGui/ImGuiHepers.hpp>
-#include <Tools/Utilities/Input/Input.hpp>
-#include <Tools/Utilities/Game/Timer.h>
-#include <cctype>
+#include <Tools/Utilities/Input/Input.hpp>  
 #include <shellapi.h>
-#pragma optimize("",off)
+
+#include <Editor/Editor/Core/Editor.h> 
+#include <Editor/Editor/Windows/EditorWindows/Viewport.h>
+#include <Engine/AssetManager/ComponentSystem/GameObject.h>
+#include <Engine/AssetManager/ComponentSystem/Components/Transform.h>
+#include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>
+#include <Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h>	
+#include <Engine/AssetManager/ComponentSystem/Components/CameraComponent.h> 
+#include "Engine/PersistentSystems/Scene.h"
+
+#pragma optimize("",off) 
+
+void GenerateSceneForIcon(std::shared_ptr<Mesh> meshAsset, std::shared_ptr<TextureHolder> renderTarget)
+{
+	auto newScene = std::make_shared<Scene>();
+	{
+		GameObject worldRoot = GameObject::Create(newScene);
+		worldRoot.SetName("WordRoot");
+		Transform& transform = worldRoot.AddComponent<Transform>();
+		transform.SetRotation(80, 0, 0);
+		transform.SetPosition(0, 5, 0);
+		cLight& pLight = worldRoot.AddComponent<cLight>(eLightType::Directional); 
+		pLight.SetColor(Vector3f(1, 1, 1));
+		pLight.SetPower(2.0f);
+		pLight.BindDirectionToTransform(true);
+	}
+
+	{
+		auto renderObject = GameObject::Create(newScene);
+		renderObject.AddComponent<Transform>();
+		auto& mr = renderObject.AddComponent<cMeshRenderer>();
+		mr.SetNewMesh(meshAsset);
+	}
+
+	const auto res = Vector2ui(512, 512);
+	{
+		CameraSettings settings; 
+		settings.APRatio = static_cast<float>(res.x) / res.y;
+		settings.resolution = res;
+		GameObject camera = GameObject::Create(newScene);
+		camera.SetName("Camera");
+		auto& cameraComponent = camera.AddComponent<cCamera>(settings);
+		newScene->GetGOM().SetLastGOAsCamera();
+		cameraComponent.SetActive(true);
+		auto& transform = camera.AddComponent<Transform>();
+		//transform.SetPosition(0, 0, -meshAsset->boxSphereBounds.GetRadius()*2.0f);
+		//transform.SetRotation(0, 0, 0);
+		transform.SetPosition(-10, 3, 0);
+		transform.SetRotation(0, 90, 0);
+	}  
+
+	std::shared_ptr<Viewport> newViewport = std::make_shared<Viewport>(true, res, newScene, renderTarget);
+	Editor::Get().AddRenderJob(newViewport);
+	renderTarget->isBeingLoaded = true;
+}
 
 ContentDirectory::ContentDirectory() : m_CurrentPath(AssetManager::AssetPath)
 {
@@ -20,7 +71,7 @@ void ContentDirectory::RenderImGUi()
 	ImGui::Begin("ContentFolder");
 
 	{
-		if (ImGui::ArrowButton("##BackButton",ImGuiDir_Up) && m_CurrentPath != AssetManager::AssetPath)
+		if (ImGui::ArrowButton("##BackButton", ImGuiDir_Up) && m_CurrentPath != AssetManager::AssetPath)
 		{
 			m_CurrentPath = m_CurrentPath.parent_path();
 		}
@@ -45,7 +96,7 @@ void ContentDirectory::RenderImGUi()
 	if (ImGui::IsWindowFocused() && Input::IsKeyHeld(Keys::CONTROL))
 	{
 		cellSize += Input::GetMouseWheelDelta() * Timer::GetDeltaTime();
-		cellSize = std::clamp(cellSize,50.f,300.f);
+		cellSize = std::clamp(cellSize, 50.f, 300.f);
 	}
 
 	ImGui::NewLine();
@@ -54,10 +105,10 @@ void ContentDirectory::RenderImGUi()
 	auto columnCount = static_cast<int>(contentFolderWidth / cellWidth);
 
 
-	ImGui::Columns(std::max(columnCount,1),nullptr);
+	ImGui::Columns(std::max(columnCount, 1), nullptr);
 	for (const auto& it : std::filesystem::directory_iterator(m_CurrentPath))
 	{
-		const auto& path = std::filesystem::relative(it.path(),AssetManager::AssetPath);
+		const auto& path = std::filesystem::relative(it.path(), AssetManager::AssetPath);
 		const auto& fileName = path.filename();
 		const auto& extension = path.extension();
 
@@ -75,18 +126,19 @@ void ContentDirectory::RenderImGUi()
 			}
 			else if (extension == ".fbx")
 			{
-				AssetManager::Get().ForceLoadAsset<TextureHolder>(std::format("INTERNAL_IMAGE_UI_{}",fileName.string()),imageTexture);
-				
+				AssetManager::Get().ForceLoadAsset<TextureHolder>(std::format("INTERNAL_IMAGE_UI_{}", fileName.string()), imageTexture);
+
 				std::shared_ptr<Mesh> mesh;
-				AssetManager::Get().ForceLoadAsset<Mesh>(path,mesh);
+				AssetManager::Get().ForceLoadAsset<Mesh>(path, mesh);
 				if (!imageTexture->isLoadedComplete && !imageTexture->isBeingLoaded)
 				{
-					GraphicsEngine::Get().RenderMRToTexture(mesh,imageTexture);
+					GenerateSceneForIcon(mesh, imageTexture);
 				}
-				else if (imageTexture->isBeingLoaded || (!imageTexture->isLoadedComplete && !imageTexture->isBeingLoaded))
+
+				if (imageTexture->isBeingLoaded || (!imageTexture->isLoadedComplete && !imageTexture->isBeingLoaded))
 				{
 					imageTexture = AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/File.png");
-				} 
+				}
 
 			}
 			else if (extension == ".json")
@@ -103,7 +155,7 @@ void ContentDirectory::RenderImGUi()
 			}
 		}
 
-		ImGui::ImageButton(fileName.string().c_str(),imageTexture,{ cellWidth,cellWidth });
+		ImGui::ImageButton(fileName.string().c_str(), imageTexture, { cellWidth,cellWidth });
 
 
 		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
@@ -114,7 +166,7 @@ void ContentDirectory::RenderImGUi()
 			}
 			else
 			{
-				ShellExecute(0,0,it.path().wstring().c_str(),0,0,SW_SHOW);
+				ShellExecute(0, 0, it.path().wstring().c_str(), 0, 0, SW_SHOW);
 			}
 		}
 		ImGui::TextWrapped(fileName.string().c_str());

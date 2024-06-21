@@ -1,0 +1,10 @@
+#pragma once
+#include "Engine/AssetManager/Objects/BaseAssets/Animations.h"
+#include "Engine/AssetManager/Objects/BaseAssets/BaseAsset.h"
+#include "Engine/AssetManager/Objects/BaseAssets/ColliderAsset.h"
+#include "Engine/AssetManager/Objects/BaseAssets/LightDataBase.h"
+#include "Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h"
+#include "Engine/AssetManager/Objects/BaseAssets/MeshAsset.h"
+#include "Engine/AssetManager/Objects/BaseAssets/ParticleEmitter.h"
+#include "Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h"
+#include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"	

@@ -3,6 +3,7 @@
 #include "DirectX/Shipyard/Texture.h"
 #include "Editor/Editor/Windows/Window.h"
 #include "EditorWindow.h"
+#include "Editor/Editor/Core/Editor.h"
 #include "Engine/AssetManager/ComponentSystem/GameObject.h"
 #include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
 
@@ -18,18 +19,18 @@ class Viewport : public EditorWindow
 	friend class Editor;
 public:
 	//MainViewport is will render from the MainCamera and if no such camera exist it will be black
-	explicit Viewport(bool IsMainViewPort,
+	 explicit Viewport(bool IsMainViewPort,
 		Vector2ui ViewportResolution = { Window::Width(),Window::Height() },
-		GameObjectManager& sceneToRender = GameObjectManager::Get(),
+		std::shared_ptr<Scene> sceneToRender = Editor::GetMainScene(),
 		std::shared_ptr<TextureHolder> RenderTexture = nullptr
 	);
  
-	~Viewport();
-	bool IsSelected();
+	~Viewport() override;
+	bool IsSelected() const;
 	bool IsRenderReady();
-	bool IsMainViewport();
+	bool IsMainViewport() const;
 	void Update();
-	Texture* GetTarget();
+	Texture* GetTarget() const;
 
 	cCamera& GetCamera();
 	Transform& GetCameraTransform();
@@ -42,7 +43,7 @@ public:
 	std::shared_ptr<TextureHolder> m_RenderTarget;
 	Vector2f ViewportResolution;
 	int ViewportIndex = 0;
-	GameObjectManager& sceneToRender;
+	std::shared_ptr<Scene> sceneToRender;
 private:
 	bool IsMainViewPort = false;
 	bool IsVisible = true;

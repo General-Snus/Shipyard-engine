@@ -1,8 +1,8 @@
 #pragma once
-#include "../../../DirectX/Shipyard/GpuResource.h"
-#include "../../../DirectX/Shipyard/Texture.h"
-#include "../../../Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
-#include "imgui.h"
+#include "DirectX/Shipyard/GpuResource.h"
+#include "DirectX/Shipyard/Texture.h"
+#include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
+#include "Tools/ImGui/ImGui/imgui.h"
 
 namespace ImGui
 {

@@ -1,5 +1,8 @@
-#include <Editor/Editor/Core/Editor.h> 
-#include "AssetManager.pch.h" 
+#include "Engine/AssetManager/AssetManager.pch.h"
+
+#include "Engine/AssetManager/ComponentSystem/Components/Collider.h"
+#include <Editor/Editor/Core/Editor.h>  
+#include "Editor/Editor/Core/ApplicationState.h"
 
 cCollider::cCollider(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager)
 {

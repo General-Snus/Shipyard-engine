@@ -1,30 +1,27 @@
-#include "DirectXHeader.pch.h"
+#include "DirectX/DirectXHeader.pch.h"
 
-#include "../CommandList.h" 
+#include <DirectX/XTK/ResourceUploadBatch.h> 
+#include "DirectX/Shipyard/CommandList.h"   
+#include "DirectX/Shipyard/GPU.h"
+#include "DirectX/Shipyard/GpuResource.h"
+#include "DirectX/Shipyard/MIPS/GenerateMipsPSO.h"
+#include "DirectX/Shipyard/ResourceStateTracker.h"
+#include "DirectX/Shipyard/Texture.h"
 
-#include <Tools/Optick/include/optick.h>
-#include <XTK/ResourceUploadBatch.h>
-
-#include "../ResourceStateTracker.h"
-#include "Shipyard/GPU.h"
-#include "Shipyard/GpuResource.h"
-#include "Shipyard/MIPS/GenerateMipsPSO.h"
-#include "Shipyard/Texture.h"
-
-CommandList::CommandList(D3D12_COMMAND_LIST_TYPE type,const std::wstring& name) : m_Type(type)
+CommandList::CommandList(D3D12_COMMAND_LIST_TYPE type, const std::wstring& name) : m_Type(type)
 {
 
-	Helpers::ThrowIfFailed(GPU::m_Device->CreateCommandAllocator(type,IID_PPV_ARGS(&m_CommandAllocator)));
+	Helpers::ThrowIfFailed(GPU::m_Device->CreateCommandAllocator(type, IID_PPV_ARGS(&m_CommandAllocator)));
 
-	Helpers::ThrowIfFailed(GPU::m_Device->CreateCommandList(0,type,m_CommandAllocator.Get(),
-		nullptr,IID_PPV_ARGS(&m_CommandList)));
+	Helpers::ThrowIfFailed(GPU::m_Device->CreateCommandList(0, type, m_CommandAllocator.Get(),
+		nullptr, IID_PPV_ARGS(&m_CommandList)));
 
 	m_CommandAllocator->SetName((name + L"Allocator").c_str());
 	m_CommandList->SetName((name + L"List").c_str());
 	m_ResourceStateTracker = std::make_unique<ResourceStateTracker>();
 }
 
-void CommandList::CopyBuffer(GpuResource& buffer,size_t numElements,size_t elementSize,const void* bufferData,D3D12_RESOURCE_FLAGS flags)
+void CommandList::CopyBuffer(GpuResource& buffer, size_t numElements, size_t elementSize, const void* bufferData, D3D12_RESOURCE_FLAGS flags)
 {
 	OPTICK_GPU_EVENT("CopyBuffer");
 	const size_t bufferSize = numElements * elementSize;
@@ -34,7 +31,7 @@ void CommandList::CopyBuffer(GpuResource& buffer,size_t numElements,size_t eleme
 	{
 		{
 			const auto var1 = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-			const auto var2 = CD3DX12_RESOURCE_DESC::Buffer(bufferSize,flags);
+			const auto var2 = CD3DX12_RESOURCE_DESC::Buffer(bufferSize, flags);
 			Helpers::ThrowIfFailed(GPU::m_Device->CreateCommittedResource(
 				&var1,
 				D3D12_HEAP_FLAG_NONE,
@@ -44,7 +41,7 @@ void CommandList::CopyBuffer(GpuResource& buffer,size_t numElements,size_t eleme
 				IID_PPV_ARGS(&d3d12Resource)));
 		}
 
-		ResourceStateTracker::AddGlobalResourceState(d3d12Resource.Get(),D3D12_RESOURCE_STATE_COMMON);
+		ResourceStateTracker::AddGlobalResourceState(d3d12Resource.Get(), D3D12_RESOURCE_STATE_COMMON);
 
 		if (bufferData != nullptr)
 		{
@@ -64,11 +61,11 @@ void CommandList::CopyBuffer(GpuResource& buffer,size_t numElements,size_t eleme
 			subresourceData.RowPitch = bufferSize;
 			subresourceData.SlicePitch = subresourceData.RowPitch;
 
-			m_ResourceStateTracker->TransitionResource(d3d12Resource.Get(),D3D12_RESOURCE_STATE_COPY_DEST);
+			m_ResourceStateTracker->TransitionResource(d3d12Resource.Get(), D3D12_RESOURCE_STATE_COPY_DEST);
 			FlushResourceBarriers();
 
-			if (UpdateSubresources(m_CommandList.Get(),d3d12Resource.Get(),
-				uploadResource.Get(),0,0,1,&subresourceData) == 0)
+			if (UpdateSubresources(m_CommandList.Get(), d3d12Resource.Get(),
+				uploadResource.Get(), 0, 0, 1, &subresourceData) == 0)
 			{
 				throw std::exception("UpdateSubresources failed");
 			}
@@ -78,27 +75,27 @@ void CommandList::CopyBuffer(GpuResource& buffer,size_t numElements,size_t eleme
 	}
 
 	buffer.SetResource(d3d12Resource);
-	buffer.CreateView(numElements,elementSize);
+	buffer.CreateView(numElements, elementSize);
 }
 
 
 
 template<typename T>
-void CommandList::SetConstantBuffer(unsigned slot,const T& constantBuffer)
+void CommandList::SetConstantBuffer(unsigned slot, const T& constantBuffer)
 {
 	const auto& alloc = GPU::m_GraphicsMemory->AllocateConstant<T>(constantBuffer);
-	m_CommandList->SetGraphicsRootConstantBufferView(slot,alloc.GpuAddress());
+	m_CommandList->SetGraphicsRootConstantBufferView(slot, alloc.GpuAddress());
 }
 
-void CommandList::CopyResource(const ComPtr<ID3D12Resource>& destination,const ComPtr<ID3D12Resource>& source)
+void CommandList::CopyResource(const ComPtr<ID3D12Resource>& destination, const ComPtr<ID3D12Resource>& source)
 {
 	OPTICK_EVENT();
-	TransitionBarrier(destination,D3D12_RESOURCE_STATE_COPY_DEST);
-	TransitionBarrier(source,D3D12_RESOURCE_STATE_COPY_SOURCE);
+	TransitionBarrier(destination, D3D12_RESOURCE_STATE_COPY_DEST);
+	TransitionBarrier(source, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 
 	FlushResourceBarriers();
-	m_CommandList->CopyResource(destination.Get(),source.Get());
+	m_CommandList->CopyResource(destination.Get(), source.Get());
 
 	TrackResource(destination);
 	TrackResource(source);
@@ -341,12 +338,12 @@ void CommandList::CopyResource(const ComPtr<ID3D12Resource>& destination,const C
 //}
 
 
-void CommandList::TransitionBarrier(const ComPtr<ID3D12Resource>& resource,D3D12_RESOURCE_STATES stateAfter,UINT subresource,bool flushBarriers)
+void CommandList::TransitionBarrier(const ComPtr<ID3D12Resource>& resource, D3D12_RESOURCE_STATES stateAfter, UINT subresource, bool flushBarriers)
 {
 	OPTICK_GPU_EVENT("TransitionBarrier");
 	if (resource)
 	{
-		const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(resource.Get(),D3D12_RESOURCE_STATE_COMMON,stateAfter,subresource);
+		const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(resource.Get(), D3D12_RESOURCE_STATE_COMMON, stateAfter, subresource);
 		m_ResourceStateTracker->ResourceBarrier(barrier);
 	}
 	else
@@ -360,15 +357,14 @@ void CommandList::TransitionBarrier(const ComPtr<ID3D12Resource>& resource,D3D12
 	}
 }
 
-void CommandList::TransitionBarrier(GpuResource& resource,D3D12_RESOURCE_STATES stateAfter,UINT subresource,bool flushBarriers)
+void CommandList::TransitionBarrier(GpuResource& resource, D3D12_RESOURCE_STATES stateAfter, UINT subresource, bool flushBarriers)
 {
 	OPTICK_EVENT();
-	resource.m_TransitioningState = stateAfter;
-	TransitionBarrier(resource.GetResource(),stateAfter,subresource,flushBarriers);
+	TransitionBarrier(resource.GetResource(), stateAfter, subresource, flushBarriers);
 	resource.m_TransitioningState = stateAfter;
 }
 
-void CommandList::SetDescriptorTable(unsigned slot,Texture* texture)
+void CommandList::SetDescriptorTable(unsigned slot, Texture* texture)
 {
 	OPTICK_EVENT();
 	const size_t offset = texture->GetHandle(ViewType::SRV).heapOffset;
@@ -379,7 +375,7 @@ void CommandList::SetDescriptorTable(unsigned slot,Texture* texture)
 		return;
 	}
 
-	TransitionBarrier(texture->GetResource(),D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	TransitionBarrier(texture->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 	m_CommandList->SetGraphicsRootDescriptorTable(
 		slot,
@@ -389,7 +385,7 @@ void CommandList::SetDescriptorTable(unsigned slot,Texture* texture)
 	TrackResource(texture->GetResource());
 }
 
-void CommandList::SetRenderTargets(unsigned numberOfTargets,Texture* renderTargets,Texture* depthBuffer)
+void CommandList::SetRenderTargets(unsigned numberOfTargets, Texture* renderTargets, Texture* depthBuffer)
 {
 	OPTICK_EVENT();
 	assert(numberOfTargets <= D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
@@ -398,20 +394,19 @@ void CommandList::SetRenderTargets(unsigned numberOfTargets,Texture* renderTarge
 	{
 		for (size_t i = 0; i < numberOfTargets; i++)
 		{
-			TransitionBarrier(renderTargets[i],D3D12_RESOURCE_STATE_RENDER_TARGET);
+			TransitionBarrier(renderTargets[i], D3D12_RESOURCE_STATE_RENDER_TARGET);
 			RTVs[i] = renderTargets[i].GetHandle(ViewType::RTV).cpuPtr;
 		}
 	}
 	if (depthBuffer)
 	{
-
 		const auto dsv = depthBuffer->GetHandle(ViewType::DSV).cpuPtr;
-		TransitionBarrier(*depthBuffer,D3D12_RESOURCE_STATE_DEPTH_WRITE);
-		m_CommandList->OMSetRenderTargets(numberOfTargets,RTVs,FALSE,&dsv);
+		TransitionBarrier(*depthBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+		m_CommandList->OMSetRenderTargets(numberOfTargets, RTVs, FALSE, &dsv);
 	}
 	else
 	{
-		m_CommandList->OMSetRenderTargets(numberOfTargets,RTVs,FALSE,nullptr);
+		m_CommandList->OMSetRenderTargets(numberOfTargets, RTVs, FALSE, nullptr);
 	}
 }
 
@@ -456,7 +451,7 @@ void CommandList::Close()
 void CommandList::Reset()
 {
 	Helpers::ThrowIfFailed(m_CommandAllocator->Reset());
-	Helpers::ThrowIfFailed(m_CommandList->Reset(m_CommandAllocator.Get(),nullptr));
+	Helpers::ThrowIfFailed(m_CommandList->Reset(m_CommandAllocator.Get(), nullptr));
 
 	m_ResourceStateTracker->Reset();
 

@@ -25,7 +25,11 @@ public:
 
 	virtual void Destroy()
 	{
-		//m_Resource->Release();
+		/*if (m_Resource)
+		{
+			m_Resource->();
+		}*/
+
 		m_Resource = nullptr;
 		for (auto& [type,pair] : m_DescriptorHandles)
 		{
@@ -62,8 +66,8 @@ public:
 	void CheckFeatureSupport();
 
 protected:
-	D3D12_RESOURCE_STATES m_UsageState;
-	D3D12_RESOURCE_STATES m_TransitioningState;
+	D3D12_RESOURCE_STATES m_UsageState{};
+	D3D12_RESOURCE_STATES m_TransitioningState{};
 
 
 	DXGI_FORMAT m_Format;

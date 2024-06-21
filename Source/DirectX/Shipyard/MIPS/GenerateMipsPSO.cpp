@@ -1,10 +1,10 @@
-#include <DirectXHeader.pch.h>
+#include <DirectX/DirectXHeader.pch.h>
 
-#include "GenerateMipsPSO.h"  
+#include "DirectX/Shipyard/MIPS/GenerateMipsPSO.h"  
 
 #include "Engine/AssetManager/AssetManager.h"
 #include "Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h"
-#include "Shipyard/GPU.h"
+#include "DirectX/Shipyard/GPU.h"
 
 //void GenerateMipsPSO::Init(const ComPtr<ID3D12Device2>& dev)
 //{

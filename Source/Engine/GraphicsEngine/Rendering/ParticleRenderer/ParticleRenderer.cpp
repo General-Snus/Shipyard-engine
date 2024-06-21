@@ -1,5 +1,5 @@
 #include <Engine/AssetManager/ComponentSystem/Components/ParticleSystem.h>
-#include "GraphicsEngine.pch.h"
+#include "Engine/GraphicsEngine/GraphicsEngine.pch.h"
 #include "ParticleRenderer.h"
 void ParticleRenderer::Init()
 {

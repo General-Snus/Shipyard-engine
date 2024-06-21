@@ -1,5 +1,8 @@
-#include "AssetManager.pch.h"
+#include "Engine/AssetManager/AssetManager.pch.h"
 #include "../AIController.h"
+
+#include "Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h"
+#include "Engine/AssetManager/Objects/AI/AgentSystem/SteeringBehaviour.h"
 
 AIController::AIController(MultipleTargets_PollingStation* aPollingStation,MultipleTargets_PollingStation* formationStation) : PollingController(aPollingStation),FormationStation(formationStation)
 {

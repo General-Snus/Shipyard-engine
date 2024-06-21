@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "Tools/Utilities/LinearAlgebra/Vector3.hpp"
-#include "Windows.h"
 #include <Tools/Utilities/TemplateHelpers.h>
 class Logger
 {
@@ -60,16 +59,16 @@ private:
 			LoggedMessages.emplace_back(msg);
 		}
 
-		int messagesCount;
-		int warnCount;
-		int errCount;
-		int criticalCount;
-		int successCount;
+		unsigned messagesCount{};
+		unsigned warnCount{};
+		unsigned errCount{};
+		unsigned criticalCount{};
+		unsigned successCount{};
 	};
 public:
 	static inline logBuffer m_Buffer;
 	static bool Create();
-	static void SetConsoleHandle(HANDLE aHandle);
+	static void SetConsoleHandle(void* aHandle);
 	static void SetPrintToVSOutput(bool bNewValue);
 	static void Log(const char* aString);
 	static Vector3f GetColor(LogType type);
@@ -90,9 +89,9 @@ public:
 	static void Critical(const std::string& anExceptionText,unsigned aLevel = 0,const std::source_location& location =
 		std::source_location::current());
 	static void NewLine();
-	FORCEINLINE HANDLE GetHandle() const { return myHandle; }
+	void* GetHandle() const { return myHandle; }
 private:
-	static inline HANDLE myHandle = 0;
+	static inline void* myHandle = 0;
 	static inline bool shouldPrintToOutput = false;
 	static inline bool isInitialized = false;
 	static inline std::string myNamespace;

@@ -1,4 +1,12 @@
-#pragma once 
+// pch.h: This is a precompiled header file.
+// Files listed below are compiled only once, improving build performance for future builds.
+// This also affects IntelliSense performance, including code completion and many code browsing features.
+// However, files listed here are ALL re-compiled if any one of them is updated between builds.
+// Do not add files here that you will be updating frequently as this negates the performance advantage.
+
+#ifndef DIRECTXHEADER_PCH_H
+#define DIRECTXHEADER_PCH_H
+
 #define WIN32_LEAN_AND_MEAN 
 #include <Windows.h>
 
@@ -21,26 +29,33 @@ using namespace Microsoft::WRL;
 #include <DirectXMath.h> 
 #include <DirectX/XTK/DescriptorHeap.h>
 #include <DirectX/XTK/GraphicsMemory.h>   
+#include <dxgiformat.h>
 //#include <DirectXTex.h>
 using namespace DirectX;
 
+//Other 
+#include "Engine/GraphicsEngine/Shaders/Registers.h"
+#include <Tools/Optick/include/optick.h>
+#include <Tools/Utilities/Error.hpp>
+
 // STL Headers
+#include <cassert>
 #include <array> 
 #include <algorithm>
 #include <atomic>
-#include <cassert> 
 #include <chrono>
 #include <condition_variable>
 #include <cstdint>
-#include <filesystem>
+#include <filesystem> 
 #include <map> 
 #include <memory> 
 #include <mutex>  
 #include <new>
 #include <stdexcept>
 #include <string> 
-#include <string>
 #include <thread>
 #include <unordered_map>
 #include <vector>   
 #include <DirectX/Shipyard/Helpers.h>
+
+#endif //DIRECTXHEADER_PCH_H

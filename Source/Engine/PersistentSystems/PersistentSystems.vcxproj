@@ -45,7 +45,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <EnableUnitySupport>true</EnableUnitySupport>
+    <EnableUnitySupport>false</EnableUnitySupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -53,7 +53,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <EnableUnitySupport>true</EnableUnitySupport>
+    <EnableUnitySupport>false</EnableUnitySupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -77,13 +77,13 @@
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(LibraryPath);$(SolutionDir)..\Dependencies\$(Configuration)\PhysXLibs\</LibraryPath>
-    <IncludePath>$(ProjectDir);$(SolutionDir);$(IncludePath);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)Tools\ImGui\MuninGraph\;$(SolutionDir)Tools\ImGui\ImGui\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include</IncludePath>
+    <IncludePath>$(SolutionDir);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)Tools\ImGui\MuninGraph\;$(SolutionDir)Tools\ImGui\ImGui\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(LibraryPath);$(SolutionDir)..\Dependencies\$(Configuration)\PhysXLibs\</LibraryPath>
-    <IncludePath>$(ProjectDir);$(SolutionDir);$(IncludePath);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)Tools\ImGui\MuninGraph\;$(SolutionDir)Tools\ImGui\ImGui\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include</IncludePath>
+    <IncludePath>$(SolutionDir);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)Tools\ImGui\MuninGraph\;$(SolutionDir)Tools\ImGui\ImGui\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -126,7 +126,7 @@
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions);PX_PHYSX_STATIC_LIB;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>PersistentSystems.pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>Engine\PersistentSystems\PersistentSystems.pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -161,7 +161,7 @@
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions);PX_PHYSX_STATIC_LIB;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>PersistentSystems.pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>Engine\PersistentSystems\PersistentSystems.pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -194,6 +194,7 @@
     <ClInclude Include="PersistentSystems.pch.h" />
     <ClInclude Include="Physics\Raycast.h" />
     <ClInclude Include="Physics\PhysXInterpeter.h" />
+    <ClInclude Include="Scene.h" />
     <ClInclude Include="System\SceneGraph\WorldGraph.h" />
   </ItemGroup>
   <ItemGroup>
@@ -204,6 +205,7 @@
     </ClCompile>
     <ClCompile Include="Physics\Source\Raycast.cpp" />
     <ClCompile Include="Physics\Source\PhysXInterpeter.cpp" />
+    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="System\SceneGraph\WorldGraph.cpp" />
   </ItemGroup>
   <ItemGroup>

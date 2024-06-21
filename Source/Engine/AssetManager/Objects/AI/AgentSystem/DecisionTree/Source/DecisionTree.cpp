@@ -1,4 +1,4 @@
-#include "AssetManager.pch.h"
+#include "Engine/AssetManager/AssetManager.pch.h"
 
 #include "../DecisionTree.h" 
 DecisionTree::Node::Node(const std::function<bool(GameObject)>& func) : myCondition(func)
@@ -29,17 +29,17 @@ DecisionTree::~DecisionTree()
 //	myNodes.try_emplace(at,Node(func));
 //}
 
-void DecisionTree::AddNodeAt(int at,const std::function<bool(GameObject)>& func)
+void DecisionTree::AddNodeAt(int at, const std::function<bool(GameObject)>& func)
 {
 	if (at >= myNodes.size())
 	{
 		//myNodes.resize(at*2); // It was at this moment he knew, he fucked up        this is ass
 	}
 
-	myNodes.try_emplace(at,Node(func));
+	myNodes.try_emplace(at, Node(func));
 }
 
-int DecisionTree::AddChildNodeAt(int at,bool atPositiveAnswer,const std::function<bool(GameObject)>& func)
+int DecisionTree::AddChildNodeAt(int at, bool atPositiveAnswer, const std::function<bool(GameObject)>& func)
 {
 	int TargetNode = -1;
 	if (atPositiveAnswer)
@@ -50,7 +50,7 @@ int DecisionTree::AddChildNodeAt(int at,bool atPositiveAnswer,const std::functio
 	{
 		TargetNode = (at + 1) * 2;
 	}
-	myNodes.try_emplace(TargetNode,Node(func));
+	myNodes.try_emplace(TargetNode, Node(func));
 	return TargetNode;
 }
 
@@ -117,9 +117,9 @@ void DecisionTree::ReorderTree()
 {
 }
 
-std::array<int,2> DecisionTree::GetChildOf(int node)
+std::array<int, 2> DecisionTree::GetChildOf(int node)
 {
-	std::array<int,2> returnArray = { -1,-1 };
+	std::array<int, 2> returnArray = { -1,-1 };
 	if (myNodes.contains((node * 2) + 1)) // true
 	{
 		returnArray[0] = (node * 2) + 1;

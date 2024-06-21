@@ -1,7 +1,10 @@
+#include "Engine/AssetManager/AssetManager.pch.h"
+
 #include <Engine/GraphicsEngine/GraphicsEngine.h>
 #include "../Skybox.h"
-#include "AssetManager.pch.h" 
 
+#include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
+#include "Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h"
 #include "Tools/ImGui/ImGui/imgui.h"
 
 Skybox::Skybox(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager)

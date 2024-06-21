@@ -1,12 +1,9 @@
-#include "DirectXHeader.pch.h"
+#include "DirectX/DirectXHeader.pch.h"
 
 #include "../CommandQueue.h"
-#include "../GPU.h"
-
-#include <DirectX/CrashHandler/NsightAftermathGpuCrashTracker.h>   
-#include <Tools/Optick/include/optick.h>
-
-#include "Shipyard/ResourceStateTracker.h"
+#include "../GPU.h" 
+#include <DirectX/CrashHandler/NsightAftermathGpuCrashTracker.h> 
+#include "DirectX/Shipyard/ResourceStateTracker.h"
 
 
 bool GPUCommandQueue::Create(const ComPtr<ID3D12Device>& device,D3D12_COMMAND_LIST_TYPE type)

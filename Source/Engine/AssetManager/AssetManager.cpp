@@ -1,9 +1,7 @@
-#include "AssetManager.pch.h" 
-#include <filesystem>
+#include "Engine/AssetManager/AssetManager.pch.h"
 
-#include <algorithm>
-#include <cctype>
-#include <string>
+#include "Engine/AssetManager/Objects/BaseAssets/MasterIncludeAssets.h"
+
 #include <Tools/Utilities/Game/Timer.h>
 
 AssetManager::AssetManager()

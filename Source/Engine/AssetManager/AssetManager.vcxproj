@@ -44,8 +44,7 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
-    <EnableUnitySupport>true</EnableUnitySupport>
+    <EnableUnitySupport>false</EnableUnitySupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -53,7 +52,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <EnableUnitySupport>true</EnableUnitySupport>
+    <EnableUnitySupport>false</EnableUnitySupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -76,13 +75,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(ProjectDir);$(SolutionDir);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)DirectX\XTK\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include</IncludePath>
+    <IncludePath>$(SolutionDir);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)DirectX\XTK\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include</IncludePath>
     <LibraryPath>$(Configuration)\;$(LibraryPath);$(SolutionDir)..\Dependencies\$(Configuration)\PhysXLibs;</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
-    <IncludePath>$(ProjectDir);$(SolutionDir);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)DirectX\XTK\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include</IncludePath>
+    <IncludePath>$(SolutionDir);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)DirectX\XTK\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include</IncludePath>
     <LibraryPath>$(Configuration)\;$(LibraryPath);$(SolutionDir)..\Dependencies\$(Configuration)\PhysXLibs;</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -126,11 +125,11 @@
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions);PX_PHYSX_STATIC_LIB;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>AssetManager.pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>Engine/AssetManager/AssetManager.pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -151,7 +150,7 @@
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions);PX_PHYSX_STATIC_LIB;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>AssetManager.pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>Engine/AssetManager/AssetManager.pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
@@ -177,6 +176,7 @@
     </ClInclude>
     <ClInclude Include="ComponentSystem\Components\Physics\cPhysXDynamicBody.h" />
     <ClInclude Include="ComponentSystem\Components\Physics\cPhysXStaticBody.h" />
+    <ClInclude Include="ComponentSystem\MasterIncludeComponent.h" />
     <ClInclude Include="Enums.h" />
     <ClInclude Include="Objects\AI\AgentSystem\AIPollingManager.h" />
     <ClInclude Include="AssetManagerUtills.hpp" />
@@ -200,6 +200,7 @@
     <ClInclude Include="ComponentSystem\Components\CameraComponent.h" />
     <ClInclude Include="ComponentSystem\Components\LightComponent.h" />
     <ClInclude Include="Objects\BaseAssets\LightDataBase.h" />
+    <ClInclude Include="Objects\BaseAssets\MasterIncludeAssets.h" />
     <ClInclude Include="Objects\BaseAssets\MaterialAsset.h" />
     <ClInclude Include="Objects\BaseAssets\Animations.h" />
     <ClInclude Include="Objects\BaseAssets\BaseAsset.h" />

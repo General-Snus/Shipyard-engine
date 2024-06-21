@@ -1,5 +1,5 @@
 #pragma once
-#include "Windows/EditorWindows/EditorWindow.h"
+#include "Editor/Editor/Windows/EditorWindows/EditorWindow.h"
 #include <cstdint>
 #include "Tools/Logging/Logging.h"
 

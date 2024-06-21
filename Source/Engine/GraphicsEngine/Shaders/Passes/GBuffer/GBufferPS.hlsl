@@ -39,6 +39,7 @@ GBufferOutput main(DefaultVertexToPixel input)
 	result.Normal.w = 1;
 
 	result.Material = materialComponent;
+	result.Material.g *= g_defaultMaterial.Roughness;
 
 	result.Effect = effect;
 

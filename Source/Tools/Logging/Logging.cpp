@@ -1,11 +1,10 @@
 #include "Logging.h"
 
+#include "Windows.h"
 #include <iomanip>
 #include <iostream>
 #include <ostream> 
-#include <sstream>
-#include "Editor/Editor/Core/Editor.h"
-#include "Tools/Utilities/DataStructures/Queue.hpp"
+#include <sstream>  
 
 std::string Logger::Timestamp()
 {
@@ -36,7 +35,7 @@ bool Logger::Create()
 	return true;
 }
 
-void Logger::SetConsoleHandle(HANDLE aHandle)
+void Logger::SetConsoleHandle(void* aHandle)
 {
 	myHandle = aHandle;
 }

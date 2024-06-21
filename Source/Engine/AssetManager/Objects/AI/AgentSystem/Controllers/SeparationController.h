@@ -2,6 +2,7 @@
 #include "DefaultControllers/PollingController.h"
 
 
+class MultipleTargets_PollingStation;
 
 class SeparationController : public PollingController
 {

@@ -1,7 +1,14 @@
-#include <Editor/Editor/Defines.h>
 #include <Engine/AssetManager/AssetManager.pch.h>
+
+#include <Editor/Editor/Defines.h>
 #include <Engine/PersistentSystems/ArtificialInteligence/AICommands/AICommands.h>
 #include "../DecisionTreeController.h" 
+
+#include "Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h"
+#include "Engine/AssetManager/ComponentSystem/Components/ActorSystem/CombatComponent.h"
+#include "Engine/AssetManager/Objects/AI/AgentSystem/AIPollingManager.h"
+#include "Engine/AssetManager/Objects/AI/AgentSystem/SteeringBehaviour.h"
+#include "Engine/AssetManager/Objects/AI/AgentSystem/PollingStations/Target_PollingStation.h"
 
 DecisionTreeController::DecisionTreeController(const DecisionTree& decisionTree) : myTree(decisionTree)
 {

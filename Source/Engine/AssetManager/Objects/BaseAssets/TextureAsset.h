@@ -15,11 +15,7 @@ public:
 	void SetRawTexture(const std::shared_ptr<Texture>& aTexture) { RawTexture = aTexture; }
 	void SetRawTexture(  Texture  aTexture) { *RawTexture = aTexture; }
 	eTextureType GetTextureType() const { return textureType; }
-	void SetTextureType(eTextureType aTextureType)
-	{
-		RawTexture->isCubeMap = (aTextureType == eTextureType::CubeMap);
-		textureType = aTextureType;
-	} 
+	void SetTextureType(eTextureType aTextureType);
 	void InspectorView() override;
 private: 
 	eTextureType textureType;

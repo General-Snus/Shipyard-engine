@@ -1,9 +1,7 @@
-#include "AssetManager.pch.h"
+#include "Engine/AssetManager/AssetManager.pch.h"
 
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
-#include <wrl.h>
-#include "../BaseAsset.h"
-
+#include "../BaseAsset.h" 
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 #include "Tools/ImGui/ImGui/ImGuiHepers.hpp"
 

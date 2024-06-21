@@ -1,5 +1,4 @@
-#pragma once  
-#include <Tools/ThirdParty/nlohmann/json.hpp> 
+#pragma once   
 #include <xhash>
 namespace SY {//I fucking hate windows internals
 
@@ -12,8 +11,7 @@ namespace SY {//I fucking hate windows internals
 
 		operator uint32_t() const { return myUUID; }
 
-		bool IsValid() const { return myUUID != UINT_MAX; }
-		NLOHMANN_DEFINE_TYPE_INTRUSIVE(UUID,myUUID);
+		bool IsValid() const { return myUUID != UINT_MAX; } 
 
 	private:
 		uint32_t myUUID;

@@ -96,51 +96,51 @@ REFL_AUTO(type(Component)
 template <class T>
 bool Component::HasComponent() const
 {
-	return GameObjectManager::Get().HasComponent<T>(myOwnerID);
+	return myManager->HasComponent<T>(myOwnerID);
 }
 
 template<class T>
 inline T& Component::GetComponent()
 {
-	return GameObjectManager::Get().GetComponent<T>(myOwnerID);
+	return myManager->GetComponent<T>(myOwnerID);
 }
 
 template<class T>
 inline T* Component::TryGetComponent()
 {
-	return GameObjectManager::Get().TryGetComponent<T>(myOwnerID);
+	return myManager->TryGetComponent<T>(myOwnerID);
 }
 
 template<class T>
 inline T* Component::TryGetAddComponent()
 {
-	if (auto* returnComponent = GameObjectManager::Get().TryGetComponent<T>(myOwnerID))
+	if (auto* returnComponent = myManager->TryGetComponent<T>(myOwnerID))
 	{
 		return returnComponent;
 	}
-	return &GameObjectManager::Get().AddComponent<T>(myOwnerID);
+	return &myManager->AddComponent<T>(myOwnerID);
 }
 
 
 template<class T>
 inline const T& Component::GetComponent() const
 {
-	return GameObjectManager::Get().GetComponent<T>(myOwnerID);
+	return myManager->GetComponent<T>(myOwnerID);
 }
 
 template<class T>
 inline const T* Component::TryGetComponent() const
 {
-	return GameObjectManager::Get().TryGetComponent<T>(myOwnerID);
+	return myManager->TryGetComponent<T>(myOwnerID);
 }
 
 template<class T>
 inline const T* Component::TryGetAddComponent() const
 {
-	if (auto* returnComponent = GameObjectManager::Get().TryGetComponent<T>(myOwnerID))
+	if (auto* returnComponent = myManager->TryGetComponent<T>(myOwnerID))
 	{
 		return returnComponent;
 	}
-	return GameObjectManager::Get().AddComponent<T>(myOwnerID);
+	return myManager->AddComponent<T>(myOwnerID);
 }
 

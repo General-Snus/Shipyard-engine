@@ -1,6 +1,10 @@
-#include "AssetManager.pch.h"
+#include "Engine/AssetManager/AssetManager.pch.h"
 #include "../CombatComponent.h"
 #include <Engine/AssetManager/ComponentSystem/Components/TaskSpecific/ProjectileComponent.h>
+
+#include "Engine/AssetManager/ComponentSystem/Components/Collider.h"
+#include "Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h"
+#include <Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h>
 
 CombatComponent::CombatComponent(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager)
 {
@@ -59,7 +63,7 @@ void CombatComponent::FireProjectile()
 	{
 		myAttackTimer = 0.f;
 		//Fire projectile
-		GameObject projectile = GameObjectManager::Get().CreateGameObject();
+		GameObject projectile = GameObject::Create();
 
 
 		auto& transform = projectile.AddComponent <Transform>();

@@ -1,11 +1,12 @@
 #pragma once 
-#include "../Component.h"
-
+#include "../Component.h" 
 #include <Engine/GraphicsEngine/Rendering/Vertex.h>
 #include <Tools/Utilities/LinearAlgebra/Vector3.hpp>
 #include "MeshRenderer.h"
 
 #define boneLimit 128
+
+class Animation;
 
 enum class eAnimationState
 {
@@ -29,7 +30,7 @@ public:
 	void Update() override;
 
 	void RenderAnimation(const std::shared_ptr<Mesh>& aData,const Matrix& aTransform) const;
-	void AddAnimation(Animation aAnimation);
+	void AddAnimation(std::shared_ptr<Animation> aAnimation);
 	void AddAnimation(const std::filesystem::path& aFilePath);
 	eAnimationState GetState() const;
 	void SetState(eAnimationState aState);
