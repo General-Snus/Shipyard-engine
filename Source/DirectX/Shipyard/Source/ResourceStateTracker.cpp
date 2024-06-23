@@ -97,7 +97,7 @@ void ResourceStateTracker::UAVBarrier(const GpuResource* resource)
 
 void ResourceStateTracker::AliasBarrier(const GpuResource* resourceBefore, const GpuResource* resourceAfter)
 {
-	OPTICK_EVENT();
+	OPTICK_GPU_EVENT("AliasBarrier");
 	ID3D12Resource* pResourceBefore = resourceBefore != nullptr ? resourceBefore->GetResource().Get() : nullptr;
 	ID3D12Resource* pResourceAfter = resourceAfter != nullptr ? resourceAfter->GetResource().Get() : nullptr;
 
@@ -118,7 +118,7 @@ void ResourceStateTracker::FlushResourceBarriers(CommandList& commandList)
 
 uint32_t ResourceStateTracker::FlushPendingResourceBarriers(CommandList& commandList)
 {
-	OPTICK_EVENT();
+	OPTICK_GPU_EVENT("FlushPendingResourceBarriers");
 	assert(ms_IsLocked);
 
 	// Resolve the pending resource barriers by checking the global state of the 
@@ -184,8 +184,8 @@ uint32_t ResourceStateTracker::FlushPendingResourceBarriers(CommandList& command
 
 void ResourceStateTracker::CommitFinalResourceStates()
 {
-	OPTICK_EVENT();
-	//assert(ms_IsLocked);
+	OPTICK_GPU_EVENT("CommitFinalResourceStates");
+	assert(ms_IsLocked);
 
 	for (const auto& resourceState : m_FinalResourceState)
 	{

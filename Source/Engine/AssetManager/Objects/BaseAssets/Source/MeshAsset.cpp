@@ -9,10 +9,10 @@
 
 
 
-Mesh::Mesh(const std::filesystem::path& aFilePath) : AssetBase(aFilePath),bufferSize(0)
+Mesh::Mesh(const std::filesystem::path& aFilePath) : AssetBase(aFilePath), bufferSize(0)
 {
 }
-const std::unordered_map<unsigned int,std::shared_ptr<Material>>& Mesh::GetMaterialList()
+const std::unordered_map<unsigned int, std::shared_ptr<Material>>& Mesh::GetMaterialList()
 {
 	return materials;
 }
@@ -20,13 +20,13 @@ const std::unordered_map<unsigned int,std::shared_ptr<Material>>& Mesh::GetMater
 void Mesh::FillMaterialPaths(const aiScene* scene)
 {
 	OPTICK_EVENT();
-	for (auto& [key,matPath] : idToMaterial)
+	for (auto& [key, matPath] : idToMaterial)
 	{
 		std::filesystem::path texturePath;
 		int textureLoaded = 0;
 		Vector4f color;
 		auto material = scene->mMaterials[key];
-		material->Get(AI_MATKEY_COLOR_DIFFUSE,color);
+		material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
 
 		Material::DataMaterial dataMat;
 		dataMat.materialData.albedoColor = color;
@@ -61,10 +61,10 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 		//}
 
 
-		std::pair<std::filesystem::path,std::shared_ptr<TextureHolder>> holder;
+		std::pair<std::filesystem::path, std::shared_ptr<TextureHolder>> holder;
 		if (material->GetTextureCount(aiTextureType_BASE_COLOR))
 		{
-			material->GetTexture(aiTextureType_BASE_COLOR,0,&str);
+			material->GetTexture(aiTextureType_BASE_COLOR, 0, &str);
 			holder.first = str.C_Str();
 			dataMat.textures[0] = holder;
 			textureLoaded++;
@@ -72,7 +72,7 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 
 		if (material->GetTextureCount(aiTextureType_DIFFUSE) && !str.length)
 		{
-			material->GetTexture(aiTextureType_DIFFUSE,0,&str);
+			material->GetTexture(aiTextureType_DIFFUSE, 0, &str);
 			holder.first = str.C_Str();
 			dataMat.textures[0] = holder;
 			textureLoaded++;
@@ -80,7 +80,7 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 
 		if (material->GetTextureCount(aiTextureType_HEIGHT))
 		{
-			material->GetTexture(aiTextureType_HEIGHT,0,&str);
+			material->GetTexture(aiTextureType_HEIGHT, 0, &str);
 			holder.first = str.C_Str();
 			dataMat.textures[1] = holder;
 			textureLoaded++;
@@ -88,14 +88,14 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 
 		if (material->GetTextureCount(aiTextureType_NORMALS))
 		{
-			material->GetTexture(aiTextureType_NORMALS,0,&str);
+			material->GetTexture(aiTextureType_NORMALS, 0, &str);
 			holder.first = str.C_Str();
 			dataMat.textures[1] = holder;
 			textureLoaded++;
 		}
 		if (material->GetTextureCount(aiTextureType_DIFFUSE_ROUGHNESS))
 		{
-			material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS,0,&str);
+			material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &str);
 			holder.first = str.C_Str();
 			dataMat.textures[2] = holder;
 			textureLoaded++;
@@ -103,7 +103,7 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 
 		if (material->GetTextureCount(aiTextureType_SPECULAR))
 		{
-			material->GetTexture(aiTextureType_SPECULAR,0,&str);
+			material->GetTexture(aiTextureType_SPECULAR, 0, &str);
 			holder.first = str.C_Str();
 			dataMat.textures[2] = holder;
 			textureLoaded++;
@@ -111,7 +111,7 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 
 		if (material->GetTextureCount(aiTextureType_AMBIENT_OCCLUSION))
 		{
-			material->GetTexture(aiTextureType_AMBIENT_OCCLUSION,0,&str);
+			material->GetTexture(aiTextureType_AMBIENT_OCCLUSION, 0, &str);
 			holder.first = str.C_Str();
 			dataMat.textures[2] = holder;
 			textureLoaded++;
@@ -119,7 +119,7 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 
 		if (material->GetTextureCount(aiTextureType_METALNESS))
 		{
-			material->GetTexture(aiTextureType_METALNESS,0,&str);
+			material->GetTexture(aiTextureType_METALNESS, 0, &str);
 			holder.first = str.C_Str();
 			dataMat.textures[2] = holder;
 			textureLoaded++;
@@ -127,7 +127,7 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 
 		if (material->GetTextureCount(aiTextureType_EMISSIVE))
 		{
-			material->GetTexture(aiTextureType_EMISSIVE,0,&str);
+			material->GetTexture(aiTextureType_EMISSIVE, 0, &str);
 			holder.first = str.C_Str();
 			dataMat.textures[3] = holder;
 			textureLoaded++;
@@ -138,7 +138,7 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 			materials[key] = GraphicsEngine::Get().GetDefaultMaterial();
 			continue;
 		}
-		Material::CreateJson(dataMat,matPath);
+		Material::CreateJson(dataMat, matPath);
 		materials[key] = AssetManager::Get().LoadAsset<Material>(matPath);
 	}
 }
@@ -152,7 +152,7 @@ void Mesh::InspectorView()
 	{
 		ImGui::Separator();
 		for (const auto& element : Elements)
-		{ 
+		{
 			if (materials.contains(element.MaterialIndex))
 			{
 				materials.at(element.MaterialIndex)->InspectorView();
@@ -170,12 +170,12 @@ void Mesh::Init()
 	OPTICK_EVENT();
 	if (!std::filesystem::exists(AssetPath))
 	{
-		Logger::Warn("Failed to load mesh at: " + AssetPath.string());
-		return  ;
+		Logger::Warn("Failed to load mesh at: " + AssetPath.string()); 
+		return;
 	}
 
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(AssetPath.string(),(unsigned int)
+	const aiScene* scene = importer.ReadFile(AssetPath.string(), (unsigned int)
 		aiProcess_CalcTangentSpace |
 		aiProcess_Triangulate |
 		aiProcess_ValidateDataStructure |
@@ -187,39 +187,44 @@ void Mesh::Init()
 	auto  exception = importer.GetErrorString();
 	if (importer.GetException())
 	{
-		Logger::Err(exception);
+		Logger::Err(exception); 
 		return;
 	}
+
+	if (scene->HasAnimations())
+	{ 
+		Logger::Warn("Can not load animations as mesh: " + AssetPath.string()); 
+		return;
+	}
+
 	// If the import failed, report it
 	if (nullptr == scene)
 	{
 		std::string message = "Failed to load mesh " + AssetPath.string();
 		std::exception failedMeshLoad(message.c_str());
-		Logger::Critical(failedMeshLoad,2);
+		Logger::Critical(failedMeshLoad, 2); 
 		return;
 	}
 
 	for (size_t i = 0; i < scene->mNumMeshes; i++)
 	{
-		processMesh(scene->mMeshes[i],scene);
+		processMesh(scene->mMeshes[i], scene); 
+		const AABB3D<float> newBound =
+		{
+			Vector3f(scene->mMeshes[i]->mAABB.mMin.x, scene->mMeshes[i]->mAABB.mMin.y, scene->mMeshes[i]->mAABB.mMin.z),
+			Vector3f(scene->mMeshes[i]->mAABB.mMax.x, scene->mMeshes[i]->mAABB.mMax.y, scene->mMeshes[i]->mAABB.mMax.z)
+		};
+		Bounds.Extend(newBound); 
 	}
 
 	//FillMatPath   
 	FillMaterialPaths(scene);
-
-	MaxBox = Vector3f(scene->mMeshes[0]->mAABB.mMax.x,scene->mMeshes[0]->mAABB.mMax.y,scene->mMeshes[0]->mAABB.mMax.z);
-	MinBox = Vector3f(scene->mMeshes[0]->mAABB.mMin.x,scene->mMeshes[0]->mAABB.mMin.y,scene->mMeshes[0]->mAABB.mMin.z);
-	const float radius = (MaxBox - MinBox).Length();
-
-	const auto center = Vector3f((MaxBox.x - MinBox.x) / 2,(MaxBox.y - MinBox.y) / 2,(MaxBox.z - MinBox.z) / 2);
-	boxSphereBounds = Sphere<float>(center,radius);
-
 	isLoadedComplete = true;
 	bufferSize = 0;
 	return;
 }
 
-void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
+void Mesh::processMesh(aiMesh* mesh, const aiScene* scene)
 {
 	scene; OPTICK_EVENT();
 	std::vector<Vertex> mdlVertices;
@@ -238,9 +243,9 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 			mesh->mVertices[i].z
 		);
 		auto color = Vector4f(
-			RandomEngine::RandomInRange<float>(0,1),
-			RandomEngine::RandomInRange<float>(0,1),
-			RandomEngine::RandomInRange<float>(0,1),
+			RandomEngine::RandomInRange<float>(0, 1),
+			RandomEngine::RandomInRange<float>(0, 1),
+			RandomEngine::RandomInRange<float>(0, 1),
 			1.0f
 		);
 
@@ -325,7 +330,7 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 		for (unsigned int j = 0; j < mesh->mBones[i]->mNumWeights; j++)
 		{
 			const auto& vertBoneData = mesh->mBones[i]->mWeights[j];
-			mdlVertices[vertBoneData.mVertexId].AddBoneWeightAndID(vertBoneData.mWeight,i);
+			mdlVertices[vertBoneData.mVertexId].AddBoneWeightAndID(vertBoneData.mWeight, i);
 		}
 	}
 
@@ -335,14 +340,14 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 	OPTICK_GPU_CONTEXT(commandList->GetGraphicsCommandList().Get());
 
 	VertexResource vertexRes(wname);
-	if (!GPU::CreateVertexBuffer<Vertex>(commandList,vertexRes,mdlVertices))
+	if (!GPU::CreateVertexBuffer<Vertex>(commandList, vertexRes, mdlVertices))
 	{
-		Logger::Err("Failed to create vertex buffer"); 
+		Logger::Err("Failed to create vertex buffer");
 		return;
 	}
 
 	IndexResource indexRes(wname);
-	if (!GPU::CreateIndexBuffer(commandList,indexRes,mdlIndicies))
+	if (!GPU::CreateIndexBuffer(commandList, indexRes, mdlIndicies))
 	{
 		Logger::Err("Failed to create index buffer");
 		return;
@@ -361,7 +366,7 @@ void Mesh::processMesh(aiMesh* mesh,const aiScene* scene)
 	toAdd.PrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	toAdd.Stride = sizeof(Vertex);
 	toAdd.MaterialIndex = mesh->mMaterialIndex;
-	idToMaterial.try_emplace(mesh->mMaterialIndex,"");
+	idToMaterial.try_emplace(mesh->mMaterialIndex, "");
 
 	Elements.emplace_back(toAdd);
 	mdlVertices.clear();

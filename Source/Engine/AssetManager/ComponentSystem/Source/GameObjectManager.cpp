@@ -14,6 +14,7 @@ GameObjectManager::~GameObjectManager()
 
 GameObject GameObjectManager::CreateGameObject()
 {
+	OPTICK_EVENT();
 	GameObjectData data;
 
 	data.IsActive = true;
@@ -27,6 +28,7 @@ GameObject GameObjectManager::CreateGameObject()
 
 void GameObjectManager::DeleteGameObject(const SY::UUID aGameObjectID, bool force)
 {
+	OPTICK_EVENT();
 	if (force)
 	{
 		if (myGameObjects.contains(aGameObjectID))
@@ -51,11 +53,13 @@ void GameObjectManager::DeleteGameObject(const SY::UUID aGameObjectID, bool forc
 
 void GameObjectManager::DeleteGameObject(const GameObject aGameObject, bool force)
 {
+	OPTICK_EVENT();
 	DeleteGameObject(aGameObject.myID, force);
 }
 
 bool GameObjectManager::GetActive(const SY::UUID aGameObjectID)
 {
+	OPTICK_EVENT();
 	if (!myGameObjects.contains(aGameObjectID))
 	{
 		return false;
@@ -66,6 +70,7 @@ bool GameObjectManager::GetActive(const SY::UUID aGameObjectID)
 
 Layer GameObjectManager::GetLayer(const SY::UUID aGameObjectID)
 {
+	OPTICK_EVENT();
 	return myGameObjects.at(aGameObjectID).onLayer;
 }
 
@@ -89,6 +94,7 @@ GameObject GameObjectManager::GetCamera()
 
 GameObject GameObjectManager::GetGameObject(SY::UUID anID)
 {
+	OPTICK_EVENT();
 	if (myGameObjects.contains(anID))
 	{
 		return GameObject(anID, this);
@@ -140,6 +146,7 @@ void GameObjectManager::SetLastGOAsCamera()
 
 void GameObjectManager::CustomOrderUpdate()
 {
+	OPTICK_EVENT();
 	DeleteObjects();
 }
 
@@ -207,10 +214,8 @@ void GameObjectManager::AddObjects()
 {
 	OPTICK_EVENT();
 	for (auto& i : myObjectsToAdd)
-	{
-
-		myGameObjects.emplace(i, true);
-
+	{ 
+		myGameObjects.emplace(i, true); 
 	}
 	myObjectsToAdd.clear();
 }
@@ -226,6 +231,7 @@ void GameObjectManager::OnSiblingChanged(SY::UUID anID, const std::type_info* So
 
 std::string GameObjectManager::GetName(const SY::UUID aGameObjectID)
 {
+	OPTICK_EVENT();
 	if (!myGameObjects.contains(aGameObjectID))
 	{
 		return "";
@@ -236,6 +242,7 @@ std::string GameObjectManager::GetName(const SY::UUID aGameObjectID)
 
 void GameObjectManager::SetName(const std::string& name, const SY::UUID aGameObjectID)
 {
+	OPTICK_EVENT();
 	if (!myGameObjects.contains(aGameObjectID))
 	{
 		return;

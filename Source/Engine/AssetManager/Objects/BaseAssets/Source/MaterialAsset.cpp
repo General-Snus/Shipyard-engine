@@ -197,6 +197,7 @@ void Material::Update()
 
 std::shared_ptr<TextureHolder> Material::GetTexture(eTextureType type)
 {
+	OPTICK_EVENT();
 	if (data.textures.empty())
 	{
 		return nullptr;

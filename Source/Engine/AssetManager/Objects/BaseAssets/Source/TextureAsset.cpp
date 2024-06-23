@@ -103,6 +103,7 @@ void TextureHolder::Init()
 		//	return;
 		//}
 		//Logger::Err("Error: Default texture was not found");
+		isBeingLoaded = false;
 		isLoadedComplete = false;
 		return;
 	}

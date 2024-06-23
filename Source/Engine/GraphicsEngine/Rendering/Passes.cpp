@@ -21,7 +21,7 @@
 
 void Passes::WriteShadows(std::shared_ptr<CommandList>& commandList, GameObjectManager& scene)
 {
-	OPTICK_EVENT(); 
+	OPTICK_GPU_EVENT("WriteShadows");
 
 	const auto& meshRendererList = scene.GetAllComponents<cMeshRenderer>();
 	const auto graphicCommandList = commandList->GetGraphicsCommandList();
@@ -34,6 +34,7 @@ void Passes::WriteShadows(std::shared_ptr<CommandList>& commandList, GameObjectM
 
 	auto renderShadows = [](const std::vector<cMeshRenderer>& objectsToRender, const std::shared_ptr<CommandList>& list, const std::string_view debugName)
 		{
+			debugName;
 			MaterialBuffer materialBuffer;
 			for (const auto& object : objectsToRender)
 			{
@@ -42,16 +43,17 @@ void Passes::WriteShadows(std::shared_ptr<CommandList>& commandList, GameObjectM
 				list->AllocateBuffer<ObjectBuffer>(eRootBindings::objectBuffer, { transform.GetRawTransform() });
 				for (auto& element : object.GetElements())
 				{
+					OPTICK_GPU_EVENT(debugName.data());
 					GPU::ConfigureInputAssembler(*list, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST, element.IndexResource);
 					materialBuffer.vertexBufferIndex = element.VertexBuffer.GetHandle(ViewType::SRV).heapOffset;
 					list->AllocateBuffer<MaterialBuffer>(eRootBindings::materialBuffer, materialBuffer);
-					OPTICK_GPU_EVENT(debugName.data());
 					list->GetGraphicsCommandList()->DrawIndexedInstanced(element.IndexResource.GetIndexCount(), 1, 0, 0, 0);
 				}
 			}
 		};
 	auto setShadowPrerequisite = [](const cLight& light, int map, std::shared_ptr<CommandList> const& list) -> std::shared_ptr<Texture>
 		{
+			OPTICK_GPU_EVENT("setShadowPrerequisite");
 			const auto& shadowMap = light.GetShadowMap(map);
 			list->GetGraphicsCommandList()->RSSetViewports(1, &shadowMap->GetViewPort());
 			list->GetGraphicsCommandList()->RSSetScissorRects(1, &shadowMap->GetRect());
@@ -76,6 +78,7 @@ void Passes::WriteShadows(std::shared_ptr<CommandList>& commandList, GameObjectM
 		{
 		case eLightType::Directional:
 		{
+			OPTICK_GPU_EVENT("DirectionalShadow");
 			const std::shared_ptr<Texture>& shadowMap = setShadowPrerequisite(light, 0, commandList);
 			renderShadows(meshRendererList, commandList, "DirectionalLight");
 			shadowMap->SetView(ViewType::SRV);
@@ -86,6 +89,7 @@ void Passes::WriteShadows(std::shared_ptr<CommandList>& commandList, GameObjectM
 		break;
 		case eLightType::Point:
 		{
+			OPTICK_GPU_EVENT("PointlightShadow");
 			for (int j = 0; j < 6; j++)
 			{
 				const std::shared_ptr<Texture>& shadowMap = setShadowPrerequisite(light, j, commandList);
@@ -99,6 +103,7 @@ void Passes::WriteShadows(std::shared_ptr<CommandList>& commandList, GameObjectM
 		break;
 		case eLightType::Spot:
 		{
+			OPTICK_GPU_EVENT("SpotlightShadow");
 			const std::shared_ptr<Texture>& shadowMap = setShadowPrerequisite(light, 0, commandList);
 			renderShadows(meshRendererList, commandList, "SpotlightShadowDraw");
 			shadowMap->SetView(ViewType::SRV);
@@ -120,7 +125,6 @@ void Passes::WriteShadows(std::shared_ptr<CommandList>& commandList, GameObjectM
 
 LightBuffer Passes::CreateLightBuffer(GameObjectManager& scene)
 {
-	OPTICK_EVENT();
 	LightBuffer lightBuffer;
 	lightBuffer.NullifyMemory();
 
@@ -130,6 +134,7 @@ LightBuffer Passes::CreateLightBuffer(GameObjectManager& scene)
 		{
 		case eLightType::Directional:
 		{
+			OPTICK_EVENT("Directional");
 			auto* data = i.GetData<DirectionalLight>().get();
 			if (i.GetIsShadowCaster())
 			{
@@ -143,6 +148,7 @@ LightBuffer Passes::CreateLightBuffer(GameObjectManager& scene)
 		//REFACTOR
 		case eLightType::Point:
 		{
+			OPTICK_EVENT("Point");
 			auto* data = i.GetData<PointLight>().get();
 			if (i.GetIsShadowCaster())
 			{
@@ -159,6 +165,7 @@ LightBuffer Passes::CreateLightBuffer(GameObjectManager& scene)
 		}
 		case eLightType::Spot:
 		{
+			OPTICK_EVENT("Spot");
 			auto* data = i.GetData<SpotLight>().get();
 			if (i.GetIsShadowCaster())
 			{

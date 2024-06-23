@@ -85,6 +85,7 @@ void DebugDrawer::RemoveDebugPrimitive(PrimitiveHandle& aHandle)
 
 void DebugDrawer::Update(float aDeltaTime)
 {
+	OPTICK_EVENT();
 	for (auto it = myDebugLifetime.begin(); it != myDebugLifetime.end(); ++it)
 	{
 		it->second -= aDeltaTime;

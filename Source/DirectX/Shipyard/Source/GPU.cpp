@@ -313,6 +313,7 @@ void GPU::UpdateBufferResource(
 void GPU::ConfigureInputAssembler(
 	CommandList& commandList,D3D_PRIMITIVE_TOPOLOGY topology,IndexResource& indexResource)
 {
+	OPTICK_GPU_EVENT("ConfigureInputAssembler");
 	commandList.GetGraphicsCommandList()->IASetPrimitiveTopology(topology);
 	commandList.TransitionBarrier(indexResource,D3D12_RESOURCE_STATE_INDEX_BUFFER);
 	const auto& indexView = indexResource.GetIndexBufferView();

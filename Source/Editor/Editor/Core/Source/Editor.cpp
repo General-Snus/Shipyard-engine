@@ -42,6 +42,7 @@
  
 void SetupImGuiStyle()
 {
+	OPTICK_EVENT();
 	ImGuizmo::AllowAxisFlip(false);
 	// Rounded Visual Studio style by RedNicStone from ImThemes
 	ImGuiStyle& style = ImGui::GetStyle();
@@ -137,6 +138,7 @@ bool Editor::Initialize(HWND aHandle)
 	if (constexpr bool profileStartup = true) {
 		OPTICK_START_CAPTURE();
 	}
+	OPTICK_EVENT();
 	Logger::Create();
 	Logger::SetPrintToVSOutput(true);
 	GetWindowRect(Window::windowHandler, &ViewportRect);
@@ -252,8 +254,7 @@ void Editor::DoWinProc(const MSG& aMessage)
 
 int	 Editor::Run()
 {
-	OPTICK_FRAME("MainThread");
-
+	OPTICK_FRAME("MainThread", Optick::FrameType::CPU); 
 	if (IsGUIActive)
 	{
 		UpdateImGui();
@@ -271,6 +272,7 @@ int	 Editor::Run()
 
 void Editor::ShowSplashScreen()
 {
+	OPTICK_EVENT();
 	if (!mySplashWindow)
 	{
 		mySplashWindow = std::make_unique<SplashWindow>();
@@ -287,14 +289,10 @@ void Editor::HideSplashScreen() const
 
 void Editor::UpdateImGui()
 {
-	OPTICK_EVENT();
-
+	OPTICK_EVENT(); 
 	ImGui_ImplDX12_NewFrame();
-	OPTICK_CATEGORY("ImGui_ImplDX12_NewFrame", Optick::Category::UI);
 	ImGui_ImplWin32_NewFrame();
-	OPTICK_CATEGORY("ImGui_ImplWin32_NewFrame", Optick::Category::UI);
 	ImGui::NewFrame();
-	OPTICK_CATEGORY("ImGui::NewFrame", Optick::Category::UI);
 	ImGuizmo::BeginFrame();
 
 	ImGui::DockSpaceOverViewport();
@@ -308,8 +306,8 @@ void Editor::UpdateImGui()
 }
 
 void Editor::Update()
-{
-	OPTICK_FRAME_EVENT(Optick::FrameType::CPU);
+{ 
+	OPTICK_EVENT();
 	Timer::Update();
 	const float delta = Timer::GetDeltaTime();
 
@@ -324,19 +322,21 @@ void Editor::Update()
 void Editor::Render()
 {
 	OPTICK_EVENT();
-
+	std::vector<std::shared_ptr<Viewport>> test;
 	for (auto& viewport : m_Viewports)
 	{
+		test.emplace_back(viewport);
 		viewport->Update();
 	}
 	for (auto& viewport : m_CustomSceneRenderPasses)
 	{
+		test.emplace_back(viewport);
 		viewport->Update();
 	}
 
-	auto& collection = m_Viewports;
-	collection.insert(collection.end(), m_CustomSceneRenderPasses.begin(), m_CustomSceneRenderPasses.end());
-	GraphicsEngine::Get().Render(collection);
+
+
+	GraphicsEngine::Get().Render(test);
 
 	for (auto& viewport : m_CustomSceneRenderPasses)
 	{
@@ -353,6 +353,7 @@ void Editor::Render()
 
 void Editor::AddViewPort()
 {
+	OPTICK_EVENT();
 	static int ViewportIndex = 0;
 	auto viewport = std::make_shared<Viewport>(!static_cast<bool>(ViewportIndex));
 	viewport->ViewportIndex = ViewportIndex;
@@ -363,6 +364,7 @@ void Editor::AddViewPort()
 
 void Editor::TopBar()
 {
+	OPTICK_EVENT();
 	if (ImGui::BeginMainMenuBar())
 	{
 		if (ImGui::BeginMenu("File"))

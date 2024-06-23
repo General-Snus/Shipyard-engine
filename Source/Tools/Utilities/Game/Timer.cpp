@@ -1,6 +1,8 @@
 #include <assert.h>
 #include "Timer.h"
 
+#include <Tools/Optick/include/optick.h>
+
 Timer::Timer()
 {
 	myTimeSinceLastUpdate = std::chrono::high_resolution_clock::now();
@@ -10,6 +12,7 @@ Timer::Timer()
 
 void Timer::Update()
 {
+	OPTICK_EVENT();
 	myDeltaTime = std::chrono::duration<float>(std::chrono::high_resolution_clock::now() - myTimeSinceLastUpdate).count();
 	myTimeSinceLastUpdate = std::chrono::high_resolution_clock::now();
 }

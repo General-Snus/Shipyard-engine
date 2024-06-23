@@ -53,15 +53,17 @@ void AssetManager::ThreadedLoading()
 			OPTICK_TAG("AssetType",name);
 
 			if (working->isLoadedComplete)
-			{
-				working->isBeingLoaded = false;
+			{ 
 				//this->assetCallbackMaster.UpdateStatusOf<T>(working->GetAssetPath(),AssetCallbackMaster::created); 
 				const double timeEnd = Timer::GetTotalTime();
 				const double diff = (timeEnd - timeStart) * 1000.0;
 				const std::string str = "Loaded: " + working->GetAssetPath().string() + " in " + std::to_string(diff) + "ms \n";
 				Logger::Log(str);
+				working->isBeingLoaded = false;
 				return;
 			}
+
+			working->isBeingLoaded = false;
 			const std::string str = "Failed to load " + working->GetAssetPath().string();
 			Logger::Warn(str);
 		}

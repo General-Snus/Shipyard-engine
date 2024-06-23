@@ -16,6 +16,7 @@
 
 void GameLauncher::Init()
 {
+	OPTICK_EVENT();
 	{
 		GameObject camera = GameObject::Create();
 		camera.SetName("Camera");
@@ -99,6 +100,7 @@ std::vector<GameObject> LoadTest(const std::filesystem::path& path)
 
 void GameLauncher::GenerateNewRandomCubes()
 {
+	OPTICK_EVENT();
 	std::string arr[3] = { "Models/Cube.fbx","Models/CubeHoled.fbx","Models/SteelFloor.fbx" };
 	for (size_t i = 0; i < 10; i++)
 	{
@@ -120,6 +122,7 @@ void GameLauncher::GenerateNewRandomCubes()
 
 void GameLauncher::Start()
 {
+	OPTICK_EVENT();
 #pragma region BaseSetup 
 	{
 		GameObject worldRoot = GameObject::Create();
@@ -266,6 +269,7 @@ void GameLauncher::Start()
 
 void GameLauncher::Update(float delta)
 {
+	OPTICK_EVENT();
 
 	if (Input::IsKeyPressed(static_cast<unsigned>(Keys::I)))
 	{

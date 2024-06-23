@@ -24,6 +24,10 @@ public:
 	void SetNewMesh(const std::shared_ptr<Mesh> aMesh);
 	void SetMaterialPath(const std::filesystem::path& aFilePath);
 	void SetMaterialPath(const std::filesystem::path& aFilePath,int elementIndex);
+
+	void SetMaterial(const std::shared_ptr<Material> aMaterial);
+	void SetMaterial(const std::shared_ptr<Material> aMaterial,int elementIndex);
+
 	std::shared_ptr<Material> GetMaterial(int materialIndex = 0) const;
 	std::vector<Element>& GetElements() const;
 	std::shared_ptr<Mesh> GetRawMesh() const;

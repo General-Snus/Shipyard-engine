@@ -1,6 +1,7 @@
 #pragma once
 #include <Tools/Utilities/LinearAlgebra/Sphere.hpp> 
 #include "BaseAsset.h"
+#include "Tools/Utilities/LinearAlgebra/AABB3D.hpp"
 #include "Tools/Utilities/LinearAlgebra/Matrix4x4.h"
 
 class Material;
@@ -16,9 +17,7 @@ public:
 	Mesh(const std::filesystem::path& aFilePath);
 	void Init() override;
 
-	Vector3f MaxBox;
-	Vector3f MinBox;
-	Sphere<float> boxSphereBounds;
+	AABB3D<float> Bounds; 
 	std::vector<Element> Elements;
 	const std::unordered_map<unsigned int,std::shared_ptr<Material>>& GetMaterialList();
 	void FillMaterialPaths(const aiScene* scene);
@@ -38,7 +37,5 @@ private:
 
 REFL_AUTO(
 	type(Mesh,bases<AssetBase>),
-	field(MaxBox),
-	field(MinBox) 
-
+	field(Bounds)
 )

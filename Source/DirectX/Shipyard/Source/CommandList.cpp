@@ -83,13 +83,14 @@ void CommandList::CopyBuffer(GpuResource& buffer, size_t numElements, size_t ele
 template<typename T>
 void CommandList::SetConstantBuffer(unsigned slot, const T& constantBuffer)
 {
+	OPTICK_GPU_EVENT("SetConstantBuffer");
 	const auto& alloc = GPU::m_GraphicsMemory->AllocateConstant<T>(constantBuffer);
 	m_CommandList->SetGraphicsRootConstantBufferView(slot, alloc.GpuAddress());
 }
 
 void CommandList::CopyResource(const ComPtr<ID3D12Resource>& destination, const ComPtr<ID3D12Resource>& source)
 {
-	OPTICK_EVENT();
+	OPTICK_GPU_EVENT("CopyResource");
 	TransitionBarrier(destination, D3D12_RESOURCE_STATE_COPY_DEST);
 	TransitionBarrier(source, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
@@ -387,7 +388,8 @@ void CommandList::SetDescriptorTable(unsigned slot, Texture* texture)
 
 void CommandList::SetRenderTargets(unsigned numberOfTargets, Texture* renderTargets, Texture* depthBuffer)
 {
-	OPTICK_EVENT();
+
+	OPTICK_GPU_EVENT("SetRenderTargets");
 	assert(numberOfTargets <= D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
 	D3D12_CPU_DESCRIPTOR_HANDLE RTVs[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT] = {};
 	if (renderTargets)
@@ -412,16 +414,19 @@ void CommandList::SetRenderTargets(unsigned numberOfTargets, Texture* renderTarg
 
 void CommandList::TrackResource(Microsoft::WRL::ComPtr<ID3D12Object> object)
 {
+	OPTICK_EVENT();
 	m_TrackedObjects.push_back(object);
 }
 
 void CommandList::TrackResource(const GpuResource& res)
 {
+	OPTICK_EVENT();
 	TrackResource(res.GetResource());
 }
 
 void CommandList::ReleaseTrackedObjects()
 {
+	OPTICK_EVENT();
 	m_TrackedObjects.clear();
 }
 
@@ -432,6 +437,7 @@ void CommandList::FlushResourceBarriers()
 
 bool CommandList::Close(CommandList& pendingCommandList)
 {
+	OPTICK_EVENT();
 	FlushResourceBarriers();
 
 	m_CommandList->Close();
@@ -450,6 +456,7 @@ void CommandList::Close()
 
 void CommandList::Reset()
 {
+	OPTICK_GPU_EVENT("Reset");
 	Helpers::ThrowIfFailed(m_CommandAllocator->Reset());
 	Helpers::ThrowIfFailed(m_CommandList->Reset(m_CommandAllocator.Get(), nullptr));
 

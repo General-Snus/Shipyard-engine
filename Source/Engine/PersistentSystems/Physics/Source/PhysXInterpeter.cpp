@@ -45,6 +45,7 @@ void quaternion2Euler(const physx::PxQuat& q,float res[])
 
 int Shipyard_PhysX::InitializePhysx()
 {
+	OPTICK_EVENT();
 	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION,gAllocator,gErrorCallback);
 
 	gPvd = PxCreatePvd(*gFoundation);

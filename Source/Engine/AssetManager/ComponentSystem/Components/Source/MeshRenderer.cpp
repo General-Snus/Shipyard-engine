@@ -29,16 +29,26 @@ void cMeshRenderer::SetNewMesh(std::shared_ptr<Mesh> aMesh)
 
 void cMeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath)
 {
-	SetMaterialPath(aFilePath, 0);
+	SetMaterial (AssetManager::Get().LoadAsset<Material>(aFilePath), 0);
 }
 
 void cMeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath, int elementIndex)
+{ 
+	SetMaterial (AssetManager::Get().LoadAsset<Material>(aFilePath), elementIndex);
+}
+
+void cMeshRenderer::SetMaterial (const std::shared_ptr<Material> aMaterial)
+{
+	SetMaterial(aMaterial,0);
+}
+
+void cMeshRenderer::SetMaterial(const std::shared_ptr<Material> aMaterial, int elementIndex)
 {
 	if (m_OverrideMaterial.size() <= elementIndex)
 	{
 		m_OverrideMaterial.resize(elementIndex + 1);
 	}
-	m_OverrideMaterial[elementIndex] = AssetManager::Get().LoadAsset<Material>(aFilePath);
+	m_OverrideMaterial[elementIndex] = aMaterial;
 }
 
 std::shared_ptr<Material> cMeshRenderer::GetMaterial(int materialIndex) const

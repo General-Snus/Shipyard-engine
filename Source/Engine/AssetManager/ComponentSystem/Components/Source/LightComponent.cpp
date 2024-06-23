@@ -58,6 +58,7 @@ bool cLight::GetIsShadowCaster() const
 }
 void cLight::SetIsShadowCaster(const bool active)
 {
+	OPTICK_EVENT();
 	isShadowCaster = active;
 
 	if (active)

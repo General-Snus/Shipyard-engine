@@ -290,14 +290,11 @@ void GraphicsEngine::UpdateSettings()
 	RHI::SetConstantBuffer(PIPELINE_STAGE_PIXEL_SHADER,REG_GraphicSettingsBuffer,myGraphicSettingsBuffer);
 	RHI::UpdateConstantBufferData(myGraphicSettingsBuffer);
 	*/
-}
-
-
-
-#pragma optimize("",off) 
-
-void GraphicsEngine::Render(std::vector< std::shared_ptr<Viewport>>& renderViewPorts)
+} 
+#pragma  optimize("",off)
+void GraphicsEngine::Render(  std::vector< std::shared_ptr<Viewport>> renderViewPorts)
 {
+	OPTICK_EVENT();
 	BeginFrame();
 
 	for (auto& viewport : renderViewPorts)
@@ -311,6 +308,7 @@ void GraphicsEngine::Render(std::vector< std::shared_ptr<Viewport>>& renderViewP
 
 void GraphicsEngine::BeginFrame()
 {
+	OPTICK_EVENT();
 	myCamera = Scene::ActiveManager().GetCamera().TryGetComponent<cCamera>();
 	if (!myCamera)
 	{
@@ -320,11 +318,16 @@ void GraphicsEngine::BeginFrame()
 }
 uint64_t GraphicsEngine::RenderFrame(Viewport& renderViewPort,GameObjectManager& scene)
 {
-	OPTICK_EVENT();
 	if (renderViewPort.IsRenderReady())
 	{
+		OPTICK_EVENT();
 		auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 		auto commandList = commandQueue->GetCommandList(L"RenderFrame");
+		OPTICK_GPU_CONTEXT(commandList->GetGraphicsCommandList().Get());
+
+
+
+		OPTICK_GPU_EVENT("RenderFrame");
 		PrepareBuffers(commandList,renderViewPort,scene);
 		Passes::WriteShadows(commandList,scene);
 		commandList->FlushResourceBarriers();
@@ -345,21 +348,20 @@ uint64_t GraphicsEngine::RenderFrame(Viewport& renderViewPort,GameObjectManager&
 
 void GraphicsEngine::EndFrame()
 {
-	OPTICK_EVENT();
 	const auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 	const auto commandList = commandQueue->GetCommandList();
-	OPTICK_GPU_CONTEXT(commandList->GetGraphicsCommandList().Get());
 
-
+	OPTICK_GPU_CONTEXT(commandList->GetGraphicsCommandList().Get()); 
 	commandList->SetRenderTargets(1,GPU::GetCurrentBackBuffer(),nullptr);
 	ImGuiPass(commandList);
 
+	OPTICK_GPU_EVENT("EndFrame");
 
 	const auto* backBuffer = GPU::GetCurrentBackBuffer();
 	commandList->TransitionBarrier(backBuffer->GetResource(),D3D12_RESOURCE_STATE_PRESENT);
 	commandQueue->ExecuteCommandList(commandList);
 
-	OPTICK_CATEGORY("Present",Optick::Category::Wait);
+	OPTICK_CATEGORY("Present",Optick::Category::Rendering);
 	OPTICK_GPU_FLIP(GPU::m_Swapchain->m_SwapChain.Get());
 	Helpers::ThrowIfFailed(GPU::m_Swapchain->m_SwapChain->Present(DXGI_SWAP_EFFECT_DISCARD,DXGI_PRESENT_ALLOW_TEARING));
 	GPU::m_FenceValues[GPU::m_FrameIndex] = commandQueue->Signal();
@@ -371,7 +373,7 @@ void GraphicsEngine::EndFrame()
 
 void GraphicsEngine::PrepareBuffers(std::shared_ptr<CommandList> commandList,Viewport& renderViewPort,GameObjectManager& scene)
 {
-	OPTICK_GPU_CONTEXT(commandList->GetGraphicsCommandList().Get());
+	OPTICK_GPU_EVENT("PrepareBuffers");
 
 	//const UINT currentBackBufferIndex = chain->GetCurrentBackBufferIndex();
 	const auto* backBuffer = GPU::GetCurrentBackBuffer();
@@ -412,6 +414,7 @@ void GraphicsEngine::PrepareBuffers(std::shared_ptr<CommandList> commandList,Vie
 }
 void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandList,Viewport& renderViewPort,GameObjectManager& scene)
 {
+	OPTICK_GPU_EVENT("DeferredRenderingPass");
 	auto& list = scene.GetAllComponents<cMeshRenderer>();
 	{
 		constexpr uint32_t bufferCount = 7;
@@ -459,6 +462,7 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
 
 			for (int i = 0; i < static_cast<int>(eTextureType::EffectMap) + 1; i++)
 			{
+				OPTICK_GPU_EVENT("SetTextures");
 				if (auto textureAsset = meshRenderer.GetTexture(static_cast<eTextureType>(i),materialIndex))
 				{
 					auto tex = textureAsset->GetRawTexture();
@@ -517,6 +521,7 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
 }
 void GraphicsEngine::EnvironmentLightPass(std::shared_ptr<CommandList> commandList)
 {
+	OPTICK_GPU_EVENT("EnvironmentLightPass");
 	auto& environmentLight = PSOCache::GetState(PSOCache::ePipelineStateID::DeferredLighting);
 	constexpr uint32_t bufferCount = 7;
 	const auto& gBufferTextures = PSOCache::GetState(PSOCache::ePipelineStateID::GBuffer)->RenderTargets();
@@ -546,6 +551,7 @@ void GraphicsEngine::EnvironmentLightPass(std::shared_ptr<CommandList> commandLi
 }
 void GraphicsEngine::ToneMapperPass(std::shared_ptr<CommandList> commandList,Texture* target)
 {
+	OPTICK_GPU_EVENT("ToneMapperPass");
 	const auto& toneMapper = PSOCache::GetState(PSOCache::ePipelineStateID::ToneMap);
 
 	const auto& pipelineState = toneMapper->GetPipelineState().Get();
@@ -566,7 +572,7 @@ void GraphicsEngine::ToneMapperPass(std::shared_ptr<CommandList> commandList,Tex
 }
 
 void GraphicsEngine::ImGuiPass(std::shared_ptr<CommandList> commandList)
-{
+{ 
 	OPTICK_GPU_EVENT("ImGui");
 	ImGui::Render();
 	ImGuiIO& io = ImGui::GetIO();

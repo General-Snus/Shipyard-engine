@@ -5,6 +5,7 @@
 #include "imgui.h" 
 void Inspector::RenderImGUi()
 {
+	OPTICK_EVENT();
 
 	ImGui::Begin("Inspector");
 	const auto& selectedGameObjects = Editor::GetSelectedGameObjects();

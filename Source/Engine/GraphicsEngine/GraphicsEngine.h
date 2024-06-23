@@ -169,7 +169,7 @@ public:
 		return myInstance;
 	}
 	bool Initialize(HWND windowHandle,bool enableDeviceDebug);
-	void Render(std::vector<std::shared_ptr<Viewport>>& renderViewPorts);
+	void Render(  std::vector<std::shared_ptr<Viewport>>  renderViewPorts);
 
 	 
 

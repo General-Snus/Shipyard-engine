@@ -1,9 +1,12 @@
 #include "../Console.h"
 
+#include <Tools/Optick/include/optick.h>
+
 #include "imgui.h"
 
 void Console::RenderImGUi()
 {
+	OPTICK_EVENT();
 	ImGui::Begin("Console");
 	{
 		using enum Logger::LogType;

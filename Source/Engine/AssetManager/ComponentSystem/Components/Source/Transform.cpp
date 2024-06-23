@@ -31,6 +31,7 @@ void Transform::Update()
 
 void Transform::MakeClean()
 {
+	OPTICK_EVENT();
 	IsRecentlyUpdated = true;
 	MakeSaneRotation();
 	myTransform =
@@ -223,6 +224,7 @@ void Transform::SetGizmo(bool enabled)
 
 void Transform::InspectorView()
 {
+	OPTICK_EVENT();
 	Component::InspectorView();
 	IsDirty |= ImGui::DragFloat3("Position",&myPosition);
 	IsDirty |= ImGui::DragFloat3("Euler angles",&myRotation);

@@ -24,8 +24,11 @@ public:
 	float DistanceTo(const Vector3<T>& aPosition) const;
 	Vector3<T> ClosestPoint(const Vector3<T>& aPosition) const;
 
+
+	void Extend(AABB3D<T> aAABB3D);
 	Vector3<T> GetCenter() const { return (MinPoint + MaxPoint) * 0.5f; }
 	Vector3<T> GetWidth() const { return (MaxPoint - MinPoint) * 0.5f; }
+	T GetRadius() const { return (MaxPoint - MinPoint).Length()/T(2); }
 	T GetXSize() const { return (MaxPoint.x - MinPoint.x) * 0.5f; }
 	T GetYSize() const { return (MaxPoint.y - MinPoint.y) * 0.5f; }
 	T GetZSize() const { return (MaxPoint.z - MinPoint.z) * 0.5f; }
@@ -99,7 +102,17 @@ inline Vector3<T> AABB3D<T>::ClosestPoint(const Vector3<T>& aPosition) const
 	return pointOnBounds;
 }
 
+template <class T>
+void AABB3D<T>::Extend(AABB3D<T> aAABB3D)
+{
+	MinPoint.x = std::min(MinPoint.x,aAABB3D.MinPoint.x);
+	MinPoint.y = std::min(MinPoint.y,aAABB3D.MinPoint.y);
+	MinPoint.z = std::min(MinPoint.z,aAABB3D.MinPoint.z);
 
+	MaxPoint.x = std::max(MaxPoint.x,aAABB3D.MaxPoint.x);
+	MaxPoint.y = std::max(MaxPoint.y,aAABB3D.MaxPoint.y);
+	MaxPoint.z = std::max(MaxPoint.z,aAABB3D.MaxPoint.z);
+}
 
 
 template<class T>

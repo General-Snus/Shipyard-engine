@@ -13,6 +13,7 @@
 
 void Hierarchy::RenderImGUi()
 {
+	OPTICK_EVENT();
 	{
 		const auto& gObjList = Scene::ActiveManager().GetAllGameObjects();
 		ImGui::Begin("Hierarchy");

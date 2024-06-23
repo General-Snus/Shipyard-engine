@@ -44,6 +44,7 @@ bool GPUCommandQueue::Create(const ComPtr<ID3D12Device>& device,D3D12_COMMAND_LI
 
 uint64_t GPUCommandQueue::Signal()
 {
+	OPTICK_GPU_EVENT("Signal");
 	uint64_t fenceValueForSignal = ++m_FenceValue;
 	Helpers::ThrowIfFailed(m_CommandQueue->Signal(m_Fence.Get(),fenceValueForSignal));
 	return fenceValueForSignal;
@@ -56,6 +57,7 @@ bool GPUCommandQueue::IsFenceComplete(uint64_t fenceValue)
 
 void GPUCommandQueue::WaitForFenceValue(uint64_t fenceValue)
 {
+	OPTICK_GPU_EVENT("WaitForFenceValue");
 	if (!IsFenceComplete(fenceValue))
 	{
 		auto event = ::CreateEvent(NULL,FALSE,FALSE,NULL);
@@ -170,6 +172,7 @@ uint64_t GPUCommandQueue::ExecuteCommandList(const std::vector<std::shared_ptr<C
 
 void GPUCommandQueue::ProccessInFlightCommandLists()
 {
+	OPTICK_GPU_EVENT("ProccessInFlightCommandLists");
 	std::unique_lock<std::mutex> lock(m_ProcessInFlightCommandListsThreadMutex,std::defer_lock);
 
 	while (m_bProcessInFlightCommandLists)

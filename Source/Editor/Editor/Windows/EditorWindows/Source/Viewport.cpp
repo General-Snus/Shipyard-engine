@@ -89,6 +89,7 @@ bool Viewport::IsMainViewport() const
 
 void Viewport::Update()
 {
+	OPTICK_EVENT();
 	if (IsMainViewPort)
 	{
 		myVirtualCamera = sceneToRender->GetGOM().GetCamera();
@@ -142,6 +143,7 @@ Matrix Viewport::ViewInverse()
 
 void Viewport::RenderImGUi()
 {
+	OPTICK_EVENT();
 	/*ImGuiWindowFlags windowFlags = ImGuiViewportFlags_IsPlatformWindow
 		| ImGuiViewportFlags_NoDecoration
 		| ImGuiViewportFlags_NoTaskBarIcon

@@ -147,7 +147,6 @@ std::shared_ptr<T> AssetManager::LoadAsset(const std::filesystem::path& aFilePat
 template<class T>
 std::shared_ptr<T> AssetManager::LoadAsset(const std::filesystem::path& aFilePath,const bool useExact)
 {
-
 	const std::type_info* typeInfo = &typeid(T);
 	std::shared_ptr<Library> library = GetLibraryOfType<T>();
 
