@@ -12,13 +12,14 @@ public:
 	MYLIB_REFLECTABLE();
 	AssetBase(const std::filesystem::path& aFilePath);
 	virtual ~AssetBase() = default;
+	//When overriding you have the responisiblitity to set the isloadedcomplete flag
 	virtual void Init() = 0;
 	bool  isLoadedComplete = false;
 	bool  isBeingLoaded = false;
 	const std::filesystem::path& GetAssetPath()	const { return AssetPath; };
 	std::vector<std::function<void()>> callBackOnFinished; 
 
-	void InspectorView() override;
+	bool InspectorView() override;
 	std::filesystem::path AssetPath;
 protected:
 };

@@ -666,7 +666,7 @@ struct OPTICK_API Event
 
 	Event(const EventDescription& description)
 	{
-		data = Start(description);
+		data = Start(description);	
 	}
 
 	~Event()

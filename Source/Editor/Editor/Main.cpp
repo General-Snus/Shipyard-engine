@@ -44,6 +44,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		}
 		__except (ExceptionFilterFunction(GetExceptionInformation()))
 		{
+
 		}
 	}
 	return true;

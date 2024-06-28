@@ -120,8 +120,12 @@ void cAnimator::UpdateAnimationHierarcy(float t)
 	}
 }
 
-void cAnimator::InspectorView()
+bool cAnimator::InspectorView()
 {
-	Component::InspectorView();
+	if (!Component::InspectorView())
+	{
+		return false;
+	}
 	Reflect<cAnimator>();
+	return true;
 }

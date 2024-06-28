@@ -137,6 +137,7 @@ void ContentDirectory::RenderImGUi()
 
 				if (imageTextureReady && meshReady)
 				{
+					Logger::Log("FBX Icon Generated");
 					GenerateSceneForIcon(mesh, imageTexture, GraphicsEngine::Get().GetDefaultMaterial());
 				}
 
@@ -159,6 +160,7 @@ void ContentDirectory::RenderImGUi()
 
 				if (imageTextureReady && meshReady && materialReady)
 				{
+					Logger::Log("Material Icon Generated");
 					GenerateSceneForIcon(mesh, imageTexture, materialPreview);
 				}
 

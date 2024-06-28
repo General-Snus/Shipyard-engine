@@ -7,34 +7,13 @@
 #include "UUID.h"
 #include "Tools/Optick/include/optick.h"
 
+#include <Engine/AssetManager/Enums.h>
+
 class Component;
-
-enum class Layer
-{
-	None = 0,
-	Default = 1,
-	Enemy = 1 << 2,
-	Player = 1 << 3,
-	Entities = Enemy | Player,
-	Projectile = 1 << 4,
-	Environment = 1 << 5,
-	Count = 1 << 6,
-	AllLayers = INT32_MAX
-};
-
-template<class T> inline Layer operator~ (Layer a) { return (Layer)~(int)a; }
-template<class T> inline Layer operator| (Layer a,Layer b) { return (Layer)((int)a | (int)b); }
-template<class T> inline Layer operator& (Layer a,Layer b) { return (Layer)((int)a & (int)b); }
-template<class T> inline Layer operator^ (Layer a,Layer b) { return (Layer)((int)a ^ (int)b); }
-template<class T> inline Layer& operator|= (Layer a,Layer b) { return (Layer&)((int&)a |= (int)b); }
-template<class T> inline Layer& operator&= (Layer a,Layer b) { return (Layer&)((int&)a &= (int)b); }
-template<class T> inline Layer& operator^= (Layer a,Layer b) { return (Layer&)((int&)a ^= (int)b); }
 
 
 class ComponentManagerBase;
 class GameObject;
-// Singleton for main scene but can also be handeled as a separate scene, will split later
-//TODO URGENT
 class GameObjectManager
 {
 private:

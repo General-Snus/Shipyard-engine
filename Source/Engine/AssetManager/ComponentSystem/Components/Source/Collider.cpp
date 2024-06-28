@@ -97,8 +97,12 @@ void cCollider::OnSiblingChanged(const std::type_info* SourceClass)
 		GetGameObject().OnSiblingChanged(&typeid(cCollider));
 	}
 }
-void cCollider::InspectorView()
+bool cCollider::InspectorView()
 {
-	Component::InspectorView();
+	if (!Component::InspectorView())
+	{
+		return false;
+	}
 	Reflect<cCollider>();
+	return true;
 }

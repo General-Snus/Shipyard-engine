@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include <format> 
 #include "Tools/Utilities/LinearAlgebra/Vector3.hpp"
 #include <Tools/Utilities/TemplateHelpers.h>
 class Logger
@@ -21,7 +22,7 @@ public:
 		All = INT32_MAX
 	};
 
-	 
+
 private:
 	struct LogMsg
 	{
@@ -80,7 +81,9 @@ public:
 	}
 
 	static void Log(const std::string& aString);
-	static void Warn(const std::string& aString);
+	static void Warn(const std::string& aString); 
+
+
 	static void Err(const std::string& aString,const std::source_location& location =
 		std::source_location::current());
 	static void Succ(const std::string& aString);
@@ -102,4 +105,4 @@ private:
 };
 
 
-ENABLE_ENUM_BITWISE_OPERATORS(Logger::LogType)
+ENABLE_ENUM_BITWISE_OPERATORS(Logger::LogType) 

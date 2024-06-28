@@ -143,11 +143,14 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 	}
 }
 
-void Mesh::InspectorView()
+bool Mesh::InspectorView()
 {
-	ImGui::PushID(this);
-	AssetBase::InspectorView();
+	if (!AssetBase::InspectorView())
+	{
+		return false;
+	}
 
+	ImGui::PushID(this);
 	if (ImGui::TreeNodeEx("Material slots")) // Replace with element name
 	{
 		ImGui::Separator();
@@ -163,6 +166,7 @@ void Mesh::InspectorView()
 		ImGui::TreePop();
 	}
 	ImGui::PopID();
+	return true;
 }
 
 void Mesh::Init()

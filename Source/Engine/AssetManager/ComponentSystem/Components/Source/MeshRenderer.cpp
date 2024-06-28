@@ -102,10 +102,14 @@ std::shared_ptr<Mesh> cMeshRenderer::GetRawMesh() const
 	return m_Mesh;
 }
 
-void cMeshRenderer::InspectorView()
+bool cMeshRenderer::InspectorView()
 {
-	Component::InspectorView();
+	if (!Component::InspectorView())
+	{
+		return false;
+	}
 	Reflect<cMeshRenderer>();
+	return true;
 }
 
 std::shared_ptr<TextureHolder> cMeshRenderer::GetTexture(eTextureType type, unsigned materialIndex) const
@@ -221,8 +225,12 @@ void cSkeletalMeshRenderer::Render()
 	}
 }
 
-void cSkeletalMeshRenderer::InspectorView()
+bool cSkeletalMeshRenderer::InspectorView()
 {
-	Component::InspectorView();
+	if (!Component::InspectorView())
+	{
+		return false;
+	}
 	Reflect<cSkeletalMeshRenderer>();
+	return true;
 }

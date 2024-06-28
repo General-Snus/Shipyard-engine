@@ -222,14 +222,18 @@ void Transform::SetGizmo(bool enabled)
 	}
 }
 
-void Transform::InspectorView()
+bool Transform::InspectorView()
 {
-	OPTICK_EVENT();
-	Component::InspectorView();
+	OPTICK_EVENT(); 
+	if (!Component::InspectorView())
+	{
+		return false;
+	}
 	IsDirty |= ImGui::DragFloat3("Position",&myPosition);
 	IsDirty |= ImGui::DragFloat3("Euler angles",&myRotation);
 	ImGui::DragFloat4("Quaternion",&myQuaternion,1,0,0,"%.4f",ImGuiSliderFlags_NoInput);
 	IsDirty |= ImGui::DragFloat3("Scale",&myScale);
+	return true;
 }
 
 void Transform::SetRotation(float X,float Y,float Z)

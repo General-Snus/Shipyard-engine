@@ -484,6 +484,7 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
 						materialBuffer.emissiveTexture = tex->GetHeapOffset();
 						break;
 					default:
+						Logger::Critical("Texture type is not found or is not valid for used on deffered");
 						break;
 					}
 				}
@@ -504,6 +505,7 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
 						materialBuffer.emissiveTexture = defaultEffectTexture->GetRawTexture()->GetHeapOffset();
 						break;
 					default:
+						Logger::Critical("Texture type is not found or is not valid for used on deffered");
 						break;
 					}
 				}

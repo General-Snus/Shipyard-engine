@@ -35,7 +35,7 @@ public:
 	eAnimationState GetState() const;
 	void SetState(eAnimationState aState);
 	void SetPlayingAnimation(unsigned int aAnimationIndex);
-	void InspectorView() override;
+	bool InspectorView() override;
 private:
 	void SetHierarchy(unsigned int aBoneID,const  Matrix& aParentMatrix);
 	void UpdateAnimationHierarcy(float t);

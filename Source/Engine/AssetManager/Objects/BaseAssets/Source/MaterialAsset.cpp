@@ -137,9 +137,12 @@ void Material::Init()
 	isLoadedComplete = true;
 }
 
-void Material::InspectorView()
+bool Material::InspectorView()
 {
-	AssetBase::InspectorView();
+	if (!AssetBase::InspectorView())
+	{
+		return false;
+	}
 	Reflect<Material>();
 
 
@@ -172,6 +175,7 @@ void Material::InspectorView()
 		}
 		ImGui::TreePop();
 	}
+	return true;
 }
 
 MaterialBuffer& Material::GetMaterialData()

@@ -668,9 +668,13 @@ FrameBuffer cLight::GetShadowMapFrameBuffer(const int number) const
 	return fb;
 }
 
-void cLight::InspectorView()
+bool cLight::InspectorView()
 {
-	Component::InspectorView();
+	if (!Component::InspectorView())
+	{
+		return false;
+	}
+
 	Reflect<cLight>();
 	using enum eLightType;
 	switch (myLightType)
@@ -687,4 +691,5 @@ void cLight::InspectorView()
 	case uninitialized:
 		break;
 	}
+	return true;
 }

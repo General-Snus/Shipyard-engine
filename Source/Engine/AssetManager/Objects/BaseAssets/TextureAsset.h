@@ -16,7 +16,7 @@ public:
 	void SetRawTexture(  Texture  aTexture) { *RawTexture = aTexture; }
 	eTextureType GetTextureType() const { return textureType; }
 	void SetTextureType(eTextureType aTextureType);
-	void InspectorView() override;
+	bool InspectorView() override;
 private: 
 	eTextureType textureType;
 	std::shared_ptr<Texture> RawTexture;

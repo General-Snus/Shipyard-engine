@@ -31,7 +31,7 @@ public:
 	std::shared_ptr<Material> GetMaterial(int materialIndex = 0) const;
 	std::vector<Element>& GetElements() const;
 	std::shared_ptr<Mesh> GetRawMesh() const;
-	void InspectorView() override;
+	bool InspectorView() override;
 
 	std::shared_ptr<TextureHolder> GetTexture(eTextureType type,unsigned materialIndex = 0) const;
 	bool IsDefaultMesh() const;
@@ -60,7 +60,7 @@ public:
 
 	void SetNewMesh(const std::filesystem::path& aFilePath);
 	void Render() override;
-	void InspectorView() override;
+	bool InspectorView() override;
 
 	FORCEINLINE const std::shared_ptr<Skeleton> GetRawSkeleton() const
 	{

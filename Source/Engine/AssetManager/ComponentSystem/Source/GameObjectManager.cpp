@@ -248,5 +248,13 @@ void GameObjectManager::SetName(const std::string& name, const SY::UUID aGameObj
 		return;
 	}
 
+	if (name.size() > 128)
+	{
+		std::string stringCopy = name;
+		stringCopy.resize(128);
+		Logger::Warn(std::format("Name is set to be longer then the max limit of 128, name is reduced to {}" ,stringCopy)); // Why do i need to cstr this??
+		myGameObjects.at(aGameObjectID).Name = stringCopy;
+		return;
+	}
 	myGameObjects.at(aGameObjectID).Name = name;
 }

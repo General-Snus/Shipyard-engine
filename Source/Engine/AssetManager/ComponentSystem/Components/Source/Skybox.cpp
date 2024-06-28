@@ -31,10 +31,15 @@ void Skybox::Update()
 }
 
 
-void Skybox::InspectorView()
+bool Skybox::InspectorView()
 {
-	Component::InspectorView();
+	if (!Component::InspectorView())
+	{
+		return false;
+	}
+
 	Reflect<Skybox>();
+		return true;
 }
 
 void Skybox::Render()

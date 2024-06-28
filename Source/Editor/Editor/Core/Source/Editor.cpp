@@ -233,13 +233,8 @@ bool Editor::Initialize(HWND aHandle)
 
 void Editor::DoWinProc(const MSG& aMessage)
 {
-	extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-	if (ImGui_ImplWin32_WndProcHandler(aMessage.hwnd, aMessage.message, aMessage.wParam, aMessage.lParam))
-	{
-		return;
-	}
 
-	if (aMessage.message == WM_QUIT)
+	if (aMessage.message == WM_CLOSE)
 	{
 		GPU::UnInitialize();
 		ImGui_ImplDX12_Shutdown();
@@ -247,6 +242,12 @@ void Editor::DoWinProc(const MSG& aMessage)
 		ImGui::DestroyContext();
 		return;
 	}
+
+	extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+	if (ImGui_ImplWin32_WndProcHandler(aMessage.hwnd, aMessage.message, aMessage.wParam, aMessage.lParam))
+	{
+		return;
+	} 
 
 	Input::UpdateEvents(aMessage.message, aMessage.wParam, aMessage.lParam);
 	Input::UpdateMouseInput(aMessage.message, aMessage.wParam);

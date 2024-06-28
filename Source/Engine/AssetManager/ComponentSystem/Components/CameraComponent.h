@@ -47,7 +47,7 @@ public:
 	Matrix GetProjection() { return m_Projection; };
 	FrameBuffer GetFrameBuffer();
 	Vector4f WoldSpaceToPostProjectionSpace(Vector3f aEntity);
-	void InspectorView() override;
+	bool InspectorView() override;
 
 	CameraSettings mySettings;
 private:

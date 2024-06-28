@@ -21,7 +21,7 @@ public:
 	std::vector<Element> Elements;
 	const std::unordered_map<unsigned int,std::shared_ptr<Material>>& GetMaterialList();
 	void FillMaterialPaths(const aiScene* scene);
-	void InspectorView() override;
+	bool InspectorView() override;
 
 private:
 	std::unordered_map<unsigned int,std::shared_ptr<Material>> materials;

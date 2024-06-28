@@ -64,7 +64,7 @@ public:
 	bool GetIsBound() const;
 
 	FrameBuffer GetShadowMapFrameBuffer(const int number = 0) const;
-	void InspectorView() override;
+	bool InspectorView() override;
 
 	template<class T>
 	std::shared_ptr<T> GetData();

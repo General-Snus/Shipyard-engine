@@ -45,7 +45,7 @@ public:
 	const T* TryGetComponent() const;
 	template <class T>
 	const T* TryGetAddComponent() const;
-	void InspectorView() override;
+	bool InspectorView() override;
 
 	inline bool IsActive() const { return m_IsActive && myManager->GetActive(myOwnerID); }
 	inline void SetActive(const bool aState) { m_IsActive = aState; }

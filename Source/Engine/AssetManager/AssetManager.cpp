@@ -46,6 +46,12 @@ void AssetManager::ThreadedLoading()
 			std::shared_ptr<AssetBase> working;
 			working = myAssetQueue.Dequeue();
 
+			if (!working)
+			{
+				Logger::Err("Something shit itself when loading asset: Asset was empty!");
+				return;
+			}
+
 			working->isBeingLoaded = true;
 			working->Init();
 
@@ -53,7 +59,7 @@ void AssetManager::ThreadedLoading()
 			OPTICK_TAG("AssetType",name);
 
 			if (working->isLoadedComplete)
-			{ 
+			{
 				//this->assetCallbackMaster.UpdateStatusOf<T>(working->GetAssetPath(),AssetCallbackMaster::created); 
 				const double timeEnd = Timer::GetTotalTime();
 				const double diff = (timeEnd - timeStart) * 1000.0;

@@ -12,9 +12,13 @@ TextureHolder::TextureHolder(const std::filesystem::path& aFilePath,eTextureType
 	RawTexture = std::make_shared<Texture>();
 }
 
-void TextureHolder::InspectorView()
-{
-	AssetBase::InspectorView(); 
+bool TextureHolder::InspectorView()
+{ 
+	if (!AssetBase::InspectorView())
+	{
+		return false;
+	}
+	return true;
 }
 
 void TextureHolder::SetTextureType(eTextureType aTextureType)

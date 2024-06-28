@@ -9,12 +9,14 @@ void Component::Abandon()
 	IsInherited = std::max((IsInherited - 1),0);
 }
 
- void Component::InspectorView()
+bool Component::InspectorView()
 {
-	 OPTICK_EVENT();
+	OPTICK_EVENT();
+
+	bool isOpened = false;
 	const TypeInfo& typeInfo = this->GetTypeInfo();
 	ImGui::Checkbox(std::format("##{}{}",typeInfo.Name().c_str(),std::to_string(myOwnerID).c_str()).c_str(),&m_IsActive);
 	ImGui::SameLine(0,10);
-	ImGui::Text(typeInfo.Name().c_str()); 
-	ImGui::SameLine();
+	isOpened = ImGui::CollapsingHeader(typeInfo.Name().c_str(),ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_OpenOnDoubleClick);
+	return isOpened;
 }

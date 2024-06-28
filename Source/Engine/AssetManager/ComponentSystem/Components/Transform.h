@@ -71,7 +71,7 @@ public:
 	~Transform() override = default;
 	void SetGizmo(bool enabled);
 	void InitPrimitive(); 
-	void InspectorView() override;
+	bool InspectorView() override;
 
 
 

@@ -23,7 +23,7 @@ public:
 	void SetColliderType(Args... someParameters);
 
 	void OnSiblingChanged(const std::type_info* SourceClass = nullptr) override;
-	void InspectorView() override;
+	bool InspectorView() override;
 
 	//void AddToNotify(std::weak_ptr<Component> aComponent) { myNotify.push_back(aComponent); }
 	//void Notify(std::weak_ptr<cCollider> notifier) { for(auto& i : myNotify) i.lock()->CollidedWith(notifier); }

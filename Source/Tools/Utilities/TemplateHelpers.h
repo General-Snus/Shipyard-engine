@@ -37,6 +37,17 @@ inline _ENUM_TYPE& operator^=(_ENUM_TYPE& a, const _ENUM_TYPE& b) \
 };
 
 
+
+template <typename T,T... S,typename F>
+constexpr void for_sequence(std::integer_sequence<T,S...>,F f) {
+	(static_cast<void>(f(std::integral_constant<T,S>{})),...);
+}
+
+template<auto n,typename F>
+constexpr void for_sequence(F f) {
+	for_sequence(std::make_integer_sequence<decltype(n),n>{},f);
+}
+
 template <typename ... Trest>
 struct unique_types;
 

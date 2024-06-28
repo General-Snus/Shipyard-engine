@@ -41,7 +41,7 @@ public:
 	static bool CreateJson(const DataMaterial& data,const std::filesystem::path& pth); 
 	Material(const std::filesystem::path& aFilePath); // Json path
 	void Init() override;
-	void InspectorView() override;
+	bool InspectorView() override;
 
 	MaterialBuffer& GetMaterialData();
 	void Update();

@@ -9,7 +9,7 @@ public:
 	Skybox(const SY::UUID anOwnerId,GameObjectManager* aManager,const std::filesystem::path& aPath);
 
 	void Update() override;
-	void InspectorView()override;
+	bool InspectorView()override;
 	void Render() override;
 
 private:

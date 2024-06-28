@@ -127,7 +127,7 @@ class Reflectable
 {
 public:
 	virtual const TypeInfo& GetTypeInfo() const = 0;
-	virtual void InspectorView() {};
+	virtual bool InspectorView() { return false; };
 	template<typename TypeToReflect>
 	void Reflect(this auto& aReflectedObject);
 	template <typename TypeToReflect>
