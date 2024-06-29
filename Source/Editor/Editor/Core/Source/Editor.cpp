@@ -247,14 +247,15 @@ bool Editor::Initialize(HWND aHandle)
 }
 
 void Editor::DoWinProc(const MSG& aMessage)
-{
-
+{ 
 	if (aMessage.message == WM_CLOSE)
 	{
-		GPU::UnInitialize();
+		ThreadPool::Get().Destroy();
+		Shipyard_PhysX::Get().ShutdownPhysx();
 		ImGui_ImplDX12_Shutdown();
 		ImGui_ImplWin32_Shutdown();
 		ImGui::DestroyContext();
+		GPU::UnInitialize();
 		return;
 	}
 

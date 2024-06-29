@@ -25,11 +25,9 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 		std::filesystem::path texturePath;
 		int textureLoaded = 0;
 		Vector4f color;
-		auto material = scene->mMaterials[key];
-		material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
+		auto material = scene->mMaterials[key]; 
 
-		Material::DataMaterial dataMat;
-		dataMat.materialData.albedoColor = color;
+		Material::DataMaterial dataMat; 
 		dataMat.textures.resize(4);
 
 

@@ -40,7 +40,7 @@ public:
 	Matrix& View();
 	void RenderImGUi() override;
 
-	void TakeInput();
+
 
 
 	std::shared_ptr<TextureHolder> m_RenderTarget;
@@ -48,6 +48,9 @@ public:
 	int ViewportIndex = 0;
 	std::shared_ptr<Scene> sceneToRender;
 private:
+	void TakeInput();
+	void RenderToolbar();
+
 	bool IsMainViewPort = false;
 	bool IsVisible = true;
 	bool IsUsed = false;

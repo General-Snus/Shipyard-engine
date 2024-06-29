@@ -14,13 +14,13 @@ public:
 	virtual ~AssetBase() = default;
 	//When overriding you have the responisiblitity to set the isloadedcomplete flag
 	virtual void Init() = 0;
+	const std::filesystem::path& GetAssetPath()	const { return AssetPath; };
+	bool InspectorView() override;
+
+	std::filesystem::path AssetPath;
 	bool  isLoadedComplete = false;
 	bool  isBeingLoaded = false;
-	const std::filesystem::path& GetAssetPath()	const { return AssetPath; };
 	std::vector<std::function<void()>> callBackOnFinished; 
-
-	bool InspectorView() override;
-	std::filesystem::path AssetPath;
 protected:
 };
 

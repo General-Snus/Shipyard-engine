@@ -447,7 +447,9 @@ void cLight::Update()
 	{
 		ConformToTransform();
 	}
-	if (isDirty)
+
+	//TODO dealt with dynamic maps and static maps in some way
+	//if (isDirty)
 	{
 		switch (myLightType)
 		{

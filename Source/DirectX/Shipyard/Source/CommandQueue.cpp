@@ -63,7 +63,6 @@ void GPUCommandQueue::WaitForFenceValue(uint64_t fenceValue)
 		auto event = ::CreateEvent(NULL,FALSE,FALSE,NULL);
 		assert(event && "Failed to create fence event handle.");
 
-		// Is this function thread safe?
 		m_Fence->SetEventOnCompletion(fenceValue,event);
 		::WaitForSingleObject(event,DWORD_MAX);
 
@@ -172,8 +171,9 @@ uint64_t GPUCommandQueue::ExecuteCommandList(const std::vector<std::shared_ptr<C
 
 void GPUCommandQueue::ProccessInFlightCommandLists()
 {
+	OPTICK_THREAD("ProccessInFlightCommandLists");
 	OPTICK_GPU_EVENT("ProccessInFlightCommandLists");
-	std::unique_lock<std::mutex> lock(m_ProcessInFlightCommandListsThreadMutex,std::defer_lock);
+	std::unique_lock lock(m_ProcessInFlightCommandListsThreadMutex,std::defer_lock);
 
 	while (m_bProcessInFlightCommandLists)
 	{
@@ -200,7 +200,7 @@ void GPUCommandQueue::ProccessInFlightCommandLists()
 
 void GPUCommandQueue::Flush()
 {
-	std::unique_lock<std::mutex> lock(m_ProcessInFlightCommandListsThreadMutex);
+	std::unique_lock lock(m_ProcessInFlightCommandListsThreadMutex);
 	m_ProcessInFlightCommandListsThreadCV.wait(lock,[this] { return m_InFlightCommandLists.Empty(); });
 
 	// In case the command queue was signaled directly 
@@ -213,4 +213,10 @@ void GPUCommandQueue::Flush()
 void GPUCommandQueue::Wait(const GPUCommandQueue& other) const
 {
 	m_CommandQueue->Wait(other.m_Fence.Get(),other.m_FenceValue);
+}
+
+void GPUCommandQueue::Destroy()
+{
+	Flush();
+	m_bProcessInFlightCommandLists = false;
 }

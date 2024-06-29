@@ -26,6 +26,8 @@ public:
 
 	void Wait(const GPUCommandQueue& other) const;
 
+	void Destroy();
+
 private:
 	using CommandListEntry = std::tuple<uint64_t,std::shared_ptr<CommandList> >;
 

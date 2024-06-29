@@ -9,42 +9,42 @@ class AssetBase;
 namespace Reflection
 {
 	template <typename T>
-	void ImGuiReflect(T& ref, const std::string& identifier)
+	void ImGuiReflect(T& ref,const std::string& identifier)
 	{
 		identifier;
 		ImGui::TextWrapped(refl::runtime::debug_str(ref).c_str());
 	}
 
 	template <typename T>
-	void ImGuiReflect(const T& ref, const std::string& identifier)
+	void ImGuiReflect(const T& ref,const std::string& identifier)
 	{
 		identifier;
 		ImGui::TextWrapped(refl::runtime::debug_str(ref).c_str());
 	}
 
-	inline void ImGuiReflect(bool& ref, const std::string& identifier)
+	inline void ImGuiReflect(bool& ref,const std::string& identifier)
 	{
-		ImGui::Checkbox(std::format("##{}", identifier).c_str(), &ref);
+		ImGui::Checkbox(std::format("##{}",identifier).c_str(),&ref);
 	}
 
-	inline void ImGuiReflect(Vector2<float>& ref, const std::string& identifier)
+	inline void ImGuiReflect(Vector2<float>& ref,const std::string& identifier)
 	{
-		ImGui::DragFloat2(std::format("##{}", identifier).c_str(), &ref.x);
+		ImGui::DragFloat2(std::format("##{}",identifier).c_str(),&ref.x);
 	}
 
-	inline void ImGuiReflect(Vector3<float>& ref, const std::string& identifier)
+	inline void ImGuiReflect(Vector3<float>& ref,const std::string& identifier)
 	{
-		ImGui::DragFloat3(std::format("##{}", identifier).c_str(), &ref.x);
+		ImGui::DragFloat3(std::format("##{}",identifier).c_str(),&ref.x);
 	}
 
-	inline void ImGuiReflect(Vector4<float>& ref, const std::string& identifier)
+	inline void ImGuiReflect(Vector4<float>& ref,const std::string& identifier)
 	{
-		ImGui::DragFloat4(std::format("##{}", identifier).c_str(), &ref.x);
+		ImGui::DragFloat4(std::format("##{}",identifier).c_str(),&ref.x);
 	}
 
-	inline void ImGuiReflect(float& ref, const std::string& identifier)
+	inline void ImGuiReflect(float& ref,const std::string& identifier)
 	{
-		ImGui::DragFloat(std::format("##{}", identifier).c_str(), &ref);
+		ImGui::DragFloat(std::format("##{}",identifier).c_str(),&ref);
 	}
 
 
@@ -70,14 +70,14 @@ namespace Reflection
 		a->InspectorView();
 	};
 }
-struct serializable : refl::attr::usage::field, refl::attr::usage::function
+struct serializable : refl::attr::usage::field,refl::attr::usage::function
 {
 };
 template <typename T>
-void serialize(std::ostream& os, T&& value)
+void serialize(std::ostream& os,T&& value)
 {
 	// iterate over the members of T
-	for_each(refl::reflect(value).members, [&](auto member)
+	for_each(refl::reflect(value).members,[&](auto member)
 		{
 			// is_readable checks if the member is a non-const field
 			// or a 0-arg const-qualified function marked with property attribute
@@ -116,7 +116,7 @@ private:
 
 	// given a type_descriptor, we construct a TypeInfo
 	// with all the metadata we care about (currently only name)
-	template <typename T, typename... Fields>
+	template <typename T,typename... Fields>
 	TypeInfo(refl::type_descriptor<T> td)
 		: name_(td.name)
 	{
@@ -150,47 +150,43 @@ public:
 template <typename TypeToReflect>//Make sure only reflected objects can get here
 inline void Reflectable::Reflect(this auto& aReflectedObject)
 {
-	if (ImGui::TreeNodeEx("##test"))
+	auto TypeReflector = [&] <typename T>(this auto & self)
 	{
-		auto TypeReflector = [&] <typename T>(this auto & self)
+		auto imp = [&]<typename T0>(T0 member)
 		{
-			auto imp = [&]<typename T0>(T0 member)
+			if constexpr (Reflection::InspectorSyntaxPtr<decltype(member(aReflectedObject))>)
 			{
-				if constexpr (Reflection::InspectorSyntaxPtr<decltype(member(aReflectedObject))>)
-				{
-					member(aReflectedObject)->InspectorView();
-					return;
-				}
-				if constexpr (Reflection::InspectorSyntax<decltype(member(aReflectedObject))>)
-				{
-					member(aReflectedObject).InspectorView();
-					return;
-				}
+				member(aReflectedObject)->InspectorView();
+				return;
+			}
+			if constexpr (Reflection::InspectorSyntax<decltype(member(aReflectedObject))>)
+			{
+				member(aReflectedObject).InspectorView();
+				return;
+			}
 
-				if (refl::is_reflectable<T0>())
-				{
-					//self<T0>(member(aReflectedObject));
-					return;
-				}
+			if (refl::is_reflectable<T0>())
+			{
+				//self<T0>(member(aReflectedObject));
+				return;
+			}
 
-				const std::string arg = std::string(get_display_name(member)) + ": ";
-				ImGui::PushID(arg.c_str());
-				ImGui::Columns(2);
-				ImGui::SetColumnWidth(0, 200);
-				ImGui::Text(arg.data());
-				ImGui::NextColumn();
-				Reflection::ImGuiReflect(member(aReflectedObject), arg);
-				ImGui::Columns(1);
-				ImGui::PopID();
-				ImGui::Indent(16.f);
-				ImGui::Unindent(16.0f);
-			};
-			refl::util::for_each(refl::reflect<T>().members, imp);
+			const std::string arg = std::string(get_display_name(member)) + ": ";
+			ImGui::PushID(arg.c_str());
+			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0,200);
+			ImGui::Text(arg.data());
+			ImGui::NextColumn();
+			Reflection::ImGuiReflect(member(aReflectedObject),arg);
+			ImGui::Columns(1);
+			ImGui::PopID();
+			ImGui::Indent(16.f);
+			ImGui::Unindent(16.0f);
 		};
-		TypeReflector.template operator() < TypeToReflect > ();
-		ImGui::Separator();
-		ImGui::TreePop();
-	}
+		refl::util::for_each(refl::reflect<T>().members,imp);
+	};
+	TypeReflector.template operator() < TypeToReflect > ();
+	ImGui::Separator();
 };
 
 template <typename TypeToReflect>
@@ -203,7 +199,7 @@ inline void Reflectable::Reflect(TypeToReflect& aReflectedObject)
 			const std::string arg = std::string(get_display_name(member)) + ": ";
 			ImGui::TextWrapped(arg.data());
 			ImGui::SameLine();
-			Reflection::ImGuiReflect(member(aReflectedObject), arg);
+			Reflection::ImGuiReflect(member(aReflectedObject),arg);
 
 			ImGui::Indent(16.f);
 			if constexpr (Reflection::InspectorSyntaxPtr<decltype(member(aReflectedObject))>)
@@ -218,7 +214,7 @@ inline void Reflectable::Reflect(TypeToReflect& aReflectedObject)
 			ImGui::Unindent(16.0f);
 
 		};
-		refl::util::for_each(refl::reflect<T>().members, imp);
+		refl::util::for_each(refl::reflect<T>().members,imp);
 	};
 	TypeReflector.template operator() < TypeToReflect > ();
 	ImGui::Separator();

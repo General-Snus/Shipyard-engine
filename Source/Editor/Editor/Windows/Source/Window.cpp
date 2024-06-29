@@ -69,14 +69,17 @@ bool Window::Update()
 	{
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
-		if (msg.message == WM_QUIT) return false;
+		if (msg.message == WM_QUIT)
+		{
+			return false;
+		}
 	}
 	return true;
 }
+
+
 LRESULT CALLBACK Window::WinProc(_In_ HWND hWnd,_In_ UINT uMsg,_In_ WPARAM wParam,_In_ LPARAM lParam)
-{
-	LRESULT out{};
-	
+{	
 	if (callback)
 	{
 		MSG msg{};
@@ -88,15 +91,18 @@ LRESULT CALLBACK Window::WinProc(_In_ HWND hWnd,_In_ UINT uMsg,_In_ WPARAM wPara
 		callback(msg);
 	}
 
-	if (uMsg == WM_CLOSE || uMsg == WM_DESTROY)
+	switch (uMsg)
 	{
+	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
-	}
+		break;
 
-	out = DefWindowProc(hWnd,uMsg,wParam,lParam);
+	default:
+		break;
+	} 
 
-	return out;
+	return DefWindowProc(hWnd,uMsg,wParam,lParam);
 }
 void Window::SetCallbackFunction(const std::function<void(MSG const& msg)>& aCallback)
 {

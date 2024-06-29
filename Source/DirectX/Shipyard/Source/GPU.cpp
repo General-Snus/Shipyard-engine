@@ -199,12 +199,10 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,const std::shared
 
 bool GPU::UnInitialize()
 {
-	m_DirectCommandQueue->Flush();
-	m_CopyCommandQueue->Flush();
-	m_ComputeCommandQueue->Flush();
-	m_GraphicsMemory.reset();
-
-	//::CloseHandle(g_FenceEvent);
+	m_DirectCommandQueue->Destroy();
+	m_CopyCommandQueue->Destroy();
+	m_ComputeCommandQueue->Destroy();
+	m_GraphicsMemory.reset(); 
 
 	return true;
 }
