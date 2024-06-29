@@ -33,7 +33,7 @@ public:
 	void AllocateBuffer(eRootBindings binding,const T& var)
 	{
 		const auto& alloc = GPU::m_GraphicsMemory->AllocateConstant<T>(var);
-		m_CommandList->SetGraphicsRootConstantBufferView(binding,alloc.GpuAddress());
+		m_CommandList->SetGraphicsRootConstantBufferView(binding,alloc.GpuAddress()); 
 	}
 
 	void SetRenderTargets(unsigned numberOfTargets,Texture* renderTargets,Texture* depthBuffer);

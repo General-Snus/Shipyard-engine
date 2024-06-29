@@ -137,8 +137,7 @@ private:
 	static inline std::shared_ptr<Mesh> defaultMesh;
 	static inline std::shared_ptr<Material> defaultMaterial; 
 	GraphicsSettings myGraphicSettings;
-	HeapHandle ViewPortHeapHandle;
-	// We're a container singleton, no instancing this outside the class.
+	HeapHandle ViewPortHeapHandle; 
 	GraphicsEngine() = default;
 
 

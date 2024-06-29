@@ -11,7 +11,9 @@ struct CameraSettings
 	float APRatio = 16.0f / 9.0f;;
 	float farfield = 1000000.0f;
 	float nearField = 0.01f;
-	Vector2ui resolution = {  (Window::Width()), (Window::Height()) };
+
+	//Explainer: Imgui deals in fractions and projection is more accurate this way.
+	Vector2f resolution = {  (float)(Window::Width()), (float)(Window::Height()) };
 	bool isOrtho = false;
 	bool IsInControll = false;
 	float FowInRad() const { return DEG_TO_RAD * fow; };
@@ -52,7 +54,7 @@ public:
 	CameraSettings mySettings;
 private:
 	Matrix m_Projection; 
-	float cameraSpeed = 10;
+	float cameraSpeed = 25;
 };
 
 REFL_AUTO(type(cCamera)

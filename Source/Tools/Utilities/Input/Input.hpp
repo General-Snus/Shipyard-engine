@@ -19,13 +19,14 @@ public:
 	static bool IsKeyReleased(const int aKeyCode);
 	static bool IsKeyReleased(Keys aKeyCode);
 	static Vector2<float> GetMousePosition();
-	static Vector2<float> GetMousePositionDelta();
+	static Vector2<float> GetMousePositionDelta(); 
 	static bool UpdateMouseInput(UINT message,WPARAM wParam);
 	//Positive is forward away from user
 	static float GetMouseWheelDelta();
 	static unsigned int GetLastPressedKey();
 	static bool UpdateEvents(UINT message,WPARAM wParam,LPARAM lParam);
 	static void Update();
+	inline static float g_MouseWheelDeadZone = 10;
 
 private:
 	inline static std::bitset<256> currentFrameUpdate;

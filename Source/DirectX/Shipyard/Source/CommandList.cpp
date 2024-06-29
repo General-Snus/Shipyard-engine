@@ -10,9 +10,7 @@
 
 CommandList::CommandList(D3D12_COMMAND_LIST_TYPE type, const std::wstring& name) : m_Type(type)
 {
-
-	Helpers::ThrowIfFailed(GPU::m_Device->CreateCommandAllocator(type, IID_PPV_ARGS(&m_CommandAllocator)));
-
+	Helpers::ThrowIfFailed(GPU::m_Device->CreateCommandAllocator(type, IID_PPV_ARGS(&m_CommandAllocator))); 
 	Helpers::ThrowIfFailed(GPU::m_Device->CreateCommandList(0, type, m_CommandAllocator.Get(),
 		nullptr, IID_PPV_ARGS(&m_CommandList)));
 

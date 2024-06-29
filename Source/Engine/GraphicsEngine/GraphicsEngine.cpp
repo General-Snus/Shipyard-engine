@@ -364,6 +364,7 @@ void GraphicsEngine::EndFrame()
 	OPTICK_CATEGORY("Present",Optick::Category::Rendering);
 	OPTICK_GPU_FLIP(GPU::m_Swapchain->m_SwapChain.Get());
 	Helpers::ThrowIfFailed(GPU::m_Swapchain->m_SwapChain->Present(DXGI_SWAP_EFFECT_DISCARD,DXGI_PRESENT_ALLOW_TEARING));
+
 	GPU::m_FenceValues[GPU::m_FrameIndex] = commandQueue->Signal();
 	GPU::m_FrameIndex = GPU::m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
 
@@ -593,31 +594,7 @@ void GraphicsEngine::ImGuiPass(std::shared_ptr<CommandList> commandList)
 
 	/*commandList->GetGraphicsCommandList()->SetDescriptorHeaps(1,ImGuiHeap);*/
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(),commandList->GetGraphicsCommandList().Get());
-}
-
-
-
-void GraphicsEngine::RenderTextureTo(eRenderTargets from,eRenderTargets to)  const
-{
-	from; to;
-
-	//const Texture* texture1 = GraphicsEngine::Get().GetTargetTextures(from).get();
-	//const Texture* texture2 = GraphicsEngine::Get().GetTargetTextures(to).get();
-
-	/*RHI::SetRenderTarget(texture2,nullptr);
-	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_Target0,texture1);
-	RHI::ConfigureInputAssembler(
-		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
-		nullptr,
-		nullptr,
-		0,
-		nullptr
-	);
-	RHI::Draw(4);
-	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,REG_Target0,nullptr);*/
-}
-
-
+} 
 FORCEINLINE std::shared_ptr<Texture> GraphicsEngine::GetTargetTextures(eRenderTargets type) const
 {
 	switch (type)

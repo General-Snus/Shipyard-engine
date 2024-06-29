@@ -30,11 +30,11 @@ void ColliderAsset::Init()
 {
 }
 
-ColliderAssetAABB::ColliderAssetAABB() :ColliderAsset(eColliderType::AABB),myAABB(AABB3D<float>())
+ColliderAssetAABB::ColliderAssetAABB() :ColliderAsset(eColliderType::AABB) 
 {
 }
 
-ColliderAssetAABB::ColliderAssetAABB(const AABB3D<float>& rf) : myAABB(rf),ColliderAsset(eColliderType::AABB)
+ColliderAssetAABB::ColliderAssetAABB(const AABB3D<float>& rf) : ColliderAsset(eColliderType::AABB),myAABB(rf)
 {
 }
 

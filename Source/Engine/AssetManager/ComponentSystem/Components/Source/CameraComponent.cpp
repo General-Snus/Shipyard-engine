@@ -21,7 +21,7 @@ cCamera::cCamera(const SY::UUID anOwnerId,GameObjectManager* aManager) : Compone
 
 	if (!mySettings.isOrtho)
 	{
-		const auto dxMatrix = XMMatrixPerspectiveFovLH(mySettings.FowInRad(), mySettings.APRatio, mySettings.farfield,
+		const auto dxMatrix = XMMatrixPerspectiveFovLH(mySettings.FowInRad(),mySettings.APRatio,mySettings.farfield,
 			mySettings.nearField);
 		m_Projection = Matrix(&dxMatrix);
 	}
@@ -59,7 +59,7 @@ cCamera::cCamera(const SY::UUID anOwnerId,GameObjectManager* aManager,const Came
 	}
 	else
 	{
-		const auto dxMatrix = XMMatrixOrthographicLH(static_cast<float>(mySettings.resolution.x), static_cast<float>(mySettings.resolution.y),1000000,mySettings.nearField);
+		const auto dxMatrix = XMMatrixOrthographicLH(static_cast<float>(mySettings.resolution.x),static_cast<float>(mySettings.resolution.y),1000000,mySettings.nearField);
 		m_Projection = Matrix(&dxMatrix);
 	}
 
@@ -84,83 +84,108 @@ cCamera::~cCamera()
 void cCamera::Update()
 {
 	OPTICK_EVENT();
-	mySettings.fow = std::clamp(mySettings.fow, 5.f, 360.f);
+	mySettings.fow = std::clamp(mySettings.fow,5.f,360.f);
 
 	if (!mySettings.IsInControll)
 	{
 		return;
 	}
 
-
-
 	Transform& aTransform = this->GetGameObject().GetComponent<Transform>();
-	float aTimeDelta = Timer:: GetDeltaTime();
-	const float mdf = cameraSpeed;
-	const float rotationSpeed = 20000; 
+	float aTimeDelta = Timer::GetDeltaTime();
+	Vector3f mdf = cameraSpeed;
+	float rotationSpeed = 20000;
+	const float mousePower = 50.f;
 
-	if (Input::IsKeyHeld(static_cast<int>(Keys::UP)))
+
+	if (Input::IsKeyHeld(Keys::SHIFT))
 	{
-		cameraSpeed = cameraSpeed * 1.01f;
-	}
-	if (Input::IsKeyHeld(static_cast<int>(Keys::DOWN)))
-	{
-		cameraSpeed = std::clamp(cameraSpeed * 0.99f,.5f,static_cast<float>(INT_MAX));
+		mdf = Vector3f();
 	}
 
-	if (Input::IsKeyHeld(static_cast<int>(Keys::MOUSERBUTTON)))
+	if (Input::IsKeyHeld(Keys::LCONTROL))
+	{
+		mdf = Vector3f();
+		rotationSpeed = 0;
+	}
+
+	if (Input::GetMouseWheelDelta() > Input::g_MouseWheelDeadZone)
+	{
+		cameraSpeed = std::clamp(cameraSpeed * 1.05f,.5f,static_cast<float>(INT_MAX));
+	}
+	if (Input::GetMouseWheelDelta() < -Input::g_MouseWheelDeadZone)
+	{
+		cameraSpeed = std::clamp(cameraSpeed * 0.95f,.5f,static_cast<float>(INT_MAX));
+	}
+
+	if (Input::IsKeyHeld(Keys::MBUTTON))
+	{  
+		const Vector3f movementUp = GlobalUp * Input::GetMousePositionDelta().y * mousePower;
+		const Vector3f movementRight = aTransform.GetRight() * Input::GetMousePositionDelta().x * mousePower;
+		aTransform.Move((movementUp + movementRight) * aTimeDelta * mdf); 
+	}
+
+	if (Input::IsKeyHeld(Keys::MOUSERBUTTON))
 	{
 		const Vector3f mouseDeltaVector =
 		{
-			static_cast<float>(Input::GetMousePositionDelta().y),
-			-static_cast<float>(Input::GetMousePositionDelta().x),
+			std::abs(Input::GetMousePositionDelta().y) > 0.001f ? Input::GetMousePositionDelta().y : 0.f,
+			std::abs(Input::GetMousePositionDelta().x) > 0.001f ? -Input::GetMousePositionDelta().x : 0.f,
 			0.0f
 		};
-		aTransform.Rotate(mouseDeltaVector * rotationSpeed * Timer:: GetDeltaTime());
+
+		aTransform.Rotate(mouseDeltaVector * rotationSpeed * aTimeDelta);
 	}
 
-	if (Input::IsKeyHeld(static_cast<int>(Keys::W)))
+	if (Input::IsKeyHeld(Keys::MOUSELBUTTON))
+	{
+		const Vector3f mouseDeltaVector =
+		{
+			0.0f,
+			std::abs(Input::GetMousePositionDelta().x) > 0.001f ? Input::GetMousePositionDelta().x : 0.f,
+			0.0f
+		};
+
+		aTransform.Rotate(mouseDeltaVector * rotationSpeed * aTimeDelta);
+
+		Vector3f newForward = aTransform.GetForward() + aTransform.GetUp();
+		newForward.y = 0;
+		newForward.Normalize();
+		aTransform.Move(newForward * Input::GetMousePositionDelta().y * mousePower * aTimeDelta * mdf);
+	}
+
+	if (Input::IsKeyHeld(Keys::W))
 	{
 		aTransform.Move(aTransform.GetForward() * aTimeDelta * mdf);
 	}
-
-	if (Input::IsKeyHeld(static_cast<int>(Keys::S)))
+	if (Input::IsKeyHeld(Keys::S))
 	{
 		aTransform.Move(-aTransform.GetForward() * aTimeDelta * mdf);
 	}
-
-	if (Input::IsKeyHeld(static_cast<int>(Keys::D)))
+	if (Input::IsKeyHeld(Keys::D))
 	{
 		aTransform.Move(aTransform.GetRight() * aTimeDelta * mdf);
 	}
-
-	if (Input::IsKeyHeld(static_cast<int>(Keys::A)))
+	if (Input::IsKeyHeld(Keys::A))
 	{
 		aTransform.Move(-aTransform.GetRight() * aTimeDelta * mdf);
-	}
-	if (Input::IsKeyHeld(static_cast<int>(Keys::E)))
+	} 
+
+	if (Input::IsKeyHeld(Keys::E))
 	{
-		aTransform.Rotate({ 0,200.f * aTimeDelta });
-	}
+		aTransform.Move(GlobalUp * aTimeDelta * mdf);
+	} 
+
+	if (Input::IsKeyHeld(Keys::Q))
+	{
+		aTransform.Move(-GlobalUp * aTimeDelta * mdf);
+	} 
 #ifdef Flashlight
 	if (Input::GetInstance().IsKeyPressed((int)Keys::F))
 	{
 		GetComponent<cLight>().BindDirectionToTransform(!GetComponent<cLight>().GetIsBound());
 	}
 #endif
-	if (Input::IsKeyHeld(static_cast<int>(Keys::Q)))
-	{
-		aTransform.Rotate({ 0,-200.f * aTimeDelta });
-	}
-
-	if (Input::IsKeyHeld(static_cast<int>(Keys::SPACE)))
-	{
-		aTransform.Move(aTransform.GetUp() * aTimeDelta * mdf);
-	}
-
-	if (Input::IsKeyHeld(static_cast<int>(Keys::SHIFT)))
-	{
-		aTransform.Move(-aTransform.GetUp() * aTimeDelta * mdf);
-	}
 }
 
 void cCamera::Render()
@@ -203,6 +228,7 @@ std::array<Vector4f,4> cCamera::GetFrustrumCorners() const
 
 	return corners;
 }
+
 Vector3f cCamera::GetPointerDirection(const Vector2<int> position)
 {
 	Vector4f viewPosition;
@@ -220,15 +246,12 @@ Vector3f cCamera::GetPointerDirection(const Vector2<int> position)
 	const Matrix myTransform = GetGameObject().GetComponent<Transform>().GetTransform();
 	const Vector4f out = viewPosition * Matrix::GetFastInverse(myTransform);
 	return Vector3f(out.x,out.y,out.z);
-
 }
+
 Vector3f cCamera::GetPointerDirectionNDC(const Vector2<int> position) const
 {
 	position;
 	throw std::exception("Not implemented");
-
-
-
 }
 
 FrameBuffer cCamera::GetFrameBuffer()
@@ -236,12 +259,13 @@ FrameBuffer cCamera::GetFrameBuffer()
 	OPTICK_EVENT();
 	auto& transform = GetComponent<Transform>();
 	FrameBuffer buffer;
-	buffer.ProjectionMatrix = m_Projection;
+	auto dxMatrix = XMMatrixPerspectiveFovLH(mySettings.FowInRad(),mySettings.APRatio,mySettings.farfield,mySettings.nearField);
+	buffer.ProjectionMatrix = Matrix(&dxMatrix);
 	buffer.ViewMatrix = Matrix::GetFastInverse(transform.GetTransform());
 	buffer.Time = Timer::GetDeltaTime();
 	buffer.FB_RenderMode = static_cast<int>(ApplicationState::filter);
 	buffer.FB_CameraPosition = transform.GetPosition();
-	buffer.FB_ScreenResolution = mySettings.resolution;
+	buffer.FB_ScreenResolution = static_cast<Vector2ui>(mySettings.resolution);
 	//buffer.Data.FB_FrustrumCorners = { Vector4f(),Vector4f(),Vector4f(),Vector4f() };;
 	return buffer;
 }
@@ -274,5 +298,4 @@ bool cCamera::InspectorView()
 	}
 	Reflect<cCamera>();
 	return true;
-
 }

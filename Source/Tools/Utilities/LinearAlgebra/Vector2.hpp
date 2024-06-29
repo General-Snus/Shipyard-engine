@@ -35,6 +35,7 @@ public:
 	~Vector2<T>() = default;
 
 	T* operator&();
+
 	//Implicit cast operator to any datatype, return initializer list of x, y, z
 	template <class U>
 	explicit operator U() const;
@@ -210,12 +211,17 @@ T* Vector2<T>::operator&()
 	return &x;
 }
 
+
+#pragma warning( push )
+#pragma warning( disable : 4244  )
 template<class T>
 template<class U>
 inline Vector2<T>::operator U() const
 {
-	return { x,y };
-}
+	return U(x,y);
+} 
+#pragma warning(pop)
+
 
 template<class T>
 inline T& Vector2<T>::operator[](int value)

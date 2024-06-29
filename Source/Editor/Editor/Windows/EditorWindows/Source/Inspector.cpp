@@ -17,13 +17,14 @@ void Inspector::RenderImGUi()
 	{
 		auto gameobject = selectedGameObjects[0];  
 
+		ImGui::PushItemWidth(60);
 		if (bool activeStatus = gameobject.GetActive(); ImGui::Checkbox("##",&activeStatus))
 		{
 			gameobject.SetActive(activeStatus);
 		}
+		ImGui::PopItemWidth();
 
-		ImGui::SameLine();
-
+		ImGui::SameLine(); 
 		ImGui::PushItemWidth(200);
 
 		char strName[128] = {};
@@ -34,7 +35,7 @@ void Inspector::RenderImGUi()
 		}
 		ImGui::PopItemWidth();
 
-		ImGui::PushItemWidth(40); //NOTE: (Push/Pop)ItemWidth is optional 
+		ImGui::PushItemWidth(60); 
 		ImGui::Text("Tag: ");
 		ImGui::PopItemWidth();
 
@@ -58,13 +59,19 @@ void Inspector::RenderImGUi()
 		{ 
 			gameobject.SetLayer((Layer)(1 << currentLayer));
 		}
-		ImGui::PopItemWidth();  
+		ImGui::PopItemWidth(); 
 
+		ImGui::NewLine();
+		ImGui::Separator();
+		ImGui::NewLine();
 
 		for (auto& cmp : gameobject.GetAllComponents())
 		{
 			cmp->InspectorView();
+
+			ImGui::NewLine();
 			ImGui::Separator();
+			ImGui::NewLine();
 		}
 	}
 	ImGui::End();

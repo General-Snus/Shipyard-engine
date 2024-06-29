@@ -20,7 +20,7 @@ class Viewport : public EditorWindow
 public:
 	//MainViewport is will render from the MainCamera and if no such camera exist it will be black
 	 explicit Viewport(bool IsMainViewPort,
-		Vector2ui ViewportResolution = { Window::Width(),Window::Height() },
+		Vector2f ViewportResolution = { (float)Window::Width(),(float)Window::Height() },
 		std::shared_ptr<Scene> sceneToRender = Editor::GetMainScene(),
 		std::shared_ptr<TextureHolder> RenderTexture = nullptr
 	);
@@ -37,7 +37,10 @@ public:
 
 	Matrix Projection();
 	Matrix ViewInverse();
+	Matrix& View();
 	void RenderImGUi() override;
+
+	void TakeInput();
 
 
 	std::shared_ptr<TextureHolder> m_RenderTarget;

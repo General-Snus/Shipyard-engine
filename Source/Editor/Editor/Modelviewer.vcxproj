@@ -335,6 +335,7 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Windows\EditorWindows\CustomFuncWindow.h" />
     <ClInclude Include="Windows\EditorWindows\Console.h" />
     <ClInclude Include="Windows\EditorWindows\ContentDirectory.h" />
     <ClInclude Include="Core\Editor.h" />
@@ -361,6 +362,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Windows\EditorWindows\Source\CustomFuncWindow.cpp" />
     <ClCompile Include="Windows\EditorWindows\Source\Console.cpp" />
     <ClCompile Include="Windows\EditorWindows\Source\ContentDirectory.cpp" />
     <ClCompile Include="Core\Source\ApplicationState.cpp" />

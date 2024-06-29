@@ -70,7 +70,7 @@ public:
 
 	~Transform() override = default;
 	void SetGizmo(bool enabled);
-	void InitPrimitive(); 
+	void InitPrimitive();
 	bool InspectorView() override;
 
 
@@ -88,7 +88,7 @@ public:
 	Transform& Root() const;
 	Transform& GetParent() const;
 	Transform& Find(const std::string& nameOfChild) const;
-	Transform& FindRecursive(const std::string& nameOfChild) const; 
+	Transform& FindRecursive(const std::string& nameOfChild) const;
 	Transform& GetChild(int index) const;
 	bool HasChildren() const;
 	unsigned int GetChildCount() const;
@@ -108,26 +108,26 @@ public:
 	void DetachChildren(int index) const;
 
 	//Detach from parent
-	void Detach(); 
+	void Detach();
 
 private:
 	GameObject m_Parent;
 	std::vector<GameObject> m_Children;
 
-	bool IsRecentlyUpdated;
-	bool IsDirty;
-	bool IsDebugGizmoEnabled;
+	bool IsRecentlyUpdated = false;
+	bool IsDirty = true;
+	bool IsDebugGizmoEnabled = false;
 	void MakeClean();
 	void MakeSaneRotation();
 
-	Vector3<float> myPosition;
-	Vector3<float> myRotation;
-	Quaternionf myQuaternion;
-	Vector3<float> myScale;
+	Vector3<float> myPosition{};
+	Vector3<float> myRotation{};
+	Quaternionf myQuaternion{};
+	Vector3<float> myScale = Vector3f(1,1,1);;
 
-	Matrix4x4<float> myTransform;
-	Matrix4x4<float> myWorldSpaceTransform;
-	DebugDrawer::PrimitiveHandle primitive;
+	Matrix4x4<float> myTransform{};
+	Matrix4x4<float> myWorldSpaceTransform{};
+	DebugDrawer::PrimitiveHandle primitive{};
 };
 
 

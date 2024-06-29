@@ -39,39 +39,54 @@
 #if PHYSX 
 #include <Engine/PersistentSystems/Physics/PhysXInterpeter.h>
 #endif // PHYSX 0
+#include <Editor/Editor/Windows/EditorWindows/CustomFuncWindow.h>
  
 void SetupImGuiStyle()
 {
 	OPTICK_EVENT();
 	ImGuizmo::AllowAxisFlip(false);
+	auto& guizmoStyle = ImGuizmo::GetStyle();
+
+
+	guizmoStyle.TranslationLineThickness = 6.0f;
+	guizmoStyle.TranslationLineArrowSize = 8.0f;
+	guizmoStyle.RotationLineThickness = 4.0f;
+	guizmoStyle.RotationOuterLineThickness = 5.0f;
+	guizmoStyle.ScaleLineThickness = 5.0f;
+	guizmoStyle.ScaleLineCircleSize = 7.0f;
+	guizmoStyle.HatchedAxisLineThickness = 6.0f;
+	guizmoStyle.CenterCircleSize = 8.0f;
+
+
+
 	// Rounded Visual Studio style by RedNicStone from ImThemes
 	ImGuiStyle& style = ImGui::GetStyle();
 
 	style.Alpha = 1.0f;
 	style.DisabledAlpha = 0.6000000238418579f;
 	style.WindowPadding = ImVec2(8.0f, 8.0f);
-	style.WindowRounding = 4.0f;
+	style.WindowRounding = 0.0f;
 	style.WindowBorderSize = 0.0f;
 	style.WindowMinSize = ImVec2(32.0f, 32.0f);
 	style.WindowTitleAlign = ImVec2(0.0f, 0.5f);
-	style.WindowMenuButtonPosition = ImGuiDir_Left;
+	style.WindowMenuButtonPosition = ImGuiDir_None;
 	style.ChildRounding = 0.0f;
 	style.ChildBorderSize = 1.0f;
 	style.PopupRounding = 4.0f;
 	style.PopupBorderSize = 1.0f;
 	style.FramePadding = ImVec2(4.0f, 3.0f);
-	style.FrameRounding = 2.5f;
+	style.FrameRounding = 0.0f;
 	style.FrameBorderSize = 0.0f;
 	style.ItemSpacing = ImVec2(8.0f, 4.0f);
 	style.ItemInnerSpacing = ImVec2(4.0f, 4.0f);
 	style.CellPadding = ImVec2(4.0f, 2.0f);
 	style.IndentSpacing = 21.0f;
 	style.ColumnsMinSpacing = 6.0f;
-	style.ScrollbarSize = 11.0f;
-	style.ScrollbarRounding = 2.5f;
-	style.GrabMinSize = 10.0f;
-	style.GrabRounding = 2.0f;
-	style.TabRounding = 3.5f;
+	style.ScrollbarSize = 20.0f;
+	style.ScrollbarRounding = 0.f;
+	style.GrabMinSize = 20.0f;
+	style.GrabRounding = 0.f;
+	style.TabRounding = 0.f;
 	style.TabBorderSize = 0.0f;
 	style.TabMinWidthForCloseButton = 0.0f;
 	style.ColorButtonPosition = ImGuiDir_Right;
@@ -387,6 +402,17 @@ void Editor::TopBar()
 		}
 		if (ImGui::BeginMenu("Edit"))
 		{
+			if (ImGui::Selectable("ImGuiDemoWindow"))
+			{   
+				 g_EditorWindows.emplace_back(std::make_shared<CustomFuncWindow>(&ImGui::ShowDemoWindow,(bool*)0));
+			}
+
+			if (ImGui::Selectable("Refresh Style"))
+			{ 
+				SetupImGuiStyle();
+			}
+
+
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("Window"))

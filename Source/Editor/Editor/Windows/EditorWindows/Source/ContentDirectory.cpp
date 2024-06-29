@@ -43,7 +43,7 @@ void GenerateSceneForIcon(std::shared_ptr<Mesh> meshAsset, std::shared_ptr<Textu
 		mr.SetMaterial(material);
 	}
 
-	const auto res = Vector2ui(1920, 1080);
+	const auto res = Vector2f(1920.f, 1080.f);
 	{
 		CameraSettings settings;
 		settings.APRatio = static_cast<float>(res.x) / res.y;

@@ -3,6 +3,7 @@
 
 class Inspector : public EditorWindow
 {
+public:
 	void RenderImGUi() override;
 };
 

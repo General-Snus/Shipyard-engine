@@ -5,13 +5,8 @@
 
 #include "Tools/ImGui/ImGui/imgui.h"
 
-Transform::Transform(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager),IsDirty(true)
-{
-	myTransform = Matrix();
-	myPosition = Vector3f();
-	myRotation = Vector3f();
-	myScale = Vector3f(1,1,1);
-	IsDebugGizmoEnabled = false;
+Transform::Transform(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager)
+{ 
 }
 
 void Transform::Init()
@@ -222,6 +217,72 @@ void Transform::SetGizmo(bool enabled)
 	}
 }
 
+void DrawVec3Control(const std::string& label,Vector3f& values,float resetValue = 0.0f,float columnWidth = 100.0f)
+{
+	ImGuiIO& io = ImGui::GetIO();
+	auto boldFont = io.Fonts->Fonts[0];
+
+	ImGui::PushID(label.c_str());
+
+	ImGui::Columns(2);
+	ImGui::SetColumnWidth(0,columnWidth);
+	ImGui::Text("%s",label.c_str());
+	ImGui::NextColumn();
+
+	ImGui::PushMultiItemsWidths(3,ImGui::CalcItemWidth());
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing,ImVec2{ 0, 0 });
+
+	float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+	ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+
+	ImGui::PushStyleColor(ImGuiCol_Button,ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered,ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive,ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+	ImGui::PushFont(boldFont);
+	if (ImGui::Button("X",buttonSize))
+		values.x = resetValue;
+	ImGui::PopFont();
+	ImGui::PopStyleColor(3);
+
+	ImGui::SameLine();
+	ImGui::DragFloat("##X",&values.x,0.1f,0.0f,0.0f,"%.2f");
+	ImGui::PopItemWidth();
+	ImGui::SameLine();
+
+	ImGui::PushStyleColor(ImGuiCol_Button,ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered,ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive,ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
+	ImGui::PushFont(boldFont);
+	if (ImGui::Button("Y",buttonSize))
+		values.y = resetValue;
+	ImGui::PopFont();
+	ImGui::PopStyleColor(3);
+
+	ImGui::SameLine();
+	ImGui::DragFloat("##Y",&values.y,0.1f,0.0f,0.0f,"%.2f");
+	ImGui::PopItemWidth();
+	ImGui::SameLine();
+
+	ImGui::PushStyleColor(ImGuiCol_Button,ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered,ImVec4{ 0.2f, 0.35f, 0.9f, 1.0f });
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive,ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
+	ImGui::PushFont(boldFont);
+	if (ImGui::Button("Z",buttonSize))
+		values.z = resetValue;
+	ImGui::PopFont();
+	ImGui::PopStyleColor(3);
+
+	ImGui::SameLine();
+	ImGui::DragFloat("##Z",&values.z,0.1f,0.0f,0.0f,"%.2f");
+	ImGui::PopItemWidth();
+
+	ImGui::PopStyleVar();
+
+	ImGui::Columns(1);
+
+	ImGui::PopID();
+}
+
 bool Transform::InspectorView()
 {
 	OPTICK_EVENT(); 
@@ -229,10 +290,28 @@ bool Transform::InspectorView()
 	{
 		return false;
 	}
-	IsDirty |= ImGui::DragFloat3("Position",&myPosition);
-	IsDirty |= ImGui::DragFloat3("Euler angles",&myRotation);
-	ImGui::DragFloat4("Quaternion",&myQuaternion,1,0,0,"%.4f",ImGuiSliderFlags_NoInput);
-	IsDirty |= ImGui::DragFloat3("Scale",&myScale);
+
+	std::array<const char*,2> localGlobal = {"Relative", "World"};
+	static int coordinateSpace1 = 0; 
+	//ImGui::BeginColumns("##Transform",2,ImGuiOldColumnFlags_NoResize);
+	//ImGui::SetColumnWidth(0,125);
+	//
+	//ImGui::Combo("##Location",&coordinateSpace1,localGlobal.data(),2); 
+	//static int coordinateSpace2 = 0;
+	//ImGui::Combo("##Rotation",&coordinateSpace2,localGlobal.data(),2); 
+	//static int coordinateSpace3 = 0;
+	//ImGui::Combo("##Scale",&coordinateSpace3,localGlobal.data(),2); 
+	//ImGui::NextColumn();
+
+
+	DrawVec3Control("Position",myPosition);
+	DrawVec3Control("Euler angles",myRotation);
+	DrawVec3Control("Scale",myScale);
+	//IsDirty |= ImGui::DragFloat3("Position",&myPosition);
+	//IsDirty |= ImGui::DragFloat3("Euler angles",&myRotation);
+	//ImGui::DragFloat4("Quaternion",&myQuaternion,1,0,0,"%.4f",ImGuiSliderFlags_NoInput);
+	//IsDirty |= ImGui::DragFloat3("Scale",&myScale);
+	//ImGui::EndColumns();
 	return true;
 }
 
