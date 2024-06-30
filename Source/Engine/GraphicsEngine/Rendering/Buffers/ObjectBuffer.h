@@ -7,6 +7,6 @@ struct ObjectBuffer
 	Vector3f MinExtents = -Vector3f(1,1,1);;
 	alignas(4) bool hasBone = false;
 	Vector3f MaxExtents = Vector3f(1,1,1);;
-	alignas(4) bool isInstanced = false;
+	uint32_t uniqueID{};
 	//std::array < Matrix,128> myBoneTransforms; // 64 * 128 = 8192 bytes
 };

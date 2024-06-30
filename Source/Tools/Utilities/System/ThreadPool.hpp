@@ -6,8 +6,7 @@
 #include <mutex>
 #include <queue>
 #include <thread> 
-#include "SingletonTemplate.h"
-#pragma message("Compiling ThreadPool.h")
+#include "SingletonTemplate.h" 
 
 class ThreadPool : public Singleton<ThreadPool>
 {

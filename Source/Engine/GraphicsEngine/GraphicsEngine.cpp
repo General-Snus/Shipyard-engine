@@ -52,10 +52,20 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 	SetupBlendStates();
 	SetupDebugDrawline();
 
+	const auto& gBufferTextures = PSOCache::GetState(PSOCache::ePipelineStateID::GBuffer)->RenderTargets();
 
+	const size_t dataSize = gBufferTextures[5].GetWidth() * gBufferTextures[5].GetHeight() * sizeof(float) * 2;
+	BufferForPicking = new uint32_t[dataSize];
 	const auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 	OPTICK_GPU_INIT_D3D12(GPU::m_Device.Get(),commandQueue->GetCommandQueue().GetAddressOf(),1);
 	return true;
+}
+
+uint32_t GraphicsEngine::ReadPickingData(Vector2ui position)
+{
+	const int pos = position.x * position.y;
+
+	return (unsigned)pos;
 }
 
 bool GraphicsEngine::SetupDebugDrawline()
@@ -290,20 +300,20 @@ void GraphicsEngine::UpdateSettings()
 	RHI::SetConstantBuffer(PIPELINE_STAGE_PIXEL_SHADER,REG_GraphicSettingsBuffer,myGraphicSettingsBuffer);
 	RHI::UpdateConstantBufferData(myGraphicSettingsBuffer);
 	*/
-} 
-#pragma  optimize("",off)
-void GraphicsEngine::Render(  std::vector< std::shared_ptr<Viewport>> renderViewPorts)
+}
+
+void GraphicsEngine::Render(std::vector< std::shared_ptr<Viewport>> renderViewPorts)
 {
 	OPTICK_EVENT();
 	BeginFrame();
 
 	for (auto& viewport : renderViewPorts)
 	{
-		RenderFrame(*viewport, viewport->sceneToRender->GetGOM());
+		RenderFrame(*viewport,viewport->sceneToRender->GetGOM());
 	}
 	EndFrame();
 }
- 
+
 
 
 void GraphicsEngine::BeginFrame()
@@ -316,6 +326,7 @@ void GraphicsEngine::BeginFrame()
 	}
 	UpdateSettings();
 }
+
 uint64_t GraphicsEngine::RenderFrame(Viewport& renderViewPort,GameObjectManager& scene)
 {
 	if (renderViewPort.IsRenderReady())
@@ -331,7 +342,7 @@ uint64_t GraphicsEngine::RenderFrame(Viewport& renderViewPort,GameObjectManager&
 		PrepareBuffers(commandList,renderViewPort,scene);
 		Passes::WriteShadows(commandList,scene);
 		commandList->FlushResourceBarriers();
-		 
+
 		DeferredRenderingPass(commandList,renderViewPort,scene);
 		EnvironmentLightPass(commandList);
 		ToneMapperPass(commandList,renderViewPort.GetTarget());
@@ -351,7 +362,7 @@ void GraphicsEngine::EndFrame()
 	const auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 	const auto commandList = commandQueue->GetCommandList();
 
-	OPTICK_GPU_CONTEXT(commandList->GetGraphicsCommandList().Get()); 
+	OPTICK_GPU_CONTEXT(commandList->GetGraphicsCommandList().Get());
 	commandList->SetRenderTargets(1,GPU::GetCurrentBackBuffer(),nullptr);
 	ImGuiPass(commandList);
 
@@ -419,7 +430,6 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
 	auto& list = scene.GetAllComponents<cMeshRenderer>();
 	{
 		constexpr uint32_t bufferCount = 7;
-
 		commandList->GetGraphicsCommandList()->RSSetViewports(1,&GPU::m_Viewport);
 		commandList->GetGraphicsCommandList()->RSSetScissorRects(1,&GPU::m_ScissorRect);
 
@@ -445,6 +455,7 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
 			continue;
 		}
 
+		const auto ID = meshRenderer.GetOwner();
 		const auto& transform = meshRenderer.GetComponent<Transform>();
 		for (auto& element : meshRenderer.GetElements())
 		{
@@ -453,8 +464,8 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
 			objectBuffer.MaxExtents = Vector3f(1,1,1);
 			objectBuffer.MinExtents = -Vector3f(1,1,1);
 			objectBuffer.hasBone = false;
-			objectBuffer.isInstanced = false;
-			commandList->AllocateBuffer(eRootBindings::objectBuffer,objectBuffer); 
+			objectBuffer.uniqueID = ID;
+			commandList->AllocateBuffer(eRootBindings::objectBuffer,objectBuffer);
 			vertCount += element.VertexBuffer.GetVertexCount();
 			GPU::ConfigureInputAssembler(*commandList,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.IndexResource);
 
@@ -529,6 +540,26 @@ void GraphicsEngine::EnvironmentLightPass(std::shared_ptr<CommandList> commandLi
 	constexpr uint32_t bufferCount = 7;
 	const auto& gBufferTextures = PSOCache::GetState(PSOCache::ePipelineStateID::GBuffer)->RenderTargets();
 
+
+	//TODO READBACK BUFFER
+	/*
+	if (true)
+	{
+		const auto& resourceRef = gBufferTextures[5].GetResource();
+		const size_t dataSize = gBufferTextures[5].GetWidth() * gBufferTextures[5].GetHeight() * sizeof(float) * 2;
+		void* mapData = BufferForPicking;
+		D3D12_RANGE readRange = { 0,dataSize};
+		HRESULT hr = resourceRef->Map(0,&readRange,&mapData);
+
+		if (SUCCEEDED(hr))
+		{
+			memcpy(BufferForPicking,mapData,dataSize);
+			resourceRef->Unmap(0,nullptr);
+		}
+		WantPickingData = false;
+	}*/
+
+
 	{
 		GPU::ClearRTV(*commandList.get(),environmentLight->RenderTargets(),environmentLight->GetNumberOfTargets());
 		commandList->SetRenderTargets(environmentLight->GetNumberOfTargets(),environmentLight->RenderTargets(),nullptr);
@@ -575,7 +606,7 @@ void GraphicsEngine::ToneMapperPass(std::shared_ptr<CommandList> commandList,Tex
 }
 
 void GraphicsEngine::ImGuiPass(std::shared_ptr<CommandList> commandList)
-{ 
+{
 	OPTICK_GPU_EVENT("ImGui");
 	ImGui::Render();
 	ImGuiIO& io = ImGui::GetIO();
@@ -594,7 +625,7 @@ void GraphicsEngine::ImGuiPass(std::shared_ptr<CommandList> commandList)
 
 	/*commandList->GetGraphicsCommandList()->SetDescriptorHeaps(1,ImGuiHeap);*/
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(),commandList->GetGraphicsCommandList().Get());
-} 
+}
 FORCEINLINE std::shared_ptr<Texture> GraphicsEngine::GetTargetTextures(eRenderTargets type) const
 {
 	switch (type)

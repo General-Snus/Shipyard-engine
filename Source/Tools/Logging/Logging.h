@@ -1,13 +1,14 @@
-#pragma once
-#define NOMINMAX
+#pragma once 
 #include <mutex>
 #include <source_location> 
 #include <string>
-#include <vector>
-
+#include <vector> 
 #include <format> 
+
 #include "Tools/Utilities/LinearAlgebra/Vector3.hpp"
 #include <Tools/Utilities/TemplateHelpers.h>
+#include <Tools/Utilities/Color.hpp>
+
 class Logger
 {
 public:
@@ -72,7 +73,7 @@ public:
 	static void SetConsoleHandle(void* aHandle);
 	static void SetPrintToVSOutput(bool bNewValue);
 	static void Log(const char* aString);
-	static Vector3f GetColor(LogType type);
+	static Color GetColor(LogType type);
 
 	template<typename T>
 	static void  Log(const T& aString)

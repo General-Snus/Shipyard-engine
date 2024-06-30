@@ -45,9 +45,13 @@ void Window::Init(const WinInitSettings& init)
 		(GetSystemMetrics(SM_CYSCREEN) - init.windowSize.y) / 2,
 		init.windowSize.x,
 		init.windowSize.y,
-		nullptr,nullptr,nullptr,
+		nullptr,nullptr,
+		windowClass.hInstance,
 		nullptr
 	);
+
+	::ShowWindow(windowHandler,SW_SHOWDEFAULT);
+	::UpdateWindow(windowHandler);
 
 	if (windowHandler == nullptr)
 	{

@@ -35,7 +35,7 @@ void Hierarchy::RenderImGUi()
 			}
 
 			{
-				bool arg = data.IsActive;
+				bool isActive = data.IsActive;
 				if (ImGui::TreeNodeEx(std::format("##{}",data.Name).c_str(),flags))
 				{
 					ImGui::SameLine(); 
@@ -44,10 +44,12 @@ void Hierarchy::RenderImGUi()
 					ImGui::Image(gameObjectWidget,{ height,height });
 					ImGui::SameLine();
 
-					auto color = ImVec4(1.0f,1.0f,1.0f,1.0f);
+					const auto& style = ImGui::GetStyle();
+
+					auto color = style.Colors[ImGuiCol_Text];
 					if (ImGui::IsItemHovered())
 					{
-						color = ImVec4(0.0f,1.0f,0.0f,1.0f);
+						color =  style.Colors[ImGuiCol_CheckMark];
 
 						if (ImGui::IsItemClicked())
 						{
@@ -58,11 +60,9 @@ void Hierarchy::RenderImGUi()
 
 					}
 
-					if (!arg)
+					if (!isActive)
 					{
-						color.x *= .5f;
-						color.y *= .5f;
-						color.z *= .5f;
+						color = style.Colors[ImGuiCol_TextDisabled]; 
 					}
 
 					ImGui::PushStyleColor(ImGuiCol_Text,color);

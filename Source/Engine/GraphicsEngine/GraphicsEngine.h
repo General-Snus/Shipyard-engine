@@ -82,7 +82,8 @@ private:
 	LineBuffer myLineBuffer;
 	G_Buffer myG_Buffer;
 	GraphicSettingsBuffer myGraphicSettingsBuffer;
-
+	static inline uint32_t* BufferForPicking;
+	static inline bool WantPickingData = false;
 
 	SIZE myWindowSize{ 0,0 };
 	HWND myWindowHandle{};
@@ -135,11 +136,11 @@ private:
 	static inline std::shared_ptr<TextureHolder> defaultParticleTexture;
 	static inline std::shared_ptr<TextureHolder> defaultCubeMap;
 	static inline std::shared_ptr<Mesh> defaultMesh;
-	static inline std::shared_ptr<Material> defaultMaterial; 
+	static inline std::shared_ptr<Material> defaultMaterial;
 	GraphicsSettings myGraphicSettings;
-	HeapHandle ViewPortHeapHandle; 
+	HeapHandle ViewPortHeapHandle;
 	GraphicsEngine() = default;
-
+	uint32_t ReadPickingData(Vector2ui position);
 
 private:
 	static bool SetupDebugDrawline();
@@ -159,7 +160,7 @@ private:
 	static void DeferredRenderingPass(std::shared_ptr<CommandList> commandList,Viewport& renderViewPort,GameObjectManager& scene);
 	static void EnvironmentLightPass(std::shared_ptr<CommandList> commandList);
 	static void ToneMapperPass(std::shared_ptr<CommandList> commandList,Texture* target);
-	static void ImGuiPass(std::shared_ptr<CommandList> commandList); 
+	static void ImGuiPass(std::shared_ptr<CommandList> commandList);
 	void RenderTextureTo(eRenderTargets from,eRenderTargets to) const;
 public:
 	inline static GraphicsEngine& Get()
@@ -168,9 +169,9 @@ public:
 		return myInstance;
 	}
 	bool Initialize(HWND windowHandle,bool enableDeviceDebug);
-	void Render(  std::vector<std::shared_ptr<Viewport>>  renderViewPorts);
+	void Render(std::vector<std::shared_ptr<Viewport>>  renderViewPorts);
 
-	 
+
 
 	void SetDepthState(eDepthStencilStates state)
 	{
@@ -199,7 +200,7 @@ public:
 	FORCEINLINE ComPtr<ID3DBlob> GetBloomShader() const { return bloomShader; }
 	FORCEINLINE ComPtr<ID3DBlob> GetParticleVSShader() const { return particleVertexShader; }
 	FORCEINLINE ComPtr<ID3DBlob> GetParticleGSShader() const { return particleGeometryShader; }
-	FORCEINLINE ComPtr<ID3DBlob> GetParticlePSShader() const { return particlePixelShader; }  
+	FORCEINLINE ComPtr<ID3DBlob> GetParticlePSShader() const { return particlePixelShader; }
 
 	FORCEINLINE std::shared_ptr<Texture> GetTargetTextures(eRenderTargets type) const;
 

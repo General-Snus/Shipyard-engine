@@ -293,15 +293,15 @@ bool Transform::InspectorView()
 
 	std::array<const char*,2> localGlobal = {"Relative", "World"};
 	static int coordinateSpace1 = 0; 
-	//ImGui::BeginColumns("##Transform",2,ImGuiOldColumnFlags_NoResize);
-	//ImGui::SetColumnWidth(0,125);
-	//
-	//ImGui::Combo("##Location",&coordinateSpace1,localGlobal.data(),2); 
-	//static int coordinateSpace2 = 0;
-	//ImGui::Combo("##Rotation",&coordinateSpace2,localGlobal.data(),2); 
-	//static int coordinateSpace3 = 0;
-	//ImGui::Combo("##Scale",&coordinateSpace3,localGlobal.data(),2); 
-	//ImGui::NextColumn();
+	ImGui::BeginColumns("##Transform",2,ImGuiOldColumnFlags_NoResize);
+	ImGui::SetColumnWidth(0,125);
+	
+	ImGui::Combo("##Location",&coordinateSpace1,localGlobal.data(),2); 
+	static int coordinateSpace2 = 0;
+	 ImGui::Combo("##Rotation",&coordinateSpace2,localGlobal.data(),2); 
+	static int coordinateSpace3 = 0;
+	ImGui::Combo("##Scale",&coordinateSpace3,localGlobal.data(),2); 
+	ImGui::NextColumn();
 
 
 	DrawVec3Control("Position",myPosition);

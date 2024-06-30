@@ -50,25 +50,25 @@ void Logger::Log(const char* aString)
 	Log(std::string(aString));
 }
 
-Vector3f Logger::GetColor(LogType type)
+Color Logger::GetColor(LogType type)
 {
 	switch (type)
 	{
 	using enum Logger::LogType;
 	case message:
-		return Vector3f(1.0f,1.0f,1.0f);
+		return Color(1.0f,1.0f,1.0f);
 		break;
 	case warning:
-		return Vector3f(1.0f,1.0f,0.0f);
+		return Color(1.0f,1.0f,0.0f);
 		break;
 	case error:
-		return Vector3f(1.0f,0.0f,0.0f);
+		return Color(1.0f,0.0f,0.0f);
 		break;
 	case critical:
-		return Vector3f(1.0f,0.0f,0.0f);
+		return Color(1.0f,0.0f,0.0f);
 		break; 
 	case success:
-		return Vector3f(0.0f,1.0f,0.0f);
+		return Color(0.0f,1.0f,0.0f);
 		break;
 	default:
 		std::unreachable();

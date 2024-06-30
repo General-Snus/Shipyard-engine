@@ -56,8 +56,7 @@ bool GPUCommandQueue::IsFenceComplete(uint64_t fenceValue)
 }
 
 void GPUCommandQueue::WaitForFenceValue(uint64_t fenceValue)
-{
-	OPTICK_GPU_EVENT("WaitForFenceValue");
+{ 
 	if (!IsFenceComplete(fenceValue))
 	{
 		auto event = ::CreateEvent(NULL,FALSE,FALSE,NULL);

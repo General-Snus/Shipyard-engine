@@ -12,7 +12,7 @@ void Console::RenderImGUi()
 		using enum Logger::LogType;
 		const auto& style = ImGui::GetStyle();
 
-		auto getButtonColor = [&](Logger::LogType val,Logger::LogType buttonType) 
+		auto getButtonColor = [&](Logger::LogType val,Logger::LogType buttonType)
 			{
 				if ((val & buttonType) == none)
 				{
@@ -24,7 +24,13 @@ void Console::RenderImGUi()
 				}
 			};
 
-		ImGui::ColorButton("All",getButtonColor(filter,All)) ? filter = All : none;
+		if (ImGui::ColorButton("All",getButtonColor(filter,All)))
+		{
+
+			if (filter == All) { filter = none; }
+			if (filter != All) { filter = All; }
+
+		}
 		ImGui::SameLine();
 		ImGui::Text(std::format("All: {}",Logger::m_Buffer.LoggedMessages.size()).c_str());
 		ImGui::SameLine();
@@ -37,7 +43,7 @@ void Console::RenderImGUi()
 		ImGui::ColorButton("Warnings: ",getButtonColor(filter,warning)) ? filter ^= warning : none;
 		ImGui::SameLine();
 		ImGui::Text(std::format("Warnings: {}",Logger::m_Buffer.warnCount).c_str());
-		ImGui::SameLine(); 
+		ImGui::SameLine();
 
 		ImGui::ColorButton("Error: ",getButtonColor(filter,error)) ? filter ^= error : none;
 		ImGui::SameLine();
@@ -59,17 +65,17 @@ void Console::RenderImGUi()
 			static int size = 0;
 			for (const auto& [type,message] : Logger::m_Buffer.LoggedMessages)
 			{
-				if (message.empty() ||  (filter & type) == none)
+				if (message.empty() || (filter & type) == none)
 				{
 					continue;
 				}
 
-				Vector3f logColor = Logger::GetColor(type);
-				const auto color = ImVec4(logColor.x,logColor.y,logColor.z,1.0f);
-
-				ImGui::PushStyleColor(ImGuiCol_Text,color);
+				//Color logColor = Logger::GetColor(type);
+				//const auto color = logColor.GetRGBA();
+				//
+				//ImGui::PushStyleColor(ImGuiCol_Text,color);
 				ImGui::TextWrapped(message.c_str());
-				ImGui::PopStyleColor();
+				//ImGui::PopStyleColor();
 			}
 			if (size != Logger::m_Buffer.LoggedMessages.size())
 			{

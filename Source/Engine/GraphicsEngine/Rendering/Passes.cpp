@@ -130,6 +130,11 @@ LightBuffer Passes::CreateLightBuffer(GameObjectManager& scene)
 
 	for (auto& i : scene.GetAllComponents<cLight>())
 	{
+		if (!i.IsActive())
+		{
+			continue;
+		}
+
 		switch (i.GetType())
 		{
 		case eLightType::Directional:

@@ -109,24 +109,19 @@ void cCamera::Update()
 		rotationSpeed = 0;
 	}
 
-	if (Input::GetMouseWheelDelta() > Input::g_MouseWheelDeadZone)
-	{
-		cameraSpeed = std::clamp(cameraSpeed * 1.05f,.5f,static_cast<float>(INT_MAX));
-	}
-	if (Input::GetMouseWheelDelta() < -Input::g_MouseWheelDeadZone)
-	{
-		cameraSpeed = std::clamp(cameraSpeed * 0.95f,.5f,static_cast<float>(INT_MAX));
-	}
+	bool anyMouseKeyHeld = false;
 
 	if (Input::IsKeyHeld(Keys::MBUTTON))
-	{  
+	{
+		anyMouseKeyHeld = true;
 		const Vector3f movementUp = GlobalUp * Input::GetMousePositionDelta().y * mousePower;
 		const Vector3f movementRight = aTransform.GetRight() * Input::GetMousePositionDelta().x * mousePower;
-		aTransform.Move((movementUp + movementRight) * aTimeDelta * mdf); 
+		aTransform.Move((movementUp + movementRight) * aTimeDelta * mdf);
 	}
 
 	if (Input::IsKeyHeld(Keys::MOUSERBUTTON))
 	{
+		anyMouseKeyHeld = true;
 		const Vector3f mouseDeltaVector =
 		{
 			std::abs(Input::GetMousePositionDelta().y) > 0.001f ? Input::GetMousePositionDelta().y : 0.f,
@@ -139,19 +134,44 @@ void cCamera::Update()
 
 	if (Input::IsKeyHeld(Keys::MOUSELBUTTON))
 	{
+		anyMouseKeyHeld = true;
 		const Vector3f mouseDeltaVector =
 		{
 			0.0f,
 			std::abs(Input::GetMousePositionDelta().x) > 0.001f ? Input::GetMousePositionDelta().x : 0.f,
 			0.0f
 		};
-
+		//Logger::Log(std::format("mouse delta x {}",mouseDeltaVector.y));
 		aTransform.Rotate(mouseDeltaVector * rotationSpeed * aTimeDelta);
 
 		Vector3f newForward = aTransform.GetForward() + aTransform.GetUp();
 		newForward.y = 0;
 		newForward.Normalize();
 		aTransform.Move(newForward * Input::GetMousePositionDelta().y * mousePower * aTimeDelta * mdf);
+	}
+
+	if (Input::GetMouseWheelDelta() > Input::g_MouseWheelDeadZone)
+	{
+		if (anyMouseKeyHeld)
+		{
+			cameraSpeed = std::clamp(cameraSpeed * 1.05f,.5f,static_cast<float>(INT_MAX));
+		}
+		else
+		{
+
+			aTransform.Move(aTransform.GetForward() * 10.0f * aTimeDelta * mdf);
+		}
+	}
+	if (Input::GetMouseWheelDelta() < -Input::g_MouseWheelDeadZone)
+	{
+		if (anyMouseKeyHeld)
+		{
+			cameraSpeed = std::clamp(cameraSpeed * 0.95f,.5f,static_cast<float>(INT_MAX));
+		}
+		else
+		{
+			aTransform.Move(-aTransform.GetForward()*10.0f * aTimeDelta * mdf);
+		}
 	}
 
 	if (Input::IsKeyHeld(Keys::W))
@@ -169,17 +189,17 @@ void cCamera::Update()
 	if (Input::IsKeyHeld(Keys::A))
 	{
 		aTransform.Move(-aTransform.GetRight() * aTimeDelta * mdf);
-	} 
+	}
 
 	if (Input::IsKeyHeld(Keys::E))
 	{
 		aTransform.Move(GlobalUp * aTimeDelta * mdf);
-	} 
+	}
 
 	if (Input::IsKeyHeld(Keys::Q))
 	{
 		aTransform.Move(-GlobalUp * aTimeDelta * mdf);
-	} 
+	}
 #ifdef Flashlight
 	if (Input::GetInstance().IsKeyPressed((int)Keys::F))
 	{

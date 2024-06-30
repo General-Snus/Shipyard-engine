@@ -6,7 +6,7 @@
 #include "../PSO.h"  
 #include "Engine/AssetManager/AssetManager.h" 
 #include "Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h" 
-
+	
 
 void PSOCache::InitAllStates()
 {
@@ -14,13 +14,13 @@ void PSOCache::InitAllStates()
 	InitRootSignature(); 
 	{
 		constexpr std::array rtvFormats = {
-			DXGI_FORMAT_R8G8B8A8_UNORM,
-			DXGI_FORMAT_R16G16B16A16_SNORM,
-			DXGI_FORMAT_R8G8B8A8_UNORM,
-			DXGI_FORMAT_R8G8B8A8_UNORM,
-			DXGI_FORMAT_R16G16B16A16_SNORM,
-			DXGI_FORMAT_R32G32B32A32_FLOAT,
-			DXGI_FORMAT_R32_FLOAT
+			DXGI_FORMAT_R8G8B8A8_UNORM,		//Albedo
+			DXGI_FORMAT_R16G16B16A16_SNORM,	//Normal
+			DXGI_FORMAT_R8G8B8A8_UNORM,		//Material
+			DXGI_FORMAT_R8G8B8A8_UNORM,		//Effect(R)
+			DXGI_FORMAT_R16G16B16A16_SNORM,	//Vertex Normal
+			DXGI_FORMAT_R32G32B32A32_FLOAT, //World position
+			DXGI_FORMAT_R32G32_FLOAT		//Depth(R)
 		};
 		auto pso = PSO::CreatePSO(
 			"Shaders/Default_VS.cso",

@@ -158,22 +158,16 @@ Matrix& Viewport::View()
 void Viewport::RenderImGUi()
 {
 	OPTICK_EVENT();
-	/*ImGuiWindowFlags windowFlags = ImGuiViewportFlags_IsPlatformWindow
-		| ImGuiViewportFlags_NoDecoration
-		| ImGuiViewportFlags_NoTaskBarIcon
-		| ImGuiViewportFlags_NoAutoMerge
-		| ImGuiViewportFlags_CanHostOtherWindows
-		| ImGuiWindowFlags_MenuBar
-		| ImGuiWindowFlags_NoCollapse
-		| ImGuiWindowFlags_NoResize;
+	 ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar;
 		//const auto aspecRatio = (res.x / res.y);
 		//ImGui::SetNextWindowSizeConstraints(ImVec2(0,0),ImVec2(FLT_MAX,FLT_MAX),CustomConstraints::AspectRatio,(void*)&aspecRatio);   // Aspect ratio
-		*/
+		 
 
 	std::vector<GameObject>& selectedObjects = Editor::GetSelectedGameObjects();
 
-	TakeInput();
+	TakeInput(); 
 
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding,{ 0.f,0.f });
 	std::string title = "Scene ";
 	if (IsMainViewport())
 	{
@@ -185,7 +179,7 @@ void Viewport::RenderImGUi()
 
 	}
 
-	if (ImGui::Begin(title.c_str(),nullptr))
+	if (ImGui::Begin(title.c_str(),nullptr,windowFlags))
 	{
 		IsUsed = ImGui::IsWindowFocused();
 		IsVisible = ImGui::IsItemVisible();
@@ -235,6 +229,7 @@ void Viewport::RenderImGUi()
 		IsVisible = false;
 	}
 	ImGui::End();
+	ImGui::PopStyleVar();
 }
 
 void Viewport::RenderToolbar()

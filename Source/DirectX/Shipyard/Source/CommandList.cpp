@@ -453,8 +453,7 @@ void CommandList::Close()
 }
 
 void CommandList::Reset()
-{
-	OPTICK_GPU_EVENT("Reset");
+{ 
 	Helpers::ThrowIfFailed(m_CommandAllocator->Reset());
 	Helpers::ThrowIfFailed(m_CommandList->Reset(m_CommandAllocator.Get(), nullptr));
 

@@ -1,0 +1,22 @@
+{
+"Dark":
+    {
+    "Active/Loaded": "#9DD2EB",
+    "DetailColor": "#D09055",
+    "Inactive/Unloaded": "#7872B8",
+    "PrimaryColor": "#2A2E31",
+    "SecondaryColor": "#3E4144",
+    "TextColor": "#E6E9EB"
+    },
+"FontPath": "/Fonts/NotoSans-Regular.ttf",
+"FontSize": 20.0,
+"Light":
+    {
+    "Active/Loaded": "#7AB8D5",
+    "DetailColor": "#D09055",
+    "Inactive/Unloaded": "#615B90",
+    "PrimaryColor": "#F3F6F8",
+    "SecondaryColor": "#C6D4DF",
+    "TextColor": "#1D1D1E"
+    }
+}

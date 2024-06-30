@@ -1,4 +1,5 @@
 #pragma once
+#define NOMINMAX
 #include "Editor/Editor/Windows/EditorWindows/EditorWindow.h"
 #include <cstdint>
 #include "Tools/Logging/Logging.h"

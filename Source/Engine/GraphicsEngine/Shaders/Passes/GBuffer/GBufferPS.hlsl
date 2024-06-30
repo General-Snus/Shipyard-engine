@@ -43,10 +43,12 @@ GBufferOutput main(DefaultVertexToPixel input)
 
 	result.Effect = effect;
 
-	result.VertexNormal.xyz = input.Normal;
+	result.VertexNormal.xyz = input.Normal;	
 	result.VertexNormal.w = 1;
 
 	result.WorldPosition = input.WorldPosition;
-	result.Depth = (length(cameraDirection));
+	result.Depth.x = (length(cameraDirection));
+	result.Depth.y = g_ObjectBuffer.OB_ID;
+
 	return result;
 }

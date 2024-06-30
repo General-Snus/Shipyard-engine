@@ -6,6 +6,7 @@
 #include "../LinearAlgebra/Vector2.hpp"
 #include "Editor/Editor/Windows/Window.h"
 #include "EnumKeys.h"
+#include "Tools/Logging/Logging.h"
 
 class Input
 {
@@ -20,7 +21,7 @@ public:
 	static bool IsKeyReleased(Keys aKeyCode);
 	static Vector2<float> GetMousePosition();
 	static Vector2<float> GetMousePositionDelta(); 
-	static bool UpdateMouseInput(UINT message,WPARAM wParam);
+	static bool UpdateMouseInput( );
 	//Positive is forward away from user
 	static float GetMouseWheelDelta();
 	static unsigned int GetLastPressedKey();
@@ -83,7 +84,7 @@ inline float Input::GetMouseWheelDelta()
 	return myMouseWheelDelta;
 }
 
-inline bool Input::UpdateMouseInput(UINT message,WPARAM wParam)
+inline bool Input::UpdateMouseInput()
 {
 	myLastMousePosition = myMousePosition;
 	POINT pt = { 0, 0 };
@@ -93,8 +94,27 @@ inline bool Input::UpdateMouseInput(UINT message,WPARAM wParam)
 	myMousePosition.y = 1.0f - 2.f * (static_cast<float>(pt.y) / static_cast<float>(res.y));
 	myMousePosition.x *= -1.f;
 
+	return true;
+}
+
+inline unsigned int Input::GetLastPressedKey()
+{
+	return lastPressedKey;
+}
+
+inline bool Input::UpdateEvents(UINT message,WPARAM wParam,LPARAM lParam)
+{
+	lParam;
 	switch (message)
 	{
+	case WM_KEYDOWN:
+		liveKeyUpdate[wParam] = true;
+		lastPressedKey = (unsigned int)wParam;
+		return true;
+	case WM_KEYUP:
+		liveKeyUpdate[wParam] = false;
+		return true;
+
 	case WM_LBUTTONDOWN:
 		lastPressedKey = 0x01;
 		liveKeyUpdate[0x01] = true;
@@ -121,32 +141,11 @@ inline bool Input::UpdateMouseInput(UINT message,WPARAM wParam)
 
 	case WM_MOUSEWHEEL:
 		myMouseWheelDelta = static_cast<float>(GET_WHEEL_DELTA_WPARAM(wParam));
-		return true; 
+		return true;
 
 	case WM_MOUSEMOVE:
 		return true;
-	default:
-		return false;
-	}
-}
 
-inline unsigned int Input::GetLastPressedKey()
-{
-	return lastPressedKey;
-}
-
-inline bool Input::UpdateEvents(UINT message,WPARAM wParam,LPARAM lParam)
-{
-	lParam;
-	switch (message)
-	{
-	case WM_KEYDOWN:
-		liveKeyUpdate[wParam] = true;
-		lastPressedKey = (unsigned int)wParam;
-		return true;
-	case WM_KEYUP:
-		liveKeyUpdate[wParam] = false;
-		return true;
 	default:
 		return false;
 	}
@@ -157,4 +156,5 @@ inline void Input::Update()
 	lastFrameUpdate = currentFrameUpdate;
 	currentFrameUpdate = liveKeyUpdate;
 	myMouseWheelDelta = 0.0f;
+	UpdateMouseInput();
 }
