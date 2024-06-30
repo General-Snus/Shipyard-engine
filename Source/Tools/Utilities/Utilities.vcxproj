@@ -248,6 +248,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Color.hpp" />
     <ClInclude Include="DataStructures\BSTSet.hpp" />
     <ClInclude Include="DataStructures\DoublyLinkedList.hpp" />
     <ClInclude Include="DataStructures\HashMap.hpp" />

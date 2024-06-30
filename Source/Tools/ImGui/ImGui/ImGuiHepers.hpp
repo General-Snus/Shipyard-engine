@@ -27,5 +27,5 @@ namespace ImGui
 		{
 			ImageButton(fileName,reinterpret_cast<ImTextureID>(id),image_size,uv0,uv1,bg_col,tint_col);
 		}
-	}
+	} 
 }
