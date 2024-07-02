@@ -60,9 +60,14 @@ public:
 	template <typename T = float>
 	static  T RandomBinomial();
 };
+template<typename T>
+inline bool IsApproximate(const T& lhv,const T& rhv)
+{
+	return std::abs(lhv - rhv) < std::numeric_limits<T>::epsilon();
+}
 
 inline std::mt19937_64& RandomEngine::engineInstance()
-{ 
+{
 	/*std::seed_seq seed(
 		{
 			Timer::GetInstance().GetTotalTime(),

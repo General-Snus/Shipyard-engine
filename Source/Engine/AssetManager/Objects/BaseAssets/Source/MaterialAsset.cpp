@@ -65,76 +65,75 @@ void Material::Init()
 	{
 		data.materialData = MaterialBuffer();
 	}
+
 	data.vertexShader = GraphicsEngine::Get().GetDefaultVSShader();
 	data.pixelShader = GraphicsEngine::Get().GetDefaultPSShader();
-
-	//std::shared_ptr<TextureHolder> text = AssetManager::GetInstance().LoadAsset<TextureHolder>("",true);
-	//textures[(int)text->textureType] = text;
-
+	 
 	if (std::filesystem::exists(AssetPath) && AssetPath.extension() == ".json")
 	{
+
 		std::ifstream file(AssetPath);
 		assert(file.is_open());
 
 		nlohmann::json json = nlohmann::json::parse(file);
 		file.close();
+		isLoadedComplete = true; // will be set to faalse if failing any where, bad but im not gonna be bothered
+		
+		try
 		{
-			try
+			nlohmann::json& js = json["MaterialBuffer"];
+
+			data.materialData.albedoColor[0] = js["albedoColor"][0];
+			data.materialData.albedoColor[1] = js["albedoColor"][1];
+			data.materialData.albedoColor[2] = js["albedoColor"][2];
+			data.materialData.albedoColor[3] = js["albedoColor"][3];
+
+			data.materialData.UVTiling[0] = js["UVTiling"][0];
+			data.materialData.UVTiling[1] = js["UVTiling"][1];
+
+			data.materialData.NormalStrength = js["NormalStrength"];
+			data.materialData.Shine = js["Shine"];
+		}
+		catch (const std::exception& e)
+		{
+			std::string msg = "Unsuccessfull loading of material data file at path: " + AssetPath.string() + " " + e.what();
+			Logger::Warn(msg);
+			isLoadedComplete = false;
+		} 
+		
+		try
+		{
+			nlohmann::json& js = json["Textures"];
+			for (const auto& i : js)
 			{
-				nlohmann::json& js = json["MaterialBuffer"];
+				std::shared_ptr<TextureHolder> texture;
+				const std::filesystem::path path = i["TexturePath"];
 
-				data.materialData.albedoColor[0] = js["albedoColor"][0];
-				data.materialData.albedoColor[1] = js["albedoColor"][1];
-				data.materialData.albedoColor[2] = js["albedoColor"][2];
-				data.materialData.albedoColor[3] = js["albedoColor"][3];
+				if (path.empty())
+				{
+					continue;
+				}
 
-				data.materialData.UVTiling[0] = js["UVTiling"][0];
-				data.materialData.UVTiling[1] = js["UVTiling"][1];
+				texture = AssetManager::Get().LoadAsset<TextureHolder>(path);
 
-				data.materialData.NormalStrength = js["NormalStrength"];
-				data.materialData.Shine = js["Shine"];
-			}
-			catch (const std::exception& e)
-			{
-				std::string msg = "Unsuccessfull loading of material data file at path: " + AssetPath.string() + " " + e.what();
-				Logger::Warn(msg);				
+				const int type = i["TextureType"];
+				texture->SetTextureType(static_cast<eTextureType>(type));
+
+				data.textures[type].first = path;
+				data.textures[type].second = texture;
 			}
 		}
-		{
-			try
-			{
-				nlohmann::json& js = json["Textures"];
-				for (const auto& i : js)
-				{
-					std::shared_ptr<TextureHolder> texture;
-					const std::filesystem::path path = i["TexturePath"];
-
-					if (path.empty())
-					{
-						continue;
-					}
-
-					texture = AssetManager::Get().LoadAsset<TextureHolder>(path);
-
-					const int type = i["TextureType"];
-					texture->SetTextureType(static_cast<eTextureType>(type));
-
-					data.textures[type].first = path;
-					data.textures[type].second = texture;
-				}
-			}
-			catch (const std::exception& e)
-			{ 
-				std::string msg = "Unsuccessfull loading of material texture file at path: " + AssetPath.string() + " " + e.what();
-				Logger::Warn(msg);
-			}
+		catch (const std::exception& e)
+		{ 
+			std::string msg = "Unsuccessfull loading of material texture file at path: " + AssetPath.string() + " " + e.what();
+			Logger::Warn(msg);
+			isLoadedComplete = false;
 		}
 	}
 	else
 	{
 		isLoadedComplete = false;
 	}
-	isLoadedComplete = true;
 }
 
 bool Material::InspectorView()

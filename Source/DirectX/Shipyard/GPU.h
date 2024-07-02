@@ -144,7 +144,7 @@ public:
 	static inline std::array<ComPtr<ID3D12CommandAllocator>,m_FrameCount> m_CommandAllocators;
 	static inline Texture m_renderTargets[m_FrameCount];
 
-
+	static inline std::mutex lockForTextureLoad;
 	static inline uint64_t m_FenceValues[m_FrameCount] = {};
 	static inline D3D_ROOT_SIGNATURE_VERSION m_FeatureData;
 

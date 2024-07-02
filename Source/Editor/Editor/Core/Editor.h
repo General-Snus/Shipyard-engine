@@ -16,12 +16,7 @@ class Scene;
 class Editor : public Singleton<Editor>
 {
 	friend class Singleton<Editor>;
-	friend class Logger;
-	enum eMenuLayers
-	{
-		count
-	};
-private:
+	friend class Logger; 
 	std::unique_ptr<SplashWindow> mySplashWindow = nullptr;
 	void ShowSplashScreen();
 	void HideSplashScreen() const;
@@ -33,15 +28,17 @@ private:
 	void AddViewPort();
 	void TopBar(); 
 public:
+	int Run();
 	bool Initialize(HWND aHandle);
 	void DoWinProc(const MSG& msg);
-	int Run();
+
 	static RECT GetViewportRECT();
 	static Vector2<unsigned int> GetViewportResolution();
 
 	bool GetIsGUIActive() const { return IsGUIActive; };
 	void SetIsGUIActive(bool set) { IsGUIActive = set; }; 
 	void AddRenderJob(std::shared_ptr<Viewport> aViewport); 
+	uint32_t GetAmountOfRenderJob(); 
 	static inline std::vector<std::shared_ptr<EditorWindow>> g_EditorWindows;
 	static std::vector<GameObject>& GetSelectedGameObjects() { return m_SelectedGameObjects; }
 	static inline bool IsPlaying = false; 

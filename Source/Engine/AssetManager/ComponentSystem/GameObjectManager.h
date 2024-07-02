@@ -26,9 +26,7 @@ private:
 	}; 
 	friend class GameObject;
 public: 
-	GameObjectManager() = default; 
-	GameObjectManager(GameObjectManager const&) = default;
-	GameObjectManager(GameObjectManager&&) = default;
+	GameObjectManager() = default;  
 	~GameObjectManager();
 	GameObject CreateGameObject(); 
 	void DeleteGameObject(const SY::UUID aGameObjectID,bool force = false);

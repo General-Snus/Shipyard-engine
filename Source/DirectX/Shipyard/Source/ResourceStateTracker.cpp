@@ -9,11 +9,9 @@ std::mutex ResourceStateTracker::ms_GlobalMutex;
 bool ResourceStateTracker::ms_IsLocked = false;
 ResourceStateTracker::ResourceStateMap ResourceStateTracker::ms_GlobalResourceState;
 
-ResourceStateTracker::ResourceStateTracker()
-{}
+ResourceStateTracker::ResourceStateTracker() = default;
 
-ResourceStateTracker::~ResourceStateTracker()
-{}
+ResourceStateTracker::~ResourceStateTracker() = default;
 
 void ResourceStateTracker::ResourceBarrier(const D3D12_RESOURCE_BARRIER& barrier)
 {
@@ -28,12 +26,12 @@ void ResourceStateTracker::ResourceBarrier(const D3D12_RESOURCE_BARRIER& barrier
 		const auto iter = m_FinalResourceState.find(transitionBarrier.pResource);
 		if (iter != m_FinalResourceState.end())
 		{
-			auto& resourceState = iter->second;
+			const auto & resourceState = iter->second;
 			// If the known final state of the resource is different...
 			if (transitionBarrier.Subresource == D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES && !resourceState.SubresourceState.empty())
 			{
 				// First transition all of the subresources if they are different than the StateAfter.
-				for (auto subresourceState : resourceState.SubresourceState)
+				for (const auto& subresourceState : resourceState.SubresourceState)
 				{
 					if (transitionBarrier.StateAfter != subresourceState.second)
 					{
@@ -46,7 +44,7 @@ void ResourceStateTracker::ResourceBarrier(const D3D12_RESOURCE_BARRIER& barrier
 			}
 			else
 			{
-				auto finalState = resourceState.GetSubresourceState(transitionBarrier.Subresource);
+				const auto& finalState = resourceState.GetSubresourceState(transitionBarrier.Subresource);
 				if (transitionBarrier.StateAfter != finalState)
 				{
 					// Push a new transition barrier with the correct before state.
@@ -139,12 +137,12 @@ uint32_t ResourceStateTracker::FlushPendingResourceBarriers(CommandList& command
 			{
 				// If all subresources are being transitioned, and there are multiple
 				// subresources of the resource that are in a different state...
-				auto& resourceState = iter->second;
+				auto const& resourceState = iter->second;
 				if (pendingTransition.Subresource == D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES &&
 					!resourceState.SubresourceState.empty())
 				{
 					// Transition all subresources
-					for (auto subresourceState : resourceState.SubresourceState)
+					for (auto& subresourceState : resourceState.SubresourceState)
 					{
 						if (pendingTransition.StateAfter != subresourceState.second)
 						{
@@ -170,7 +168,7 @@ uint32_t ResourceStateTracker::FlushPendingResourceBarriers(CommandList& command
 		}
 	}
 
-	UINT numBarriers = static_cast<UINT>(resourceBarriers.size());
+	auto numBarriers = static_cast<UINT>(resourceBarriers.size());
 	if (numBarriers > 0)
 	{
 		auto d3d12CommandList = commandList.GetGraphicsCommandList();
@@ -221,7 +219,7 @@ void ResourceStateTracker::AddGlobalResourceState(ID3D12Resource* resource, D3D1
 	OPTICK_GPU_EVENT("AddGlobalResourceState");
 	if (resource != nullptr)
 	{
-		std::lock_guard<std::mutex> lock(ms_GlobalMutex);
+		std::scoped_lock lock(ms_GlobalMutex);
 		ms_GlobalResourceState[resource].SetSubresourceState(D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, state);
 	}
 }
@@ -230,7 +228,7 @@ void ResourceStateTracker::RemoveGlobalResourceState(ID3D12Resource* resource)
 {
 	if (resource != nullptr)
 	{
-		std::lock_guard<std::mutex> lock(ms_GlobalMutex);
+		std::scoped_lock lock(ms_GlobalMutex);
 		ms_GlobalResourceState.erase(resource);
 	}
 }

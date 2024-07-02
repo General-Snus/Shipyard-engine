@@ -1,6 +1,6 @@
-
+ 
 {
-    "MaterialData": {
+    "MaterialBuffer": {
         "albedoColor":  [1.0,1.0,1.0,1.0] ,
         "UVTiling": [1.0,1.0],
         "NormalStrength" : 1.0,

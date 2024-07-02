@@ -1,6 +1,7 @@
 #pragma once 
 #include "LinearAlgebra/Vectors.hpp"
 #include <string>
+#include <Tools/Utilities/Math.hpp>
 
 #undef min
 #undef max
@@ -26,12 +27,12 @@ public:
 	void operator=(const std::string& hex) {
 		*this = FromHex(hex); 
 	}
-
+	
 	bool operator==(const Color& other) const {
-		return std::abs(r - other.r) < 0.001f &&
-			std::abs(g - other.g) < 0.001f &&
-			std::abs(b - other.b) < 0.001f &&
-			std::abs(a - other.a) < 0.001f;
+		return IsApproximate(r,other.r) &&
+			IsApproximate(g,other.g) &&
+			IsApproximate(b,other.b) &&
+			IsApproximate(a,other.a);
 	}
 	 
 	Vector4f operator()() const { return Vector4f(r,g,b,a); } 

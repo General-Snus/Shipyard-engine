@@ -392,6 +392,7 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 		Logger::Err(error); 
 		return false;
 	}
+	std::scoped_lock lock(lockForTextureLoad);
 
 	outTexture->myName = aFileName.filename().string();
 	ResourceUploadBatch resourceUpload(m_Device.Get());
@@ -444,6 +445,7 @@ bool GPU::LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName
 bool GPU::LoadTextureFromMemory(Texture* outTexture,const std::filesystem::path& aName,const BYTE* someImageData,size_t anImageDataSize,bool generateMips,const D3D12_SHADER_RESOURCE_VIEW_DESC* aSRVDesc)
 {
 	outTexture; aName; someImageData; anImageDataSize; aSRVDesc;
+	std::scoped_lock lock(lockForTextureLoad);
 	outTexture->myName = aName.string();
 	//outTexture->m_DescriptorHandle = std::make_unique<DescriptorHeap>(m_Device.Get(),
 	//	eDescriptors::Textures);

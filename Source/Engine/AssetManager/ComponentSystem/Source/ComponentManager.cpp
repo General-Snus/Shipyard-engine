@@ -4,3 +4,4 @@
 ComponentManagerBase::ComponentManagerBase(GameObjectManager* manager) : myManager(manager) 
 {
 }
+

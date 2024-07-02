@@ -6,7 +6,8 @@
 class Scene
 {
 public: 
-	Scene();
+	Scene() = default;
+	Scene(const Scene& other) = default;
 	GameObjectManager& GetGOM() { return myGameObjectManager; }
 	static GameObjectManager& ActiveManager(); // this wont fly as you most likely will get the main scene by accident
 

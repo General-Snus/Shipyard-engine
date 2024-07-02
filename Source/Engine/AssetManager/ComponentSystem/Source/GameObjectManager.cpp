@@ -3,7 +3,7 @@
 #include "../GameObject.h"
 #include "../GameObjectManager.h"  
 #include "Engine/AssetManager/ComponentSystem/ComponentManager.h" 
-
+ 
 GameObjectManager::~GameObjectManager()
 {
 	for (auto& [key, cm] : myComponentManagers)

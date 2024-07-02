@@ -36,6 +36,8 @@ public:
 	uint32_t GetWidth() const { return static_cast<uint32_t>(m_Viewport.Width); }
 	uint32_t GetHeight() const { return static_cast<uint32_t>(m_Viewport.Height); }
 
+	Vector2ui GetResolution() const { return Vector2ui(GetWidth(),GetHeight()); };
+
 	//KEKW
 	const D3D12_RECT& GetRect() const { return m_Rect; };
 	const D3D12_VIEWPORT& GetViewPort() const { return m_Viewport; };

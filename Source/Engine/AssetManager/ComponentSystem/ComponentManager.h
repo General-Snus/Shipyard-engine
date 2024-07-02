@@ -78,6 +78,7 @@ private:
 	std::unordered_map<unsigned int,SY::UUID> myVectorIndexToGameObjectID;
 	std::vector<T> myComponents;
 };
+ 
 
 template<class T>
 inline void ComponentManager<T>::Destroy()

@@ -164,7 +164,8 @@ std::shared_ptr<T> AssetManager::LoadAsset(const std::filesystem::path& aFilePat
 		{
 			std::pair<std::filesystem::path,std::shared_ptr<T>> newObject(aFilePath,std::make_shared<T>(aFilePath));
 			ptr = library->Add(newObject);
-			myAssetQueue.EnqueueUnique(newObject.second);
+			myAssetQueue.EnqueueUnique(newObject.second); 
+			newObject.second->isBeingLoaded = true;
 #if ThreadedAssetLoading
 			ThreadPool::Get().SubmitWork(std::bind(&AssetManager::ThreadedLoading,this));
 #else
@@ -177,6 +178,7 @@ std::shared_ptr<T> AssetManager::LoadAsset(const std::filesystem::path& aFilePat
 			std::pair<std::filesystem::path,std::shared_ptr<T>> newObject(aFilePath,std::make_shared<T>(loadPath));
 			ptr = library->Add<T>(newObject);
 			myAssetQueue.EnqueueUnique(newObject.second);
+			newObject.second->isBeingLoaded = true;
 #if ThreadedAssetLoading
 			ThreadPool::Get().SubmitWork(std::bind(&AssetManager::ThreadedLoading,this));
 #else

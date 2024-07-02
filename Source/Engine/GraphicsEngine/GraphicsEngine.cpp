@@ -447,6 +447,12 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
 		commandList->GetGraphicsCommandList()->SetGraphicsRootConstantBufferView(eRootBindings::frameBuffer,alloc0.GpuAddress());
 	}
 
+
+	const uint32_t dtAlbedo = defaultTexture->GetRawTexture()->GetHeapOffset();
+	const uint32_t dtNormal = defaultNormalTexture->GetRawTexture()->GetHeapOffset();
+	const uint32_t dtMaterial = defaultMatTexture->GetRawTexture()->GetHeapOffset();
+	const uint32_t dtEffect = defaultEffectTexture->GetRawTexture()->GetHeapOffset();
+
 	int vertCount = 0;
 	for (auto& meshRenderer : list)
 	{
@@ -457,15 +463,18 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
 
 		const auto ID = meshRenderer.GetOwner();
 		const auto& transform = meshRenderer.GetComponent<Transform>();
+
+
+		ObjectBuffer objectBuffer;
+		objectBuffer.myTransform = transform.GetRawTransform();
+		objectBuffer.MaxExtents = meshRenderer.GetRawMesh()->Bounds.GetMax();
+		objectBuffer.MinExtents = meshRenderer.GetRawMesh()->Bounds.GetMin();
+		objectBuffer.hasBone = false;
+		objectBuffer.uniqueID = ID;
+		commandList->AllocateBuffer(eRootBindings::objectBuffer,objectBuffer);
+
 		for (auto& element : meshRenderer.GetElements())
 		{
-			ObjectBuffer objectBuffer;
-			objectBuffer.myTransform = transform.GetRawTransform();
-			objectBuffer.MaxExtents = Vector3f(1,1,1);
-			objectBuffer.MinExtents = -Vector3f(1,1,1);
-			objectBuffer.hasBone = false;
-			objectBuffer.uniqueID = ID;
-			commandList->AllocateBuffer(eRootBindings::objectBuffer,objectBuffer);
 			vertCount += element.VertexBuffer.GetVertexCount();
 			GPU::ConfigureInputAssembler(*commandList,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.IndexResource);
 
@@ -480,20 +489,20 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
 					auto tex = textureAsset->GetRawTexture();
 					tex->SetView(ViewType::SRV);
 					commandList->TrackResource(tex->GetResource());
-
+					const auto heapOffset = tex->GetHeapOffset();
 					switch (static_cast<eTextureType>(i))
 					{
 					case eTextureType::ColorMap:
-						materialBuffer.albedoTexture = tex->GetHeapOffset();
+						materialBuffer.albedoTexture = heapOffset != -1 ? heapOffset : dtAlbedo;
 						break;
 					case eTextureType::NormalMap:
-						materialBuffer.normalTexture = tex->GetHeapOffset();
+						materialBuffer.normalTexture = heapOffset != -1 ? heapOffset : dtNormal;
 						break;
 					case eTextureType::MaterialMap:
-						materialBuffer.materialTexture = tex->GetHeapOffset();
+						materialBuffer.materialTexture = heapOffset != -1 ? heapOffset : dtMaterial;
 						break;
 					case eTextureType::EffectMap:
-						materialBuffer.emissiveTexture = tex->GetHeapOffset();
+						materialBuffer.emissiveTexture = heapOffset != -1 ? heapOffset : dtEffect;
 						break;
 					default:
 						Logger::Critical("Texture type is not found or is not valid for used on deffered");
@@ -505,16 +514,16 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
 					switch (static_cast<eTextureType>(i))
 					{
 					case eTextureType::ColorMap:
-						materialBuffer.albedoTexture = defaultTexture->GetRawTexture()->GetHeapOffset();
+						materialBuffer.albedoTexture = dtAlbedo;
 						break;
 					case eTextureType::NormalMap:
-						materialBuffer.normalTexture = defaultNormalTexture->GetRawTexture()->GetHeapOffset();
+						materialBuffer.normalTexture = dtNormal;
 						break;
 					case eTextureType::MaterialMap:
-						materialBuffer.materialTexture = defaultMatTexture->GetRawTexture()->GetHeapOffset();
+						materialBuffer.materialTexture = dtMaterial;
 						break;
 					case eTextureType::EffectMap:
-						materialBuffer.emissiveTexture = defaultEffectTexture->GetRawTexture()->GetHeapOffset();
+						materialBuffer.emissiveTexture = dtEffect;
 						break;
 					default:
 						Logger::Critical("Texture type is not found or is not valid for used on deffered");
@@ -524,6 +533,13 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
 			}
 			materialBuffer.vertexBufferIndex = element.VertexBuffer.GetHandle(ViewType::SRV).heapOffset;
 			materialBuffer.vertexOffset = 0; //vertex offset is part of drawcall, if i ever use this i need to set it here
+
+			assert(materialBuffer.albedoTexture != -1 && "HEAP INDEX OUT OF BOUND");
+			assert(materialBuffer.normalTexture != -1 && "HEAP INDEX OUT OF BOUND");
+			assert(materialBuffer.materialTexture != -1 && "HEAP INDEX OUT OF BOUND");
+			assert(materialBuffer.emissiveTexture != -1 && "HEAP INDEX OUT OF BOUND");
+			assert(materialBuffer.vertexBufferIndex != -1 && "HEAP INDEX OUT OF BOUND");
+			assert(materialBuffer.vertexOffset != -1 && "HEAP INDEX OUT OF BOUND");
 
 			const auto& alloc2 = GPU::m_GraphicsMemory->AllocateConstant<MaterialBuffer>(materialBuffer);
 			commandList->GetGraphicsCommandList()->SetGraphicsRootConstantBufferView(REG_DefaultMaterialBuffer,alloc2.GpuAddress());

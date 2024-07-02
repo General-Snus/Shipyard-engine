@@ -23,11 +23,19 @@ Viewport::Viewport(bool IsMainViewPort,Vector2f ViewportResolution,
 	ViewportResolution(ViewportResolution),
 	sceneToRender(aScene),IsMainViewPort(IsMainViewPort)
 {
+
+	const auto resolution = static_cast<Vector2ui>(ViewportResolution);
 	if (!m_RenderTarget)
 	{
 		m_RenderTarget = std::make_shared<TextureHolder>("ViewportTargetTexture");
 	}
-	m_RenderTarget->GetRawTexture()->AllocateTexture(static_cast<Vector2ui>(ViewportResolution),"Target1");
+
+	if (!m_RenderTarget->GetRawTexture() || 
+		m_RenderTarget->GetRawTexture()->GetWidth() != resolution.x && 
+		m_RenderTarget->GetRawTexture()->GetHeight() != resolution.y)
+	{
+		m_RenderTarget->GetRawTexture()->AllocateTexture(resolution,"Target1");
+	}
 
 	if (IsMainViewPort)
 	{
@@ -36,7 +44,7 @@ Viewport::Viewport(bool IsMainViewPort,Vector2f ViewportResolution,
 	else
 	{
 		CameraSettings settings;
-		settings.APRatio = static_cast<float>(ViewportResolution.x) / ViewportResolution.y;
+		settings.APRatio =  ViewportResolution.x  / ViewportResolution.y;
 		myVirtualCamera = sceneToRender->ActiveManager().CreateGameObject();
 		myVirtualCamera.AddComponent<Transform>();
 		myVirtualCamera.AddComponent<cCamera>(settings);

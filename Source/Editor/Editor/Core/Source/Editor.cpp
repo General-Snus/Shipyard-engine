@@ -500,10 +500,10 @@ void Editor::Render()
 	}
 	m_CustomSceneRenderPasses.clear();
 
-	{
-		using namespace std::chrono_literals;
-		std::this_thread::sleep_for(std::chrono::milliseconds(8));
-	}
+	//{
+	//	using namespace std::chrono_literals;
+	//	std::this_thread::sleep_for(std::chrono::milliseconds(8));
+	//}
 }
 
 void Editor::AddViewPort()
@@ -618,4 +618,9 @@ Vector2<unsigned int> Editor::GetViewportResolution()
 void Editor::AddRenderJob(std::shared_ptr<Viewport> aViewport)
 {
 	m_CustomSceneRenderPasses.emplace_back(aViewport);
+}
+
+uint32_t Editor::GetAmountOfRenderJob()
+{
+	return static_cast<uint32_t>(m_CustomSceneRenderPasses.size());
 }
