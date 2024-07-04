@@ -4,6 +4,8 @@
 class Inspector : public EditorWindow
 {
 public:
+	Inspector();
+	void ToFront();
 	void RenderImGUi() override;
 };
 

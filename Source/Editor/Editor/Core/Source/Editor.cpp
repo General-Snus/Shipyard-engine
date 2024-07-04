@@ -7,10 +7,10 @@
 #include <Windows.h>
 
 #include <Editor/Editor/Windows/Window.h>
-#include <Engine/AssetManager/ComponentSystem/GameObject.h>
 #include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h> 
 #include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXDynamicBody.h> 
 #include <Engine/AssetManager/ComponentSystem/Components/Transform.h> 
+#include <Engine/AssetManager/ComponentSystem/GameObject.h>
 
 #include <Tools/ImGui/ImGui/backends/imgui_impl_dx12.h>
 #include <Tools/ImGUI/ImGUI/imgui.h>  
@@ -24,18 +24,18 @@
 #include <Tools/Utilities/Input/Input.hpp>
 #include <Tools/Utilities/System/ThreadPool.hpp>
 #include "../Editor.h"
-#include "Engine/AssetManager/AssetManager.h"
-#include "Engine/AssetManager/ComponentSystem/Components/LightComponent.h"
 #include "DirectX/Shipyard/GPU.h"
-#include "Engine/GraphicsEngine/GraphicsEngine.h"   
-#include "Engine/PersistentSystems/System/SceneGraph/WorldGraph.h"
 #include "Editor/Editor/Windows/EditorWindows/Console.h"
 #include "Editor/Editor/Windows/EditorWindows/ContentDirectory.h"
 #include "Editor/Editor/Windows/EditorWindows/Hierarchy.h"
 #include "Editor/Editor/Windows/EditorWindows/Inspector.h"
 #include "Editor/Editor/Windows/EditorWindows/Viewport.h"
 #include "Editor/Editor/Windows/SplashWindow.h" 
+#include "Engine/AssetManager/AssetManager.h"
+#include "Engine/AssetManager/ComponentSystem/Components/LightComponent.h"
+#include "Engine/GraphicsEngine/GraphicsEngine.h"   
 #include "Engine/PersistentSystems/Scene.h"
+#include "Engine/PersistentSystems/System/SceneGraph/WorldGraph.h"
 #if PHYSX 
 #include <Engine/PersistentSystems/Physics/PhysXInterpeter.h>
 #endif // PHYSX 0
@@ -178,7 +178,7 @@ void SetupImGuiStyle(bool light = false)
 			auto text = Color(js["TextColor"]);
 			auto active = Color(js["Active/Loaded"]);
 			auto inactive = Color(js["Inactive/Unloaded"]);
-			 
+
 
 			const float onClick = .9f;
 			const float onHover = 1.1f;
@@ -230,6 +230,8 @@ void SetupImGuiStyle(bool light = false)
 			style.Colors[ImGuiCol_TabHovered] = Detail.GetRGBA() * onHover;
 			style.Colors[ImGuiCol_TabUnfocused] = primary.GetRGBA();
 			style.Colors[ImGuiCol_TabUnfocusedActive] = Detail.GetRGBA();
+			style.Colors[ImGuiCol_TabSelected] = Detail.GetRGBA() * onClick;
+			style.Colors[ImGuiCol_TabSelectedOverline] = Detail.GetRGBA();
 
 			style.Colors[ImGuiCol_Text] = text.GetRGBA();
 			style.Colors[ImGuiCol_TextSelectedBg] = Detail.GetRGBA();
@@ -253,7 +255,7 @@ void SetupImGuiStyle(bool light = false)
 }
 void LoadFont()
 {
-	bool haveLoadedFont = false; 
+	bool haveLoadedFont = false;
 	ImGuiIO& io = ImGui::GetIO();
 
 	auto path = AssetManager::AssetPath / "Theme.json";
@@ -334,9 +336,9 @@ bool Editor::Initialize(HWND aHandle)
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-	io.ConfigFlags |= ImGuiConfigFlags_DpiEnableScaleViewports; 
-	io.ConfigDockingWithShift = true; 
-	 
+	io.ConfigFlags |= ImGuiConfigFlags_DpiEnableScaleViewports;
+	io.ConfigDockingWithShift = true;
+
 	ImGui_ImplWin32_Init(aHandle);
 	if (const auto& heap = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV];
 		!ImGui_ImplDX12_Init(
@@ -375,6 +377,9 @@ bool Editor::Initialize(HWND aHandle)
 	ScriptEditor = Graph::GraphTool::Get().GetScriptingEditor();
 	ScriptEditor->Init();
 #endif 
+
+	m_Callbacks[EditorCallback::ObjectSelected] = Event();
+
 
 	AddViewPort();
 	g_EditorWindows.emplace_back(std::make_shared<Inspector>());
@@ -554,7 +559,7 @@ void Editor::TopBar()
 
 			if (ImGui::Selectable("Dark Theme"))
 			{
-				SetupImGuiStyle(false );
+				SetupImGuiStyle(false);
 			}
 
 

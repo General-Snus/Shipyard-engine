@@ -1,17 +1,18 @@
 #include <Engine/AssetManager/AssetManager.pch.h> 
 
-#include "GameLauncher.h"   
-#include <Engine/AssetManager/ComponentSystem/Components/Transform.h>   
-#include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>   
 #include <Engine/AssetManager/ComponentSystem/Components/CameraComponent.h>    
-#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXDynamicBody.h>   
-#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXStaticBody.h>   
-#include <Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h>   
+#include <Engine/AssetManager/ComponentSystem/Components/Collider.h> 
 #include <Engine/AssetManager/ComponentSystem/Components/DEBUGCOMPONENTS/FrameStatistics.h>   
 #include <Engine/AssetManager/ComponentSystem/Components/DEBUGCOMPONENTS/RenderMode.h>   
-#include <Engine/AssetManager/ComponentSystem/Components/Collider.h> 
+#include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>   
+#include <Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h>   
+#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXDynamicBody.h>   
+#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXStaticBody.h>   
+#include <Engine/AssetManager/ComponentSystem/Components/Transform.h>   
 #include <Engine/AssetManager/Objects/AI/AgentSystem/AIEventManager.h> 
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
+#include "GameLauncher.h"
+
 
 
 void GameLauncher::Init()
@@ -25,21 +26,21 @@ void GameLauncher::Init()
 		Scene::ActiveManager().SetLastGOAsCamera();
 		cameraComponent.SetActive(true);
 		auto& transform = camera.AddComponent<Transform>();
-		transform.SetPosition(-10, 3, 0);
-		transform.SetRotation(0, 90, 0);
+		transform.SetPosition(-10,3,0);
+		transform.SetRotation(0,90,0);
 	}
 }
 
-bool SaveTest(std::vector<GameObject> gameObjectsToSave, const std::filesystem::path& path)
+bool SaveTest(std::vector<GameObject> gameObjectsToSave,const std::filesystem::path& path)
 {
 	Logger::Log("Saving Gameobjects");
-	std::ofstream file(path.string(), std::ios_base::binary);
+	std::ofstream file(path.string(),std::ios_base::binary);
 	if (!file.is_open())
 	{
 		return false;
 	}
 	int a = static_cast<int>(gameObjectsToSave.size());
-	file.write((char*)&a, sizeof(a));
+	file.write((char*)&a,sizeof(a));
 
 	for (auto& i : gameObjectsToSave)
 	{
@@ -48,10 +49,10 @@ bool SaveTest(std::vector<GameObject> gameObjectsToSave, const std::filesystem::
 		int strLength = static_cast<int>(meshPath.length());
 		unsigned int id = i.GetID();
 
-		file.write((char*)&id, sizeof(id));
-		file.write((char*)&position, sizeof(position));
-		file.write((char*)&strLength, sizeof(strLength));
-		file.write(&meshPath[0], strLength);
+		file.write((char*)&id,sizeof(id));
+		file.write((char*)&position,sizeof(position));
+		file.write((char*)&strLength,sizeof(strLength));
+		file.write(&meshPath[0],strLength);
 
 		Logger::Log("Saved: " + std::to_string(id));
 	}
@@ -62,14 +63,14 @@ bool SaveTest(std::vector<GameObject> gameObjectsToSave, const std::filesystem::
 std::vector<GameObject> LoadTest(const std::filesystem::path& path)
 {
 	std::vector<GameObject> gameObjectsToSave;
-	std::ifstream file(path.string(), std::ios_base::binary);
+	std::ifstream file(path.string(),std::ios_base::binary);
 	if (!file.is_open())
 	{
 		return gameObjectsToSave;
 	}
 
 	int size = 0;
-	file.read((char*)&size, sizeof(int));
+	file.read((char*)&size,sizeof(int));
 	gameObjectsToSave.resize(size);
 	Logger::Log("\n\nLoading Gameobjects " + std::to_string(size));
 
@@ -80,17 +81,17 @@ std::vector<GameObject> LoadTest(const std::filesystem::path& path)
 		std::string meshPath;
 		int strLength = 0;
 
-		file.read((char*)&uuid, sizeof(uuid));
-		file.read((char*)&position, sizeof(position));
+		file.read((char*)&uuid,sizeof(uuid));
+		file.read((char*)&position,sizeof(position));
 
-		file.read((char*)&strLength, sizeof(strLength));
+		file.read((char*)&strLength,sizeof(strLength));
 		meshPath.resize(strLength);
-		file.read(&meshPath[0], strLength);
-		 
+		file.read(&meshPath[0],strLength);
+
 		i = GameObject::Create();
 		auto& transform = i.AddComponent<Transform>();
 		transform.SetPosition(position);
-		i.AddComponent<cMeshRenderer>(meshPath, true);
+		i.AddComponent<cMeshRenderer>(meshPath,true);
 		i.AddComponent<cPhysXDynamicBody>();
 		Logger::Log("Loaded: " + std::to_string(uuid));
 	}
@@ -123,6 +124,26 @@ void GameLauncher::GenerateNewRandomCubes()
 void GameLauncher::Start()
 {
 	OPTICK_EVENT();
+
+
+
+	m_CustomKeyCallback.AddListener(std::bind(&GameLauncher::LocalFunction,this));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #pragma region BaseSetup 
 	{
 		GameObject worldRoot = GameObject::Create();
@@ -133,16 +154,18 @@ void GameLauncher::Start()
 		//worldRoot.AddComponent<Skybox>();
 
 
-		Transform& transform = worldRoot.AddComponent<Transform>();
-		transform.SetRotation(80, 0, 0);
-		transform.SetPosition(0, 5, 0);
+		auto& transform = worldRoot.AddComponent<Transform>();
+		transform.SetRotation(80,0,0);
+		transform.SetPosition(0,5,0);
 
 		worldRoot.AddComponent<cMeshRenderer>("Models/Cube.fbx");
 
-		cLight& pLight = worldRoot.AddComponent<cLight>(eLightType::Directional);
-		pLight.SetColor(Vector3f(1, 1, 1));
+		auto& pLight = worldRoot.AddComponent<cLight>(eLightType::Directional);
+		pLight.SetColor(Vector3f(1,1,1));
 		pLight.SetPower(2.0f);
 		pLight.BindDirectionToTransform(true);
+
+
 		//if(gom.GetAllComponents<BackgroundColor>().empty())
 		//{
 		//	worldRoot.AddComponent<BackgroundColor>(Vector4f(1.0f,1.0f,1.0f,1.0f));
@@ -154,9 +177,9 @@ void GameLauncher::Start()
 		floor.SetName("Floor");
 
 		auto& transform = floor.AddComponent<Transform>();
-		transform.SetPosition(0, -0.0f, 0);
-		transform.SetRotation(0, 0.f, 0.f);
-		transform.SetScale(500.f, 20.f, 500.f);
+		transform.SetPosition(0,-0.0f,0);
+		transform.SetRotation(0,0.f,0.f);
+		transform.SetScale(500.f,20.f,500.f);
 		transform.SetGizmo(false);
 		floor.SetActive(false);
 		floor.AddComponent<cMeshRenderer>("Models/Cube.fbx");
@@ -170,11 +193,10 @@ void GameLauncher::Start()
 	{
 		GameObject sponza = GameObject::Create();
 		sponza.SetName("Sponza");
-
 		sponza.AddComponent<cMeshRenderer>("Models/Sponza/Sponza.fbx");
 		//sponza.AddComponent<cMeshRenderer>("Models/Sponza/Sponza3Intel.fbx");
 		auto& transform = sponza.AddComponent<Transform>();
-		transform.SetPosition(0, 0, 0);
+		transform.SetPosition(0,0,0);
 		transform.SetScale(.01f);
 		transform.SetGizmo(false);
 	}
@@ -185,7 +207,7 @@ void GameLauncher::Start()
 
 		auto& transform = myCustomHandler.AddComponent<Transform>();
 		auto& light = myCustomHandler.AddComponent<cLight>(eLightType::Point);
-		transform.SetPosition(0, 5, -4);
+		transform.SetPosition(0,5,-4);
 		light.BindDirectionToTransform(true);
 		light.SetColor({ .5f,.5f,1 });
 		light.SetPower(10);
@@ -199,23 +221,23 @@ void GameLauncher::Start()
 
 		auto& transform = myCustomHandler2.AddComponent<Transform>();
 		auto& light = myCustomHandler2.AddComponent<cLight>(eLightType::Point);
-		transform.SetPosition(0, 30, 4);
+		transform.SetPosition(0,30,4);
 		light.BindDirectionToTransform(true);
 		light.SetIsShadowCaster(false);
 		light.SetColor({ 1,.5f,.5f });
 		light.SetPower(10);
 		light.SetRange(4.5f);
 	}
+
 	{
 		GameObject buddha = GameObject::Create();
 		buddha.SetName("buddha");
-
 		buddha.AddComponent<cMeshRenderer>("Models/Buddha.fbx");
 		buddha.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BuddhaMaterial.json");
 		auto& transform = buddha.AddComponent<Transform>();
-		transform.SetPosition(0, 0, 0);
-		transform.Rotate(0, 90, 0);
-		transform.SetScale(0.5f, .5f, .5f);
+		transform.SetPosition(0,0,0);
+		transform.Rotate(0,90,0);
+		transform.SetScale(0.5f,.5f,.5f);
 		transform.SetGizmo(false);
 	}
 
@@ -223,9 +245,10 @@ void GameLauncher::Start()
 		GameObject pointLight = GameObject::Create();
 		pointLight.SetName("pointLight");
 		auto& transform = pointLight.AddComponent<Transform>();
-		transform.SetPosition(-5, 1, 0);
+		transform.SetPosition(-5,1,0);
 		pointLight.AddComponent<cLight>(eLightType::Point);
 	}
+
 	{
 		GameObject spotLight = GameObject::Create();
 		spotLight.SetName("spotLight");
@@ -339,7 +362,7 @@ void GameLauncher::Update(float delta)
 		{
 			direction = 1.f;
 		}
-		transform.Move(5.f * direction * delta, 0, 0);
+		transform.Move(5.f * direction * delta,0,0);
 	}
 
 	{
@@ -353,19 +376,29 @@ void GameLauncher::Update(float delta)
 		{
 			direction2 = 1.f;
 		}
-		transform.Move(5.f * direction * delta, 0, 0);
+		transform.Move(5.f * direction * delta,0,0);
 	}
 
+
+	if (Input::IsKeyPressed(Keys::P))
+	{
+		m_CustomKeyCallback.Invoke();
+	}
 
 
 	Transform& pLight = Scene::ActiveManager().GetWorldRoot().GetComponent<Transform>();
 	constexpr float rotSpeed = 25.f;
 	if (Input::IsKeyHeld(static_cast<int>(Keys::NUMPAD6)))
 	{
-		pLight.Rotate(rotSpeed * delta, 0, 0);
+		pLight.Rotate(rotSpeed * delta,0,0);
 	}
 	if (Input::IsKeyHeld(static_cast<int>(Keys::NUMPAD3)))
 	{
-		pLight.Rotate(-rotSpeed * delta, 0, 0);
+		pLight.Rotate(-rotSpeed * delta,0,0);
 	}
+}
+
+void GameLauncher::LocalFunction()
+{
+	Logger::Log("Local Function Called");
 }

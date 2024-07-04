@@ -144,6 +144,9 @@
     <ClInclude Include="Color.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="System\Event.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game\Camera.cpp">
@@ -159,6 +162,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="System\ThreadPool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Source\Event.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

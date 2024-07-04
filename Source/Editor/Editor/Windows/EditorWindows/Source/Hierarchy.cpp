@@ -1,13 +1,13 @@
 #include "../Hierarchy.h"
 
+#include <Engine/AssetManager/ComponentSystem/Components/Transform.h>
+#include  <format>
+#include "Editor/Editor/Core/Editor.h" 
 #include "Engine/AssetManager/AssetManager.h"
 #include "Engine/AssetManager/ComponentSystem/GameObjectManager.h"
-#include "Editor/Editor/Core/Editor.h" 
-#include  <format>
+#include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
 #include "ImGuiHepers.hpp"
 #include "Tools/Utilities/Input/Input.hpp"
-#include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
-#include <Engine/AssetManager/ComponentSystem/Components/Transform.h>
 
 #include "Engine/PersistentSystems/Scene.h"
 
@@ -38,7 +38,7 @@ void Hierarchy::RenderImGUi()
 				bool isActive = data.IsActive;
 				if (ImGui::TreeNodeEx(std::format("##{}",data.Name).c_str(),flags))
 				{
-					ImGui::SameLine(); 
+					ImGui::SameLine();
 					auto gameObjectWidget = AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/GameObject.png");
 					const auto height = ImGui::GetFrameHeight();
 					ImGui::Image(gameObjectWidget,{ height,height });
@@ -49,10 +49,13 @@ void Hierarchy::RenderImGUi()
 					auto color = style.Colors[ImGuiCol_Text];
 					if (ImGui::IsItemHovered())
 					{
-						color =  style.Colors[ImGuiCol_CheckMark];
+						color = style.Colors[ImGuiCol_CheckMark];
 
 						if (ImGui::IsItemClicked())
 						{
+							Editor::Get().m_Callbacks[EditorCallback::ObjectSelected].Invoke();
+
+
 							auto& refSelected = Editor::GetSelectedGameObjects();
 							!Input::IsKeyHeld(Keys::SHIFT) ? refSelected.clear() : __nop();
 							refSelected.push_back(Scene::ActiveManager().GetGameObject(id));
@@ -62,7 +65,7 @@ void Hierarchy::RenderImGUi()
 
 					if (!isActive)
 					{
-						color = style.Colors[ImGuiCol_TextDisabled]; 
+						color = style.Colors[ImGuiCol_TextDisabled];
 					}
 
 					ImGui::PushStyleColor(ImGuiCol_Text,color);

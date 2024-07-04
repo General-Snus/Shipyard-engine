@@ -259,6 +259,7 @@
     <ClInclude Include="DataStructures\Stack.hpp" />
     <ClInclude Include="DataStructures\VectorOnStack.hpp" />
     <ClInclude Include="Error.hpp" />
+    <ClInclude Include="System\Event.h" />
     <ClInclude Include="Files\Images\stb_image.h" />
     <ClInclude Include="Files\Images\stb_image_resize2.h" />
     <ClInclude Include="Files\Images\stb_image_write.h" />
@@ -292,6 +293,7 @@
     <ClInclude Include="System\ThreadPool.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="System\Source\Event.cpp" />
     <ClCompile Include="Game\Camera.cpp" />
     <ClCompile Include="Game\Timer.cpp" />
     <ClCompile Include="LinearAlgebra\Matrix4x4.cpp" />
