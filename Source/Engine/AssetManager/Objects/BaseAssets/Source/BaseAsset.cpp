@@ -31,6 +31,6 @@ inline bool AssetBase::InspectorView()
 	float size = ImGui::CalcTextSize("A").y;
 	ImGui::Image(GraphicsEngine::Get().GetDefaultTexture(eTextureType::ColorMap),ImVec2(size,size),ImVec2(0,0),ImVec2(1,1),color);
 	ImGui::SameLine();
-	isOpened = ImGui::CollapsingHeader(typeInfo.Name().c_str(),ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_OpenOnDoubleClick);
+	isOpened = ImGui::CollapsingHeader(typeInfo.Name().c_str(),ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_DefaultOpen);
 	return isOpened;
 }

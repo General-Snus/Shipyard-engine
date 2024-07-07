@@ -139,14 +139,14 @@ public:
 	virtual const TypeInfo& GetTypeInfo() const override \
 	{ \
 		return TypeInfo::Get<::refl::trait::remove_qualifiers_t<decltype(*this)>>(); \
-	} 
+	}  
 
 
 #pragma warning( push )
 #pragma warning( disable : 4702) 
 
 
-
+//Reflect public reflected members
 template <typename TypeToReflect>//Make sure only reflected objects can get here
 inline void Reflectable::Reflect(this auto& aReflectedObject)
 {

@@ -289,6 +289,7 @@
     <ClInclude Include="Physics\Raycast.h" />
     <ClInclude Include="Physics\PhysXInterpeter.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="SceneUtilities.h" />
     <ClInclude Include="System\SceneGraph\WorldGraph.h" />
   </ItemGroup>
   <ItemGroup>
@@ -301,6 +302,7 @@
     <ClCompile Include="Physics\Source\Raycast.cpp" />
     <ClCompile Include="Physics\Source\PhysXInterpeter.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="SceneUtilities.cpp" />
     <ClCompile Include="System\SceneGraph\WorldGraph.cpp" />
   </ItemGroup>
   <ItemGroup>

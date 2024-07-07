@@ -46,8 +46,6 @@ public:
 
 	bool GetIsGUIActive() const { return IsGUIActive; };
 	void SetIsGUIActive(bool set) { IsGUIActive = set; };
-	void AddRenderJob(std::shared_ptr<Viewport> aViewport);
-	uint32_t GetAmountOfRenderJob();
 	static inline std::vector<std::shared_ptr<EditorWindow>> g_EditorWindows;
 	static std::vector<GameObject>& GetSelectedGameObjects() { return m_SelectedGameObjects; }
 	static inline bool IsPlaying = false;
@@ -67,7 +65,6 @@ private:
 	inline static std::vector<GameObject> m_SelectedGameObjects;
 	static inline std::shared_ptr<Scene> m_MainScene;
 	std::vector< std::shared_ptr<Viewport>> m_Viewports;
-	std::vector< std::shared_ptr<Viewport>> m_CustomSceneRenderPasses; //lifetime 1 frame 
 	GameLauncher myGameLauncher;
 	bool IsGUIActive = true;
 };

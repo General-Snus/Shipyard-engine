@@ -7,7 +7,7 @@
 void Console::RenderImGUi()
 {
 	OPTICK_EVENT();
-	ImGui::Begin("Console");
+	ImGui::Begin("Console",&m_KeepWindow);
 	{
 		using enum Logger::LogType;
 		const auto& style = ImGui::GetStyle();

@@ -91,6 +91,11 @@ inline void ComponentManager<T>::Destroy()
 template<class T>
 T& ComponentManager<T>::AddComponent(const SY::UUID aGameObjectID)
 {
+	if (HasComponent(aGameObjectID))
+	{
+		return myComponents[myGameObjectIDtoVectorIndex[aGameObjectID]];
+	}
+
 	myGameObjectIDtoVectorIndex[aGameObjectID] = static_cast<unsigned int>(myComponents.size());
 	myVectorIndexToGameObjectID[static_cast<unsigned int>(myComponents.size())] = aGameObjectID;
 	myComponents.push_back(T(aGameObjectID,myManager));
@@ -102,6 +107,11 @@ T& ComponentManager<T>::AddComponent(const SY::UUID aGameObjectID)
 template<class T>
 inline T& ComponentManager<T>::AddComponent(const SY::UUID aGameObjectID,const T& aComponent)
 {
+	if (HasComponent(aGameObjectID))
+	{
+		return myComponents[myGameObjectIDtoVectorIndex[aGameObjectID]];
+	}
+
 	myGameObjectIDtoVectorIndex[aGameObjectID] = static_cast<unsigned int>(myComponents.size());
 	myVectorIndexToGameObjectID[static_cast<unsigned int>(myComponents.size())] = aGameObjectID;
 	myComponents.push_back(aComponent);
@@ -115,6 +125,11 @@ template<class T>
 template<typename...  Args>
 inline T& ComponentManager<T>::AddComponent(const SY::UUID aGameObjectID,Args... someParameters)
 {
+	if (HasComponent(aGameObjectID))
+	{
+		return myComponents[myGameObjectIDtoVectorIndex[aGameObjectID]];
+	}
+
 	myGameObjectIDtoVectorIndex[aGameObjectID] = static_cast<unsigned int>(myComponents.size());
 	myVectorIndexToGameObjectID[static_cast<unsigned int>(myComponents.size())] = aGameObjectID;
 	myComponents.push_back(T(aGameObjectID,myManager,someParameters...));

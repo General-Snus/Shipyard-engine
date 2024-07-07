@@ -109,6 +109,30 @@ bool cMeshRenderer::InspectorView()
 		return false;
 	}
 	Reflect<cMeshRenderer>();
+
+	auto onDropTargetCallback = [&](const ImGuiPayload* payload)
+		{
+			if (payload)
+			{
+				const auto path = std::string((const char*)payload->Data,payload->DataSize);
+				m_Mesh = AssetManager::Get().LoadAsset<Mesh>(path); 
+				Logger::Log(path);
+			}
+		};
+
+
+	m_Mesh->InspectorView(onDropTargetCallback);
+	if (ImGui::TreeNodeEx("Override materials")) // Replace with element name 
+	{
+		for (auto& material : m_OverrideMaterial)
+		{
+			material->InspectorView();
+		}
+
+		ImGui::TreePop();
+	}
+
+
 	return true;
 }
 
@@ -193,6 +217,15 @@ void cMeshRenderer::Render()
 	//myRenderData->myMesh->myInstances.emplace_back(Matrix());
 	//GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),isInstanced);
 }
+
+
+
+
+
+
+
+
+
 
 cSkeletalMeshRenderer::cSkeletalMeshRenderer(const SY::UUID anOwnerId, GameObjectManager* aManager) : cMeshRenderer(anOwnerId, aManager)
 {

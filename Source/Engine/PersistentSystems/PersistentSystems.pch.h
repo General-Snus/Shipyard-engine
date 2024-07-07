@@ -13,4 +13,6 @@
 #include "ArtificialInteligence/AICommands/AICommands.h" 
 #include "Physics/PhysXInterpeter.h"
 #include "Physics/Raycast.h"
+#include <Tools/Logging/Logging.h>
+#include <Tools/Reflection/refl.hpp>
 #endif //PERSISTENT_PCH_H

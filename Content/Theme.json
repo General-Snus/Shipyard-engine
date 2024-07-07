@@ -8,8 +8,9 @@
     "SecondaryColor": "#3E4144",
     "TextColor": "#E6E9EB"
     },
-"FontPath": "/Fonts/NotoSans-Regular.ttf",
-"FontSize": 20.0,
+"FontPathComment": "/Fonts/NotoSans-Regular.ttf",
+"FontPath": "/Fonts/roboto/Roboto-Regular.ttf",
+"FontSize": 16.0,
 "Light":
     {
     "Active/Loaded": "#7AB8D5",

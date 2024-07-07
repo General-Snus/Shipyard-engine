@@ -13,6 +13,8 @@
 #include "Engine/PersistentSystems/Scene.h"
 #include "Tools/Logging/Logging.h"
 #include "Tools/Utilities/Input/Input.hpp"
+#include <Engine/AssetManager/AssetManager.h>
+#include <Engine/PersistentSystems/SceneUtilities.h>
 
 ImGuizmo::OPERATION m_CurrentGizmoOperation = ImGuizmo::OPERATION::UNIVERSAL;
 ImGuizmo::MODE m_CurrentGizmoMode = ImGuizmo::MODE::WORLD;
@@ -30,8 +32,8 @@ Viewport::Viewport(bool IsMainViewPort,Vector2f ViewportResolution,
 		m_RenderTarget = std::make_shared<TextureHolder>("ViewportTargetTexture");
 	}
 
-	if (!m_RenderTarget->GetRawTexture() || 
-		m_RenderTarget->GetRawTexture()->GetWidth() != resolution.x && 
+	if (!m_RenderTarget->GetRawTexture() ||
+		m_RenderTarget->GetRawTexture()->GetWidth() != resolution.x &&
 		m_RenderTarget->GetRawTexture()->GetHeight() != resolution.y)
 	{
 		m_RenderTarget->GetRawTexture()->AllocateTexture(resolution,"Target1");
@@ -44,7 +46,7 @@ Viewport::Viewport(bool IsMainViewPort,Vector2f ViewportResolution,
 	else
 	{
 		CameraSettings settings;
-		settings.APRatio =  ViewportResolution.x  / ViewportResolution.y;
+		settings.APRatio = ViewportResolution.x / ViewportResolution.y;
 		myVirtualCamera = sceneToRender->ActiveManager().CreateGameObject();
 		myVirtualCamera.AddComponent<Transform>();
 		myVirtualCamera.AddComponent<cCamera>(settings);
@@ -166,14 +168,14 @@ Matrix& Viewport::View()
 void Viewport::RenderImGUi()
 {
 	OPTICK_EVENT();
-	 ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar;
-		//const auto aspecRatio = (res.x / res.y);
-		//ImGui::SetNextWindowSizeConstraints(ImVec2(0,0),ImVec2(FLT_MAX,FLT_MAX),CustomConstraints::AspectRatio,(void*)&aspecRatio);   // Aspect ratio
-		 
+	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar;
+	//const auto aspecRatio = (res.x / res.y);
+	//ImGui::SetNextWindowSizeConstraints(ImVec2(0,0),ImVec2(FLT_MAX,FLT_MAX),CustomConstraints::AspectRatio,(void*)&aspecRatio);   // Aspect ratio
+
 
 	std::vector<GameObject>& selectedObjects = Editor::GetSelectedGameObjects();
 
-	TakeInput(); 
+	TakeInput();
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding,{ 0.f,0.f });
 	std::string title = "Scene ";
@@ -187,7 +189,7 @@ void Viewport::RenderImGUi()
 
 	}
 
-	if (ImGui::Begin(title.c_str(),nullptr,windowFlags))
+	if (ImGui::Begin(title.c_str(),&m_KeepWindow,windowFlags))
 	{
 		IsUsed = ImGui::IsWindowFocused();
 		IsVisible = ImGui::IsItemVisible();
@@ -196,6 +198,21 @@ void Viewport::RenderImGUi()
 		float windowWidth = ImGui::GetWindowWidth();
 		float windowHeight = ImGui::GetWindowHeight();
 		ImGui::Image(m_RenderTarget,ImVec2(windowWidth,windowHeight));
+
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* test = ImGui::AcceptDragDropPayload("ContentAsset_Mesh"))
+			{
+				const std::filesystem::path  data = std::string((char*)test->Data,test->DataSize);
+				const std::string type = AssetManager::AssetType(data);
+
+				SceneUtils::AddAssetToScene(data,sceneToRender);
+
+
+				Logger::Log(type);
+			}
+			ImGui::EndDragDropTarget();
+		}
 
 		ViewportResolution = { windowWidth,windowHeight };
 		if (!IsMainViewport())
@@ -211,10 +228,11 @@ void Viewport::RenderImGUi()
 			{
 				auto& transform = gameObject.GetComponent<Transform>();
 				bool transfomed = ImGuizmo::Manipulate(&cameraView,&cameraProjection,m_CurrentGizmoOperation,m_CurrentGizmoMode,
-					&transform.GetMutableTransform()); 
+					&transform.GetMutableTransform());
 
 				if (transfomed)
 				{
+					GetCamera().GetSettings().IsInControll = false;
 					Vector3f loc;
 					Vector3f rot;
 					Vector3f scale;
@@ -225,10 +243,15 @@ void Viewport::RenderImGUi()
 					transform.SetPosition(loc);
 					transform.SetRotation(rot);
 					transform.SetScale(scale);
-				} 
+				}
+				else
+				{
+
+					GetCamera().GetSettings().IsInControll = true;
+				}
 			}
 
-			RenderToolbar( );
+			RenderToolbar();
 		}
 	}
 	else

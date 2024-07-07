@@ -18,77 +18,20 @@
 #include "Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h"
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 #include "Engine/PersistentSystems/Scene.h"
+#include <Engine/GraphicsEngine/GraphicsEngineUtilities.h>
 
-bool ContentDirectory::GenerateSceneForIcon(std::shared_ptr<Mesh> meshAsset,std::shared_ptr<TextureHolder> renderTarget,std::shared_ptr<Material> material)
-{
-	OPTICK_EVENT();
 
-	if (Editor::Get().GetAmountOfRenderJob())
-	{
-		return false;
-	}
-
-	renderTarget->isBeingLoaded = true;
-	{
-		auto& transform = newScene->GetGOM().GetCamera().GetComponent<Transform>();
-		const Vector3f position = meshAsset->Bounds.GetCenter() + Vector3f(0,0,-meshAsset->Bounds.GetRadius());
-		transform.SetPosition(position);
-	}
-
-	{
-		auto target = newScene->GetGOM().GetPlayer();
-		auto& mr = target.GetComponent<cMeshRenderer>();
-		mr.SetNewMesh(meshAsset);
-		mr.SetMaterial(material);
-	}
-
-	const auto res = Vector2f(1920.f,1080.f);
-	auto newViewport = std::make_shared<Viewport>(true,res,newScene,renderTarget);
-	Editor::Get().AddRenderJob(newViewport);
-	return true;
-}
 
 ContentDirectory::ContentDirectory() : m_CurrentPath(AssetManager::AssetPath)
 {
-	newScene = std::make_shared<Scene>();
-	{
-		GameObject worldRoot = GameObject::Create(newScene);
-		worldRoot.SetName("WordRoot");
-		Transform& transform = worldRoot.AddComponent<Transform>();
-		transform.SetRotation(80,0,0);
-		transform.SetPosition(0,5,0);
-		cLight& pLight = worldRoot.AddComponent<cLight>(eLightType::Directional);
-		pLight.SetColor(Vector3f(1,1,1));
-		pLight.SetPower(2.0f);
-		pLight.BindDirectionToTransform(true);
-	}
-
-	const auto res = Vector2f(1920.f,1080.f);
-	{
-		CameraSettings settings;
-		settings.APRatio = static_cast<float>(res.x) / res.y;
-		settings.resolution = res;
-		GameObject camera = GameObject::Create(newScene);
-		camera.SetName("Camera");
-		auto& cameraComponent = camera.AddComponent<cCamera>(settings);
-		newScene->GetGOM().SetLastGOAsCamera();
-		cameraComponent.SetActive(true);
-	}
-
-	{
-		auto renderObject = GameObject::Create(newScene);
-		renderObject.SetName("RenderMesh");
-		renderObject.AddComponent<Transform>();
-		renderObject.AddComponent<cMeshRenderer>();
-		newScene->GetGOM().SetLastGOAsPlayer();
-	}
+	
 }
 
 
 void ContentDirectory::RenderImGUi()
 {
-	OPTICK_EVENT();
-	ImGui::Begin("ContentFolder");
+	OPTICK_EVENT(); 
+	ImGui::Begin("ContentFolder",&m_KeepWindow);
 
 	{
 		if (ImGui::ArrowButton("##BackButton",ImGuiDir_Up) && m_CurrentPath != AssetManager::AssetPath)
@@ -146,7 +89,7 @@ void ContentDirectory::RenderImGUi()
 	}
 
 	for (const auto& fullPath : m_CurrentDirectoryPaths)
-	{ 
+	{
 		const auto& path = std::filesystem::relative(fullPath,AssetManager::AssetPath);
 		OPTICK_EVENT("DirectoryIteration");
 		const auto& fileName = path.filename();
@@ -177,7 +120,7 @@ void ContentDirectory::RenderImGUi()
 				const bool meshReady = mesh->isLoadedComplete && !mesh->isBeingLoaded;
 				if (!imageTexture->isBeingLoaded && meshReady)
 				{
-					GenerateSceneForIcon(mesh,imageTexture,GraphicsEngine::Get().GetDefaultMaterial());
+					GraphicsEngineUtilities::GenerateSceneForIcon(mesh,imageTexture,GraphicsEngine::Get().GetDefaultMaterial());
 				}
 				else
 				{
@@ -200,7 +143,7 @@ void ContentDirectory::RenderImGUi()
 
 				if (!imageTexture->isBeingLoaded && meshReady && materialReady)
 				{
-					GenerateSceneForIcon(mesh,imageTexture,materialPreview);
+					GraphicsEngineUtilities::GenerateSceneForIcon(mesh,imageTexture,materialPreview);
 					Logger::Log("Material Preview Queued up");
 				}
 				else
@@ -221,6 +164,16 @@ void ContentDirectory::RenderImGUi()
 		}
 
 		ImGui::ImageButton(fileName.string().c_str(),imageTexture,{ cellWidth,cellWidth });
+
+		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+		{
+			const std::string payload = path.string();
+			auto type = std::format("ContentAsset_{}",AssetManager::AssetType(path)).c_str();
+			ImGui::SetDragDropPayload(type,payload.c_str(),payload.size());
+			ImGui::Text(fullPath.stem().string().c_str());
+			ImGui::EndDragDropSource();
+		}
+
 		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 		{
 			if (std::filesystem::is_directory(fullPath))

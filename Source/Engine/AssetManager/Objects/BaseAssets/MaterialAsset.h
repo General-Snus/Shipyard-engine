@@ -18,9 +18,9 @@ struct MaterialBuffer
 	float Roughness = 1.f;
 	int albedoTexture = -1;
 	int normalTexture = -1;
-	int materialTexture = -1;
-
+	int materialTexture = -1; 
 	int emissiveTexture = -1;
+
 	unsigned int vertexOffset = 0;
 	unsigned int vertexBufferIndex = 0;
 	float padding;
@@ -51,6 +51,5 @@ private:
 	std::shared_ptr<TextureHolder> GetTexture(eTextureType);
 	DataMaterial data;
 };
-REFL_AUTO(
-	type(Material)
-)
+
+REFL_AUTO(type(Material))

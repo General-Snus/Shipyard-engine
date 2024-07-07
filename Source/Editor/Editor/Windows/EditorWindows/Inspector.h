@@ -7,6 +7,8 @@ public:
 	Inspector();
 	void ToFront();
 	void RenderImGUi() override;
+private:
+	bool toFront = false;
 };
 
 template <class F,std::size_t... Is>

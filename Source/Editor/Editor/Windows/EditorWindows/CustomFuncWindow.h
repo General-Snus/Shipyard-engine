@@ -3,6 +3,7 @@
 #include <functional>
 #include <future>
 #include <Tools/Logging/Logging.h>
+#include <imgui.h>
 
 class CustomFuncWindow : public EditorWindow
 {
@@ -26,10 +27,12 @@ public:
 
 	void RenderImGUi()
 	{
+		ImGui::Begin("CustomFuncWindow",&m_KeepWindow);
 		if (m_Func)
 		{
 			m_Func();
 		}
+		ImGui::End();
 	};
 
 private:

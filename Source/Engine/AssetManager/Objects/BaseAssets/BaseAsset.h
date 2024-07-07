@@ -3,9 +3,12 @@
 #include "DirectX/Shipyard/GpuResource.h"
 #include "Engine/AssetManager/Reflection/ReflectionTemplate.h"
 #include "Tools/Reflection/refl.hpp"
+#include "Tools/Logging/Logging.h"
 #include "Engine/GraphicsEngine/Rendering/Vertex.h"
 #include <functional> 
  
+class Scene;
+
 class AssetBase : public Reflectable
 {
 public:
@@ -16,6 +19,12 @@ public:
 	virtual void Init() = 0;
 	const std::filesystem::path& GetAssetPath()	const { return AssetPath; };
 	bool InspectorView() override;
+
+	virtual bool InjectIntoScene(std::shared_ptr<Scene> SceneToAddAsset) 
+	{
+		Logger::Warn(std::format("Asset could not be added to scene\nAsset of type {} is not possible to load into scene",GetTypeInfo().Name())); 
+		return false; 
+	};
 
 	std::filesystem::path AssetPath;
 	bool  isLoadedComplete = false;

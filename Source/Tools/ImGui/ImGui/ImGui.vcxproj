@@ -41,8 +41,6 @@
     <ClInclude Include="imgui_bezier_math.h" />
     <ClInclude Include="imgui_canvas.h" />
     <ClInclude Include="imgui_extra_math.h" />
-    <ClInclude Include="imgui_impl_dx11.h" />
-    <ClInclude Include="imgui_impl_win32.h" />
     <ClInclude Include="imgui_internal.h" />
     <ClInclude Include="imgui_node_editor.h" />
     <ClInclude Include="imgui_node_editor_internal.h" />
@@ -68,8 +66,6 @@
     <ClCompile Include="imgui_canvas.cpp" />
     <ClCompile Include="imgui_demo.cpp" />
     <ClCompile Include="imgui_draw.cpp" />
-    <ClCompile Include="imgui_impl_dx11.cpp" />
-    <ClCompile Include="imgui_impl_win32.cpp" />
     <ClCompile Include="imgui_node_editor.cpp" />
     <ClCompile Include="imgui_node_editor_api.cpp" />
     <ClCompile Include="imgui_tables.cpp" />

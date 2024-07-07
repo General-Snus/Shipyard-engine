@@ -284,7 +284,7 @@ void GameLauncher::Start()
 	}
 	else
 	{
-		GenerateNewRandomCubes();
+		//GenerateNewRandomCubes();
 	}
 #endif
 	Logger::Log("GameLauncher start");

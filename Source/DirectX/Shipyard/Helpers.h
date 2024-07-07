@@ -172,7 +172,7 @@ namespace Helpers
 	inline void ThrowIfFailed(HRESULT hr) noexcept(false)
 	{
 		if (FAILED(hr))
-		{
+		{   
 			_com_error err(hr);
 			std::wstring errMsg = std::to_wstring(				*err.ErrorMessage());
 			Logger::Err(string_cast<std::string>(errMsg));

@@ -22,14 +22,12 @@ public:
 	const std::unordered_map<unsigned int,std::shared_ptr<Material>>& GetMaterialList();
 	void FillMaterialPaths(const aiScene* scene);
 	bool InspectorView() override;
+	bool InspectorView(const std::function<void(const ImGuiPayload* payload)>& doOnDropTarget)  ;
 
 private:
 	std::unordered_map<unsigned int,std::shared_ptr<Material>> materials;
 	std::unordered_map<unsigned int,std::filesystem::path> idToMaterial;
-
-	ComPtr<ID3D12Resource> myInstanceBuffer{};
-	std::vector<Matrix> myInstances{};
-	int bufferSize{};
+	   
 	void processMesh(aiMesh* mesh,const aiScene* scene);
 	void ResizeBuffer();
 	void UpdateInstanceBuffer();

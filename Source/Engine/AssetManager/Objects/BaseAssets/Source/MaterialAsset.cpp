@@ -146,7 +146,7 @@ bool Material::InspectorView()
 
 
 
-	if (ImGui::TreeNodeEx(AssetPath.filename().string().c_str()))
+	//if (ImGui::TreeNodeEx(AssetPath.filename().string().c_str()))
 	{
 		ImGui::Text("Shader data");
 		data.vertexShader.lock()->InspectorView();
@@ -171,8 +171,7 @@ bool Material::InspectorView()
 				}
 			}
 			ImGui::TreePop();
-		}
-		ImGui::TreePop();
+		} 
 	}
 	return true;
 }

@@ -13,8 +13,8 @@
 #include <Engine/AssetManager/ComponentSystem/GameObject.h>
 
 #include <Tools/ImGui/ImGui/backends/imgui_impl_dx12.h>
+#include <Tools/ImGUI/ImGUI/backends/imgui_impl_win32.h>
 #include <Tools/ImGUI/ImGUI/imgui.h>  
-#include <Tools/ImGUI/ImGUI/imgui_impl_win32.h>
 #include "ImGuizmo.h"
 
 
@@ -488,22 +488,9 @@ void Editor::Render()
 		test.emplace_back(viewport);
 		viewport->Update();
 	}
-	for (auto& viewport : m_CustomSceneRenderPasses)
-	{
-		test.emplace_back(viewport);
-		viewport->Update();
-	}
-
-
-
 	GraphicsEngine::Get().Render(test);
 
-	for (auto& viewport : m_CustomSceneRenderPasses)
-	{
-		viewport->m_RenderTarget->isBeingLoaded = false;
-		viewport->m_RenderTarget->isLoadedComplete = true;
-	}
-	m_CustomSceneRenderPasses.clear();
+
 
 	//{
 	//	using namespace std::chrono_literals;
@@ -531,15 +518,15 @@ void Editor::TopBar()
 		{
 			if (ImGui::Selectable("Open Scene"))
 			{
-
+				//Here we can open the binary scene file
 			}
 			if (ImGui::Selectable("New Scene"))
 			{
-
+				//Here we can open the binary scene file
 			}
 			if (ImGui::Selectable("Save Scene"))
 			{
-
+				//Here we can open the binary scene file
 			}
 
 			ImGui::EndMenu();
@@ -560,8 +547,7 @@ void Editor::TopBar()
 			if (ImGui::Selectable("Dark Theme"))
 			{
 				SetupImGuiStyle(false);
-			}
-
+			} 
 
 			ImGui::EndMenu();
 		}
@@ -602,8 +588,18 @@ void Editor::TopBar()
 
 	for (const auto& windows : g_EditorWindows)
 	{
-		windows->RenderImGUi();
+		if (windows && windows->m_KeepWindow)
+		{
+			windows->RenderImGUi();
+		}
 	}
+
+	const auto [first,last] = std::ranges::remove_if(g_EditorWindows.begin(),g_EditorWindows.end(),[](const std::shared_ptr<EditorWindow>& window)
+		{
+			return !window->m_KeepWindow;
+		});
+
+	g_EditorWindows.erase(first,last);
 }
 
 RECT Editor::GetViewportRECT()
@@ -618,14 +614,4 @@ Vector2<unsigned int> Editor::GetViewportResolution()
 		rect.right - rect.left,
 		rect.bottom - rect.top
 	);
-}
-
-void Editor::AddRenderJob(std::shared_ptr<Viewport> aViewport)
-{
-	m_CustomSceneRenderPasses.emplace_back(aViewport);
-}
-
-uint32_t Editor::GetAmountOfRenderJob()
-{
-	return static_cast<uint32_t>(m_CustomSceneRenderPasses.size());
 }

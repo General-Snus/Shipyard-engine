@@ -61,14 +61,12 @@ enum class eShader
 class cCamera;
 class Texture;
 class TextureHolder;
+class Scene;
 class PSOCache;
 
 class GraphicsEngine
 {
-	friend class GraphicCommandBase;
-	friend class ShadowRenderer;
-	friend class ParticleSystem;
-	friend class InstanceRenderer;
+	friend class GraphicsEngineUtilities; 
 public:
 	enum class eDepthStencilStates : unsigned int
 	{
@@ -137,11 +135,18 @@ private:
 	static inline std::shared_ptr<TextureHolder> defaultCubeMap;
 	static inline std::shared_ptr<Mesh> defaultMesh;
 	static inline std::shared_ptr<Material> defaultMaterial;
+
 	GraphicsSettings myGraphicSettings;
 	HeapHandle ViewPortHeapHandle;
 	GraphicsEngine() = default;
 	uint32_t ReadPickingData(Vector2ui position);
 
+	static inline std::shared_ptr<Scene> newScene;
+	std::vector< std::shared_ptr<Viewport>> m_CustomSceneRenderPasses; //lifetime 1 frame 
+
+
+	void AddRenderJob(std::shared_ptr<Viewport> aViewport);
+	uint32_t GetAmountOfRenderJob();
 private:
 	static bool SetupDebugDrawline();
 	void SetupDefaultVariables();
@@ -160,8 +165,7 @@ private:
 	static void DeferredRenderingPass(std::shared_ptr<CommandList> commandList,Viewport& renderViewPort,GameObjectManager& scene);
 	static void EnvironmentLightPass(std::shared_ptr<CommandList> commandList);
 	static void ToneMapperPass(std::shared_ptr<CommandList> commandList,Texture* target);
-	static void ImGuiPass(std::shared_ptr<CommandList> commandList);
-	void RenderTextureTo(eRenderTargets from,eRenderTargets to) const;
+	static void ImGuiPass(std::shared_ptr<CommandList> commandList); 
 public:
 	inline static GraphicsEngine& Get()
 	{
@@ -169,6 +173,7 @@ public:
 		return myInstance;
 	}
 	bool Initialize(HWND windowHandle,bool enableDeviceDebug);
+	void InitializeCustomRenderScene();
 	void Render(std::vector<std::shared_ptr<Viewport>>  renderViewPorts);
 
 

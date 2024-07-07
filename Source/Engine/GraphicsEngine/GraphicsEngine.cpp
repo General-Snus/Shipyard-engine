@@ -52,6 +52,8 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 	SetupBlendStates();
 	SetupDebugDrawline();
 
+	InitializeCustomRenderScene();
+
 	const auto& gBufferTextures = PSOCache::GetState(PSOCache::ePipelineStateID::GBuffer)->RenderTargets();
 
 	const size_t dataSize = gBufferTextures[5].GetWidth() * gBufferTextures[5].GetHeight() * sizeof(float) * 2;
@@ -59,6 +61,42 @@ bool GraphicsEngine::Initialize(HWND windowHandle,bool enableDeviceDebug)
 	const auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 	OPTICK_GPU_INIT_D3D12(GPU::m_Device.Get(),commandQueue->GetCommandQueue().GetAddressOf(),1);
 	return true;
+}
+
+void GraphicsEngine::InitializeCustomRenderScene()
+{
+	newScene = std::make_shared<Scene>();
+	{
+		GameObject worldRoot = GameObject::Create(newScene);
+		worldRoot.SetName("WordRoot");
+		Transform& transform = worldRoot.AddComponent<Transform>();
+		transform.SetRotation(80,0,0);
+		transform.SetPosition(0,5,0);
+		cLight& pLight = worldRoot.AddComponent<cLight>(eLightType::Directional);
+		pLight.SetColor(Vector3f(1,1,1));
+		pLight.SetPower(2.0f);
+		pLight.BindDirectionToTransform(true);
+	}
+
+	const auto res = Vector2f(1920.f,1080.f);
+	{
+		CameraSettings settings;
+		settings.APRatio = static_cast<float>(res.x) / res.y;
+		settings.resolution = res;
+		GameObject camera = GameObject::Create(newScene);
+		camera.SetName("Camera");
+		auto& cameraComponent = camera.AddComponent<cCamera>(settings);
+		newScene->GetGOM().SetLastGOAsCamera();
+		cameraComponent.SetActive(true);
+	}
+
+	{
+		auto renderObject = GameObject::Create(newScene);
+		renderObject.SetName("RenderMesh");
+		renderObject.AddComponent<Transform>();
+		renderObject.AddComponent<cMeshRenderer>();
+		newScene->GetGOM().SetLastGOAsPlayer();
+	}
 }
 
 uint32_t GraphicsEngine::ReadPickingData(Vector2ui position)
@@ -302,9 +340,29 @@ void GraphicsEngine::UpdateSettings()
 	*/
 }
 
+
+void GraphicsEngine::AddRenderJob(std::shared_ptr<Viewport> aViewport)
+{
+	m_CustomSceneRenderPasses.emplace_back(aViewport);
+}
+
+uint32_t GraphicsEngine::GetAmountOfRenderJob()
+{
+	return static_cast<uint32_t>(m_CustomSceneRenderPasses.size());
+}
+
+
 void GraphicsEngine::Render(std::vector< std::shared_ptr<Viewport>> renderViewPorts)
 {
 	OPTICK_EVENT();
+
+
+	for (auto& viewport : m_CustomSceneRenderPasses)
+	{
+		renderViewPorts.emplace_back(viewport);
+		viewport->Update();
+	}
+
 	BeginFrame();
 
 	for (auto& viewport : renderViewPorts)
@@ -312,9 +370,14 @@ void GraphicsEngine::Render(std::vector< std::shared_ptr<Viewport>> renderViewPo
 		RenderFrame(*viewport,viewport->sceneToRender->GetGOM());
 	}
 	EndFrame();
+
+	for (auto& viewport : m_CustomSceneRenderPasses)
+	{
+		viewport->m_RenderTarget->isBeingLoaded = false;
+		viewport->m_RenderTarget->isLoadedComplete = true;
+	}
+	m_CustomSceneRenderPasses.clear();
 }
-
-
 
 void GraphicsEngine::BeginFrame()
 {
@@ -374,7 +437,17 @@ void GraphicsEngine::EndFrame()
 
 	OPTICK_CATEGORY("Present",Optick::Category::Rendering);
 	OPTICK_GPU_FLIP(GPU::m_Swapchain->m_SwapChain.Get());
-	Helpers::ThrowIfFailed(GPU::m_Swapchain->m_SwapChain->Present(DXGI_SWAP_EFFECT_DISCARD,DXGI_PRESENT_ALLOW_TEARING));
+	auto hr = GPU::m_Swapchain->m_SwapChain->Present(DXGI_SWAP_EFFECT_DISCARD,DXGI_PRESENT_ALLOW_TEARING);
+
+	if (hr == 84)
+	{
+		const auto deviceRemovalReason = GPU::m_Device->GetDeviceRemovedReason();
+		__debugbreak();
+		throw deviceRemovalReason;
+	}
+
+	Helpers::ThrowIfFailed(hr);
+
 
 	GPU::m_FenceValues[GPU::m_FrameIndex] = commandQueue->Signal();
 	GPU::m_FrameIndex = GPU::m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();

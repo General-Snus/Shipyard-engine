@@ -296,16 +296,13 @@ bool Transform::InspectorView()
 
 	const std::array<const char*,2> localGlobal = { "Relative", "World" };
 	static int coordinateSpace1 = 0;
-	ImGui::BeginColumns("##Transform",2,ImGuiOldColumnFlags_NoResize);
-	ImGui::SetColumnWidth(0,125);
-
+	ImGui::BeginColumns("##Transform",2,ImGuiOldColumnFlags_NoResize); 
 	ImGui::Combo("##Location",&coordinateSpace1,localGlobal.data(),2);
 	static int coordinateSpace2 = 0;
 	ImGui::Combo("##Rotation",&coordinateSpace2,localGlobal.data(),2);
 	static int coordinateSpace3 = 0;
 	ImGui::Combo("##Scale",&coordinateSpace3,localGlobal.data(),2);
-	ImGui::NextColumn();
-
+	ImGui::NextColumn(); 
 
 	IsDirty |= DrawVec3Control("Position",myPosition);
 	IsDirty |= DrawVec3Control("Euler angles",myRotation);

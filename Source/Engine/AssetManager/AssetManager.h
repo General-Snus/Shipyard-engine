@@ -63,6 +63,12 @@ public:
 
 	bool AdaptPath(std::filesystem::path& path);
 
+
+	//TODO just because this isnt optimal
+	//Shame place, these are needed for the hopefully nieche condition of not knowing what you are loading
+	static std::string AssetType(const std::filesystem::path& path)  ;
+	static std::shared_ptr<AssetBase> TryLoadAsset(const std::filesystem::path& path)  ;
+
 	static inline constexpr char exprAssetPath[15] = "../../Content";
 	static inline std::filesystem::path AssetPath = exprAssetPath;
 private:

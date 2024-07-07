@@ -303,6 +303,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="GraphicsEngineUtilities.h" />
     <ClInclude Include="InterOp\GPUBuffer.h" />
     <ClInclude Include="DebugDrawer\DebugDrawer.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -341,6 +342,7 @@
     <ClInclude Include="Shaders\Registers.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GraphicsEngineUtilities.cpp" />
     <ClCompile Include="InterOp\Source\GPUBuffer.cpp" />
     <ClCompile Include="DebugDrawer\DebugDrawer.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>

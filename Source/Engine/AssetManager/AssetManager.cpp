@@ -34,6 +34,73 @@ bool AssetManager::AdaptPath(std::filesystem::path& path)
 	return false;
 }
 
+std::string AssetManager::AssetType(const std::filesystem::path& path)
+{
+	auto  extension = path.extension().string();
+	std::ranges::for_each(extension,[](char& c) { c = (char)std::tolower((int)c); });
+
+	if (extension == "") //Either Invalid Or directory, either case ignore
+	{
+		return "";
+	}
+	else if (extension == ".fbx")
+	{
+		//Is Animation Test return "Animation"
+		return refl::reflect<Mesh>().name.str();
+	}
+	else if (extension == ".json")
+	{
+		return refl::reflect<Material>().name.str();;
+	}
+	else if (extension == ".cso")
+	{
+		return refl::reflect<ShipyardShader>().name.str();
+	}
+	else if (extension == ".png" || extension == ".dds" || extension == ".hdr")
+	{
+		return refl::reflect<TextureHolder>().name.str();
+	}
+
+	return extension;
+}
+
+std::shared_ptr<AssetBase> AssetManager::TryLoadAsset(const std::filesystem::path& path)
+{
+	const auto assetTypeByExtension = AssetType(path);
+	  
+	if (assetTypeByExtension == refl::reflect<Mesh>().name.str())
+	{
+		return Get().LoadAsset<Mesh>(path);
+	}
+
+	if (assetTypeByExtension == refl::reflect<Material>().name.str())
+	{
+		return Get().LoadAsset<Material>(path);
+	}
+
+	if (assetTypeByExtension == refl::reflect<ShipyardShader>().name.str())
+	{
+		return Get().LoadAsset<ShipyardShader>(path);
+	}
+
+	if (assetTypeByExtension == refl::reflect<Animation>().name.str())
+	{
+		return Get().LoadAsset<Animation>(path);
+	}
+
+	if (assetTypeByExtension == refl::reflect<Skeleton>().name.str())
+	{
+		return Get().LoadAsset<Skeleton>(path);
+	}
+
+	if (assetTypeByExtension == refl::reflect<TextureHolder>().name.str())
+	{
+		return Get().LoadAsset<TextureHolder>(path);
+	}
+
+	return std::shared_ptr<AssetBase>();
+}
+
 void AssetManager::ThreadedLoading()
 {
 	OPTICK_THREAD("ThreadedLoading");

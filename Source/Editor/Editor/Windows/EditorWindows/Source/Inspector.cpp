@@ -8,27 +8,37 @@
 #include "imgui.h" 
 #include "Tools/Logging/Logging.h"
 #include "Tools/Utilities/TemplateHelpers.h"
+#include <Engine/AssetManager/AssetManager.h>
+#include <Engine/PersistentSystems/SceneUtilities.h>
 
 Inspector::Inspector()
 {
-	Editor::Get().m_Callbacks[EditorCallback::ObjectSelected].AddListener(std::bind(&Inspector::ToFront,this));
+	Editor::Get().m_Callbacks[EditorCallback::ObjectSelected].AddListener([this]() { this->ToFront(); });
 }
 
 void Inspector::ToFront()
 {
 	Logger::Log("Inspector::ToFront");
+	toFront = true;
 }
 
 void Inspector::RenderImGUi()
 {
 	OPTICK_EVENT();
 
-	ImGui::Begin("Inspector");
-	const auto& selectedGameObjects = Editor::GetSelectedGameObjects();
+	ImGui::Begin("Inspector",&m_KeepWindow);
 
+	if (toFront)
+	{
+		ImGui::SetWindowFocus();
+		toFront = false;
+	}
+	GameObject gameobject;
+
+	const auto& selectedGameObjects = Editor::GetSelectedGameObjects();
 	if (!selectedGameObjects.empty())
 	{
-		auto gameobject = selectedGameObjects[0];
+		gameobject = selectedGameObjects[0];
 
 		ImGui::PushItemWidth(60);
 		if (bool activeStatus = gameobject.GetActive(); ImGui::Checkbox("##",&activeStatus))
@@ -86,6 +96,10 @@ void Inspector::RenderImGUi()
 			ImGui::Separator();
 			ImGui::NewLine();
 		}
+
+
+
 	}
-	ImGui::End();
+
+	ImGui::End(); 
 }
