@@ -497,14 +497,14 @@ void cLight::ConformToTransform()
 	{
 		using enum eLightType;
 	case Directional:
-		myDirectionLightData->Direction = Vector4f(transform->GetForward(),1);
+		myDirectionLightData->Direction = Vector4f(transform->GetForward(WORLD),1);
 		break;
 	case Point:
-		myPointLightData->Position = transform->GetPosition();
+		myPointLightData->Position = transform->GetPosition(WORLD);
 		break;
 	case Spot:
-		mySpotLightData->Position = transform->GetPosition();
-		mySpotLightData->Direction = transform->GetForward();
+		mySpotLightData->Position = transform->GetPosition(WORLD);
+		mySpotLightData->Direction = transform->GetForward(WORLD);
 		break;
 	case uninitialized:
 		break;

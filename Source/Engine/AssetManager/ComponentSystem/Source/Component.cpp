@@ -1,5 +1,6 @@
 #include "Engine/AssetManager/AssetManager.pch.h"
 
+#include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
 #include <cmath>
 #include "../Component.h"
 
@@ -19,4 +20,9 @@ bool Component::InspectorView()
 	ImGui::SameLine(0,10);
 	isOpened = ImGui::CollapsingHeader(typeInfo.Name().c_str(),ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_OpenOnDoubleClick);
 	return isOpened;
+}
+
+Transform& Component::transform()  
+{
+	return GetComponent<Transform>();
 }

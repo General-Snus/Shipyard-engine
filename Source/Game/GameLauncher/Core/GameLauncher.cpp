@@ -123,27 +123,8 @@ void GameLauncher::GenerateNewRandomCubes()
 
 void GameLauncher::Start()
 {
-	OPTICK_EVENT();
-
-
-
-	m_CustomKeyCallback.AddListener(std::bind(&GameLauncher::LocalFunction,this));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	OPTICK_EVENT(); 
+	m_CustomKeyCallback.AddListener(std::bind(&GameLauncher::LocalFunction,this)); 
 #pragma region BaseSetup 
 	{
 		GameObject worldRoot = GameObject::Create();
@@ -239,16 +220,22 @@ void GameLauncher::Start()
 		transform.Rotate(0,90,0);
 		transform.SetScale(0.5f,.5f,.5f);
 		transform.SetGizmo(false);
+
+		{
+			GameObject pointLight = GameObject::Create();
+			pointLight.SetName("pointLight");
+			auto& transform1 = pointLight.AddComponent<Transform>();
+			transform1.SetPosition(-5, 1, 0);
+			pointLight.AddComponent<cLight>(eLightType::Point);
+			pointLight.transform().SetParent(buddha.transform());
+		}
+
+
+
+
 	}
 
-	{
-		GameObject pointLight = GameObject::Create();
-		pointLight.SetName("pointLight");
-		auto& transform = pointLight.AddComponent<Transform>();
-		transform.SetPosition(-5,1,0);
-		pointLight.AddComponent<cLight>(eLightType::Point);
-	}
-
+	
 	{
 		GameObject spotLight = GameObject::Create();
 		spotLight.SetName("spotLight");
@@ -288,6 +275,10 @@ void GameLauncher::Start()
 	}
 #endif
 	Logger::Log("GameLauncher start");
+
+
+
+
 }
 
 void GameLauncher::Update(float delta)

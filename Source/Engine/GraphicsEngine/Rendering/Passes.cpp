@@ -40,7 +40,7 @@ void Passes::WriteShadows(std::shared_ptr<CommandList>& commandList, GameObjectM
 			{
 				if (!object.IsActive()) { continue; }
 				const auto& transform = object.GetComponent<Transform>();
-				list->AllocateBuffer<ObjectBuffer>(eRootBindings::objectBuffer, { transform.GetRawTransform() });
+				list->AllocateBuffer<ObjectBuffer>(eRootBindings::objectBuffer, { transform.WorldMatrix() });
 				for (auto& element : object.GetElements())
 				{
 					OPTICK_GPU_EVENT(debugName.data());

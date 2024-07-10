@@ -539,7 +539,7 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
 
 
 		ObjectBuffer objectBuffer;
-		objectBuffer.myTransform = transform.GetRawTransform();
+		objectBuffer.myTransform = transform.WorldMatrix();
 		objectBuffer.MaxExtents = meshRenderer.GetRawMesh()->Bounds.GetMax();
 		objectBuffer.MinExtents = meshRenderer.GetRawMesh()->Bounds.GetMin();
 		objectBuffer.hasBone = false;

@@ -24,17 +24,17 @@
 
 ContentDirectory::ContentDirectory() : m_CurrentPath(AssetManager::AssetPath)
 {
-	
+
 }
 
 
 void ContentDirectory::RenderImGUi()
 {
-	OPTICK_EVENT(); 
-	ImGui::Begin("ContentFolder",&m_KeepWindow);
+	OPTICK_EVENT();
+	ImGui::Begin("ContentFolder", &m_KeepWindow);
 
 	{
-		if (ImGui::ArrowButton("##BackButton",ImGuiDir_Up) && m_CurrentPath != AssetManager::AssetPath)
+		if (ImGui::ArrowButton("##BackButton", ImGuiDir_Up) && m_CurrentPath != AssetManager::AssetPath)
 		{
 			IsDirty = true;
 			m_CurrentPath = m_CurrentPath.parent_path();
@@ -67,7 +67,7 @@ void ContentDirectory::RenderImGUi()
 	if (ImGui::IsWindowFocused() && Input::IsKeyHeld(Keys::CONTROL))
 	{
 		cellSize += Input::GetMouseWheelDelta() * Timer::GetDeltaTime();
-		cellSize = std::clamp(cellSize,50.f,300.f);
+		cellSize = std::clamp(cellSize, 50.f, 300.f);
 	}
 
 	ImGui::NewLine();
@@ -76,7 +76,7 @@ void ContentDirectory::RenderImGUi()
 	auto columnCount = static_cast<int>(contentFolderWidth / cellWidth);
 
 
-	ImGui::Columns(std::max(columnCount,1),nullptr);
+	ImGui::Columns(std::max(columnCount, 1), nullptr);
 
 	if (IsDirty)
 	{
@@ -90,7 +90,7 @@ void ContentDirectory::RenderImGUi()
 
 	for (const auto& fullPath : m_CurrentDirectoryPaths)
 	{
-		const auto& path = std::filesystem::relative(fullPath,AssetManager::AssetPath);
+		const auto& path = std::filesystem::relative(fullPath, AssetManager::AssetPath);
 		OPTICK_EVENT("DirectoryIteration");
 		const auto& fileName = path.filename();
 		const auto& extension = path.extension();
@@ -112,44 +112,19 @@ void ContentDirectory::RenderImGUi()
 
 		else if (extension == ".fbx")
 		{
-			imageTexture = AssetManager::Get().LoadAsset<TextureHolder>(std::format("INTERNAL_IMAGE_UI_{}",fileName.string()));
 			std::shared_ptr<Mesh> mesh = AssetManager::Get().LoadAsset<Mesh>(path);
-
-			if (!imageTexture->isLoadedComplete)
+			if (mesh && mesh->isLoadedComplete)
 			{
-				const bool meshReady = mesh->isLoadedComplete && !mesh->isBeingLoaded;
-				if (!imageTexture->isBeingLoaded && meshReady)
-				{
-					GraphicsEngineUtilities::GenerateSceneForIcon(mesh,imageTexture,GraphicsEngine::Get().GetDefaultMaterial());
-				}
-				else
-				{
-					imageTexture = AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/File.png");
-				}
+				imageTexture = mesh->GetEditorIcon();
 			}
 		}
 
 		else if (extension == ".json")
 		{
-			imageTexture = AssetManager::Get().LoadAsset<TextureHolder>(std::format("INTERNAL_IMAGE_UI_{}",fileName.string()));
-			if (!imageTexture->isLoadedComplete)
+			std::shared_ptr<Material> materialPreview = AssetManager::Get().LoadAsset<Material>(path);
+			if (materialPreview && materialPreview->isLoadedComplete)
 			{
-				std::shared_ptr<Mesh> mesh = AssetManager::Get().LoadAsset<Mesh>("Materials/MaterialPreviewMesh.fbx");
-				std::shared_ptr<Material> materialPreview = AssetManager::Get().LoadAsset<Material>(path);
-
-				bool meshReady = mesh->isLoadedComplete && !mesh->isBeingLoaded;
-				bool materialReady = materialPreview->isLoadedComplete && !materialPreview->isBeingLoaded;
-
-
-				if (!imageTexture->isBeingLoaded && meshReady && materialReady)
-				{
-					GraphicsEngineUtilities::GenerateSceneForIcon(mesh,imageTexture,materialPreview);
-					Logger::Log("Material Preview Queued up");
-				}
-				else
-				{
-					imageTexture = AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/File.png");
-				}
+				imageTexture = materialPreview->GetEditorIcon();
 			}
 		}
 
@@ -158,18 +133,18 @@ void ContentDirectory::RenderImGUi()
 			imageTexture = AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/File.png");
 		}
 
-		else
+		if(!imageTexture)
 		{
 			imageTexture = AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/File.png");
 		}
 
-		ImGui::ImageButton(fileName.string().c_str(),imageTexture,{ cellWidth,cellWidth });
+		ImGui::ImageButton(fileName.string().c_str(), imageTexture, { cellWidth,cellWidth });
 
 		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
 		{
 			const std::string payload = path.string();
-			auto type = std::format("ContentAsset_{}",AssetManager::AssetType(path)).c_str();
-			ImGui::SetDragDropPayload(type,payload.c_str(),payload.size());
+			auto type = std::format("ContentAsset_{}", AssetManager::AssetType(path)).c_str();
+			ImGui::SetDragDropPayload(type, payload.c_str(), payload.size());
 			ImGui::Text(fullPath.stem().string().c_str());
 			ImGui::EndDragDropSource();
 		}
@@ -183,7 +158,7 @@ void ContentDirectory::RenderImGUi()
 			}
 			else
 			{
-				ShellExecute(0,0,fullPath.wstring().c_str(),0,0,SW_SHOW);
+				ShellExecute(0, 0, fullPath.wstring().c_str(), 0, 0, SW_SHOW);
 			}
 		}
 		ImGui::TextWrapped(fileName.string().c_str());

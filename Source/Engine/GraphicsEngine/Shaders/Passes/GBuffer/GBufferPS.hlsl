@@ -49,6 +49,7 @@ GBufferOutput main(DefaultVertexToPixel input)
 	result.WorldPosition = input.WorldPosition;
 	result.Depth.x = (length(cameraDirection));
 	result.Depth.y = g_ObjectBuffer.OB_ID;
+	result.Depth.zw = 0;
 
 	return result;
 }

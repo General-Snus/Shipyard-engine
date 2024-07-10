@@ -144,6 +144,26 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 	}
 }
 
+std::shared_ptr<TextureHolder> Mesh::GetEditorIcon()
+{
+	auto imageTexture = AssetManager::Get().LoadAsset<TextureHolder>(std::format("INTERNAL_IMAGE_UI_{}", AssetPath.filename().string()));
+	std::shared_ptr<Mesh> mesh = AssetManager::Get().LoadAsset<Mesh>(AssetPath, true);
+
+	if (!imageTexture->isLoadedComplete)
+	{
+		const bool meshReady = mesh->isLoadedComplete && !mesh->isBeingLoaded;
+		if (!imageTexture->isBeingLoaded && meshReady)
+		{
+			GraphicsEngineUtilities::GenerateSceneForIcon(mesh, imageTexture, GraphicsEngine::Get().GetDefaultMaterial());
+		}
+		else
+		{
+			imageTexture = AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+		}
+	}
+	return imageTexture;
+}
+
 bool Mesh::InspectorView()
 {
 	return InspectorView({});

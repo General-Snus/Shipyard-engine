@@ -47,6 +47,7 @@ public:
 	void Update();
 	void SetShader(const std::shared_ptr<ShipyardShader>& aVertexShader,const std::shared_ptr<ShipyardShader>& aPixelShader);
 	void SetAsResources();
+	std::shared_ptr<TextureHolder> GetEditorIcon();
 private:
 	std::shared_ptr<TextureHolder> GetTexture(eTextureType);
 	DataMaterial data;

@@ -236,6 +236,7 @@ void Logger::Critical(const std::exception& anException,unsigned aLevel,const st
 	}
 }
 
+//Critical error will proberly throw somewhere close, if caught and handeled like by a script holder it can still print what went bad
 void Logger::Critical(const std::string& anExceptionText,unsigned aLevel,const std::source_location& location)
 {
 	if (isInitialized)

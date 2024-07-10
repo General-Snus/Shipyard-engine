@@ -11,6 +11,7 @@ enum class eComponentType
 	backgroundColor,
 };
 
+class Transform;
 class Component : public Reflectable
 {
 public:
@@ -65,6 +66,8 @@ public:
 	//IsInherited is a new system that allows a component to remove an other component from the update loop and promise to take care of it themselves
 	int IsInherited = 0;
 	bool m_IsActive = true;
+
+	Transform& transform()  ;
 private:
 	Component() = default;
 

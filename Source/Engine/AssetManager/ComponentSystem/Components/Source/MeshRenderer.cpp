@@ -6,6 +6,9 @@
 #include "Engine/AssetManager/Objects/BaseAssets/Animations.h"
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 #include "Tools/ImGui/ImGui/imgui.h"
+#include "Tools/ImGui/ImGui/ImGuiHepers.hpp"
+#include <Engine/GraphicsEngine/GraphicsEngineUtilities.h>
+#include <unordered_set>
 
 cMeshRenderer::cMeshRenderer(const SY::UUID anOwnerId, GameObjectManager* aManager) : Component(anOwnerId, aManager)
 {
@@ -29,17 +32,17 @@ void cMeshRenderer::SetNewMesh(std::shared_ptr<Mesh> aMesh)
 
 void cMeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath)
 {
-	SetMaterial (AssetManager::Get().LoadAsset<Material>(aFilePath), 0);
+	SetMaterial(AssetManager::Get().LoadAsset<Material>(aFilePath), 0);
 }
 
 void cMeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath, int elementIndex)
-{ 
-	SetMaterial (AssetManager::Get().LoadAsset<Material>(aFilePath), elementIndex);
+{
+	SetMaterial(AssetManager::Get().LoadAsset<Material>(aFilePath), elementIndex);
 }
 
-void cMeshRenderer::SetMaterial (const std::shared_ptr<Material> aMaterial)
+void cMeshRenderer::SetMaterial(const std::shared_ptr<Material> aMaterial)
 {
-	SetMaterial(aMaterial,0);
+	SetMaterial(aMaterial, 0);
 }
 
 void cMeshRenderer::SetMaterial(const std::shared_ptr<Material> aMaterial, int elementIndex)
@@ -52,7 +55,7 @@ void cMeshRenderer::SetMaterial(const std::shared_ptr<Material> aMaterial, int e
 }
 
 std::shared_ptr<Material> cMeshRenderer::GetMaterial(int materialIndex) const
-{ 
+{
 	assert(materialIndex >= 0);
 
 	if (!m_OverrideMaterial.empty() && m_OverrideMaterial.size() > materialIndex)
@@ -61,7 +64,7 @@ std::shared_ptr<Material> cMeshRenderer::GetMaterial(int materialIndex) const
 		{
 			return mat;
 		};
-	} 
+	}
 
 	if (m_Mesh->materials.contains(materialIndex))
 	{
@@ -69,7 +72,7 @@ std::shared_ptr<Material> cMeshRenderer::GetMaterial(int materialIndex) const
 		{
 			return mat;
 		};
-	} 
+	}
 
 	return nullptr;
 }
@@ -114,24 +117,101 @@ bool cMeshRenderer::InspectorView()
 		{
 			if (payload)
 			{
-				const auto path = std::string((const char*)payload->Data,payload->DataSize);
-				m_Mesh = AssetManager::Get().LoadAsset<Mesh>(path); 
+				const auto path = std::string((const char*)payload->Data, payload->DataSize);
+				m_Mesh = AssetManager::Get().LoadAsset<Mesh>(path);
 				Logger::Log(path);
 			}
 		};
 
 
-	m_Mesh->InspectorView(onDropTargetCallback);
-	if (ImGui::TreeNodeEx("Override materials")) // Replace with element name 
+	//m_Mesh->InspectorView(onDropTargetCallback);
+
+
 	{
-		for (auto& material : m_OverrideMaterial)
+
+		if (ImGui::TreeNodeEx("Static meshes", ImGuiTreeNodeFlags_DefaultOpen)) // Replace with element name
 		{
-			material->InspectorView();
+			ImGui::BeginChild("MeshChild");
+			ImGui::BeginTable("Mesh", 2);
+			ImGui::TableNextColumn();
+			ImGui::Text("Static Mesh");
+			ImGui::TableNextColumn();
+			ImGui::Image(m_Mesh->GetEditorIcon(), { 100,100 });
+
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* test = ImGui::AcceptDragDropPayload("ContentAsset_Mesh"))
+				{
+					onDropTargetCallback(test);
+				}
+				ImGui::EndDragDropTarget();
+			}
+			ImGui::EndTable();
+			ImGui::Separator();
+			ImGui::TreePop();
+		}
+	}
+
+
+	if (ImGui::TreeNodeEx("Materials", ImGuiTreeNodeFlags_DefaultOpen)) // Replace with element name
+	{
+		int index = 0;
+		std::unordered_set<uint32_t> materialIndexes;
+		for (const auto& element : m_Mesh->Elements)
+		{
+			materialIndexes.emplace(element.MaterialIndex);
+		}
+
+		for (const auto& matIndex : materialIndexes)
+		{
+			const auto textIndex = std::format("Material {}:", index);
+			ImGui::BeginTable(textIndex.c_str(), 2);
+			ImGui::TableNextColumn();
+			ImGui::Text(textIndex.c_str());
+			ImGui::TableNextColumn();
+
+			if (m_OverrideMaterial.size() > matIndex && m_OverrideMaterial[matIndex])
+			{
+				ImGui::Image(m_OverrideMaterial[matIndex]->GetEditorIcon(), { 100,100 });
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ContentAsset_Material"))
+					{
+						if (payload)
+						{
+							const auto path = std::string((const char*)payload->Data, payload->DataSize);
+							m_OverrideMaterial[matIndex] = AssetManager::Get().LoadAsset<Material>(path);
+							Logger::Log(path);
+						}
+					}
+					ImGui::EndDragDropTarget();
+				}
+			}
+			else if (m_Mesh->materials.contains(matIndex))
+			{
+				ImGui::Image(m_Mesh->materials.at(matIndex)->GetEditorIcon(), { 100,100 });
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ContentAsset_Material"))
+					{
+						if (payload)
+						{
+							const auto path = std::string((const char*)payload->Data, payload->DataSize);
+							m_Mesh->materials.at(matIndex) = AssetManager::Get().LoadAsset<Material>(path);
+							Logger::Log(path);
+						}
+					}
+					ImGui::EndDragDropTarget();
+				}
+			}
+
+			ImGui::Separator();
+			index++;
+			ImGui::EndTable();
 		}
 
 		ImGui::TreePop();
 	}
-
 
 	return true;
 }

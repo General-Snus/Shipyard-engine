@@ -23,7 +23,10 @@ GameObject GameObjectManager::CreateGameObject()
 
 	//Force add transform?
 	myGameObjects.emplace(myLastID, data);
-	return GameObject(myLastID++, this);
+	auto object = GameObject(myLastID++, this);
+	object.AddComponent<Transform>();
+	
+	return object;
 } 
 
 void GameObjectManager::DeleteGameObject(const SY::UUID aGameObjectID, bool force)

@@ -1,6 +1,7 @@
 #pragma once  
-#include "Engine/AssetManager/ComponentSystem/GameObjectManager.h"  
+#include "Engine/AssetManager/ComponentSystem/GameObjectManager.h"
 
+class Transform;
 class Scene;
 
 class GameObject
@@ -25,10 +26,10 @@ public:
 	bool HasComponent() const;
 
 	template <class T>
-	T* TryGetComponent();
+	T* TryGetComponent() const ;
 
 	template <class T>
-	T& GetComponent();
+	T& GetComponent() const; 
 
 	std::vector<Component*> GetAllComponents() const;
 
@@ -46,6 +47,7 @@ public:
 	SY::UUID GetID() const { return myID; }
 	bool IsValid() const { return myID.IsValid(); }
 
+	Transform& transform() const;
 private:
 	friend class GameObjectManager; //Only the asset manager can create and destroy components 
 	GameObject(const SY::UUID anID, GameObjectManager* aManager) : myID(anID), myManager(aManager) {}
@@ -88,7 +90,7 @@ bool GameObject::HasComponent() const
 }
 
 template<class T>
-T* GameObject::TryGetComponent()
+T* GameObject::TryGetComponent() const
 {
 	assert(myManager != nullptr && "GameObject has no manager");
 	assert(myID.IsValid() && "GameObject has no ID");
@@ -96,7 +98,7 @@ T* GameObject::TryGetComponent()
 }
 
 template<class T>
-T& GameObject::GetComponent()
+T& GameObject::GetComponent() const
 {
 	assert(myManager != nullptr && "GameObject has no manager");
 	assert(myID.IsValid() && "GameObject has no ID");

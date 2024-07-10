@@ -6,6 +6,7 @@
 #include <Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h>
 
 #include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
+#include <Engine/GraphicsEngine/GraphicsEngineUtilities.h>
 
 bool Material::CreateJson(const DataMaterial& data,const std::filesystem::path& writePath)
 {
@@ -174,6 +175,31 @@ bool Material::InspectorView()
 		} 
 	}
 	return true;
+}
+
+std::shared_ptr<TextureHolder> Material::GetEditorIcon()
+{
+	auto imageTexture = AssetManager::Get().LoadAsset<TextureHolder>(std::format("INTERNAL_IMAGE_UI_{}", AssetPath.filename().string()));
+	if (! imageTexture || !imageTexture->isLoadedComplete)
+	{
+		std::shared_ptr<Mesh> mesh = AssetManager::Get().LoadAsset<Mesh>("Materials/MaterialPreviewMesh.fbx");
+		std::shared_ptr<Material> materialPreview = AssetManager::Get().LoadAsset<Material>(AssetPath,true);
+
+		bool meshReady = mesh->isLoadedComplete && !mesh->isBeingLoaded;
+		bool materialReady = materialPreview->isLoadedComplete && !materialPreview->isBeingLoaded;
+
+
+		if (!imageTexture->isBeingLoaded && meshReady && materialReady)
+		{
+			GraphicsEngineUtilities::GenerateSceneForIcon(mesh, imageTexture, materialPreview);
+			Logger::Log("Material Preview Queued up");
+		}
+		else
+		{
+			imageTexture = AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+		}
+	}
+	return imageTexture;
 }
 
 MaterialBuffer& Material::GetMaterialData()
