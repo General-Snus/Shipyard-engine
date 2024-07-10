@@ -113,25 +113,11 @@ bool cMeshRenderer::InspectorView()
 	}
 	Reflect<cMeshRenderer>();
 
-	auto onDropTargetCallback = [&](const ImGuiPayload* payload)
-		{
-			if (payload)
-			{
-				const auto path = std::string((const char*)payload->Data, payload->DataSize);
-				m_Mesh = AssetManager::Get().LoadAsset<Mesh>(path);
-				Logger::Log(path);
-			}
-		};
-
-
-	//m_Mesh->InspectorView(onDropTargetCallback);
-
 
 	{
 
 		if (ImGui::TreeNodeEx("Static meshes", ImGuiTreeNodeFlags_DefaultOpen)) // Replace with element name
-		{
-			ImGui::BeginChild("MeshChild");
+		{ 
 			ImGui::BeginTable("Mesh", 2);
 			ImGui::TableNextColumn();
 			ImGui::Text("Static Mesh");
@@ -140,15 +126,16 @@ bool cMeshRenderer::InspectorView()
 
 			if (ImGui::BeginDragDropTarget())
 			{
-				if (const ImGuiPayload* test = ImGui::AcceptDragDropPayload("ContentAsset_Mesh"))
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ContentAsset_Mesh"))
 				{
-					onDropTargetCallback(test);
+					const auto path = std::string((const char*)payload->Data, payload->DataSize);
+					m_Mesh = AssetManager::Get().LoadAsset<Mesh>(path);
 				}
 				ImGui::EndDragDropTarget();
 			}
 			ImGui::EndTable();
 			ImGui::Separator();
-			ImGui::TreePop();
+			ImGui::TreePop(); 
 		}
 	}
 
@@ -180,8 +167,7 @@ bool cMeshRenderer::InspectorView()
 						if (payload)
 						{
 							const auto path = std::string((const char*)payload->Data, payload->DataSize);
-							m_OverrideMaterial[matIndex] = AssetManager::Get().LoadAsset<Material>(path);
-							Logger::Log(path);
+							m_OverrideMaterial[matIndex] = AssetManager::Get().LoadAsset<Material>(path); 
 						}
 					}
 					ImGui::EndDragDropTarget();

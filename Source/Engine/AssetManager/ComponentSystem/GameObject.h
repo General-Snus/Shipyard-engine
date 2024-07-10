@@ -31,10 +31,18 @@ public:
 	template <class T>
 	T& GetComponent() const; 
 
+	
+	operator SY::UUID() const;
+	operator std::string() const;
+	operator bool() const;
+
+
 	std::vector<Component*> GetAllComponents() const;
 
 	bool GetActive() const;
 	void SetActive(bool aState) const;
+
+
 
 	std::string GetName() const { return myManager->GetName(myID); };;
 	void SetName(const std::string& name) const { myManager->SetName(name, myID); };
@@ -103,6 +111,19 @@ T& GameObject::GetComponent() const
 	assert(myManager != nullptr && "GameObject has no manager");
 	assert(myID.IsValid() && "GameObject has no ID");
 	return myManager->GetComponent<T>(myID);
+}
+
+inline GameObject::operator SY::UUID() const
+{
+	return myID;
+}
+inline GameObject::operator std::string() const
+{
+	return GetName();
+}
+inline GameObject::operator bool() const
+{
+	return IsValid();
 }
 
 inline std::vector<Component*> GameObject::GetAllComponents() const

@@ -385,7 +385,8 @@ bool Editor::Initialize(HWND aHandle)
 	g_EditorWindows.emplace_back(std::make_shared<Inspector>());
 	g_EditorWindows.emplace_back(std::make_shared<Hierarchy>());
 	g_EditorWindows.emplace_back(std::make_shared<ContentDirectory>());
-	g_EditorWindows.emplace_back(std::make_shared<Console>());
+	g_EditorWindows.emplace_back(std::make_shared<Console>()); 
+	AddViewPort();
 	return true;
 }
 

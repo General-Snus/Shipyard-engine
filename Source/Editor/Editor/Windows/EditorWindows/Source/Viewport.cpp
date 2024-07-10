@@ -19,11 +19,11 @@
 ImGuizmo::OPERATION m_CurrentGizmoOperation = ImGuizmo::OPERATION::UNIVERSAL;
 ImGuizmo::MODE m_CurrentGizmoMode = ImGuizmo::MODE::WORLD;
 
-Viewport::Viewport(bool IsMainViewPort,Vector2f ViewportResolution,
-	std::shared_ptr<Scene> aScene,std::shared_ptr<TextureHolder> RenderTexture) :
+Viewport::Viewport(bool IsMainViewPort, Vector2f ViewportResolution,
+	std::shared_ptr<Scene> aScene, std::shared_ptr<TextureHolder> RenderTexture) :
 	m_RenderTarget(RenderTexture),
 	ViewportResolution(ViewportResolution),
-	sceneToRender(aScene),IsMainViewPort(IsMainViewPort)
+	sceneToRender(aScene), IsMainViewPort(IsMainViewPort)
 {
 
 	const auto resolution = static_cast<Vector2ui>(ViewportResolution);
@@ -36,20 +36,21 @@ Viewport::Viewport(bool IsMainViewPort,Vector2f ViewportResolution,
 		m_RenderTarget->GetRawTexture()->GetWidth() != resolution.x &&
 		m_RenderTarget->GetRawTexture()->GetHeight() != resolution.y)
 	{
-		m_RenderTarget->GetRawTexture()->AllocateTexture(resolution,"Target1");
+		m_RenderTarget->GetRawTexture()->AllocateTexture(resolution, "Target1");
 	}
 
 	if (IsMainViewPort)
 	{
-		myVirtualCamera = sceneToRender->GetGOM().GetCamera();
+		myVirtualCamera = GameObject::Create(sceneToRender);
 	}
 	else
 	{
 		CameraSettings settings;
 		settings.APRatio = ViewportResolution.x / ViewportResolution.y;
-		myVirtualCamera = sceneToRender->ActiveManager().CreateGameObject();
-		myVirtualCamera.AddComponent<Transform>();
+		myVirtualCamera = GameObject::Create(sceneToRender);
 		myVirtualCamera.AddComponent<cCamera>(settings);
+
+		sceneToRender->GetGOM().SetIsVisibleInHierarchy(myVirtualCamera, false);
 	}
 }
 
@@ -57,7 +58,7 @@ Viewport::~Viewport()
 {
 	if (!IsMainViewPort)
 	{
-		sceneToRender->GetGOM().DeleteGameObject(myVirtualCamera,true);
+		sceneToRender->GetGOM().DeleteGameObject(myVirtualCamera, true);
 	}
 	else
 	{
@@ -135,12 +136,12 @@ Matrix Viewport::Projection()
 	if (!ViewportCamera)
 	{
 		CameraSettings settings;
-		const auto dxMatrix = XMMatrixPerspectiveFovLH(settings.FowInRad(),settings.APRatio,settings.nearField,settings.farfield);
+		const auto dxMatrix = XMMatrixPerspectiveFovLH(settings.FowInRad(), settings.APRatio, settings.nearField, settings.farfield);
 		return Matrix(&dxMatrix);
 	}
 
 	const CameraSettings& settings = ViewportCamera->GetSettings();
-	const auto dxMatrix = XMMatrixPerspectiveFovLH(settings.FowInRad(),settings.APRatio,settings.nearField,settings.farfield);
+	const auto dxMatrix = XMMatrixPerspectiveFovLH(settings.FowInRad(), settings.APRatio, settings.nearField, settings.farfield);
 	return Matrix(&dxMatrix);
 }
 
@@ -177,7 +178,7 @@ void Viewport::RenderImGUi()
 
 	TakeInput();
 
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding,{ 0.f,0.f });
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.f,0.f });
 	std::string title = "Scene ";
 	if (IsMainViewport())
 	{
@@ -189,7 +190,7 @@ void Viewport::RenderImGUi()
 
 	}
 
-	if (ImGui::Begin(title.c_str(),&m_KeepWindow,windowFlags))
+	if (ImGui::Begin(title.c_str(), &m_KeepWindow, windowFlags))
 	{
 		IsUsed = ImGui::IsWindowFocused();
 		IsVisible = ImGui::IsItemVisible();
@@ -197,16 +198,16 @@ void Viewport::RenderImGUi()
 
 		float windowWidth = ImGui::GetWindowWidth();
 		float windowHeight = ImGui::GetWindowHeight();
-		ImGui::Image(m_RenderTarget,ImVec2(windowWidth,windowHeight));
+		ImGui::Image(m_RenderTarget, ImVec2(windowWidth, windowHeight));
 
 		if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* test = ImGui::AcceptDragDropPayload("ContentAsset_Mesh"))
 			{
-				const std::filesystem::path  data = std::string((char*)test->Data,test->DataSize);
+				const std::filesystem::path  data = std::string((char*)test->Data, test->DataSize);
 				const std::string type = AssetManager::AssetType(data);
 
-				SceneUtils::AddAssetToScene(data,sceneToRender);
+				SceneUtils::AddAssetToScene(data, sceneToRender);
 
 
 				Logger::Log(type);
@@ -219,30 +220,40 @@ void Viewport::RenderImGUi()
 		{
 
 			ImGuizmo::SetDrawlist();
-			ImGuizmo::SetRect(ImGui::GetWindowPos().x,ImGui::GetWindowPos().y,windowWidth,windowHeight);
+			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
 			auto cameraView = ViewInverse();
 			auto cameraProjection = Projection();
 
 
 			for (auto& gameObject : selectedObjects)
 			{
-				auto& transform = gameObject.GetComponent<Transform>();
-				bool transfomed = ImGuizmo::Manipulate(&cameraView,&cameraProjection,m_CurrentGizmoOperation,m_CurrentGizmoMode,
-					&transform.GetMutableTransform());
+				auto& transform = gameObject.transform();
+				Matrix mat = transform.WorldMatrix();
 
-				if (transfomed)
+				bool transformed = ImGuizmo::Manipulate(&cameraView, &cameraProjection, m_CurrentGizmoOperation, m_CurrentGizmoMode,
+					&mat);
+
+				if (transformed)
 				{
 					GetCamera().GetSettings().IsInControll = false;
 					Vector3f loc;
 					Vector3f rot;
 					Vector3f scale;
+
+					if (transform.HasParent())
+					{
+						mat = mat * transform.GetParent().WorldMatrix().GetInverse(); //TODO This doesnt support scaled objects, fix asap im eepy now
+					}
+
+
 					ImGuizmo::DecomposeMatrixToComponents(
-						transform.GetMutableTransform().GetMatrixPtr(),
-						&loc,&rot,&scale);
+						mat.GetMatrixPtr(),
+						&loc, &rot, &scale);
 
 					transform.SetPosition(loc);
 					transform.SetRotation(rot);
 					transform.SetScale(scale);
+					transform.Update();
 				}
 				else
 				{
@@ -269,7 +280,7 @@ void Viewport::RenderToolbar()
 	float textHeight = ImGui::CalcTextSize("A").y;
 	// style.FramePadding can also be used here
 	ImVec2 toolbarItemSize = ImVec2{ textHeight * 4.0f, textHeight * 2.0f };
-	ImVec2 toolbarPos = ImGui::GetWindowPos() + ImVec2(2.0f * style.WindowPadding.x,8.0f * style.WindowPadding.y);
+	ImVec2 toolbarPos = ImGui::GetWindowPos() + ImVec2(2.0f * style.WindowPadding.x, 8.0f * (style.WindowPadding.y + style.FramePadding.y));
 	ImGui::SetNextWindowSize(toolbarItemSize);
 	ImGui::SetNextWindowPos(toolbarPos);
 
@@ -280,37 +291,37 @@ void Viewport::RenderToolbar()
 		ImGuiWindowFlags_NoBringToFrontOnFocus;
 
 	ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_NoPadWithHalfSpacing;
-	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing,{ 0.0f, 0.0f });
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 0.0f });
 
 
-	if (ImGui::BeginChild("##ViewportToolbar",ImVec2(toolbarItemSize.x,0),0,toolbarFlags)) {
+	if (ImGui::BeginChild("##ViewportToolbar", ImVec2(toolbarItemSize.x, 0), 0, toolbarFlags)) {
 		// Bring the toolbar window always on top.
 		ImGui::BringWindowToDisplayFront(ImGui::GetCurrentWindow());
-		ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign,ImVec2(0.5f,0.5f));
-		if (ImGui::Selectable("Universal",m_CurrentGizmoOperation == ImGuizmo::OPERATION::UNIVERSAL,selectableFlags,toolbarItemSize))
+		ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
+		if (ImGui::Selectable("Universal", m_CurrentGizmoOperation == ImGuizmo::OPERATION::UNIVERSAL, selectableFlags, toolbarItemSize))
 		{
 			m_CurrentGizmoOperation = ImGuizmo::OPERATION::UNIVERSAL;
 		}
-		if (ImGui::Selectable("Move",m_CurrentGizmoOperation == ImGuizmo::OPERATION::TRANSLATE,selectableFlags,toolbarItemSize))
+		if (ImGui::Selectable("Move", m_CurrentGizmoOperation == ImGuizmo::OPERATION::TRANSLATE, selectableFlags, toolbarItemSize))
 		{
 			m_CurrentGizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
 		}
-		if (ImGui::Selectable("Rotate",m_CurrentGizmoOperation == ImGuizmo::OPERATION::ROTATE,selectableFlags,toolbarItemSize))
+		if (ImGui::Selectable("Rotate", m_CurrentGizmoOperation == ImGuizmo::OPERATION::ROTATE, selectableFlags, toolbarItemSize))
 		{
 			m_CurrentGizmoOperation = ImGuizmo::OPERATION::ROTATE;
 		}
 		ImGui::Separator();
-		if (ImGui::Selectable("Scale",m_CurrentGizmoOperation == ImGuizmo::OPERATION::SCALE,selectableFlags,toolbarItemSize))
+		if (ImGui::Selectable("Scale", m_CurrentGizmoOperation == ImGuizmo::OPERATION::SCALE, selectableFlags, toolbarItemSize))
 		{
 			m_CurrentGizmoOperation = ImGuizmo::OPERATION::SCALE;
 		}
-		if (ImGui::Selectable("Bounds",m_CurrentGizmoOperation == ImGuizmo::OPERATION::BOUNDS,selectableFlags,toolbarItemSize))
+		if (ImGui::Selectable("Bounds", m_CurrentGizmoOperation == ImGuizmo::OPERATION::BOUNDS, selectableFlags, toolbarItemSize))
 		{
 			m_CurrentGizmoOperation = ImGuizmo::OPERATION::BOUNDS;
 		}
 		std::string mode;
 		m_CurrentGizmoMode ? mode = "Global" : mode = "Local";
-		if (ImGui::Selectable(mode.c_str(),false,selectableFlags,toolbarItemSize))
+		if (ImGui::Selectable(mode.c_str(), false, selectableFlags, toolbarItemSize))
 		{
 			m_CurrentGizmoMode = static_cast<ImGuizmo::MODE>(!static_cast<bool>(m_CurrentGizmoMode));
 		}

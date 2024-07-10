@@ -223,6 +223,17 @@ void GameObjectManager::AddObjects()
 	myObjectsToAdd.clear();
 }
 
+void GameObjectManager::SetIsVisibleInHierarchy(const SY::UUID aGameObjectID,bool setValue)
+{
+	OPTICK_EVENT();
+	if (!myGameObjects.contains(aGameObjectID))
+	{
+		return;
+	}
+
+	myGameObjects.at(aGameObjectID).IsVisibleInHierarcy = setValue;
+}
+
 void GameObjectManager::OnSiblingChanged(SY::UUID anID, const std::type_info* SourceClass)
 {
 	OPTICK_EVENT();

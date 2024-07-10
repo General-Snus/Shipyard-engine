@@ -79,6 +79,9 @@ public:
 	void SetUpdatePriority(const ComponentManagerBase::UpdatePriority aPriority);
 	void Update();
 
+	//Dev function to hide object within a scene from the editor
+	void SetIsVisibleInHierarchy(const SY::UUID aGameObjectID, bool setValue);
+
 
 	//Please dont call this for an other object than your own
 	void OnSiblingChanged(SY::UUID anID,const std::type_info* SourceClass = nullptr); 
