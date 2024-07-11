@@ -25,12 +25,8 @@ void AssetManager::RecursiveNameSave()
 }
 bool AssetManager::AdaptPath(std::filesystem::path& path)
 {
-	OPTICK_EVENT();
-	if (nameToPathMap.contains(path))
-	{
-		path = nameToPathMap.at(path);
-		return true;
-	}
+	OPTICK_EVENT(); 
+	UNREFERENCED_PARAMETER(path);
 	return false;
 }
 

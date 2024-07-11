@@ -68,7 +68,6 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <EnableUnitySupport>false</EnableUnitySupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -293,6 +292,7 @@
     <ClInclude Include="System\ThreadPool.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FileHelpers.hpp" />
     <ClCompile Include="System\Source\Event.cpp" />
     <ClCompile Include="Game\Camera.cpp" />
     <ClCompile Include="Game\Timer.cpp" />

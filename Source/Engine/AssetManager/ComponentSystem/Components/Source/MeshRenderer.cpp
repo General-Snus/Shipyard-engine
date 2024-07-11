@@ -105,6 +105,8 @@ std::shared_ptr<Mesh> cMeshRenderer::GetRawMesh() const
 	return m_Mesh;
 }
 
+#pragma optimize("",off)
+
 bool cMeshRenderer::InspectorView()
 {
 	if (!Component::InspectorView())
@@ -117,7 +119,7 @@ bool cMeshRenderer::InspectorView()
 	{
 
 		if (ImGui::TreeNodeEx("Static meshes", ImGuiTreeNodeFlags_DefaultOpen)) // Replace with element name
-		{ 
+		{
 			ImGui::BeginTable("Mesh", 2);
 			ImGui::TableNextColumn();
 			ImGui::Text("Static Mesh");
@@ -133,9 +135,35 @@ bool cMeshRenderer::InspectorView()
 				}
 				ImGui::EndDragDropTarget();
 			}
+			if (ImGui::BeginPopupContextItem()) // <-- use last item id as popup id
+			{
+
+				ImGui::BeginTable("Mesh", 2, 0, { 0,500 });
+				ImGui::TableNextColumn();
+				const auto& assetMap = AssetManager::Get().GetLibraryOfType<Mesh>()->GetContentCatalogue<Mesh>();
+				for (const auto& [path, content] : assetMap)
+				{
+					if (!content)
+					{
+						continue;
+					}
+
+					ImGui::Text(path.stem().string().c_str());
+					ImGui::TableNextColumn();
+					if (ImGui::ImageButton(("PopUpContextMenu" + path.string()).c_str(), content->GetEditorIcon(), { 100,100 }))
+					{
+						m_Mesh = AssetManager::Get().LoadAsset<Mesh>(path);
+						ImGui::CloseCurrentPopup();
+					}
+					ImGui::TableNextColumn();
+				}
+				ImGui::EndTable(); 
+				ImGui::EndPopup();
+			}
+			ImGui::SetItemTooltip("Replace mesh");
 			ImGui::EndTable();
 			ImGui::Separator();
-			ImGui::TreePop(); 
+			ImGui::TreePop();
 		}
 	}
 
@@ -167,11 +195,12 @@ bool cMeshRenderer::InspectorView()
 						if (payload)
 						{
 							const auto path = std::string((const char*)payload->Data, payload->DataSize);
-							m_OverrideMaterial[matIndex] = AssetManager::Get().LoadAsset<Material>(path); 
+							m_OverrideMaterial[matIndex] = AssetManager::Get().LoadAsset<Material>(path);
 						}
 					}
 					ImGui::EndDragDropTarget();
 				}
+
 			}
 			else if (m_Mesh->materials.contains(matIndex))
 			{
