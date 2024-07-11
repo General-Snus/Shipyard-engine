@@ -73,3 +73,5 @@ REFL_AUTO(
 	type(cSkeletalMeshRenderer),
 	field(mySkeleton)
 )
+
+void PopUpContextForAsset();

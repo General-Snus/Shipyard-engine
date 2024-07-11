@@ -10,6 +10,38 @@
 #include <Engine/GraphicsEngine/GraphicsEngineUtilities.h>
 #include <unordered_set>
 
+
+
+//Must define function EditorIcon for asset
+template<typename asset = Mesh>
+inline void PopUpContextForAsset(std::shared_ptr<asset>& replace)
+{
+	if (ImGui::BeginPopupContextItem())
+	{
+		ImGui::BeginTable(replace->GetTypeInfo().Name().c_str(), 2, 0, {0,500});
+		ImGui::TableNextColumn();
+		const auto& assetMap = AssetManager::Get().GetLibraryOfType<asset>()->GetContentCatalogue<asset>();
+		for (const auto& [path, content] : assetMap)
+		{
+			if (!content)
+			{
+				continue;
+			}
+
+			ImGui::Text(path.stem().string().c_str());
+			ImGui::TableNextColumn();
+			if (ImGui::ImageButton(("PopUpContextMenu" + path.string()).c_str(), content->GetEditorIcon(), { 100,100 }))
+			{
+				replace = AssetManager::Get().LoadAsset<asset>(path);
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::TableNextColumn();
+		}
+		ImGui::EndTable();
+		ImGui::EndPopup();
+	}
+}
+
 cMeshRenderer::cMeshRenderer(const SY::UUID anOwnerId, GameObjectManager* aManager) : Component(anOwnerId, aManager)
 {
 	m_Mesh = AssetManager::Get().LoadAsset<Mesh>("default.fbx");
@@ -123,8 +155,8 @@ bool cMeshRenderer::InspectorView()
 			ImGui::BeginTable("Mesh", 2);
 			ImGui::TableNextColumn();
 			ImGui::Text("Static Mesh");
-			ImGui::TableNextColumn();
-			ImGui::Image(m_Mesh->GetEditorIcon(), { 100,100 });
+			ImGui::TableNextColumn(); 
+			ImGui::ImageButton("WeirdUniqueIdentifer11231941241", m_Mesh->GetEditorIcon(), {100,100});
 
 			if (ImGui::BeginDragDropTarget())
 			{
@@ -135,31 +167,7 @@ bool cMeshRenderer::InspectorView()
 				}
 				ImGui::EndDragDropTarget();
 			}
-			if (ImGui::BeginPopupContextItem()) // <-- use last item id as popup id
-			{
-
-				ImGui::BeginTable("Mesh", 2, 0, { 0,500 });
-				ImGui::TableNextColumn();
-				const auto& assetMap = AssetManager::Get().GetLibraryOfType<Mesh>()->GetContentCatalogue<Mesh>();
-				for (const auto& [path, content] : assetMap)
-				{
-					if (!content)
-					{
-						continue;
-					}
-
-					ImGui::Text(path.stem().string().c_str());
-					ImGui::TableNextColumn();
-					if (ImGui::ImageButton(("PopUpContextMenu" + path.string()).c_str(), content->GetEditorIcon(), { 100,100 }))
-					{
-						m_Mesh = AssetManager::Get().LoadAsset<Mesh>(path);
-						ImGui::CloseCurrentPopup();
-					}
-					ImGui::TableNextColumn();
-				}
-				ImGui::EndTable(); 
-				ImGui::EndPopup();
-			}
+			PopUpContextForAsset<Mesh>(m_Mesh);
 			ImGui::SetItemTooltip("Replace mesh");
 			ImGui::EndTable();
 			ImGui::Separator();
@@ -187,7 +195,7 @@ bool cMeshRenderer::InspectorView()
 
 			if (m_OverrideMaterial.size() > matIndex && m_OverrideMaterial[matIndex])
 			{
-				ImGui::Image(m_OverrideMaterial[matIndex]->GetEditorIcon(), { 100,100 });
+				ImGui::ImageButton("WeirdUniqueIdentifer512512313241", m_OverrideMaterial[matIndex]->GetEditorIcon(), { 100,100 });
 				if (ImGui::BeginDragDropTarget())
 				{
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ContentAsset_Material"))
@@ -199,12 +207,13 @@ bool cMeshRenderer::InspectorView()
 						}
 					}
 					ImGui::EndDragDropTarget();
-				}
+				} 
+				PopUpContextForAsset<Material>(m_OverrideMaterial[matIndex]);
 
 			}
 			else if (m_Mesh->materials.contains(matIndex))
 			{
-				ImGui::Image(m_Mesh->materials.at(matIndex)->GetEditorIcon(), { 100,100 });
+				ImGui::ImageButton("WeirdUniqueIdentife124675471", m_Mesh->materials.at(matIndex)->GetEditorIcon(), { 100,100 });
 				if (ImGui::BeginDragDropTarget())
 				{
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ContentAsset_Material"))
@@ -218,6 +227,7 @@ bool cMeshRenderer::InspectorView()
 					}
 					ImGui::EndDragDropTarget();
 				}
+				PopUpContextForAsset<Material>(m_Mesh->materials.at(matIndex));
 			}
 
 			ImGui::Separator();
@@ -230,6 +240,7 @@ bool cMeshRenderer::InspectorView()
 
 	return true;
 }
+
 
 std::shared_ptr<TextureHolder> cMeshRenderer::GetTexture(eTextureType type, unsigned materialIndex) const
 {
