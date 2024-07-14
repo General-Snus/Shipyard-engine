@@ -43,4 +43,8 @@ namespace ImGui
 		ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
 		ImGui::Text(text.c_str());
 	}
+	 
+
+	static bool IsItemJustReleased() { return IsItemDeactivated() && !ImGui::IsItemActive(); }
+	static bool IsItemJustActivated() { return !IsItemDeactivated() && ImGui::IsItemActive(); }
 }

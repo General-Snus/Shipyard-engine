@@ -1,5 +1,7 @@
 #define NOMINMAX 
 
+
+//TODO Un-yikes the includes
 #include <assert.h>
 #include <filesystem>
 #include <fstream>
@@ -42,6 +44,7 @@
 #include <Editor/Editor/Windows/EditorWindows/CustomFuncWindow.h>
 #include <json.h>
 #include <Tools/Utilities/Color.hpp>
+#include <Editor/Editor/Commands/CommandBuffer.h>
 
 void SetupImGuiStyle(bool light = false)
 {
@@ -318,8 +321,7 @@ bool Editor::Initialize(HWND aHandle)
 	Logger::SetPrintToVSOutput(true);
 	GetWindowRect(Window::windowHandler,&ViewportRect);
 	ShowSplashScreen();
-	ThreadPool::Get().Init();
-
+	ThreadPool::Get().Init(); 
 
 #ifdef _DEBUG
 	GraphicsEngine::Get().Initialize(aHandle,true);

@@ -93,6 +93,12 @@
     <ClInclude Include="Windows\EditorWindows\CustomFuncWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Commands\CommandBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands\ComponentChanged.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Source\Editor.cpp">
@@ -147,6 +153,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Windows\EditorWindows\Source\CustomFuncWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Commands\Source\CommandBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Commands\Source\ComponentChanged.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

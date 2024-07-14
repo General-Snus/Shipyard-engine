@@ -4,6 +4,9 @@
 #include "../Transform.h"
 
 #include "Tools/ImGui/ImGui/imgui.h"
+#include <Tools/ImGui/ImGui/ImGuiHepers.hpp>
+ 
+#include <Editor/Editor/Commands/CommandBuffer.h>
 
 Transform::Transform(const SY::UUID anOwnerId, GameObjectManager* aManager) : Component(anOwnerId, aManager)
 {
@@ -39,7 +42,7 @@ void Transform::MakeClean()
 
 	if (HasParent())
 	{
-		myWorldSpaceTransform = GetTransform()*m_Parent.transform().WorldMatrix();
+		myWorldSpaceTransform = GetTransform() * m_Parent.transform().WorldMatrix();
 	}
 	else
 	{
@@ -287,7 +290,8 @@ void Transform::SetGizmo(bool enabled)
 
 bool DrawVec3Control(const std::string& label, Vector3f& values, float resetValue = 0.0f, float columnWidth = 100.0f)
 {
-	bool changed = false;
+	resetValue;//Leave this here becuase prefabs might want this?
+	bool changed = 0;
 
 	ImGui::PushID(label.c_str());
 
@@ -303,47 +307,42 @@ bool DrawVec3Control(const std::string& label, Vector3f& values, float resetValu
 	const ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
 
 	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
-	if (ImGui::Button("X", buttonSize))
-	{
-		values.x = resetValue;
-		changed = true;
-	}
+	ImGui::Button("X", buttonSize);
 	ImGui::PopStyleColor(3);
 
 	ImGui::SameLine();
-	changed |= ImGui::DragFloat("##X", &values.x, 0.1f);
+	changed |= ImGui::DragFloat("##X", &values.x, 0.1f); 
+	if (ImGui::IsItemJustReleased())
+	{
+		//changed = 2;
+	}
+	
 	ImGui::PopItemWidth();
 	ImGui::SameLine();
 
 	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
-	if (ImGui::Button("Y", buttonSize))
-	{
-		values.y = resetValue;
-		changed = true;
-	}
+	ImGui::Button("Y", buttonSize);
 	ImGui::PopStyleColor(3);
 
 	ImGui::SameLine();
 	changed |= ImGui::DragFloat("##Y", &values.y, 0.1f);
+	if (ImGui::IsItemJustReleased())
+	{
+		//changed = 2;
+	}
 	ImGui::PopItemWidth();
 	ImGui::SameLine();
 
 	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.35f, 0.9f, 1.0f });
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
-	if (ImGui::Button("Z", buttonSize))
-	{
-		values.z = resetValue;
-		changed = true;
-	}
+	ImGui::Button("Z", buttonSize);
 	ImGui::PopStyleColor(3);
 
 	ImGui::SameLine();
 	changed |= ImGui::DragFloat("##Z", &values.z, 0.1f);
+	if (ImGui::IsItemJustReleased())
+	{
+		//changed = 2;
+	}
 	ImGui::PopItemWidth();
 
 	ImGui::PopStyleVar();
@@ -372,9 +371,17 @@ bool Transform::InspectorView()
 	ImGui::Combo("##Scale", &coordinateSpace3, localGlobal.data(), 2);
 	ImGui::NextColumn();
 
+
 	IsDirty |= DrawVec3Control("Position", myPosition);
 	IsDirty |= DrawVec3Control("Euler angles", myRotation);
 	IsDirty |= DrawVec3Control("Scale", myScale);
+
+
+
+
+
+
+
 	//IsDirty |= ImGui::DragFloat3("Position",&myPosition);
 	//IsDirty |= ImGui::DragFloat3("Euler angles",&myRotation);
 	//ImGui::DragFloat4("Quaternion",&myQuaternion,1,0,0,"%.4f",ImGuiSliderFlags_NoInput);

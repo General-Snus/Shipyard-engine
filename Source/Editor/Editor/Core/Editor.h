@@ -8,6 +8,7 @@
 
 
 class Viewport;
+class CommandBuffer;
 struct ImGuizmoOp;
 class EditorWindow;
 class ScriptGraphEditor;
@@ -33,10 +34,7 @@ class Editor : public Singleton<Editor>
 
 	void AddViewPort();
 	void TopBar();
-public:
-
-
-
+public: 
 	int Run();
 	bool Initialize(HWND aHandle);
 	void DoWinProc(const MSG& msg);
@@ -55,15 +53,18 @@ public:
 		return m_MainScene;
 	}
 
-	std::unordered_map<EditorCallback,Event> m_Callbacks;
-
-
+	std::unordered_map<EditorCallback,Event> m_Callbacks; 
 private:
 	Editor() = default;
+
+
 	inline static RECT ViewportRect;
-	std::shared_ptr<ScriptGraphEditor> ScriptEditor;
 	inline static std::vector<GameObject> m_SelectedGameObjects;
-	static inline std::shared_ptr<Scene> m_MainScene;
+	inline static std::shared_ptr<Scene> m_MainScene;
+	
+
+
+	std::shared_ptr<ScriptGraphEditor> ScriptEditor;
 	std::vector< std::shared_ptr<Viewport>> m_Viewports;
 	GameLauncher myGameLauncher;
 	bool IsGUIActive = true;

@@ -338,6 +338,8 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Commands\CommandBuffer.h" />
+    <ClInclude Include="Commands\ComponentChanged.h" />
     <ClInclude Include="Windows\EditorWindows\CustomFuncWindow.h" />
     <ClInclude Include="Windows\EditorWindows\Console.h" />
     <ClInclude Include="Windows\EditorWindows\ContentDirectory.h" />
@@ -365,6 +367,8 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Commands\Source\CommandBuffer.cpp" />
+    <ClCompile Include="Commands\Source\ComponentChanged.cpp" />
     <ClCompile Include="Windows\EditorWindows\Source\CustomFuncWindow.cpp" />
     <ClCompile Include="Windows\EditorWindows\Source\Console.cpp" />
     <ClCompile Include="Windows\EditorWindows\Source\ContentDirectory.cpp" />
