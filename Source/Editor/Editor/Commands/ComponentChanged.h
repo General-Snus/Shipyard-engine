@@ -1,5 +1,5 @@
 #pragma once
-#include "CommandBuffer.h"
+#include <Editor/Editor/Commands/CommandBuffer.h>
 #include <Engine/AssetManager/ComponentSystem/Component.h>
 
 template<typename ComponentType>
@@ -10,8 +10,9 @@ public:
 	ComponentChanged(GameObject changedObject,std::string idenfier);
 	~ComponentChanged() = default;
 
-	bool Merge()
+	bool Merge(BaseCommand* ptr)
 	{
+		ptr;
 		return false;
 	}
 
@@ -48,3 +49,8 @@ private:
 //{
 //
 //}
+
+template<typename ComponentType>
+inline ComponentChanged<ComponentType>::ComponentChanged(GameObject changedObject, std::string idenfier)
+{
+}

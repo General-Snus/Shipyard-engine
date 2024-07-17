@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include <Editor/Editor/Commands/ComponentChanged.h>
+#include <assert.h> 
 
 class BaseCommand
 {
@@ -41,7 +41,7 @@ public:
 
 		commandList.erase(commandList.begin() + cursor + 1, commandList.end());
 		commandList.push_back(ptr);
-		cursor = commandList.size() - 1;
+		cursor = static_cast<int>(commandList.size()) - 1;
 	};
 
 
