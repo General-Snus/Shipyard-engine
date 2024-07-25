@@ -1,9 +1,8 @@
 #pragma once  
 #include <Engine/AssetManager/Reflection/ReflectionTemplate.h>
-#include <Tools/Reflection/refl.hpp>
 #include "Tools/Utilities/LinearAlgebra/Matrix4x4.h"
 
-struct alignas(16) SpotLight : Reflectable
+class alignas(16) SpotLight : Reflectable
 {
 private:
 	MYLIB_REFLECTABLE();
@@ -54,7 +53,7 @@ private:
 
 };
 
-struct alignas(16) PointLight : Reflectable
+class alignas(16) PointLight : Reflectable
 { 
 private:
 	MYLIB_REFLECTABLE();	
@@ -86,7 +85,7 @@ REFL_AUTO(
 	field(Range)
 )
 
-struct alignas(16) DirectionalLight : Reflectable
+class alignas(16) DirectionalLight : public Reflectable
 {
 private:
 	MYLIB_REFLECTABLE();
@@ -108,4 +107,4 @@ REFL_AUTO(
 	type(DirectionalLight),
 	field(Color),
 	field(Power)
-)
+) 

@@ -53,9 +53,10 @@ public:
 	Layer GetLayer() const { return myManager->GetLayer(myID); };
 
 	SY::UUID GetID() const { return myID; }
-	bool IsValid() const { return myID.IsValid(); }
+	bool IsValid() const { return myID.IsValid() && myManager != nullptr; }
 
 	Transform& transform() const;
+	Scene& scene() const;
 private:
 	friend class GameObjectManager; //Only the asset manager can create and destroy components 
 	GameObject(const SY::UUID anID, GameObjectManager* aManager) : myID(anID), myManager(aManager) {}

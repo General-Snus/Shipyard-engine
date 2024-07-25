@@ -45,6 +45,7 @@
 #include <json.h>
 #include <Tools/Utilities/Color.hpp>
 #include <Editor/Editor/Commands/CommandBuffer.h>
+#include <Editor/Editor/Windows/EditorWindows/History.h>
 
 void SetupImGuiStyle(bool light = false)
 {
@@ -321,7 +322,7 @@ bool Editor::Initialize(HWND aHandle)
 	Logger::SetPrintToVSOutput(true);
 	GetWindowRect(Window::windowHandler,&ViewportRect);
 	ShowSplashScreen();
-	ThreadPool::Get().Init(); 
+	ThreadPool::Get().Init();
 
 #ifdef _DEBUG
 	GraphicsEngine::Get().Initialize(aHandle,true);
@@ -387,7 +388,7 @@ bool Editor::Initialize(HWND aHandle)
 	g_EditorWindows.emplace_back(std::make_shared<Inspector>());
 	g_EditorWindows.emplace_back(std::make_shared<Hierarchy>());
 	g_EditorWindows.emplace_back(std::make_shared<ContentDirectory>());
-	g_EditorWindows.emplace_back(std::make_shared<Console>()); 
+	g_EditorWindows.emplace_back(std::make_shared<Console>());
 	AddViewPort();
 	return true;
 }
@@ -460,6 +461,21 @@ void Editor::UpdateImGui()
 
 	ImGui::DockSpaceOverViewport();
 	TopBar();
+
+
+	if (Input::IsKeyHeld(Keys::CONTROL) && Input::IsKeyPressed(Keys::Z))
+	{
+
+		if (Input::IsKeyHeld(Keys::SHIFT))
+		{
+			CommandBuffer::MainEditorCommandBuffer().Redo();
+		}
+		else
+		{
+			CommandBuffer::MainEditorCommandBuffer().Undo();
+		}
+	}
+
 
 #if UseScriptGraph
 	const float delta = Timer::GetInstance().GetDeltaTime();
@@ -550,7 +566,7 @@ void Editor::TopBar()
 			if (ImGui::Selectable("Dark Theme"))
 			{
 				SetupImGuiStyle(false);
-			} 
+			}
 
 			ImGui::EndMenu();
 		}
@@ -580,6 +596,12 @@ void Editor::TopBar()
 			{
 				g_EditorWindows.emplace_back(std::make_shared<Console>());
 			}
+
+			if (ImGui::Selectable("History"))
+			{
+				g_EditorWindows.emplace_back(std::make_shared<History>());
+			}
+
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("Tools"))

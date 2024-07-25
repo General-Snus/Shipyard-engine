@@ -1,9 +1,7 @@
-#pragma once
-#include <memory>
+#pragma once 
 #include "Engine/AssetManager/Reflection/ReflectionTemplate.h"
 #include "GameObject.h"
-#include "GameObjectManager.h"
-#include "Tools/Reflection/refl.hpp"
+#include "GameObjectManager.h" 
 
 enum class eComponentType
 {

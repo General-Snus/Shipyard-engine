@@ -135,9 +135,7 @@ std::vector<Element>& cMeshRenderer::GetElements() const
 std::shared_ptr<Mesh> cMeshRenderer::GetRawMesh() const
 {
 	return m_Mesh;
-}
-
-#pragma optimize("",off)
+} 
 
 bool cMeshRenderer::InspectorView()
 {
@@ -145,11 +143,8 @@ bool cMeshRenderer::InspectorView()
 	{
 		return false;
 	}
-	Reflect<cMeshRenderer>();
-
-
+	Reflect<cMeshRenderer>(); 
 	{
-
 		if (ImGui::TreeNodeEx("Static meshes", ImGuiTreeNodeFlags_DefaultOpen)) // Replace with element name
 		{
 			ImGui::BeginTable("Mesh", 2);

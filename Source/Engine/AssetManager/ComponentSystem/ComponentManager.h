@@ -160,14 +160,10 @@ inline T& ComponentManager<T>::GetComponent(const SY::UUID aGameObjectID)
 template<class T>
 T* ComponentManager<T>::TryGetComponent(const SY::UUID aGameObjectID)
 {
-	if (myGameObjectIDtoVectorIndex.find(aGameObjectID) != myGameObjectIDtoVectorIndex.end())
+	if (myGameObjectIDtoVectorIndex.contains(aGameObjectID))
 	{
 		return &myComponents[myGameObjectIDtoVectorIndex[aGameObjectID]];
-	}
-
-	//std::cout << "ComponentManager: Tried to get a component but the game object did not exist.ID : " << aGameObjectID << " \n";
-	//assert(false && "ComponentManager: Tried to get a component but the game object did not exist. ID: " + aGameObjectID);
-	//ERROR_PRINT("ComponentManager: Tried to get a component but the game object did not exist. ID: " + aGameObjectID);
+	} 
 	return nullptr;
 }
 

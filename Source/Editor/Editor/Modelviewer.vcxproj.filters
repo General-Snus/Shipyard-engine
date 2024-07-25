@@ -102,6 +102,12 @@
     <ClInclude Include="Commands\VarChanged.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Commands\SceneAction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\EditorWindows\History.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Source\Editor.cpp">
@@ -165,6 +171,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Commands\Source\VarChanged.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Commands\Source\SceneAction.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\EditorWindows\Source\History.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

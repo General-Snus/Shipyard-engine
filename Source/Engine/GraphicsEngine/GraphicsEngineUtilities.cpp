@@ -26,6 +26,7 @@ bool GraphicsEngineUtilities::GenerateSceneForIcon(std::shared_ptr<Mesh> meshAss
 		auto& transform = GraphicsEngine::newScene->GetGOM().GetCamera().GetComponent<Transform>();
 		const Vector3f position = meshAsset->Bounds.GetCenter() + Vector3f(0,0,-meshAsset->Bounds.GetRadius());
 		transform.SetPosition(position);
+		transform.Update();
 	}
 
 	{

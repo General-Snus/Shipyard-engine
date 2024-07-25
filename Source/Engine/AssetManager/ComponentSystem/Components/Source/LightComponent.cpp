@@ -675,8 +675,7 @@ bool cLight::InspectorView()
 	if (!Component::InspectorView())
 	{
 		return false;
-	}
-
+	} 
 	Reflect<cLight>();
 	using enum eLightType;
 	switch (myLightType)

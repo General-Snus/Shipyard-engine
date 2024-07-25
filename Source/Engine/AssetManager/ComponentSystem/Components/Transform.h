@@ -10,6 +10,8 @@ enum eSpace
 	WORLD,LOCAL
 };
 
+#define DoDirtyChecks false //  allows or disallows isDirty, to get tasks done, TODO create a event manager for dirty events checks.
+
 //LEFTHANDED X RIGHT Y UP Z FORWARD AS GOD INTENDED
 class Transform : public Component
 {
@@ -121,13 +123,14 @@ public:
 private:
 	GameObject m_Parent;
 	std::vector<GameObject> m_Children;
-
 	bool IsRecentlyUpdated = false;
+#if DoDirtyChecks
 	bool IsDirty = true;
+#endif
+	void SetDirty(bool arg = true);
 	bool IsDebugGizmoEnabled = false;
 	void MakeClean();
 	void MakeSaneRotation();
-
 	Vector3<float> myPosition{};
 	Vector3<float> myRotation{};
 	Quaternionf myQuaternion{};

@@ -3,221 +3,291 @@
 #include "Tools/ImGui/ImGui/imgui_internal.h"
 #include "Tools/Reflection/refl.hpp"
 #include "Tools/Utilities/LinearAlgebra/Vectors.hpp"
-
+#include <Editor/Editor/Commands/CommandBuffer.h>
+#include <Editor/Editor/Commands/VarChanged.h>
+#include <Tools/Utilities/TemplateHelpers.h>
+#include <type_traits>
 class AssetBase;
 
 namespace Reflection
 {
-	template <typename T>
-	void ImGuiReflect(T& ref,const std::string& identifier)
-	{
-		identifier;
-		ImGui::TextWrapped(refl::runtime::debug_str(ref).c_str());
-	}
-
-	template <typename T>
-	void ImGuiReflect(const T& ref,const std::string& identifier)
-	{
-		identifier;
-		ImGui::TextWrapped(refl::runtime::debug_str(ref).c_str());
-	}
-
-	inline void ImGuiReflect(bool& ref,const std::string& identifier)
-	{
-		ImGui::Checkbox(std::format("##{}",identifier).c_str(),&ref);
-	}
-
-	inline void ImGuiReflect(Vector2<float>& ref,const std::string& identifier)
-	{
-		ImGui::DragFloat2(std::format("##{}",identifier).c_str(),&ref.x);
-	}
-
-	inline void ImGuiReflect(Vector3<float>& ref,const std::string& identifier)
-	{
-		ImGui::DragFloat3(std::format("##{}",identifier).c_str(),&ref.x);
-	}
-
-	inline void ImGuiReflect(Vector4<float>& ref,const std::string& identifier)
-	{
-		ImGui::DragFloat4(std::format("##{}",identifier).c_str(),&ref.x);
-	}
-
-	inline void ImGuiReflect(float& ref,const std::string& identifier)
-	{
-		ImGui::DragFloat(std::format("##{}",identifier).c_str(),&ref);
-	}
-
-
-
-
-
-
-	template <typename T> struct is_shared_ptr : std::false_type {};
-	template <typename T> struct is_shared_ptr<std::shared_ptr<T>> : std::true_type {};
-	template <typename T> concept IsSharedPtr = is_shared_ptr<T>::value;
-
-	template<typename T>
-	concept pointerSyntax = requires(T a) {
-		a->GetTypeInfo();
-	};
-
-	template<typename T>
-	concept InspectorSyntax = requires(T a) {
-		a.InspectorView();
-	};
-	template<typename T>
-	concept InspectorSyntaxPtr = requires(T a) {
-		a->InspectorView();
-	};
+template <typename T> bool ImGuiReflect(T &ref, const std::string &identifier)
+{
+    identifier;
+    ImGui::TextWrapped(refl::runtime::debug_str(ref).c_str());
+    return false;
 }
-struct serializable : refl::attr::usage::field,refl::attr::usage::function
+
+template <typename T> bool ImGuiReflect(const T &ref, const std::string &identifier)
+{
+    identifier;
+    ImGui::TextWrapped(refl::runtime::debug_str(ref).c_str());
+    return false;
+}
+
+inline bool ImGuiReflect(bool &ref, const std::string &identifier)
+{
+    return ImGui::Checkbox(std::format("##{}", identifier).c_str(), &ref);
+}
+
+inline bool ImGuiReflect(Vector2<float> &ref, const std::string &identifier)
+{
+    return ImGui::DragFloat2(std::format("##{}", identifier).c_str(), &ref.x);
+}
+
+inline bool ImGuiReflect(Vector3<float> &ref, const std::string &identifier)
+{
+    return ImGui::DragFloat3(std::format("##{}", identifier).c_str(), &ref.x);
+}
+
+inline bool ImGuiReflect(Vector4<float> &ref, const std::string &identifier)
+{
+    return ImGui::DragFloat4(std::format("##{}", identifier).c_str(), &ref.x);
+}
+
+inline bool ImGuiReflect(float &ref, const std::string &identifier)
+{
+    return ImGui::DragFloat(std::format("##{}", identifier).c_str(), &ref);
+}
+
+template <typename T>
+concept pointerSyntax = requires(T a) { a->GetTypeInfo(); };
+
+template <typename T>
+concept IsComponent = requires(T a) { a.GetGameObject(); };
+template <typename T>
+concept IsComponentPtr = requires(T a) { a->GetGameObject(); };
+
+template <typename T>
+concept InspectorSyntax = requires(T a) { a.InspectorView(); };
+template <typename T>
+concept InspectorSyntaxPtr = requires(T a) { a->InspectorView(); };
+} // namespace Reflection
+struct serializable : refl::attr::usage::field, refl::attr::usage::function
 {
 };
-template <typename T>
-void serialize(std::ostream& os,T&& value)
+template <typename T> void serialize(std::ostream &os, T &&value)
 {
-	// iterate over the members of T
-	for_each(refl::reflect(value).members,[&](auto member)
-		{
-			// is_readable checks if the member is a non-const field
-			// or a 0-arg const-qualified function marked with property attribute
-			if constexpr (is_readable(member) && refl::descriptor::has_attribute<serializable>(member))
-			{
-				// get_display_name prefers the friendly_name of the property over the function name
-				os << get_display_name(member) << "=";
-				// member(value) returns a reference to the field or calls the property accessor
-				os << member(value) << ";";
-			}
-		});
+    // iterate over the members of T
+    for_each(refl::reflect(value).members, [&](auto member) {
+        // is_readable checks if the member is a non-const field
+        // or a 0-arg const-qualified function marked with property attribute
+        if constexpr (is_readable(member) && refl::descriptor::has_attribute<serializable>(member))
+        {
+            // get_display_name prefers the friendly_name of the property over the function name
+            os << get_display_name(member) << "=";
+            // member(value) returns a reference to the field or calls the property accessor
+            os << member(value) << ";";
+        }
+    });
 }
 
 class TypeInfo
 {
-public:
-	// instances can be obtained only through calls to Get()
-	template <typename T>
-	static const TypeInfo& Get()
-	{
-		// here we create the singleton instance for this particular type
-		static const TypeInfo ti(refl::reflect<T>());
-		return ti;
-	}
+  public:
+    // instances can be obtained only through calls to Get()
+    template <typename T> static const TypeInfo &Get()
+    {
+        // here we create the singleton instance for this particular type
+        static const TypeInfo ti(refl::reflect<T>());
+        return ti;
+    }
 
-	const std::string& Name() const
-	{
-		return name_;
-	}
+    const std::string &Name() const
+    {
+        return name_;
+    }
 
-private:
+  private:
+    // were only storing the name for demonstration purposes,
+    // but this can be extended to hold other properties as well
+    std::string name_;
 
-	// were only storing the name for demonstration purposes,
-	// but this can be extended to hold other properties as well
-	std::string name_;
-
-	// given a type_descriptor, we construct a TypeInfo
-	// with all the metadata we care about (currently only name)
-	template <typename T,typename... Fields>
-	TypeInfo(refl::type_descriptor<T> td)
-		: name_(td.name)
-	{
-	}
+    // given a type_descriptor, we construct a TypeInfo
+    // with all the metadata we care about (currently only name)
+    template <typename T, typename... Fields> TypeInfo(refl::type_descriptor<T> td) : name_(td.name)
+    {
+    }
 };
+
+template <typename T, typename Type = std::remove_cvref_t<T>>
+inline constexpr const bool isStdType = get_name(refl::reflect<Type>()).template substr<0, 5>() == "std::";
+
+template <class T, typename RawType = std::remove_cvref_t<T>> constexpr bool isReflectableClass()
+{
+    if constexpr (std::is_class_v<RawType> && refl::is_reflectable<RawType>() && !std::is_fundamental_v<RawType> &&
+                  !std::is_array_v<RawType>)
+    {
+        return !isStdType<RawType>;
+    }
+    return false;
+}
+
+template <typename T> constexpr bool isReflectableClass_v = isReflectableClass<T>();
+template <class T>
+concept ReflectableClass = isReflectableClass<T>();
 
 class Reflectable
 {
-public:
-	virtual const TypeInfo& GetTypeInfo() const = 0;
-	virtual bool InspectorView() { return false; };
-	template<typename TypeToReflect>
-	void Reflect(this auto& aReflectedObject);
-	template <typename TypeToReflect>
-	void Reflect(TypeToReflect& aReflectedObject);
+  public:
+    virtual const TypeInfo &GetTypeInfo() const = 0;
+    virtual bool InspectorView()
+    {
+        return false;
+    };
+
+    template <typename T0 = Component> void Reflect(this auto &aReflectedObject);
+    template <typename T0 = Component> void Reflect(T0 &aReflectedObject);
 };
 
-// define a convenience macro to autoimplement GetTypeInfo()
-#define MYLIB_REFLECTABLE() \
-	virtual const TypeInfo& GetTypeInfo() const override \
-	{ \
-		return TypeInfo::Get<::refl::trait::remove_qualifiers_t<decltype(*this)>>(); \
-	}  
+#define MYLIB_REFLECTABLE()                                                                                            \
+    virtual const TypeInfo &GetTypeInfo() const override                                                               \
+    {                                                                                                                  \
+        return TypeInfo::Get<::refl::trait::remove_qualifiers_t<decltype(*this)>>();                                   \
+    }
 
+#pragma warning(push)
+#pragma warning(disable : 4702)
 
-#pragma warning( push )
-#pragma warning( disable : 4702) 
+#pragma optimize("", off)
 
-
-//Reflect public reflected members
-template <typename TypeToReflect>//Make sure only reflected objects can get here
-inline void Reflectable::Reflect(this auto& aReflectedObject)
+// Reflect public reflected members
+template <typename T0> // Make sure only reflected objects can get here
+inline void Reflectable::Reflect(this auto &aReflectedObject)
 {
-	auto TypeReflector = [&] <typename T>(this auto & self)
-	{
-		auto imp = [&]<typename T0>(T0 member)
-		{
-			if constexpr (Reflection::InspectorSyntaxPtr<decltype(member(aReflectedObject))>)
-			{
-				member(aReflectedObject)->InspectorView();
-				return;
-			}
-			if constexpr (Reflection::InspectorSyntax<decltype(member(aReflectedObject))>)
-			{
-				member(aReflectedObject).InspectorView();
-				return;
-			}
+    if constexpr (!isReflectableClass<T0>())
+    {
+        return;
+    }
 
-			if (refl::is_reflectable<T0>())
-			{
-				//self<T0>(member(aReflectedObject));
-				return;
-			}
+    auto imp = [&]<typename T1 = float>(T1 member) {
+        using MemberType = std::remove_reference_t<decltype(unwrapPointer(member(aReflectedObject)))>;
+        using componentType = std::remove_reference_t<decltype(unwrapPointer(aReflectedObject))>;
+        using declType = decltype(member(aReflectedObject));
 
-			const std::string arg = std::string(get_display_name(member)) + ": ";
-			ImGui::PushID(arg.c_str());
-			ImGui::Columns(2);
-			ImGui::SetColumnWidth(0,200);
-			ImGui::Text(arg.data());
-			ImGui::NextColumn();
-			Reflection::ImGuiReflect(member(aReflectedObject),arg);
-			ImGui::Columns(1);
-			ImGui::PopID();
-			ImGui::Indent(16.f);
-			ImGui::Unindent(16.0f);
-		};
-		refl::util::for_each(refl::reflect<T>().members,imp);
-	};
-	TypeReflector.template operator() < TypeToReflect > ();
-	ImGui::Separator();
+        if constexpr (Reflection::InspectorSyntaxPtr<declType>)
+        {
+            member(aReflectedObject)->InspectorView();
+            return;
+        }
+        if constexpr (Reflection::InspectorSyntax<declType>)
+        {
+            member(aReflectedObject).InspectorView();
+            return;
+        }
+
+        using ptrType = std::add_pointer_t<MemberType>;
+        using cmpType = std::add_pointer_t<T0>;
+
+        const std::string arg = std::string(get_display_name(member)) + ": ";
+        const std::string testString = refl::reflect<ptrType>().name.str();
+        const std::string testString2 = refl::reflect<cmpType>().name.str();
+
+        ImGui::PushID(arg.c_str());
+        ImGui::Columns(2);
+        ImGui::SetColumnWidth(0, 200);
+        ImGui::Text(arg.data());
+        ImGui::NextColumn();
+        const auto oldValue = member(aReflectedObject);
+        const bool changed = Reflection::ImGuiReflect(member(aReflectedObject), arg);
+
+        constexpr bool isConvertible = std::is_convertible_v<cmpType, Component *>;
+        constexpr bool isBase = std::is_base_of_v<Component, T0>;
+        isConvertible;
+        isBase;
+        testString;
+        testString2;
+        if constexpr (isConvertible && isBase)
+        {
+            if (changed)
+            {
+                const auto newValue = member(aReflectedObject);
+                if constexpr (SmartPointerType<declType>)
+                {
+                    isConvertible;
+                    newValue;
+                    oldValue;
+                    // const auto ptr = std::make_shared<VarChanged<T0, MemberType>>(
+                    //     aReflectedObject, member(aReflectedObject).get(), oldValue, newValue, arg);
+                    // CommandBuffer::MainEditorCommandBuffer().AddCommand(ptr);
+                }
+                else if constexpr (std::is_pointer_v<declType>)
+                {
+                    isConvertible;
+                    newValue;
+                    oldValue;
+                    // const auto ptr = std::make_shared<VarChanged<T0, MemberType>>(
+                    //     aReflectedObject, member(aReflectedObject).get(), oldValue, newValue, arg);
+                    // CommandBuffer::MainEditorCommandBuffer().AddCommand(ptr);
+                }
+                else
+                {
+                    isConvertible;
+                    newValue;
+                    oldValue;
+
+                    const MemberType *unwrapped = &unwrapPointer(member(aReflectedObject));
+                    componentType *unwrappedComponent = &(aReflectedObject);
+
+                    const MemberType old = oldValue;
+                    const MemberType neww = newValue;
+
+                    old;
+                    neww;
+                    unwrapped;
+                    unwrappedComponent;
+                    const auto ptr = std::make_shared<VarChanged<componentType, MemberType>>(unwrappedComponent,
+                                                                                             unwrapped, old, neww, arg);
+                    CommandBuffer::MainEditorCommandBuffer().AddCommand(ptr);
+                }
+                if (ImGui::IsItemDeactivatedAfterEdit())
+                {
+                    CommandBuffer::MainEditorCommandBuffer().GetLastCommand()->SetMergeBlocker(true);
+                }
+            }
+        }
+
+        ImGui::Columns(1);
+        ImGui::PopID();
+        ImGui::Indent(16.f);
+        ImGui::Unindent(16.0f);
+    };
+    refl::util::for_each(refl::reflect(aReflectedObject).members, imp);
+    ImGui::Separator();
 };
 
-template <typename TypeToReflect>
-inline void Reflectable::Reflect(TypeToReflect& aReflectedObject)
+template <typename T0> __forceinline void Reflectable::Reflect(T0 &aReflectedObject)
 {
-	auto TypeReflector = [&] <typename T>(this auto & self)
-	{
-		auto imp = [&]<typename T0>(T0 member)
-		{
-			const std::string arg = std::string(get_display_name(member)) + ": ";
-			ImGui::TextWrapped(arg.data());
-			ImGui::SameLine();
-			Reflection::ImGuiReflect(member(aReflectedObject),arg);
+    if constexpr (!isReflectableClass<T0>())
+    {
+        return;
+    }
 
-			ImGui::Indent(16.f);
-			if constexpr (Reflection::InspectorSyntaxPtr<decltype(member(aReflectedObject))>)
-			{
-				member(aReflectedObject)->InspectorView();
-			}
-			if constexpr (Reflection::InspectorSyntax<decltype(member(aReflectedObject))>)
-			{
-				member(aReflectedObject).InspectorView();
-			}
+    auto imp = [&]<typename MemberTypes>(MemberTypes member) {
+        if constexpr (Reflection::InspectorSyntaxPtr<decltype(member(aReflectedObject))>)
+        {
+            member(aReflectedObject)->InspectorView();
+        }
+        if constexpr (Reflection::InspectorSyntax<decltype(member(aReflectedObject))>)
+        {
+            member(aReflectedObject).InspectorView();
+        }
 
-			ImGui::Unindent(16.0f);
+        const std::string arg = std::string(get_display_name(member)) + ": ";
+        ImGui::PushID(arg.c_str());
+        ImGui::Columns(2);
+        ImGui::SetColumnWidth(0, 200);
+        ImGui::Text(arg.data());
+        ImGui::NextColumn();
 
-		};
-		refl::util::for_each(refl::reflect<T>().members,imp);
-	};
-	TypeReflector.template operator() < TypeToReflect > ();
-	ImGui::Separator();
+        Reflection::ImGuiReflect(member(aReflectedObject), arg);
+
+        ImGui::Columns(1);
+        ImGui::PopID();
+        ImGui::Indent(16.f);
+        ImGui::Unindent(16.0f);
+    };
+    refl::util::for_each(refl::reflect<T0>().members, imp);
+    ImGui::Separator();
 }
-
-#pragma warning( pop ) 
+#pragma warning(pop)

@@ -10,6 +10,7 @@
 #include <Engine/AssetManager/Enums.h>
 
 class Component;
+class Scene;
 
 
 class ComponentManagerBase;
@@ -26,9 +27,12 @@ private:
 	}; 
 	friend class GameObject;
 public: 
-	GameObjectManager() = default;  
+	GameObjectManager(Scene& ref) : m_OwnerScene(ref) {};
+
 	~GameObjectManager();
-	GameObject CreateGameObject(); 
+	GameObject CreateGameObject();
+	GameObject CreateGameObject(const SY::UUID aGameObjectID);
+
 	void DeleteGameObject(const SY::UUID aGameObjectID,bool force = false);
 	void DeleteGameObject(const GameObject aGameObject,bool force = false);
 
@@ -80,8 +84,7 @@ public:
 	void Update();
 
 	//Dev function to hide object within a scene from the editor
-	void SetIsVisibleInHierarchy(const SY::UUID aGameObjectID, bool setValue);
-
+	void SetIsVisibleInHierarchy(const SY::UUID aGameObjectID, bool setValue); 
 
 	//Please dont call this for an other object than your own
 	void OnSiblingChanged(SY::UUID anID,const std::type_info* SourceClass = nullptr); 
@@ -95,6 +98,8 @@ private:
 	void SortUpdateOrder();
 	void DeleteObjects();
 	void AddObjects();
+
+	Scene& m_OwnerScene;
 
 	std::unordered_map<const std::type_info*,std::shared_ptr<ComponentManagerBase>> myComponentManagers = { };
 	std::unordered_map<SY::UUID,GameObjectData> myGameObjects = { };
@@ -161,10 +166,7 @@ T* GameObjectManager::TryGetComponent(const SY::UUID aGameObjectID)
 	if (myComponentManagers.contains(&typeid(T)))
 	{
 		return std::static_pointer_cast<ComponentManager<T>>(myComponentManagers[&typeid(T)])->TryGetComponent(aGameObjectID);
-	}
-	//std::cout << "GameObjectManager: Tried to get a component which was not present on GameObjectID : " << aGameObjectID << std::endl;
-	//assert(false && "GameObjectManager::TryGetComponent(...) component manager doesn't exist.");
-	//ERROR_PRINT("GameObjectManager: Tried to get a component which was not present on GameObjectID: " + aGameObjectID);
+	} 
 	return nullptr;
 }
 

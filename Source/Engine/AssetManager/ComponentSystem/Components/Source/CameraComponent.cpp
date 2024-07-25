@@ -16,18 +16,16 @@
 cCamera::cCamera(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager)
 {
 	GetGameObject().AddComponent<Transform>();
-	GetGameObject().GetComponent<Transform>().SetGizmo(false);
+	GetGameObject().GetComponent<Transform>().SetGizmo(false); 
 
-
-	if (!mySettings.isOrtho)
+	if (!isOrtho)
 	{
-		const auto dxMatrix = XMMatrixPerspectiveFovLH(mySettings.FowInRad(),mySettings.APRatio,mySettings.farfield,
-			mySettings.nearField);
+		const auto dxMatrix = XMMatrixPerspectiveFovLH(FowInRad(),APRatio(),farfield,nearField);
 		m_Projection = Matrix(&dxMatrix);
 	}
 	else
 	{
-		const auto dxMatrix = XMMatrixOrthographicLH(40,40,1000000,mySettings.nearField);
+		const auto dxMatrix = XMMatrixOrthographicLH(fow,fow,farfield,nearField);
 		m_Projection = Matrix(&dxMatrix);
 	}
 
@@ -44,39 +42,7 @@ cCamera::cCamera(const SY::UUID anOwnerId,GameObjectManager* aManager) : Compone
 	GetComponent<cLight>().BindDirectionToTransform(true);
 #endif
 }
-
-cCamera::cCamera(const SY::UUID anOwnerId,GameObjectManager* aManager,const CameraSettings& settings) : Component(anOwnerId,aManager)
-{
-	GetGameObject().AddComponent<Transform>();
-	GetGameObject().GetComponent<Transform>().SetGizmo(false);
-	mySettings = settings;
-
-	if (!mySettings.isOrtho)
-	{
-		const auto dxMatrix = XMMatrixPerspectiveFovLH(mySettings.FowInRad(),mySettings.APRatio,mySettings.farfield,
-			mySettings.nearField);
-		m_Projection = Matrix(&dxMatrix);
-	}
-	else
-	{
-		const auto dxMatrix = XMMatrixOrthographicLH(static_cast<float>(mySettings.resolution.x),static_cast<float>(mySettings.resolution.y),1000000,mySettings.nearField);
-		m_Projection = Matrix(&dxMatrix);
-	}
-
-#ifdef Flashlight
-	GetGameObject().AddComponent<cLight>(eLightType::Spot);
-	std::weak_ptr<SpotLight> pLight = GetComponent<cLight>().GetData<SpotLight>();
-	pLight.lock()->Position = Vector3f(0,0,0);
-	pLight.lock()->Color = Vector3f(1,1,1);
-	pLight.lock()->Power = 2000.0f * Kilo;
-	pLight.lock()->Range = 1000;
-	pLight.lock()->Direction = { 0,-1,0 };
-	pLight.lock()->InnerConeAngle = 10 * DEG_TO_RAD;
-	pLight.lock()->OuterConeAngle = 45 * DEG_TO_RAD;
-	GetComponent<cLight>().BindDirectionToTransform(true);
-#endif
-}
-
+ 
 cCamera::~cCamera()
 {
 }
@@ -84,9 +50,9 @@ cCamera::~cCamera()
 void cCamera::Update()
 {
 	OPTICK_EVENT();
-	mySettings.fow = std::clamp(mySettings.fow,5.f,360.f);
+	fow = std::clamp(fow,0.1f,360.f);
 
-	if (!mySettings.IsInControll)
+	if (!IsInControll)
 	{
 		return;
 	}
@@ -210,31 +176,13 @@ void cCamera::Update()
 
 void cCamera::Render()
 {
-}
-
-void cCamera::SetSettings(const CameraSettings& settings)
-{
-	mySettings = settings;
-
-	if (!mySettings.isOrtho)
-	{
-		const auto dxMatrix = XMMatrixPerspectiveFovLH(mySettings.FowInRad(),mySettings.APRatio,mySettings.farfield,
-			mySettings.nearField);
-		m_Projection = Matrix(&dxMatrix);
-	}
-	else
-	{
-		const auto dxMatrix = XMMatrixOrthographicLH(40,40,1000000,mySettings.nearField);
-		m_Projection = Matrix(&dxMatrix);
-	}
-}
+} 
 
 std::array<Vector4f,4> cCamera::GetFrustrumCorners() const
 {
-	const float farplane = 10000; // I dont use farplanes but some effect wants them anyway
-	const float aspectRatio = std::bit_cast<float>(mySettings.resolution.x) / std::bit_cast<float>(mySettings.resolution.y);
-	const float halfHeight = farplane * tanf(0.25f * mySettings.FowInRad());
-	const float halfWidth = aspectRatio * halfHeight;
+	const float farplane = 10000; // I dont use farplanes but some effect wants them anyway 
+	const float halfHeight = farplane * tanf(0.25f * FowInRad());
+	const float halfWidth = APRatio() * halfHeight;
 	std::array<Vector4f,4> corners;
 	corners[0] = { -halfWidth, -halfHeight, farplane, 0.0f };
 	corners[1] = { -halfWidth,	halfHeight, farplane, 0.0f };
@@ -279,13 +227,13 @@ FrameBuffer cCamera::GetFrameBuffer()
 	OPTICK_EVENT();
 	auto& transform = GetComponent<Transform>();
 	FrameBuffer buffer;
-	auto dxMatrix = XMMatrixPerspectiveFovLH(mySettings.FowInRad(),mySettings.APRatio,mySettings.farfield,mySettings.nearField);
+	auto dxMatrix = XMMatrixPerspectiveFovLH(FowInRad(),APRatio(),farfield,nearField);
 	buffer.ProjectionMatrix = Matrix(&dxMatrix);
 	buffer.ViewMatrix = Matrix::GetFastInverse(transform.GetTransform());
 	buffer.Time = Timer::GetDeltaTime();
 	buffer.FB_RenderMode = static_cast<int>(ApplicationState::filter);
 	buffer.FB_CameraPosition = transform.GetPosition();
-	buffer.FB_ScreenResolution = static_cast<Vector2ui>(mySettings.resolution);
+	buffer.FB_ScreenResolution = static_cast<Vector2ui>(resolution);
 	//buffer.Data.FB_FrustrumCorners = { Vector4f(),Vector4f(),Vector4f(),Vector4f() };;
 	return buffer;
 }
@@ -316,6 +264,7 @@ bool cCamera::InspectorView()
 	{
 		return false;
 	}
-	Reflect<cCamera>();
+	Reflect<cCamera>();  
+
 	return true;
 }

@@ -11,7 +11,7 @@
 #include "Rendering/Buffers/ObjectBuffer.h" 
 #include <Engine/AssetManager/ComponentSystem/GameObjectManager.h>
 
-#define _DEBUGDRAW 
+//#define _DEBUGDRAW 
 
 class Viewport;
 using namespace Microsoft::WRL;

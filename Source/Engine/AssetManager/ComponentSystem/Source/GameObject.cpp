@@ -13,3 +13,8 @@ Transform& GameObject::transform() const
 {
 	return GetComponent<Transform>();
 }
+
+Scene& GameObject::scene() const
+{
+	return myManager->m_OwnerScene;
+}

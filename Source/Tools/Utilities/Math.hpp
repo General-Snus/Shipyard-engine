@@ -1,13 +1,13 @@
 #pragma once
+#include "Game/Timer.h"
+#include "LinearAlgebra/Vectors.hpp"
+#include <DirectXMath.h>
 #include <algorithm>
 #include <chrono> // For DefaultSeed generation
 #include <cmath>
-#include <DirectXMath.h>
 #include <intrin.h>
 #include <numbers>
 #include <random>
-#include "Game/Timer.h"
-#include "LinearAlgebra/Vectors.hpp"
 
 constexpr float PI = std::numbers::pi_v<float>;
 constexpr float PI2 = PI * 2.0f;
@@ -17,8 +17,9 @@ constexpr float PIQUARTER = PI * 0.25f;
 constexpr float DEG_TO_RAD = PI / 180.0f;
 constexpr float RAD_TO_DEG = 180.0f / PI;
 constexpr float Sqrt2 = std::numbers::sqrt2_v<float>;
+constexpr double Golden_Ratio = 1.618033988749894;
 
-//Units
+// Units
 constexpr float Micro = 0.000001f;
 constexpr float Milli = 0.001f;
 constexpr float Centi = 0.01f;
@@ -26,23 +27,20 @@ constexpr float Deci = 0.1f;
 constexpr float Kilo = 1000.0f;
 constexpr float Mega = 1000000.0f;
 
-const float AU = 1.495978707f * std::powf(10,11);
-//Bytes
+// Bytes
 constexpr float BitToByte = 1 / 8.f;
 constexpr float ByteToBit = 8.f;
-
 
 constexpr int Byte = 1;
 constexpr int KiloByte = 1024;
 constexpr int MegaByte = 1048576;
 constexpr int GigaByte = 1073741824;
-constexpr float TeraByte = 1099511627776;
+constexpr auto TeraByte = 1099511627776;
 
-//Bytes
-
-const Vector3f GlobalRight = Vector3f(1.0,0.0,0.0);
-const Vector3f GlobalUp = Vector3f(0.0,1.0,0.0);
-const Vector3f GlobalFwd = Vector3f(0.0,0.0,1.0);
+// Bytes
+constexpr Vector3f GlobalRight = Vector3f(1.0,0.0,0.0);
+constexpr Vector3f GlobalUp = Vector3f(0.0,1.0,0.0);
+constexpr Vector3f GlobalFwd = Vector3f(0.0,0.0,1.0);
 
 class RandomEngine
 {
@@ -50,57 +48,50 @@ public:
 	RandomEngine() = delete;
 	static std::mt19937_64& engineInstance();
 
-	template <typename T = float>
-	static T RandomInRange(const T& a = 0.0f,const T& b = 1.0f);
+	template <typename T = float> static T RandomInRange(const T& a = 0.0f,const T& b = 1.0f);
 
+	template <typename T = float> static T RandomNormal(const T& a = 0.0f,const T& b = 1.0f);
 
-	template <typename T = float>
-	static  T RandomNormal(const T& a = 0.0f,const T& b = 1.0f);
-
-	template <typename T = float>
-	static  T RandomBinomial();
+	template <typename T = float> static T RandomBinomial();
 };
-template<typename T>
-inline bool IsApproximate(const T& lhv,const T& rhv)
+template <typename T> inline bool IsApproximate(const T& lhv,const T& rhv)
 {
 	return std::abs(lhv - rhv) < std::numeric_limits<T>::epsilon();
 }
 
 inline std::mt19937_64& RandomEngine::engineInstance()
 {
-	/*std::seed_seq seed(
+	/*
+	std::seed_seq seed(
 		{
 			Timer::GetInstance().GetTotalTime(),
 			Timer::GetInstance().GetTotalTime()
 		}
-	); */
+	);
+	*/
 
 	static auto engine = std::mt19937_64();
 	return engine;
 }
-template<class T>
-inline T RandomEngine::RandomInRange(const T& a,const T& b)
+template <class T> inline T RandomEngine::RandomInRange(const T& a,const T& b)
 {
-	std::uniform_real_distribution<T> dist{ a,b };
+	std::uniform_real_distribution<T> dist{ a, b };
 	return dist(engineInstance());
 }
 
-template <class T>
-inline T RandomEngine::RandomNormal(const T& a,const T& b)
+template <class T> inline T RandomEngine::RandomNormal(const T& a,const T& b)
 {
-	std::normal_distribution<T> dist{ a,b };
+	std::normal_distribution<T> dist{ a, b };
 	return dist(engineInstance());
 }
-template <class T>
-inline T RandomEngine::RandomBinomial()
+template <class T> inline T RandomEngine::RandomBinomial()
 {
-	return (RandomEngine::RandomInRange<T>(0,1) - RandomEngine::RandomInRange<T>(0,1)); //poor mans binomial
+	return (RandomEngine::RandomInRange<T>(0,1) - RandomEngine::RandomInRange<T>(0,1)); // poor mans binomial
 }
 
-template <>
-inline int RandomEngine::RandomInRange(const int& a,const int& b)
+template <> inline int RandomEngine::RandomInRange(const int& a,const int& b)
 {
-	std::uniform_int_distribution dist{ a,b };
+	std::uniform_int_distribution dist{ a, b };
 	return dist(engineInstance());
 }
 
@@ -110,29 +101,27 @@ inline float Log2(float x)
 	return std::log(x) * invLog2;
 }
 
-template <typename T>
-inline T Mod(T a,T b)
+template <typename T> inline T Mod(T a,T b)
 {
 	T result = a - (a / b) * b;
 	return (T)((result < 0) ? result + b : result);
 }
 
-template <>
-inline float Mod(float a,float b)
+template <> inline float Mod(float a,float b)
 {
 	return std::remainderf(a,b);
 }
 
-
 inline float Lerp(float start_value,float end_value,float t)
 {
-	t = std::clamp<float>(t,0,1); //assures that the given parameter "t" is between 0 and 1
+	t = std::clamp<float>(t,0,1); // assures that the given parameter "t" is between 0 and 1
 
 	return start_value + (end_value - start_value) * t;
 }
-//TODO FIX THIS SHIT; ADD TO CU
+// TODO FIX THIS SHIT; ADD TO CU
 
-inline void threeaxisrot(const float r11,const float r12,const float r21,const float r31,const float r32,Vector3f& res)
+inline void threeaxisrot(const float r11,const float r12,const float r21,const float r31,const float r32,
+	Vector3f& res)
 {
 	res[0] = atan2(r31,r32);
 	res[1] = asin(r21);
@@ -141,12 +130,9 @@ inline void threeaxisrot(const float r11,const float r12,const float r21,const f
 
 inline void quaternion2Euler(const Vector4f& q,Vector3f& res)
 {
-	threeaxisrot(-2 * (q.y * q.z - q.w * q.x),
-		q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
-		2 * (q.x * q.z + q.w * q.y),
-		-2 * (q.x * q.y - q.w * q.z),
-		q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z,
-		res);
+	threeaxisrot(-2 * (q.y * q.z - q.w * q.x),q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
+		2 * (q.x * q.z + q.w * q.y),-2 * (q.x * q.y - q.w * q.z),
+		q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z,res);
 }
 
 //
@@ -159,7 +145,7 @@ inline void quaternion2Euler(const Vector4f& q,Vector3f& res)
 //
 // Developed by Minigraph
 //
-// Author:  James Stanard 
+// Author:  James Stanard
 //
 
 template <typename T> __forceinline T AlignUpWithMask(T value,size_t mask)
@@ -232,8 +218,9 @@ __forceinline XMVECTOR SplatZero()
 __forceinline XMVECTOR SplatOne(XMVECTOR zero = SplatZero())
 {
 	__m128i AllBits = _mm_castps_si128(_mm_cmpeq_ps(zero,zero));
-	return _mm_castsi128_ps(_mm_slli_epi32(_mm_srli_epi32(AllBits,25),23));	// return 0x3F800000
-	//return _mm_cvtepi32_ps(_mm_srli_epi32(SetAllBits(zero), 31));				// return (float)1;  (alternate method)
+	return _mm_castsi128_ps(_mm_slli_epi32(_mm_srli_epi32(AllBits,25),23)); // return 0x3F800000
+	// return _mm_cvtepi32_ps(_mm_srli_epi32(SetAllBits(zero), 31));				// return (float)1;  (alternate
+	// method)
 }
 
 #if defined(_XM_SSE4_INTRINSICS_)
@@ -293,19 +280,60 @@ __forceinline XMVECTOR SetWToOne(FXMVECTOR vec)
 
 #else // !_XM_SSE_INTRINSICS_
 
-INLINE XMVECTOR SplatOne() { return XMVectorSplatOne(); }
-INLINE XMVECTOR CreateXUnitVector() { return g_XMIdentityR0; }
-INLINE XMVECTOR CreateYUnitVector() { return g_XMIdentityR1; }
-INLINE XMVECTOR CreateZUnitVector() { return g_XMIdentityR2; }
-INLINE XMVECTOR CreateWUnitVector() { return g_XMIdentityR3; }
-INLINE XMVECTOR SetWToZero(FXMVECTOR vec) { return XMVectorAndInt(vec,g_XMMask3); }
-INLINE XMVECTOR SetWToOne(FXMVECTOR vec) { return XMVectorSelect(g_XMIdentityR3,vec,g_XMMask3); }
+INLINE XMVECTOR SplatOne()
+{
+	return XMVectorSplatOne();
+}
+INLINE XMVECTOR CreateXUnitVector()
+{
+	return g_XMIdentityR0;
+}
+INLINE XMVECTOR CreateYUnitVector()
+{
+	return g_XMIdentityR1;
+}
+INLINE XMVECTOR CreateZUnitVector()
+{
+	return g_XMIdentityR2;
+}
+INLINE XMVECTOR CreateWUnitVector()
+{
+	return g_XMIdentityR3;
+}
+INLINE XMVECTOR SetWToZero(FXMVECTOR vec)
+{
+	return XMVectorAndInt(vec,g_XMMask3);
+}
+INLINE XMVECTOR SetWToOne(FXMVECTOR vec)
+{
+	return XMVectorSelect(g_XMIdentityR3,vec,g_XMMask3);
+}
 
 #endif
 
-enum class EZeroTag { kZero,kOrigin };
-enum class EIdentityTag { kOne,kIdentity };
-enum class EXUnitVector { kXUnitVector };
-enum class EYUnitVector { kYUnitVector };
-enum class EZUnitVector { kZUnitVector };
-enum class EWUnitVector { kWUnitVector };
+enum class EZeroTag
+{
+	kZero,
+	kOrigin
+};
+enum class EIdentityTag
+{
+	kOne,
+	kIdentity
+};
+enum class EXUnitVector
+{
+	kXUnitVector
+};
+enum class EYUnitVector
+{
+	kYUnitVector
+};
+enum class EZUnitVector
+{
+	kZUnitVector
+};
+enum class EWUnitVector
+{
+	kWUnitVector
+};

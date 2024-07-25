@@ -80,12 +80,11 @@ void GraphicsEngine::InitializeCustomRenderScene()
 
 	const auto res = Vector2f(1920.f,1080.f);
 	{
-		CameraSettings settings;
-		settings.APRatio = static_cast<float>(res.x) / res.y;
-		settings.resolution = res;
 		GameObject camera = GameObject::Create(newScene);
 		camera.SetName("Camera");
-		auto& cameraComponent = camera.AddComponent<cCamera>(settings);
+		auto& cameraComponent = camera.AddComponent<cCamera>();
+		cameraComponent.SetResolution(res); 
+
 		newScene->GetGOM().SetLastGOAsCamera();
 		cameraComponent.SetActive(true);
 	}
