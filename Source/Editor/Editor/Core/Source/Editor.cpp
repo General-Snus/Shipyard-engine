@@ -24,6 +24,7 @@
 #include <Tools/Optick/include/optick.h>
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/Input/Input.hpp>
+#include <Tools/Utilities/Color.h>
 #include <Tools/Utilities/System/ThreadPool.hpp>
 #include "../Editor.h"
 #include "DirectX/Shipyard/GPU.h"
@@ -42,10 +43,10 @@
 #include <Engine/PersistentSystems/Physics/PhysXInterpeter.h>
 #endif // PHYSX 0
 #include <Editor/Editor/Windows/EditorWindows/CustomFuncWindow.h>
-#include <json.h>
-#include <Tools/Utilities/Color.hpp>
+#include <json.h> 
 #include <Editor/Editor/Commands/CommandBuffer.h>
 #include <Editor/Editor/Windows/EditorWindows/History.h>
+#include "Editor/Editor/Windows/EditorWindows/ColorPresets.h"
 
 void SetupImGuiStyle(bool light = false)
 {
@@ -72,7 +73,7 @@ void SetupImGuiStyle(bool light = false)
 	style.DisabledAlpha = 0.6000000238418579f;
 	style.WindowPadding = ImVec2(10.0f,10.0f);
 	style.WindowRounding = 0.0f;
-	style.WindowBorderSize = 0.0f;
+	style.WindowBorderSize = 1.0f;
 	style.WindowMinSize = ImVec2(32.0f,32.0f);
 	style.WindowTitleAlign = ImVec2(0.0f,0.5f);
 	style.WindowMenuButtonPosition = ImGuiDir_None;
@@ -323,6 +324,8 @@ bool Editor::Initialize(HWND aHandle)
 	GetWindowRect(Window::windowHandler,&ViewportRect);
 	ShowSplashScreen();
 	ThreadPool::Get().Init();
+	//ColorManager::InitializeDefaultColors(); 
+	ColorManager::LoadColorsFromFile("Settings/ColorManagerData.ShipyardText");
 
 #ifdef _DEBUG
 	GraphicsEngine::Get().Initialize(aHandle,true);
@@ -397,6 +400,7 @@ void Editor::DoWinProc(const MSG& aMessage)
 {
 	if (aMessage.message == WM_CLOSE)
 	{
+		ColorManager::DumpToFile("Settings/ColorManagerData.ShipyardText");
 		ThreadPool::Get().Destroy();
 		Shipyard_PhysX::Get().ShutdownPhysx();
 		ImGui_ImplDX12_Shutdown();
@@ -600,6 +604,11 @@ void Editor::TopBar()
 			if (ImGui::Selectable("History"))
 			{
 				g_EditorWindows.emplace_back(std::make_shared<History>());
+			}
+
+			if (ImGui::Selectable("ColorPresets"))
+			{
+				g_EditorWindows.emplace_back(std::make_shared<ColorPresets>());
 			}
 
 			ImGui::EndMenu();

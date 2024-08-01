@@ -135,9 +135,9 @@ bool cLight::GetIsRendered() const
 {
 	return isRendered;
 }
-void cLight::SetIsRendered(const bool aRendered)
+void cLight::SetIsRendered(const bool shouldRender)
 {
-	isRendered = aRendered;
+	this->isRendered = shouldRender;
 }
 
 bool cLight::GetIsDirty() const
@@ -196,20 +196,21 @@ float cLight::GetPower()const
 	return 0;
 }
 
-void cLight::SetColor(const Vector3f color)
+void cLight::SetColor(const Color& color)
 {
+	m_Color = color;
 	SetIsDirty(true);
 	switch (myLightType)
 	{
 		using enum eLightType;
 	case Directional:
-		myDirectionLightData->Color = color;
+		myDirectionLightData->Color = m_Color.GetRGB();
 		break;
 	case Point:
-		myPointLightData->Color = color;
+		myPointLightData->Color = m_Color.GetRGB();
 		break;
 	case Spot:
-		mySpotLightData->Color = color;
+		mySpotLightData->Color = m_Color.GetRGB();
 		break;
 	case uninitialized:
 		break;
@@ -217,26 +218,9 @@ void cLight::SetColor(const Vector3f color)
 		break;
 	}
 }
-Vector3f cLight::GetColor()const
+Color cLight::GetColor()const
 {
-	switch (myLightType)
-	{
-		using enum eLightType;
-	case Directional:
-		return myDirectionLightData->Color;
-		break;
-	case Point:
-		return myPointLightData->Color;
-		break;
-	case Spot:
-		return mySpotLightData->Color;
-		break;
-	case uninitialized:
-		break;
-	default:
-		break;
-	}
-	return Vector3f();
+	return m_Color; 
 }
 
 void cLight::SetPosition(const Vector3f position)
@@ -451,20 +435,24 @@ void cLight::Update()
 	//TODO dealt with dynamic maps and static maps in some way
 	//if (isDirty)
 	{
+		Vector3f color = m_Color.GetRGB();
 		switch (myLightType)
 		{
 			using enum eLightType;
 		case Directional:
-			RedrawDirectionMap();
+			RedrawDirectionMap(); 
+			myDirectionLightData->Color = color;
 			myDirectionLightData->Power = std::max(0.0f,myDirectionLightData->Power);
 			break;
 		case Point:
 			RedrawPointMap();
+			myPointLightData->Color = color;
 			myPointLightData->Power = std::max(0.0f,myPointLightData->Power);
 			myPointLightData->Range = std::max(0.0f,myPointLightData->Range);
 			break;
 		case Spot:
 			RedrawSpotMap();
+			mySpotLightData->Color = color;
 			mySpotLightData->InnerConeAngle = std::clamp(mySpotLightData->InnerConeAngle,0.f,mySpotLightData->OuterConeAngle);
 			mySpotLightData->OuterConeAngle = std::clamp(mySpotLightData->OuterConeAngle,mySpotLightData->InnerConeAngle,360.f);
 			mySpotLightData->Power = std::max(0.0f,mySpotLightData->Power);

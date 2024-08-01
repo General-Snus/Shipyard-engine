@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "Tools/Utilities/LinearAlgebra/Vector3.hpp"
-#include <Tools/Utilities/Color.hpp>
+#include <Tools/Utilities/Color.h>
 #include <Tools/Utilities/TemplateHelpers.h>
 
 class Logger

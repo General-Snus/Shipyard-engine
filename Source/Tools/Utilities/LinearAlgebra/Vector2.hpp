@@ -1,10 +1,6 @@
 #pragma once
 #include <assert.h>
-#define VEC2
 
-#ifndef VEC2
-#include "Vector2.hpp" 
-#endif // !1
 
 #ifndef VEC3
 #include "Vector3.hpp" 
@@ -15,6 +11,8 @@
 #endif // !1 
 
 
+#ifndef VEC2 
+#define VEC2
 template <class T>
 class Vector2
 {
@@ -267,3 +265,4 @@ inline const T& Vector2<T>::operator[](int value) const
 using Vector2f = Vector2<float>;
 using Vector2i = Vector2<int>;
 using Vector2ui = Vector2<unsigned int>;
+#endif // !1

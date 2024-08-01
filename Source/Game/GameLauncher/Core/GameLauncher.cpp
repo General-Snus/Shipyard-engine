@@ -142,7 +142,7 @@ void GameLauncher::Start()
 		worldRoot.AddComponent<cMeshRenderer>("Models/Cube.fbx");
 
 		auto& pLight = worldRoot.AddComponent<cLight>(eLightType::Directional);
-		pLight.SetColor(Vector3f(1,1,1));
+		pLight.SetColor("White");
 		pLight.SetPower(2.0f);
 		pLight.BindDirectionToTransform(true);
 
@@ -190,7 +190,7 @@ void GameLauncher::Start()
 		auto& light = myCustomHandler.AddComponent<cLight>(eLightType::Point);
 		transform.SetPosition(0,5,-4);
 		light.BindDirectionToTransform(true);
-		light.SetColor({ .5f,.5f,1 });
+		light.SetColor("Blue");
 		light.SetPower(10);
 		light.SetIsShadowCaster(false);
 		light.SetRange(4.5f);
@@ -198,7 +198,7 @@ void GameLauncher::Start()
 
 	{
 		myCustomHandler2 = GameObject::Create();
-		myCustomHandler.SetName("CustomHandler2");
+		myCustomHandler2.SetName("CustomHandler2");
 
 		auto& transform = myCustomHandler2.AddComponent<Transform>();
 		auto& light = myCustomHandler2.AddComponent<cLight>(eLightType::Point);

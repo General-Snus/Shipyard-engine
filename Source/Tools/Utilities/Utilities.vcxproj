@@ -247,7 +247,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Color.hpp" />
+    <ClInclude Include="Color.h" />
     <ClInclude Include="DataStructures\BSTSet.hpp" />
     <ClInclude Include="DataStructures\DoublyLinkedList.hpp" />
     <ClInclude Include="DataStructures\HashMap.hpp" />
@@ -292,6 +292,7 @@
     <ClInclude Include="System\ThreadPool.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Color.cpp" />
     <ClCompile Include="FileHelpers.hpp" />
     <ClCompile Include="System\Source\Event.cpp" />
     <ClCompile Include="Game\Camera.cpp" />

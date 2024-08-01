@@ -51,6 +51,7 @@
     <ClInclude Include="imstb_textedit.h" />
     <ClInclude Include="imstb_truetype.h" />
     <ClInclude Include="ImZoomSlider.h" />
+    <ClInclude Include="misc\cpp\imgui-combo-filter.h" />
     <ClInclude Include="misc\cpp\imgui_stdlib.h" />
     <ClInclude Include="misc\single_file\imgui_single_file.h" />
   </ItemGroup>
@@ -74,6 +75,7 @@
     <ClCompile Include="implot_demo.cpp" />
     <ClCompile Include="implot_items.cpp" />
     <ClCompile Include="ImSequencer.cpp" />
+    <ClCompile Include="misc\cpp\imgui-combo-filter.cpp" />
     <ClCompile Include="misc\cpp\imgui_stdlib.cpp" />
     <ClCompile Include="misc\fonts\binary_to_compressed_c.cpp" />
   </ItemGroup>

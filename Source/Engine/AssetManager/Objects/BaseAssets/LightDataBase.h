@@ -2,7 +2,7 @@
 #include <Engine/AssetManager/Reflection/ReflectionTemplate.h>
 #include "Tools/Utilities/LinearAlgebra/Matrix4x4.h"
 
-class alignas(16) SpotLight : Reflectable
+class alignas(16) SpotLight : public Reflectable
 {
 private:
 	MYLIB_REFLECTABLE();
@@ -28,8 +28,7 @@ public:
 };
 
 REFL_AUTO(
-	type(SpotLight),
-	field(Color),
+	type(SpotLight), 
 	field(Power),
 	field(Position),
 	field(Range),
@@ -78,15 +77,14 @@ public:
 };
 
 REFL_AUTO(
-	type(PointLight),
-	field(Color),
+	type(PointLight), 
 	field(Power),
 	field(Position),
 	field(Range)
 )
 
 class alignas(16) DirectionalLight : public Reflectable
-{
+{ 
 private:
 	MYLIB_REFLECTABLE();
 	int64_t alignment{};
@@ -104,7 +102,6 @@ private:
 };
 
 REFL_AUTO(
-	type(DirectionalLight),
-	field(Color),
+	type(DirectionalLight), 
 	field(Power)
 ) 

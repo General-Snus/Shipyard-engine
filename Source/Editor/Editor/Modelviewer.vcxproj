@@ -338,6 +338,7 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Windows\EditorWindows\ColorPresets.h" />
     <ClInclude Include="Commands\CommandBuffer.h" />
     <ClInclude Include="Commands\ComponentChanged.h" />
     <ClInclude Include="Commands\VarChanged.h" />
@@ -370,6 +371,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Windows\EditorWindows\Source\ColorPresets.cpp" />
     <ClCompile Include="Commands\Source\CommandBuffer.cpp" />
     <ClCompile Include="Commands\Source\ComponentChanged.cpp" />
     <ClCompile Include="Commands\Source\VarChanged.cpp" />

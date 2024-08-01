@@ -345,7 +345,6 @@
     <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\FrameStatistics.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\CameraComponent.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\LightComponent.cpp" />
-    <ClCompile Include="Objects\BaseAssets\Source\LightDataBase.cpp" />
     <ClCompile Include="Objects\BaseAssets\Source\MaterialAsset.cpp" />
     <ClCompile Include="Objects\BaseAssets\Source\Animations.cpp" />
     <ClCompile Include="Objects\BaseAssets\Source\BaseAsset.cpp" />

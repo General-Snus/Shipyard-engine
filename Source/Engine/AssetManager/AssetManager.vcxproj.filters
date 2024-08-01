@@ -233,9 +233,6 @@
     <ClCompile Include="ComponentSystem\Components\Source\LightComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\BaseAssets\Source\LightDataBase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ComponentSystem\Components\Source\CameraComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

@@ -141,7 +141,7 @@
     <ClInclude Include="Error.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Color.hpp">
+    <ClInclude Include="Color.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="System\Event.h">
@@ -168,6 +168,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FileHelpers.hpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Color.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

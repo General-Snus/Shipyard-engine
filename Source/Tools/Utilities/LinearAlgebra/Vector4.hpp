@@ -3,7 +3,22 @@
 #include <assert.h>
 #include <cassert> 
 #include <cmath>
-#include <iostream>
+
+
+#define VEC4
+
+#ifndef VEC2
+#include "Vector2.hpp" 
+#endif // !1
+
+#ifndef VEC3
+#include "Vector3.hpp" 
+#endif // !1
+
+#ifndef VEC4
+#include "Vector4.hpp" 
+#endif // !1 
+
 template <class T>
 class Vector4
 {
@@ -330,3 +345,21 @@ inline const T& Vector4<T>::operator[](int value) const
 using Vector4f = Vector4<float>;
 using Vector4i = Vector4<int>;
 using Vector4ui = Vector4<unsigned int>;
+
+
+template<>
+struct std::hash<Vector4f>
+{
+	std::size_t operator()(const Vector4f& vector) const noexcept
+	{
+		std::size_t seed = 0;
+		std::hash<float> hasher;
+
+		seed ^= hasher(vector.x) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+		seed ^= hasher(vector.y) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+		seed ^= hasher(vector.z) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+		seed ^= hasher(vector.w) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+
+		return seed;
+	}
+};
