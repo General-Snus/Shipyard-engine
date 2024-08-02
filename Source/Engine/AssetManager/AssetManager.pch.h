@@ -33,6 +33,7 @@
 
 // STL Headers 
 #include <algorithm>
+#include <cmath>
 #include <string>
 #include <fstream>
 #include <iostream>

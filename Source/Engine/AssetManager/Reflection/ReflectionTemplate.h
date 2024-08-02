@@ -1,20 +1,21 @@
 #pragma once
 #include <ranges>
+#include <type_traits>
 
 #include "Tools/ImGui/ImGui/imgui.h"
 #include "Tools/ImGui/ImGui/imgui_internal.h"
+#include "Tools/ImGui/ImGui/misc/cpp/imgui-combo-filter.h"
+
 #include "Tools/Reflection/refl.hpp"
 #include "Tools/Utilities/LinearAlgebra/Vectors.hpp"
 #include <Editor/Editor/Commands/CommandBuffer.h>
 #include <Editor/Editor/Commands/VarChanged.h>
 #include <Tools/Utilities/TemplateHelpers.h>
-#include <type_traits>
 
-#include "Tools/ImGui/ImGui/misc/cpp/imgui-combo-filter.h"
 class AssetBase;
 
 namespace Reflection
-{
+{ 
 	template <typename T> bool ImGuiReflect(T& ref, const std::string& identifier)
 	{
 		identifier;
@@ -34,7 +35,6 @@ namespace Reflection
 		return ImGui::Checkbox(std::format("##{}", identifier).c_str(), &ref);
 	}
 
-#pragma optimize("", off)
 	inline bool ImGuiReflect(Color& ref, const std::string& identifier)
 	{
 		bool returnArg = false;
@@ -52,7 +52,7 @@ namespace Reflection
 		ImGui::Separator();
 		ImGui::Text("Color preset menu");
 		static bool blendColor = false;
-		ImGui::Checkbox("Use blended color:", &blendColor);
+		returnArg |= ImGui::Checkbox("Use blended color:", &blendColor);
 
 		if (blendColor)
 		{
@@ -84,9 +84,9 @@ namespace Reflection
 			static int selected_item1 = -1;
 
 			selected_item1 = preSelected != ColorManager::m_NamedColor.size() ? preSelected : -1;
-			 
+
 			if (ImGui::ComboAutoSelect("Preset", selected_item1, keys, item_getter1, autoselect_search_vector, ImGuiComboFlags_HeightSmall)
-					&& selected_item1 != -1)
+				&& selected_item1 != -1)
 			{
 				returnArg = true;
 				ref.m_ColorName = keys.at(selected_item1);
@@ -170,16 +170,22 @@ public:
 		return name_;
 	}
 
+	const std::type_info* TypeID() const
+	{
+		return typeId;
+	}
+
 private:
 	// were only storing the name for demonstration purposes,
 	// but this can be extended to hold other properties as well
 	std::string name_;
+	const std::type_info* typeId;
 
 	// given a type_descriptor, we construct a TypeInfo
 	// with all the metadata we care about (currently only name)
-	template <typename T, typename... Fields> TypeInfo(refl::type_descriptor<T> td) : name_(td.name)
+	template <typename T, typename... Fields> TypeInfo(refl::type_descriptor<T> td) : name_(td.name), typeId(&typeid(T))
 	{
-	}
+	} 
 };
 
 template <typename T, typename Type = std::remove_cvref_t<T>>
@@ -221,7 +227,6 @@ public:
 #pragma warning(push)
 #pragma warning(disable : 4702)
 
-#pragma optimize("", off)
 
 // Reflect public reflected members
 template <typename T0> // Make sure only reflected objects can get here
@@ -232,7 +237,7 @@ inline void Reflectable::Reflect(this auto& aReflectedObject)
 		return;
 	}
 
-	auto imp = [&]<typename T1 = float>(T1 member) {
+	auto imp = [&]<typename T1 = int>(T1 member) {
 		using MemberType = std::remove_reference_t<decltype(unwrapPointer(member(aReflectedObject)))>;
 		using componentType = std::remove_reference_t<decltype(unwrapPointer(aReflectedObject))>;
 		using declType = decltype(member(aReflectedObject));
@@ -294,20 +299,11 @@ inline void Reflectable::Reflect(this auto& aReflectedObject)
 				}
 				else
 				{
-					isConvertible;
-					newValue;
-					oldValue;
-
 					const MemberType* unwrapped = &unwrapPointer(member(aReflectedObject));
 					componentType* unwrappedComponent = &(aReflectedObject);
-
 					const MemberType old = oldValue;
 					const MemberType neww = newValue;
 
-					old;
-					neww;
-					unwrapped;
-					unwrappedComponent;
 					const auto ptr = std::make_shared<VarChanged<componentType, MemberType>>(unwrappedComponent,
 						unwrapped, old, neww, arg);
 					CommandBuffer::MainEditorCommandBuffer().AddCommand(ptr);
@@ -335,31 +331,76 @@ template <typename T0> __forceinline void Reflectable::Reflect(T0& aReflectedObj
 		return;
 	}
 
-	auto imp = [&]<typename MemberTypes>(MemberTypes member) {
-		if constexpr (Reflection::InspectorSyntaxPtr<decltype(member(aReflectedObject))>)
+	auto imp = [&]<typename T1 = float>(const T1 member) {
+		using MemberType = std::remove_reference_t < decltype(unwrapPointer(member(aReflectedObject)))>; 
+		using declType = decltype(member(aReflectedObject));
+
+		if constexpr (Reflection::InspectorSyntaxPtr<declType>)
 		{
 			member(aReflectedObject)->InspectorView();
+			return;
 		}
-		if constexpr (Reflection::InspectorSyntax<decltype(member(aReflectedObject))>)
+		if constexpr (Reflection::InspectorSyntax<declType>)
 		{
 			member(aReflectedObject).InspectorView();
+			return;
 		}
-
+		 
 		const std::string arg = std::string(get_display_name(member)) + ": ";
+
 		ImGui::PushID(arg.c_str());
 		ImGui::Columns(2);
 		ImGui::SetColumnWidth(0, 200);
 		ImGui::Text(arg.data());
 		ImGui::NextColumn();
+		const auto oldValue = member(aReflectedObject);
+		const bool changed = Reflection::ImGuiReflect(member(aReflectedObject), arg);
 
-		Reflection::ImGuiReflect(member(aReflectedObject), arg);
+		if constexpr (!isReflectableClass<MemberType>())
+		{
+			if (changed)
+			{
+				const auto newValue = member(aReflectedObject);
+				if constexpr (SmartPointerType<declType>)
+				{
+					newValue;
+					oldValue;
+					// const auto ptr = std::make_shared<VarChanged<T0, MemberType>>(
+					//     aReflectedObject, member(aReflectedObject).get(), oldValue, newValue, arg);
+					// CommandBuffer::MainEditorCommandBuffer().AddCommand(ptr);
+				}
+				else if constexpr (std::is_pointer_v<declType>)
+				{
+					newValue;
+					oldValue;
+					// const auto ptr = std::make_shared<VarChanged<T0, MemberType>>(
+					//     aReflectedObject, member(aReflectedObject).get(), oldValue, newValue, arg);
+					// CommandBuffer::MainEditorCommandBuffer().AddCommand(ptr);
+				}
+				else
+				{
+					const auto ptr = std::make_shared<PointerVarChanged<MemberType>>(
+						&unwrapPointer(member(aReflectedObject)),
+						oldValue,
+						newValue,
+						arg
+					);
+					CommandBuffer::MainEditorCommandBuffer().AddCommand(ptr);
+				}
+				if (ImGui::IsItemDeactivatedAfterEdit())
+				{
+					CommandBuffer::MainEditorCommandBuffer().GetLastCommand()->SetMergeBlocker(true);
+				}
+			}
+		}
 
 		ImGui::Columns(1);
 		ImGui::PopID();
 		ImGui::Indent(16.f);
 		ImGui::Unindent(16.0f);
 	};
-	refl::util::for_each(refl::reflect<T0>().members, imp);
+	refl::util::for_each(refl::reflect(aReflectedObject).members, imp);
 	ImGui::Separator();
 }
 #pragma warning(pop)
+ 

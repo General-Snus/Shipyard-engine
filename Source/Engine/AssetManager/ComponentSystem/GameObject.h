@@ -1,8 +1,11 @@
-#pragma once  
+
+#ifndef GameObjectDef 
+#define GameObjectDef 
 #include "Engine/AssetManager/ComponentSystem/GameObjectManager.h"
 
 class Transform;
 class Scene;
+class Component;
 
 class GameObject
 {
@@ -11,6 +14,7 @@ public:
 	static GameObject Create(std::shared_ptr<Scene> ref = nullptr);  // why not set scene to active scene by default? INCLUDE HELL
 	GameObject() = default;
 	~GameObject() = default;
+
 
 
 	template <class T>
@@ -22,27 +26,28 @@ public:
 	template <class T, typename... Args>
 	T& AddComponent(Args... someParameters);
 
+	Component* AddComponent(const Component* aComponent);
+
 	template <class T>
 	bool HasComponent() const;
 
 	template <class T>
-	T* TryGetComponent() const ;
+	T* TryGetComponent() const;
 
 	template <class T>
-	T& GetComponent() const; 
+	T& GetComponent() const;
 
-	
+
 	operator SY::UUID() const;
 	operator std::string() const;
-	operator bool() const;
+	bool operator==(const GameObject& other)  const;
 
 
 	std::vector<Component*> GetAllComponents() const;
+	std::vector<Component*> CopyAllComponents() const;
 
 	bool GetActive() const;
 	void SetActive(bool aState) const;
-
-
 
 	std::string GetName() const { return myManager->GetName(myID); };;
 	void SetName(const std::string& name) const { myManager->SetName(name, myID); };
@@ -66,6 +71,18 @@ private:
 	GameObjectManager* myManager = nullptr;
 };
 
+__forceinline std::vector<Component*> GameObject::CopyAllComponents() const
+{
+	assert(myManager != nullptr && "GameObject has no manager");
+	assert(myID.IsValid() && "GameObject has no ID");
+	return myManager->CopyAllAttachedComponents(myID);
+}
+inline bool GameObject::GetActive() const
+{
+	assert(myManager != nullptr && "GameObject has no manager");
+	assert(myID.IsValid() && "GameObject has no ID");
+	return myManager->GetActive(myID);
+}
 template<class T>
 T& GameObject::AddComponent()
 {
@@ -81,6 +98,7 @@ T& GameObject::AddComponent(const T& aComponent)
 	assert(myID.IsValid() && "GameObject has no ID");
 	return myManager->AddComponent<T>(myID, aComponent);
 }
+
 
 template<class T, typename ...Args>
 T& GameObject::AddComponent(Args ...someParameters)
@@ -114,6 +132,12 @@ T& GameObject::GetComponent() const
 	return myManager->GetComponent<T>(myID);
 }
 
+inline bool GameObject::operator==(const GameObject& other) const
+{
+	return !(myID != other.myID || myManager != other.myManager);
+}
+ 
+
 inline GameObject::operator SY::UUID() const
 {
 	return myID;
@@ -121,25 +145,8 @@ inline GameObject::operator SY::UUID() const
 inline GameObject::operator std::string() const
 {
 	return GetName();
-}
-inline GameObject::operator bool() const
-{
-	return IsValid();
-}
+} 
 
-inline std::vector<Component*> GameObject::GetAllComponents() const
-{
-	assert(myManager != nullptr && "GameObject has no manager");
-	assert(myID.IsValid() && "GameObject has no ID");
-	return myManager->GetAllAttachedComponents(myID);
-}
-
-inline bool GameObject::GetActive() const
-{
-	assert(myManager != nullptr && "GameObject has no manager");
-	assert(myID.IsValid() && "GameObject has no ID");
-	return myManager->GetActive(myID);
-}
 
 inline void GameObject::SetActive(const bool aState) const
 {
@@ -154,3 +161,4 @@ inline void GameObject::OnSiblingChanged(const std::type_info* SourceClass) cons
 	assert(myID.IsValid() && "GameObject has no ID");
 	myManager->OnSiblingChanged(myID, SourceClass);
 }
+#endif

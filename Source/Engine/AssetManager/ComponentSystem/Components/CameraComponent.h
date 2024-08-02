@@ -3,10 +3,7 @@
 #include "Engine/GraphicsEngine/Rendering/Buffers/FrameBuffer.h"
 #include <Engine/AssetManager/ComponentSystem/Component.h>
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
-#define ENABLE_REFLECTION_FOR(TypeName, ...) \
-    REFL_TYPE(TypeName __VA_OPT__(, )) \
-    REFL_DETAIL_FOR_EACH(REFL_DETAIL_EX_1_field __VA_OPT__(, ) __VA_ARGS__) \
-    REFL_END
+
 class cCamera : public Component
 {
   public:

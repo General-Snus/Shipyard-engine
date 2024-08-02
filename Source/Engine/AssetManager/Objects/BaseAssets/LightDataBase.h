@@ -29,10 +29,8 @@ public:
 
 REFL_AUTO(
 	type(SpotLight), 
-	field(Power),
-	field(Position),
-	field(Range),
-	field(Direction),
+	field(Power), 
+	field(Range), 
 	field(InnerConeAngle),
 	field(OuterConeAngle)
 )
@@ -78,8 +76,7 @@ public:
 
 REFL_AUTO(
 	type(PointLight), 
-	field(Power),
-	field(Position),
+	field(Power), 
 	field(Range)
 )
 

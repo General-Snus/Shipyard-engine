@@ -1,7 +1,6 @@
 #include "Engine/AssetManager/AssetManager.pch.h"
 
 #include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
-#include <cmath>
 #include "../Component.h"
 
 

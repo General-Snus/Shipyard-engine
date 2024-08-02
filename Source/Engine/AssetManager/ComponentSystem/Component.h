@@ -1,7 +1,10 @@
-#pragma once 
-#include "Engine/AssetManager/Reflection/ReflectionTemplate.h"
+ 
+
+#ifndef ComponentDef 
+#define ComponentDef  
 #include "GameObject.h"
-#include "GameObjectManager.h" 
+#include "GameObjectManager.h"
+#include "Engine/AssetManager/Reflection/ReflectionTemplate.h"
 
 enum class eComponentType
 {
@@ -17,6 +20,8 @@ public:
 	 
 	Component(const SY::UUID anOwnerID,GameObjectManager* aManager) : myOwnerID(anOwnerID),myManager(aManager),m_IsActive(true),myComponentType(eComponentType::base) {}
 	Component(const SY::UUID anOwnerID,GameObjectManager* aManager,eComponentType aComponentType) : myOwnerID(anOwnerID),myManager(aManager),m_IsActive(true),myComponentType(aComponentType) {}
+
+	Component(const Component& aComponent) = default;
 	virtual ~Component() noexcept = default;
 
 	virtual void Init() {}
@@ -28,8 +33,8 @@ public:
 	template <class T>
 	bool HasComponent() const;
 
-	inline const SY::UUID GetOwner()  const { return myOwnerID; }
-	inline GameObject GetGameObject() const { return myManager->GetGameObject(myOwnerID); }
+	const SY::UUID GetOwner()  const { return myOwnerID; }
+	GameObject GetGameObject() const { return myManager->GetGameObject(myOwnerID); }
 
 	template <class T>
 	T& GetComponent();
@@ -46,8 +51,8 @@ public:
 	const T* TryGetAddComponent() const;
 	bool InspectorView() override;
 
-	inline bool IsActive() const { return m_IsActive && myManager->GetActive(myOwnerID); }
-	inline void SetActive(const bool aState) { m_IsActive = aState; }
+	bool IsActive() const { return m_IsActive && myManager->GetActive(myOwnerID); }
+	void SetActive(const bool aState) { m_IsActive = aState; }
 
 	virtual void CollidedWith(const SY::UUID /*aGameObjectID*/) {}
 
@@ -73,12 +78,12 @@ private:
 	friend class ComponentManager;
 
 
-	inline void SetOwnerID(const SY::UUID anOwnerID)
+	void SetOwnerID(const SY::UUID anOwnerID)
 	{
 		myOwnerID = anOwnerID;
 	}
 
-	inline void SetManager(GameObjectManager* aManager)
+	void SetManager(GameObjectManager* aManager)
 	{
 		myManager = aManager;
 	}
@@ -101,19 +106,19 @@ bool Component::HasComponent() const
 }
 
 template<class T>
-inline T& Component::GetComponent()
+T& Component::GetComponent()
 {
 	return myManager->GetComponent<T>(myOwnerID);
 }
 
 template<class T>
-inline T* Component::TryGetComponent()
+T* Component::TryGetComponent()
 {
 	return myManager->TryGetComponent<T>(myOwnerID);
 }
 
 template<class T>
-inline T* Component::TryGetAddComponent()
+T* Component::TryGetAddComponent()
 {
 	if (auto* returnComponent = myManager->TryGetComponent<T>(myOwnerID))
 	{
@@ -124,19 +129,19 @@ inline T* Component::TryGetAddComponent()
 
 
 template<class T>
-inline const T& Component::GetComponent() const
+const T& Component::GetComponent() const
 {
 	return myManager->GetComponent<T>(myOwnerID);
 }
 
 template<class T>
-inline const T* Component::TryGetComponent() const
+const T* Component::TryGetComponent() const
 {
 	return myManager->TryGetComponent<T>(myOwnerID);
 }
 
 template<class T>
-inline const T* Component::TryGetAddComponent() const
+const T* Component::TryGetAddComponent() const
 {
 	if (auto* returnComponent = myManager->TryGetComponent<T>(myOwnerID))
 	{
@@ -145,3 +150,4 @@ inline const T* Component::TryGetAddComponent() const
 	return myManager->AddComponent<T>(myOwnerID);
 }
 
+#endif

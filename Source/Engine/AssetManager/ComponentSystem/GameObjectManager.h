@@ -1,20 +1,18 @@
-#pragma once
+ 
+#ifndef GameObjectManagerDef 
+#define GameObjectManagerDef 
 #include <memory>
 #include <string>
 #include <unordered_map>
-
-#include "ComponentManager.h"
 #include "UUID.h"
-#include "Tools/Optick/include/optick.h"
-
 #include <Engine/AssetManager/Enums.h>
+#include "Tools/Optick/include/optick.h" 
+#include "ComponentManager.h"
 
 class Component;
-class Scene;
-
-
-class ComponentManagerBase;
+class Scene; 
 class GameObject;
+
 class GameObjectManager
 {
 private:
@@ -24,26 +22,26 @@ private:
 		bool IsVisibleInHierarcy = true;
 		Layer onLayer = Layer::Default;
 		std::string Name;
-	}; 
+	};
 	friend class GameObject;
-public: 
+public:
 	GameObjectManager(Scene& ref) : m_OwnerScene(ref) {};
 
 	~GameObjectManager();
 	GameObject CreateGameObject();
 	GameObject CreateGameObject(const SY::UUID aGameObjectID);
 
-	void DeleteGameObject(const SY::UUID aGameObjectID,bool force = false);
-	void DeleteGameObject(const GameObject aGameObject,bool force = false);
+	void DeleteGameObject(const SY::UUID aGameObjectID, bool force = false);
+	void DeleteGameObject(const GameObject aGameObject, bool force = false);
 
 	template <class T>
 	T& AddComponent(const SY::UUID aGameObjectID);
 
 	template <class T>
-	T& AddComponent(const SY::UUID aGameObjectID,const T& aComponent);
+	T& AddComponent(const SY::UUID aGameObjectID, const T& aComponent);
 
-	template <class T,typename... Args>
-	T& AddComponent(const SY::UUID aGameObjectID,Args... someParameters);
+	template <class T, typename... Args>
+	T& AddComponent(const SY::UUID aGameObjectID, Args... someParameters);
 
 	template<class T>
 	std::vector<T>& GetAllComponents();
@@ -58,18 +56,19 @@ public:
 	T& GetComponent(const SY::UUID aGameObjectID);
 
 	std::vector<Component*> GetAllAttachedComponents(SY::UUID aGameObjectID);
+	std::vector<Component*> CopyAllAttachedComponents(SY::UUID aGameObjectID);
 
 	bool GetActive(const SY::UUID aGameObjectID);
-	Layer GetLayer(const SY::UUID aGameObjectID); 
+	Layer GetLayer(const SY::UUID aGameObjectID);
 
 	GameObject GetWorldRoot();
 	GameObject GetPlayer();
 	GameObject GetCamera();
 	GameObject GetGameObject(SY::UUID anID);
 
-	void CollidedWith(const SY::UUID aFirstID,const SY::UUID aTargetID);
-	void SetActive(const SY::UUID aGameObjectID,const bool aState);
-	void SetLayer(const SY::UUID aGameObjectID,const Layer alayer);
+	void CollidedWith(const SY::UUID aFirstID, const SY::UUID aTargetID);
+	void SetActive(const SY::UUID aGameObjectID, const bool aState);
+	void SetLayer(const SY::UUID aGameObjectID, const Layer alayer);
 
 	void SetLastGOAsPlayer();
 	void SetLastGOAsWorld();
@@ -77,20 +76,20 @@ public:
 
 	//hack used to add and remove same id in same frame
 	void CustomOrderUpdate();
-	const std::unordered_map<SY::UUID,GameObjectData>& GetAllGameObjects();
+	const std::unordered_map<SY::UUID, GameObjectData>& GetAllGameObjects();
 
 	template <class T>
 	void SetUpdatePriority(const ComponentManagerBase::UpdatePriority aPriority);
 	void Update();
 
 	//Dev function to hide object within a scene from the editor
-	void SetIsVisibleInHierarchy(const SY::UUID aGameObjectID, bool setValue); 
+	void SetIsVisibleInHierarchy(const SY::UUID aGameObjectID, bool setValue);
 
 	//Please dont call this for an other object than your own
-	void OnSiblingChanged(SY::UUID anID,const std::type_info* SourceClass = nullptr); 
+	void OnSiblingChanged(SY::UUID anID, const std::type_info* SourceClass = nullptr);
 private:
 	std::string GetName(const SY::UUID aGameObjectID);
-	void SetName(const std::string& name,const SY::UUID aGameObjectID);
+	void SetName(const std::string& name, const SY::UUID aGameObjectID);
 
 
 	template <class T>
@@ -101,9 +100,9 @@ private:
 
 	Scene& m_OwnerScene;
 
-	std::unordered_map<const std::type_info*,std::shared_ptr<ComponentManagerBase>> myComponentManagers = { };
-	std::unordered_map<SY::UUID,GameObjectData> myGameObjects = { };
-	std::vector<std::pair<const std::type_info*,std::shared_ptr<ComponentManagerBase>>> myUpdateOrder = { };
+	std::unordered_map<const std::type_info*, std::shared_ptr<ComponentManagerBase>> myComponentManagers = { };
+	std::unordered_map<SY::UUID, GameObjectData> myGameObjects = { };
+	std::vector<std::pair<const std::type_info*, std::shared_ptr<ComponentManagerBase>>> myUpdateOrder = { };
 
 
 
@@ -127,25 +126,28 @@ T& GameObjectManager::AddComponent(const SY::UUID aGameObjectID)
 }
 
 template<class T>
-T& GameObjectManager::AddComponent(const SY::UUID aGameObjectID,const T& aComponent)
+T& GameObjectManager::AddComponent(const SY::UUID aGameObjectID, const T& aComponent)
 {
 	OPTICK_EVENT();
 	if (!myComponentManagers.contains(&typeid(T)))
 	{
 		AddManager<T>();
 	}
-	return std::static_pointer_cast<ComponentManager<T>>(myComponentManagers[&typeid(T)])->AddComponent(aGameObjectID,aComponent);
+	return std::static_pointer_cast<ComponentManager<T>>(myComponentManagers[&typeid(T)])->AddComponent(aGameObjectID, aComponent);
 }
 
-template<class T,typename... Args>
-T& GameObjectManager::AddComponent(const SY::UUID aGameObjectID,Args ...someParameters)
+
+
+
+template<class T, typename... Args>
+T& GameObjectManager::AddComponent(const SY::UUID aGameObjectID, Args ...someParameters)
 {
 	OPTICK_EVENT();
 	if (!myComponentManagers.contains(&typeid(T)))
 	{
 		AddManager<T>();
 	}
-	return std::static_pointer_cast<ComponentManager<T>>(myComponentManagers[&typeid(T)])->AddComponent(aGameObjectID,someParameters...);
+	return std::static_pointer_cast<ComponentManager<T>>(myComponentManagers[&typeid(T)])->AddComponent(aGameObjectID, someParameters...);
 }
 
 template<class T>
@@ -166,7 +168,7 @@ T* GameObjectManager::TryGetComponent(const SY::UUID aGameObjectID)
 	if (myComponentManagers.contains(&typeid(T)))
 	{
 		return std::static_pointer_cast<ComponentManager<T>>(myComponentManagers[&typeid(T)])->TryGetComponent(aGameObjectID);
-	} 
+	}
 	return nullptr;
 }
 
@@ -189,19 +191,6 @@ inline T& GameObjectManager::GetComponent(const SY::UUID aGameObjectID)
 	return std::static_pointer_cast<ComponentManager<T>>(myComponentManagers[&typeid(T)])->GetComponent(aGameObjectID);
 }
 
-inline std::vector<Component*> GameObjectManager::GetAllAttachedComponents(const SY::UUID aGameObjectID)
-{
-	std::vector<Component*> components;
-	for (auto& [type,manager] : myComponentManagers)
-	{
-		auto* cmp = manager->TryGetComponent(aGameObjectID);
-		if (cmp)
-		{
-			components.emplace_back(cmp);
-		}
-	}
-	return components;
-}
 
 template<class T>
 void GameObjectManager::SetUpdatePriority(const ComponentManagerBase::UpdatePriority aPriority)
@@ -221,4 +210,5 @@ void GameObjectManager::AddManager()
 	OPTICK_EVENT();
 	myComponentManagers[&typeid(T)] = std::make_shared<ComponentManager<T>>(this);
 	SortUpdateOrder();
-} 	
+}
+#endif

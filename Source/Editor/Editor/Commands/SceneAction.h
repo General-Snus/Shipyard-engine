@@ -13,7 +13,8 @@ public:
 
 	bool Merge(std::shared_ptr<BaseCommand>& ptr) override;
 private:
-	const GameObject m_object;
+	  GameObject m_object;
+	std::vector<Component*> m_components;
 };
 
 class GameobjectDeleted : public BaseCommand
@@ -25,5 +26,6 @@ public:
 
 	bool Merge(std::shared_ptr<BaseCommand>& ptr) override;
 private:
-	const GameObject m_object;
+	  GameObject m_object;
+	std::vector<Component*> m_components;
 };

@@ -2,6 +2,7 @@
 #include <Tools/Logging/Logging.h>
 #include <assert.h>
 #include <vector>
+ 
 class BaseCommand
 {
   public:
@@ -111,4 +112,4 @@ class CommandBuffer
   private:
     std::vector<std::shared_ptr<BaseCommand>> commandList;
     int cursor = 0;
-};
+}; 
