@@ -22,16 +22,21 @@ namespace ImGui
 			Image(reinterpret_cast<ImTextureID>(id),image_size,uv0,uv1,tint_col,border_col);
 		}
 	}
-	inline bool ImageButton(const char* strId, std::shared_ptr<TextureHolder> aTexture,const ImVec2& image_size,const ImVec2& uv0 = ImVec2(0,0),const ImVec2& uv1 = ImVec2(1,1),const ImVec4& bg_col = ImVec4(0,0,0,0),const ImVec4& tint_col = ImVec4(1,1,1,1))
+	inline bool ImageButton(const char* strId, std::shared_ptr<TextureHolder> aTexture,const ImVec2& image_size,ImGuiButtonFlags flags = 0,const ImVec2& uv0 = ImVec2(0,0),const ImVec2& uv1 = ImVec2(1,1),const ImVec4& bg_col = ImVec4(0,0,0,0),const ImVec4& tint_col = ImVec4(1,1,1,1))
 	{
+		ImGuiContext& g = *GImGui;
+		ImGuiWindow* window = g.CurrentWindow;
+		if (window->SkipItems)
+			return false;
+
 		if (const auto id = aTexture->GetRawTexture()->GetHandle(ViewType::SRV).gpuPtr.ptr)
-		{
-			return ImageButton(strId,reinterpret_cast<ImTextureID>(id),image_size,uv0,uv1,bg_col,tint_col);
+		{ 
+			return ImageButtonEx(window->GetID(strId), reinterpret_cast<ImTextureID>(id), image_size, uv0, uv1, bg_col, tint_col, flags);
 		}
 		else
 		{
-			auto newId = GraphicsEngine::Get().GetDefaultTexture(eTextureType::ColorMap)->GetRawTexture()->GetHandle(ViewType::SRV).gpuPtr.ptr;
-			return ImageButton(strId, reinterpret_cast<ImTextureID>(newId), image_size, uv0, uv1, bg_col, tint_col);
+			auto newId = GraphicsEngine::Get().GetDefaultTexture(eTextureType::ColorMap)->GetRawTexture()->GetHandle(ViewType::SRV).gpuPtr.ptr; 
+			return ImageButtonEx(window->GetID(strId), reinterpret_cast<ImTextureID>(newId), image_size, uv0, uv1, bg_col, tint_col, flags);
 		}
 		return false;
 	} 

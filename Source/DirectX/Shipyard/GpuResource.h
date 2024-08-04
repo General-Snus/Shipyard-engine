@@ -24,28 +24,30 @@ public:
 	//GpuResource(GpuResource& toCopy);
 
 	virtual void Destroy()
-	{
-		/*if (m_Resource)
-		{
-			m_Resource->();
-		}*/
-
+	{ 
 		m_Resource = nullptr;
-		for (auto& [type,pair] : m_DescriptorHandles)
+		for (auto& [type, pair] : m_DescriptorHandles)
 		{
 			pair.cpuPtr.ptr = 0;
 			pair.heapOffset = -1;
 		}
+
+		// Reset states
+		m_UsageState = D3D12_RESOURCE_STATE_COMMON;
+		m_TransitioningState = D3D12_RESOURCE_STATE_COMMON;
+		m_RecentBoundType = ViewType::SRV;
+		m_Format = DXGI_FORMAT_UNKNOWN;
+		m_ResourceName.clear();
 	}
 
-	virtual void CreateView(size_t numElements,size_t elementSize);
+	virtual void CreateView(size_t numElements, size_t elementSize);
 	virtual void SetView(ViewType view);
-	virtual void SetView(ViewType view,HeapHandle handle);
+	virtual void SetView(ViewType view, HeapHandle handle);
 	virtual void ClearView(ViewType view);
 
 	virtual HeapHandle GetHandle(ViewType type);
 	virtual HeapHandle GetHandle(ViewType type) const;
-	virtual HeapHandle CreateViewWithHandle(ViewType type,HeapHandle handle);
+	virtual HeapHandle CreateViewWithHandle(ViewType type, HeapHandle handle);
 	virtual HeapHandle GetHandle() const;
 	virtual int GetHeapOffset() const;
 
@@ -72,13 +74,13 @@ protected:
 
 	DXGI_FORMAT m_Format;
 	ViewType m_RecentBoundType = ViewType::SRV;
-	std::unordered_map<ViewType,HeapHandle> m_DescriptorHandles;
+	std::unordered_map<ViewType, HeapHandle> m_DescriptorHandles;
 
 	std::filesystem::path m_ResourceName;
 	ComPtr<ID3D12Resource> m_Resource;
 	D3D12_FEATURE_DATA_FORMAT_SUPPORT m_FormatSupport;
 };
- 
+
 
 class IndexResource : public GpuResource
 {
@@ -92,7 +94,7 @@ public:
 	{
 		return m_IndexBufferView;
 	}
-	void CreateView(size_t numElements,size_t elementSize) override;
+	void CreateView(size_t numElements, size_t elementSize) override;
 
 private:
 	uint32_t m_NumIndices;
@@ -108,7 +110,7 @@ public:
 
 	uint32_t GetVertexCount() const { return m_NumVertices; }
 	uint32_t GetVertexStride() const { return m_VertexStride; }
-	void CreateView(size_t numElements,size_t elementSize) override;
+	void CreateView(size_t numElements, size_t elementSize) override;
 
 private:
 	uint32_t m_NumVertices;

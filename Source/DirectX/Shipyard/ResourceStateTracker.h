@@ -49,9 +49,7 @@
 #include <mutex>
 #include <map>
 #include <unordered_map>
-#include <vector>
-
-#include "Helpers.h"
+#include <vector> 
 
 class GpuResource;
 class CommandList;

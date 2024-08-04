@@ -1,4 +1,5 @@
- 
+# pragma once
+
 
 #ifndef ComponentDef 
 #define ComponentDef  

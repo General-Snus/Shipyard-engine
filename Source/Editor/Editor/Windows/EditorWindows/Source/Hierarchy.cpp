@@ -34,7 +34,6 @@ void Hierarchy::RenderNode(const Transform& transform)
 			const auto height = ImGui::GetFrameHeight();
 			ImGui::Image(gameObjectWidget, { height,height });
 			ImGui::SameLine();
-			transform;
 			const auto& style = ImGui::GetStyle();
 
 			auto color = style.Colors[ImGuiCol_Text];
@@ -51,7 +50,79 @@ void Hierarchy::RenderNode(const Transform& transform)
 					!Input::IsKeyHeld(Keys::SHIFT) ? refSelected.clear() : __nop();
 					refSelected.push_back(Scene::ActiveManager().GetGameObject(id));
 				}
+			}
+			const auto popupId = "##Hierarchy" + static_cast<std::string>(id);
+			if (ImGui::BeginPopupContextItem(popupId.c_str()))
+			{
+				if (ImGui::Selectable("Create Empty"))
+				{
+					GameObject::Create("Empty");
+				}
+				if (ImGui::Selectable("Create Empty Child"))
+				{
+					auto parent = Scene::ActiveManager().GetGameObject(id);
+					auto child = GameObject::Create("Empty");
+					child.transform().SetParent(parent.transform());
+				}
+				ImGui::Separator();
+				if (ImGui::Selectable("Duplicate"))
+				{
+					auto gameObject = Scene::ActiveManager().GetGameObject(id);
+					auto components = gameObject.CopyAllComponents();
 
+					auto newObject = GameObject::Create(gameObject.GetName() + "_1");
+					for (auto& i : components)
+					{
+						newObject.AddBaseComponent(i);
+					}
+				}
+				if (ImGui::Selectable("Delete"))
+				{
+					Scene::ActiveManager().DeleteGameObject(id);
+				}
+				ImGui::Separator();
+				if (ImGui::Selectable("Rename"))
+				{
+					auto gameObject = Scene::ActiveManager().GetGameObject(id);
+					gameObject.SetName("Renamed GameObject");
+				}
+				ImGui::Separator();
+				if (ImGui::Selectable("Copy"))
+				{
+				}
+				if (ImGui::Selectable("Paste"))
+				{
+				}
+				ImGui::Separator();
+				if (ImGui::Selectable("Move To View"))
+				{
+
+				}
+				if (ImGui::Selectable("Align With View"))
+				{
+				}
+				if (ImGui::Selectable("Align View to Selected"))
+				{
+				}
+				if (ImGui::Selectable("Set as Parent"))
+				{
+					auto selected = Editor::GetSelectedGameObjects();
+					for (auto& child : selected)
+					{
+						child.GetComponent<Transform>().SetParent(Scene::ActiveManager().GetGameObject(id).GetComponent<Transform>());
+					}
+				}
+				if (ImGui::Selectable("Clear Parent"))
+				{
+					auto gameObject = Scene::ActiveManager().GetGameObject(id);
+					gameObject.transform().Detach();
+				}
+				ImGui::Separator();
+				if (ImGui::Selectable("Add Component"))
+				{
+
+				}
+				ImGui::EndPopup();
 			}
 
 			if (!isActive)
@@ -85,12 +156,12 @@ void Hierarchy::RenderImGUi()
 	OPTICK_EVENT();
 	{
 		const auto& gObjList = Scene::ActiveManager().GetAllGameObjects();
-		ImGui::Begin("Hierarchy",&m_KeepWindow);
+		ImGui::Begin("Hierarchy", &m_KeepWindow);
 		ImGui::Separator();
 		ImGui::BeginChild("GameObjectList");
-		for (const auto& [id,data] : gObjList)
+		for (const auto& [id, data] : gObjList)
 		{
-			const auto& transform = Scene::ActiveManager().GetComponent<Transform>(id); 
+			const auto& transform = Scene::ActiveManager().GetComponent<Transform>(id);
 
 			if (!data.IsVisibleInHierarcy || transform.HasParent()) //We let parent handle the iterating over the children
 			{

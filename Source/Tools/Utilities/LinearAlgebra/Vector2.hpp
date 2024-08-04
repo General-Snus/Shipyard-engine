@@ -1,6 +1,6 @@
 #pragma once
 #include <assert.h>
-
+#include <compare>
 
 #ifndef VEC3
 #include "Vector3.hpp" 
@@ -22,7 +22,7 @@ public:
 	//Creates a null-vector
 	Vector2<T>();
 	//Creates a vector (aX, aY)
-	Vector2<T>(const T& aX,const T& aY);
+	Vector2<T>(const T& aX, const T& aY);
 
 	//Copy constructor (compiler generated)
 	Vector2<T>(const Vector2<T>& aVector) = default;
@@ -62,8 +62,23 @@ public:
 
 };
 
+template <class T> std::strong_ordering operator<=>(const Vector2<T>& aVector0, const Vector2<T>& aVector1)
+{ 
+	if (auto cmp = aVector0.x <=> aVector1.x; cmp != 0)
+	{
+		return cmp;
+	}
+	return aVector0.y <=> aVector1.y;
+}
+
+template <class T> bool operator!=(const Vector2<T>& aVector0, const Vector2<T>& aVector1)
+{
+	return (aVector0 <=> aVector1) != 0;
+}
+
+
 //Returns the vector sum of aVector0 and aVector1
-template <class T> Vector2<T> operator+(const Vector2<T>& aVector0,const Vector2<T>& aVector1)
+template <class T> Vector2<T> operator+(const Vector2<T>& aVector0, const Vector2<T>& aVector1)
 {
 	return Vector2<T>(
 		aVector0.x + aVector1.x,
@@ -72,7 +87,7 @@ template <class T> Vector2<T> operator+(const Vector2<T>& aVector0,const Vector2
 }
 
 //Returns the vector difference of aVector0 and aVector1
-template <class T> Vector2<T> operator-(const Vector2<T>& aVector0,const Vector2<T>& aVector1)
+template <class T> Vector2<T> operator-(const Vector2<T>& aVector0, const Vector2<T>& aVector1)
 {
 	return Vector2<T>(
 		aVector0.x - aVector1.x,
@@ -81,7 +96,7 @@ template <class T> Vector2<T> operator-(const Vector2<T>& aVector0,const Vector2
 }
 
 //Returns the vector aVector multiplied by the scalar aScalar
-template <class T> Vector2<T> operator*(const Vector2<T>& aVector,const T& aScalar)
+template <class T> Vector2<T> operator*(const Vector2<T>& aVector, const T& aScalar)
 {
 	return Vector2<T>(
 		aVector.x * aScalar,
@@ -90,7 +105,7 @@ template <class T> Vector2<T> operator*(const Vector2<T>& aVector,const T& aScal
 }
 
 //Returns the vector aVector multiplied by the scalar aScalar
-template <class T> Vector2<T> operator*(const T& aScalar,const Vector2<T>& aVector)
+template <class T> Vector2<T> operator*(const T& aScalar, const Vector2<T>& aVector)
 {
 	return Vector2<T>(
 		aVector.x * aScalar,
@@ -99,7 +114,7 @@ template <class T> Vector2<T> operator*(const T& aScalar,const Vector2<T>& aVect
 }
 
 //Returns the vector aVector divided by the scalar aScalar (equivalent to aVector multiplied by 1 / aScalar)
-template <class T> Vector2<T> operator/(const Vector2<T>& aVector,const T& aScalar)
+template <class T> Vector2<T> operator/(const Vector2<T>& aVector, const T& aScalar)
 {
 	const T mlt = (1 / aScalar);
 
@@ -110,28 +125,28 @@ template <class T> Vector2<T> operator/(const Vector2<T>& aVector,const T& aScal
 }
 
 //Equivalent to setting aVector0 to (aVector0 + aVector1)
-template <class T> void operator+=(Vector2<T>& aVector0,const Vector2<T>& aVector1)
+template <class T> void operator+=(Vector2<T>& aVector0, const Vector2<T>& aVector1)
 {
 	aVector0.x = aVector0.x + aVector1.x;
 	aVector0.y = aVector0.y + aVector1.y;
 }
 
 //Equivalent to setting aVector0 to (aVector0 - aVector1)
-template <class T> void operator-=(Vector2<T>& aVector0,const Vector2<T>& aVector1)
+template <class T> void operator-=(Vector2<T>& aVector0, const Vector2<T>& aVector1)
 {
 	aVector0.x = aVector0.x - aVector1.x;
 	aVector0.y = aVector0.y - aVector1.y;
 }
 
 //Equivalent to setting aVector to (aVector * aScalar)
-template <class T> void operator*=(Vector2<T>& aVector,const T& aScalar)
+template <class T> void operator*=(Vector2<T>& aVector, const T& aScalar)
 {
 	aVector.x = aVector.x * aScalar;
 	aVector.y = aVector.y * aScalar;
 }
 
 //Equivalent to setting aVector to (aVector / aScalar)
-template <class T> void operator/=(Vector2<T>& aVector,const T& aScalar)
+template <class T> void operator/=(Vector2<T>& aVector, const T& aScalar)
 {
 	aVector.x = aVector.x / aScalar;
 	aVector.y = aVector.y / aScalar;
@@ -140,7 +155,7 @@ template <class T> void operator/=(Vector2<T>& aVector,const T& aScalar)
 template<class T>
 inline Vector2<T>& Vector2<T>::operator=(const T& aTypeT)
 {
-	x,y = aTypeT;
+	x, y = aTypeT;
 	return *this;
 }
 
@@ -148,7 +163,7 @@ inline Vector2<T>& Vector2<T>::operator=(const T& aTypeT)
 template<class T>
 inline Vector2<T> Vector2<T>::operator-() const
 {
-	return Vector2<T>(-x,-y);
+	return Vector2<T>(-x, -y);
 }
 
 template<class T>
@@ -197,7 +212,7 @@ inline Vector2<T>::Vector2()
 }
 
 template<class T>
-inline Vector2<T>::Vector2(const T& aX,const T& aY)
+inline Vector2<T>::Vector2(const T& aX, const T& aY)
 {
 	x = aX;
 	y = aY;
@@ -216,8 +231,8 @@ template<class T>
 template<class U>
 inline Vector2<T>::operator U() const
 {
-	return U(x,y);
-} 
+	return U(x, y);
+}
 #pragma warning(pop)
 
 

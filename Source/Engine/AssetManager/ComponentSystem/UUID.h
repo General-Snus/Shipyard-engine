@@ -10,6 +10,7 @@ namespace SY {//I fucking hate windows internals
 		UUID(const UUID& aUUID) = default;
 
 		operator uint32_t() const { return myUUID; }
+		operator std::string() const { return std::to_string(myUUID); }
 
 		bool IsValid() const { return myUUID != UINT_MAX; } 
 

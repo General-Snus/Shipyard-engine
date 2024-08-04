@@ -10,5 +10,4 @@ bool ComponentManagerBase::ValidComponentType(const Component* cmp)
 {
 	return cmp->GetTypeInfo().Name() == Comparator;
 }
-
  

@@ -41,6 +41,8 @@ public:
 	//Cost: 1 Contains,1 Get, 1 reintp cast
 	virtual Component* TryGetBaseComponent(const SY::UUID aGameObjectID) = 0;
 
+	virtual Component* DeepCopy(const Component* cmp) = 0;
+	virtual Component* DeepCopy(const SY::UUID aGameObjectID) = 0;
 
 protected:
 	std::string Comparator;
@@ -76,6 +78,8 @@ public:
 	//Cost: 1 Contains,1 Get, 
 	T* TryGetComponent(const SY::UUID aGameObjectID);
 
+	Component* DeepCopy(const Component* cmp) override;
+	Component* DeepCopy(const SY::UUID aGameObjectID) override;
 
 	void Update() override;
 	void Render() override;
@@ -190,6 +194,31 @@ T* ComponentManager<T>::TryGetComponent(const SY::UUID aGameObjectID)
 	if (myGameObjectIDtoVectorIndex.contains(aGameObjectID))
 	{
 		return &myComponents[myGameObjectIDtoVectorIndex[aGameObjectID]];
+	}
+	return nullptr;
+}
+
+template <class T>
+Component* ComponentManager<T>::DeepCopy(const Component* cmp)
+{
+	const T* cmpT = dynamic_cast<const T*>(cmp);
+	if (cmpT != nullptr)
+	{
+		return new T(*cmpT);
+	}
+	return nullptr;
+}
+
+template <class T>
+Component* ComponentManager<T>::DeepCopy(const SY::UUID aGameObjectID)
+{
+	if (myGameObjectIDtoVectorIndex.contains(aGameObjectID))
+	{
+		const T* cmpT = dynamic_cast<const T*>(&myComponents[myGameObjectIDtoVectorIndex[aGameObjectID]]);
+		if (cmpT != nullptr)
+		{
+			return new T(*cmpT);
+		}
 	}
 	return nullptr;
 }

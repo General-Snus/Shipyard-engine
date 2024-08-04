@@ -30,6 +30,9 @@ public:
 	cLight(const SY::UUID anOwnerId, GameObjectManager* aManager); // Create a generic cube
 	cLight(const SY::UUID anOwnerId, GameObjectManager* aManager, const eLightType type);
 
+
+	void Init() override;
+
 	eLightType GetType() const;
 	void SetType(const eLightType aType);
 

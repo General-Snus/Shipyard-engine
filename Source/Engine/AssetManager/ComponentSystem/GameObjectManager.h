@@ -1,4 +1,4 @@
- 
+ # pragma once
 #ifndef GameObjectManagerDef 
 #define GameObjectManagerDef 
 #include <memory>
@@ -39,6 +39,7 @@ public:
 
 	template <class T>
 	T& AddComponent(const SY::UUID aGameObjectID, const T& aComponent);
+	Component* AddBaseComponent(const SY::UUID aGameObjectID, const Component* aComponent);
 
 	template <class T, typename... Args>
 	T& AddComponent(const SY::UUID aGameObjectID, Args... someParameters);
@@ -135,9 +136,6 @@ T& GameObjectManager::AddComponent(const SY::UUID aGameObjectID, const T& aCompo
 	}
 	return std::static_pointer_cast<ComponentManager<T>>(myComponentManagers[&typeid(T)])->AddComponent(aGameObjectID, aComponent);
 }
-
-
-
 
 template<class T, typename... Args>
 T& GameObjectManager::AddComponent(const SY::UUID aGameObjectID, Args ...someParameters)

@@ -55,6 +55,11 @@ void Passes::WriteShadows(std::shared_ptr<CommandList>& commandList, GameObjectM
 		{
 			OPTICK_GPU_EVENT("setShadowPrerequisite");
 			const auto& shadowMap = light.GetShadowMap(map);
+			if (!shadowMap)
+			{
+				return nullptr;
+			}
+
 			list->GetGraphicsCommandList()->RSSetViewports(1, &shadowMap->GetViewPort());
 			list->GetGraphicsCommandList()->RSSetScissorRects(1, &shadowMap->GetRect());
 
@@ -80,6 +85,11 @@ void Passes::WriteShadows(std::shared_ptr<CommandList>& commandList, GameObjectM
 		{
 			OPTICK_GPU_EVENT("DirectionalShadow");
 			const std::shared_ptr<Texture>& shadowMap = setShadowPrerequisite(light, 0, commandList);
+			if (!shadowMap)
+			{
+				continue;
+			}
+
 			renderShadows(meshRendererList, commandList, "DirectionalLight");
 			shadowMap->SetView(ViewType::SRV);
 
@@ -93,6 +103,12 @@ void Passes::WriteShadows(std::shared_ptr<CommandList>& commandList, GameObjectM
 			for (int j = 0; j < 6; j++)
 			{
 				const std::shared_ptr<Texture>& shadowMap = setShadowPrerequisite(light, j, commandList);
+				if (!shadowMap)
+				{
+					continue;
+				}
+
+
 				renderShadows(meshRendererList, commandList, "PointlightShadowDraw");
 				shadowMap->SetView(ViewType::SRV);
 
@@ -105,6 +121,11 @@ void Passes::WriteShadows(std::shared_ptr<CommandList>& commandList, GameObjectM
 		{
 			OPTICK_GPU_EVENT("SpotlightShadow");
 			const std::shared_ptr<Texture>& shadowMap = setShadowPrerequisite(light, 0, commandList);
+			if (!shadowMap)
+			{
+				continue;
+			}
+
 			renderShadows(meshRendererList, commandList, "SpotlightShadowDraw");
 			shadowMap->SetView(ViewType::SRV);
 

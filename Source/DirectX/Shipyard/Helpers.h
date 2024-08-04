@@ -6,13 +6,13 @@
 #include <d3d12.h>
 #include <DirectX/XTK/DirectXHelpers.h>
 #include <exception>
-#include "Tools/Logging/Logging.h" 
-
-#include <Tools/Utilities/Error.hpp>
-
+#include "Tools/Logging/Logging.h"  
+#include <Tools/Utilities/Error.hpp> 
 
 namespace Helpers
 {
+	  void ThrowIfFailed(HRESULT hr)  noexcept(false);
+
 	inline DXGI_FORMAT GetUAVCompatableFormat(DXGI_FORMAT format)
 	{
 		DXGI_FORMAT uavFormat = format;
@@ -169,16 +169,7 @@ namespace Helpers
 		return result;
 	}
 
-	inline void ThrowIfFailed(HRESULT hr) noexcept(false)
-	{
-		if (FAILED(hr))
-		{   
-			_com_error err(hr);
-			std::wstring errMsg = std::to_wstring(				*err.ErrorMessage());
-			Logger::Err(string_cast<std::string>(errMsg));
-			throw std::exception(string_cast<std::string>(errMsg).c_str());
-		}
-	}
+	
 
 	inline void ThrowIfSucceded(HRESULT hr) noexcept(false)
 	{

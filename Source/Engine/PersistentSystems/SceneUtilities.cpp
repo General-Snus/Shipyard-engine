@@ -15,7 +15,7 @@ bool SceneUtils::AddAssetToScene(const std::filesystem::path& aPath,const std::s
 		Logger::Warn(std::format("Asset could not be injected into scene at {}",aPath.string()));
 		return false;
 	} 
-	GameObject obj = GameObject::Create(aScene);
+	GameObject obj = GameObject::Create("RenderedObject",aScene);
 	obj.SetName(aPath.stem().string());
 	obj.AddComponent<Transform>();
 

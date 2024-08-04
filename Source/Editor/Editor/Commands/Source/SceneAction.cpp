@@ -3,7 +3,6 @@
 #include "Engine/AssetManager/ComponentSystem/GameObjectManager.h"
 #include <Engine/PersistentSystems/Scene.h> 
 
-
 GameobjectAdded::GameobjectAdded(const GameObject object) : m_object(object)
 {
 	assert(object.IsValid()); 
@@ -21,7 +20,7 @@ void GameobjectAdded::Do()
 
 	for (auto& i : m_components)
 	{ 
-		m_object.AddComponent(*i );
+		m_object.AddComponent(*i);
 	}
 }
 
@@ -34,15 +33,22 @@ bool GameobjectAdded::Merge(std::shared_ptr<BaseCommand>& ptr)
 GameobjectDeleted::GameobjectDeleted(const GameObject object) : m_object(object)
 {
 	assert(object.IsValid());
+	m_components = m_object.CopyAllComponents();
 }
 
 void GameobjectDeleted::Undo()
 {
-	//m_object.scene().GetGOM().CreateGameObject();
+	m_object.scene().GetGOM().CreateGameObject(m_object.GetID());
+
+	for (auto& i : m_components)
+	{ 
+		m_object.AddComponent(*i);
+	}
 }
 
 void GameobjectDeleted::Do()
 {
+	m_object.scene().GetGOM().DeleteGameObject(m_object.GetID());
 }
 
 bool GameobjectDeleted::Merge(std::shared_ptr<BaseCommand>& ptr)

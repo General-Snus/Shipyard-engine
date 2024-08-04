@@ -11,7 +11,7 @@ class GameObject
 {
 public:
 	//If no default argument is provided, the function will create a new GameObject in the active scene
-	static GameObject Create(std::shared_ptr<Scene> ref = nullptr);  // why not set scene to active scene by default? INCLUDE HELL
+	static GameObject Create(const std::string& name = "", std::shared_ptr<Scene> ref = nullptr);  // why not set scene to active scene by default? INCLUDE HELL
 	GameObject() = default;
 	~GameObject() = default;
 
@@ -26,7 +26,7 @@ public:
 	template <class T, typename... Args>
 	T& AddComponent(Args... someParameters);
 
-	Component* AddComponent(const Component* aComponent);
+	Component* AddBaseComponent(const Component* aComponent) const;
 
 	template <class T>
 	bool HasComponent() const;

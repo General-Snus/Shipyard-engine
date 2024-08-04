@@ -67,8 +67,7 @@ void GraphicsEngine::InitializeCustomRenderScene()
 {
 	newScene = std::make_shared<Scene>();
 	{
-		GameObject worldRoot = GameObject::Create(newScene);
-		worldRoot.SetName("WordRoot");
+		GameObject worldRoot = GameObject::Create("WordRoot",newScene); 
 		Transform& transform = worldRoot.AddComponent<Transform>();
 		transform.SetRotation(80,0,0);
 		transform.SetPosition(0,5,0);
@@ -80,8 +79,7 @@ void GraphicsEngine::InitializeCustomRenderScene()
 
 	const auto res = Vector2f(1920.f,1080.f);
 	{
-		GameObject camera = GameObject::Create(newScene);
-		camera.SetName("Camera");
+		GameObject camera = GameObject::Create("Camera",newScene); 
 		auto& cameraComponent = camera.AddComponent<cCamera>();
 		cameraComponent.SetResolution(res); 
 
@@ -90,8 +88,7 @@ void GraphicsEngine::InitializeCustomRenderScene()
 	}
 
 	{
-		auto renderObject = GameObject::Create(newScene);
-		renderObject.SetName("RenderMesh");
+		auto renderObject = GameObject::Create("RenderMesh",newScene); 
 		renderObject.AddComponent<Transform>();
 		renderObject.AddComponent<cMeshRenderer>();
 		newScene->GetGOM().SetLastGOAsPlayer();

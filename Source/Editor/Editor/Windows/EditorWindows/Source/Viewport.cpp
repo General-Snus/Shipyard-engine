@@ -39,11 +39,11 @@ Viewport::Viewport(bool IsMainViewPort, Vector2f ViewportResolution, std::shared
 
     if (IsMainViewPort)
     {
-        myVirtualCamera = GameObject::Create(sceneToRender);
+        myVirtualCamera = GameObject::Create("MainCamera",sceneToRender);
     }
     else
     {
-        myVirtualCamera = GameObject::Create(sceneToRender);
+        myVirtualCamera = GameObject::Create("SecondaryCamera", sceneToRender);
         sceneToRender->GetGOM().SetIsVisibleInHierarchy(myVirtualCamera, false);
 
         auto &camera = myVirtualCamera.AddComponent<cCamera>();

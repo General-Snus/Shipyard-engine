@@ -10,6 +10,8 @@
 #include <Engine/GraphicsEngine/GraphicsEngineUtilities.h>
 #include <unordered_set>
 
+#include "Editor/Editor/Core/Editor.h"
+#include "Editor/Editor/Windows/EditorWindows/CustomFuncWindow.h"
 
 
 //Must define function EditorIcon for asset
@@ -18,7 +20,7 @@ inline void PopUpContextForAsset(std::shared_ptr<asset>& replace)
 {
 	if (ImGui::BeginPopupContextItem())
 	{
-		ImGui::BeginTable(replace->GetTypeInfo().Name().c_str(), 2, 0, {0,500});
+		ImGui::BeginTable(replace->GetTypeInfo().Name().c_str(), 2, 0, { 0,500 });
 		ImGui::TableNextColumn();
 		const auto& assetMap = AssetManager::Get().GetLibraryOfType<asset>()->GetContentCatalogue<asset>();
 		for (const auto& [path, content] : assetMap)
@@ -135,7 +137,7 @@ std::vector<Element>& cMeshRenderer::GetElements() const
 std::shared_ptr<Mesh> cMeshRenderer::GetRawMesh() const
 {
 	return m_Mesh;
-} 
+}
 
 bool cMeshRenderer::InspectorView()
 {
@@ -143,15 +145,15 @@ bool cMeshRenderer::InspectorView()
 	{
 		return false;
 	}
-	Reflect<cMeshRenderer>(); 
+	Reflect<cMeshRenderer>();
 	{
 		if (ImGui::TreeNodeEx("Static meshes", ImGuiTreeNodeFlags_DefaultOpen)) // Replace with element name
 		{
 			ImGui::BeginTable("Mesh", 2);
 			ImGui::TableNextColumn();
 			ImGui::Text("Static Mesh");
-			ImGui::TableNextColumn(); 
-			ImGui::ImageButton("WeirdUniqueIdentifer11231941241", m_Mesh->GetEditorIcon(), {100,100});
+			ImGui::TableNextColumn();
+			ImGui::ImageButton("WeirdUniqueIdentifer11231941241", m_Mesh->GetEditorIcon(), { 100,100 });
 
 			if (ImGui::BeginDragDropTarget())
 			{
@@ -190,7 +192,13 @@ bool cMeshRenderer::InspectorView()
 
 			if (m_OverrideMaterial.size() > matIndex && m_OverrideMaterial[matIndex])
 			{
-				ImGui::ImageButton("WeirdUniqueIdentifer512512313241", m_OverrideMaterial[matIndex]->GetEditorIcon(), { 100,100 });
+				if (ImGui::ImageButton("WeirdUniqueIdentifer512512313241", m_OverrideMaterial[matIndex]->GetEditorIcon(), { 100,100 }, ImGuiButtonFlags_PressedOnDoubleClick))
+				{
+					auto newWindow = std::make_shared<CustomFuncWindow>(std::bind(&Material::InspectorView, m_OverrideMaterial[matIndex]));
+
+					Editor::Get().g_EditorWindows.emplace_back(newWindow);
+				}
+
 				if (ImGui::BeginDragDropTarget())
 				{
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ContentAsset_Material"))
@@ -202,13 +210,18 @@ bool cMeshRenderer::InspectorView()
 						}
 					}
 					ImGui::EndDragDropTarget();
-				} 
+				}
 				PopUpContextForAsset<Material>(m_OverrideMaterial[matIndex]);
 
 			}
 			else if (m_Mesh->materials.contains(matIndex))
 			{
-				ImGui::ImageButton("WeirdUniqueIdentife124675471", m_Mesh->materials.at(matIndex)->GetEditorIcon(), { 100,100 });
+				if(ImGui::ImageButton("WeirdUniqueIdentife124675471", m_Mesh->materials.at(matIndex)->GetEditorIcon(), { 100,100 }, ImGuiButtonFlags_PressedOnDoubleClick))
+				{
+					auto newWindow = std::make_shared<CustomFuncWindow>(std::bind(&Material::InspectorView, m_Mesh->materials.at(matIndex)));
+
+					Editor::Get().g_EditorWindows.emplace_back(newWindow);
+				}
 				if (ImGui::BeginDragDropTarget())
 				{
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ContentAsset_Material"))

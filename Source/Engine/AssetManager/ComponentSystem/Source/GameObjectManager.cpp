@@ -2,8 +2,7 @@
 
 #include "../GameObject.h"
 #include "../GameObjectManager.h"  
-#include "Engine/AssetManager/ComponentSystem/ComponentManager.h" 
-
+#include "Engine/AssetManager/ComponentSystem/ComponentManager.h"
 
 GameObjectManager::~GameObjectManager()
 {
@@ -73,13 +72,13 @@ void GameObjectManager::DeleteGameObject(const SY::UUID aGameObjectID, bool forc
 	myObjectsToDelete.push_back(aGameObjectID);
 }
 
-  void GameObjectManager::DeleteGameObject(const GameObject aGameObject, bool force)
+void GameObjectManager::DeleteGameObject(const GameObject aGameObject, bool force)
 {
 	OPTICK_EVENT();
 	DeleteGameObject(aGameObject.myID, force);
 }
 
-  std::vector<Component*> GameObjectManager::GetAllAttachedComponents(const SY::UUID aGameObjectID)
+std::vector<Component*> GameObjectManager::GetAllAttachedComponents(const SY::UUID aGameObjectID)
 {
 	std::vector<Component*> components;
 	for (auto& [type, manager] : myComponentManagers)
@@ -93,15 +92,14 @@ void GameObjectManager::DeleteGameObject(const SY::UUID aGameObjectID, bool forc
 	return components;
 }
 
-  std::vector<Component*> GameObjectManager::CopyAllAttachedComponents(SY::UUID aGameObjectID)
+std::vector<Component*> GameObjectManager::CopyAllAttachedComponents(SY::UUID aGameObjectID)
 {
 	std::vector<Component*> components;
 	for (auto& [type, manager] : myComponentManagers)
 	{
-		auto cmp = manager->TryGetBaseComponent(aGameObjectID);
-		if (cmp)
+		if (const auto cmp = manager->DeepCopy(aGameObjectID))
 		{
-			components.emplace_back(new Component(*cmp));
+			components.emplace_back(cmp);
 		}
 	}
 	return components;
@@ -179,18 +177,16 @@ void GameObjectManager::SetLayer(const SY::UUID aGameObjectID, const Layer aLaye
 {
 	myGameObjects.at(aGameObjectID).onLayer = aLayer;
 }
-
-template<>
-Component& GameObjectManager::AddComponent(const SY::UUID aGameObjectID, const Component& aComponent)
+ 
+  Component* GameObjectManager::AddBaseComponent(const SY::UUID aGameObjectID, const Component* aComponent)
 {
 	OPTICK_EVENT();
-
-	if (!myComponentManagers.contains(aComponent.GetTypeInfo().TypeID()))
+	if (!myComponentManagers.contains(aComponent->GetTypeInfo().TypeID()))
 	{
 		throw std::exception("You reached a dead end of my mind because i have no clue how i should do this");
 	}
 
-	return  *myComponentManagers[aComponent.GetTypeInfo().TypeID()]->AddComponent(aGameObjectID, &aComponent);
+	return myComponentManagers[aComponent->GetTypeInfo().TypeID()]->AddComponent(aGameObjectID, aComponent);
 }
 
 void GameObjectManager::SetLastGOAsPlayer()
