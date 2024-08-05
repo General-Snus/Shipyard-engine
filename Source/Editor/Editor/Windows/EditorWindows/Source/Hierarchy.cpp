@@ -11,6 +11,87 @@
 
 #include "Engine/PersistentSystems/Scene.h"
 
+void Hierarchy::PopupMenu(SY::UUID id)
+{
+	const auto popupId = "##Hierarchy" + static_cast<std::string>(id);
+	if (ImGui::BeginPopupContextItem(popupId.c_str()))
+	{
+		if (ImGui::Selectable("Create Empty"))
+		{
+			GameObject::Create("Empty");
+		}
+		if (ImGui::Selectable("Create Empty Child"))
+		{
+			auto parent = Scene::ActiveManager().GetGameObject(id);
+			auto child = GameObject::Create("Empty");
+			child.transform().SetParent(parent.transform());
+		}
+		ImGui::Separator();
+		if (ImGui::Selectable("Duplicate"))
+		{
+			auto gameObject = Scene::ActiveManager().GetGameObject(id);
+			auto components = gameObject.CopyAllComponents();
+
+			auto newObject = GameObject::Create(gameObject.GetName() + "_1");
+			for (auto& i : components)
+			{
+				newObject.AddBaseComponent(i);
+			}
+		}
+		if (ImGui::Selectable("Delete"))
+		{
+			Scene::ActiveManager().DeleteGameObject(id);
+		}
+		ImGui::Separator();
+		if (ImGui::Selectable("Rename"))
+		{
+			auto gameObject = Scene::ActiveManager().GetGameObject(id);
+			gameObject.SetName("Renamed GameObject");
+		}
+		ImGui::Separator();
+		if (ImGui::Selectable("Copy"))
+		{
+		}
+		if (ImGui::Selectable("Paste"))
+		{
+		}
+		ImGui::Separator();
+		if (ImGui::Selectable("Move camera to object"))
+		{
+			Editor::Get().FocusObject(Scene::ActiveManager().GetGameObject(id));
+		}
+		if (ImGui::Selectable("Align With View"))
+		{
+			//Move object to align with scene camera
+			Editor::Get().AlignObject(Scene::ActiveManager().GetGameObject(id));
+		}
+		if (ImGui::Selectable("Align View to Selected"))
+		{
+			//Move scene camera to align with selected object
+			Editor::Get().FocusObject(Scene::ActiveManager().GetGameObject(id), false);
+		}
+		if (ImGui::Selectable("Set as Parent"))
+		{
+			auto selected = Editor::GetSelectedGameObjects();
+			for (auto& child : selected)
+			{
+				child.GetComponent<Transform>().SetParent(Scene::ActiveManager().GetGameObject(id).GetComponent<Transform>());
+			}
+		}
+		if (ImGui::Selectable("Clear Parent"))
+		{
+			auto gameObject = Scene::ActiveManager().GetGameObject(id);
+			gameObject.transform().Detach();
+		}
+		ImGui::Separator();
+		if (ImGui::Selectable("Add Component"))
+		{
+
+		}
+		ImGui::EndPopup();
+	}
+}
+
 void Hierarchy::RenderNode(const Transform& transform)
 {
 	const auto& data = transform.GetGameObject();
@@ -23,7 +104,6 @@ void Hierarchy::RenderNode(const Transform& transform)
 	{
 		flags |= ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_Leaf;
 	}
-
 
 	{
 		bool isActive = data.GetActive();
@@ -51,79 +131,7 @@ void Hierarchy::RenderNode(const Transform& transform)
 					refSelected.push_back(Scene::ActiveManager().GetGameObject(id));
 				}
 			}
-			const auto popupId = "##Hierarchy" + static_cast<std::string>(id);
-			if (ImGui::BeginPopupContextItem(popupId.c_str()))
-			{
-				if (ImGui::Selectable("Create Empty"))
-				{
-					GameObject::Create("Empty");
-				}
-				if (ImGui::Selectable("Create Empty Child"))
-				{
-					auto parent = Scene::ActiveManager().GetGameObject(id);
-					auto child = GameObject::Create("Empty");
-					child.transform().SetParent(parent.transform());
-				}
-				ImGui::Separator();
-				if (ImGui::Selectable("Duplicate"))
-				{
-					auto gameObject = Scene::ActiveManager().GetGameObject(id);
-					auto components = gameObject.CopyAllComponents();
-
-					auto newObject = GameObject::Create(gameObject.GetName() + "_1");
-					for (auto& i : components)
-					{
-						newObject.AddBaseComponent(i);
-					}
-				}
-				if (ImGui::Selectable("Delete"))
-				{
-					Scene::ActiveManager().DeleteGameObject(id);
-				}
-				ImGui::Separator();
-				if (ImGui::Selectable("Rename"))
-				{
-					auto gameObject = Scene::ActiveManager().GetGameObject(id);
-					gameObject.SetName("Renamed GameObject");
-				}
-				ImGui::Separator();
-				if (ImGui::Selectable("Copy"))
-				{
-				}
-				if (ImGui::Selectable("Paste"))
-				{
-				}
-				ImGui::Separator();
-				if (ImGui::Selectable("Move To View"))
-				{
-
-				}
-				if (ImGui::Selectable("Align With View"))
-				{
-				}
-				if (ImGui::Selectable("Align View to Selected"))
-				{
-				}
-				if (ImGui::Selectable("Set as Parent"))
-				{
-					auto selected = Editor::GetSelectedGameObjects();
-					for (auto& child : selected)
-					{
-						child.GetComponent<Transform>().SetParent(Scene::ActiveManager().GetGameObject(id).GetComponent<Transform>());
-					}
-				}
-				if (ImGui::Selectable("Clear Parent"))
-				{
-					auto gameObject = Scene::ActiveManager().GetGameObject(id);
-					gameObject.transform().Detach();
-				}
-				ImGui::Separator();
-				if (ImGui::Selectable("Add Component"))
-				{
-
-				}
-				ImGui::EndPopup();
-			}
+			PopupMenu(id);
 
 			if (!isActive)
 			{

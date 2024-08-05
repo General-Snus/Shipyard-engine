@@ -7,7 +7,7 @@
 
 enum eSpace
 {
-	WORLD,LOCAL
+	WORLD, LOCAL
 };
 
 #define DoDirtyChecks false //  allows or disallows isDirty, to get tasks done, TODO create a event manager for dirty events checks.
@@ -57,7 +57,7 @@ public:
 	void SetRotation(float X, float Y, float Z);
 	void SetRotation(Vector2f angularRotation);
 	void SetRotation(Vector3f angularRotation);
-	void LookAt(Vector3f target);
+	void LookAt(Vector3f target, Vector3f Up = GlobalUp);
 
 	//"You will eventually regret any use of Euler angles."
 	//John Carmack
@@ -91,13 +91,13 @@ public:
 
 
 	std::string GetParentName()  const;
-	void SetParent(Transform& parent);
-	void SetParent(Transform& parent, bool worldPositionStays);
+	bool SetParent(Transform& parent);
+	bool SetParent(Transform& parent, bool worldPositionStays);
 	Transform& Root();
 	bool HasParent() const;
 	Transform& GetParent() const;
 	bool Find(const std::string& nameOfChild, Transform& transform) const;
-	bool FindRecursive(const std::string& nameOfChild,Transform& transform) const;
+	bool FindRecursive(const std::string& nameOfChild, Transform& transform) const;
 	Transform& GetChild(int index) const;
 	bool HasChildren() const;
 	unsigned int GetChildCount() const;
@@ -105,17 +105,19 @@ public:
 	std::vector<std::reference_wrapper<Transform>> GetAllDirectChildren() const;
 
 	//Will be called from upstairs because gameobjects will also be able to create/destroy children
-	void AddChild(Transform& child);
-	void AddChildren(std::vector<std::reference_wrapper<Transform>>& childs);
-	void RemoveChild(Transform& child);
+	bool AddChild(Transform& child);
+	bool AddChildren(std::vector<std::reference_wrapper<Transform>>& childs);
+	bool RemoveChild(Transform& child);
 	void RemoveAllChildren();
 	void SetChildrenActive(bool isActive) const;
 	void SetChildrenActiveRecursive(bool isActive) const;
 
 
 	bool IsChildOf(Transform& parent) const;
-	void DetachChildren() ;
+	void DetachChildren();
 	void DetachChildren(int index);
+	void DetachChildID(const SY::UUID index);
+	void DetachChild(const GameObject& index);
 
 	//Detach from parent
 	void Detach();

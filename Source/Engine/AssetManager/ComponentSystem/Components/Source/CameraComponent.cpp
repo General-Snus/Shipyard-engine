@@ -13,27 +13,27 @@
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 #include "Tools/Utilities/Input/EnumKeys.h"
 
-cCamera::cCamera(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager)
+cCamera::cCamera(const SY::UUID anOwnerId, GameObjectManager* aManager) : Component(anOwnerId, aManager)
 {
 	GetGameObject().AddComponent<Transform>();
-	GetGameObject().GetComponent<Transform>().SetGizmo(false); 
+	GetGameObject().GetComponent<Transform>().SetGizmo(false);
 
 	if (!isOrtho)
 	{
-		const auto dxMatrix = XMMatrixPerspectiveFovLH(FowInRad(),APRatio(),farfield,nearField);
+		const auto dxMatrix = XMMatrixPerspectiveFovLH(FowInRad(), APRatio(), farfield, nearField);
 		m_Projection = Matrix(&dxMatrix);
 	}
 	else
 	{
-		const auto dxMatrix = XMMatrixOrthographicLH(fow,fow,farfield,nearField);
+		const auto dxMatrix = XMMatrixOrthographicLH(fow, fow, farfield, nearField);
 		m_Projection = Matrix(&dxMatrix);
 	}
 
 #ifdef Flashlight
 	GetGameObject().AddComponent<cLight>(eLightType::Spot);
 	std::weak_ptr<SpotLight> pLight = GetComponent<cLight>().GetData<SpotLight>();
-	pLight.lock()->Position = Vector3f(0,0,0);
-	pLight.lock()->Color = Vector3f(1,1,1);
+	pLight.lock()->Position = Vector3f(0, 0, 0);
+	pLight.lock()->Color = Vector3f(1, 1, 1);
 	pLight.lock()->Power = 2000.0f * Kilo;
 	pLight.lock()->Range = 1000;
 	pLight.lock()->Direction = { 0,-1,0 };
@@ -42,7 +42,7 @@ cCamera::cCamera(const SY::UUID anOwnerId,GameObjectManager* aManager) : Compone
 	GetComponent<cLight>().BindDirectionToTransform(true);
 #endif
 }
- 
+
 cCamera::~cCamera()
 {
 }
@@ -50,7 +50,7 @@ cCamera::~cCamera()
 void cCamera::Update()
 {
 	OPTICK_EVENT();
-	fow = std::clamp(fow,0.1f,360.f);
+	fow = std::clamp(fow, 0.1f, 360.f);
 
 	if (!IsInControll)
 	{
@@ -90,8 +90,8 @@ void cCamera::Update()
 		anyMouseKeyHeld = true;
 		const Vector3f mouseDeltaVector =
 		{
-			std::abs(Input::GetMousePositionDelta().y) > 0.001f ? Input::GetMousePositionDelta().y : 0.f,
-			std::abs(Input::GetMousePositionDelta().x) > 0.001f ? -Input::GetMousePositionDelta().x : 0.f,
+			std::abs(Input::GetMousePositionDelta().y) > 0.001f ? -Input::GetMousePositionDelta().y : 0.f,
+			std::abs(Input::GetMousePositionDelta().x) > 0.001f ? Input::GetMousePositionDelta().x : 0.f,
 			0.0f
 		};
 
@@ -120,51 +120,53 @@ void cCamera::Update()
 	{
 		if (anyMouseKeyHeld)
 		{
-			cameraSpeed = std::clamp(cameraSpeed * 1.05f,.5f,static_cast<float>(INT_MAX));
+			cameraSpeed = std::clamp(cameraSpeed * 1.1f, .5f, static_cast<float>(INT_MAX));
 		}
 		else
 		{
 
-			aTransform.Move(aTransform.GetForward() * 10.0f * aTimeDelta * mdf);
+			aTransform.Move(aTransform.GetForward() * 5.0f * aTimeDelta * mdf);
 		}
 	}
 	if (Input::GetMouseWheelDelta() < -Input::g_MouseWheelDeadZone)
 	{
 		if (anyMouseKeyHeld)
 		{
-			cameraSpeed = std::clamp(cameraSpeed * 0.95f,.5f,static_cast<float>(INT_MAX));
+			cameraSpeed = std::clamp(cameraSpeed * 0.95f, .5f, static_cast<float>(INT_MAX));
 		}
 		else
 		{
-			aTransform.Move(-aTransform.GetForward()*10.0f * aTimeDelta * mdf);
+			aTransform.Move(-aTransform.GetForward() * 5.0f * aTimeDelta * mdf);
 		}
 	}
+	if (anyMouseKeyHeld)
+	{
+		if (Input::IsKeyHeld(Keys::W))
+		{
+			aTransform.Move(aTransform.GetForward() * aTimeDelta * mdf);
+		}
+		if (Input::IsKeyHeld(Keys::S))
+		{
+			aTransform.Move(-aTransform.GetForward() * aTimeDelta * mdf);
+		}
+		if (Input::IsKeyHeld(Keys::D))
+		{
+			aTransform.Move(aTransform.GetRight() * aTimeDelta * mdf);
+		}
+		if (Input::IsKeyHeld(Keys::A))
+		{
+			aTransform.Move(-aTransform.GetRight() * aTimeDelta * mdf);
+		}
 
-	if (Input::IsKeyHeld(Keys::W))
-	{
-		aTransform.Move(aTransform.GetForward() * aTimeDelta * mdf);
-	}
-	if (Input::IsKeyHeld(Keys::S))
-	{
-		aTransform.Move(-aTransform.GetForward() * aTimeDelta * mdf);
-	}
-	if (Input::IsKeyHeld(Keys::D))
-	{
-		aTransform.Move(aTransform.GetRight() * aTimeDelta * mdf);
-	}
-	if (Input::IsKeyHeld(Keys::A))
-	{
-		aTransform.Move(-aTransform.GetRight() * aTimeDelta * mdf);
-	}
+		if (Input::IsKeyHeld(Keys::E))
+		{
+			aTransform.Move(GlobalUp * aTimeDelta * mdf);
+		}
 
-	if (Input::IsKeyHeld(Keys::E))
-	{
-		aTransform.Move(GlobalUp * aTimeDelta * mdf);
-	}
-
-	if (Input::IsKeyHeld(Keys::Q))
-	{
-		aTransform.Move(-GlobalUp * aTimeDelta * mdf);
+		if (Input::IsKeyHeld(Keys::Q))
+		{
+			aTransform.Move(-GlobalUp * aTimeDelta * mdf);
+		}
 	}
 #ifdef Flashlight
 	if (Input::GetInstance().IsKeyPressed((int)Keys::F))
@@ -172,18 +174,18 @@ void cCamera::Update()
 		GetComponent<cLight>().BindDirectionToTransform(!GetComponent<cLight>().GetIsBound());
 	}
 #endif
-}
+		}
 
 void cCamera::Render()
 {
-} 
+}
 
-std::array<Vector4f,4> cCamera::GetFrustrumCorners() const
+std::array<Vector4f, 4> cCamera::GetFrustrumCorners() const
 {
 	const float farplane = 10000; // I dont use farplanes but some effect wants them anyway 
 	const float halfHeight = farplane * tanf(0.25f * FowInRad());
 	const float halfWidth = APRatio() * halfHeight;
-	std::array<Vector4f,4> corners;
+	std::array<Vector4f, 4> corners;
 	corners[0] = { -halfWidth, -halfHeight, farplane, 0.0f };
 	corners[1] = { -halfWidth,	halfHeight, farplane, 0.0f };
 	corners[2] = { halfWidth, +halfHeight, farplane, 0.0f };
@@ -203,17 +205,17 @@ Vector3f cCamera::GetPointerDirection(const Vector2<int> position)
 	auto size = Editor::GetViewportResolution();
 
 	viewPosition.x = ((2.0f * position.x / size.x) - 1);
-	viewPosition /= m_Projection(1,1);
+	viewPosition /= m_Projection(1, 1);
 
 	viewPosition.y = ((-2.0f * position.y / size.y) - 1);
-	viewPosition /= m_Projection(2,2);
+	viewPosition /= m_Projection(2, 2);
 
 	viewPosition.z = 1;
 	viewPosition.w = 0;
 
 	const Matrix myTransform = GetGameObject().GetComponent<Transform>().GetTransform();
 	const Vector4f out = viewPosition * Matrix::GetFastInverse(myTransform);
-	return Vector3f(out.x,out.y,out.z);
+	return Vector3f(out.x, out.y, out.z);
 }
 
 Vector3f cCamera::GetPointerDirectionNDC(const Vector2<int> position) const
@@ -227,7 +229,7 @@ FrameBuffer cCamera::GetFrameBuffer()
 	OPTICK_EVENT();
 	auto& transform = GetComponent<Transform>();
 	FrameBuffer buffer;
-	auto dxMatrix = XMMatrixPerspectiveFovLH(FowInRad(),APRatio(),farfield,nearField);
+	auto dxMatrix = XMMatrixPerspectiveFovLH(FowInRad(), APRatio(), farfield, nearField);
 	buffer.ProjectionMatrix = Matrix(&dxMatrix);
 	buffer.ViewMatrix = Matrix::GetFastInverse(transform.GetTransform());
 	buffer.Time = Timer::GetDeltaTime();
@@ -264,7 +266,7 @@ bool cCamera::InspectorView()
 	{
 		return false;
 	}
-	Reflect<cCamera>();  
+	Reflect<cCamera>();
 
 	return true;
 }

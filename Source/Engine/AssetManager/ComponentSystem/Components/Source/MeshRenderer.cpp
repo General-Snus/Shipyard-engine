@@ -139,6 +139,27 @@ std::shared_ptr<Mesh> cMeshRenderer::GetRawMesh() const
 	return m_Mesh;
 }
 
+float cMeshRenderer::GetBoundingSphereRadius() const
+{
+	if (!m_Mesh)
+	{
+		return 0;
+	}
+
+	//TODO Returned the scaled and transformed bound
+	return m_Mesh->Bounds.GetRadius();
+}
+
+AABB3D<> cMeshRenderer::GetBoundingBox() const
+{
+	if (!m_Mesh)
+	{
+		return AABB3D();
+	}
+	//TODO Returned the scaled and transformed bound
+	return m_Mesh->Bounds;
+}
+
 bool cMeshRenderer::InspectorView()
 {
 	if (!Component::InspectorView())
@@ -216,7 +237,7 @@ bool cMeshRenderer::InspectorView()
 			}
 			else if (m_Mesh->materials.contains(matIndex))
 			{
-				if(ImGui::ImageButton("WeirdUniqueIdentife124675471", m_Mesh->materials.at(matIndex)->GetEditorIcon(), { 100,100 }, ImGuiButtonFlags_PressedOnDoubleClick))
+				if (ImGui::ImageButton("WeirdUniqueIdentife124675471", m_Mesh->materials.at(matIndex)->GetEditorIcon(), { 100,100 }, ImGuiButtonFlags_PressedOnDoubleClick))
 				{
 					auto newWindow = std::make_shared<CustomFuncWindow>(std::bind(&Material::InspectorView, m_Mesh->materials.at(matIndex)));
 
@@ -307,29 +328,6 @@ std::shared_ptr<TextureHolder> cMeshRenderer::GetTexture(eTextureType type, unsi
 	}
 
 	return nullptr;
-}
-void cMeshRenderer::Render()
-{
-	OPTICK_EVENT();
-	//if (auto* myTransform = this->TryGetComponent<Transform>())
-	//{
-	//	if (!isInstanced)
-	//	{
-	//		GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),isInstanced);
-	//		//GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,myTransform->GetTransform(),isInstanced);
-	//		return;
-	//	}
-	//	myRenderData->myMesh->myInstances.emplace_back(myTransform->GetTransform());
-	//	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,myTransform->GetTransform(),isInstanced);
-	//	return;
-	//}
-	//if (!isInstanced)
-	//{
-	//	GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),isInstanced);
-	//	//GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderMeshShadow>(myRenderData,Matrix(),isInstanced);
-	//}
-	//myRenderData->myMesh->myInstances.emplace_back(Matrix());
-	//GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderMesh>(myRenderData,Matrix(),isInstanced);
 }
 
 

@@ -48,6 +48,8 @@ public:
 	static std::vector<GameObject>& GetSelectedGameObjects() { return m_SelectedGameObjects; }
 	static inline bool IsPlaying = false;
 
+	void FocusObject(const GameObject& focus, bool focusWithOffset = true) const;
+	void AlignObject(const GameObject& focus) const;
 	static std::shared_ptr<Scene> GetMainScene()
 	{
 		return m_MainScene;

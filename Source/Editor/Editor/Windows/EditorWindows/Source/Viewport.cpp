@@ -73,6 +73,11 @@ bool Viewport::IsSelected() const
     return IsUsed;
 }
 
+bool Viewport::IsHovered() const
+{
+	return IsMouseHoverering;
+}
+
 bool Viewport::IsRenderReady()
 {
     // if you are main and there is a active camera
@@ -105,7 +110,7 @@ void Viewport::Update()
     }
     else
     {
-        myVirtualCamera.SetActive(IsSelected());
+       // myVirtualCamera.SetActive(IsSelected());
         auto &camera = myVirtualCamera.GetComponent<cCamera>();
         camera.IsInControl(IsSelected());
         camera.SetResolution(ViewportResolution);
@@ -190,7 +195,7 @@ void Viewport::RenderImGUi()
         float windowHeight = ImGui::GetWindowHeight();
         ImGui::Image(m_RenderTarget, ImVec2(windowWidth, windowHeight));
         const bool isWindowFocused = ImGui::IsItemHovered();
-
+        IsMouseHoverering = isWindowFocused;
         if (ImGui::BeginDragDropTarget())
         {
             if (const ImGuiPayload *test = ImGui::AcceptDragDropPayload("ContentAsset_Mesh"))

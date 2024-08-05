@@ -2,6 +2,7 @@
 #define NOMINMAX
 #include <algorithm>
 #include "Vectors.hpp" 
+#include "Sphere.hpp" 
 
 class Transform;
 template<class T = float>
@@ -24,6 +25,7 @@ public:
 	float DistanceTo(const Vector3<T>& aPosition) const;
 	Vector3<T> ClosestPoint(const Vector3<T>& aPosition) const;
 
+	Sphere<T> GetBoundingSphere() const { return Sphere<T>(GetCenter(),GetRadius()); } 
 
 	void Extend(AABB3D<T> aAABB3D);
 	Vector3<T> GetCenter() const { return (MinPoint + MaxPoint) * 0.5f; }

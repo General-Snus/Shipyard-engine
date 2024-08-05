@@ -27,6 +27,7 @@ public:
  
 	~Viewport() override;
 	bool IsSelected() const;
+	bool IsHovered() const;
 	bool IsRenderReady();
 	bool IsMainViewport() const;
 	void Update();
@@ -54,6 +55,7 @@ private:
 	bool IsMainViewPort = false;
 	bool IsVisible = true;
 	bool IsUsed = false;
+	bool IsMouseHoverering = false;
 	GameObject myVirtualCamera;
 };
 

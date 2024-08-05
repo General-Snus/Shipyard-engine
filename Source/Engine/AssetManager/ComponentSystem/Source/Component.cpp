@@ -35,3 +35,4 @@ Transform& Component::transform()
 {
 	return GetComponent<Transform>();
 }
+ 
