@@ -1,5 +1,6 @@
-#include "../Transform.h"
 #include "Engine/AssetManager/AssetManager.pch.h"
+
+#include "../Transform.h"
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
 #include <Tools/Utilities/Math.hpp>
 
@@ -13,8 +14,32 @@ Transform::Transform(const SY::UUID anOwnerId, GameObjectManager* aManager) : Co
 {
 }
 
+void Transform::Destroy()
+{
+	Component::Destroy();
+	Detach();
+	RemoveAllChildren();
+}
+
 void Transform::Init()
 {
+	if (m_Parent.IsValid())
+	{
+		m_Parent.transform().AddChild(*this);
+	}
+
+	if(!m_Children.empty())
+	{
+		auto children = m_Children;
+		m_Children.clear();
+		for (auto& child : children)
+		{
+			if(child.IsValid())
+			{
+				child.transform().SetParent(*this);
+			}
+		}
+	} 
 }
 
 void Transform::Update()
@@ -26,7 +51,7 @@ void Transform::Update()
 	{
 		MakeClean();
 		this->GetGameObject().OnSiblingChanged(&typeid(Transform));
-	}
+}
 #else
 	MakeClean();
 	this->GetGameObject().OnSiblingChanged(&typeid(Transform));
@@ -608,6 +633,23 @@ Transform& Transform::GetChild(int index) const
 	}
 }
 
+bool Transform::HasChild(const SY::UUID id) const
+{ 
+	for (auto& c : m_Children)
+	{
+		if (c.GetID() == id)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Transform::HasChild(const GameObject& obj) const
+{
+	return HasChild(obj.GetID());
+}
+
 bool Transform::HasChildren() const
 {
 	return !m_Children.empty();
@@ -650,7 +692,11 @@ std::vector<std::reference_wrapper<Transform>> Transform::GetAllDirectChildren()
 
 bool Transform::AddChild(Transform& child)
 {
-	if (child.GetGameObject().IsValid())
+
+	const auto id = child.GetGameObject().GetID();
+
+
+	if (id.IsValid())
 	{
 		child.Detach();
 		child.m_Parent = GetGameObject();
@@ -699,7 +745,7 @@ bool Transform::RemoveChild(Transform& child)
 		myManager->DeleteGameObject(m_Children[indexToRemove]);
 		m_Children.erase(m_Children.begin() + indexToRemove);
 		return true;
-	} 
+	}
 
 	return false;
 }

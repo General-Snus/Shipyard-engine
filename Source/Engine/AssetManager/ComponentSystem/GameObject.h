@@ -18,6 +18,9 @@ public:
 
 
 	template <class T>
+	void RemoveComponent();
+
+	template <class T>
 	T& AddComponent();
 
 	template <class T>
@@ -58,7 +61,7 @@ public:
 	Layer GetLayer() const { return myManager->GetLayer(myID); };
 
 	SY::UUID GetID() const { return myID; }
-	bool IsValid() const { return myID.IsValid() && myManager != nullptr; }
+	bool IsValid() const { return myID.IsValid() && myManager != nullptr && myManager->HasGameObject(myID); }
 
 	Transform& transform() const;
 	Scene& scene() const;
@@ -83,6 +86,15 @@ inline bool GameObject::GetActive() const
 	assert(myID.IsValid() && "GameObject has no ID");
 	return myManager->GetActive(myID);
 }
+
+template <class T>
+void GameObject::RemoveComponent()
+{
+	assert(myManager != nullptr && "GameObject has no manager");
+	assert(myID.IsValid() && "GameObject has no ID");
+	myManager->RemoveComponent<T>(myID);
+}
+
 template<class T>
 T& GameObject::AddComponent()
 {
@@ -136,7 +148,7 @@ inline bool GameObject::operator==(const GameObject& other) const
 {
 	return !(myID != other.myID || myManager != other.myManager);
 }
- 
+
 
 inline GameObject::operator SY::UUID() const
 {
@@ -145,7 +157,7 @@ inline GameObject::operator SY::UUID() const
 inline GameObject::operator std::string() const
 {
 	return GetName();
-} 
+}
 
 
 inline void GameObject::SetActive(const bool aState) const

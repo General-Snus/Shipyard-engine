@@ -489,6 +489,20 @@ void Editor::UpdateImGui()
 #endif
 }
 
+void Editor::CheckSelectedForRemoved()
+{
+	OPTICK_EVENT();
+	for (auto& selected : m_SelectedGameObjects)
+	{
+		if (!selected.scene().GetGOM().HasGameObject(selected.GetID()))
+		{
+			//TODO do other than just clear, clear only the value that is removed
+			m_SelectedGameObjects.clear();
+			break;
+		}
+	}
+}
+
 void Editor::FocusObject(const GameObject& focus, bool focusWithOffset) const
 {
 	for (auto& viewport : m_Viewports)

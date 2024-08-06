@@ -19,7 +19,7 @@ public:
 	MYLIB_REFLECTABLE();
 	Transform() = delete;
 	Transform(const SY::UUID anOwnerId, GameObjectManager* aManager);
-
+	void Destroy() override;
 	void Init() override;
 	void Update() override;
 	void Render() override;
@@ -99,6 +99,10 @@ public:
 	bool Find(const std::string& nameOfChild, Transform& transform) const;
 	bool FindRecursive(const std::string& nameOfChild, Transform& transform) const;
 	Transform& GetChild(int index) const;
+
+	bool HasChild(const SY::UUID id) const;
+	bool HasChild(const GameObject& id) const; 
+
 	bool HasChildren() const;
 	unsigned int GetChildCount() const;
 	std::vector<std::reference_wrapper<Transform>> GetAllChildren();

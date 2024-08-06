@@ -2,8 +2,10 @@
 
 #include "../GameObject.h"
 #include "../GameObjectManager.h"  
-#include "Engine/AssetManager/ComponentSystem/ComponentManager.h"
 
+#include "Editor/Editor/Core/Editor.h"
+#include "Engine/AssetManager/ComponentSystem/ComponentManager.h"
+ 
 GameObjectManager::~GameObjectManager()
 {
 	for (auto& [key, cm] : myComponentManagers)
@@ -31,19 +33,35 @@ GameObject GameObjectManager::CreateGameObject()
 
 GameObject GameObjectManager::CreateGameObject(const SY::UUID aGameObjectID)
 {
-	OPTICK_EVENT();
 	GameObjectData data;
 
 	data.IsActive = true;
-	data.Name = "GameObject(" + std::to_string(myLastID) + ")";
+	data.Name = "GameObject(" + std::to_string(aGameObjectID) + ")";
 	data.onLayer = Layer::Default;
 
-	if (myGameObjects.contains(aGameObjectID))
-		//Force add transform?
-		myGameObjects.emplace(myLastID, data);
-	auto object = GameObject(myLastID++, this);
-	object.AddComponent<Transform>();
+	return CreateGameObject(aGameObjectID, data);
+}
 
+GameObject GameObjectManager::CreateGameObject(const SY::UUID aGameObjectID, const GameObjectData& data)
+{
+	OPTICK_EVENT();
+
+
+	SY::UUID id;
+	if (myGameObjects.contains(aGameObjectID))
+	{
+		myGameObjects.emplace(myLastID, data);
+		id = myLastID;
+		myLastID++;
+	}
+	else
+	{
+		myGameObjects.emplace(aGameObjectID, data);
+		id = aGameObjectID;
+	}
+
+	auto object = GameObject(id, this);
+	object.AddComponent<Transform>();
 	return object;
 }
 
@@ -60,6 +78,7 @@ void GameObjectManager::DeleteGameObject(const SY::UUID aGameObjectID, bool forc
 			}
 
 			myGameObjects.erase(aGameObjectID);
+			Editor::Get().CheckSelectedForRemoved();
 		}
 		else
 		{
@@ -80,6 +99,7 @@ void GameObjectManager::DeleteGameObject(const GameObject aGameObject, bool forc
 
 std::vector<Component*> GameObjectManager::GetAllAttachedComponents(const SY::UUID aGameObjectID)
 {
+	OPTICK_EVENT();
 	std::vector<Component*> components;
 	for (auto& [type, manager] : myComponentManagers)
 	{
@@ -94,6 +114,7 @@ std::vector<Component*> GameObjectManager::GetAllAttachedComponents(const SY::UU
 
 std::vector<Component*> GameObjectManager::CopyAllAttachedComponents(SY::UUID aGameObjectID)
 {
+	OPTICK_EVENT();
 	std::vector<Component*> components;
 	for (auto& [type, manager] : myComponentManagers)
 	{
@@ -105,7 +126,7 @@ std::vector<Component*> GameObjectManager::CopyAllAttachedComponents(SY::UUID aG
 	return components;
 }
 
-bool GameObjectManager::GetActive(const SY::UUID aGameObjectID)
+bool GameObjectManager::GetActive(const SY::UUID aGameObjectID) const
 {
 	OPTICK_EVENT();
 	if (!myGameObjects.contains(aGameObjectID))
@@ -116,7 +137,7 @@ bool GameObjectManager::GetActive(const SY::UUID aGameObjectID)
 	return myGameObjects.at(aGameObjectID).IsActive;
 }
 
-Layer GameObjectManager::GetLayer(const SY::UUID aGameObjectID)
+Layer GameObjectManager::GetLayer(const SY::UUID aGameObjectID) const
 {
 	OPTICK_EVENT();
 	return myGameObjects.at(aGameObjectID).onLayer;
@@ -152,6 +173,20 @@ GameObject GameObjectManager::GetGameObject(SY::UUID anID)
 	return GameObject();
 }
 
+bool GameObjectManager::HasGameObject(SY::UUID anID) const
+{
+	if (myGameObjects.contains(anID) && anID.IsValid())
+	{
+		return true;
+	}
+	return false;
+}
+
+bool GameObjectManager::HasGameObject(const GameObject& anID) const
+{
+	return HasGameObject(anID.myID);
+}
+
 void GameObjectManager::CollidedWith(const SY::UUID aFirstID, const SY::UUID aTargetID)
 {
 	OPTICK_EVENT();
@@ -170,15 +205,14 @@ void GameObjectManager::SetActive(const SY::UUID aGameObjectID, const bool aStat
 		return;
 	}
 	assert(false && "GameObjectManager: Tried to set active on a missing GameObject. ID: " + aGameObjectID);
-	//ERROR_PRINT("GameObjectManager: Tried to set active on a missing GameObject. ID: " + aGameObjectID);
 }
 
 void GameObjectManager::SetLayer(const SY::UUID aGameObjectID, const Layer aLayer)
 {
 	myGameObjects.at(aGameObjectID).onLayer = aLayer;
 }
- 
-  Component* GameObjectManager::AddBaseComponent(const SY::UUID aGameObjectID, const Component* aComponent)
+
+Component* GameObjectManager::AddBaseComponent(const SY::UUID aGameObjectID, const Component* aComponent)
 {
 	OPTICK_EVENT();
 	if (!myComponentManagers.contains(aComponent->GetTypeInfo().TypeID()))
@@ -236,8 +270,8 @@ void GameObjectManager::SortUpdateOrder()
 	{
 		myUpdateOrder.push_back(cm);
 	}
-	std::sort(myUpdateOrder.begin(), myUpdateOrder.end(),
-		[](auto& aFirst, auto& aSecond)
+	std::ranges::sort(myUpdateOrder,
+		[](const auto& aFirst, const auto& aSecond)
 		{
 			return static_cast<int>(aFirst.second->GetUpdatePriority()) < static_cast<int>(aSecond.second->GetUpdatePriority());
 		});
@@ -257,6 +291,7 @@ void GameObjectManager::DeleteObjects()
 				cm.second->DeleteGameObject(myObjectsToDelete[i]);
 			}
 			myGameObjects.erase(myObjectsToDelete[i]);
+			Editor::Get().CheckSelectedForRemoved();
 		}
 		else
 		{
@@ -326,4 +361,15 @@ void GameObjectManager::SetName(const std::string& name, const SY::UUID aGameObj
 		return;
 	}
 	myGameObjects.at(aGameObjectID).Name = name;
+}
+
+GameObjectManager::GameObjectData GameObjectManager::GetData(const SY::UUID aGameObjectID)
+{
+	OPTICK_EVENT();
+	if (!myGameObjects.contains(aGameObjectID))
+	{
+		return {};
+	}
+
+	return myGameObjects.at(aGameObjectID);
 }

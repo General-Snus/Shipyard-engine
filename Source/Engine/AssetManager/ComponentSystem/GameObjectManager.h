@@ -16,6 +16,7 @@ class GameObject;
 class GameObjectManager
 {
 private:
+public:
 	struct GameObjectData
 	{
 		bool IsActive = true;
@@ -24,15 +25,20 @@ private:
 		std::string Name;
 	};
 	friend class GameObject;
-public:
+	friend class GameobjectAdded;
+	friend class GameobjectDeleted;
 	GameObjectManager(Scene& ref) : m_OwnerScene(ref) {};
 
 	~GameObjectManager();
 	GameObject CreateGameObject();
-	GameObject CreateGameObject(const SY::UUID aGameObjectID);
+	GameObject CreateGameObject(const SY::UUID aGameObjectID); 
 
 	void DeleteGameObject(const SY::UUID aGameObjectID, bool force = false);
 	void DeleteGameObject(const GameObject aGameObject, bool force = false);
+
+	template <class T>
+	void RemoveComponent(const SY::UUID aGameObjectID);
+
 
 	template <class T>
 	T& AddComponent(const SY::UUID aGameObjectID);
@@ -59,13 +65,15 @@ public:
 	std::vector<Component*> GetAllAttachedComponents(SY::UUID aGameObjectID);
 	std::vector<Component*> CopyAllAttachedComponents(SY::UUID aGameObjectID);
 
-	bool GetActive(const SY::UUID aGameObjectID);
-	Layer GetLayer(const SY::UUID aGameObjectID);
+	bool GetActive(const SY::UUID aGameObjectID) const;
+	Layer GetLayer(const SY::UUID aGameObjectID) const;
 
 	GameObject GetWorldRoot();
 	GameObject GetPlayer();
 	GameObject GetCamera();
 	GameObject GetGameObject(SY::UUID anID);
+	bool HasGameObject(SY::UUID anID) const;
+	bool HasGameObject(const GameObject& anID) const;
 
 	void CollidedWith(const SY::UUID aFirstID, const SY::UUID aTargetID);
 	void SetActive(const SY::UUID aGameObjectID, const bool aState);
@@ -92,6 +100,9 @@ private:
 	std::string GetName(const SY::UUID aGameObjectID);
 	void SetName(const std::string& name, const SY::UUID aGameObjectID);
 
+	GameObjectData GetData(const SY::UUID aGameObjectID); 
+	GameObject CreateGameObject(const SY::UUID aGameObjectID, const GameObjectData& data);
+
 
 	template <class T>
 	void AddManager();
@@ -114,6 +125,16 @@ private:
 	unsigned int myPlayer{};
 	unsigned int myCamera{};
 };
+
+ template <class T>
+ void GameObjectManager::RemoveComponent(const SY::UUID aGameObjectID)
+ {
+	 OPTICK_EVENT();
+	 if (myComponentManagers.contains(&typeid(T)))
+	 {
+		 std::static_pointer_cast<ComponentManager<T>>(myComponentManagers[&typeid(T)])->DeleteGameObject(aGameObjectID);
+	 }
+ }
 
 template<class T>
 T& GameObjectManager::AddComponent(const SY::UUID aGameObjectID)

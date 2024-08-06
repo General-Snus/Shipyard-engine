@@ -39,7 +39,7 @@ void Inspector::RenderImGUi()
 	if (!selectedGameObjects.empty())
 	{
 		gameobject = selectedGameObjects[0];
-
+		 
 		ImGui::PushItemWidth(60);
 		if (bool activeStatus = gameobject.GetActive(); ImGui::Checkbox("##",&activeStatus))
 		{

@@ -251,23 +251,23 @@ void ComponentManager<T>::Render()
 template<class T>
 void ComponentManager<T>::DeleteGameObject(const SY::UUID aGameObjectID)
 {
-	auto it = myGameObjectIDtoVectorIndex.find(aGameObjectID);		// Find the game object
+	const auto it = myGameObjectIDtoVectorIndex.find(aGameObjectID);
 	if (it == myGameObjectIDtoVectorIndex.end())
 	{
-		return;			// If it doesn't exist, don't do anything
+		return;
 	}
-	unsigned int index = it->second;								// Get the component index of the game object
-	unsigned int id = myVectorIndexToGameObjectID[static_cast<unsigned int>(myComponents.size() - 1)]; // Get the id of the game object with the last component 
-	myComponents[index].Destroy(); // Call custom destructor 
-	myComponents[index] = myComponents[myComponents.size() - 1]; // Swap the last component with the component to remove (cyclic remove)
-	//std::swap(myComponents[index],myComponents[myComponents.size() - 1]); // Swap the last component with the component to remove (cyclic remove) 
-	myComponents.pop_back();										// Remove the newly last component (the component to remove)
+	const unsigned int index = it->second;
+	const unsigned int id = myVectorIndexToGameObjectID[static_cast<unsigned int>(myComponents.size() - 1)];
+	myComponents[index].Destroy();
+	myComponents[index] = myComponents[myComponents.size() - 1];
+	//std::swap(myComponents[index],myComponents[myComponents.size() - 1]); 
+	myComponents.pop_back();
+	 
+	myGameObjectIDtoVectorIndex[id] = index;
+	myVectorIndexToGameObjectID[index] = id;
 
-	myGameObjectIDtoVectorIndex[id] = index;						// Change the previously last game object to refer to the new component index
-	myVectorIndexToGameObjectID[index] = id;						// Change the index to refer to the game object
-
-	myVectorIndexToGameObjectID.erase(myVectorIndexToGameObjectID.at(static_cast<unsigned int>(myComponents.size())));// Remove the removed component from the game object id list
-	myGameObjectIDtoVectorIndex.erase(it->first);					// Remove the removed game object id from the component list
+	myVectorIndexToGameObjectID.erase(myVectorIndexToGameObjectID.at(static_cast<unsigned int>(myComponents.size())));
+	myGameObjectIDtoVectorIndex.erase(it->first);
 }
 
 template<class T>

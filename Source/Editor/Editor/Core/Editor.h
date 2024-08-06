@@ -46,6 +46,7 @@ public:
 	void SetIsGUIActive(bool set) { IsGUIActive = set; };
 	static inline std::vector<std::shared_ptr<EditorWindow>> g_EditorWindows;
 	static std::vector<GameObject>& GetSelectedGameObjects() { return m_SelectedGameObjects; }
+	static void CheckSelectedForRemoved();
 	static inline bool IsPlaying = false;
 
 	void FocusObject(const GameObject& focus, bool focusWithOffset = true) const;

@@ -7,10 +7,11 @@
 #include "Engine/AssetManager/ComponentSystem/GameObjectManager.h"
 #include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
 #include "ImGuiHepers.hpp"
+#include "Editor/Editor/Commands/SceneAction.h"
 #include "Tools/Utilities/Input/Input.hpp"
+#include "Engine/PersistentSystems/Scene.h" 
 
-#include "Engine/PersistentSystems/Scene.h"
-
+ 
 #undef min
 #undef max
 
@@ -21,13 +22,20 @@ void Hierarchy::PopupMenu(SY::UUID id)
 	{
 		if (ImGui::Selectable("Create Empty"))
 		{
-			GameObject::Create("Empty");
+			const auto ptr = std::make_shared<GameobjectAdded>(GameObject::Create("Empty"));
+			CommandBuffer::MainEditorCommandBuffer().AddCommand(ptr);
+			CommandBuffer::MainEditorCommandBuffer().GetLastCommand()->SetMergeBlocker(true);
 		}
 		if (ImGui::Selectable("Create Empty Child"))
 		{
 			auto parent = Scene::ActiveManager().GetGameObject(id);
-			auto child = GameObject::Create("Empty");
+			auto child = GameObject::Create("Empty child");
 			child.transform().SetParent(parent.transform());
+
+
+			const auto ptr = std::make_shared<GameobjectAdded>(child);
+			CommandBuffer::MainEditorCommandBuffer().AddCommand(ptr);
+			CommandBuffer::MainEditorCommandBuffer().GetLastCommand()->SetMergeBlocker(true);
 		}
 		ImGui::Separator();
 		if (ImGui::Selectable("Duplicate"))

@@ -14,6 +14,7 @@ public:
 	bool Merge(std::shared_ptr<BaseCommand>& ptr) override;
 private:
 	  GameObject m_object;
+	  GameObjectManager::GameObjectData data;
 	std::vector<Component*> m_components;
 };
 
@@ -26,6 +27,7 @@ public:
 
 	bool Merge(std::shared_ptr<BaseCommand>& ptr) override;
 private:
-	  GameObject m_object;
+	GameObject m_object;
+	GameObjectManager::GameObjectData data;
 	std::vector<Component*> m_components;
-};
+}; 
