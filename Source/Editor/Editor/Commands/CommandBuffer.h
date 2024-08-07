@@ -2,7 +2,7 @@
 #include <Tools/Logging/Logging.h>
 #include <assert.h>
 #include <vector>
- 
+
 class BaseCommand
 {
   public:
@@ -26,7 +26,6 @@ class BaseCommand
     std::string Description = "Unknown command";
 };
 
-
 using CommandPacket = std::vector<std::shared_ptr<BaseCommand>>;
 class CommandBuffer
 {
@@ -47,14 +46,15 @@ class CommandBuffer
             commandList.erase(commandList.begin() + (cursor + 1), commandList.end());
         }
 
-        commandList.push_back({ ptr });
+        commandList.push_back({ptr});
         cursor = static_cast<int>(commandList.size()) - 1;
     }
 
-const    std::vector<CommandPacket>& GetCommandList();;
+    const std::vector<CommandPacket> &GetCommandList();
+    ;
 
     // assumed complete command
-    inline void AddCommand(const CommandPacket& ptr)
+    inline void AddCommand(const CommandPacket &ptr)
     {
         if (commandList.size() > cursor && ptr.front()->Merge(commandList[cursor].back()))
         {
@@ -83,7 +83,7 @@ const    std::vector<CommandPacket>& GetCommandList();;
         {
             commandList.erase(commandList.begin() + (cursor + 1), commandList.begin() + commandList.size());
         }
-        commandList.push_back({ ptr });
+        commandList.push_back({ptr});
         cursor = static_cast<int>(commandList.size()) - 1;
     };
 
@@ -97,6 +97,10 @@ const    std::vector<CommandPacket>& GetCommandList();;
     inline BaseCommand *GetLastCommand()
     {
         assert(commandList.back() != nullptr);
+        if (commandList.empty() || commandList.back().empty())
+        {
+            return nullptr;
+        }
         return commandList.back().back().get();
     };
 
@@ -105,7 +109,7 @@ const    std::vector<CommandPacket>& GetCommandList();;
         if (!commandList.empty() && cursor >= 0)
         {
             Logger::Log(std::format("Undoing command at {}", cursor));
-            for (auto& command : commandList[cursor])
+            for (auto &command : commandList[cursor])
             {
                 command->Undo();
             }
@@ -118,11 +122,11 @@ const    std::vector<CommandPacket>& GetCommandList();;
         if (commandList.size() > cursor + 1)
         {
             Logger::Log(std::format("Redoing command at {}", cursor));
-            for(auto& command : commandList[cursor + 1])
-			{
+            for (auto &command : commandList[cursor + 1])
+            {
                 command->Do();
-			}
-           
+            }
+
             cursor++;
         }
     };
@@ -135,4 +139,4 @@ const    std::vector<CommandPacket>& GetCommandList();;
   private:
     std::vector<CommandPacket> commandList;
     int cursor = 0;
-}; 
+};
