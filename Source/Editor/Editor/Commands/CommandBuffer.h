@@ -26,6 +26,8 @@ class BaseCommand
     std::string Description = "Unknown command";
 };
 
+
+using CommandPacket = std::vector<std::shared_ptr<BaseCommand>>;
 class CommandBuffer
 {
   public:
@@ -35,7 +37,7 @@ class CommandBuffer
     {
         auto ptr = std::make_shared<CommandClass>(arguments...);
 
-        if (commandList.size() > cursor && ptr->Merge(commandList[cursor]))
+        if (commandList.size() > cursor && ptr->Merge(commandList[cursor].back()))
         {
             return;
         }
@@ -45,16 +47,16 @@ class CommandBuffer
             commandList.erase(commandList.begin() + (cursor + 1), commandList.end());
         }
 
-        commandList.push_back(ptr);
+        commandList.push_back({ ptr });
         cursor = static_cast<int>(commandList.size()) - 1;
-    };
+    }
+
+const    std::vector<CommandPacket>& GetCommandList();;
 
     // assumed complete command
-    inline void AddCommand(std::shared_ptr<BaseCommand> ptr)
+    inline void AddCommand(const CommandPacket& ptr)
     {
-        assert(ptr != nullptr);
-
-        if (commandList.size() > cursor && ptr->Merge(commandList[cursor]))
+        if (commandList.size() > cursor && ptr.front()->Merge(commandList[cursor].back()))
         {
             return;
         }
@@ -64,6 +66,24 @@ class CommandBuffer
             commandList.erase(commandList.begin() + (cursor + 1), commandList.begin() + commandList.size());
         }
         commandList.push_back(ptr);
+        cursor = static_cast<int>(commandList.size()) - 1;
+    }
+
+    // assumed complete command
+    inline void AddCommand(std::shared_ptr<BaseCommand> ptr)
+    {
+        assert(ptr != nullptr);
+
+        if (commandList.size() > cursor && ptr->Merge(commandList[cursor].back()))
+        {
+            return;
+        }
+
+        if (!commandList.empty())
+        {
+            commandList.erase(commandList.begin() + (cursor + 1), commandList.begin() + commandList.size());
+        }
+        commandList.push_back({ ptr });
         cursor = static_cast<int>(commandList.size()) - 1;
     };
 
@@ -77,7 +97,7 @@ class CommandBuffer
     inline BaseCommand *GetLastCommand()
     {
         assert(commandList.back() != nullptr);
-        return commandList.back().get();
+        return commandList.back().back().get();
     };
 
     void Undo()
@@ -85,7 +105,10 @@ class CommandBuffer
         if (!commandList.empty() && cursor >= 0)
         {
             Logger::Log(std::format("Undoing command at {}", cursor));
-            commandList[cursor]->Undo();
+            for (auto& command : commandList[cursor])
+            {
+                command->Undo();
+            }
             cursor--;
         }
     };
@@ -95,21 +118,21 @@ class CommandBuffer
         if (commandList.size() > cursor + 1)
         {
             Logger::Log(std::format("Redoing command at {}", cursor));
-            commandList[cursor + 1]->Do();
+            for(auto& command : commandList[cursor + 1])
+			{
+                command->Do();
+			}
+           
             cursor++;
         }
     };
 
-    const std::vector<std::shared_ptr<BaseCommand>> &GetCommandList()
-    {
-        return commandList;
-    };
-    int GetCursor()
+    int GetCursor() const
     {
         return cursor;
     };
 
   private:
-    std::vector<std::shared_ptr<BaseCommand>> commandList;
+    std::vector<CommandPacket> commandList;
     int cursor = 0;
 }; 

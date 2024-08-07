@@ -11,3 +11,8 @@ CommandBuffer& CommandBuffer::MainEditorCommandBuffer()
 	static CommandBuffer instance;
 	return instance;
 }
+
+const std::vector<CommandPacket>& CommandBuffer::GetCommandList()
+{
+	return commandList;
+}

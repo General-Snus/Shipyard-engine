@@ -44,15 +44,10 @@ void Hierarchy::PopupMenu(SY::UUID id)
 			auto components = gameObject.CopyAllComponents();
 
 			auto newObject = GameObject::Create(gameObject.GetName() + "_1");
-			for (const auto& i : components)
+			for (auto& i : components)
 			{
 				newObject.AddBaseComponent(i);
 			}
-
-
-			const auto ptr = std::make_shared<GameobjectAdded>(newObject);
-			CommandBuffer::MainEditorCommandBuffer().AddCommand(ptr);
-			CommandBuffer::MainEditorCommandBuffer().GetLastCommand()->SetMergeBlocker(true);
 		}
 		if (ImGui::Selectable("Delete"))
 		{
@@ -75,7 +70,6 @@ void Hierarchy::PopupMenu(SY::UUID id)
 		if (ImGui::Selectable("Paste"))
 		{
 			auto selected = Editor::GetSelectedGameObjects();
-			CommandPacket packet;
 			for (auto& object : copiedObjects)
 			{
 				auto components = object.CopyAllComponents();
@@ -84,12 +78,7 @@ void Hierarchy::PopupMenu(SY::UUID id)
 				{
 					newObject.AddBaseComponent(i);
 				}
-
-				packet.emplace_back(std::make_shared<GameobjectAdded>(newObject));
 			}
-
-			CommandBuffer::MainEditorCommandBuffer().AddCommand(packet);
-			CommandBuffer::MainEditorCommandBuffer().GetLastCommand()->SetMergeBlocker(true);
 		}
 		ImGui::Separator();
 		if (ImGui::Selectable("Move camera to object"))
@@ -109,12 +98,9 @@ void Hierarchy::PopupMenu(SY::UUID id)
 		if (ImGui::Selectable("Set as Parent"))
 		{
 			auto selected = Editor::GetSelectedGameObjects();
-
 			for (auto& child : selected)
 			{
-				//TODO Whole component change function
-				auto& parentTransform = Scene::ActiveManager().GetGameObject(id).transform();
-				child.transform().SetParent(parentTransform); 
+				child.GetComponent<Transform>().SetParent(Scene::ActiveManager().GetGameObject(id).GetComponent<Transform>());
 			}
 		}
 		if (ImGui::Selectable("Clear Parent"))

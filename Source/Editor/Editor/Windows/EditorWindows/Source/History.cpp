@@ -14,8 +14,8 @@ void History::RenderImGUi()
             int cursor = CommandBuffer::MainEditorCommandBuffer().GetCursor();
             for (const auto &command : CommandBuffer::MainEditorCommandBuffer().GetCommandList())
             {
-                auto text = command->GetDescription();
-                if (!command)
+                auto text = command.front()->GetDescription();
+                if (!command.front())
                 {
                     continue;
                 }
