@@ -93,6 +93,12 @@
     <ClInclude Include="misc\cpp\imgui-combo-filter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="misc\cpp\WMDropManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Font\IconsFontAwesome5.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imgui.cpp">

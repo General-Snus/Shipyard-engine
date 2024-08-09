@@ -8,6 +8,7 @@ public:
 	void RenderImGUi() override;
 private:
 	void PopupMenu(SY::UUID id);
-	void RenderNode(const Transform& transform);
+	void RenderNode(  Transform& transform);
+	void DragDrop( Transform& transform );
 };
 

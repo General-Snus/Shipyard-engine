@@ -8,7 +8,8 @@
     "SecondaryColor": "#3E4144",
     "TextColor": "#E6E9EB"
     },
-"FontPathComment": "/Fonts/NotoSans-Regular.ttf",
+"FontPathComment": "Dont change awsome font from awsomefont5",
+"FontAwsome": "/Fonts/FontAwesome/fa-solid-900.ttf",
 "FontPath": "/Fonts/roboto/Roboto-Regular.ttf",
 "FontSize": 16.0,
 "Light":

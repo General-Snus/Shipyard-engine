@@ -15,7 +15,8 @@ class Scene;
 
 enum class EditorCallback
 {
-    ObjectSelected
+    ObjectSelected,
+    WM_DropFile,
 };
 
 class Editor : public Singleton<Editor>
@@ -23,6 +24,7 @@ class Editor : public Singleton<Editor>
 
     friend class Singleton<Editor>;
     friend class Logger;
+    friend class ContentDirectory;
     std::unique_ptr<SplashWindow> mySplashWindow = nullptr;
     void ShowSplashScreen();
     void HideSplashScreen() const;
@@ -73,6 +75,7 @@ class Editor : public Singleton<Editor>
 
   private:
     Editor() = default;
+    std::vector<std::filesystem::path> WM_DroppedPath;
 
     inline static RECT ViewportRect;
     inline static std::vector<GameObject> m_SelectedGameObjects;

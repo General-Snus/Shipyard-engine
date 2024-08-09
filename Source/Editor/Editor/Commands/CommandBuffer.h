@@ -1,6 +1,7 @@
 #pragma once
 #include <Tools/Logging/Logging.h>
 #include <assert.h>
+#include <cassert>
 #include <vector>
 
 class BaseCommand
@@ -96,7 +97,8 @@ class CommandBuffer
 
     inline BaseCommand *GetLastCommand()
     {
-        assert(commandList.back() != nullptr);
+        assert(!commandList.back().empty() && "Got nullptr back");
+        assert(commandList.back().back() != nullptr);
         if (commandList.empty() || commandList.back().empty())
         {
             return nullptr;

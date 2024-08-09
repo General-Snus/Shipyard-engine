@@ -42,11 +42,14 @@
 #endif // PHYSX 0
 #include "Editor/Editor/Windows/EditorWindows/ColorPresets.h"
 #include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
+#include <CommCtrl.h>
 #include <Editor/Editor/Commands/CommandBuffer.h>
 #include <Editor/Editor/Commands/SceneAction.h>
 #include <Editor/Editor/Windows/EditorWindows/CustomFuncWindow.h>
 #include <Editor/Editor/Windows/EditorWindows/History.h>
+#include <Tools/ImGui/ImGui/Font/IconsFontAwesome5.h>
 #include <json.h>
+#include <misc/cpp/WMDropManager.h>
 
 void SetupImGuiStyle(bool light = false)
 {
@@ -276,14 +279,24 @@ void LoadFont()
             float fontSize = json["FontSize"];
             std::filesystem::path FontPath = json["FontPath"];
 
-            ImFontConfig font_config{};
             const std::string backupFont = AssetManager::AssetPath.string() + "/Fonts/roboto/Roboto-Light.ttf";
+            const std::string awsomeFont = AssetManager::AssetPath.string() + "/Fonts/FontAwesome/fa-solid-900.ttf";
             const std::string font_path = AssetManager::AssetPath.string() + (FontPath).string();
-            if (!io.Fonts->AddFontFromFileTTF(font_path.c_str(), fontSize, &font_config))
+
+            if (!io.Fonts->AddFontFromFileTTF(font_path.c_str(), fontSize))
             {
-                io.Fonts->AddFontFromFileTTF(backupFont.c_str(), 16.0f, &font_config);
+                io.Fonts->AddFontFromFileTTF(backupFont.c_str(), 16.0f);
             }
-            font_config.MergeMode = true;
+
+            static const ImWchar icons_ranges[] = {ICON_MIN_FA, ICON_MAX_16_FA, 0};
+            ImFontConfig icons_config;
+            icons_config.MergeMode = true;
+            icons_config.PixelSnapH = true;
+            icons_config.GlyphMinAdvanceX = fontSize * (2.f / 3.f);
+            if (!io.Fonts->AddFontFromFileTTF(awsomeFont.c_str(), fontSize, &icons_config, icons_ranges))
+            {
+                io.Fonts->AddFontFromFileTTF(backupFont.c_str(), 16.0f);
+            }
 
             if (!io.Fonts->Build())
             {
@@ -310,6 +323,7 @@ void LoadFont()
             Logger::Err("fucked up font load");
         }
     }
+    io.Fonts->AddFontDefault();
 }
 
 bool Editor::Initialize(HWND aHandle)
@@ -377,6 +391,7 @@ bool Editor::Initialize(HWND aHandle)
 #endif
 
     m_Callbacks[EditorCallback::ObjectSelected] = Event();
+    m_Callbacks[EditorCallback::WM_DropFile] = Event();
 
     AddViewPort();
     g_EditorWindows.emplace_back(std::make_shared<Inspector>());
@@ -389,8 +404,31 @@ bool Editor::Initialize(HWND aHandle)
 
 void Editor::DoWinProc(const MSG &aMessage)
 {
-    if (aMessage.message == WM_CLOSE)
+
+    switch (aMessage.message)
     {
+
+    case WM_DROPFILES: {
+        HDROP hDrop = (HDROP)aMessage.wParam;
+        UINT numFiles = DragQueryFileW(hDrop, 0xFFFFFFFF, NULL, 0); // Get the number of dropped files
+        WM_DroppedPath.clear();
+        for (UINT i = 0; i < numFiles; i++)
+        {
+            UINT filePathLength = DragQueryFile(hDrop, i, NULL, 0); // Get the length of the file path
+
+            std::wstring filePath;
+            filePath.resize(filePathLength + 1);                          // Create a buffer to hold the file path
+            DragQueryFile(hDrop, i, filePath.data(), filePathLength + 1); // Get the file path
+            WM_DroppedPath.emplace_back(filePath);
+        }
+
+        DragFinish(hDrop); // Release the dropped files handle
+        if (!WM_DroppedPath.empty())
+            m_Callbacks[EditorCallback::WM_DropFile].Invoke();
+        break;
+    }
+
+    case WM_CLOSE:
         ColorManager::DumpToFile("Settings/ColorManagerData.ShipyardText");
         ThreadPool::Get().Destroy();
         Shipyard_PhysX::Get().ShutdownPhysx();
@@ -399,6 +437,8 @@ void Editor::DoWinProc(const MSG &aMessage)
         ImGui::DestroyContext();
         GPU::UnInitialize();
         return;
+    default:
+        break;
     }
 
     Input::UpdateEvents(aMessage.message, aMessage.wParam, aMessage.lParam);
