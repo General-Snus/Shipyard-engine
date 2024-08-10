@@ -690,7 +690,9 @@ void Editor::TopBar()
         {
             if (ImGui::Selectable("ImGuiDemoWindow"))
             {
-                g_EditorWindows.emplace_back(std::make_shared<CustomFuncWindow>(&ImGui::ShowDemoWindow, (bool *)0));
+                auto window = std::make_shared<CustomFuncWindow>(&ImGui::ShowDemoWindow, (bool *)0);
+                window->SetWindowName("ImGui demo holder");
+                g_EditorWindows.emplace_back(window);
             }
 
             if (ImGui::Selectable("Light Theme"))

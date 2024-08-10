@@ -9,6 +9,7 @@
 #include "ImGuiHepers.hpp"
 #include "Tools/Utilities/Input/Input.hpp"
 #include <Engine/AssetManager/ComponentSystem/Components/Transform.h>
+#include <Font/IconsFontAwesome5.h>
 #include <format>
 
 #undef min
@@ -149,7 +150,8 @@ void Hierarchy::RenderNode(Transform &transform)
 
         ImGui::PushStyleColor(ImGuiCol_Text, color);
 
-        bool node_open = ImGui::TreeNodeEx((void *)(intptr_t)id, flags, data.GetName().c_str());
+        bool node_open =
+            ImGui::TreeNodeEx((void *)(intptr_t)id, flags, std::format("{} {}", ICON_FA_CUBE, data.GetName()).c_str());
         DragDrop(transform);
         if (ImGui::IsItemHovered())
         {
@@ -165,25 +167,6 @@ void Hierarchy::RenderNode(Transform &transform)
             }
         }
         PopupMenu(id);
-
-        // ImGui::SameLine();
-        // auto gameObjectWidget = AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/GameObject.png");
-        // const auto height = ImGui::GetFrameHeight();
-        // ImGui::Image(gameObjectWidget, {height, height});
-        // ImGui::SameLine();
-        //
-        // if (!isActive)
-        //{
-        //     color = style.Colors[ImGuiCol_TextDisabled];
-        // }
-        // if (!isSelected)
-        //{
-        //     color = style.Colors[ImGuiCol_TextSelectedBg];
-        // }
-        //
-        // ImGui::PushStyleColor(ImGuiCol_Text, color);
-        // ImGui::TextWrapped(data.GetName().c_str());
-        // ImGui::PopStyleColor();
 
         if (hasChildren)
         {
@@ -218,7 +201,6 @@ inline void Hierarchy::DragDrop(Transform &transform)
 
             obj.transform().SetParent(transform);
         }
-        ImGui::Text("This is a drag and drop target");
         ImGui::EndDragDropTarget();
     }
     if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))

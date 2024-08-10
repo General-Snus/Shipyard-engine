@@ -39,7 +39,7 @@ Viewport::Viewport(bool IsMainViewPort, Vector2f ViewportResolution, std::shared
 
     if (IsMainViewPort)
     {
-        myVirtualCamera = GameObject::Create("MainCamera",sceneToRender);
+        myVirtualCamera = GameObject::Create("MainCamera", sceneToRender);
     }
     else
     {
@@ -75,7 +75,7 @@ bool Viewport::IsSelected() const
 
 bool Viewport::IsHovered() const
 {
-	return IsMouseHoverering;
+    return IsMouseHoverering;
 }
 
 bool Viewport::IsRenderReady()
@@ -110,7 +110,7 @@ void Viewport::Update()
     }
     else
     {
-       // myVirtualCamera.SetActive(IsSelected());
+        // myVirtualCamera.SetActive(IsSelected());
         auto &camera = myVirtualCamera.GetComponent<cCamera>();
         camera.IsInControl(IsSelected());
         camera.SetResolution(ViewportResolution);
@@ -245,7 +245,7 @@ void Viewport::RenderImGUi()
                                         .GetInverse(); // TODO This doesnt support scaled objects, fix asap im eepy now
                     }
 
-                    ImGuizmo::DecomposeMatrixToComponents(mat.GetMatrixPtr(), &loc, &rot, &scale);
+                    ImGuizmo::DecomposeMatrixToComponents(mat.GetMatrixPtr(), &loc.x, &rot.x, &scale.x);
 
                     transform.SetPosition(loc);
                     transform.SetRotation(rot);

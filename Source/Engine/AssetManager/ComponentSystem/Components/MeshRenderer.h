@@ -2,6 +2,8 @@
 #include "Engine/AssetManager/ComponentSystem/Component.h"
 #include "Engine/AssetManager/Enums.h"
 #include "Engine/AssetManager/Objects/BaseAssets/MeshAsset.h"
+#include "Tools/ImGui/ImGui/ImGuiHepers.hpp"
+#include <Engine/AssetManager/AssetManager.h>
 #include <Engine/AssetManager/Objects/BaseAssets/BaseAsset.h>
 #define AsUINT(v) static_cast<unsigned>(v)
 
@@ -18,10 +20,9 @@ class cMeshRenderer : public Component
     cMeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager); // Create a generic cube
     cMeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager, const std::filesystem::path &aFilePath,
                   bool useExact = false);
-    ~cMeshRenderer() override = default; 
+    ~cMeshRenderer() override = default;
 
-
-	//Mesh
+    // Mesh
     void SetNewMesh(const std::filesystem::path &aFilePath);
     void SetNewMesh(const std::shared_ptr<Mesh> aMesh);
     std::vector<Element> &GetElements() const;
@@ -29,15 +30,15 @@ class cMeshRenderer : public Component
     float GetBoundingSphereRadius() const;
     AABB3D<float> GetBoundingBox() const;
 
-    //Materials
+    // Materials
     std::shared_ptr<Material> GetMaterial(int materialIndex = 0) const;
-	void SetMaterialPath(const std::filesystem::path &aFilePath);
+    void SetMaterialPath(const std::filesystem::path &aFilePath);
     void SetMaterialPath(const std::filesystem::path &aFilePath, int elementIndex);
     void SetMaterial(const std::shared_ptr<Material> aMaterial);
     void SetMaterial(const std::shared_ptr<Material> aMaterial, int elementIndex);
     std::shared_ptr<TextureHolder> GetTexture(eTextureType type, unsigned materialIndex = 0) const;
 
-    //Other
+    // Other
     bool InspectorView() override;
     bool IsDefaultMesh() const;
     bool isInstanced = false;

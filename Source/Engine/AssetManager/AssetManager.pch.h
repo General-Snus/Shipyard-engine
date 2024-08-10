@@ -71,6 +71,7 @@
 */
 #include <Editor/Editor/Defines.h>  
 #include "AssetManager.h"
+#include "AssetManagerUtills.hpp"
 #include "ComponentSystem/UUID.h" 
 #define UseTGAImporter 0
 #endif //ASSETMANAGER_PCH_H 
