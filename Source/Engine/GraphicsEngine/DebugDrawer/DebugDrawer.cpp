@@ -1,16 +1,7 @@
-#include "GraphicsEngine.pch.h"
-#include "DebugDrawer.h"
+#include "Engine/GraphicsEngine/GraphicsEngine.pch.h"
 
-#include "../Shaders/Include/LineDrawer_PS.h"
-#include "../Shaders/Include/LineDrawer_VS.h"  
-const std::vector<D3D12_INPUT_ELEMENT_DESC> DebugVertex::InputLayoutDescription =
-{
-	{"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-	{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-};
-//ComPtr<ID3D11InputLayout> DebugVertex::InputLayout;
-
-
+#include "DebugDrawer.h" 
+#include "DirectX/Shipyard/GPU.h"
 
 DebugDrawer& DebugDrawer::Get()
 {
@@ -49,6 +40,19 @@ bool DebugDrawer::Initialize()
 		sizeof(BuiltIn_LineDrawer_VS_ByteCode)
 	);*/
 
+
+	auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COPY);
+	auto commandList = commandQueue->GetCommandList();
+
+	std::vector<DebugVertex> vertices;
+	vertices.resize(65536);
+
+	std::vector<uint32_t> indicies;
+	indicies.resize(65536);
+
+	GPU::CreateVertexBuffer<DebugVertex>(commandList,vertexBuffer,vertices);
+	GPU::CreateIndexBuffer(commandList,indexBuffer,indicies);
+	commandQueue->ExecuteCommandList(commandList);
 	//// Create dynamic vertex and index buffer
 	//if (!(
 	//	RHI::CreateDynamicVertexBuffer(myLineVertexBuffer,65536,sizeof(DebugVertex)) &&
@@ -81,6 +85,7 @@ void DebugDrawer::RemoveDebugPrimitive(PrimitiveHandle& aHandle)
 
 void DebugDrawer::Update(float aDeltaTime)
 {
+	OPTICK_EVENT();
 	for (auto it = myDebugLifetime.begin(); it != myDebugLifetime.end(); ++it)
 	{
 		it->second -= aDeltaTime;
@@ -94,75 +99,75 @@ void DebugDrawer::Update(float aDeltaTime)
 
 void DebugDrawer::Render()
 {
-	//if (myPrimitiveListDirty)
-	//{
-	//	myNumLineIndices = 0;
+	if (myPrimitiveListDirty)
+	{
+		myNumLineIndices = 0;
 
-	//	D3D11_MAPPED_SUBRESOURCE vxResource{};
-	//	D3D11_MAPPED_SUBRESOURCE ixResource{};
+		//D3D11_MAPPED_SUBRESOURCE vxResource{};
+		//D3D11_MAPPED_SUBRESOURCE ixResource{};
 
-	//	/*RHI::Context->Map(myLineVertexBuffer.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&vxResource);
-	//	RHI::Context->Map(myLineIndexBuffer.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&ixResource);*/
+		/*RHI::Context->Map(myLineVertexBuffer.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&vxResource);
+		RHI::Context->Map(myLineIndexBuffer.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&ixResource);*/
 
-	//	size_t currentVxOffset = 0;
-	//	size_t currentIxOffset = 0;
+		//size_t currentVxOffset = 0;
+		//size_t currentIxOffset = 0;
+		//
+		//for (auto it = myDebugPrimitives.begin(); it != myDebugPrimitives.end(); ++it)
+		//{
+		//	Primitive& currentPrimitive = it->second;
+		//
+		//	DebugVertex* vxPtr = static_cast<DebugVertex*>(vxResource.pData) + currentVxOffset;
+		//
+		//	for (size_t v = 0; v < currentPrimitive.Vertices.size(); ++v)
+		//	{
+		//		vxPtr[v] = currentPrimitive.Vertices[v];
+		//		//Vector3f position = Matrix::ReadPosition(currentPrimitive.Transform);
+		//		//vxPtr[v].Position = Vector4f(currentPrimitive.Vertices[v].Position + Vector4f(position.x,position.y,position.z,1.0f));
+		//		vxPtr[v].Position = Vector4f(currentPrimitive.Vertices[v].Position * currentPrimitive.Transform);
+		//		vxPtr[v].Position.w = 1.0f;
+		//	}
+		//
+		//	unsigned int* ixPtr = static_cast<unsigned int*>(ixResource.pData) + currentIxOffset;
+		//	const unsigned int vxOffset = static_cast<unsigned int>(currentVxOffset);
+		//
+		//	for (size_t i = 0; i < currentPrimitive.Indices.size(); ++i)
+		//	{
+		//		ixPtr[i] = currentPrimitive.Indices[i] + vxOffset;
+		//	}
+		//
+		//	currentVxOffset += currentPrimitive.Vertices.size();
+		//	currentIxOffset += currentPrimitive.Indices.size();
+		//}
+		//
+		//myNumLineIndices = currentIxOffset;
+		//
+		////RHI::Context->Unmap(myLineVertexBuffer.Get(),0);
+		////RHI::Context->Unmap(myLineIndexBuffer.Get(),0);
+		//
+		//myPrimitiveListDirty = false;
+	}
 
-	//	for (auto it = myDebugPrimitives.begin(); it != myDebugPrimitives.end(); ++it)
-	//	{
-	//		Primitive& currentPrimitive = it->second;
+	if (myNumLineIndices > 0)
+	{/*
+		RHI::ConfigureInputAssembler(
+			D3D11_PRIMITIVE_TOPOLOGY_LINELIST,
+			myLineVertexBuffer,
+			myLineIndexBuffer,
+			sizeof(DebugVertex),
+			DebugVertex::InputLayout
+		);*/
 
-	//		DebugVertex* vxPtr = static_cast<DebugVertex*>(vxResource.pData) + currentVxOffset;
-
-	//		for (size_t v = 0; v < currentPrimitive.Vertices.size(); ++v)
-	//		{
-	//			vxPtr[v] = currentPrimitive.Vertices[v];
-	//			//Vector3f position = Matrix::ReadPosition(currentPrimitive.Transform);
-	//			//vxPtr[v].Position = Vector4f(currentPrimitive.Vertices[v].Position + Vector4f(position.x,position.y,position.z,1.0f));
-	//			vxPtr[v].Position = Vector4f(currentPrimitive.Vertices[v].Position * currentPrimitive.Transform);
-	//			vxPtr[v].Position.w = 1.0f;
-	//		}
-
-	//		unsigned int* ixPtr = static_cast<unsigned int*>(ixResource.pData) + currentIxOffset;
-	//		const unsigned int vxOffset = static_cast<unsigned int>(currentVxOffset);
-
-	//		for (size_t i = 0; i < currentPrimitive.Indices.size(); ++i)
-	//		{
-	//			ixPtr[i] = currentPrimitive.Indices[i] + vxOffset;
-	//		}
-
-	//		currentVxOffset += currentPrimitive.Vertices.size();
-	//		currentIxOffset += currentPrimitive.Indices.size();
-	//	}
-
-	//	myNumLineIndices = currentIxOffset;
-
-	//	//RHI::Context->Unmap(myLineVertexBuffer.Get(),0);
-	//	//RHI::Context->Unmap(myLineIndexBuffer.Get(),0);
-
-	//	myPrimitiveListDirty = false;
-	//}
-
-	//if (myNumLineIndices > 0)
-	//{/*
-	//	RHI::ConfigureInputAssembler(
-	//		D3D11_PRIMITIVE_TOPOLOGY_LINELIST,
-	//		myLineVertexBuffer,
-	//		myLineIndexBuffer,
-	//		sizeof(DebugVertex),
-	//		DebugVertex::InputLayout
-	//	);*/
-
-	//	RHI::SetVertexShader(myLineVS.get());
-	//	RHI::SetPixelShader(myLinePS.get());
-	//	RHI::DrawIndexed(static_cast<UINT>(myNumLineIndices));
-	//}
+		//RHI::SetVertexShader(myLineVS.get());
+		//RHI::SetPixelShader(myLinePS.get());
+		//RHI::DrawIndexed(static_cast<UINT>(myNumLineIndices));
+	}
 }
 
 DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugLine(const Vector3f& aStart,const Vector3f& aFinish,const Vector3f& aColor,const float lifetime)
 {
 	Primitive primitive{};
-	primitive.Vertices.push_back(DebugVertex(aStart,aColor));
-	primitive.Vertices.push_back(DebugVertex(aFinish,aColor));
+	primitive.Vertices.push_back(DebugVertex(aStart,Vector4f(aColor,1.0f)));
+	primitive.Vertices.push_back(DebugVertex(aFinish,Vector4f(aColor,1.0f)));
 	primitive.Indices.push_back(0);
 	primitive.Indices.push_back(1);
 
@@ -173,20 +178,20 @@ DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugGizmo(const Vector3f& aCenter,
 {
 	Primitive primitive{};
 	//X 
-	primitive.Vertices.push_back(DebugVertex(aCenter,{ 1,0,0 }));
-	primitive.Vertices.push_back(DebugVertex({ aLength,0,0 },{ 1,0,0 }));
+	primitive.Vertices.push_back(DebugVertex(aCenter,{ 1,0,0,1 }));
+	primitive.Vertices.push_back(DebugVertex({ aLength,0,0 },{ 1,0,0,1 }));
 	primitive.Indices.push_back(0);
 	primitive.Indices.push_back(1);
 
 	//Y
-	primitive.Vertices.push_back(DebugVertex(aCenter,{ 0,1,0 }));
-	primitive.Vertices.push_back(DebugVertex({ 0,aLength,0 },{ 0,1,0 }));
+	primitive.Vertices.push_back(DebugVertex(aCenter,{ 0,1,0 ,1 }));
+	primitive.Vertices.push_back(DebugVertex({ 0,aLength,0 },{ 0,1,0,1 }));
 	primitive.Indices.push_back(2);
 	primitive.Indices.push_back(3);
 
 	//Z
-	primitive.Vertices.push_back(DebugVertex(aCenter,{ 0,0,1 }));
-	primitive.Vertices.push_back(DebugVertex({ 0,0,aLength },{ 0,0,1 }));
+	primitive.Vertices.push_back(DebugVertex(aCenter,{ 0,0,1,1 }));
+	primitive.Vertices.push_back(DebugVertex({ 0,0,aLength },{ 0,0,1,1 }));
 	primitive.Indices.push_back(4);
 	primitive.Indices.push_back(5);
 
@@ -202,21 +207,21 @@ DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugBox(const Vector3f& aMin,const
 	Vector3f vertex = min;
 
 	primitive.Vertices.reserve(8);
-	primitive.Vertices.push_back(DebugVertex(vertex,aColor));
+	primitive.Vertices.push_back(DebugVertex(vertex,Vector4f(aColor,1.0f)));
 	vertex.x = max.x;
-	primitive.Vertices.push_back(DebugVertex(vertex,aColor));
+	primitive.Vertices.push_back(DebugVertex(vertex,Vector4f(aColor,1.0f)));
 	vertex.y = max.y;
-	primitive.Vertices.push_back(DebugVertex(vertex,aColor));
+	primitive.Vertices.push_back(DebugVertex(vertex,Vector4f(aColor,1.0f)));
 	vertex.z = max.z;
-	primitive.Vertices.push_back(DebugVertex(vertex,aColor));
+	primitive.Vertices.push_back(DebugVertex(vertex,Vector4f(aColor,1.0f)));
 	vertex.y = min.y;
-	primitive.Vertices.push_back(DebugVertex(vertex,aColor));
+	primitive.Vertices.push_back(DebugVertex(vertex,Vector4f(aColor,1.0f)));
 	vertex.x = min.x;
-	primitive.Vertices.push_back(DebugVertex(vertex,aColor));
+	primitive.Vertices.push_back(DebugVertex(vertex,Vector4f(aColor,1.0f)));
 	vertex.y = max.y;
-	primitive.Vertices.push_back(DebugVertex(vertex,aColor));
+	primitive.Vertices.push_back(DebugVertex(vertex,Vector4f(aColor,1.0f)));
 	vertex.z = min.z;
-	primitive.Vertices.push_back(DebugVertex(vertex,aColor));
+	primitive.Vertices.push_back(DebugVertex(vertex,Vector4f(aColor,1.0f)));
 
 
 	primitive.Indices.reserve(24);
@@ -537,11 +542,11 @@ DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugGrid(const Vector3f& aCenter,c
 	primitive.Vertices.reserve(static_cast<size_t>(someNumCells) * 4 + 4);
 	primitive.Indices.reserve(static_cast<size_t>(someNumCells) * 4 + 4);
 
-	DebugVertex vertex(Vector3f(),aColor);
+	DebugVertex vertex(Vector3f(),Vector4f(aColor,1.0f));
 
-	float offset = (anExtent * 2.f) / someNumCells;
+	float offset = (anExtent * 2.f) / static_cast<float>(someNumCells);
 
-	Vector4f aStartPos = Vector4f(aCenter.x,aCenter.y,aCenter.z,1.0f);
+	auto aStartPos = Vector4f(aCenter.x,aCenter.y,aCenter.z,1.0f);
 	aStartPos.x -= anExtent;
 	aStartPos.z -= anExtent;
 	Vector4f anEndPos = aStartPos;

@@ -1,11 +1,13 @@
-﻿#include "PersistentSystems.pch.h"
-#include "RegisterExternalNodes.h"
-#include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
-#include <Tools/Utilities/Input/EnumKeys.h>
-#include <Tools/Utilities/Input/InputHandler.hpp>
+﻿#include "Engine/PersistentSystems/PersistentSystems.pch.h"
 
-#include "GraphicsEngine.h"
-#include "ComponentSystem/Components/CameraComponent.h"
+#include <Tools/Utilities/Input/EnumKeys.h>
+#include <Tools/Utilities/Input/Input.hpp>
+#include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
+#include "RegisterExternalNodes.h" 
+#include "Engine/AssetManager/ComponentSystem/Components/CameraComponent.h"
+#include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
+#include "Engine/GraphicsEngine/GraphicsEngine.h"
+#include "Engine/PersistentSystems/Scene.h"
 //
 //void MVNode_TestNode::Init()
 //{
@@ -156,7 +158,7 @@ size_t MVNode_GetGameObject::DoOperation()
 	unsigned int ID;
 	if (GetPinData("ID",ID))
 	{
-		auto arg = GameObjectManager::Get().GetGameObject(ID);
+		auto arg = Scene::ActiveManager().GetGameObject(ID);
 		if (arg.IsValid())
 		{
 			SetPinData("GameObject",arg);
@@ -291,7 +293,7 @@ void MVNode_GetCursorPosition::Init()
 
 size_t MVNode_GetCursorPosition::DoOperation()
 {
-	const auto position = InputHandler::GetInstance().GetMousePosition();
+	const auto position = Input::GetMousePosition();
 	SetPinData("CursorPosition",Vector3f((float)position.x,(float)position.y,0));
 	return ExitViaPin("Out");
 }
@@ -307,9 +309,9 @@ void MVNode_Distance::Init()
 
 size_t MVNode_Distance::DoOperation()
 {
-	  Vector3f vector;
+	Vector3f vector;
 	if (GetPinData("Vector",vector))
-	{ 
+	{
 		SetPinData("Distance",vector.Length());
 		return ExitViaPin("Out");
 	}
@@ -332,7 +334,7 @@ size_t MVNode_VectorMinus::DoOperation()
 	Vector3f vectorB;
 	if (GetPinData("VectorA",vectorA) && GetPinData("VectorB",vectorB))
 	{
-		SetPinData("Difference",vectorA-vectorB);
+		SetPinData("Difference",vectorA - vectorB);
 		return ExitViaPin("Out");
 	}
 	return ExitWithError("Could not find Vector");
@@ -352,8 +354,8 @@ size_t MVNode_ScreenSpacePosition::DoOperation()
 	Vector3f vector;
 	if (GetPinData("World position",vector))
 	{
-		auto& camera = GameObjectManager::Get().GetCamera().GetComponent<cCamera>();
-		Vector4f screenspacePos = camera.WoldSpaceToPostProjectionSpace(vector); 
+		auto& camera = Scene::ActiveManager().GetCamera().GetComponent<cCamera>();
+		Vector4f screenspacePos = camera.WoldSpaceToPostProjectionSpace(vector);
 		SetPinData("Screen position",Vector3f(screenspacePos.x,screenspacePos.y,screenspacePos.z));
 		return ExitViaPin("Out");
 	}

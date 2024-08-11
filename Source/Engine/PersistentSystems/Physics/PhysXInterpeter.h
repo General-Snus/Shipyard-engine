@@ -32,10 +32,10 @@ public:
 
 	void ShutdownPhysx();
 
-	template<typename T>
-	static T* CookMesh(std::shared_ptr<Mesh> myToBeCookedMesh);
+    // template<typename T>
+    // static T* CookMesh(std::shared_ptr<Mesh> myToBeCookedMesh);
 
-	physx::PxScene* GetScene();
+    physx::PxScene* GetScene();
 	physx::PxPhysics* GetPhysicsWorld();
 	physx::PxMaterial* GetDefaultMaterial();
 private:

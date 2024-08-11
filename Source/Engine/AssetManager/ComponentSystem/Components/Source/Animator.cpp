@@ -1,25 +1,28 @@
-#include "AssetManager.pch.h"
+#include "Engine/AssetManager/AssetManager.pch.h"
+#include "Engine/AssetManager/ComponentSystem/Components/Animator.h"
 
-cAnimator::cAnimator(const unsigned int anOwnerId) : Component(anOwnerId),myCurrentAnimation(0),myAnimationTimer(0)
+#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
+#include "Engine/AssetManager/Objects/BaseAssets/Animations.h"
+
+cAnimator::cAnimator(const SY::UUID anOwnerId,GameObjectManager* aManager)  
+	: Component(anOwnerId,aManager),myCurrentAnimation(0),myAnimationTimer(0)
 {
 	mySkeleton = (this->TryGetComponent<cSkeletalMeshRenderer>())->GetRawSkeleton();
 	if (!mySkeleton)
 	{
-		std::cout << "cSkeletalMeshRenderer component does not have a skeleton" << std::endl;
+		Logger::Err("cSkeletalMeshRenderer component does not have a skeleton"); 
 	}
 }
 
-cAnimator::cAnimator(const unsigned int anOwnerId,const std::filesystem::path& aFilePath) : Component(anOwnerId),myCurrentAnimation(0),myAnimationTimer(0),myCurrentFrame(0)
+cAnimator::cAnimator(const SY::UUID anOwnerId,GameObjectManager* aManager,const std::filesystem::path& aFilePath) : Component(anOwnerId,aManager),myCurrentAnimation(0),myAnimationTimer(0),myCurrentFrame(0)
 {
 	aFilePath;
 	mySkeleton = (this->TryGetComponent<cSkeletalMeshRenderer>())->GetRawSkeleton();
 	if (!mySkeleton)
 	{
-		Logger::Warn("cSkeletalMeshRenderer component does not have a skeleton");
-	}
-	std::shared_ptr<Animation> animation;
-	AssetManager::Get().LoadAsset<Animation>(aFilePath,animation);
-	myAnimations.push_back(animation);
+		Logger::Err("cSkeletalMeshRenderer component does not have a skeleton");
+	}  
+	myAnimations.push_back(AssetManager::Get().LoadAsset<Animation>(aFilePath));
 }
 
 void cAnimator::Update()
@@ -29,7 +32,7 @@ void cAnimator::Update()
 	if (myAnimations.size())
 	{
 		const float TimePerFrame = (1 / myAnimations[myCurrentAnimation]->frameRate);
-		myAnimationTimer += Timer::GetInstance().GetDeltaTime();
+		myAnimationTimer += Timer::GetDeltaTime();
 		if (myAnimationTimer >= TimePerFrame)
 		{
 			float percentage = myAnimationTimer / TimePerFrame;
@@ -50,23 +53,21 @@ void cAnimator::Update()
 	}
 }
 
-void cAnimator::RenderAnimation(const std::shared_ptr<RenderData>& aData,const Matrix& aTransform) const
+void cAnimator::RenderAnimation(const std::shared_ptr<Mesh>& aData,const Matrix& aTransform) const
 {
 	aData; aTransform;
 	//GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderSkeletalMeshShadow>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
 	//GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderSkeletalMesh>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
 }
 
-void cAnimator::AddAnimation(Animation aAnimation)
+void cAnimator::AddAnimation(std::shared_ptr<Animation> aAnimation)
 {
-	myAnimations.push_back(std::make_shared<Animation>(aAnimation));
+	myAnimations.push_back(aAnimation);
 }
 
 void cAnimator::AddAnimation(const std::filesystem::path& aFilePath)
 {
-	std::shared_ptr<Animation> animation;
-	AssetManager::Get().LoadAsset<Animation>(aFilePath,animation);
-	myAnimations.push_back(animation);
+	myAnimations.push_back(AssetManager::Get().LoadAsset<Animation>(aFilePath));
 }
 
 void cAnimator::SetHierarchy(unsigned int aBoneID,const Matrix& aParentMatrix)
@@ -117,5 +118,14 @@ void cAnimator::UpdateAnimationHierarcy(float t)
 		}
 		SetHierarchy(0,Matrix());
 	}
+}
 
+bool cAnimator::InspectorView()
+{
+	if (!Component::InspectorView())
+	{
+		return false;
+	}
+	Reflect<cAnimator>();
+	return true;
 }

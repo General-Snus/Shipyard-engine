@@ -1,11 +1,9 @@
-#include "DirectXHeader.pch.h"
+#include "DirectX/DirectXHeader.pch.h"
 
 #include "../CommandQueue.h"
-#include "../GPU.h"
-
-#include <DirectX/CrashHandler/NsightAftermathGpuCrashTracker.h>   
-
-#include "Shipyard/ResourceStateTracker.h"
+#include "../GPU.h" 
+#include <DirectX/CrashHandler/NsightAftermathGpuCrashTracker.h> 
+#include "DirectX/Shipyard/ResourceStateTracker.h"
 
 
 bool GPUCommandQueue::Create(const ComPtr<ID3D12Device>& device,D3D12_COMMAND_LIST_TYPE type)
@@ -35,14 +33,18 @@ bool GPUCommandQueue::Create(const ComPtr<ID3D12Device>& device,D3D12_COMMAND_LI
 	case D3D12_COMMAND_LIST_TYPE_DIRECT:
 		m_CommandQueue->SetName(L"Direct Command Queue");
 		break;
+	default:
+		assert(false && "Invalid command list type.");
+		break;
 	}
 
-	m_ProcessInFlightCommandListsThread = std::thread(&GPUCommandQueue::ProccessInFlightCommandLists,this);
+	m_ProcessInFlightCommandListsThread = std::jthread(&GPUCommandQueue::ProccessInFlightCommandLists,this);
 	return true;
 }
 
 uint64_t GPUCommandQueue::Signal()
 {
+	OPTICK_GPU_EVENT("Signal");
 	uint64_t fenceValueForSignal = ++m_FenceValue;
 	Helpers::ThrowIfFailed(m_CommandQueue->Signal(m_Fence.Get(),fenceValueForSignal));
 	return fenceValueForSignal;
@@ -54,13 +56,12 @@ bool GPUCommandQueue::IsFenceComplete(uint64_t fenceValue)
 }
 
 void GPUCommandQueue::WaitForFenceValue(uint64_t fenceValue)
-{
+{ 
 	if (!IsFenceComplete(fenceValue))
 	{
 		auto event = ::CreateEvent(NULL,FALSE,FALSE,NULL);
 		assert(event && "Failed to create fence event handle.");
 
-		// Is this function thread safe?
 		m_Fence->SetEventOnCompletion(fenceValue,event);
 		::WaitForSingleObject(event,DWORD_MAX);
 
@@ -70,6 +71,7 @@ void GPUCommandQueue::WaitForFenceValue(uint64_t fenceValue)
 
 std::shared_ptr<CommandList> GPUCommandQueue::GetCommandList(const std::wstring& name)
 {
+	OPTICK_EVENT();
 	std::shared_ptr<CommandList> commandList;
 
 	// If there is a command list on the queue.
@@ -103,6 +105,7 @@ uint64_t GPUCommandQueue::ExecuteCommandList(std::shared_ptr<CommandList> comman
 
 uint64_t GPUCommandQueue::ExecuteCommandList(const std::vector<std::shared_ptr<CommandList> >& commandLists)
 {
+	OPTICK_GPU_EVENT("ExecuteCommandList");
 	ResourceStateTracker::Lock();
 
 	// Command lists that need to put back on the command list queue.
@@ -141,6 +144,7 @@ uint64_t GPUCommandQueue::ExecuteCommandList(const std::vector<std::shared_ptr<C
 	}
 
 	UINT numCommandLists = static_cast<UINT>(d3d12CommandLists.size());
+	OPTICK_GPU_EVENT("ListExecution");
 	m_CommandQueue->ExecuteCommandLists(numCommandLists,d3d12CommandLists.data());
 	uint64_t fenceValue = Signal();
 
@@ -166,7 +170,9 @@ uint64_t GPUCommandQueue::ExecuteCommandList(const std::vector<std::shared_ptr<C
 
 void GPUCommandQueue::ProccessInFlightCommandLists()
 {
-	std::unique_lock<std::mutex> lock(m_ProcessInFlightCommandListsThreadMutex,std::defer_lock);
+	OPTICK_THREAD("ProccessInFlightCommandLists");
+	OPTICK_GPU_EVENT("ProccessInFlightCommandLists");
+	std::unique_lock lock(m_ProcessInFlightCommandListsThreadMutex,std::defer_lock);
 
 	while (m_bProcessInFlightCommandLists)
 	{
@@ -193,7 +199,7 @@ void GPUCommandQueue::ProccessInFlightCommandLists()
 
 void GPUCommandQueue::Flush()
 {
-	std::unique_lock<std::mutex> lock(m_ProcessInFlightCommandListsThreadMutex);
+	std::unique_lock lock(m_ProcessInFlightCommandListsThreadMutex);
 	m_ProcessInFlightCommandListsThreadCV.wait(lock,[this] { return m_InFlightCommandLists.Empty(); });
 
 	// In case the command queue was signaled directly 
@@ -203,7 +209,13 @@ void GPUCommandQueue::Flush()
 	WaitForFenceValue(m_FenceValue);
 }
 
-void GPUCommandQueue::Wait(const GPUCommandQueue& other)
+void GPUCommandQueue::Wait(const GPUCommandQueue& other) const
 {
 	m_CommandQueue->Wait(other.m_Fence.Get(),other.m_FenceValue);
+}
+
+void GPUCommandQueue::Destroy()
+{
+	Flush();
+	m_bProcessInFlightCommandLists = false;
 }

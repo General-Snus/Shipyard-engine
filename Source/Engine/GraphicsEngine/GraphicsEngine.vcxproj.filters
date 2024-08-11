@@ -102,6 +102,12 @@
     <ClInclude Include="InterOp\GPUBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Rendering\Passes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsEngineUtilities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicsEngine.pch.cpp">
@@ -140,6 +146,12 @@
     <ClCompile Include="InterOp\Source\GPUBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Rendering\Passes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsEngineUtilities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Headers\ObjectBuffer.hlsli" />
@@ -176,7 +188,6 @@
     <FxCompile Include="Shaders\Passes\PostProcessing\SSAO_PS.hlsl" />
     <FxCompile Include="Shaders\DefaultShaders\Default_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\PostProcessing\EdgeBlur.hlsl" />
-    <FxCompile Include="Shaders\Processing\GenerateMips_CS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Objects\DataObjects\DefaultParticle_P.dds" />

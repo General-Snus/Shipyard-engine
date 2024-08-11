@@ -4,8 +4,8 @@
 class CombatComponent : public Component
 {
 public:
-	CombatComponent(const SY::UUID anOwnerID);
-	~CombatComponent() = default;
+	CombatComponent(const SY::UUID anOwnerID,GameObjectManager* aManager);
+	~CombatComponent() override = default;
 	void Init() override;
 	void Update() override;
 	void Render() override;
@@ -29,3 +29,5 @@ private:
 	float myDeathTimer;
 	float myAttackTimer = 0;
 };
+
+REFL_AUTO(type(CombatComponent))

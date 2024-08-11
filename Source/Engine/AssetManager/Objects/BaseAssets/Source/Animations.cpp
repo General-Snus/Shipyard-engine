@@ -1,4 +1,6 @@
-#include "AssetManager.pch.h"
+#include "Engine/AssetManager/AssetManager.pch.h"
+
+#include "Engine/AssetManager/Objects/BaseAssets/Animations.h"
 
 void Animation::Init()
 {
@@ -163,8 +165,7 @@ void Skeleton::Init()
 		}
 	}
 	catch (const std::exception& e)
-	{
-		std::cout << "Error: Meshloader failed to load: " << AssetPath << "\n" << e.what() << "\n";
+	{  
 	}
 #else
 	Assimp::Importer importer;

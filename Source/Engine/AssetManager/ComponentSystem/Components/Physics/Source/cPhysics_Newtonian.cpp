@@ -1,7 +1,7 @@
-#include "AssetManager.pch.h"
+#include "Engine/AssetManager/AssetManager.pch.h"
 #include "../cPhysics_Newtonian.h"
 
-cPhysics_Newtonian::cPhysics_Newtonian(const SY::UUID anOwnerID) : Component(anOwnerID)
+cPhysics_Newtonian::cPhysics_Newtonian(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager)
 {
 }
 

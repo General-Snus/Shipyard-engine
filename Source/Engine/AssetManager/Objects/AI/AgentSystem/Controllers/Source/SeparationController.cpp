@@ -1,6 +1,10 @@
-#include "AssetManager.pch.h"
+#include "Engine/AssetManager/AssetManager.pch.h"
 #include "../SeparationController.h"
 #include <Tools/Utilities/LinearAlgebra/Quaternions.hpp>
+
+#include "Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h"
+#include "Engine/AssetManager/Objects/AI/AgentSystem/SteeringBehaviour.h"
+#include "Engine/AssetManager/Objects/AI/AgentSystem/PollingStations/Target_PollingStation.h"
 
 SeparationController::SeparationController(MultipleTargets_PollingStation* station,GameObject componentCheck) : PollingController(station)
 {

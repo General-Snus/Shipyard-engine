@@ -20,14 +20,10 @@
 #include "RootSignature.h"
 #include "Texture.h"
 
-namespace DirectX
-{
-	/*class ResourceUploadBatch;
-	class DescriptorHeap;
-	class GraphicsMemory;*/
-}
 
-
+#ifndef incGPU
+#define incGPU
+ 
 class GPUSupport
 {
 public:
@@ -42,7 +38,7 @@ public:
 	void Create(HWND hwnd,ComPtr<ID3D12CommandQueue>,UINT Width,UINT Height,UINT bufferCount);
 	void Present();
 	ComPtr<IDXGISwapChain4> m_SwapChain;
-	DXGI_SWAP_CHAIN_DESC1 m_Desc;
+	DXGI_SWAP_CHAIN_DESC1 m_Desc{};
 };
 
 
@@ -65,11 +61,11 @@ public:
 	static void CopyBuffer(const CommandList& aCommandList,GpuResource& buffer,size_t numElements,size_t elementSize,const void* bufferData,D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
 
 	static void ConfigureInputAssembler(
-		CommandList& commandList,D3D_PRIMITIVE_TOPOLOGY topology,
-		VertexResource& vertexResource,IndexResource& indexResource
+		CommandList& commandList,D3D_PRIMITIVE_TOPOLOGY topology, IndexResource& indexResource
 	);
 
 	static HeapHandle GetHeapHandle(eHeapTypes type);
+	static HeapHandle GetHeapHandle(DescriptorPile& pile);
 
 	template<typename vertexType>
 	static bool CreateVertexBuffer(
@@ -81,8 +77,7 @@ public:
 		const std::shared_ptr<CommandList>& commandList,
 		IndexResource& outIndexResource,
 		const std::vector<uint32_t>& aIndexList
-	);
-	static bool CreateDepthStencil(const D3D12_DEPTH_STENCIL_DESC& depthStencilDesc);
+	); 
 
 	static void ResizeDepthBuffer(unsigned width,unsigned height);
 
@@ -101,6 +96,8 @@ public:
 
 	static void ClearRTV(const CommandList& commandList,
 		Texture* rtv,unsigned textureCount = 1);
+
+	static void ClearDepth(const CommandList& commandList,Texture* texture);
 
 	static void ClearDepth(const CommandList& commandList,
 		D3D12_CPU_DESCRIPTOR_HANDLE dsv,FLOAT depth = 0);
@@ -124,7 +121,7 @@ public:
 	static HANDLE CreateEventHandle();
 
 	static void GetHardwareAdapter(
-		_In_ IDXGIFactory1* pFactory,
+		_In_ IDXGIFactory4* pFactory,
 		_Outptr_result_maybenull_ IDXGIAdapter1** ppAdapter,
 		bool requestHighPerformanceAdapter = false);
 
@@ -132,11 +129,11 @@ public:
 	static void  setAftermathEventMarker(const std::string& markerData,bool appManagedMarker);
 	static std::string  createMarkerStringForFrame(const char* markerString);
 #endif
-	static inline constexpr UINT m_FrameCount = 2;
+	static constexpr UINT m_FrameCount = 2;
 	static inline constexpr bool m_useWarpDevice = false;
 	static inline UINT m_FrameIndex;
 
-	static inline ComPtr<ID3D12Device2> m_Device;
+	static inline ComPtr<ID3D12Device8> m_Device;
 	static inline unsigned m_Width;
 	static inline unsigned m_Height;
 	static inline std::shared_ptr<GPUCommandQueue> m_DirectCommandQueue;
@@ -144,10 +141,10 @@ public:
 	static inline std::shared_ptr<GPUCommandQueue> m_ComputeCommandQueue;
 
 	static inline std::unique_ptr<GPUSwapchain> m_Swapchain;
-	static inline ComPtr<ID3D12CommandAllocator> m_CommandAllocators[m_FrameCount];
+	static inline std::array<ComPtr<ID3D12CommandAllocator>,m_FrameCount> m_CommandAllocators;
 	static inline Texture m_renderTargets[m_FrameCount];
 
-
+	static inline std::mutex lockForTextureLoad;
 	static inline uint64_t m_FenceValues[m_FrameCount] = {};
 	static inline D3D_ROOT_SIGNATURE_VERSION m_FeatureData;
 
@@ -169,10 +166,12 @@ public:
 	static inline std::shared_ptr<Texture> m_BackBuffer;
 	static inline std::shared_ptr<Texture> m_DepthBuffer;
 	static inline std::shared_ptr<DirectX::GraphicsMemory> m_GraphicsMemory;
-	static inline std::unique_ptr<DirectX::DescriptorPile> m_ResourceDescriptors[(int)eHeapTypes::HEAP_COUNT];
-	static inline std::unique_ptr<DirectX::DescriptorPile> m_ImGui_Heap;
 
-private:
+
+
+	static inline std::unique_ptr<DirectX::DescriptorPile> m_ResourceDescriptors[(int)eHeapTypes::HEAP_COUNT]; 
+	static inline std::array<size_t,(int)eHeapTypes::HEAP_COUNT> m_HeapSizes;
+
 };
 
 template<typename vertexType>
@@ -188,6 +187,5 @@ inline bool GPU::CreateVertexBuffer(
 	);
 
 	return true;
-}
-
-
+} 
+#endif

@@ -1,7 +1,7 @@
-#include "DirectXHeader.pch.h" 
+#include "DirectX/DirectXHeader.pch.h" 
 
 #include "DirectX/Shipyard/RootSignature.h" 
-#include "Shipyard/GPU.h"
+#include "DirectX/Shipyard/GPU.h"
 
 GPURootSignature::GPURootSignature()
 	: m_RootSignatureDesc{}

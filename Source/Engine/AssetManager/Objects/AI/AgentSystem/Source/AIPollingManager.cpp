@@ -1,5 +1,7 @@
-#include "AssetManager.pch.h"
+#include "Engine/AssetManager/AssetManager.pch.h"
 #include "../AIPollingManager.h" 
+
+#include "Engine/AssetManager/Objects/AI/AgentSystem/PollingStations/Target_PollingStation.h"
 
 
 void AIPollingManager::AddStation(const std::string& aGivenName,std::shared_ptr<PollingStation> aNewStation)

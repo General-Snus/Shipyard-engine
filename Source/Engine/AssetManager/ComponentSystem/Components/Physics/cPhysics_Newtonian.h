@@ -2,7 +2,7 @@
 class cPhysics_Newtonian : public Component
 {
 public:
-	cPhysics_Newtonian(const SY::UUID anOwnerID);
+	cPhysics_Newtonian(const SY::UUID anOwnerId,GameObjectManager* aManager) ;
 	void Init() override;
 	void Update() override;
 	void Render() override;
@@ -11,3 +11,5 @@ private:
 	double ph_mass;
 };
 
+
+REFL_AUTO(type(cPhysics_Newtonian))

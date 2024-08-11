@@ -5,12 +5,17 @@
 #include <vector>
 #include <wrl/client.h> 
 
+
+#ifndef incCommandList
+#define incCommandList
+
 enum class eHeapTypes;
 class ResourceStateTracker;
 class GpuResource;
 class Texture;
 struct ID3D12GraphicsCommandList2;
 struct ID3D12Resource;
+        class GPU;
 
 using DxCommandList = ComPtr<ID3D12GraphicsCommandList2>;
 class CommandList
@@ -23,6 +28,13 @@ public:
 	void TransitionBarrier(const ComPtr<ID3D12Resource>& resource,D3D12_RESOURCE_STATES stateAfter,UINT subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,bool flushBarriers = false);
 	void TransitionBarrier(GpuResource& resource,D3D12_RESOURCE_STATES stateAfter,UINT subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,bool flushBarriers = false);
 	void SetDescriptorTable(unsigned slot,Texture* texture);
+
+	template<typename T>
+	void AllocateBuffer(eRootBindings binding,const T& var)
+	{
+		const auto& alloc = GPU::m_GraphicsMemory->AllocateConstant<T>(var);
+		m_CommandList->SetGraphicsRootConstantBufferView(binding,alloc.GpuAddress()); 
+	}
 
 	void SetRenderTargets(unsigned numberOfTargets,Texture* renderTargets,Texture* depthBuffer);
 
@@ -60,3 +72,5 @@ private:
 	std::vector<ComPtr<ID3D12Object>> m_TrackedObjects;
 };
 
+
+#endif // incCommandList

@@ -2,7 +2,8 @@
 #include <Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h> 
 #include <Tools/Utilities/LinearAlgebra/AABB3D.hpp>
 #include <Tools/Utilities/LinearAlgebra/Sphere.hpp>  
-#include "BaseAsset.h" 
+#include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
+#include "Engine/AssetManager/Objects/BaseAssets/BaseAsset.h" 
 
 enum class eColliderType
 {
@@ -28,6 +29,7 @@ struct PrimitiveHandle;
 class ColliderAsset : public AssetBase
 {
 public:
+	MYLIB_REFLECTABLE();
 	ColliderAsset() = delete; // Always tell the type stupid
 	explicit ColliderAsset(eColliderType type);
 	explicit ColliderAsset(const std::filesystem::path& aFilePath);
@@ -42,12 +44,14 @@ protected:
 	Sphere<float> boundingBox;
 	std::vector<DebugDrawer::PrimitiveHandle> myHandles;
 };
+REFL_AUTO(type(ColliderAsset))
 
 
 //Have thomas look at this
 class ColliderAssetAABB : public ColliderAsset
 {
 public:
+	MYLIB_REFLECTABLE();
 	explicit ColliderAssetAABB();
 	explicit ColliderAssetAABB(const AABB3D<float>& rf);
 	void RenderDebugLines(Transform& data) override;
@@ -57,21 +61,25 @@ private:
 	AABB3D<float> myAABB;
 	AABB3D<float> myOriginalAABB;
 };
+REFL_AUTO(type(ColliderAssetAABB))
 
 class ColliderAssetSphere : public ColliderAsset
 {
 public:
+	MYLIB_REFLECTABLE();
 	explicit ColliderAssetSphere();
 	explicit ColliderAssetSphere(const Sphere<float>& rf);
 	void RenderDebugLines(Transform& data) override;
 private:
 	Sphere<float> mySphere;
 };
+REFL_AUTO(type(ColliderAssetSphere))
 
 
 class ColliderAssetConvex : public ColliderAsset
 {
 public:
+	MYLIB_REFLECTABLE();
 	explicit ColliderAssetConvex();
 	explicit ColliderAssetConvex(const std::shared_ptr<Mesh>& rf);
 	explicit ColliderAssetConvex(const std::filesystem::path& path);
@@ -81,12 +89,15 @@ public:
 private:
 	std::shared_ptr<Mesh> aColliderMesh;
 };
+REFL_AUTO(type(ColliderAssetConvex))
 
 
 
 class ColliderAssetPlanar : public ColliderAsset
 {
 public:
+
+	MYLIB_REFLECTABLE();
 	explicit ColliderAssetPlanar();
 	explicit ColliderAssetPlanar(const std::shared_ptr<Mesh>& rf);
 	explicit ColliderAssetPlanar(const std::filesystem::path& path);
@@ -96,3 +107,5 @@ public:
 private:
 	std::shared_ptr<Mesh> aColliderMesh;
 };
+
+REFL_AUTO(type(ColliderAssetPlanar))

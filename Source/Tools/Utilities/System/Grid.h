@@ -25,7 +25,7 @@ class GridCell
 {
 public:
 	GridCell() = delete;
-	GridCell(const Vector2<float> position, const float size);
+	GridCell(const Vector2<float> position,const float size);
 
 	Vector2<float> myPosition;
 	float myHalfWidth;
@@ -33,7 +33,7 @@ public:
 
 	std::vector<GridObject*> myObjects;
 	//std::vector<Tga::LinePrimitive> myQuad;
-	 
+
 	bool Contains(const Border& aObject);
 	bool ContainsPart(const Border& aObject);
 
@@ -54,7 +54,7 @@ public:
 		float aGridSize
 	);
 	void Update();
-	void Render(); 
+	void Render();
 
 	Vector2f GetOffset() const;
 	void AddObject(GridObject* aObject);
@@ -67,5 +67,5 @@ private:
 	const float myGridSize;
 	Vector2f myCenterOffset;
 	GridCell* myRoot;
-	int count; 
-}; 
+	int count;
+};

@@ -1,12 +1,11 @@
-#include <Editor/Editor/Core/Editor.h> 
+#include "Engine/AssetManager/AssetManager.pch.h"
 #include <Tools/ImGui/ImGui/imgui.h> 
 #include "../RenderMode.h"
-#include "AssetManager.pch.h"
 
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 
 //TODO FIX THIS WITH EDITOR SETTINGS??
-static inline std::string tonemaps[5] = {
+static inline std::array<std::string,5> tonemaps = {
 	"No tonemap",
 	"Tonemap_Reinhard2",
 	"Tonemap_UnrealEngine",
@@ -29,7 +28,7 @@ void RenderMode::Update()
 			if (ImGui::RadioButton(ApplicationState::layerNames[i].c_str(),false))
 			{
 				currentlyActiveLayer = i;
-				Editor::GetApplicationState().filter = (DebugFilter)i;
+				ApplicationState::filter = static_cast<DebugFilter>(i);
 			}
 		}
 	}
@@ -56,10 +55,3 @@ void RenderMode::Update()
 	ImGui::End();
 }
 
-void RenderMode::OnExit()
-{
-}
-
-void RenderMode::OnStart()
-{
-}

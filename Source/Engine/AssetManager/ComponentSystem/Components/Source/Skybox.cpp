@@ -1,13 +1,18 @@
-#include "AssetManager.pch.h" 
+#include "Engine/AssetManager/AssetManager.pch.h"
+
 #include <Engine/GraphicsEngine/GraphicsEngine.h>
 #include "../Skybox.h"
 
-Skybox::Skybox(const unsigned int anOwnerId) : Component(anOwnerId)
+#include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
+#include "Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h"
+#include "Tools/ImGui/ImGui/imgui.h"
+
+Skybox::Skybox(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager)
 {
 	myCubeMap = GraphicsEngine::Get().GetDefaultTexture(eTextureType::CubeMap);
 }
 
-Skybox::Skybox(const unsigned int anOwnerId,const std::filesystem::path& aPath) : Component(anOwnerId)
+Skybox::Skybox(const SY::UUID anOwnerId,GameObjectManager* aManager,const std::filesystem::path& aPath) : Component(anOwnerId,aManager)
 {
 	AssetManager::Get().ForceLoadAsset<TextureHolder>(aPath,myCubeMap);
 	AssetManager::Get().ForceLoadAsset<Material>(aPath,mySkyboxMaterial);
@@ -23,6 +28,18 @@ Skybox::Skybox(const unsigned int anOwnerId,const std::filesystem::path& aPath) 
 
 void Skybox::Update()
 {
+}
+
+
+bool Skybox::InspectorView()
+{
+	if (!Component::InspectorView())
+	{
+		return false;
+	}
+
+	Reflect<Skybox>();
+		return true;
 }
 
 void Skybox::Render()

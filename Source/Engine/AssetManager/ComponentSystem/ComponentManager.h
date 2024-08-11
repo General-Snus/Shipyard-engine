@@ -1,13 +1,16 @@
-#pragma once
-#include <cassert>  
-#include <Engine/AssetManager/AssetManagerUtills.hpp>
-#include <iostream>
+
+#ifndef ComponentManagerDef 
+#define ComponentManagerDef  
+#include <cassert>
 #include <unordered_map>
 #include <vector>
+#include <string>
 #include "UUID.h"
-//Original creation by Simon
+#include <Tools/Reflection/refl.hpp>
 
+class GameObjectManager;
 class Component;
+
 class ComponentManagerBase
 {
 public:
@@ -20,17 +23,30 @@ public:
 		Render
 	};
 
-	ComponentManagerBase() = default;
+	ComponentManagerBase(GameObjectManager* manager, std::string typeName);
 	virtual ~ComponentManagerBase() = default;
 	virtual void Destroy() = 0;
 	virtual void Update() = 0;
 	virtual void Render() = 0;
 	virtual void DeleteGameObject(const SY::UUID aGameObjectID) = 0;
-	virtual void CollidedWith(const SY::UUID aFirstID,const SY::UUID aTargetID) = 0;
-	virtual void OnSiblingChanged(const SY::UUID aGameObjectID,const std::type_info* SourceClass = nullptr) = 0;
+	virtual void CollidedWith(const SY::UUID aFirstID, const SY::UUID aTargetID) = 0;
+	virtual void OnSiblingChanged(const SY::UUID aGameObjectID, const std::type_info* SourceClass = nullptr) = 0;
+
+	virtual Component* AddComponent(SY::UUID aGameObjectID, const Component* aComponent) = 0;
+	virtual bool ValidComponentType(const Component* cmp);
 
 	void SetUpdatePriority(const UpdatePriority aPriority) { myUpdatePriority = aPriority; }
-	const UpdatePriority GetUpdatePriority() const { return myUpdatePriority; }
+	UpdatePriority GetUpdatePriority() const { return myUpdatePriority; }
+
+	//Cost: 1 Contains,1 Get, 1 reintp cast
+	virtual Component* TryGetBaseComponent(const SY::UUID aGameObjectID) = 0;
+
+	virtual Component* DeepCopy(const Component* cmp) = 0;
+	virtual Component* DeepCopy(const SY::UUID aGameObjectID) = 0;
+
+protected:
+	std::string Comparator;
+	GameObjectManager* myManager = nullptr;
 
 private:
 	UpdatePriority myUpdatePriority = ComponentManagerBase::UpdatePriority::Normal;
@@ -41,36 +57,41 @@ template <class T>
 class ComponentManager : public ComponentManagerBase
 {
 public:
-	ComponentManager() = default;
+	ComponentManager(GameObjectManager* manager) : ComponentManagerBase(manager, refl::reflect<T>().name.str()) { };
 	~ComponentManager() = default;
 
 	void Destroy() override;
 
+	Component* AddComponent(SY::UUID aGameObjectID, const Component* aComponent) override;
 	T& AddComponent(const SY::UUID aGameObjectID);
-
-	T& AddComponent(const SY::UUID aGameObjectID,const T& aComponent);
-
+	T& AddComponent(const SY::UUID aGameObjectID, const T& aComponent);
 	template <typename... Args>
-	T& AddComponent(const SY::UUID aGameObjectID,Args... someParameters);
+	T& AddComponent(const SY::UUID aGameObjectID, Args... someParameters);
+
+	Component* TryGetBaseComponent(const SY::UUID aGameObjectID) override;
 
 	const bool HasComponent(const SY::UUID aGameObjectID) const;
-
+	//Cost: 1 Get, 
 	std::vector<T>& GetAllComponents();
-
+	//Cost: 1 Get, 
 	T& GetComponent(const SY::UUID aGameObjectID);
-
+	//Cost: 1 Contains,1 Get, 
 	T* TryGetComponent(const SY::UUID aGameObjectID);
+
+	Component* DeepCopy(const Component* cmp) override;
+	Component* DeepCopy(const SY::UUID aGameObjectID) override;
 
 	void Update() override;
 	void Render() override;
 	void DeleteGameObject(const SY::UUID aGameObjectID) override;
-	void CollidedWith(const SY::UUID aFirstID,const SY::UUID aTargetID) override;
-	void OnSiblingChanged(const SY::UUID aGameObjectID,const std::type_info* SourceClass = nullptr) override;
+	void CollidedWith(const SY::UUID aFirstID, const SY::UUID aTargetID) override;
+	void OnSiblingChanged(const SY::UUID aGameObjectID, const std::type_info* SourceClass = nullptr) override;
 private:
-	std::unordered_map<SY::UUID,unsigned int> myGameObjectIDtoVectorIndex;
-	std::unordered_map<unsigned int,SY::UUID> myVectorIndexToGameObjectID;
+	std::unordered_map<SY::UUID, unsigned int> myGameObjectIDtoVectorIndex;
+	std::unordered_map<unsigned int, SY::UUID> myVectorIndexToGameObjectID;
 	std::vector<T> myComponents;
 };
+
 
 template<class T>
 inline void ComponentManager<T>::Destroy()
@@ -80,34 +101,70 @@ inline void ComponentManager<T>::Destroy()
 	myComponents.clear();
 }
 
+
+template <class T>
+Component* ComponentManager<T>::TryGetBaseComponent(const SY::UUID aGameObjectID)
+{
+	return reinterpret_cast<Component*>(TryGetComponent(aGameObjectID));
+}
+
 template<class T>
 T& ComponentManager<T>::AddComponent(const SY::UUID aGameObjectID)
 {
+	if (HasComponent(aGameObjectID))
+	{
+		return myComponents[myGameObjectIDtoVectorIndex[aGameObjectID]];
+	}
+
 	myGameObjectIDtoVectorIndex[aGameObjectID] = static_cast<unsigned int>(myComponents.size());
 	myVectorIndexToGameObjectID[static_cast<unsigned int>(myComponents.size())] = aGameObjectID;
-	myComponents.push_back(T(aGameObjectID));
+	myComponents.push_back(T(aGameObjectID, myManager));
+	static_cast<Component*>(&myComponents.back())->SetManager(myManager);
 	static_cast<Component*>(&myComponents.back())->Init();
 	return myComponents.back();
 }
 
 template<class T>
-inline T& ComponentManager<T>::AddComponent(const SY::UUID aGameObjectID,const T& aComponent)
+inline Component* ComponentManager<T>::AddComponent(const SY::UUID aGameObjectID, const Component* aComponent)
 {
+	const T* cmp = dynamic_cast<const T*>(aComponent);
+	if (cmp != nullptr)
+	{
+		return &AddComponent(aGameObjectID, *cmp);
+	}
+	return nullptr;
+}
+
+template<class T>
+inline T& ComponentManager<T>::AddComponent(const SY::UUID aGameObjectID, const T& aComponent)
+{
+	if (HasComponent(aGameObjectID))
+	{
+		return myComponents[myGameObjectIDtoVectorIndex[aGameObjectID]];
+	}
+
 	myGameObjectIDtoVectorIndex[aGameObjectID] = static_cast<unsigned int>(myComponents.size());
 	myVectorIndexToGameObjectID[static_cast<unsigned int>(myComponents.size())] = aGameObjectID;
 	myComponents.push_back(aComponent);
 	static_cast<Component*>(&myComponents.back())->SetOwnerID(aGameObjectID);
+	static_cast<Component*>(&myComponents.back())->SetManager(myManager);
 	static_cast<Component*>(&myComponents.back())->Init();
 	return myComponents.back();
 }
 
 template<class T>
 template<typename...  Args>
-inline T& ComponentManager<T>::AddComponent(const SY::UUID aGameObjectID,Args... someParameters)
+inline T& ComponentManager<T>::AddComponent(const SY::UUID aGameObjectID, Args... someParameters)
 {
+	if (HasComponent(aGameObjectID))
+	{
+		return myComponents[myGameObjectIDtoVectorIndex[aGameObjectID]];
+	}
+
 	myGameObjectIDtoVectorIndex[aGameObjectID] = static_cast<unsigned int>(myComponents.size());
 	myVectorIndexToGameObjectID[static_cast<unsigned int>(myComponents.size())] = aGameObjectID;
-	myComponents.push_back(T(aGameObjectID,someParameters...));
+	myComponents.push_back(T(aGameObjectID, myManager, someParameters...));
+	static_cast<Component*>(&myComponents.back())->SetManager(myManager);
 	static_cast<Component*>(&myComponents.back())->Init();
 	return myComponents.back();
 }
@@ -134,16 +191,38 @@ inline T& ComponentManager<T>::GetComponent(const SY::UUID aGameObjectID)
 template<class T>
 T* ComponentManager<T>::TryGetComponent(const SY::UUID aGameObjectID)
 {
-	if (myGameObjectIDtoVectorIndex.find(aGameObjectID) != myGameObjectIDtoVectorIndex.end())
+	if (myGameObjectIDtoVectorIndex.contains(aGameObjectID))
 	{
 		return &myComponents[myGameObjectIDtoVectorIndex[aGameObjectID]];
 	}
-
-	//std::cout << "ComponentManager: Tried to get a component but the game object did not exist.ID : " << aGameObjectID << " \n";
-	//assert(false && "ComponentManager: Tried to get a component but the game object did not exist. ID: " + aGameObjectID);
-	//ERROR_PRINT("ComponentManager: Tried to get a component but the game object did not exist. ID: " + aGameObjectID);
 	return nullptr;
 }
+
+template <class T>
+Component* ComponentManager<T>::DeepCopy(const Component* cmp)
+{
+	const T* cmpT = dynamic_cast<const T*>(cmp);
+	if (cmpT != nullptr)
+	{
+		return new T(*cmpT);
+	}
+	return nullptr;
+}
+
+template <class T>
+Component* ComponentManager<T>::DeepCopy(const SY::UUID aGameObjectID)
+{
+	if (myGameObjectIDtoVectorIndex.contains(aGameObjectID))
+	{
+		const T* cmpT = dynamic_cast<const T*>(&myComponents[myGameObjectIDtoVectorIndex[aGameObjectID]]);
+		if (cmpT != nullptr)
+		{
+			return new T(*cmpT);
+		}
+	}
+	return nullptr;
+}
+
 
 template<class T>
 void ComponentManager<T>::Update()
@@ -172,31 +251,27 @@ void ComponentManager<T>::Render()
 template<class T>
 void ComponentManager<T>::DeleteGameObject(const SY::UUID aGameObjectID)
 {
-	auto it = myGameObjectIDtoVectorIndex.find(aGameObjectID);		// Find the game object
+	const auto it = myGameObjectIDtoVectorIndex.find(aGameObjectID);
 	if (it == myGameObjectIDtoVectorIndex.end())
 	{
-		return;			// If it doesn't exist, don't do anything
+		return;
 	}
-	unsigned int index = it->second;								// Get the component index of the game object
-	unsigned int id = myVectorIndexToGameObjectID[static_cast<unsigned int>(myComponents.size() - 1)]; // Get the id of the game object with the last component 
-	myComponents[index].Destroy(); // Call custom destructor 
-	myComponents[index] = myComponents[myComponents.size() - 1]; // Swap the last component with the component to remove (cyclic remove)
-	//std::swap(myComponents[index],myComponents[myComponents.size() - 1]); // Swap the last component with the component to remove (cyclic remove)
+	const unsigned int index = it->second;
+	const unsigned int id = myVectorIndexToGameObjectID[static_cast<unsigned int>(myComponents.size() - 1)];
+	myComponents[index].Destroy();
+	myComponents[index] = myComponents[myComponents.size() - 1];
+	//std::swap(myComponents[index],myComponents[myComponents.size() - 1]); 
+	myComponents.pop_back();
+	 
+	myGameObjectIDtoVectorIndex[id] = index;
+	myVectorIndexToGameObjectID[index] = id;
 
-
-	std::cout << "Removed " << typeid(T).name() << " at id: " << std::to_string(id) + "\n";
-	myComponents.pop_back();										// Remove the newly last component (the component to remove)
-
-	myGameObjectIDtoVectorIndex[id] = index;						// Change the previously last game object to refer to the new component index
-	myVectorIndexToGameObjectID[index] = id;						// Change the index to refer to the game object
-
-	// TODO: vvv THESE
-	myVectorIndexToGameObjectID.erase(myVectorIndexToGameObjectID.at(static_cast<unsigned int>(myComponents.size())));// Remove the removed component from the game object id list
-	myGameObjectIDtoVectorIndex.erase(it->first);					// Remove the removed game object id from the component list
+	myVectorIndexToGameObjectID.erase(myVectorIndexToGameObjectID.at(static_cast<unsigned int>(myComponents.size())));
+	myGameObjectIDtoVectorIndex.erase(it->first);
 }
 
 template<class T>
-void ComponentManager<T>::CollidedWith(const SY::UUID aFirstID,const SY::UUID aTargetID)
+void ComponentManager<T>::CollidedWith(const SY::UUID aFirstID, const SY::UUID aTargetID)
 {
 	if (myGameObjectIDtoVectorIndex.find(aFirstID) != myGameObjectIDtoVectorIndex.end())
 	{
@@ -211,7 +286,7 @@ void ComponentManager<T>::CollidedWith(const SY::UUID aFirstID,const SY::UUID aT
 }
 
 template<class T>
-inline void ComponentManager<T>::OnSiblingChanged(const SY::UUID aGameObjectID,const std::type_info* SourceClass)
+inline void ComponentManager<T>::OnSiblingChanged(const SY::UUID aGameObjectID, const std::type_info* SourceClass)
 {
 	if (SourceClass == &typeid(T))
 	{
@@ -223,3 +298,5 @@ inline void ComponentManager<T>::OnSiblingChanged(const SY::UUID aGameObjectID,c
 		myComponents[myGameObjectIDtoVectorIndex[aGameObjectID]].OnSiblingChanged(SourceClass);
 	}
 }
+
+#endif

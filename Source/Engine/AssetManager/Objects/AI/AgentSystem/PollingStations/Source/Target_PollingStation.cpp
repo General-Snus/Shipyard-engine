@@ -1,4 +1,8 @@
-#include "AssetManager.pch.h"
+#include "Engine/AssetManager/AssetManager.pch.h"
+#include "Engine/AssetManager/Objects/AI/AgentSystem/PollingStations/Target_PollingStation.h"
+
+#include "Engine/AssetManager/ComponentSystem/Components/Collider.h"
+#include "Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h"
 
 Target_PollingStation::Target_PollingStation(const GameObject aTarget) : target(aTarget),PollingStation()
 {

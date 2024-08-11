@@ -1,10 +1,11 @@
-#include <AssetManager.pch.h>
+#include "Engine/AssetManager/AssetManager.pch.h"
+
 #include <Tools/Utilities/Math.hpp>
 #include "../ParticleEmitter.h"
-
-#include <Tools/ImGui/ImGui/imgui.h>
-
+#include <Tools/ImGui/ImGui/imgui.h> 
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
+#include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
+
 
 
 void ParticleEmitter::InitParticle(Particlevertex& vertex) const
@@ -30,7 +31,7 @@ ParticleEmitter::ParticleEmitter(const ParticleEmitterTemplate& aTemplate) : Ass
 	}
 	else
 	{
-		AssetManager::Get().LoadAsset<TextureHolder>(aTemplate.EmmiterSettings.ParticleTexture,texture);
+		texture = AssetManager::Get().LoadAsset<TextureHolder>(aTemplate.EmmiterSettings.ParticleTexture);
 	}
 
 	settings = aTemplate.EmmiterSettings;
@@ -50,7 +51,7 @@ ParticleEmitter::ParticleEmitter(const ParticleEmitterTemplate& aTemplate) : Ass
 
 	//if (!RHI::CreateDynamicVertexBuffer(vertexBuffer,particles.size(),sizeof(Particlevertex)))
 	{
-		std::cout << "Failed to create vertex buffer" << std::endl;
+		Logger::Err("Failed to create vertex buffer");
 		return;
 	}
 	//stride = sizeof(Particlevertex);

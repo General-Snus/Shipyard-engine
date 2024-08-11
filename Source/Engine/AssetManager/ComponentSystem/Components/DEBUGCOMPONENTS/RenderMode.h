@@ -1,17 +1,14 @@
 #pragma once
-#include <Engine/AssetManager/ComponentSystem/Component.h> 
-#include <Engine/AssetManager/ComponentSystem/Components/DEBUGCOMPONENTS/ImGuiComponent.h>
 #include <Editor/Editor/Core/ApplicationState.h> 
+#include <Engine/AssetManager/ComponentSystem/Component.h>  
 
-class RenderMode : public ImGuiComponent
+class RenderMode : public Component
 {
 public:
 	RenderMode() = delete;
-	RenderMode(const SY::UUID anOwnerId) : ImGuiComponent(anOwnerId) { OnStart(); };
+	RenderMode(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager) {  };
 	void Update() override;
-	void OnExit() override;
-	void OnStart() override;
-	~RenderMode() { OnExit(); };
+	~RenderMode() override {   };
 
 private:
 	int currentlyActiveTone = 0;
@@ -19,3 +16,4 @@ private:
 	bool myRenderMode[(int)DebugFilter::count] = { false };
 
 };
+REFL_AUTO(type(RenderMode))

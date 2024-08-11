@@ -21,6 +21,17 @@ public:
 	T  GetRadius() const;
 	bool ExpandSphere(const Sphere<T>& sphere);
 
+	Vector3<T> ClosestPoint(const Vector3<T>& aPosition) const
+	{
+		Vector3<T> relativeVector = aPosition - Center;
+		const float length = relativeVector.Length();
+		if(length <= Radius)
+		{
+			return aPosition;
+		}
+		return Center + relativeVector * (Radius / length);
+	}
+
 private:
 	Vector3<T> Center;
 	T Radius;

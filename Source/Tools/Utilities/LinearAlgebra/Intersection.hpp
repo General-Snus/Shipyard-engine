@@ -1,11 +1,10 @@
-#include "Vectors.hpp" 
-
-#include "AABB3D.hpp" 
-#include "Circle.hpp"
-#include "Plane.hpp"
-#include "Ray.hpp" 
-#include "Ray2d.hpp" 
-#include "Sphere.hpp"
+#include "Tools/Utilities/LinearAlgebra/Vectors.hpp"  
+#include "Tools/Utilities/LinearAlgebra/AABB3D.hpp" 
+#include "Tools/Utilities/LinearAlgebra/Circle.hpp"
+#include "Tools/Utilities/LinearAlgebra/Plane.hpp"
+#include "Tools/Utilities/LinearAlgebra/Ray.hpp" 
+#include "Tools/Utilities/LinearAlgebra/Ray2d.hpp" 
+#include "Tools/Utilities/LinearAlgebra/Sphere.hpp"
 
 // If the ray is parallel to the plane, aOutIntersectionPoint remains unchanged. If
 // the ray is in the plane, true is returned, if not, false is returned. If the ray

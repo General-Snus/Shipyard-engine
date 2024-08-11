@@ -1,9 +1,11 @@
 #pragma once
 #include <Engine/AssetManager/ComponentSystem/Component.h>
-#include <Engine/AssetManager/Objects/BaseAssets/ParticleEmitter.h>
+#include <Engine/AssetManager/Objects/BaseAssets/ParticleEmitter.h> 
+
 class ParticleSystem : public Component
 {
 public:
+	MYLIB_REFLECTABLE();
 	ParticleSystem() = delete; // Create a generic cube
 	ParticleSystem(const unsigned int anOwnerId); // Create a generic cube 
 	ParticleSystem(const unsigned int anOwnerId,const std::filesystem::path& aFilePath);
@@ -17,3 +19,4 @@ private:
 
 };
 
+REFL_AUTO(type(ParticleSystem))

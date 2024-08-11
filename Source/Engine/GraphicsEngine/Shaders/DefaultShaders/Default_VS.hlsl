@@ -11,7 +11,7 @@ float3 PositionInBound(float3 aMin, float3 aMax, float3 aPosition)
 DefaultVertexToPixel main(uint vertexId : SV_VertexID)
 {
 
-    Vertex vertex = meshHeap[g_defaultMaterial.vertexBufferIndex].Load<Vertex>((g_defaultMaterial.vertexOffset + vertexId) * sizeof(Vertex));
+    Vertex vertex = meshHeap[g_defaultMaterial.vertexBufferIndex].Load<Vertex>((g_defaultMaterial.vertexOffset + vertexId) * sizeof(Vertex)); 
 
 
     DefaultVertexToPixel result;
@@ -35,19 +35,10 @@ DefaultVertexToPixel main(uint vertexId : SV_VertexID)
     //    result.BiNormal = mul(result.BiNormal, (float3x3)skinMatrix);
     //    result.Tangent = mul(result.Tangent, (float3x3)skinMatrix);
     //}
-    
-    
-    
+
     float3x3 worldNormalRotation = (float3x3)g_ObjectBuffer.OB_Transform;
     result.WorldPosition = mul(g_ObjectBuffer.OB_Transform, result.Position);
-    
-    if(g_ObjectBuffer.OB_Instanced)
-    {
-    //    worldNormalRotation = (float3x3)input.World;
-    //    result.WorldPosition = mul(input.World, result.Position);
-    }
-    
-    
+     
     result.Normal = mul(result.Normal, transpose(worldNormalRotation));
     result.BiNormal = mul(result.BiNormal, worldNormalRotation);
     result.Tangent = mul(result.Tangent, worldNormalRotation);

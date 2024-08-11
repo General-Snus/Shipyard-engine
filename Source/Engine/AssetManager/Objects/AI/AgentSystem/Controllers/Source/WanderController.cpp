@@ -1,6 +1,10 @@
-#include "AssetManager.pch.h"
+#include "Engine/AssetManager/AssetManager.pch.h"
 #include "../WanderController.h"
 #include <Tools/Utilities/Math.hpp> 
+
+#include "Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h"
+#include "Engine/AssetManager/Objects/AI/AgentSystem/AIEventManager.h"
+#include "Engine/AssetManager/Objects/AI/AgentSystem/SteeringBehaviour.h"
 
 WanderController::WanderController(GameObject componentCheck)
 {

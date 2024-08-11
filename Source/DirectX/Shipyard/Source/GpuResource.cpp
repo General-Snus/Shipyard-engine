@@ -1,10 +1,7 @@
-#include "DirectXHeader.pch.h"
+#include "DirectX/DirectXHeader.pch.h"
 
-#include "Shipyard/GpuResource.h"
-
-#include <cassert>
-
-#include "Shipyard/GPU.h"
+#include "DirectX/Shipyard/GpuResource.h" 
+#include "DirectX/Shipyard/GPU.h"
 
 VertexResource::VertexResource(std::filesystem::path name)
 {
@@ -13,6 +10,7 @@ VertexResource::VertexResource(std::filesystem::path name)
 
 void VertexResource::CreateView(size_t numElements,size_t elementSize)
 {
+	OPTICK_EVENT();
 	m_NumVertices = static_cast<uint32_t>(numElements);
 	m_VertexStride = static_cast<uint32_t>(elementSize);
 
@@ -22,12 +20,9 @@ void VertexResource::CreateView(size_t numElements,size_t elementSize)
 	SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	SRVDesc.Buffer.NumElements = (m_NumVertices * m_VertexStride) / 4;
 	SRVDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_RAW;
-
-	const int heapOffset = static_cast<int>(GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->Allocate());
-	const auto descriptorHandle = GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->GetCpuHandle(heapOffset);
-	GPU::m_Device->CreateShaderResourceView(m_Resource.Get(),&SRVDesc,descriptorHandle);
-
-	m_DescriptorHandles[ViewType::SRV] = HeapHandle(descriptorHandle,heapOffset);
+	HeapHandle handle = GPU::GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
+	GPU::m_Device->CreateShaderResourceView(m_Resource.Get(),&SRVDesc,handle.cpuPtr);
+	m_DescriptorHandles[ViewType::SRV] = handle;
 }
 
 GpuResource::GpuResource() : m_UsageState(D3D12_RESOURCE_STATE_COMMON),
@@ -62,12 +57,14 @@ m_Resource(nullptr),m_FormatSupport()
 
 void GpuResource::CreateView(size_t numElements,size_t elementSize)
 {
+	OPTICK_GPU_EVENT("CreateView");
 	UNREFERENCED_PARAMETER(numElements);
 	UNREFERENCED_PARAMETER(elementSize);
 }
 
 void GpuResource::Reset()
 {
+	OPTICK_EVENT();
 	m_Resource.Reset();
 	m_ResourceName.clear();
 	m_FormatSupport = {};
@@ -97,6 +94,7 @@ bool GpuResource::CheckDSVSupport() const
 
 void GpuResource::SetView(ViewType view)
 {
+	OPTICK_EVENT();
 	if (!m_Resource ||
 		m_DescriptorHandles.contains(view) && m_DescriptorHandles.at(view).heapOffset != -1)
 	{
@@ -167,18 +165,102 @@ void GpuResource::SetView(ViewType view)
 	m_RecentBoundType = view;
 }
 
+void GpuResource::SetView(ViewType view,HeapHandle handle)
+{
+	OPTICK_EVENT();
+	if (!m_Resource)
+	{
+		return;
+	}
+
+	auto device = GPU::m_Device;
+	CheckFeatureSupport();
+	CD3DX12_RESOURCE_DESC desc(m_Resource->GetDesc());
+
+	switch (view)
+	{
+	case ViewType::UAV:
+	{
+		CreateUnorderedAccessView(GPU::m_Device.Get(),m_Resource.Get(),handle.cpuPtr,desc.MipLevels);
+		m_DescriptorHandles[ViewType::UAV] = handle;
+	}
+	break;
+	case ViewType::SRV:
+	{
+		if (CheckDSVSupport())
+		{
+			D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+			SRVDesc.Format = Helpers::GetDepthFormat(m_Format);
+			SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+			SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+			SRVDesc.Texture2D.MipLevels = 1;
+
+			GPU::m_Device->CreateShaderResourceView(m_Resource.Get(),&SRVDesc,handle.cpuPtr);
+			m_DescriptorHandles[ViewType::SRV] = handle;
+		}
+		else
+		{
+			CreateShaderResourceView(GPU::m_Device.Get(),m_Resource.Get(),handle.cpuPtr);
+			m_DescriptorHandles[ViewType::SRV] = handle;
+		}
+	}
+	break;
+	case ViewType::RTV:
+	{
+		device->CreateRenderTargetView(m_Resource.Get(),nullptr,handle.cpuPtr);
+		m_DescriptorHandles[ViewType::RTV] = handle;
+	}
+	break;
+	case ViewType::DSV:
+	{
+		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+		dsvDesc.Format = m_Format;
+		dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+		dsvDesc.Texture2D.MipSlice = 0;
+		dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+
+		device->CreateDepthStencilView(m_Resource.Get(),&dsvDesc,handle.cpuPtr);
+		m_DescriptorHandles[ViewType::DSV] = handle;
+	}
+	break;
+	default:
+		assert(false && "Out of range view type");
+		break;
+	}
+	m_RecentBoundType = view;
+}
+
 void GpuResource::ClearView(ViewType view)
 {
+	OPTICK_EVENT();
 	m_DescriptorHandles.contains(view) ? m_DescriptorHandles.erase(view) : NULL;
 }
 
 HeapHandle GpuResource::GetHandle(ViewType type)
 {
-	if (m_DescriptorHandles.find(type) != m_DescriptorHandles.end() && m_DescriptorHandles.at(type).heapOffset != -1)
+	OPTICK_EVENT();
+	if (m_DescriptorHandles.contains(type) && m_DescriptorHandles.at(type).heapOffset != -1)
 	{
 		return  m_DescriptorHandles.at(type);
 	}
 	SetView(type);
+	return  m_DescriptorHandles.at(type);
+}
+
+HeapHandle GpuResource::GetHandle(ViewType type) const
+{
+	OPTICK_EVENT();
+	if (m_DescriptorHandles.contains(type) && m_DescriptorHandles.at(type).heapOffset != -1)
+	{
+		return  m_DescriptorHandles.at(type);
+	}
+	return  HeapHandle();
+}
+
+HeapHandle GpuResource::CreateViewWithHandle(ViewType type,HeapHandle handle)
+{
+	OPTICK_EVENT();
+	SetView(type,handle);
 	return  m_DescriptorHandles.at(type);
 }
 
@@ -189,12 +271,18 @@ HeapHandle GpuResource::GetHandle() const
 
 int GpuResource::GetHeapOffset() const
 {
+	OPTICK_EVENT();
+	if (m_DescriptorHandles.at(m_RecentBoundType).heapOffset != -1 && m_DescriptorHandles.at(m_RecentBoundType).heapOffset > GPU::m_HeapSizes[(int)m_RecentBoundType])
+	{
+		throw InternalGPUError("HeapOffset was out of range of heap"); 
+	}
 	return m_DescriptorHandles.at(m_RecentBoundType).heapOffset;
 };
 
 
 void GpuResource::SetResource(const ComPtr<ID3D12Resource>& resource)
 {
+	OPTICK_GPU_EVENT("SetResource");
 	m_Resource = resource;
 	m_Resource->SetName(m_ResourceName.c_str());
 	CheckFeatureSupport();
@@ -228,6 +316,7 @@ bool GpuResource::CheckFormatSupport(D3D12_FORMAT_SUPPORT2 formatSupport) const
 
 void GpuResource::CheckFeatureSupport()
 {
+	OPTICK_EVENT();
 	if (m_Resource)
 	{
 		auto desc = m_Resource->GetDesc();
@@ -244,15 +333,11 @@ void GpuResource::CheckFeatureSupport()
 	}
 }
 
-void UAVResource::CreateView(size_t numElements)
+IndexResource::IndexResource() : GpuResource(),m_NumIndices(0),m_IndexFormat(DXGI_FORMAT_UNKNOWN)
 {
-	numElements;
-	//size_t end;
-	//m_AllocatedElements = numElements;
-	//GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->AllocateRange(numElements,,end);
 }
 
-IndexResource::IndexResource(std::filesystem::path name)
+IndexResource::IndexResource(const std::filesystem::path& name) : GpuResource(),m_NumIndices(0),m_IndexFormat(DXGI_FORMAT_UNKNOWN) 
 {
 	m_ResourceName = name;
 }

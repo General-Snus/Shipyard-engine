@@ -1,8 +1,8 @@
-#include "AssetManager.pch.h"
+#include "Engine/AssetManager/AssetManager.pch.h"
 #include "../cPhysics_Kinematic.h"
 
 
-cPhysics_Kinematic::cPhysics_Kinematic(const SY::UUID anOwnerID) : Component(anOwnerID)
+cPhysics_Kinematic::cPhysics_Kinematic(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager)
 {
 	ph_velocity = { 0.0f, 0.0f, 0.0f };
 	ph_acceleration = { 0.0f, 0.0f, 0.0f };
@@ -51,7 +51,7 @@ void cPhysics_Kinematic::InitPrimitive()
 void cPhysics_Kinematic::Update()
 {
 	OPTICK_EVENT();
-	float delta = Timer::GetInstance().GetDeltaTime();
+	float delta = Timer:: GetDeltaTime();
 	auto& transform = GetComponent<Transform>();
 	ph_velocity += ph_acceleration * delta;
 	ph_Angular_velocity += ph_Angular_acceleration * delta;

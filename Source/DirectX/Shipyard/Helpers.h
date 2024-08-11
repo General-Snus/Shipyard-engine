@@ -6,12 +6,13 @@
 #include <d3d12.h>
 #include <DirectX/XTK/DirectXHelpers.h>
 #include <exception>
-#include "Tools/Logging/Logging.h" 
-
-
+#include "Tools/Logging/Logging.h"  
+#include <Tools/Utilities/Error.hpp> 
 
 namespace Helpers
 {
+	  void ThrowIfFailed(HRESULT hr)  noexcept(false);
+
 	inline DXGI_FORMAT GetUAVCompatableFormat(DXGI_FORMAT format)
 	{
 		DXGI_FORMAT uavFormat = format;
@@ -141,18 +142,17 @@ namespace Helpers
 		};
 	}
 
-
 	template<typename T,typename U>
 	inline static T string_cast(const U& someString)
 	{
 		someString;
-		return nullptr;
+		throw NotImplemented();
 	}
 
 	template<>
 	inline std::wstring string_cast<std::wstring>(const std::string& someString)
 	{
-		const int sLength = static_cast<int>(someString.length());
+		const auto sLength = static_cast<int>(someString.length());
 		const int len = MultiByteToWideChar(CP_ACP,0,someString.c_str(),sLength,nullptr,0);
 		std::wstring result(len,L'\0');
 		MultiByteToWideChar(CP_ACP,0,someString.c_str(),sLength,&result[0],len);
@@ -162,23 +162,15 @@ namespace Helpers
 	template<>
 	inline std::string string_cast<std::string>(const std::wstring& someString)
 	{
-		const int sLength = static_cast<int>(someString.length());
+		const auto sLength = static_cast<int>(someString.length());
 		const int len = WideCharToMultiByte(CP_ACP,0,someString.c_str(),sLength,nullptr,0,nullptr,nullptr);
 		std::string result(len,L'\0');
 		WideCharToMultiByte(CP_ACP,0,someString.c_str(),sLength,&result[0],len,nullptr,nullptr);
 		return result;
 	}
 
-	inline void ThrowIfFailed(HRESULT hr) noexcept(false)
-	{
-		if (FAILED(hr))
-		{
-			_com_error err(hr);
-			std::wstring errMsg = err.ErrorMessage();
-			Logger::Err(string_cast<std::string>(errMsg));
-			throw std::exception(string_cast<std::string>(errMsg).c_str());
-		}
-	}
+	
+
 	inline void ThrowIfSucceded(HRESULT hr) noexcept(false)
 	{
 		if (!FAILED(hr))
@@ -188,6 +180,19 @@ namespace Helpers
 			throw err;
 		}
 	}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	//
 // Copyright (c) Microsoft. All rights reserved.
@@ -244,8 +249,8 @@ namespace Helpers
 
 	template <typename T> inline size_t HashState(const T* StateDesc,size_t Count = 1,size_t Hash = 2166136261U)
 	{
-		static_assert((sizeof(T) & 3) == 0 && alignof(T) >= 4,"State object is not word-aligned");
+		static_assert((sizeof(T) & 3) == 0 && alignof(T) >= 4,"State m_object is not word-aligned");
 		return HashRange((uint32_t*)StateDesc,(uint32_t*)(StateDesc + Count),Hash);
-	}
+	} 
 
 }

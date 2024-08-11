@@ -1,8 +1,8 @@
-#pragma once
-#include <Engine/AssetManager/ComponentSystem/Components/ParticleSystem.h>
+#pragma once 
 #include <Engine/AssetManager/Objects/BaseAssets/BaseAsset.h>
 #include <Engine/GraphicsEngine/Rendering/ParticleRenderer/ParticleVertex.h>
 
+class TextureHolder;
 class ParticleSystem;
 struct EmmiterSettingsData
 {
@@ -45,6 +45,7 @@ struct ParticleEmitterTemplate
 class ParticleEmitter : public AssetBase
 {
 private:
+	MYLIB_REFLECTABLE();
 	void InitParticle(Particlevertex& vertex) const;
 	EmmiterSettingsData settings;
 	//ComPtr<ID3D11Buffer> vertexBuffer;
@@ -68,3 +69,5 @@ public:
 
 	FORCEINLINE const EmmiterSettingsData& GetSettings() const { return settings; }
 };
+
+REFL_AUTO(type(ParticleEmitter))

@@ -1,25 +1,23 @@
-#include "DirectXHeader.pch.h"
+#include "DirectX/DirectXHeader.pch.h"
 
-#include "Shipyard/Texture.h"
-
-#include <DirectXTex/DirectXTex.h>
-#include <XTK/ResourceUploadBatch.h>
-
-#include "Shipyard/CommandQueue.h"
-#include "Shipyard/eDescriptors.h"
-#include "Shipyard/GPU.h"
-#include "Shipyard/Helpers.h"
+#include "DirectX/Shipyard/Texture.h" 
+#include <DirectX/DirectXTex/DirectXTex.h> 
+#include <DirectX/XTK/ResourceUploadBatch.h> 
+#include "DirectX/Shipyard/CommandQueue.h"
+#include "DirectX/Shipyard/eDescriptors.h"
+#include "DirectX/Shipyard/GPU.h" 
 
 
 Texture::Texture() : m_Viewport(0,0,0,0,0,1),m_Rect(0,0,0,0)
 {
-	auto value = HeapHandle(D3D12_CPU_DESCRIPTOR_HANDLE(),-1);
+	auto value = HeapHandle(D3D12_CPU_DESCRIPTOR_HANDLE(),D3D12_GPU_DESCRIPTOR_HANDLE(),-1);
 	m_DescriptorHandles.emplace(ViewType::SRV,value);
 };
 
 
 bool Texture::AllocateTexture(const Vector2ui dimentions,const std::filesystem::path& name,DXGI_FORMAT Format,D3D12_RESOURCE_FLAGS flags,D3D12_RESOURCE_STATES targetResourceState)
 {
+	OPTICK_EVENT();
 	const auto width = dimentions.x;
 	const auto height = dimentions.y;
 
@@ -98,6 +96,7 @@ bool Texture::AllocateTexture(const Vector2ui dimentions,const std::filesystem::
 
 void Texture::SetView(D3D12_SHADER_RESOURCE_VIEW_DESC view)
 {
+	OPTICK_EVENT();
 	if (!m_Resource ||
 		m_DescriptorHandles.contains(ViewType::SRV) && m_DescriptorHandles.at(ViewType::SRV).heapOffset != -1)
 	{
@@ -117,6 +116,7 @@ void Texture::SetView(D3D12_UNORDERED_ACCESS_VIEW_DESC view)
 
 void Texture::SetView(ViewType view)
 {
+	OPTICK_EVENT();
 	if (!m_Resource ||
 		m_DescriptorHandles.contains(view) && m_DescriptorHandles.at(view).heapOffset != -1)
 	{
@@ -146,32 +146,28 @@ void Texture::SetView(ViewType view)
 			SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 			SRVDesc.Texture2D.MipLevels = 1;
 
-			const int heapOffset = (int)GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->Allocate();
-			const auto descriptorHandle = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->GetCpuHandle(heapOffset);
-			GPU::m_Device->CreateShaderResourceView(m_Resource.Get(),&SRVDesc,descriptorHandle);
-			m_DescriptorHandles[ViewType::SRV] = HeapHandle(descriptorHandle,heapOffset);
+			HeapHandle handle = GPU::GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
+			GPU::m_Device->CreateShaderResourceView(m_Resource.Get(),&SRVDesc,handle.cpuPtr);
+			m_DescriptorHandles[ViewType::SRV] = handle;
 		}
 		else
 		{
-			const int heapOffset = (int)GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->Allocate();
-			const auto descriptorHandle = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV]->GetCpuHandle(heapOffset);
-			CreateShaderResourceView(GPU::m_Device.Get(),m_Resource.Get(),descriptorHandle,isCubeMap);
-			m_DescriptorHandles[ViewType::SRV] = HeapHandle(descriptorHandle,heapOffset);
+			HeapHandle handle = GPU::GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
+			CreateShaderResourceView(GPU::m_Device.Get(),m_Resource.Get(),handle.cpuPtr,isCubeMap);
+			m_DescriptorHandles[ViewType::SRV] = handle;
 		}
 		break;
 	}
 	case ViewType::RTV:
 	{
-		const int heapOffset = (int)GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_RTV]->Allocate();
-		const auto descriptorHandle = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_RTV]->GetCpuHandle(heapOffset);
-		device->CreateRenderTargetView(m_Resource.Get(),nullptr,descriptorHandle);
-		m_DescriptorHandles[ViewType::RTV] = HeapHandle(descriptorHandle,heapOffset);
+		HeapHandle handle = GPU::GetHeapHandle(eHeapTypes::HEAP_TYPE_RTV);
+		device->CreateRenderTargetView(m_Resource.Get(),nullptr,handle.cpuPtr);
+		m_DescriptorHandles[ViewType::RTV] = handle;
 		break;
 	}
 	case ViewType::DSV:
 	{
-		const int heapOffset = (int)GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_DSV]->Allocate();
-		const auto descriptorHandle = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_DSV]->GetCpuHandle(heapOffset);
+		HeapHandle handle = GPU::GetHeapHandle(eHeapTypes::HEAP_TYPE_DSV);
 
 		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
 		dsvDesc.Format = m_Format;
@@ -179,8 +175,8 @@ void Texture::SetView(ViewType view)
 		dsvDesc.Texture2D.MipSlice = 0;
 		dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
 
-		device->CreateDepthStencilView(m_Resource.Get(),&dsvDesc,descriptorHandle);
-		m_DescriptorHandles[ViewType::DSV] = HeapHandle(descriptorHandle,heapOffset);
+		device->CreateDepthStencilView(m_Resource.Get(),&dsvDesc,handle.cpuPtr);
+		m_DescriptorHandles[ViewType::DSV] = handle;
 		break;
 	}
 	default:

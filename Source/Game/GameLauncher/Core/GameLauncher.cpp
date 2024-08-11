@@ -1,34 +1,39 @@
-
-// Exclude things we don't need from the Windows headers
 #include <Engine/AssetManager/AssetManager.pch.h> 
 
-#include <Game/GameLauncher/TaskSpecificImplementation/DecicionTree/DecisionTreeController.h>
-#include <Game/GameLauncher/TaskSpecificImplementation/StateMachine/StateMachineController.h>
-#include <Tools/Logging/Logging.h>
-#include <Tools/Optick/src/optick.h>
-#include <Tools/ThirdParty/nlohmann/json.hpp>   
-#include <Tools/Utilities/Game/Timer.h>
-#include <Tools/Utilities/Input/InputHandler.hpp>
-#include <Tools/Utilities/Math.hpp>
+#include <Engine/AssetManager/ComponentSystem/Components/CameraComponent.h>    
+#include <Engine/AssetManager/ComponentSystem/Components/Collider.h> 
+#include <Engine/AssetManager/ComponentSystem/Components/DEBUGCOMPONENTS/FrameStatistics.h>   
+#include <Engine/AssetManager/ComponentSystem/Components/DEBUGCOMPONENTS/RenderMode.h>   
+#include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>   
+#include <Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h>   
+#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXDynamicBody.h>   
+#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXStaticBody.h>   
+#include <Engine/AssetManager/ComponentSystem/Components/Transform.h>   
+#include <Engine/AssetManager/Objects/AI/AgentSystem/AIEventManager.h> 
+#include "Engine/GraphicsEngine/GraphicsEngine.h"
 #include "GameLauncher.h"
 
-#include <Engine/PersistentSystems/Physics/PhysXInterpeter.h>
-#include <fstream>
-#include <iostream>
-#include <sstream>
 
-#include "GraphicsEngine.h"
-#include "Input/EnumKeys.h"
-
-using json = nlohmann::json;
 
 void GameLauncher::Init()
 {
+	OPTICK_EVENT();
+	{
+		GameObject camera = GameObject::Create();
+		camera.SetName("Camera");
+		camera.AddComponent<cMeshRenderer>("Models/Camera/Camera.fbx");
+		auto& cameraComponent = camera.AddComponent<cCamera>();
+		Scene::ActiveManager().SetLastGOAsCamera();
+		cameraComponent.SetActive(true);
+		auto& transform = camera.AddComponent<Transform>();
+		transform.SetPosition(-10,3,0);
+		transform.SetRotation(0,90,0);
+	}
 }
 
 bool SaveTest(std::vector<GameObject> gameObjectsToSave,const std::filesystem::path& path)
 {
-	Logger::Log("\n\nSaving Gameobjects");
+	Logger::Log("Saving Gameobjects");
 	std::ofstream file(path.string(),std::ios_base::binary);
 	if (!file.is_open())
 	{
@@ -69,9 +74,9 @@ std::vector<GameObject> LoadTest(const std::filesystem::path& path)
 	gameObjectsToSave.resize(size);
 	Logger::Log("\n\nLoading Gameobjects " + std::to_string(size));
 
-	for (auto& i : gameObjectsToSave)
+	for (GameObject& i : gameObjectsToSave)
 	{
-		SY::UUID uuid;
+		SY::UUID uuid{};
 		Vector3f position;
 		std::string meshPath;
 		int strLength = 0;
@@ -83,9 +88,7 @@ std::vector<GameObject> LoadTest(const std::filesystem::path& path)
 		meshPath.resize(strLength);
 		file.read(&meshPath[0],strLength);
 
-
-		GameObjectManager::Get().CustomOrderUpdate();
-		i = GameObjectManager::Get().CreateGameObjectAt(uuid);
+		i = GameObject::Create();
 		auto& transform = i.AddComponent<Transform>();
 		transform.SetPosition(position);
 		i.AddComponent<cMeshRenderer>(meshPath,true);
@@ -98,12 +101,13 @@ std::vector<GameObject> LoadTest(const std::filesystem::path& path)
 
 void GameLauncher::GenerateNewRandomCubes()
 {
-	const float range = 50.f;
+	OPTICK_EVENT();
 	std::string arr[3] = { "Models/Cube.fbx","Models/CubeHoled.fbx","Models/SteelFloor.fbx" };
 	for (size_t i = 0; i < 10; i++)
 	{
-		vectorOfGameObjects.push_back(GameObjectManager::Get().CreateGameObject());
-		GameObject vectorObject = vectorOfGameObjects.back();
+		constexpr float range = 50.f;
+		vectorOfGameObjects.push_back(GameObject::Create());
+		GameObject& vectorObject = vectorOfGameObjects.back();
 		vectorObject.AddComponent<cMeshRenderer>(arr[rand() % 3]);
 		auto& transform = vectorObject.AddComponent<Transform>();
 
@@ -119,36 +123,30 @@ void GameLauncher::GenerateNewRandomCubes()
 
 void GameLauncher::Start()
 {
-	GameObjectManager& gom = GameObjectManager::Get();
-#pragma region BaseSetup
-
-	myMesh = gom.CreateGameObject();
-
+	OPTICK_EVENT(); 
+	m_CustomKeyCallback.AddListener(std::bind(&GameLauncher::LocalFunction,this)); 
+#pragma region BaseSetup 
 	{
-		GameObject camera = gom.CreateGameObject();
-		auto& cameraComponent = camera.AddComponent<cCamera>();
-		gom.SetLastGOAsCamera();
-		cameraComponent.SetActive(true);
-		auto& transform = camera.AddComponent<Transform>();
-		transform.SetPosition(-10,27,0);
-		transform.SetRotation(0,90,0);
-	}
-
-	{
-		GameObject worldRoot = gom.CreateGameObject();
-		gom.SetLastGOAsWorld();
-
+		GameObject worldRoot = GameObject::Create();
+		Scene::ActiveManager().SetLastGOAsWorld();
+		worldRoot.SetName("WordRoot");
 		worldRoot.AddComponent<FrameStatistics>();
 		worldRoot.AddComponent<RenderMode>();
 		//worldRoot.AddComponent<Skybox>();
-		Transform& transform = worldRoot.AddComponent<Transform>();
+
+
+		auto& transform = worldRoot.AddComponent<Transform>();
 		transform.SetRotation(80,0,0);
-		cLight& pLight = worldRoot.AddComponent<cLight>(eLightType::Directional);
+		transform.SetPosition(0,5,0);
+
 		worldRoot.AddComponent<cMeshRenderer>("Models/Cube.fbx");
 
-		pLight.SetColor(Vector3f(1,1,1));
+		auto& pLight = worldRoot.AddComponent<cLight>(eLightType::Directional);
+		pLight.SetColor("White");
 		pLight.SetPower(2.0f);
 		pLight.BindDirectionToTransform(true);
+
+
 		//if(gom.GetAllComponents<BackgroundColor>().empty())
 		//{
 		//	worldRoot.AddComponent<BackgroundColor>(Vector4f(1.0f,1.0f,1.0f,1.0f));
@@ -156,7 +154,9 @@ void GameLauncher::Start()
 	}
 
 	{
-		GameObject floor = gom.CreateGameObject();
+		GameObject floor = GameObject::Create();
+		floor.SetName("Floor");
+
 		auto& transform = floor.AddComponent<Transform>();
 		transform.SetPosition(0,-0.0f,0);
 		transform.SetRotation(0,0.f,0.f);
@@ -164,7 +164,6 @@ void GameLauncher::Start()
 		transform.SetGizmo(false);
 		floor.SetActive(false);
 		floor.AddComponent<cMeshRenderer>("Models/Cube.fbx");
-		//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json"); 
 #if PHYSX
 		auto& collider = floor.AddComponent<cCollider>();
 		collider.SetColliderType<ColliderAssetAABB>();
@@ -173,30 +172,34 @@ void GameLauncher::Start()
 	}
 #if true // Sponza
 	{
-		GameObject sponza = gom.CreateGameObject();
+		GameObject sponza = GameObject::Create();
+		sponza.SetName("Sponza");
 		sponza.AddComponent<cMeshRenderer>("Models/Sponza/Sponza.fbx");
 		//sponza.AddComponent<cMeshRenderer>("Models/Sponza/Sponza3Intel.fbx");
-		//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
 		auto& transform = sponza.AddComponent<Transform>();
-		transform.SetPosition(0,25,0);
+		transform.SetPosition(0,0,0);
 		transform.SetScale(.01f);
 		transform.SetGizmo(false);
 	}
 #endif 
 	{
-		myCustomHandler = gom.CreateGameObject();
+		myCustomHandler = GameObject::Create();
+		myCustomHandler.SetName("CustomHandler");
+
 		auto& transform = myCustomHandler.AddComponent<Transform>();
 		auto& light = myCustomHandler.AddComponent<cLight>(eLightType::Point);
-		transform.SetPosition(0,30,-4);
+		transform.SetPosition(0,5,-4);
 		light.BindDirectionToTransform(true);
-		light.SetColor({ .5f,.5f,1 });
+		light.SetColor("Blue");
 		light.SetPower(10);
 		light.SetIsShadowCaster(false);
 		light.SetRange(4.5f);
 	}
 
 	{
-		myCustomHandler2 = gom.CreateGameObject();
+		myCustomHandler2 = GameObject::Create();
+		myCustomHandler2.SetName("CustomHandler2");
+
 		auto& transform = myCustomHandler2.AddComponent<Transform>();
 		auto& light = myCustomHandler2.AddComponent<cLight>(eLightType::Point);
 		transform.SetPosition(0,30,4);
@@ -206,16 +209,40 @@ void GameLauncher::Start()
 		light.SetPower(10);
 		light.SetRange(4.5f);
 	}
+
 	{
-		GameObject buddha = gom.CreateGameObject();
+		GameObject buddha = GameObject::Create();
+		buddha.SetName("buddha");
 		buddha.AddComponent<cMeshRenderer>("Models/Buddha.fbx");
 		buddha.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BuddhaMaterial.json");
 		auto& transform = buddha.AddComponent<Transform>();
-		transform.SetPosition(0,25,0);
+		transform.SetPosition(0,0,0);
 		transform.Rotate(0,90,0);
 		transform.SetScale(0.5f,.5f,.5f);
 		transform.SetGizmo(false);
+
+		{
+			GameObject pointLight = GameObject::Create();
+			pointLight.SetName("pointLight");
+			auto& transform1 = pointLight.AddComponent<Transform>();
+			transform1.SetPosition(-5, 1, 0);
+			pointLight.AddComponent<cLight>(eLightType::Point);
+			pointLight.transform().SetParent(buddha.transform());
+		}
+
+
+
+
 	}
+
+	
+	{
+		GameObject spotLight = GameObject::Create();
+		spotLight.SetName("spotLight");
+		spotLight.AddComponent<Transform>();
+		spotLight.AddComponent<cLight>(eLightType::Spot);
+	}
+
 	{
 		//for (int x = 0; x < 4; x++)
 		//{
@@ -244,38 +271,42 @@ void GameLauncher::Start()
 	}
 	else
 	{
-		GenerateNewRandomCubes();
-}
+		//GenerateNewRandomCubes();
+	}
 #endif
 	Logger::Log("GameLauncher start");
+
+
+
+
 }
 
 void GameLauncher::Update(float delta)
 {
+	OPTICK_EVENT();
 
-	if (InputHandler::GetInstance().IsKeyPressed(static_cast<unsigned>(Keys::I)))
+	if (Input::IsKeyPressed(static_cast<unsigned>(Keys::I)))
 	{
 		Logger::Log(std::to_string(1.f / delta));
 	}
-	delta;
 	OPTICK_EVENT();
 	AIEventManager::Instance().Update();
-	if (InputHandler::GetInstance().IsKeyPressed(static_cast<int>(Keys::K)))
+	if (Input::IsKeyPressed(static_cast<int>(Keys::K)))
 	{
 		GraphicsEngine::Get().GetSettings().DebugRenderer_Active = !GraphicsEngine::Get().GetSettings().DebugRenderer_Active;
 	}
 
-	if (InputHandler::GetInstance().IsKeyPressed(static_cast<int>(Keys::F5)))
+	if (Input::IsKeyPressed(static_cast<int>(Keys::F5)))
 	{
-		Editor::GetApplicationState().filter = DebugFilter::NoFilter;
+		ApplicationState::filter = DebugFilter::NoFilter;
 	}
 
-	if (InputHandler::GetInstance().IsKeyPressed(static_cast<int>(Keys::F6)))
+	if (Input::IsKeyPressed(static_cast<int>(Keys::F6)))
 	{
-		Editor::GetApplicationState().filter = static_cast<DebugFilter>((static_cast<int>(Editor::GetApplicationState().filter) + 1) % static_cast<int>(DebugFilter::count));
+		ApplicationState::filter = static_cast<DebugFilter>((static_cast<int>(ApplicationState::filter) + 1) % static_cast<int>(DebugFilter::count));
 	}
 #if PHYSX
-	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::F4))
+	/*if (Input::IsKeyPressed((int)Keys::F4))
 	{
 		while (vectorOfGameObjects.size())
 		{
@@ -285,12 +316,12 @@ void GameLauncher::Update(float delta)
 		GameObjectManager::Get().CustomOrderUpdate();
 	}
 
-	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::F5))
+	if (Input::IsKeyPressed((int)Keys::F5))
 	{
 		SaveTest(vectorOfGameObjects,"GameObjectSaveFile.SaveFiles");
 	}
 
-	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::F6))
+	if (Input::IsKeyPressed((int)Keys::F6))
 	{
 		if (std::filesystem::exists("GameObjectSaveFile.SaveFiles"))
 		{
@@ -304,24 +335,16 @@ void GameLauncher::Update(float delta)
 		}
 	}
 
-	if (InputHandler::GetInstance().IsKeyPressed((int)Keys::R))
+	if (Input::IsKeyPressed((int)Keys::R))
 	{
 		GenerateNewRandomCubes();
-	}
+	}*/
 #endif
 
-	//Other
-	{
-		for (auto& i : GameObjectManager::Get().GetAllComponents<cLight>()) // TODO optimize this once you have a lot of lights and lightobjects
-		{
-			i.SetIsDirty(true);
-			i.SetIsRendered(false);
-		}
-	}
 
 	{
 		auto& transform = myCustomHandler.GetComponent<Transform>();
-		auto position = transform.GetPosition();
+		const auto position = transform.GetPosition();
 		if (position.x > 12.f)
 		{
 			direction = -1.f;
@@ -348,15 +371,25 @@ void GameLauncher::Update(float delta)
 	}
 
 
+	if (Input::IsKeyPressed(Keys::P))
+	{
+		m_CustomKeyCallback.Invoke();
+	}
 
-	Transform& pLight = GameObjectManager::Get().GetWorldRoot().GetComponent<Transform>();
+
+	Transform& pLight = Scene::ActiveManager().GetWorldRoot().GetComponent<Transform>();
 	constexpr float rotSpeed = 25.f;
-	if (InputHandler::GetInstance().IsKeyHeld(static_cast<int>(Keys::NUMPAD6)))
+	if (Input::IsKeyHeld(static_cast<int>(Keys::NUMPAD6)))
 	{
 		pLight.Rotate(rotSpeed * delta,0,0);
 	}
-	if (InputHandler::GetInstance().IsKeyHeld(static_cast<int>(Keys::NUMPAD3)))
+	if (Input::IsKeyHeld(static_cast<int>(Keys::NUMPAD3)))
 	{
 		pLight.Rotate(-rotSpeed * delta,0,0);
 	}
+}
+
+void GameLauncher::LocalFunction()
+{
+	Logger::Log("Local Function Called");
 }

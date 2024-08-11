@@ -4,15 +4,13 @@
 #define D3D12_GPU_VIRTUAL_ADDRESS_NULL      ((D3D12_GPU_VIRTUAL_ADDRESS)0) 
 #define D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN   ((D3D12_GPU_VIRTUAL_ADDRESS)-1)
 
-#include <memory>
+#include <filesystem> 
 #include <string>
 #include <unordered_map>
-#include <wrl/client.h>   
+#include <wrl/client.h>
+#include "Gpu_fwd.h"
 
-#include "Gpu_fwd.h" 
 using namespace Microsoft::WRL;
-
-
 
 class GpuResource
 {
@@ -26,20 +24,30 @@ public:
 	//GpuResource(GpuResource& toCopy);
 
 	virtual void Destroy()
-	{
+	{ 
 		m_Resource = nullptr;
-		for (auto& [type,pair] : m_DescriptorHandles)
+		for (auto& [type, pair] : m_DescriptorHandles)
 		{
 			pair.cpuPtr.ptr = 0;
 			pair.heapOffset = -1;
 		}
+
+		// Reset states
+		m_UsageState = D3D12_RESOURCE_STATE_COMMON;
+		m_TransitioningState = D3D12_RESOURCE_STATE_COMMON;
+		m_RecentBoundType = ViewType::SRV;
+		m_Format = DXGI_FORMAT_UNKNOWN;
+		m_ResourceName.clear();
 	}
 
-	virtual void CreateView(size_t numElements,size_t elementSize);
+	virtual void CreateView(size_t numElements, size_t elementSize);
 	virtual void SetView(ViewType view);
+	virtual void SetView(ViewType view, HeapHandle handle);
 	virtual void ClearView(ViewType view);
 
 	virtual HeapHandle GetHandle(ViewType type);
+	virtual HeapHandle GetHandle(ViewType type) const;
+	virtual HeapHandle CreateViewWithHandle(ViewType type, HeapHandle handle);
 	virtual HeapHandle GetHandle() const;
 	virtual int GetHeapOffset() const;
 
@@ -60,13 +68,13 @@ public:
 	void CheckFeatureSupport();
 
 protected:
-	D3D12_RESOURCE_STATES m_UsageState;
-	D3D12_RESOURCE_STATES m_TransitioningState;
+	D3D12_RESOURCE_STATES m_UsageState{};
+	D3D12_RESOURCE_STATES m_TransitioningState{};
 
 
 	DXGI_FORMAT m_Format;
 	ViewType m_RecentBoundType = ViewType::SRV;
-	std::unordered_map<ViewType,HeapHandle> m_DescriptorHandles;
+	std::unordered_map<ViewType, HeapHandle> m_DescriptorHandles;
 
 	std::filesystem::path m_ResourceName;
 	ComPtr<ID3D12Resource> m_Resource;
@@ -74,34 +82,11 @@ protected:
 };
 
 
-
-class UAVResource : public GpuResource
-{
-public:
-	UAVResource() = default;
-	explicit UAVResource(std::wstring name);
-
-	void CreateView(size_t numElements);
-	D3D12_CPU_DESCRIPTOR_HANDLE GetHandle(unsigned offset) const
-	{
-		return { m_Handle.ptr + (bufferSize * offset) };;
-	}
-	unsigned GetAllocatedElements() const
-	{
-		return m_AllocatedElements;
-	}
-
-private:
-	D3D12_CPU_DESCRIPTOR_HANDLE m_Handle;
-	unsigned m_AllocatedElements;
-	const size_t bufferSize;
-};
-
 class IndexResource : public GpuResource
 {
 public:
-	IndexResource() = default;
-	explicit IndexResource(std::filesystem::path name);
+	IndexResource();
+	explicit IndexResource(const std::filesystem::path& name);
 
 	uint32_t GetIndexCount() const { return m_NumIndices; }
 	DXGI_FORMAT GetFormat() const { return m_IndexFormat; }
@@ -109,7 +94,7 @@ public:
 	{
 		return m_IndexBufferView;
 	}
-	void CreateView(size_t numElements,size_t elementSize) override;
+	void CreateView(size_t numElements, size_t elementSize) override;
 
 private:
 	uint32_t m_NumIndices;
@@ -125,7 +110,7 @@ public:
 
 	uint32_t GetVertexCount() const { return m_NumVertices; }
 	uint32_t GetVertexStride() const { return m_VertexStride; }
-	void CreateView(size_t numElements,size_t elementSize) override;
+	void CreateView(size_t numElements, size_t elementSize) override;
 
 private:
 	uint32_t m_NumVertices;

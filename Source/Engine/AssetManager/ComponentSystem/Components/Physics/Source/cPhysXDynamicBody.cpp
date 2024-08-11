@@ -1,11 +1,14 @@
-#include "AssetManager.pch.h"
+#include "Engine/AssetManager/AssetManager.pch.h"
 #include <Tools/ThirdParty/PhysX/physx/include/PxPhysicsAPI.h> 
 #include "../cPhysXDynamicBody.h"
 
 #include <Tools/ThirdParty/PhysX/physx/include/foundation/PxMat33.h> 
 
+#include "Engine/AssetManager/ComponentSystem/Components/Collider.h"
+#include "Engine/AssetManager/Objects/BaseAssets/ColliderAsset.h"
+
 using namespace physx;
-cPhysXDynamicBody::cPhysXDynamicBody(const SY::UUID anOwnerID) : Component(anOwnerID)
+cPhysXDynamicBody::cPhysXDynamicBody(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager)
 {
 }
 

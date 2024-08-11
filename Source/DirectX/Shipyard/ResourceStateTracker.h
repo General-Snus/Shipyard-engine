@@ -49,9 +49,7 @@
 #include <mutex>
 #include <map>
 #include <unordered_map>
-#include <vector>
-
-#include "Helpers.h"
+#include <vector> 
 
 class GpuResource;
 class CommandList;
@@ -174,6 +172,7 @@ private:
 		// Set a subresource to a particular state.
 		void SetSubresourceState(UINT subresource,D3D12_RESOURCE_STATES state)
 		{
+			OPTICK_GPU_EVENT("SetSubresourceState");
 			if (subresource == D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES)
 			{
 				State = state;

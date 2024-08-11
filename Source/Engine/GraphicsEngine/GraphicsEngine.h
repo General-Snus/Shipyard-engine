@@ -1,18 +1,20 @@
-#pragma once  
-#include <Engine/GraphicsEngine/Shaders/Registers.h> 
-#include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>  
+#pragma once    
 
-#include "Engine/AssetManager/Enums.h" 
+#include "DirectX/Shipyard/Gpu_fwd.h"
+#include "DirectX/Shipyard/PSO.h"
+#include "Engine/AssetManager/Enums.h"  
 #include "Rendering/Buffers/FrameBuffer.h"
 #include "Rendering/Buffers/G_Buffer.h"
 #include "Rendering/Buffers/GraphicSettingsBuffer.h"
 #include "Rendering/Buffers/LightBuffer.h"
 #include "Rendering/Buffers/LineBuffer.h"
-#include "Rendering/Buffers/ObjectBuffer.h"
+#include "Rendering/Buffers/ObjectBuffer.h" 
+#include <Engine/AssetManager/ComponentSystem/GameObjectManager.h>
 
-#define _DEBUGDRAW
+//#define _DEBUGDRAW 
+
+class Viewport;
 using namespace Microsoft::WRL;
-
 class Mesh;
 class Material;
 class ShipyardShader;
@@ -59,14 +61,12 @@ enum class eShader
 class cCamera;
 class Texture;
 class TextureHolder;
+class Scene;
 class PSOCache;
 
 class GraphicsEngine
 {
-	friend class GraphicCommandBase;
-	friend class ShadowRenderer;
-	friend class ParticleSystem;
-	friend class InstanceRenderer;
+	friend class GraphicsEngineUtilities; 
 public:
 	enum class eDepthStencilStates : unsigned int
 	{
@@ -76,16 +76,12 @@ public:
 	};
 	FrameBuffer myFrameBuffer;
 private:
-
-	std::shared_ptr<PSOCache> m_StateCache;
-
-
 	ObjectBuffer myObjectBuffer;
 	LineBuffer myLineBuffer;
-	LightBuffer myLightBuffer;
 	G_Buffer myG_Buffer;
 	GraphicSettingsBuffer myGraphicSettingsBuffer;
-
+	static inline uint32_t* BufferForPicking;
+	static inline bool WantPickingData = false;
 
 	SIZE myWindowSize{ 0,0 };
 	HWND myWindowHandle{};
@@ -129,29 +125,47 @@ private:
 	ComPtr<ID3DBlob> gaussShader;
 	ComPtr<ID3DBlob> bloomShader;
 
+	static inline std::shared_ptr<Texture> BRDLookUpTable;
+	static inline std::shared_ptr<TextureHolder> NoiseTable;
+	static inline std::shared_ptr<TextureHolder> defaultTexture;
+	static inline std::shared_ptr<TextureHolder> defaultNormalTexture;
+	static inline std::shared_ptr<TextureHolder> defaultMatTexture;
+	static inline std::shared_ptr<TextureHolder> defaultEffectTexture;
+	static inline std::shared_ptr<TextureHolder> defaultParticleTexture;
+	static inline std::shared_ptr<TextureHolder> defaultCubeMap;
+	static inline std::shared_ptr<Mesh> defaultMesh;
+	static inline std::shared_ptr<Material> defaultMaterial;
 
-	//Debug
-	//ComPtr<ID3D12Resource> myLineVertexBuffer;
-	//ComPtr<ID3D12Resource> myLineIndexBuffer;
-	//std::shared_ptr<ShipyardShader>  debugLineVS;
-	//std::shared_ptr<ShipyardShader> debugLinePS;
-
-	std::shared_ptr<Texture> BRDLookUpTable;
-	std::shared_ptr<TextureHolder> NoiseTable;
-	std::shared_ptr<TextureHolder> defaultTexture;
-	std::shared_ptr<TextureHolder> defaultNormalTexture;
-	std::shared_ptr<TextureHolder> defaultMatTexture;
-	std::shared_ptr<TextureHolder> defaultEffectTexture;
-	std::shared_ptr<TextureHolder> defaultParticleTexture;
-	std::shared_ptr<TextureHolder> defaultCubeMap;
-
-	std::shared_ptr<Mesh> defaultMesh;
-	std::shared_ptr<Material> defaultMaterial;
 	GraphicsSettings myGraphicSettings;
-
-	// We're a container singleton, no instancing this outside the class.
+	HeapHandle ViewPortHeapHandle;
 	GraphicsEngine() = default;
+	uint32_t ReadPickingData(Vector2ui position);
 
+	static inline std::shared_ptr<Scene> newScene;
+	std::vector< std::shared_ptr<Viewport>> m_CustomSceneRenderPasses; //lifetime 1 frame 
+
+
+	void AddRenderJob(std::shared_ptr<Viewport> aViewport);
+	uint32_t GetAmountOfRenderJob();
+private:
+	static bool SetupDebugDrawline();
+	void SetupDefaultVariables();
+	static void SetupBlendStates();
+	void SetupParticleShaders();
+	void UpdateSettings();
+	void SetupSpace3();
+	void SetupPostProcessing();
+
+
+	void BeginFrame();
+	static uint64_t RenderFrame(Viewport& renderViewPort,GameObjectManager& scene);
+	static void EndFrame();
+
+	static void PrepareBuffers(std::shared_ptr<CommandList> commandList,Viewport& renderViewPort,GameObjectManager& scene);
+	static void DeferredRenderingPass(std::shared_ptr<CommandList> commandList,Viewport& renderViewPort,GameObjectManager& scene);
+	static void EnvironmentLightPass(std::shared_ptr<CommandList> commandList);
+	static void ToneMapperPass(std::shared_ptr<CommandList> commandList,Texture* target);
+	static void ImGuiPass(std::shared_ptr<CommandList> commandList); 
 public:
 	inline static GraphicsEngine& Get()
 	{
@@ -159,27 +173,9 @@ public:
 		return myInstance;
 	}
 	bool Initialize(HWND windowHandle,bool enableDeviceDebug);
+	void InitializeCustomRenderScene();
+	void Render(std::vector<std::shared_ptr<Viewport>>  renderViewPorts);
 
-	bool SetupDebugDrawline();
-
-	void SetupDefaultVariables();
-
-	void SetupBlendStates();
-
-	void SetupParticleShaders();
-
-	void UpdateSettings();
-
-	void SetupSpace3();
-
-	void SetupPostProcessing();
-
-	void Update();
-	void BeginFrame();
-	void EndFrame();
-	void RenderFrame(float aDeltaTime,double aTotalTime);
-
-	void RenderTextureTo(eRenderTargets from,eRenderTargets to) const;
 
 
 	void SetDepthState(eDepthStencilStates state)
@@ -210,54 +206,6 @@ public:
 	FORCEINLINE ComPtr<ID3DBlob> GetParticleVSShader() const { return particleVertexShader; }
 	FORCEINLINE ComPtr<ID3DBlob> GetParticleGSShader() const { return particleGeometryShader; }
 	FORCEINLINE ComPtr<ID3DBlob> GetParticlePSShader() const { return particlePixelShader; }
-
-	/*FORCEINLINE ComPtr<ID3D11DeviceChild> GetShader(eShader type) const
-	{
-		switch(type)
-		{
-		case eShader::defaultVS:
-			return myVertexShader.As<ID3D11DeviceChild>();
-
-		case eShader::defaultPS:
-			return myPixelShader.Get();
-
-		case eShader::particleVS:
-			return particleVertexShader.Get();
-
-		case eShader::particleGS:
-			return particleGeometryShader.Get();
-
-		case eShader::particlePS:
-			return particlePixelShader.Get();
-
-		case eShader::screenSpaceQuad:
-			return myScreenSpaceQuadShader.Get();
-
-		case eShader::luminancePass:
-			return luminancePass;
-
-		case eShader::linearGammaPass:
-			return linearGammaPass.Get();
-
-		case eShader::copyShader:
-			return copyShader.Get();
-
-		case eShader::gaussShader:
-			return gaussShader.Get();
-
-		case eShader::bloomShader:
-			return bloomShader.Get();
-
-		case eShader::debugLineVS:
-			return debugLineVS.Get();
-
-		case eShader::debugLinePS:
-			return debugLinePS.Get();
-		}
-	}
-	*/
-
-
 
 	FORCEINLINE std::shared_ptr<Texture> GetTargetTextures(eRenderTargets type) const;
 

@@ -6,7 +6,7 @@
 class cPhysXDynamicBody : public Component
 {
 public:
-	cPhysXDynamicBody(const SY::UUID anOwnerID);
+	cPhysXDynamicBody(const SY::UUID anOwnerId,GameObjectManager* aManager);
 
 
 	void Init() override;
@@ -18,3 +18,4 @@ private:
 	physx::PxRigidDynamic* data;
 };
 
+REFL_AUTO(type(cPhysXDynamicBody))

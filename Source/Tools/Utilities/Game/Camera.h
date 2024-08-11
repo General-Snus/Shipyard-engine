@@ -1,6 +1,6 @@
 #pragma once
-#include "../LinearAlgebra/Vectors.hpp" 
-#include "LinearAlgebra/Matrix4x4.h"
+#include "../LinearAlgebra/Vectors.hpp"
+#include "Tools/Utilities/LinearAlgebra/Matrix4x4.h"
 
 class MainCamera
 {

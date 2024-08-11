@@ -6,7 +6,7 @@
 class cPhysXStaticBody : public Component
 {
 public:
-	cPhysXStaticBody(const SY::UUID anOwnerID);
+	cPhysXStaticBody(const SY::UUID anOwnerId,GameObjectManager* aManager);
 
 	void Init() override;
 	void UpdateFromCollider();
@@ -17,3 +17,5 @@ public:
 private:
 	physx::PxRigidStatic* data;
 };
+
+REFL_AUTO(type(cPhysXStaticBody))

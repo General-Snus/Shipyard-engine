@@ -1,12 +1,15 @@
-#include "AssetManager.pch.h" 
-#include <Editor/Editor/Core/Editor.h> 
+#include "Engine/AssetManager/AssetManager.pch.h"
 
-cCollider::cCollider(const unsigned int anOwnerId) : Component(anOwnerId)
+#include "Engine/AssetManager/ComponentSystem/Components/Collider.h"
+#include <Editor/Editor/Core/Editor.h>  
+#include "Editor/Editor/Core/ApplicationState.h"
+
+cCollider::cCollider(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager)
 {
 	myCollider = std::make_shared<ColliderAssetAABB>();
 }
 
-cCollider::cCollider(const unsigned int anOwnerId,const std::filesystem::path& aPath) : Component(anOwnerId)
+cCollider::cCollider(const SY::UUID anOwnerId,GameObjectManager* aManager ,const std::filesystem::path& aPath) : Component(anOwnerId,aManager)
 {
 	aPath;
 	myCollider = std::make_shared<ColliderAssetAABB>();
@@ -59,7 +62,7 @@ Vector3f cCollider::GetNormalToward(Vector3f position) const
 void cCollider::Render()
 {
 	OPTICK_EVENT();
-	if (Editor::GetApplicationState().drawDebugLines == false)
+	if (ApplicationState::drawDebugLines == false)
 	{
 		return;
 	}
@@ -93,4 +96,13 @@ void cCollider::OnSiblingChanged(const std::type_info* SourceClass)
 		}
 		GetGameObject().OnSiblingChanged(&typeid(cCollider));
 	}
+}
+bool cCollider::InspectorView()
+{
+	if (!Component::InspectorView())
+	{
+		return false;
+	}
+	Reflect<cCollider>();
+	return true;
 }

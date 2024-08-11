@@ -13,14 +13,8 @@
 #include <wchar.h>
 
 
-
-
-
-
-
 //#define GuardedMain
 
-LRESULT CALLBACK WinProc(_In_ HWND hWnd,_In_ UINT uMsg,_In_ WPARAM wParam,_In_ LPARAM lParam);
 LONG WINAPI ExceptionFilterFunction(_EXCEPTION_POINTERS* aExceptionP);
 void CreateMiniDump(EXCEPTION_POINTERS* someExceptionPointers);
 int Run(HINSTANCE& hInstance);
@@ -49,9 +43,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		}
 		__except (ExceptionFilterFunction(GetExceptionInformation()))
 		{
+
 		}
 	}
-	return true;
+	return 0;
 }
 
 int Run(HINSTANCE& hInstance)
@@ -77,6 +72,7 @@ LONG WINAPI ExceptionFilterFunction(_EXCEPTION_POINTERS* aExceptionP)
 	CreateMiniDump(aExceptionP);
 	return EXCEPTION_EXECUTE_HANDLER;
 }
+
 void CreateMiniDump(EXCEPTION_POINTERS* someExceptionPointers)
 {
 	BOOL bMiniDumpSuccessful;

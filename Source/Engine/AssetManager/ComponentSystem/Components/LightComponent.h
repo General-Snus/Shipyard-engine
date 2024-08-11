@@ -1,29 +1,37 @@
-#pragma once 
-#include <Engine/GraphicsEngine/Rendering/Buffers/FrameBuffer.h>
+#pragma once
 #include "Engine/AssetManager/ComponentSystem/Component.h"
+#include <Engine/GraphicsEngine/Rendering/Buffers/FrameBuffer.h>
+#include <Tools/Utilities/Color.h >
 
-enum class eLightType
+#include "Engine/AssetManager/Objects/BaseAssets/LightDataBase.h"
+
+enum class eLightType : unsigned int
 {
 	Directional = 0,
 	Point = 1,
 	Spot = 2,
 	uninitialized = 3
 };
-struct DirectionalLight;
-struct SpotLight;
+class DirectionalLight;
+class SpotLight;
+class PointLight;
+
 class Texture;
-struct PointLight;
 class cLight : public Component
 {
-
 
 	friend class GraphicsEngine;
 	friend class ShadowRenderer;
 	friend class EnvironmentLightPSO;
+
 public:
-	cLight() = delete; // Create a generic cube
-	cLight(const unsigned int anOwnerId); // Create a generic cube 
-	cLight(const unsigned int anOwnerId,const eLightType type);
+	MYLIB_REFLECTABLE();
+	cLight() = delete;                                             // Create a generic cube
+	cLight(const SY::UUID anOwnerId, GameObjectManager* aManager); // Create a generic cube
+	cLight(const SY::UUID anOwnerId, GameObjectManager* aManager, const eLightType type);
+
+
+	void Init() override;
 
 	eLightType GetType() const;
 	void SetType(const eLightType aType);
@@ -38,10 +46,10 @@ public:
 	void SetIsDirty(bool dirty);
 
 	float GetPower() const;
-	void SetPower(float power);
+	void SetPower(float power);	
 
-	Vector3f GetColor() const;
-	void SetColor(Vector3f color);
+	Color GetColor() const;
+	void SetColor(const Color& color);
 
 	void SetPosition(Vector3f position);
 	Vector3f GetPosition() const;
@@ -63,13 +71,20 @@ public:
 	bool GetIsBound() const;
 
 	FrameBuffer GetShadowMapFrameBuffer(const int number = 0) const;
+	bool InspectorView() override;
 
-	template<class T>
-	std::shared_ptr<T> GetData();
+	template <class T> std::shared_ptr<T> GetData();
 
 	void Update() override;
-	~cLight() = default;
+	~cLight() override = default;
+
+	bool boundToTransform = true;
+	bool isShadowCaster = true;
+	bool isRendered = false;
+	Color m_Color;
+
 private:
+	bool isDirty = true;
 	void ConformToTransform();
 	void RedrawShadowMap();
 	void RedrawDirectionMap();
@@ -77,32 +92,29 @@ private:
 	void RedrawSpotMap();
 	Matrix GetLightViewMatrix(int number) const;
 
+
+	eLightType myLightType;
 	std::shared_ptr<DirectionalLight> myDirectionLightData;
 	std::shared_ptr<SpotLight> mySpotLightData;
 	std::shared_ptr<PointLight> myPointLightData;
 	std::shared_ptr<Texture> shadowMap[6];
-
-	eLightType myLightType;
-	bool boundToTransform = false;
-	bool isShadowCaster = true;
-	bool isDirty = true;
-	bool isRendered = false;
 };
 
-template<>
-inline std::shared_ptr<DirectionalLight> cLight::GetData<DirectionalLight>()
+REFL_AUTO(type(cLight), field(isRendered), field(isShadowCaster), field(boundToTransform), field(m_Color))
+
+template <> inline std::shared_ptr<DirectionalLight> cLight::GetData<DirectionalLight>()
 {
+	//myDirectionLightData->Color = m_Color.GetRGB();
 	return myDirectionLightData;
 }
 
-template<>
-inline std::shared_ptr<SpotLight> cLight::GetData<SpotLight>()
-{
-	return mySpotLightData;
+template <> inline std::shared_ptr<SpotLight> cLight::GetData<SpotLight>()
+{ 
+	return mySpotLightData;	
 }
 
-template<>
-inline std::shared_ptr<PointLight> cLight::GetData<PointLight>()
+template <> inline std::shared_ptr<PointLight> cLight::GetData<PointLight>()
 {
+	//myPointLightData->Color = m_Color.GetRGB();
 	return myPointLightData;
 }

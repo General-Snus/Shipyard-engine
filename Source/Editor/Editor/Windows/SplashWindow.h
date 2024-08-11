@@ -2,11 +2,11 @@
 #include <thread> 
 #include "Windows.h"
 
-LRESULT CALLBACK SplashWinProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam);
+LRESULT CALLBACK SplashWinProc(_In_ HWND hWnd,_In_ UINT uMsg,_In_ WPARAM wParam,_In_ LPARAM lParam);
 
 class SplashWindow
 {
-	HWND myHandle, myLayeredHandle;
+	HWND myHandle,myLayeredHandle;
 	HBITMAP bmp;
 	HINSTANCE myHInstance;
 

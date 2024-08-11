@@ -9,12 +9,10 @@
 //Credited for work: Daniel Borghammar & Simon Nilsson 
 struct DebugVertex
 {
-	DebugVertex(Vector3f aPosition,Vector3f aColor = { 1.f,0.f,0.f }) : Position(aPosition.x,aPosition.y,aPosition.z,1),Color(aColor.x,aColor.y,aColor.z,1) {};
+	DebugVertex() {};
+	DebugVertex(Vector3f aPosition,Vector4f aColor = { 1.f,0.f,0.f,1.0f }) : Position(aPosition.x,aPosition.y,aPosition.z,1),Color(aColor.x,aColor.y,aColor.z,aColor.w) {};
 	Vector4f Position = { 0,0,0,0 };
 	Vector4f Color = { 0,0,0,0 };
-
-	static const std::vector<D3D12_INPUT_ELEMENT_DESC> InputLayoutDescription;
-	//static ComPtr<ID3D11InputLayout> InputLayout;
 };
 
 class DebugDrawer

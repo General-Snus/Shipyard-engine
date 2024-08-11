@@ -1,35 +1,33 @@
 #pragma once
+#include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 #include <functional>
 #include <string>
-#include <Tools/Utilities/LinearAlgebra/Vector2.hpp>
 #include <windows.h>
 
+class DropManager;
 struct WinInitSettings
 {
-	std::wstring windowTitle;
-	Vector2ui windowSize;
-	HINSTANCE hInstance;
+    std::wstring windowTitle;
+    Vector2ui windowSize;
+    HINSTANCE hInstance;
 };
 
 class Window
 {
-public:
+  public:
+    static void Init(const WinInitSettings &init);
+    static bool Update();
+    static LRESULT CALLBACK WinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-	static void Init(const WinInitSettings& init);
-	static bool Update();
-	static LRESULT CALLBACK WinProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
+    static void SetCallbackFunction(const std::function<void(MSG const &msg)> &aCallback);
+    static void Destroy();
+    static void MoveConsoleToOtherMonitor();
 
-	static void SetCallbackFunction(const std::function<void(MSG const& msg)>& aCallback);
-	static void Destroy();
-	static void MoveConsoleToOtherMonitor();
+    static unsigned int Width();
+    static unsigned int Height();
 
-	static unsigned int Width();
-	static unsigned int Height();
-
-
-	inline static HINSTANCE moduleHandler;
-	inline static HWND windowHandler;
-	//Cred goes to adira guy on reddit for wonderfull code
-	inline static std::function<void(const MSG& msg)> callback = nullptr;
+    inline static HINSTANCE moduleHandler;
+    inline static HWND windowHandler;
+    // Cred goes to adira guy on reddit for wonderfull code
+    inline static std::function<void(const MSG &msg)> callback = nullptr;
 };
-

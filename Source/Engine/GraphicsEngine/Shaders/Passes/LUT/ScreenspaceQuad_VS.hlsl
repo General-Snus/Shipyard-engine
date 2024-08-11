@@ -15,7 +15,7 @@ BRDF_VS_to_PS main(unsigned int aVertexIndex : SV_VertexID)
     
     const float2 uv[6] =
     {
-    float2(0.0f, 1.0f),
+    float2(0.0f, 1.0f), 
     float2(0.0f, 0.0f),
     float2(1.0f, 1.0f),
         

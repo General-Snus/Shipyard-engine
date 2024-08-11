@@ -8,9 +8,10 @@ class cCollider : public Component
 {
 	friend class ColliderAsset;
 public:
+	MYLIB_REFLECTABLE();
 	cCollider() = delete; // Create a generic cube
-	cCollider(const unsigned int anOwnerId); // Create a generic cube 
-	cCollider(const unsigned int anOwnerId,const std::filesystem::path& aPath);
+	cCollider(const SY::UUID anOwnerId,GameObjectManager* aManager);
+	cCollider(const SY::UUID anOwnerId,GameObjectManager* aManager,const std::filesystem::path& aPath);
 	void Update() override;
 	Vector3f GetClosestPosition(Vector3f position) const;
 	Vector3f GetNormalToward(Vector3f position) const;
@@ -22,6 +23,7 @@ public:
 	void SetColliderType(Args... someParameters);
 
 	void OnSiblingChanged(const std::type_info* SourceClass = nullptr) override;
+	bool InspectorView() override;
 
 	//void AddToNotify(std::weak_ptr<Component> aComponent) { myNotify.push_back(aComponent); }
 	//void Notify(std::weak_ptr<cCollider> notifier) { for(auto& i : myNotify) i.lock()->CollidedWith(notifier); }
@@ -35,6 +37,7 @@ private:
 	std::shared_ptr<ColliderAsset> myCollider;
 	//std::vector<std::weak_ptr<Component>> myNotify;
 };
+REFL_AUTO(type(cCollider))
 
 template<typename T,typename... Args>
 inline void cCollider::SetColliderType(Args... someParameters)
