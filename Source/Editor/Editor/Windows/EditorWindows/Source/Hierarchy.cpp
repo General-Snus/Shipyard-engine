@@ -27,7 +27,7 @@ void Hierarchy::PopupMenu(SY::UUID id)
             CommandBuffer::MainEditorCommandBuffer().AddCommand(ptr);
             CommandBuffer::MainEditorCommandBuffer().GetLastCommand()->SetMergeBlocker(true);
         }
-        if (ImGui::Selectable("Create Empty Child"))
+        if (ImGui::Selectable("Create Empty Child") && id.IsValid())
         {
             auto parent = Scene::ActiveManager().GetGameObject(id);
             auto child = GameObject::Create("Empty child");
@@ -38,7 +38,7 @@ void Hierarchy::PopupMenu(SY::UUID id)
             CommandBuffer::MainEditorCommandBuffer().GetLastCommand()->SetMergeBlocker(true);
         }
         ImGui::Separator();
-        if (ImGui::Selectable("Duplicate"))
+        if (ImGui::Selectable("Duplicate") && id.IsValid())
         {
             auto gameObject = Scene::ActiveManager().GetGameObject(id);
             auto components = gameObject.CopyAllComponents();
@@ -53,14 +53,28 @@ void Hierarchy::PopupMenu(SY::UUID id)
             CommandBuffer::MainEditorCommandBuffer().AddCommand(ptr);
             CommandBuffer::MainEditorCommandBuffer().GetLastCommand()->SetMergeBlocker(true);
         }
-        if (ImGui::Selectable("Delete"))
+        if (ImGui::Selectable("Delete") && id.IsValid())
         {
-            const auto ptr = std::make_shared<GameobjectDeleted>(Scene::ActiveManager().GetGameObject(id));
-            CommandBuffer::MainEditorCommandBuffer().AddCommand(ptr);
+            // TODO add do in add command function its more logical that way
+
+            CommandPacket packet;
+            GameObject obj = Scene::ActiveManager().GetGameObject(id);
+            const auto parentCommand = std::make_shared<GameobjectDeleted>(obj);
+
+            // for (auto const &i : obj.transform().GetAllChildren())
+            //{
+            //     const auto ptr = std::make_shared<GameobjectDeleted>(i.get().GetGameObject());
+            //     Scene::ActiveManager().DeleteGameObject(i.get().GetOwner(), true);
+            //     packet.emplace_back(ptr);
+            // }
+            packet.emplace_back(parentCommand);
+            Scene::ActiveManager().DeleteGameObject(id, true);
+
+            CommandBuffer::MainEditorCommandBuffer().AddCommand(packet);
             CommandBuffer::MainEditorCommandBuffer().GetLastCommand()->SetMergeBlocker(true);
         }
         ImGui::Separator();
-        if (ImGui::Selectable("Rename"))
+        if (ImGui::Selectable("Rename") && id.IsValid())
         {
             auto gameObject = Scene::ActiveManager().GetGameObject(id);
             gameObject.SetName("Renamed GameObject");
@@ -75,21 +89,21 @@ void Hierarchy::PopupMenu(SY::UUID id)
             Editor::Paste();
         }
         ImGui::Separator();
-        if (ImGui::Selectable("Move camera to object"))
+        if (ImGui::Selectable("Move camera to object") && id.IsValid())
         {
             Editor::Get().FocusObject(Scene::ActiveManager().GetGameObject(id));
         }
-        if (ImGui::Selectable("Align With View"))
+        if (ImGui::Selectable("Align With View") && id.IsValid())
         {
             // Move object to align with scene camera
             Editor::Get().AlignObject(Scene::ActiveManager().GetGameObject(id));
         }
-        if (ImGui::Selectable("Align View to Selected"))
+        if (ImGui::Selectable("Align View to Selected") && id.IsValid())
         {
             // Move scene camera to align with selected object
             Editor::Get().FocusObject(Scene::ActiveManager().GetGameObject(id), false);
         }
-        if (ImGui::Selectable("Set as Parent"))
+        if (ImGui::Selectable("Set as Parent") && id.IsValid())
         {
             auto selected = Editor::GetSelectedGameObjects();
 
@@ -100,13 +114,13 @@ void Hierarchy::PopupMenu(SY::UUID id)
                 child.transform().SetParent(parentTransform);
             }
         }
-        if (ImGui::Selectable("Clear Parent"))
+        if (ImGui::Selectable("Clear Parent") && id.IsValid())
         {
             auto gameObject = Scene::ActiveManager().GetGameObject(id);
             gameObject.transform().Detach();
         }
         ImGui::Separator();
-        if (ImGui::Selectable("Add Component"))
+        if (ImGui::Selectable("Add Component") && id.IsValid())
         {
         }
         ImGui::EndPopup();
@@ -124,8 +138,8 @@ void Hierarchy::RenderNode(Transform &transform)
     const auto &data = transform.GetGameObject();
     auto id = data.GetID();
     bool isSelected = false;
-
-    for (const auto &i : Editor::GetSelectedGameObjects())
+    const auto &selectedObjects = Editor::GetSelectedGameObjects();
+    for (const auto &i : selectedObjects)
     {
         if (i.GetID() == id)
         {
@@ -156,9 +170,8 @@ void Hierarchy::RenderNode(Transform &transform)
         DragDrop(transform);
         if (ImGui::IsItemHovered())
         {
-            // color = style.Colors[ImGuiCol_CheckMark];
 
-            if (ImGui::IsItemClicked())
+            if (ImGui::IsItemClicked() && !isSelected || ImGui::IsItemJustReleased())
             {
                 Editor::Get().m_Callbacks[EditorCallback::ObjectSelected].Invoke();
 
@@ -188,19 +201,36 @@ void Hierarchy::RenderNode(Transform &transform)
 
 inline void Hierarchy::DragDrop(Transform &transform)
 {
-
     if (ImGui::BeginDragDropTarget())
     {
         if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("HIERARCHY_NODE"))
         {
-            GameObject obj = *(GameObject *)payload->Data;
-            if (!obj.IsValid() && obj.GetID() != transform.GetOwner())
+            // TODO do we want all selected? We can guarantee that the payload is one of them
+            const auto &list = Editor::Get().GetSelectedGameObjects();
+            if (!list.empty())
             {
-                Logger::Warn("Invalid GameObject in hierachy_dragdrop");
-                return;
-            }
+                for (auto &obj : list)
+                {
+                    if (!obj.IsValid() && obj.GetID() != transform.GetOwner())
+                    {
+                        Logger::Warn("Invalid GameObject in hierachy_dragdrop");
+                        return;
+                    }
 
-            obj.transform().SetParent(transform);
+                    obj.transform().SetParent(transform);
+                }
+            }
+            else
+            {
+                GameObject obj = *(GameObject *)payload->Data;
+                if (!obj.IsValid() && obj.GetID() != transform.GetOwner())
+                {
+                    Logger::Warn("Invalid GameObject in hierachy_dragdrop");
+                    return;
+                }
+
+                obj.transform().SetParent(transform);
+            }
         }
         ImGui::EndDragDropTarget();
     }
@@ -250,13 +280,7 @@ void Hierarchy::RenderImGUi()
     for (const auto &[id, data] : gObjList)
     {
         const auto &transform = Scene::ActiveManager().GetComponent<Transform>(id);
-        if (!data.IsVisibleInHierarcy || transform.HasParent()) // We let parent handle the iterating over the children
-        {
-            continue;
-        }
-
-        if (!keyTerm.empty() &&
-            levensteinDistance(data.Name, keyTerm) >= std::max(data.Name.length(), keyTerm.length()))
+        if (transform.HasParent() || !data.IsVisibleInHierarcy) // We let parent handle the iterating over the children
         {
             continue;
         }
@@ -267,8 +291,8 @@ void Hierarchy::RenderImGUi()
     if (!keyTerm.empty())
     {
         // sort the list
-        std::ranges::sort(sortedList, [=](const localPair &a, const localPair &b) {
-            return levensteinDistance(a.first, keyTerm) < levensteinDistance(b.first, keyTerm);
+        std::ranges::sort(sortedList, [&keyTerm](const localPair &a, const localPair &b) {
+            return Levenstein::Distance(a.first, keyTerm) < Levenstein::Distance(b.first, keyTerm);
         });
     }
 
@@ -283,14 +307,31 @@ void Hierarchy::RenderImGUi()
     {
         if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("HIERARCHY_NODE"))
         {
-            GameObject obj = *(GameObject *)payload->Data;
-            if (!obj.IsValid())
+            const auto &list = Editor::GetSelectedGameObjects();
+            if (!list.empty())
             {
-                Logger::Warn("Invalid GameObject in hierachy_dragdrop");
-                return;
-            }
+                for (auto &obj : list)
+                {
+                    if (!obj.IsValid())
+                    {
+                        Logger::Warn("Invalid GameObject in hierachy_dragdrop");
+                        return;
+                    }
 
-            obj.transform().Detach();
+                    obj.transform().Detach();
+                }
+            }
+            else
+            {
+                GameObject obj = *(GameObject *)payload->Data;
+                if (!obj.IsValid())
+                {
+                    Logger::Warn("Invalid GameObject in hierachy_dragdrop");
+                    return;
+                }
+
+                obj.transform().Detach();
+            }
         }
         ImGui::Text("Remove parent");
         ImGui::EndDragDropTarget();

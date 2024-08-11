@@ -9,12 +9,11 @@
 #include "Tools/Reflection/refl.hpp"
 #include "Tools/Utilities/LinearAlgebra/Vectors.hpp"
 #include <Editor/Editor/Commands/CommandBuffer.h>
-#include <Editor/Editor/Commands/VarChanged.h> 
+#include <Editor/Editor/Commands/VarChanged.h>
 #include <Tools/Utilities/TemplateHelpers.h>
 
 class AssetBase;
 // TODO refactor out shit from this file
-
 
 namespace Reflection
 {
@@ -68,9 +67,10 @@ inline bool ImGuiReflect(Color &ref, const std::string &identifier)
         static float blendFactor = 0.5f;
         changed |= ImGui::SliderFloat("Blend", &blendFactor, 0.0f, 1.0f);
         ImGui::SameLine();
-
-        Vector4f blend1 = selected_item1 == -1 ? Vector4f(1, 1, 1, 1) : ColorManager::GetColor(keys.at(selected_item1));
-        Vector4f blend2 = selected_item2 == -1 ? Vector4f(1, 1, 1, 1) : ColorManager::GetColor(keys.at(selected_item2));
+        bool var1 = selected_item1 == -1 || keys.size() < selected_item1;
+        bool var2 = selected_item2 == -1 || keys.size() < selected_item2;
+        Vector4f blend1 = var1 ? Vector4f(1, 1, 1, 1) : ColorManager::GetColor(keys.at(selected_item1));
+        Vector4f blend2 = var2 ? Vector4f(1, 1, 1, 1) : ColorManager::GetColor(keys.at(selected_item2));
 
         Vector4f color = Color::RGBLerp(blend1, blend2, blendFactor);
         if (changed)

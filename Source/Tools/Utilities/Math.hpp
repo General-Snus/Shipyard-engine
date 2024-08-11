@@ -46,27 +46,42 @@ constexpr Vector3f GlobalRight = Vector3f(1.0, 0.0, 0.0);
 constexpr Vector3f GlobalUp = Vector3f(0.0, 1.0, 0.0);
 constexpr Vector3f GlobalFwd = Vector3f(0.0, 0.0, 1.0);
 
-inline size_t levensteinDistance(const std::string &s1, const std::string &s2)
+class Levenstein
 {
-    const size_t len1 = s1.size();
-    const size_t len2 = s2.size();
-    std::vector<std::vector<size_t>> d(len1 + 1, std::vector<size_t>(len2 + 1));
+  private:
+    const static inline int deletScore = 10;
+    const static inline int insertScore = 10;
+    const static inline int substitutionScore = 20;
 
-    d[0][0] = 0;
-    for (size_t i = 1; i <= len1; ++i)
-        d[i][0] = i;
-    for (size_t i = 1; i <= len2; ++i)
-        d[0][i] = i;
-
-    for (size_t i = 1; i <= len1; ++i)
+  public:
+    inline static size_t MaxSize(const std::string &s1, const std::string &s2)
     {
-        for (size_t j = 1; j <= len2; ++j)
-        {
-            d[i][j] = std::min({d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (s1[i - 1] == s2[j - 1] ? 0 : 1)});
-        }
-    }
+        return s1.length() + s2.length();
+    };
+    inline static size_t Distance(const std::string &s1, const std::string &s2)
+    {
 
-    return d[len1][len2];
+        const size_t len1 = s1.size();
+        const size_t len2 = s2.size();
+        std::vector<std::vector<size_t>> d(len1 + 1, std::vector<size_t>(len2 + 1));
+
+        d[0][0] = 0;
+        for (size_t i = 1; i <= len1; ++i)
+            d[i][0] = i * deletScore;
+        for (size_t i = 1; i <= len2; ++i)
+            d[0][i] = i * insertScore;
+
+        for (size_t i = 1; i <= len1; ++i)
+        {
+            for (size_t j = 1; j <= len2; ++j)
+            {
+                d[i][j] = std::min({d[i - 1][j] + deletScore, d[i][j - 1] + insertScore,
+                                    d[i - 1][j - 1] + (s1[i - 1] == s2[j - 1] ? 0 : substitutionScore)});
+            }
+        }
+
+        return d[len1][len2];
+    };
 };
 
 class RandomEngine

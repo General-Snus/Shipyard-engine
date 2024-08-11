@@ -34,7 +34,7 @@ template <typename asset = Mesh> void PopUpContextForAsset(std::shared_ptr<asset
             }
 
             const std::string name = path.filename().string();
-            if (!keyTerm.empty() && levensteinDistance(name, keyTerm) >= std::max(name.length(), keyTerm.length()))
+            if (!keyTerm.empty() && Levenstein::Distance(name, keyTerm) >= Levenstein::MaxSize(name, keyTerm))
             {
                 continue;
             }
@@ -45,7 +45,7 @@ template <typename asset = Mesh> void PopUpContextForAsset(std::shared_ptr<asset
         if (!keyTerm.empty())
         {
             std::ranges::sort(sortedList, [=](const localPair &a, const localPair &b) {
-                return levensteinDistance(a.first, keyTerm) < levensteinDistance(b.first, keyTerm);
+                return Levenstein::Distance(a.first, keyTerm) < Levenstein::Distance(b.first, keyTerm);
             });
         }
 
@@ -111,7 +111,6 @@ void SwitchableAsset(std::shared_ptr<assetType> &asset, std::string PayloadType,
 
     if (ImGui::BeginDragDropTarget())
     {
-
         if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(PayloadType.c_str()))
         {
             const auto path = std::string((const char *)payload->Data, payload->DataSize);

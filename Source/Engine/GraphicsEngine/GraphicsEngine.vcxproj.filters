@@ -188,7 +188,6 @@
     <FxCompile Include="Shaders\Passes\PostProcessing\SSAO_PS.hlsl" />
     <FxCompile Include="Shaders\DefaultShaders\Default_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\PostProcessing\EdgeBlur.hlsl" />
-    <FxCompile Include="Shaders\Processing\GenerateMips_CS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Objects\DataObjects\DefaultParticle_P.dds" />

@@ -74,8 +74,7 @@ inline bool ImageButton(const char *strId, ::Texture &aTexture, const ImVec2 &im
                          .gpuPtr.ptr;
         return ImageButtonEx(window->GetID(strId), reinterpret_cast<ImTextureID>(newId), image_size, uv0, uv1, bg_col,
                              tint_col, flags);
-    }
-    return false;
+    } 
 }
 
 inline void TextCentered(std::string text)
