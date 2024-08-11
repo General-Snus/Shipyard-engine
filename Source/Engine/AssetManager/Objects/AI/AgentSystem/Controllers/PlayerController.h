@@ -5,6 +5,7 @@
 class PlayerController : public Controller
 {
 public:
+	MYLIB_REFLECTABLE()
 	explicit PlayerController();
 	bool Update(GameObject input) override;
 
@@ -12,3 +13,4 @@ private:
 	void Input(const Vector3f& currentPosition); 
 	Vector3f end; 
 };
+REFL_AUTO(type(PlayerController))

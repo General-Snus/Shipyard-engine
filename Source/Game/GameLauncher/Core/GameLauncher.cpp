@@ -152,6 +152,7 @@ void GameLauncher::Start()
 
     { // DecisionTree
         auto &actor = entities[0].AddComponent<cActor>();
+        entities[0].SetName("DecisionTreeActor");
         actor.SetController(new DecisionTreeController());
         auto &mesh = entities[0].AddComponent<cMeshRenderer>("Models/C64Wanderer.fbx");
         mesh.SetMaterialPath("Materials/C64Wanderer.json");
@@ -159,6 +160,7 @@ void GameLauncher::Start()
 
     { // StateMachine
         auto &actor = entities[1].AddComponent<cActor>();
+        entities[1].SetName("StateMachineActor");
         actor.SetController(new StateMachineController());
         auto &mesh = entities[1].AddComponent<cMeshRenderer>("Models/C64Seeker.fbx");
         mesh.SetMaterialPath("Materials/C64Seeker.json");

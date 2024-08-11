@@ -7,6 +7,7 @@
 class BackgroundColor : public Component
 {
 public:
+	MYLIB_REFLECTABLE();
 	BackgroundColor() = delete; // Create a generic cube
 	BackgroundColor(const SY::UUID anOwnerId,GameObjectManager* aManager); // Create a generic cube   
 	BackgroundColor(const SY::UUID anOwnerId,GameObjectManager* aManager,Vector4f aColor); // Create a generic cube   

@@ -3,7 +3,8 @@
 
 class FrameStatistics : public Component
 {
-  public:
+public:
+	MYLIB_REFLECTABLE();
     FrameStatistics() = delete;
     FrameStatistics(const SY::UUID anOwnerId, GameObjectManager *aManager);
     void Update() override;

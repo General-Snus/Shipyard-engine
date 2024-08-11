@@ -5,6 +5,7 @@
 class StateMachineController : public Controller
 {
 public:
+	MYLIB_REFLECTABLE()
 	explicit StateMachineController(StateMachineBase decicionTree);
 	explicit StateMachineController();
 	bool Update(GameObject input) override;
@@ -17,3 +18,5 @@ private:
 
 
 
+
+REFL_AUTO(type(StateMachineController))

@@ -1,20 +1,28 @@
 #pragma once
 #include "../AIEventManager.h"
 #include <Engine/AssetManager/ComponentSystem/GameObject.h>
+#include <Engine/AssetManager/Reflection/ReflectionTemplate.h>
 #include <Tools/Utilities/Math.hpp>
 
 enum class eControllerType : int
 {
-	dummy,player,event,polling,count
+    dummy,
+    player,
+    event,
+    polling,
+    count
 };
 
-class Controller
+class Controller : private Reflectable
 {
-public:
-	virtual bool Update(GameObject input) = 0;
-	virtual void Recieve(const AIEvent& aEvent);
-	virtual bool ComponentRequirement(GameObject input);
+  public:
+    MYLIB_REFLECTABLE()
+    virtual bool Update(GameObject input) = 0;
+    virtual void Recieve(const AIEvent &aEvent);
+    virtual bool ComponentRequirement(GameObject input);
 
-protected:
-	eControllerType controllerType;
+  protected:
+    eControllerType controllerType;
 };
+
+REFL_AUTO(type(Controller))

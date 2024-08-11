@@ -4,16 +4,19 @@
 
 class DecisionTreeController : public Controller
 {
-public:
-	explicit DecisionTreeController(const DecisionTree& decicionTree);
-	explicit DecisionTreeController();
-	bool Update(GameObject input) override;
+  public:
+    MYLIB_REFLECTABLE()
+    explicit DecisionTreeController(const DecisionTree &decicionTree);
+    explicit DecisionTreeController();
+    bool Update(GameObject input) override;
 
+    bool ComponentRequirement(GameObject input) override;
 
-	bool ComponentRequirement(GameObject input) override;
-private:
-	DecisionTree myTree;
-private:
-	//Decicion functions 
+  private:
+    DecisionTree myTree;
+
+  private:
+    // Decicion functions
 };
 
+REFL_AUTO(type(DecisionTreeController))

@@ -50,6 +50,7 @@ template <typename asset = Mesh> void PopUpContextForAsset(std::shared_ptr<asset
         }
 
         ImGui::BeginTable(replace->GetTypeInfo().Name().c_str(), 2);
+        ImGui::TableSetColumnWidth(0, 50);
         ImGui::TableSetColumnWidth(1, 125);
         ImGuiListClipper clipper;
         clipper.Begin((int)sortedList.size());

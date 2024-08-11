@@ -94,7 +94,7 @@ template <typename var> inline void PointerVarChanged<var>::Do()
 
 template <typename var> inline std::string PointerVarChanged<var>::GetDescription() const
 {
-    if constexpr (refl::trait::is_reflectable_v<var> || refl::trait::is_container_v<var> ||
+    if constexpr (refl::trait::is_reflectable_v<var> && refl::trait::is_container_v<var> &&
                   refl::runtime::detail::is_ostream_printable_v<char, var>)
     {
         const std::string outMessage =

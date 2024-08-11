@@ -174,7 +174,7 @@ void ContentDirectory::RenderImGUi()
     {
         ImGuiListClipper clipper;
         const int clipperSize = std::max((int)std::ceil((float)m_CurrentDirectoryPaths.size() / columnCount), 1);
-        clipper.Begin(clipperSize);
+        clipper.Begin(clipperSize, 10);
         while (clipper.Step())
         {
             OPTICK_EVENT("DirectoryIteration");

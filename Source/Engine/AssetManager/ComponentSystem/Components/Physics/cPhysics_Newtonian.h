@@ -2,14 +2,14 @@
 class cPhysics_Newtonian : public Component
 {
 public:
-	cPhysics_Newtonian(const SY::UUID anOwnerId,GameObjectManager* aManager) ;
-	void Init() override;
-	void Update() override;
-	void Render() override;
-private:
-	Vector3f ph_force;
-	double ph_mass;
+	MYLIB_REFLECTABLE();
+    cPhysics_Newtonian(const SY::UUID anOwnerId, GameObjectManager *aManager);
+    void Init() override;
+    void Update() override;
+    void Render() override;
+    bool InspectorView() override;
+    Vector3f ph_force;
+    double ph_mass;
 };
 
-
-REFL_AUTO(type(cPhysics_Newtonian))
+REFL_AUTO(type(cPhysics_Newtonian), field(ph_force), field(ph_mass))
