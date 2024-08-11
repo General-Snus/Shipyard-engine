@@ -35,6 +35,9 @@ class Library
     template <class T> std::unordered_map<std::filesystem::path, std::shared_ptr<T>> GetContentCatalogue();
 
   private:
+    void ClearUnused();
+
+  private:
     assetMap content;
 };
 
@@ -56,6 +59,8 @@ class AssetManager : public Singleton<AssetManager>
     void SubscribeToChanges(const std::filesystem::path &aFilePath, SY::UUID gameobjectID);
 
     bool AdaptPath(std::filesystem::path &path);
+
+    void ClearUnused();
 
     // TODO just because this isnt optimal
     // Shame place, these are needed for the hopefully nieche condition of not knowing what you are loading

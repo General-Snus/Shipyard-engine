@@ -60,9 +60,7 @@ REFL_AUTO(type(AssetBase), field(AssetPath), field(isLoadedComplete), field(isBe
 struct Element
 {
     VertexResource VertexBuffer;
-    IndexResource IndexResource;
-    std::vector<Vertex> Vertices;
-    std::vector<uint32_t> Indicies;
+    IndexResource IndexResource; 
     D3D_PRIMITIVE_TOPOLOGY PrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     UINT Stride = 0;
     unsigned int MaterialIndex = 0;

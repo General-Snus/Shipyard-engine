@@ -8,7 +8,7 @@ void Console::RenderImGUi()
 {
 	OPTICK_EVENT();
 	ImGui::Begin("Console",&m_KeepWindow);
-	{
+	{//TODO clipper
 		using enum Logger::LogType;
 		const auto& style = ImGui::GetStyle();
 

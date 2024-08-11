@@ -628,6 +628,11 @@ void Editor::Update()
         Paste();
     }
 
+    if (Input::IsKeyPressed(Keys::F10))
+    {
+        AssetManager::Get().ClearUnused();
+    }
+
     // End
 
     myGameLauncher.Update(delta);

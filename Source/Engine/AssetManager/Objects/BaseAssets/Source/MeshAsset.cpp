@@ -376,8 +376,6 @@ void Mesh::processMesh(aiMesh *mesh, const aiScene *scene)
 
     toAdd.VertexBuffer = vertexRes;
     toAdd.IndexResource = indexRes;
-    toAdd.Vertices = mdlVertices;
-    toAdd.Indicies = mdlIndicies;
     toAdd.PrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     toAdd.Stride = sizeof(Vertex);
     toAdd.MaterialIndex = mesh->mMaterialIndex;

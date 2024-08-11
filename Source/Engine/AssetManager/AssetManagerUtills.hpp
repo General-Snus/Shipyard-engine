@@ -6,6 +6,7 @@
 #include <functional>
 #include <memory>
 
+#include "Tools/Utilities/Math.hpp"
 template <typename T>
 concept SupportOwnWindowPtr = requires(T a) { a->InspectorView(); };
 template <typename T>
@@ -13,11 +14,18 @@ concept SupportOwnWindow = requires(T a) { a.InspectorView(); };
 
 template <typename asset = Mesh> void PopUpContextForAsset(std::shared_ptr<asset> &replace)
 {
+    ImGui::SetNextWindowSize({0, 200});
     if (ImGui::BeginPopupContextItem())
     {
-        ImGui::BeginTable(replace->GetTypeInfo().Name().c_str(), 2, 0, {0, 500});
-        ImGui::TableNextColumn();
+        static char buf[128] = "";
+        ImGui::InputText("Search", buf, IM_ARRAYSIZE(buf));
+        const std::string keyTerm = buf;
+
+        ImGui::BeginChild("test");
         const auto &assetMap = AssetManager::Get().GetLibraryOfType<asset>()->GetContentCatalogue<asset>();
+
+        using localPair = std::pair<std::string, std::shared_ptr<asset>>;
+        static std::vector<localPair> sortedList;
         for (const auto &[path, content] : assetMap)
         {
             if (!content)
@@ -25,17 +33,47 @@ template <typename asset = Mesh> void PopUpContextForAsset(std::shared_ptr<asset
                 continue;
             }
 
-            ImGui::Text(path.stem().string().c_str());
-            ImGui::TableNextColumn();
-            if (ImGui::ImageButton(("PopUpContextMenu" + path.string()).c_str(), content->GetEditorIcon(), {100, 100}))
+            const std::string name = path.filename().string();
+            if (!keyTerm.empty() && levensteinDistance(name, keyTerm) >= std::max(name.length(), keyTerm.length()))
             {
-                replace = AssetManager::Get().LoadAsset<asset>(path);
-                ImGui::CloseCurrentPopup();
+                continue;
             }
+
+            sortedList.emplace_back(name, content);
+        }
+
+        if (!keyTerm.empty())
+        {
+            std::ranges::sort(sortedList, [=](const localPair &a, const localPair &b) {
+                return levensteinDistance(a.first, keyTerm) < levensteinDistance(b.first, keyTerm);
+            });
+        }
+
+        ImGui::BeginTable(replace->GetTypeInfo().Name().c_str(), 2);
+        ImGui::TableSetColumnWidth(1, 125);
+        ImGuiListClipper clipper;
+        clipper.Begin((int)sortedList.size());
+        while (clipper.Step())
+        {
             ImGui::TableNextColumn();
+            for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
+            {
+                const auto &[path, content] = sortedList[row];
+                ImGui::TextWrapped(path.c_str());
+                ImGui::TableNextColumn();
+                if (ImGui::ImageButton(("PopUpContextMenu" + path).c_str(), content->GetEditorIcon(), {100, 100}))
+                {
+                    replace = content;
+                    ZeroMemory(buf, 128);
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::TableNextColumn();
+            }
         }
         ImGui::EndTable();
+        ImGui::EndChild();
         ImGui::EndPopup();
+        sortedList.clear();
     }
 }
 
