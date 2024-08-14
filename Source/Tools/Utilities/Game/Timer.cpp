@@ -1,41 +1,42 @@
-#include <assert.h>
 #include "Timer.h"
+#include <assert.h>
 
 #include <Tools/Optick/include/optick.h>
 
-Timer::Timer()
+void Timer::Initialize()
 {
-	myTimeSinceLastUpdate = std::chrono::high_resolution_clock::now();
-	myStartTime = std::chrono::high_resolution_clock::now();
-	myDeltaTime = 0.0f;
-} 
+    myTimeSinceLastUpdate = std::chrono::high_resolution_clock::now();
+    myStartTime = std::chrono::high_resolution_clock::now();
+    myDeltaTime = 0.0f;
+}
 
 void Timer::Update()
 {
-	OPTICK_EVENT();
-	myDeltaTime = std::chrono::duration<float>(std::chrono::high_resolution_clock::now() - myTimeSinceLastUpdate).count();
-	myTimeSinceLastUpdate = std::chrono::high_resolution_clock::now();
+    OPTICK_EVENT();
+    myDeltaTime =
+        std::chrono::duration<float>(std::chrono::high_resolution_clock::now() - myTimeSinceLastUpdate).count();
+    myTimeSinceLastUpdate = std::chrono::high_resolution_clock::now();
 }
 
-float Timer::GetDeltaTime()  
+float Timer::GetDeltaTime()
 {
-	return myDeltaTime;
+    return myDeltaTime;
 }
 
-float Timer::GetUnscaledDeltaTime()  
+float Timer::GetUnscaledDeltaTime()
 {
-	assert(false && "Not implemented");
-	return 0.0f;
+    assert(false && "Not implemented");
+    return 0.0f;
 }
 
-//Nano seconds
-double Timer::GetTotalTime()  
+// Nano seconds
+double Timer::GetTotalTime()
 {
-	return std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - myStartTime).count();
+    return std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - myStartTime).count();
 }
 
-double Timer::GetUnscaledTotalTime()  
+double Timer::GetUnscaledTotalTime()
 {
-	assert(false && "Not implemented");
-	return 0.0;
+    assert(false && "Not implemented");
+    return 0.0;
 }

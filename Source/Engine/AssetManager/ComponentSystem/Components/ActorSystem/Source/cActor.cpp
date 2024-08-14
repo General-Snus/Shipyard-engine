@@ -39,6 +39,11 @@ bool cActor::InspectorView()
         }
     }
     ImGui::Text(std::format("Controller type: {}", controllerType).c_str());
+
+    if (controller)
+    {
+        controller->InspectorView();
+    }
     return true;
 }
 

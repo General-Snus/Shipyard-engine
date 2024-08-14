@@ -76,6 +76,11 @@ void CombatComponent::FireProjectile()
         projectileT.Rotate(90, 0, 0);
         kinematic.ph_velocity = actorT.GetForward() * myProjectileSpeed;
 
+        if (const auto &actorRenderer = actorT.TryGetComponent<cMeshRenderer>())
+        {
+            mesh.SetMaterial(actorRenderer->GetMaterial());
+        }
+
         mesh.SetNewMesh("Models/Projectile.fbx");
         projectile.SetLayer(Layer::Projectile);
         collider;

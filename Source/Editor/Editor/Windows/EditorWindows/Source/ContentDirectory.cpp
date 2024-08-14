@@ -166,20 +166,25 @@ void ContentDirectory::RenderImGUi()
         cellSize += Input::GetMouseWheelDelta() * Timer::GetDeltaTime();
         cellSize = std::clamp(cellSize, 50.f, 300.f);
     }
-    const float cellWidth = cellSize;
-    const float contentFolderWidth = ImGui::GetContentRegionAvail().x;
+    auto const &style = ImGui::GetStyle();
 
-    if (auto columnCount = std::max(static_cast<int>(contentFolderWidth / cellWidth), 1);
-        ImGui::BeginTable("Table", columnCount))
+    const float cellWidth = cellSize + style.ItemInnerSpacing.x * 2.0f;
+    const float cellHeight = cellSize + style.FramePadding.y * 2.0f + ImGui::CalcTextSize("asd\nasd").y;
+
+    const float contentFolderWidth = ImGui::GetContentRegionAvail().x;
+    const auto columnCount = std::max(static_cast<int>(contentFolderWidth / cellWidth), 1);
+    const int clipperSize = std::max((int)std::round((float)m_CurrentDirectoryPaths.size() / columnCount), 1);
+
+    if (ImGui::BeginTable("Table", columnCount))
     {
         ImGuiListClipper clipper;
-        const int clipperSize = std::max((int)std::ceil((float)m_CurrentDirectoryPaths.size() / columnCount), 1);
-        clipper.Begin(clipperSize, 10);
+        clipper.Begin(clipperSize, cellHeight);
         while (clipper.Step())
         {
             OPTICK_EVENT("DirectoryIteration");
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
             {
+                ImGui::TableNextRow();
                 for (int collumn = 0; collumn < columnCount; collumn++)
                 {
                     ImGui::TableNextColumn();
@@ -191,7 +196,6 @@ void ContentDirectory::RenderImGUi()
 
                     Node(index, cellWidth);
                 }
-                ImGui::TableNextRow();
             }
         }
         ImGui::EndTable();

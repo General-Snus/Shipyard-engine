@@ -18,10 +18,11 @@ class cPhysics_Kinematic : public Component
     Vector3f ph_acceleration;
     Vector3f ph_Angular_acceleration;
     Vector3f ph_Angular_velocity;
-    bool bindAngleToVelocity;
-    bool localVelocity;
-    float ph_maxSpeed;
-    float ph_maxAcceleration;
+    bool bindAngleToVelocity = false;
+    bool localVelocity = false;
+    float ph_maxSpeed = 100.0f;
+    float ph_maxAcceleration = 100.0f;
+    float ph_maxAngularAcceleration = 25.0f;
 
   private:
     void InitPrimitive();
@@ -30,4 +31,4 @@ class cPhysics_Kinematic : public Component
 
 REFL_AUTO(type(cPhysics_Kinematic), field(ph_velocity), field(ph_acceleration), field(ph_Angular_acceleration),
           field(ph_Angular_velocity), field(bindAngleToVelocity), field(localVelocity), field(ph_maxSpeed),
-          field(ph_maxAcceleration))
+          field(ph_maxAcceleration), field(ph_maxAngularAcceleration))

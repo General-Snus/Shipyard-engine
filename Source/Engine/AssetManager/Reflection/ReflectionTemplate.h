@@ -119,7 +119,7 @@ inline bool ImGuiReflect(Vector3<float> &ref, const std::string &identifier)
 
 inline bool ImGuiReflect(Vector4<float> &ref, const std::string &identifier)
 {
-    return ImGui::DragFloat4(std::format("##{}", identifier).c_str(), &ref.x);
+    return ImGui::DragFloat4(std::format("##{}", identifier).c_str(), &ref.x); 
 }
 
 inline bool ImGuiReflect(float &ref, const std::string &identifier)
@@ -492,43 +492,6 @@ template <typename T0> __forceinline void Reflectable::Reflect(T0 &aReflectedObj
         ImGui::NextColumn();
 
         UpdateValue(member, aReflectedObject, arg);
-        // const auto oldValue = member(aReflectedObject);
-        // const bool changed = Reflection::ImGuiReflect(member(aReflectedObject), arg);
-        //
-        // if constexpr (!isReflectableClass<MemberType>())
-        //{
-        //     if (changed)
-        //     {
-        //         const auto newValue = member(aReflectedObject);
-        //         if constexpr (SmartPointerType<declType>)
-        //         {
-        //             newValue;
-        //             oldValue;
-        //             // const auto ptr = std::make_shared<VarChanged<T0, MemberType>>(
-        //             //     aReflectedObject, member(aReflectedObject).get(), oldValue, newValue, arg);
-        //             // CommandBuffer::MainEditorCommandBuffer().AddCommand(ptr);
-        //         }
-        //         else if constexpr (std::is_pointer_v<declType>)
-        //         {
-        //             newValue;
-        //             oldValue;
-        //             // const auto ptr = std::make_shared<VarChanged<T0, MemberType>>(
-        //             //     aReflectedObject, member(aReflectedObject).get(), oldValue, newValue, arg);
-        //             // CommandBuffer::MainEditorCommandBuffer().AddCommand(ptr);
-        //         }
-        //         else
-        //         {
-        //             const auto ptr = std::make_shared<PointerVarChanged<MemberType>>(
-        //                 &unwrapPointer(member(aReflectedObject)), oldValue, newValue, arg);
-        //             CommandBuffer::MainEditorCommandBuffer().AddCommand(ptr);
-        //         }
-        //         if (ImGui::IsItemDeactivatedAfterEdit())
-        //         {
-        //             CommandBuffer::MainEditorCommandBuffer().GetLastCommand()->SetMergeBlocker(true);
-        //         }
-        //     }
-        // }
-
         ImGui::Columns(1);
         ImGui::PopID();
         ImGui::Indent(16.f);

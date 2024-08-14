@@ -18,6 +18,9 @@
 #include <Engine/AssetManager/Objects/AI/AgentSystem/PollingStations/Target_PollingStation.h>
 #include <Engine/AssetManager/Objects/AI/AgentSystem/StateMachine/StateMachineBase.h>
 
+#include <Engine/AssetManager/Objects/AI/AgentSystem/BehaviourTree/BrainTree.h>
+#include <Engine/PersistentSystems/ArtificialInteligence/AICommands/AICommands.h>
+#include <Game/GameLauncher/TaskSpecificImplementation/BehaviourTree/BehaviorTreeController.h>
 #include <Game/GameLauncher/TaskSpecificImplementation/DecicionTree/DecisionTreeController.h>
 #include <Game/GameLauncher/TaskSpecificImplementation/StateMachine/StateMachineController.h>
 
@@ -32,8 +35,8 @@ void GameLauncher::Init()
         Scene::ActiveManager().SetLastGOAsCamera();
         cameraComponent.SetActive(true);
         auto &transform = camera.AddComponent<Transform>();
-        transform.SetPosition(-10, 3, 0);
-        transform.SetRotation(0, 90, 0);
+        transform.SetPosition(0, 30, 0);
+        transform.SetRotation(90, 0, 0);
     }
 }
 
@@ -52,24 +55,6 @@ void GameLauncher::Start()
         pLight.SetColor("White");
         pLight.SetPower(2.0f);
         pLight.BindDirectionToTransform(true);
-    }
-
-    {
-        GameObject floor = GameObject::Create();
-        floor.SetName("Floor");
-
-        auto &transform = floor.AddComponent<Transform>();
-        transform.SetPosition(0, -1.5f, 0);
-        transform.SetScale(Vector3f(50.0f, 1.0f, 50.0f));
-        transform.SetGizmo(false);
-        floor.SetActive(true);
-        auto &meshRend = floor.AddComponent<cMeshRenderer>("Models/Cube.fbx");
-        meshRend.SetMaterialPath("Materials/CubeMaterial.json");
-#if PHYSX
-        auto &collider = floor.AddComponent<cCollider>();
-        collider.SetColliderType<ColliderAssetAABB>();
-        floor.AddComponent<cPhysXStaticBody>();
-#endif
     }
 
     // Decisiontree 1
@@ -98,7 +83,7 @@ void GameLauncher::Start()
         object.transform().SetScale(transformData[2]);
 
         auto &mesh = object.AddComponent<cMeshRenderer>("Models/Cube.fbx");
-        mesh.SetMaterialPath("Materials/C64Separatist.json");
+        mesh.SetMaterialPath("Materials/C64.json");
         object.AddComponent<cCollider>();
         colliders.push_back(object);
     }
@@ -137,7 +122,7 @@ void GameLauncher::Start()
         obj.transform().SetRotation(90, 0, 0);
 
         auto &mesh = obj.AddComponent<cMeshRenderer>("Models/Well.fbx");
-        mesh.SetMaterialPath("Materials/C64Separatist.json");
+        mesh.SetMaterialPath("Materials/C64Well.json");
         index++;
     }
 #pragma endregion
@@ -150,22 +135,60 @@ void GameLauncher::Start()
     AIPollingManager::Get().AddStation("Colliders", colliderPollingStation);
     AIPollingManager::Get().AddStation("Targets", formationPollingStation);
 
-    { // DecisionTree
-        auto &actor = entities[0].AddComponent<cActor>();
-        entities[0].SetName("DecisionTreeActor");
-        actor.SetController(new DecisionTreeController());
-        auto &mesh = entities[0].AddComponent<cMeshRenderer>("Models/C64Wanderer.fbx");
-        mesh.SetMaterialPath("Materials/C64Wanderer.json");
-    }
+    //{ // DecisionTree
+    //    auto &actor = entities[0].AddComponent<cActor>();
+    //    entities[0].SetName("DecisionTreeActor");
+    //    actor.SetController(new DecisionTreeController());
+    //    auto &mesh = entities[0].AddComponent<cMeshRenderer>("Models/C64Wanderer.fbx");
+    //    mesh.SetMaterialPath("Materials/C64Wanderer.json");
+    //}
 
     { // StateMachine
-        auto &actor = entities[1].AddComponent<cActor>();
-        entities[1].SetName("StateMachineActor");
+        auto &actor = entities[0].AddComponent<cActor>();
+        entities[0].SetName("StateMachineActor");
         actor.SetController(new StateMachineController());
-        auto &mesh = entities[1].AddComponent<cMeshRenderer>("Models/C64Seeker.fbx");
+        auto &mesh = entities[0].AddComponent<cMeshRenderer>("Models/C64Seeker.fbx");
         mesh.SetMaterialPath("Materials/C64Seeker.json");
     }
 
+    { // BehaviourTree
+        auto &actor = entities[1].AddComponent<cActor>();
+        entities[1].SetName("BehaviourTreeActor");
+
+        // clang-format off
+		using namespace BrainTree; 
+		BehaviorTree 	tree =  Builder()
+			.composite<Selector>("MainSelector")
+				.decorator<BehaviourTreeAICommands::IsDead>() 
+					.leaf<BehaviourTreeAICommands::DeathSpin>()
+				.end()
+				.decorator<BehaviourTreeAICommands::IsHealthy>()
+				    .composite<Selector>("BattleSelector") 
+					    .composite<Sequence>("BattleSequencer")
+					        .leaf<BehaviourTreeAICommands::IsTargetAlive>()
+					        .leaf<BehaviourTreeAICommands::IsTargetInRange>()
+                                .composite<Sequence>("CanFireSequencer") 
+						            .leaf<BehaviourTreeAICommands::AlignToTarget>()
+						            .leaf<BehaviourTreeAICommands::IsTargetInSight>()
+					            .end()
+					        .leaf<BehaviourTreeAICommands::ShootAtTarget>()
+                        .end()
+					    .composite<Sequence>("CanMoveFreelySequence")
+					        .decorator<BehaviourTreeAICommands::IsFullyHealed>()
+						        .leaf<BehaviourTreeAICommands::MoveFreely>()
+				            .end()
+					    .end()
+					.end()
+				.end()
+				.leaf<BehaviourTreeAICommands::Retreat>()
+			.end()
+			.build();
+        // clang-format on
+
+        actor.SetController(new BehaviorTreeController(tree));
+        auto &mesh = entities[1].AddComponent<cMeshRenderer>("Models/C64.fbx");
+        mesh.SetMaterialPath("Materials/C64Separatist.json");
+    }
     Logger::Log("GameLauncher start");
 
 #pragma endregion

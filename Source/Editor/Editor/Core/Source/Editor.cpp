@@ -333,6 +333,7 @@ bool Editor::Initialize(HWND aHandle)
         OPTICK_START_CAPTURE();
     }
     OPTICK_EVENT();
+    Timer::Initialize();
     Logger::Create();
     Logger::SetPrintToVSOutput(true);
     GetWindowRect(Window::windowHandler, &ViewportRect);

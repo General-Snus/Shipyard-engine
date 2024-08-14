@@ -67,6 +67,12 @@ void cPhysics_Kinematic::Update()
         ph_acceleration *= ph_maxAcceleration;
     }
 
+    if (ph_Angular_acceleration.Length() > ph_maxAngularAcceleration)
+    {
+        ph_Angular_acceleration.Normalize();
+        ph_Angular_acceleration *= ph_maxAngularAcceleration;
+    }
+
     if (localVelocity)
     {
         transform.Rotate(ph_Angular_velocity * delta);

@@ -268,12 +268,14 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="TaskSpecificImplementation\BehaviourTree\BehaviorTreeController.h" />
     <ClInclude Include="Core\GameLauncher.h" />
     <ClInclude Include="TaskSpecificImplementation\StateMachine\StateMachineController.h" />
     <ClInclude Include="TaskSpecificImplementation\StateMachine\Decicion1States.h" />
     <ClInclude Include="TaskSpecificImplementation\DecicionTree\DecisionTreeController.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="TaskSpecificImplementation\BehaviourTree\Source\BehaviorTreeController.cpp" />
     <ClCompile Include="Core\GameLauncher.cpp" />
     <ClCompile Include="TaskSpecificImplementation\StateMachine\Source\StateMachineController.cpp" />
     <ClCompile Include="TaskSpecificImplementation\StateMachine\Source\Decicion1States.cpp" />

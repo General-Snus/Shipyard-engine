@@ -30,6 +30,9 @@
     <ClInclude Include="TaskSpecificImplementation\StateMachine\StateMachineController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TaskSpecificImplementation\BehaviourTree\BehaviorTreeController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\GameLauncher.cpp">
@@ -42,6 +45,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TaskSpecificImplementation\StateMachine\Source\StateMachineController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskSpecificImplementation\BehaviourTree\Source\BehaviorTreeController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

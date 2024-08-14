@@ -103,16 +103,10 @@ template <typename T> inline bool IsApproximate(const T &lhv, const T &rhv)
 
 inline std::mt19937_64 &RandomEngine::engineInstance()
 {
-    /*
-    std::seed_seq seed(
-        {
-            Timer::GetInstance().GetTotalTime(),
-            Timer::GetInstance().GetTotalTime()
-        }
-    );
-    */
+    std::random_device rd;
+    std::seed_seq seed({rd(), rd(), rd(), rd(), rd(), rd(), rd(), rd()});
 
-    static auto engine = std::mt19937_64();
+    static auto engine = std::mt19937_64(seed);
     return engine;
 }
 template <class T> inline T RandomEngine::RandomInRange(const T &a, const T &b)

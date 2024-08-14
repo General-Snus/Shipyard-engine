@@ -91,16 +91,20 @@ void FightingState::Update(float deltaTime, GameObject input)
 
     if (GeneralizedAICommands::IsHealthy(input))
     {
-        if (GeneralizedAICommands::IsTargetInSight(input))
+        if (GeneralizedAICommands::IsTargetAlive(input) && GeneralizedAICommands::IsTargetInRange(input))
         {
-            GeneralizedAICommands::ShootAtTarget(input);
+
+            if (GeneralizedAICommands::IsTargetInSight(input))
+            {
+                GeneralizedAICommands::ShootAtTarget(input);
+            }
+            else
+            {
+                GeneralizedAICommands::AlignToTarget(input);
+            }
         }
         else
-        {
-            GeneralizedAICommands::AlignToTarget(input);
-        }
 
-        if (!GeneralizedAICommands::IsTargetAlive(input) || !GeneralizedAICommands::IsTargetInRange(input))
         {
             myStateMachine->ChangeState((int)eStates::Movement);
         }

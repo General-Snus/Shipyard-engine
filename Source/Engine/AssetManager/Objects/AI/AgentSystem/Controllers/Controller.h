@@ -13,7 +13,7 @@ enum class eControllerType : int
     count
 };
 
-class Controller : private Reflectable
+class Controller : public Reflectable
 {
   public:
     MYLIB_REFLECTABLE()
