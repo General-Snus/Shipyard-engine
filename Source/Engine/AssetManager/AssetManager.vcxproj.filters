@@ -180,6 +180,9 @@
     <ClInclude Include="Objects\BaseAssets\MasterIncludeAssets.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Objects\AI\AgentSystem\BehaviourTree\BrainTree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssetManager.pch.cpp">
@@ -332,8 +335,12 @@
     <ClCompile Include="Reflection\ReflectionTemplate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\BehaviourTree\BrainTree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

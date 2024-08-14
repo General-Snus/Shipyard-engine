@@ -333,6 +333,7 @@ bool Editor::Initialize(HWND aHandle)
         OPTICK_START_CAPTURE();
     }
     OPTICK_EVENT();
+    Timer::Initialize();
     Logger::Create();
     Logger::SetPrintToVSOutput(true);
     GetWindowRect(Window::windowHandler, &ViewportRect);
@@ -394,6 +395,7 @@ bool Editor::Initialize(HWND aHandle)
     m_Callbacks[EditorCallback::WM_DropFile] = Event();
 
     AddViewPort();
+    g_EditorWindows.reserve(100); // TODO Bruh
     g_EditorWindows.emplace_back(std::make_shared<Inspector>());
     g_EditorWindows.emplace_back(std::make_shared<Hierarchy>());
     g_EditorWindows.emplace_back(std::make_shared<ContentDirectory>());

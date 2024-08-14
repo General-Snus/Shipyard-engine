@@ -174,7 +174,7 @@ bool Material::InspectorView()
         for (const auto &[index, pair] : data.textures | std::ranges::views::enumerate)
         {
             auto &[path, texture] = pair;
-              if (texture )
+            if (texture)
             {
                 ImGui::TextCentered(std::string(magic_enum::enum_name(eTextureType(index))));
                 ImGui::Separator();

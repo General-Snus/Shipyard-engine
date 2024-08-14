@@ -1,45 +1,44 @@
-#include "Engine/AssetManager/AssetManager.pch.h"
 #include "../CombatComponent.h"
+#include "Engine/AssetManager/AssetManager.pch.h"
 #include <Engine/AssetManager/ComponentSystem/Components/TaskSpecific/ProjectileComponent.h>
 
 #include "Engine/AssetManager/ComponentSystem/Components/Collider.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h"
 #include <Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h>
 
-CombatComponent::CombatComponent(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager)
+CombatComponent::CombatComponent(const SY::UUID anOwnerId, GameObjectManager *aManager) : Component(anOwnerId, aManager)
 {
 }
 
 void CombatComponent::Init()
 {
-	myHealth = 100;
-	myDamage = 10;
-	myProjectileSpeed = 10.f;
-	myAttackSpeed = 1.f;
-	myAttackRange = 10.f;
-	myAttackCone = 10.f;
-	myVisionRange = 20.f;
-	respawnTime = 10.f;
-	myDeathTimer = 0.f;
-	spawnPoint = GetGameObject().GetComponent<Transform>().GetPosition();
-
+    myHealth = 100;
+    myDamage = 10;
+    myProjectileSpeed = 10.f;
+    myAttackSpeed = 1.f;
+    myAttackRange = 10.f;
+    myAttackCone = 10.f;
+    myVisionRange = 20.f;
+    respawnTime = 10.f;
+    myDeathTimer = 0.f;
+    spawnPoint = GetGameObject().GetComponent<Transform>().GetPosition();
 }
 
 void CombatComponent::Update()
 {
-	myAttackTimer += Timer::GetDeltaTime();
+    myAttackTimer += Timer::GetDeltaTime();
 
-	if(myHealth <= 0)
-	{
-		//'John is kill'
-		//'No' 
-		myDeathTimer += Timer::GetDeltaTime();
-		if(myDeathTimer > respawnTime)
-		{
-			myDeathTimer = 0.f;
-			Respawn();
-		}
-	}
+    if (myHealth <= 0)
+    {
+        //'John is kill'
+        //'No'
+        myDeathTimer += Timer::GetDeltaTime();
+        if (myDeathTimer > respawnTime)
+        {
+            myDeathTimer = 0.f;
+            Respawn();
+        }
+    }
 }
 
 void CombatComponent::Render()
@@ -48,51 +47,68 @@ void CombatComponent::Render()
 
 void CombatComponent::Respawn()
 {
-	auto& physicsComponent = GetGameObject().GetComponent<cPhysics_Kinematic>();
-	physicsComponent.ph_Angular_velocity = {0,0,0};
+    auto &physicsComponent = GetGameObject().GetComponent<cPhysics_Kinematic>();
+    physicsComponent.ph_Angular_velocity = {0, 0, 0};
 
-	myHealth = 100;
-	GetGameObject().GetComponent<Transform>().SetPosition(
-		RandomEngine::RandomInRange<float>(-20,20),0,RandomEngine::RandomInRange<float>(-20,20)
-	);
+    myHealth = 100;
+    transform().SetPosition(RandomEngine::RandomInRange<float>(-20, 20), 0,
+                            RandomEngine::RandomInRange<float>(-20, 20));
 }
-
+#pragma optimize("", off)
 void CombatComponent::FireProjectile()
 {
-	if(myAttackTimer > myAttackSpeed)
-	{
-		myAttackTimer = 0.f;
-		//Fire projectile
-		GameObject projectile = GameObject::Create();
+    if (myAttackTimer > myAttackSpeed)
+    {
+        myAttackTimer = 0.f;
+        // Fire projectile
+        GameObject projectile = GameObject::Create("Projectile");
+        auto &kinematic = projectile.AddComponent<cPhysics_Kinematic>();
+        auto &mesh = projectile.AddComponent<cMeshRenderer>();
+        auto &collider = projectile.AddComponent<cCollider>();
+        auto &projComponent = projectile.AddComponent<ProjectileComponent>();
+        projComponent.InitWithValues(20.f, GetGameObject());
 
+        auto &projectileT = projectile.transform();
+        auto &actorT = transform();
 
-		auto& transform = projectile.AddComponent <Transform>();
-		auto& kinematic = projectile.AddComponent <cPhysics_Kinematic>();
-		auto& mesh = projectile.AddComponent <cMeshRenderer>();
-		auto& collider = projectile.AddComponent <cCollider>();
-		auto& projComponent = projectile.AddComponent <ProjectileComponent>();
-		projComponent.InitWithValues(20.f,GetGameObject());
+        projectileT.SetPosition(actorT.GetPosition());
+        projectileT.SetRotation(actorT.GetRotation());
+        projectileT.Rotate(90, 0, 0);
+        kinematic.ph_velocity = actorT.GetForward() * myProjectileSpeed;
 
-		transform.SetPosition(GetGameObject().GetComponent<Transform>().GetPosition());
-		transform.SetRotation(GetGameObject().GetComponent<Transform>().GetRotation());
-		transform.Rotate(90,0,0);
-		kinematic.ph_velocity = GetGameObject().GetComponent<Transform>().GetForward() * myProjectileSpeed;
-		mesh.SetNewMesh("Models/Projectile.fbx");
-		projectile.SetLayer(Layer::Projectile);
-		collider;
-	}
+        if (const auto &actorRenderer = actorT.TryGetComponent<cMeshRenderer>())
+        {
+            mesh.SetMaterial(actorRenderer->GetMaterial());
+        }
+
+        mesh.SetNewMesh("Models/Projectile.fbx");
+        projectile.SetLayer(Layer::Projectile);
+        collider;
+    }
 }
+#pragma optimize("", on)
+
 void CombatComponent::Healing()
 {
-	decimalHPGeneration += 2.f * Timer:: GetDeltaTime();
+    decimalHPGeneration += 2.f * Timer::GetDeltaTime();
 
-	//KEKW
-	const int hpAdd = static_cast<int>(std::roundf(decimalHPGeneration));
-	decimalHPGeneration -= hpAdd;
-	myHealth += hpAdd;
+    // KEKW
+    const int hpAdd = static_cast<int>(std::roundf(decimalHPGeneration));
+    decimalHPGeneration -= hpAdd;
+    myHealth += hpAdd;
 
-	if(myHealth > 100)
-	{
-		myHealth = 100;
-	}
+    if (myHealth > 100)
+    {
+        myHealth = 100;
+    }
+}
+
+bool CombatComponent::InspectorView()
+{
+    if (!Component::InspectorView())
+    {
+        return false;
+    }
+    Reflect<CombatComponent>();
+    return true;
 }

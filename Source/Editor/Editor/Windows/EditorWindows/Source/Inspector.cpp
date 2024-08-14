@@ -85,8 +85,6 @@ void Inspector::RenderImGUi()
 
         gameobject.transform().InspectorView();
         ImGui::NewLine();
-        ImGui::Separator();
-        ImGui::NewLine();
         for (auto &cmp : gameobject.GetAllComponents())
         {
             if (cmp->GetTypeInfo().Name() == refl::reflect<Transform>().name.str())
@@ -95,9 +93,6 @@ void Inspector::RenderImGUi()
             }
 
             cmp->InspectorView();
-
-            ImGui::NewLine();
-            ImGui::Separator();
             ImGui::NewLine();
         }
     }

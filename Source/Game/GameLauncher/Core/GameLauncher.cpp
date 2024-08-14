@@ -1,395 +1,244 @@
-#include <Engine/AssetManager/AssetManager.pch.h> 
+#include <Engine/AssetManager/AssetManager.pch.h>
 
-#include <Engine/AssetManager/ComponentSystem/Components/CameraComponent.h>    
-#include <Engine/AssetManager/ComponentSystem/Components/Collider.h> 
-#include <Engine/AssetManager/ComponentSystem/Components/DEBUGCOMPONENTS/FrameStatistics.h>   
-#include <Engine/AssetManager/ComponentSystem/Components/DEBUGCOMPONENTS/RenderMode.h>   
-#include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>   
-#include <Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h>   
-#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXDynamicBody.h>   
-#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXStaticBody.h>   
-#include <Engine/AssetManager/ComponentSystem/Components/Transform.h>   
-#include <Engine/AssetManager/Objects/AI/AgentSystem/AIEventManager.h> 
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 #include "GameLauncher.h"
+#include <Engine/AssetManager/ComponentSystem/Components/CameraComponent.h>
+#include <Engine/AssetManager/ComponentSystem/Components/Collider.h>
+#include <Engine/AssetManager/ComponentSystem/Components/DEBUGCOMPONENTS/FrameStatistics.h>
+#include <Engine/AssetManager/ComponentSystem/Components/DEBUGCOMPONENTS/RenderMode.h>
+#include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>
+#include <Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h>
+#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXDynamicBody.h>
+#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXStaticBody.h>
+#include <Engine/AssetManager/ComponentSystem/Components/Transform.h>
 
+// Task 7 AI
+#include <Engine/AssetManager/Objects/AI/AgentSystem/AIEventManager.h>
+#include <Engine/AssetManager/Objects/AI/AgentSystem/AIPollingManager.h>
+#include <Engine/AssetManager/Objects/AI/AgentSystem/PollingStations/Target_PollingStation.h>
+#include <Engine/AssetManager/Objects/AI/AgentSystem/StateMachine/StateMachineBase.h>
 
+#include <Engine/AssetManager/Objects/AI/AgentSystem/BehaviourTree/BrainTree.h>
+#include <Engine/PersistentSystems/ArtificialInteligence/AICommands/AICommands.h>
+#include <Game/GameLauncher/TaskSpecificImplementation/BehaviourTree/BehaviorTreeController.h>
+#include <Game/GameLauncher/TaskSpecificImplementation/DecicionTree/DecisionTreeController.h>
+#include <Game/GameLauncher/TaskSpecificImplementation/StateMachine/StateMachineController.h>
 
 void GameLauncher::Init()
 {
-	OPTICK_EVENT();
-	{
-		GameObject camera = GameObject::Create();
-		camera.SetName("Camera");
-		camera.AddComponent<cMeshRenderer>("Models/Camera/Camera.fbx");
-		auto& cameraComponent = camera.AddComponent<cCamera>();
-		Scene::ActiveManager().SetLastGOAsCamera();
-		cameraComponent.SetActive(true);
-		auto& transform = camera.AddComponent<Transform>();
-		transform.SetPosition(-10,3,0);
-		transform.SetRotation(0,90,0);
-	}
-}
-
-bool SaveTest(std::vector<GameObject> gameObjectsToSave,const std::filesystem::path& path)
-{
-	Logger::Log("Saving Gameobjects");
-	std::ofstream file(path.string(),std::ios_base::binary);
-	if (!file.is_open())
-	{
-		return false;
-	}
-	int a = static_cast<int>(gameObjectsToSave.size());
-	file.write((char*)&a,sizeof(a));
-
-	for (auto& i : gameObjectsToSave)
-	{
-		const Vector3f& position = i.GetComponent<Transform>().GetPosition();
-		std::string meshPath = i.GetComponent<cMeshRenderer>().GetRawMesh()->GetAssetPath().string();
-		int strLength = static_cast<int>(meshPath.length());
-		unsigned int id = i.GetID();
-
-		file.write((char*)&id,sizeof(id));
-		file.write((char*)&position,sizeof(position));
-		file.write((char*)&strLength,sizeof(strLength));
-		file.write(&meshPath[0],strLength);
-
-		Logger::Log("Saved: " + std::to_string(id));
-	}
-	file.close();
-	return true;
-}
-
-std::vector<GameObject> LoadTest(const std::filesystem::path& path)
-{
-	std::vector<GameObject> gameObjectsToSave;
-	std::ifstream file(path.string(),std::ios_base::binary);
-	if (!file.is_open())
-	{
-		return gameObjectsToSave;
-	}
-
-	int size = 0;
-	file.read((char*)&size,sizeof(int));
-	gameObjectsToSave.resize(size);
-	Logger::Log("\n\nLoading Gameobjects " + std::to_string(size));
-
-	for (GameObject& i : gameObjectsToSave)
-	{
-		SY::UUID uuid{};
-		Vector3f position;
-		std::string meshPath;
-		int strLength = 0;
-
-		file.read((char*)&uuid,sizeof(uuid));
-		file.read((char*)&position,sizeof(position));
-
-		file.read((char*)&strLength,sizeof(strLength));
-		meshPath.resize(strLength);
-		file.read(&meshPath[0],strLength);
-
-		i = GameObject::Create();
-		auto& transform = i.AddComponent<Transform>();
-		transform.SetPosition(position);
-		i.AddComponent<cMeshRenderer>(meshPath,true);
-		i.AddComponent<cPhysXDynamicBody>();
-		Logger::Log("Loaded: " + std::to_string(uuid));
-	}
-	file.close();
-	return gameObjectsToSave;
-}
-
-void GameLauncher::GenerateNewRandomCubes()
-{
-	OPTICK_EVENT();
-	std::string arr[3] = { "Models/Cube.fbx","Models/CubeHoled.fbx","Models/SteelFloor.fbx" };
-	for (size_t i = 0; i < 10; i++)
-	{
-		constexpr float range = 50.f;
-		vectorOfGameObjects.push_back(GameObject::Create());
-		GameObject& vectorObject = vectorOfGameObjects.back();
-		vectorObject.AddComponent<cMeshRenderer>(arr[rand() % 3]);
-		auto& transform = vectorObject.AddComponent<Transform>();
-
-		Vector3f position = { RandomEngine::RandomInRange(-range,range),RandomEngine::RandomInRange(0.f,2 * range),RandomEngine::RandomInRange(-range,range) };
-		transform.SetPosition(position);
-		transform.SetScale(1.f);
-
-		vectorObject.AddComponent<cPhysXDynamicBody>();
-
-		//Logger::Log("Created: " + std::to_string(vectorObject.GetID()));
-	}
+    OPTICK_EVENT();
+    {
+        GameObject camera = GameObject::Create();
+        camera.SetName("Camera");
+        camera.AddComponent<cMeshRenderer>("Models/Camera/Camera.fbx");
+        auto &cameraComponent = camera.AddComponent<cCamera>();
+        Scene::ActiveManager().SetLastGOAsCamera();
+        cameraComponent.SetActive(true);
+        auto &transform = camera.AddComponent<Transform>();
+        transform.SetPosition(0, 30, 0);
+        transform.SetRotation(90, 0, 0);
+    }
 }
 
 void GameLauncher::Start()
 {
-	OPTICK_EVENT(); 
-	m_CustomKeyCallback.AddListener(std::bind(&GameLauncher::LocalFunction,this)); 
-#pragma region BaseSetup 
-	{
-		GameObject worldRoot = GameObject::Create();
-		Scene::ActiveManager().SetLastGOAsWorld();
-		worldRoot.SetName("WordRoot");
-		worldRoot.AddComponent<FrameStatistics>();
-		worldRoot.AddComponent<RenderMode>();
-		//worldRoot.AddComponent<Skybox>();
+    OPTICK_EVENT();
+    m_CustomKeyCallback.AddListener(std::bind(&GameLauncher::LocalFunction, this));
+#pragma region BaseSetup
+    {
+        GameObject worldRoot = GameObject::Create();
+        Scene::ActiveManager().SetLastGOAsWorld();
+        worldRoot.SetName("WordRoot");
+        // worldRoot.AddComponent<Skybox>();
 
+        auto &pLight = worldRoot.AddComponent<cLight>(eLightType::Directional);
+        pLight.SetColor("White");
+        pLight.SetPower(2.0f);
+        pLight.BindDirectionToTransform(true);
+    }
 
-		auto& transform = worldRoot.AddComponent<Transform>();
-		transform.SetRotation(80,0,0);
-		transform.SetPosition(0,5,0);
+    // Decisiontree 1
+    int actorAmount = 2;
+    int wellAmount = 2;
 
-		worldRoot.AddComponent<cMeshRenderer>("Models/Cube.fbx");
+#pragma region Collider
+    std::vector<GameObject> colliders;
+    // colliders.resize(collidersAmount);
+    auto colliderPositions = {
+        Vector3<Vector3f>(25.5f * Vector3f(1, 0, 0), Vector3f(0, 0, 0), Vector3f(1, 1, 25)),
+        Vector3<Vector3f>(25.5f * Vector3f(-1, 0, 0), Vector3f(0, 0, 0), Vector3f(1, 1, 25)),
+        Vector3<Vector3f>(25.5f * Vector3f(0, 0, 1), Vector3f(0, 0, 0), Vector3f(25, 1, 1)),
+        Vector3<Vector3f>(25.5f * Vector3f(0, 0, -1), Vector3f(0, 0, 0), Vector3f(25, 1, 1)),
+        Vector3<Vector3f>(20.f * Vector3f(0, 0, 1), Vector3f(0, 0, 0), Vector3f(1, 1, 10)),
+        Vector3<Vector3f>(20.f * Vector3f(0, 0, -1), Vector3f(0, 0, 0), Vector3f(1, 1, 10)),
+    };
 
-		auto& pLight = worldRoot.AddComponent<cLight>(eLightType::Directional);
-		pLight.SetColor("White");
-		pLight.SetPower(2.0f);
-		pLight.BindDirectionToTransform(true);
+    for (const auto &[number, transformData] : colliderPositions | std::ranges::views::enumerate)
+    {
+        // Drone
+        auto object = GameObject::Create(std::format("Wall_{}", number));
 
+        object.transform().SetPosition(transformData[0]);
+        object.transform().SetRotation(transformData[1]);
+        object.transform().SetScale(transformData[2]);
 
-		//if(gom.GetAllComponents<BackgroundColor>().empty())
-		//{
-		//	worldRoot.AddComponent<BackgroundColor>(Vector4f(1.0f,1.0f,1.0f,1.0f));
-		//}
-	}
-
-	{
-		GameObject floor = GameObject::Create();
-		floor.SetName("Floor");
-
-		auto& transform = floor.AddComponent<Transform>();
-		transform.SetPosition(0,-0.0f,0);
-		transform.SetRotation(0,0.f,0.f);
-		transform.SetScale(500.f,20.f,500.f);
-		transform.SetGizmo(false);
-		floor.SetActive(false);
-		floor.AddComponent<cMeshRenderer>("Models/Cube.fbx");
-#if PHYSX
-		auto& collider = floor.AddComponent<cCollider>();
-		collider.SetColliderType<ColliderAssetAABB>();
-		floor.AddComponent<cPhysXStaticBody>();
-#endif 
-	}
-#if true // Sponza
-	{
-		GameObject sponza = GameObject::Create();
-		sponza.SetName("Sponza");
-		sponza.AddComponent<cMeshRenderer>("Models/Sponza/Sponza.fbx");
-		//sponza.AddComponent<cMeshRenderer>("Models/Sponza/Sponza3Intel.fbx");
-		auto& transform = sponza.AddComponent<Transform>();
-		transform.SetPosition(0,0,0);
-		transform.SetScale(.01f);
-		transform.SetGizmo(false);
-	}
-#endif 
-	{
-		myCustomHandler = GameObject::Create();
-		myCustomHandler.SetName("CustomHandler");
-
-		auto& transform = myCustomHandler.AddComponent<Transform>();
-		auto& light = myCustomHandler.AddComponent<cLight>(eLightType::Point);
-		transform.SetPosition(0,5,-4);
-		light.BindDirectionToTransform(true);
-		light.SetColor("Blue");
-		light.SetPower(10);
-		light.SetIsShadowCaster(false);
-		light.SetRange(4.5f);
-	}
-
-	{
-		myCustomHandler2 = GameObject::Create();
-		myCustomHandler2.SetName("CustomHandler2");
-
-		auto& transform = myCustomHandler2.AddComponent<Transform>();
-		auto& light = myCustomHandler2.AddComponent<cLight>(eLightType::Point);
-		transform.SetPosition(0,30,4);
-		light.BindDirectionToTransform(true);
-		light.SetIsShadowCaster(false);
-		light.SetColor({ 1,.5f,.5f });
-		light.SetPower(10);
-		light.SetRange(4.5f);
-	}
-
-	{
-		GameObject buddha = GameObject::Create();
-		buddha.SetName("buddha");
-		buddha.AddComponent<cMeshRenderer>("Models/Buddha.fbx");
-		buddha.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/BuddhaMaterial.json");
-		auto& transform = buddha.AddComponent<Transform>();
-		transform.SetPosition(0,0,0);
-		transform.Rotate(0,90,0);
-		transform.SetScale(0.5f,.5f,.5f);
-		transform.SetGizmo(false);
-
-		{
-			GameObject pointLight = GameObject::Create();
-			pointLight.SetName("pointLight");
-			auto& transform1 = pointLight.AddComponent<Transform>();
-			transform1.SetPosition(-5, 1, 0);
-			pointLight.AddComponent<cLight>(eLightType::Point);
-			pointLight.transform().SetParent(buddha.transform());
-		}
-
-
-
-
-	}
-
-	
-	{
-		GameObject spotLight = GameObject::Create();
-		spotLight.SetName("spotLight");
-		spotLight.AddComponent<Transform>();
-		spotLight.AddComponent<cLight>(eLightType::Spot);
-	}
-
-	{
-		//for (int x = 0; x < 4; x++)
-		//{
-		//	for (int y = 0; y < 1; y++)
-		//	{
-		//		for (int z = 0; z < 4; z++)
-		//		{
-		//			GameObject p7 = gom.CreateGameObject();
-		//			p7.AddComponent<cMeshRenderer>("Models/L_Main.FBX");
-		//			//test3.GetComponent<cMeshRenderer>().SetMaterialPath("Materials/SteelFloor.json");
-		//			auto& transform = p7.AddComponent<Transform>();
-		//			transform.SetPosition(500.f * x,150.f + 500.f * y,500.f * z);
-		//			transform.SetRotation(90,0,0);
-		//			transform.SetGizmo(false);
-		//		}
-		//	}
-		//}
-	}
-
+        auto &mesh = object.AddComponent<cMeshRenderer>("Models/Cube.fbx");
+        mesh.SetMaterialPath("Materials/C64.json");
+        object.AddComponent<cCollider>();
+        colliders.push_back(object);
+    }
 #pragma endregion
 
-#if PHYSX 
-	if (std::filesystem::exists("GameObjectSaveFile.SaveFiles"))
-	{
-		//vectorOfGameObjects = LoadTest("GameObjectSaveFile.SaveFiles");
-	}
-	else
-	{
-		//GenerateNewRandomCubes();
-	}
-#endif
-	Logger::Log("GameLauncher start");
+#pragma region Entities
+    std::vector<GameObject> entities;
+    entities.resize(actorAmount);
+    int index = 0;
+    for (auto &obj : entities)
+    {
+        // Drone
+        obj = GameObject::Create(std::format("Entitity_{}", index));
+        auto &transform = obj.AddComponent<Transform>();
+        transform.SetPosition(RandomEngine::RandomInRange<float>(-20, 20), 0,
+                              RandomEngine::RandomInRange<float>(-20, 20));
+        transform.SetRotation(0, RandomEngine::RandomInRange(0.f, 360.f), 0);
+        obj.AddComponent<cCollider>();
+        obj.SetLayer(Layer::Entities);
+        index++;
+    }
+#pragma endregion
 
+#pragma region Healtwell
+    std::vector<GameObject> well;
+    well.resize(wellAmount); // Safety resize if we dont add more it wont realloc and span wont loose connection
+    index = 0;
+    for (auto &obj : well)
+    {
+        float x = RandomEngine::RandomInRange(-20.0f, 20.0f);
+        float z = RandomEngine::RandomInRange(-20.0f, 20.0f);
 
+        // Drone
+        obj = GameObject::Create(std::format("Well_{}", index));
+        obj.transform().SetPosition(x, 0, z);
+        obj.transform().SetRotation(90, 0, 0);
 
+        auto &mesh = obj.AddComponent<cMeshRenderer>("Models/Well.fbx");
+        mesh.SetMaterialPath("Materials/C64Well.json");
+        index++;
+    }
+#pragma endregion
 
+    auto colliderPollingStation = std::make_shared<MultipleTargets_PollingStation>(colliders);
+    auto formationPollingStation = std::make_shared<MultipleTargets_PollingStation>(entities);
+    auto wellPollingStation = std::make_shared<MultipleTargets_PollingStation>(well);
+
+    AIPollingManager::Get().AddStation("Healing", wellPollingStation);
+    AIPollingManager::Get().AddStation("Colliders", colliderPollingStation);
+    AIPollingManager::Get().AddStation("Targets", formationPollingStation);
+
+    //{ // DecisionTree
+    //    auto &actor = entities[0].AddComponent<cActor>();
+    //    entities[0].SetName("DecisionTreeActor");
+    //    actor.SetController(new DecisionTreeController());
+    //    auto &mesh = entities[0].AddComponent<cMeshRenderer>("Models/C64Wanderer.fbx");
+    //    mesh.SetMaterialPath("Materials/C64Wanderer.json");
+    //}
+
+    { // StateMachine
+        auto &actor = entities[0].AddComponent<cActor>();
+        entities[0].SetName("StateMachineActor");
+        actor.SetController(new StateMachineController());
+        auto &mesh = entities[0].AddComponent<cMeshRenderer>("Models/C64Seeker.fbx");
+        mesh.SetMaterialPath("Materials/C64Seeker.json");
+    }
+
+    { // BehaviourTree
+        auto &actor = entities[1].AddComponent<cActor>();
+        entities[1].SetName("BehaviourTreeActor");
+
+        // clang-format off
+		using namespace BrainTree; 
+		BehaviorTree 	tree =  Builder()
+			.composite<Selector>("MainSelector")
+				.decorator<BehaviourTreeAICommands::IsDead>() 
+					.leaf<BehaviourTreeAICommands::DeathSpin>()
+				.end()
+				.decorator<BehaviourTreeAICommands::IsHealthy>()
+				    .composite<Selector>("BattleSelector") 
+					    .composite<Sequence>("BattleSequencer")
+					        .leaf<BehaviourTreeAICommands::IsTargetAlive>()
+					        .leaf<BehaviourTreeAICommands::IsTargetInRange>()
+                                .composite<Sequence>("CanFireSequencer") 
+						            .leaf<BehaviourTreeAICommands::AlignToTarget>()
+						            .leaf<BehaviourTreeAICommands::IsTargetInSight>()
+					            .end()
+					        .leaf<BehaviourTreeAICommands::ShootAtTarget>()
+                        .end()
+					    .composite<Sequence>("CanMoveFreelySequence")
+					        .decorator<BehaviourTreeAICommands::IsFullyHealed>()
+						        .leaf<BehaviourTreeAICommands::MoveFreely>()
+				            .end()
+					    .end()
+					.end()
+				.end()
+				.leaf<BehaviourTreeAICommands::Retreat>()
+			.end()
+			.build();
+        // clang-format on
+
+        actor.SetController(new BehaviorTreeController(tree));
+        auto &mesh = entities[1].AddComponent<cMeshRenderer>("Models/C64.fbx");
+        mesh.SetMaterialPath("Materials/C64Separatist.json");
+    }
+    Logger::Log("GameLauncher start");
+
+#pragma endregion
 }
 
 void GameLauncher::Update(float delta)
 {
-	OPTICK_EVENT();
+    OPTICK_EVENT();
 
-	if (Input::IsKeyPressed(static_cast<unsigned>(Keys::I)))
-	{
-		Logger::Log(std::to_string(1.f / delta));
-	}
-	OPTICK_EVENT();
-	AIEventManager::Instance().Update();
-	if (Input::IsKeyPressed(static_cast<int>(Keys::K)))
-	{
-		GraphicsEngine::Get().GetSettings().DebugRenderer_Active = !GraphicsEngine::Get().GetSettings().DebugRenderer_Active;
-	}
+    if (Input::IsKeyPressed(static_cast<unsigned>(Keys::I)))
+    {
+        Logger::Log(std::to_string(1.f / delta));
+    }
+    OPTICK_EVENT();
+    AIEventManager::Instance().Update();
+    if (Input::IsKeyPressed(static_cast<int>(Keys::K)))
+    {
+        GraphicsEngine::Get().GetSettings().DebugRenderer_Active =
+            !GraphicsEngine::Get().GetSettings().DebugRenderer_Active;
+    }
 
-	if (Input::IsKeyPressed(static_cast<int>(Keys::F5)))
-	{
-		ApplicationState::filter = DebugFilter::NoFilter;
-	}
+    if (Input::IsKeyPressed(static_cast<int>(Keys::F5)))
+    {
+        ApplicationState::filter = DebugFilter::NoFilter;
+    }
 
-	if (Input::IsKeyPressed(static_cast<int>(Keys::F6)))
-	{
-		ApplicationState::filter = static_cast<DebugFilter>((static_cast<int>(ApplicationState::filter) + 1) % static_cast<int>(DebugFilter::count));
-	}
-#if PHYSX
-	/*if (Input::IsKeyPressed((int)Keys::F4))
-	{
-		while (vectorOfGameObjects.size())
-		{
-			GameObjectManager::Get().DeleteGameObject(vectorOfGameObjects.back());
-			vectorOfGameObjects.pop_back();
-		}
-		GameObjectManager::Get().CustomOrderUpdate();
-	}
+    if (Input::IsKeyPressed(static_cast<int>(Keys::F6)))
+    {
+        ApplicationState::filter = static_cast<DebugFilter>((static_cast<int>(ApplicationState::filter) + 1) %
+                                                            static_cast<int>(DebugFilter::count));
+    }
 
-	if (Input::IsKeyPressed((int)Keys::F5))
-	{
-		SaveTest(vectorOfGameObjects,"GameObjectSaveFile.SaveFiles");
-	}
+    if (Input::IsKeyPressed(Keys::P))
+    {
+        m_CustomKeyCallback.Invoke();
+    }
 
-	if (Input::IsKeyPressed((int)Keys::F6))
-	{
-		if (std::filesystem::exists("GameObjectSaveFile.SaveFiles"))
-		{
-			while (vectorOfGameObjects.size())
-			{
-				GameObjectManager::Get().DeleteGameObject(vectorOfGameObjects.back());
-				vectorOfGameObjects.pop_back();
-			}
-			GameObjectManager::Get().CustomOrderUpdate();
-			vectorOfGameObjects = LoadTest("GameObjectSaveFile.SaveFiles");
-		}
-	}
-
-	if (Input::IsKeyPressed((int)Keys::R))
-	{
-		GenerateNewRandomCubes();
-	}*/
-#endif
-
-
-	{
-		auto& transform = myCustomHandler.GetComponent<Transform>();
-		const auto position = transform.GetPosition();
-		if (position.x > 12.f)
-		{
-			direction = -1.f;
-		}
-		if (position.x < -12.f)
-		{
-			direction = 1.f;
-		}
-		transform.Move(5.f * direction * delta,0,0);
-	}
-
-	{
-		auto& transform = myCustomHandler2.GetComponent<Transform>();
-		auto position = transform.GetPosition();
-		if (position.x > 12.f)
-		{
-			direction2 = -1.f;
-		}
-		if (position.x < -12.f)
-		{
-			direction2 = 1.f;
-		}
-		transform.Move(5.f * direction * delta,0,0);
-	}
-
-
-	if (Input::IsKeyPressed(Keys::P))
-	{
-		m_CustomKeyCallback.Invoke();
-	}
-
-
-	Transform& pLight = Scene::ActiveManager().GetWorldRoot().GetComponent<Transform>();
-	constexpr float rotSpeed = 25.f;
-	if (Input::IsKeyHeld(static_cast<int>(Keys::NUMPAD6)))
-	{
-		pLight.Rotate(rotSpeed * delta,0,0);
-	}
-	if (Input::IsKeyHeld(static_cast<int>(Keys::NUMPAD3)))
-	{
-		pLight.Rotate(-rotSpeed * delta,0,0);
-	}
+    Transform &pLight = Scene::ActiveManager().GetWorldRoot().GetComponent<Transform>();
+    constexpr float rotSpeed = 25.f;
+    if (Input::IsKeyHeld(static_cast<int>(Keys::NUMPAD6)))
+    {
+        pLight.Rotate(rotSpeed * delta, 0, 0);
+    }
+    if (Input::IsKeyHeld(static_cast<int>(Keys::NUMPAD3)))
+    {
+        pLight.Rotate(-rotSpeed * delta, 0, 0);
+    }
 }
 
 void GameLauncher::LocalFunction()
 {
-	Logger::Log("Local Function Called");
+    Logger::Log("Local Function Called");
 }

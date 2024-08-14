@@ -1,16 +1,21 @@
 
 {
     "MaterialBuffer": {
-        "albedoColor":  [0,0,1,1] ,
+        "albedoColor":  [1, 0.840, 0, 1] ,
         "UVTiling": [1.0,1.0],
         "NormalStrength" : 1.0,
         "Shine" : 50
     },
     "Textures" : [
         {
-            "TextureName":  "",
-            "TexturePath":  "",
+            "TextureName":  "test1",
+            "TexturePath":  "Textures/Default/DefaultTile.dds",
             "TextureType":  0
+        },
+	{
+            "TextureName":  "test2",
+            "TexturePath":  "Textures/Default/DefaultMaterial.dds",
+            "TextureType":  3
         }
     ]
 }

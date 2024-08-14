@@ -6,6 +6,7 @@
 class cPhysXDynamicBody : public Component
 {
 public:
+	MYLIB_REFLECTABLE();
 	cPhysXDynamicBody(const SY::UUID anOwnerId,GameObjectManager* aManager);
 
 

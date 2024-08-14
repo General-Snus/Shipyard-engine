@@ -29,7 +29,7 @@ StateMachineController::StateMachineController()
 
 bool StateMachineController::Update(GameObject input)
 {
-	myMachine.Update(std::move(input));
+	myMachine.Update(input);
 
 	auto& physicsComponent = input.GetComponent<cPhysics_Kinematic>();
 	auto& transform = input.GetComponent<Transform>();
@@ -47,7 +47,7 @@ bool StateMachineController::Update(GameObject input)
 }
 
 bool StateMachineController::ComponentRequirement(GameObject input)
-{
+{	
 	if(!input.TryGetComponent<cPhysics_Kinematic>())
 	{
 		auto& phy = input.AddComponent<cPhysics_Kinematic>();

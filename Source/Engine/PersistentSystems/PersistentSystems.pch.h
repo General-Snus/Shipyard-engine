@@ -9,10 +9,14 @@
 
 #define NOMINMAX
 // add headers that you want to pre-compile here
+#include <iostream>
+#include <string>
 #include <vector>
-#include "ArtificialInteligence/AICommands/AICommands.h" 
+
+#include "ArtificialInteligence/AICommands/AICommands.h"
 #include "Physics/PhysXInterpeter.h"
 #include "Physics/Raycast.h"
+#include "Scene.h"
 #include <Tools/Logging/Logging.h>
 #include <Tools/Reflection/refl.hpp>
-#endif //PERSISTENT_PCH_H
+#endif // PERSISTENT_PCH_H

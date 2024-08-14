@@ -264,6 +264,7 @@
     <ClInclude Include="Enums.h" />
     <ClInclude Include="Objects\AI\AgentSystem\AIPollingManager.h" />
     <ClInclude Include="AssetManagerUtills.hpp" />
+    <ClInclude Include="Objects\AI\AgentSystem\BehaviourTree\BrainTree.h" />
     <ClInclude Include="Objects\BaseAssets\ColliderAsset.h" />
     <ClInclude Include="ComponentSystem\Components\Collider.h" />
     <ClInclude Include="ComponentSystem\Components\ActorSystem\cActor.h" />
@@ -325,6 +326,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Objects\AI\AgentSystem\BehaviourTree\BrainTree.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Source\AIPollingManager.cpp" />
     <ClCompile Include="AssetManagerUtills.cpp" />
     <ClCompile Include="Objects\BaseAssets\Source\ColliderAsset.cpp" />
@@ -384,6 +386,7 @@
     <ClCompile Include="Reflection\ReflectionTemplate.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="cpp.hint" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

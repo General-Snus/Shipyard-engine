@@ -8,9 +8,14 @@
     },
     "Textures" : [
         {
-            "TextureName":  "",
-            "TexturePath":  "",
+            "TextureName":  "test1",
+            "TexturePath":  "Textures/Default/DefaultTile.dds",
             "TextureType":  0
+        },
+	{
+            "TextureName":  "test2",
+            "TexturePath":  "Textures/Default/DefaultMaterial.dds",
+            "TextureType":  3
         }
     ]
 }

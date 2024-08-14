@@ -3,20 +3,20 @@
 
 class ProjectileComponent : public Component
 {
-public:
-	ProjectileComponent(const SY::UUID anOwnerID,GameObjectManager* aManager);
-	~ProjectileComponent() override = default;
-	void Init() override;
-	void Update() override;
+  public:
+	  MYLIB_REFLECTABLE();
+    ProjectileComponent(const SY::UUID anOwnerID, GameObjectManager *aManager);
+    ~ProjectileComponent() override = default;
+    void Init() override;
+    void Update() override;
 
+    void InitWithValues(float aLifetime, GameObject aCreator);
 
-	void InitWithValues(float aLifetime,GameObject aCreator);
+    void CollidedWith(const SY::UUID aGameObjectID) override;
 
-	void CollidedWith(const SY::UUID aGameObjectID) override;
-private:
-	float lifetime;
-	GameObject Creator;
+  private:
+    float lifetime;
+    GameObject Creator;
 };
-
 
 REFL_AUTO(type(ProjectileComponent))
