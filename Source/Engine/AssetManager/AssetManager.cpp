@@ -2,6 +2,7 @@
 
 #include "Engine/AssetManager/Objects/BaseAssets/MasterIncludeAssets.h"
 
+#include "Objects/BaseAssets/GraphAsset.h"
 #include <DirectX/Shipyard/GPU.h>
 #include <Tools/Utilities/Game/Timer.h>
 
@@ -66,6 +67,10 @@ std::string AssetManager::AssetType(const std::filesystem::path &path)
     {
         return refl::reflect<ShipyardShader>().name.str();
     }
+    else if (extension == ".graph")
+    {
+        return refl::reflect<GraphAsset>().name.str();
+    }
     else if (extension == ".png" || extension == ".dds" || extension == ".hdr")
     {
         return refl::reflect<TextureHolder>().name.str();
@@ -101,6 +106,11 @@ std::shared_ptr<AssetBase> AssetManager::TryLoadAsset(const std::filesystem::pat
     if (assetTypeByExtension == refl::reflect<Skeleton>().name.str())
     {
         return Get().LoadAsset<Skeleton>(path);
+    }
+
+    if (assetTypeByExtension == refl::reflect<GraphAsset>().name.str())
+    {
+        return Get().LoadAsset<GraphAsset>(path);
     }
 
     if (assetTypeByExtension == refl::reflect<TextureHolder>().name.str())

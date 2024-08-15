@@ -1,15 +1,18 @@
 #pragma once
-#include <Tools/Utilities/System/SingletonTemplate.h>  
 #include "ScriptGraphEditor/ScriptGraphEditor.h"
-namespace Graph {
-	class GraphTool : public Singleton<GraphTool> {
-	public:
-		friend class Singleton<GraphTool>;
+#include <Tools/Utilities/System/SingletonTemplate.h>
+namespace Graph
+{
+class GraphTool : public Singleton<GraphTool>
+{
+  public:
+    friend class Singleton<GraphTool>;
 
-		std::shared_ptr<ScriptGraphEditor> GetScriptingEditor();
+    std::shared_ptr<ScriptGraphEditor> OpenScriptingEditor(const std::filesystem::path &AssetPath);
 
-	private:
-		GraphTool();
-		~GraphTool();
-	};
-}
+  private:
+    std::unordered_map<std::filesystem::path, std::shared_ptr<ScriptGraphEditor>> myScriptEditors;
+    GraphTool();
+    ~GraphTool();
+};
+} // namespace Graph

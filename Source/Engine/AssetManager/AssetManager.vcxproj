@@ -262,6 +262,8 @@
     <ClInclude Include="ComponentSystem\Components\Physics\cPhysXStaticBody.h" />
     <ClInclude Include="ComponentSystem\MasterIncludeComponent.h" />
     <ClInclude Include="Enums.h" />
+    <ClInclude Include="Objects\BaseAssets\GraphAsset.h" />
+    <ClInclude Include="ComponentSystem\Components\GraphComponent.h" />
     <ClInclude Include="Objects\AI\AgentSystem\AIPollingManager.h" />
     <ClInclude Include="AssetManagerUtills.hpp" />
     <ClInclude Include="Objects\AI\AgentSystem\BehaviourTree\BrainTree.h" />
@@ -329,6 +331,7 @@
     <ClCompile Include="Objects\AI\AgentSystem\BehaviourTree\BrainTree.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Source\AIPollingManager.cpp" />
     <ClCompile Include="AssetManagerUtills.cpp" />
+    <ClCompile Include="Objects\BaseAssets\Source\GraphAsset.cpp" />
     <ClCompile Include="Objects\BaseAssets\Source\ColliderAsset.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\Collider.cpp" />
     <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\cActor.cpp" />

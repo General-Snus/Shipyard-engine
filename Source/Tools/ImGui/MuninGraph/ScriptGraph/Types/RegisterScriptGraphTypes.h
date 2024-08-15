@@ -6,123 +6,131 @@
 
 #pragma once
 
-#include "imgui.h"
-#include "imgui_internal.h"
-#include "misc/cpp/imgui_stdlib.h" 
+#include <Tools/ImGui/ImGui/imgui.h>
+#include <Tools/ImGui/ImGui/imgui_internal.h>
+#include <Tools/ImGui/ImGui/misc/cpp/imgui_stdlib.h>
 
 #include "ScriptGraph/ScriptGraphTypes.h"
 
-BeginDataTypeHandler(Float,float,GraphColor(156,246,60,255),true)
+BeginDataTypeHandler(Float, float, GraphColor(156, 246, 60, 255), true)
 
-void RenderConstructWidget(const std::string& aContainerUUID,void* aDataPtr,const ScriptGraphType& aTypeInfo) override
+    void RenderConstructWidget(const std::string &aContainerUUID, void *aDataPtr,
+                               const ScriptGraphType &aTypeInfo) override
 {
-	aTypeInfo;
-	const float y = ImGui::GetCursorPosY();
-	ImGui::SetCursorPosY(y - 2);
-	const ImVec2 inputSize = ImGui::CalcTextSize("0.0000");
-	ImGui::SetNextItemWidth(inputSize.x);
-	ImGui::InputFloat(aContainerUUID.c_str(),static_cast<float*>(aDataPtr),0,0,"%.1f");
+    aTypeInfo;
+    const float y = ImGui::GetCursorPosY();
+    ImGui::SetCursorPosY(y - 2);
+    const ImVec2 inputSize = ImGui::CalcTextSize("0.0000");
+    ImGui::SetNextItemWidth(inputSize.x);
+    ImGui::InputFloat(aContainerUUID.c_str(), static_cast<float *>(aDataPtr), 0, 0, "%.1f");
 }
 
-std::string ToString(const void* aDataPtr,const ScriptGraphType& aTypeInfo) const override
+std::string ToString(const void *aDataPtr, const ScriptGraphType &aTypeInfo) const override
 {
-	aTypeInfo;
-	return std::to_string(*static_cast<const float*>(aDataPtr));
+    aTypeInfo;
+    return std::to_string(*static_cast<const float *>(aDataPtr));
 }
 EndDataTypeHandler
 
-BeginDataTypeHandler(Bool,bool,GraphColor(149,0,0,255),true)
+BeginDataTypeHandler(Bool, bool, GraphColor(149, 0, 0, 255), true)
 
-void RenderConstructWidget(const std::string& aContainerUUID,void* aDataPtr,const ScriptGraphType& aTypeInfo) override
+    void RenderConstructWidget(const std::string &aContainerUUID, void *aDataPtr,
+                               const ScriptGraphType &aTypeInfo) override
 {
-	aTypeInfo;
-	const float y = ImGui::GetCursorPosY(); ImGui::SetCursorPosY(y - 2); ImGui::Checkbox(aContainerUUID.c_str(),static_cast<bool*>(aDataPtr));
+    aTypeInfo;
+    const float y = ImGui::GetCursorPosY();
+    ImGui::SetCursorPosY(y - 2);
+    ImGui::Checkbox(aContainerUUID.c_str(), static_cast<bool *>(aDataPtr));
 }
 
-std::string ToString(const void* aDataPtr,const ScriptGraphType& aTypeInfo) const override
+std::string ToString(const void *aDataPtr, const ScriptGraphType &aTypeInfo) const override
 {
-	aTypeInfo;
-	return *static_cast<const bool*>(aDataPtr) ? "True" : "False";
+    aTypeInfo;
+    return *static_cast<const bool *>(aDataPtr) ? "True" : "False";
 }
 EndDataTypeHandler
 
 // Example type with custom de/serializer.
-BeginDataTypeHandler(String,std::string,GraphColor(250,0,208,255),true)
+BeginDataTypeHandler(String, std::string, GraphColor(250, 0, 208, 255), true)
 
-void RenderConstructWidget(const std::string& aContainerUUID,void* aDataPtr,const ScriptGraphType& aTypeInfo) override
+    void RenderConstructWidget(const std::string &aContainerUUID, void *aDataPtr,
+                               const ScriptGraphType &aTypeInfo) override
 {
-	aTypeInfo;
-	ImGui::PushItemWidth(170);
-	ImGui::InputText(aContainerUUID.c_str(),static_cast<std::string*>(aDataPtr));
-	ImGui::PopItemWidth();
+    aTypeInfo;
+    ImGui::PushItemWidth(170);
+    ImGui::InputText(aContainerUUID.c_str(), static_cast<std::string *>(aDataPtr));
+    ImGui::PopItemWidth();
 }
 
-std::string ToString(const void* aDataPtr,const ScriptGraphType& aTypeInfo) const override
+std::string ToString(const void *aDataPtr, const ScriptGraphType &aTypeInfo) const override
 {
-	aTypeInfo;
-	return *static_cast<const std::string*>(aDataPtr);
+    aTypeInfo;
+    return *static_cast<const std::string *>(aDataPtr);
 }
 
-void SerializeData(const void* aDataPtr,const ScriptGraphType& aTypeInfo,std::vector<uint8_t>& outData) const override
+void SerializeData(const void *aDataPtr, const ScriptGraphType &aTypeInfo, std::vector<uint8_t> &outData) const override
 {
-	aTypeInfo;
-	// Strings are "fun" :P
-	// We assume that aDataPtr has a null terminator at the end...
-	const std::string* aString = static_cast<const std::string*>(aDataPtr);
+    aTypeInfo;
+    // Strings are "fun" :P
+    // We assume that aDataPtr has a null terminator at the end...
+    const std::string *aString = static_cast<const std::string *>(aDataPtr);
 
-	// We can't trust the size in typeinfo for the size of a string data block.
-	// Since we're not wstring we're just string length * sizeof(char) which is string length.
-	outData.resize(aString->length());
-	memcpy_s(outData.data(),outData.capacity(),aString->c_str(),aString->length());
+    // We can't trust the size in typeinfo for the size of a string data block.
+    // Since we're not wstring we're just string length * sizeof(char) which is string length.
+    outData.resize(aString->length());
+    memcpy_s(outData.data(), outData.capacity(), aString->c_str(), aString->length());
 }
-void DeserializeData(const std::vector<uint8_t>& inData,const ScriptGraphType& aTypeInfo,void* outDataPtr) const override
+void DeserializeData(const std::vector<uint8_t> &inData, const ScriptGraphType &aTypeInfo,
+                     void *outDataPtr) const override
 {
-	aTypeInfo;
-	// And when we build a string back from a vector we need to make sure it's sized properly.
-	// outDataPtr is already initialized as a pointer of the correct type.
-	if(!inData.empty())
-	{
-		std::string* aString = static_cast<std::string*>(outDataPtr);
-		const std::string dataString = std::string(inData.begin(),inData.end());
-		*aString = dataString;
-	}
-}
-EndDataTypeHandler
-
-BeginDataTypeHandler(Integer,int,GraphColor(14,224,161,255),true)
-
-void RenderConstructWidget(const std::string& aContainerUUID,void* aDataPtr,const ScriptGraphType& aTypeInfo) override
-{
-	aTypeInfo;
-	const float y = ImGui::GetCursorPosY();
-	ImGui::SetCursorPosY(y - 2);
-	const ImVec2 inputSize = ImGui::CalcTextSize("1000");
-	ImGui::SetNextItemWidth(inputSize.x);
-	ImGui::InputInt(aContainerUUID.c_str(),static_cast<int*>(aDataPtr),0,0);
-}
-
-std::string ToString(const void* aDataPtr,const ScriptGraphType& aTypeInfo) const override
-{
-	aTypeInfo;
-	return std::to_string(*static_cast<const int*>(aDataPtr));
+    aTypeInfo;
+    // And when we build a string back from a vector we need to make sure it's sized properly.
+    // outDataPtr is already initialized as a pointer of the correct type.
+    if (!inData.empty())
+    {
+        std::string *aString = static_cast<std::string *>(outDataPtr);
+        const std::string dataString = std::string(inData.begin(), inData.end());
+        *aString = dataString;
+    }
 }
 EndDataTypeHandler
 
-BeginDataTypeHandler(UnsignedInteger,unsigned int,GraphColor(14,224,161,255),true)
+BeginDataTypeHandler(Integer, int, GraphColor(14, 224, 161, 255), true)
 
-void RenderConstructWidget(const std::string& aContainerUUID,void* aDataPtr,const ScriptGraphType& aTypeInfo) override
+    void RenderConstructWidget(const std::string &aContainerUUID, void *aDataPtr,
+                               const ScriptGraphType &aTypeInfo) override
 {
-	aTypeInfo;
-	const float y = ImGui::GetCursorPosY();
-	ImGui::SetCursorPosY(y - 2);
-	const ImVec2 inputSize = ImGui::CalcTextSize("1000");
-	ImGui::SetNextItemWidth(inputSize.x);
-	ImGui::InputScalar(aContainerUUID.c_str(),ImGuiDataType_U32,aDataPtr);
+    aTypeInfo;
+    const float y = ImGui::GetCursorPosY();
+    ImGui::SetCursorPosY(y - 2);
+    const ImVec2 inputSize = ImGui::CalcTextSize("1000");
+    ImGui::SetNextItemWidth(inputSize.x);
+    ImGui::InputInt(aContainerUUID.c_str(), static_cast<int *>(aDataPtr), 0, 0);
 }
 
-std::string ToString(const void* aDataPtr,const ScriptGraphType& aTypeInfo) const override
+std::string ToString(const void *aDataPtr, const ScriptGraphType &aTypeInfo) const override
 {
-	aTypeInfo;
-	return std::to_string(*static_cast<const unsigned int*>(aDataPtr));
+    aTypeInfo;
+    return std::to_string(*static_cast<const int *>(aDataPtr));
+}
+EndDataTypeHandler
+
+BeginDataTypeHandler(UnsignedInteger, unsigned int, GraphColor(14, 224, 161, 255), true)
+
+    void RenderConstructWidget(const std::string &aContainerUUID, void *aDataPtr,
+                               const ScriptGraphType &aTypeInfo) override
+{
+    aTypeInfo;
+    const float y = ImGui::GetCursorPosY();
+    ImGui::SetCursorPosY(y - 2);
+    const ImVec2 inputSize = ImGui::CalcTextSize("1000");
+    ImGui::SetNextItemWidth(inputSize.x);
+    ImGui::InputScalar(aContainerUUID.c_str(), ImGuiDataType_U32, aDataPtr);
+}
+
+std::string ToString(const void *aDataPtr, const ScriptGraphType &aTypeInfo) const override
+{
+    aTypeInfo;
+    return std::to_string(*static_cast<const unsigned int *>(aDataPtr));
 }
 EndDataTypeHandler

@@ -23,6 +23,7 @@ bool Material::CreateJson(const DataMaterial &data, const std::filesystem::path 
 
         js["NormalStrength"] = data.materialData.NormalStrength;
         js["Shine"] = data.materialData.Shine;
+        js["Roughness"] = data.materialData.Roughness;
     }
 
     {
@@ -78,16 +79,16 @@ void Material::Init()
 
     if (std::filesystem::exists(AssetPath) && AssetPath.extension() == ".json")
     {
-
-        std::ifstream file(AssetPath);
-        assert(file.is_open());
-
-        nlohmann::json json = nlohmann::json::parse(file);
-        file.close();
-        isLoadedComplete = true; // will be set to faalse if failing any where, bad but im not gonna be bothered
-
+        nlohmann::json json;
         try
         {
+            std::ifstream file(AssetPath);
+            assert(file.is_open());
+
+            json = nlohmann::json::parse(file);
+            file.close();
+            isLoadedComplete = true; // will be set to faalse if failing any where, bad but im not gonna be bothered
+
             nlohmann::json &js = json["MaterialBuffer"];
 
             data.materialData.albedoColor[0] = js["albedoColor"][0];
@@ -99,6 +100,7 @@ void Material::Init()
             data.materialData.UVTiling[1] = js["UVTiling"][1];
 
             data.materialData.NormalStrength = js["NormalStrength"];
+            data.materialData.Roughness = js["Roughness"];
             data.materialData.Shine = js["Shine"];
         }
         catch (const std::exception &e)

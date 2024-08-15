@@ -405,13 +405,20 @@ bool GPU::LoadTextureFromMemory(Texture *outTexture, const std::filesystem::path
     if (generateMips && resourceUpload.IsSupportedForGenerateMips(outTexture->m_Resource->GetDesc().Format))
     {
         outTexture->SetView(ViewType::SRV);
-        resourceUpload.Transition(outTexture->m_Resource.Get(), D3D12_RESOURCE_STATE_COPY_DEST,
-                                  D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+        /*  resourceUpload.Transition(outTexture->m_Resource.Get(), D3D12_RESOURCE_STATE_COMMON,
+                                    D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);*/
         resourceUpload.GenerateMips(outTexture->m_Resource.Get());
     }
     const auto uploadResourcesFinished = resourceUpload.End(m_DirectCommandQueue->GetCommandQueue().Get());
     uploadResourcesFinished.wait();
 
+    const auto width = outTexture->m_Resource->GetDesc().Width;
+    const auto height = outTexture->m_Resource->GetDesc().Height;
+    outTexture->m_Rect = D3D12_RECT(0, 0, static_cast<uint32_t>(width), height);
+    outTexture->m_Viewport = D3D12_VIEWPORT(0, 0, static_cast<FLOAT>(width), static_cast<FLOAT>(height), 0, 1);
+    outTexture->m_Resource->SetName(aName.wstring().c_str());
+
+    outTexture->CheckFeatureSupport();
     outTexture->SetView(ViewType::SRV);
     return true;
 }

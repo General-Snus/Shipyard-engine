@@ -1,0 +1,27 @@
+
+{
+    "MaterialBuffer": {
+        "albedoColor":  [1.0,0.8,0.8,1] ,
+        "UVTiling": [0.1,0.1],
+        "NormalStrength" : 0.0,
+        "Roughness": 0.5,
+        "Shine" : 50
+    },
+    "Textures" : [
+        {
+            "TextureName":  "ABababa",
+            "TexturePath":  "Default/DefaultMaterial.dds",
+            "TextureType":  0
+        },
+        {
+            "TextureName":  "ABababa",
+            "TexturePath":  "Default/DefaultNormal.dds",
+            "TextureType":  1
+        } ,
+        {
+            "TextureName":  "ABababa",
+            "TexturePath":  "Default/DefaultMaterial.dds",
+            "TextureType":  2
+        }  
+    ]
+}

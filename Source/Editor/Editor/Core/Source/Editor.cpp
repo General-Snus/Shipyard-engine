@@ -45,6 +45,7 @@
 #include <CommCtrl.h>
 #include <Editor/Editor/Commands/CommandBuffer.h>
 #include <Editor/Editor/Commands/SceneAction.h>
+#include <Editor/Editor/Windows/EditorWindows/ChainGraph/GraphTool.h>
 #include <Editor/Editor/Windows/EditorWindows/CustomFuncWindow.h>
 #include <Editor/Editor/Windows/EditorWindows/History.h>
 #include <Tools/ImGui/ImGui/Font/IconsFontAwesome5.h>
@@ -385,11 +386,7 @@ bool Editor::Initialize(HWND aHandle)
     myGameLauncher.Init();
     myGameLauncher.Start();
     HideSplashScreen();
-
-#if UseScriptGraph
-    ScriptEditor = Graph::GraphTool::Get().GetScriptingEditor();
-    ScriptEditor->Init();
-#endif
+     
 
     m_Callbacks[EditorCallback::ObjectSelected] = Event();
     m_Callbacks[EditorCallback::WM_DropFile] = Event();
@@ -510,12 +507,6 @@ void Editor::UpdateImGui()
             CommandBuffer::MainEditorCommandBuffer().Undo();
         }
     }
-
-#if UseScriptGraph
-    const float delta = Timer::GetInstance().GetDeltaTime();
-    ScriptEditor->Update(delta);
-    ScriptEditor->Render();
-#endif
 }
 
 void Editor::CheckSelectedForRemoved()

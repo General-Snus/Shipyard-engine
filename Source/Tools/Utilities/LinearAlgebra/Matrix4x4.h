@@ -44,6 +44,7 @@ template <class T = float> class Matrix4x4
     // Static function for creating a transpose of a matrix.
     static Matrix4x4<T> Transpose(const Matrix4x4<T> &aMatrixToTranspose);
     static Matrix4x4<T> GetFastInverse(const Matrix4x4<T> &aTransform);
+    static Matrix4x4<T> GetFastInverse(const Matrix4x4<T> &aTransform, const Vector3<T> &scaling);
     static Vector3<T> ReadPosition(const Matrix4x4<T> &aMatrix);
 
     static Matrix4x4<T> LookAt(const Vector3<T> &aFrom, const Vector3<T> &aTarget, const Vector3<T> &anUp);
@@ -317,6 +318,26 @@ template <class T> inline Matrix4x4<T> Matrix4x4<T>::GetFastInverse(const Matrix
     Rotation = Rotation.Transpose(Rotation);
 
     return Transform * Rotation; // Version 1 no scaling
+}
+
+template <class T>
+inline Matrix4x4<T> Matrix4x4<T>::GetFastInverse(const Matrix4x4<T> &aTransform, const Vector3<T> &scaling)
+{
+    Matrix4x4<T> Rotation = aTransform;
+    Matrix4x4<T> Transform;
+    for (short i = 1; i <= 3; i++)
+    {
+        Rotation(4, i) = 0;
+        Transform(4, i) = -aTransform(4, i);
+    }
+    Rotation = Rotation.Transpose(Rotation);
+
+    Matrix4x4<T> Scale;
+    Scale(1, 1) = std::pow(1 / scaling.x, 2);
+    Scale(2, 2) = std::pow(1 / scaling.y, 2);
+    Scale(3, 3) = std::pow(1 / scaling.z, 2);
+
+    return Transform * Rotation * Scale; // Version 1 no scaling
 }
 template <class T> inline Vector3<T> Matrix4x4<T>::ReadPosition(const Matrix4x4<T> &aMatrix)
 {

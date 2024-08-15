@@ -183,6 +183,12 @@
     <ClInclude Include="Objects\AI\AgentSystem\BehaviourTree\BrainTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ComponentSystem\Components\GraphComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\BaseAssets\GraphAsset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssetManager.pch.cpp">
@@ -336,6 +342,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Objects\AI\AgentSystem\BehaviourTree\BrainTree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\BaseAssets\Source\GraphAsset.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

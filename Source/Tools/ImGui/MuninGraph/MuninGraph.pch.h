@@ -9,37 +9,37 @@
 
 // add headers that you want to pre-compile here
 #include "MuninGraph.h"
-#include "imgui_node_editor.h"
-#include "imgui.h"
-#include "imgui_internal.h"
-#include "backends/imgui_impl_dx11.h"
-#include "backends/imgui_impl_win32.h"
+#include "Tools/ImGui/ImGui/backends/imgui_impl_dx11.h"
+#include "Tools/ImGui/ImGui/backends/imgui_impl_win32.h"
+#include "Tools/ImGui/ImGui/imgui.h"
+#include "Tools/ImGui/ImGui/imgui_internal.h"
+#include "Tools/ImGui/ImGui/imgui_node_editor.h"
 //
-//namespace ImNodeEd = ax::NodeEditor;
+// namespace ImNodeEd = ax::NodeEditor;
 //
-//inline ImVec2 operator+(const ImVec2& A, const ImVec2& B)
+// inline ImVec2 operator+(const ImVec2& A, const ImVec2& B)
 //{
 //	return { A.x + B.x, A.y + B.y };
 //}
 //
-//inline ImVec2 operator-(const ImVec2& A, const ImVec2& B)
+// inline ImVec2 operator-(const ImVec2& A, const ImVec2& B)
 //{
 //	return { A.x - B.x, A.y - B.y };
 //}
 //
-//inline ImVec2 operator*(const ImVec2& A, const ImVec2& B)
+// inline ImVec2 operator*(const ImVec2& A, const ImVec2& B)
 //{
 //	return { A.x * B.x, A.y * B.y };
 //}
 //
-//inline ImVec2 operator*(const ImVec2& A, const float S)
+// inline ImVec2 operator*(const ImVec2& A, const float S)
 //{
 //	return { A.x * S, A.y * S };
 //}
 //
-//inline ImVec4 operator/(const ImVec4& A, const float S)
+// inline ImVec4 operator/(const ImVec4& A, const float S)
 //{
 //	return { A.x / S, A.y / S, A.z / S, A.w / S };
 //}
 
-#endif //MUNIN_GRAPH_PCH_H
+#endif // MUNIN_GRAPH_PCH_H

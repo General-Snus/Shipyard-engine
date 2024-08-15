@@ -7,11 +7,13 @@
 
 namespace ImGui
 {
-inline void Image(::Texture &aTexture, const ImVec2 &image_size)
+inline void Image(::Texture &aTexture, const ImVec2 &image_size, const ImVec2 &uv0 = ImVec2(0, 0),
+                  const ImVec2 &uv1 = ImVec2(1, 1), const ImVec4 &tint_col = ImVec4(1, 1, 1, 1),
+                  const ImVec4 &border_col = ImVec4(0, 0, 0, 0))
 {
     if (const auto id = aTexture.GetHandle(ViewType::SRV).gpuPtr.ptr)
     {
-        Image(reinterpret_cast<ImTextureID>(id), image_size);
+        Image(reinterpret_cast<ImTextureID>(id), image_size, uv0, uv1, tint_col, border_col);
     }
 }
 
@@ -74,7 +76,7 @@ inline bool ImageButton(const char *strId, ::Texture &aTexture, const ImVec2 &im
                          .gpuPtr.ptr;
         return ImageButtonEx(window->GetID(strId), reinterpret_cast<ImTextureID>(newId), image_size, uv0, uv1, bg_col,
                              tint_col, flags);
-    } 
+    }
 }
 
 inline void TextCentered(std::string text)
@@ -86,13 +88,13 @@ inline void TextCentered(std::string text)
     ImGui::Text(text.c_str());
 }
 
-inline void TextCentered(const char* text)
+inline void TextCentered(const char *text)
 {
-	auto windowWidth = ImGui::GetWindowSize().x;
-	auto textWidth = ImGui::CalcTextSize(text).x;
+    auto windowWidth = ImGui::GetWindowSize().x;
+    auto textWidth = ImGui::CalcTextSize(text).x;
 
-	ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
-	ImGui::Text(text);
+    ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
+    ImGui::Text(text);
 }
 
 static bool IsItemJustReleased()

@@ -5,7 +5,7 @@
 #include <Tools/Utilities/Math.hpp>
 
 #include "Tools/ImGui/ImGui/imgui.h"
-#include <Tools/ImGui/ImGui/ImGuiHepers.hpp>
+#include <Tools/ImGui/ImGui/ImGuiHelpers.hpp>
 
 #include <Editor/Editor/Commands/CommandBuffer.h>
 #include <Editor/Editor/Commands/VarChanged.h>

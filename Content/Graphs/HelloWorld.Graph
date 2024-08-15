@@ -1,0 +1,1 @@
+{"edges":[],"name":"ScriptGraph","nodes":[{"UID":1463,"entryHandle":"Tick","pins":[{"name":"Delta Time","value":[0,0,0,0]}],"type":"SGNode_EventTick","x":-144.0,"y":74.0,"z":0.0},{"UID":1474,"entryHandle":"","pins":[{"name":"Value","value":[0,0,0,0]},{"name":"Text","value":[]}],"type":"SGNode_FloatToString","x":252.0,"y":204.0,"z":0.0}],"variables":[]}

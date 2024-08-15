@@ -8,7 +8,7 @@
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 #include <Engine/GraphicsEngine/GraphicsEngineUtilities.h>
 #include <Engine/PersistentSystems/SceneUtilities.h>
-#include <Tools/ImGui/ImGui/ImGuiHepers.hpp>
+#include <Tools/ImGui/ImGui/ImGuiHelpers.hpp>
 
 Mesh::Mesh(const std::filesystem::path &aFilePath) : AssetBase(aFilePath)
 {
