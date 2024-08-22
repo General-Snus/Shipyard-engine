@@ -347,6 +347,9 @@
     <ClCompile Include="Objects\BaseAssets\Source\GraphAsset.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ComponentSystem\Components\Source\GraphComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -187,12 +187,21 @@ bool GameObjectManager::HasGameObject(const GameObject &anID) const
     return HasGameObject(anID.myID);
 }
 
-void GameObjectManager::CollidedWith(const SY::UUID aFirstID, const SY::UUID aTargetID)
+void GameObjectManager::OnColliderEnter(const SY::UUID aFirstID, const SY::UUID aTargetID)
 {
     OPTICK_EVENT();
     for (auto &cm : myComponentManagers | std::views::values)
     {
-        cm->CollidedWith(aFirstID, aTargetID);
+        cm->OnColliderEnter(aFirstID, aTargetID);
+    }
+}
+
+void GameObjectManager::OnColliderExit(const SY::UUID aFirstID, const SY::UUID aTargetID)
+{
+    OPTICK_EVENT();
+    for (auto &cm : myComponentManagers | std::views::values)
+    {
+        cm->OnColliderExit(aFirstID, aTargetID);
     }
 }
 

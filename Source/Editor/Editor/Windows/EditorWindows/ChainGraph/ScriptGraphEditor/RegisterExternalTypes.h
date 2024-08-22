@@ -3,9 +3,9 @@
 #include <cinttypes>
 
 #include <Engine/AssetManager/ComponentSystem/GameObject.h>
-#include <format>
-#include <ScriptGraph/ScriptGraphTypes.h> 
+#include <ScriptGraph/ScriptGraphTypes.h>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
+#include <format>
 /********************************************************************************************************************************
  *
  * Here you should declare all types that the ScriptGraph should be aware of. I.e. all
@@ -25,7 +25,8 @@
  *	 this to work. See examples below.
  *
  * You can override methods found in the base class:
- * void RenderConstructWidget(const std::string& aContainerUUID, void* aDataPtr, const ScriptGraphTypeHandler& aTypeInfo) override
+ * void RenderConstructWidget(const std::string& aContainerUUID, void* aDataPtr, const ScriptGraphTypeHandler&
+ aTypeInfo) override
  * - This should draw an ImGui widget to edit the provided data pointer.
  * - Only applies if InPlaceConstructible is True.
  *
@@ -34,34 +35,59 @@
  *   values in the UI or other things. Allows calling of ScriptGraphDataTypeRegistry::GetString
  *   to get an easily loggable representation of the contents in a data container.
  *
- * virtual void SerializeData(const void* aDataPtr, const ScriptGraphTypeHandler& aTypeInfo, std::vector<uint8_t>& outData) const
- * - If, and only if, you need to handle serialization of your data type on your own. The default serializer works for all
+ * virtual void SerializeData(const void* aDataPtr, const ScriptGraphTypeHandler& aTypeInfo, std::vector<uint8_t>&
+ outData) const
+ * - If, and only if, you need to handle serialization of your data type on your own. The default serializer works for
+ all
  *   POD types, but if you want to serialize pointers and things you need to do this yourself :).
  *
- * virtual void DeserializeData(const std::vector<uint8_t>& inData, const ScriptGraphTypeHandler& aTypeInfo, void* outDataPtr) const
-  - If, and only if, you need to handle deserialization of your data type on your own. The default deserializer works for all
+ * virtual void DeserializeData(const std::vector<uint8_t>& inData, const ScriptGraphTypeHandler& aTypeInfo, void*
+ outDataPtr) const
+  - If, and only if, you need to handle deserialization of your data type on your own. The default deserializer works
+ for all
  *  POD types, but if you want to deserialize pointers and things you need to do this yourself :).
  *
  *******************************************************************************************************************************/
 
-BeginDataTypeHandler(Vector,Vector3f,GraphColor(255,200,0,255),false)
+BeginDataTypeHandler(Vector, Vector3f, GraphColor(255, 200, 0, 255), false)
 
-std::string ToString(const void* aDataPtr,const ScriptGraphType& aTypeInfo) const override
+    std::string ToString(const void *aDataPtr, const ScriptGraphType &aTypeInfo) const override
 {
-	aTypeInfo;
-	const Vector3f vector = *static_cast<const Vector3f*>(aDataPtr);
-	std::string result = std::format("X: {}, Y: {}, Z: {}",vector.x,vector.y,vector.z);
-	return result;
+    aTypeInfo;
+    const Vector3f vector = *static_cast<const Vector3f *>(aDataPtr);
+    std::string result = std::format("X: {}, Y: {}, Z: {}", vector.x, vector.y, vector.z);
+    return result;
 }
 EndDataTypeHandler
 
-BeginDataTypeHandler(GameObjects,GameObject,GraphColor(150,255,0,255),false)
+BeginDataTypeHandler(UniqueID, SY::UUID, GraphColor(155, 155, 0, 255), false)
 
-std::string ToString(const void* aDataPtr,const ScriptGraphType& aTypeInfo) const override
+    void RenderConstructWidget(const std::string &aContainerUUID, void *aDataPtr,
+                               const ScriptGraphType &aTypeInfo) override
 {
-	aTypeInfo;
-	const GameObject go = *static_cast<const GameObject*>(aDataPtr);
-	std::string result = std::format("ID: {}",go.GetID().operator unsigned int());
-	return result;
+    aTypeInfo;
+    const float y = ImGui::GetCursorPosY();
+    ImGui::SetCursorPosY(y - 2);
+    const ImVec2 inputSize = ImGui::CalcTextSize("1000");
+    ImGui::SetNextItemWidth(inputSize.x);
+    ImGui::InputScalar(aContainerUUID.c_str(), ImGuiDataType_U32, aDataPtr);
+}
+std::string ToString(const void *aDataPtr, const ScriptGraphType &aTypeInfo) const override
+{
+    aTypeInfo;
+    const SY::UUID id = *static_cast<const SY::UUID *>(aDataPtr);
+    std::string result = id;
+    return result;
+}
+EndDataTypeHandler
+
+BeginDataTypeHandler(GameObjects, GameObject, GraphColor(150, 255, 0, 255), false)
+
+    std::string ToString(const void *aDataPtr, const ScriptGraphType &aTypeInfo) const override
+{
+    aTypeInfo;
+    const GameObject go = *static_cast<const GameObject *>(aDataPtr);
+    std::string result = std::format("Obj: {}", go.GetName());
+    return result;
 }
 EndDataTypeHandler

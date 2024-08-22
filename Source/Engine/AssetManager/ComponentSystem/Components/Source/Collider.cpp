@@ -21,6 +21,8 @@ void cCollider::Update()
 {
     OPTICK_EVENT();
     const AABB3D<float> &thisCollider = GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB();
+    std::unordered_set<SY::UUID> newCollidingObjects;
+
     for (const auto &otherColliders : Scene().ActiveManager().GetAllComponents<cCollider>())
     {
         if (otherColliders.GetOwner() == myOwnerID)
@@ -31,9 +33,23 @@ void cCollider::Update()
         const auto &collider = otherColliders.GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB();
         if (IntersectionAABB<float>(thisCollider, collider))
         {
-            Scene().ActiveManager().CollidedWith(myOwnerID, otherColliders.GetOwner());
+            newCollidingObjects.insert(otherColliders.GetOwner());
+            if (currentlyCollidingObjects.find(otherColliders.GetOwner()) == currentlyCollidingObjects.end())
+            {
+                Scene().ActiveManager().OnColliderEnter(myOwnerID, otherColliders.GetOwner());
+            }
         }
     }
+
+    for (const auto &collidingObject : currentlyCollidingObjects)
+    {
+        if (!newCollidingObjects.contains(collidingObject))
+        {
+            Scene().ActiveManager().OnColliderExit(myOwnerID, collidingObject);
+        }
+    }
+
+    currentlyCollidingObjects = std::move(newCollidingObjects);
 }
 
 Vector3f cCollider::GetClosestPosition(Vector3f position) const

@@ -1,6 +1,11 @@
 #pragma once
+#include <algorithm>
+#include <array>
+#include <concepts>
 #include <ranges>
+#include <string_view>
 #include <type_traits>
+#include <typeinfo>
 
 #include "Tools/ImGui/ImGui/imgui.h"
 #include "Tools/ImGui/ImGui/imgui_internal.h"
@@ -119,7 +124,7 @@ inline bool ImGuiReflect(Vector3<float> &ref, const std::string &identifier)
 
 inline bool ImGuiReflect(Vector4<float> &ref, const std::string &identifier)
 {
-    return ImGui::DragFloat4(std::format("##{}", identifier).c_str(), &ref.x); 
+    return ImGui::DragFloat4(std::format("##{}", identifier).c_str(), &ref.x);
 }
 
 inline bool ImGuiReflect(float &ref, const std::string &identifier)
@@ -158,15 +163,28 @@ template <typename T> void serialize(std::ostream &os, T &&value)
         }
     });
 }
-
 class TypeInfo
 {
+
   public:
     // instances can be obtained only through calls to Get()
     template <typename T> static const TypeInfo &Get()
     {
-        // here we create the singleton instance for this particular type
-        static const TypeInfo ti(refl::reflect<T>());
+        static TypeInfo ti(refl::reflect<T>());
+
+        static bool added = []() {
+            if constexpr (Reflection::IsComponent<T>)
+            {
+                ti.isComponent = true;
+            }
+            if constexpr (std::is_base_of_v<AssetBase, T>)
+            {
+                ti.isAsset = true;
+            }
+            allTypes.push_back(ti);
+            return true;
+        }();
+
         return ti;
     }
 
@@ -180,14 +198,19 @@ class TypeInfo
         return typeId;
     }
 
+    bool isComponent = false;
+    bool isAsset = false;
+
+    static const std::vector<TypeInfo> &GetAllTypes()
+    {
+        return allTypes;
+    }
+
   private:
-    // were only storing the name for demonstration purposes,
-    // but this can be extended to hold other properties as well
     std::string name_;
     const std::type_info *typeId;
+    static inline std::vector<TypeInfo> allTypes;
 
-    // given a type_descriptor, we construct a TypeInfo
-    // with all the metadata we care about (currently only name)
     template <typename T, typename... Fields> TypeInfo(refl::type_descriptor<T> td) : name_(td.name), typeId(&typeid(T))
     {
     }

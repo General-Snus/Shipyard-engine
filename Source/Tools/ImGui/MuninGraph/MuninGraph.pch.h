@@ -14,6 +14,7 @@
 #include "Tools/ImGui/ImGui/imgui.h"
 #include "Tools/ImGui/ImGui/imgui_internal.h"
 #include "Tools/ImGui/ImGui/imgui_node_editor.h"
+#include <Engine/AssetManager/ComponentSystem/UUID.h>
 //
 // namespace ImNodeEd = ax::NodeEditor;
 //

@@ -9,7 +9,7 @@ class GraphAsset : public AssetBase
 
   public:
     MYLIB_REFLECTABLE();
-
+    // Json path
     explicit GraphAsset(const std::filesystem::path &aFilePath); // Json path
     void Init() override;
     bool InspectorView() override;

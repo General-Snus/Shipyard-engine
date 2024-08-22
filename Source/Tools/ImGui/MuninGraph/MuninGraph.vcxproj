@@ -244,7 +244,7 @@
     <ClInclude Include="Graph\GraphColor.h" />
     <ClInclude Include="Graph\GraphTypes.h" />
     <ClInclude Include="ScriptGraph\Nodes\SGNode_DebugText.h" />
-    <ClInclude Include="ScriptGraph\Nodes\SGNode_FloatToString.h" />
+    <ClInclude Include="ScriptGraph\Nodes\SGNode_CastToString.h" />
     <ClInclude Include="ScriptGraph\ScriptGraphDataObject.h" />
     <ClInclude Include="Graph\NodeGraphPin.h" />
     <ClInclude Include="Graph\NodeGraphSchema.h" />
@@ -271,7 +271,7 @@
   <ItemGroup>
     <ClCompile Include="Graph\GraphColor.cpp" />
     <ClCompile Include="ScriptGraph\Nodes\SGNode_DebugText.cpp" />
-    <ClCompile Include="ScriptGraph\Nodes\SGNode_FloatToString.cpp" />
+    <ClCompile Include="ScriptGraph\Nodes\SGNode_CastToString.cpp" />
     <ClCompile Include="ScriptGraph\ScriptGraphDataObject.cpp" />
     <ClCompile Include="Graph\NodeGraphPin.cpp" />
     <ClCompile Include="Graph\NodeGraphSchema.cpp" />

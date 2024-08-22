@@ -70,20 +70,22 @@ class Logger
     static bool Create();
     static void SetConsoleHandle(void *aHandle);
     static void SetPrintToVSOutput(bool bNewValue);
-    static void Log(const char *aString);
+    static void Log(const char *aString, const std::source_location &location = std::source_location::current());
     static Color GetColor(LogType type);
-     
 
-    template <typename T> static void Log(const T &aString)
+    template <typename T>
+    static void Log(const T &aString, const std::source_location &location = std::source_location::current())
     {
         Log(std::to_string(aString));
     }
 
-    static void Log(const std::string &aString);
-    static void Warn(const std::string &aString);
+    static void Log(const std::string &aString, const std::source_location &location = std::source_location::current());
+    static void Warn(const std::string &aString,
+                     const std::source_location &location = std::source_location::current());
 
     static void Err(const std::string &aString, const std::source_location &location = std::source_location::current());
-    static void Succ(const std::string &aString);
+    static void Succ(const std::string &aString,
+                     const std::source_location &location = std::source_location::current());
     static void Critical(const std::exception &anException, unsigned aLevel = 0,
                          const std::source_location &location = std::source_location::current());
     static void Critical(const std::string &anExceptionText, unsigned aLevel = 0,

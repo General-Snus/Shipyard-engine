@@ -17,8 +17,8 @@
 #include <ImGuiHelpers.hpp>
 #include <ScriptGraph/Nodes/Events/SGNode_EventBase.h>
 #include <ScriptGraph/Nodes/Math/SGNode_MathOps.h>
+#include <ScriptGraph/Nodes/SGNode_CastToString.h>
 #include <ScriptGraph/Nodes/SGNode_DebugText.h>
-#include <ScriptGraph/Nodes/SGNode_FloatToString.h>
 #include <ScriptGraph/Nodes/SGNode_Variable.h>
 #include <ScriptGraph/ScriptGraphTypes.h>
 #include <imgui_internal.h>

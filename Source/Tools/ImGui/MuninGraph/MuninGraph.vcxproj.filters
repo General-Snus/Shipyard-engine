@@ -78,7 +78,7 @@
     <ClInclude Include="ScriptGraph\Nodes\SGNode_DebugText.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ScriptGraph\Nodes\SGNode_FloatToString.h">
+    <ClInclude Include="ScriptGraph\Nodes\SGNode_CastToString.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ScriptGraph\Types\RegisterScriptGraphTypes.h">
@@ -152,7 +152,7 @@
     <ClCompile Include="ScriptGraph\Nodes\SGNode_DebugText.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ScriptGraph\Nodes\SGNode_FloatToString.cpp">
+    <ClCompile Include="ScriptGraph\Nodes\SGNode_CastToString.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ScriptGraph\Nodes\Events\SGNode_EventBase.cpp">

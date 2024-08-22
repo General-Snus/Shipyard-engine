@@ -386,7 +386,6 @@ bool Editor::Initialize(HWND aHandle)
     myGameLauncher.Init();
     myGameLauncher.Start();
     HideSplashScreen();
-     
 
     m_Callbacks[EditorCallback::ObjectSelected] = Event();
     m_Callbacks[EditorCallback::WM_DropFile] = Event();

@@ -1,14 +1,40 @@
 ﻿#pragma once
-#include "ScriptGraph/ScriptGraphNode.h"
 #include "SGNode_EventBase.h"
+#include "ScriptGraph/ScriptGraphNode.h"
 
 BeginScriptGraphDerivedNode(SGNode_EventTick, SGNode_EventBase)
 {
-public:
+  public:
+    void Init() override;
 
-	void Init() override;
+    std::string GetNodeTitle() const override
+    {
+        return "Tick";
+    }
+    std::string GetDescription() const override
+    {
+        return "An event node that fires every frame.";
+    };
+};
 
-	FORCEINLINE bool IsInternalOnly() const override { return true; }
-	std::string GetNodeTitle() const override { return "Tick"; }
-	std::string GetDescription() const override { return "An event node that fires every frame."; };
+BeginScriptGraphDerivedNode(SGNode_EventOnEnter, SGNode_EventBase)
+{
+  public:
+    void Init() override;
+
+    std::string GetNodeTitle() const override
+    {
+        return "OnEnter";
+    }
+};
+
+BeginScriptGraphDerivedNode(SGNode_EventOnExit, SGNode_EventBase)
+{
+  public:
+    void Init() override;
+
+    std::string GetNodeTitle() const override
+    {
+        return "OnExit";
+    }
 };

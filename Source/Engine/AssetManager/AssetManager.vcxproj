@@ -323,6 +323,7 @@
     <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\CombatComponent.cpp" />
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysXDynamicBody.cpp" />
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysXStaticBody.cpp" />
+    <ClCompile Include="ComponentSystem\Components\Source\GraphComponent.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\ParticleSystem.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
