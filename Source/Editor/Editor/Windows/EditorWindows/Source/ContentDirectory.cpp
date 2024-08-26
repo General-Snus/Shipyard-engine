@@ -109,6 +109,10 @@ void ContentDirectory::Node(const int index, const float cellWidth)
         ImGui::Separator();
         if (ImGui::Selectable("ReImport"))
         {
+            if (auto asset = AssetManager::TryLoadAsset(path))
+            {
+                asset->Init();
+            }
             IsDirty = true;
         }
         ImGui::Separator();
@@ -322,7 +326,7 @@ std::shared_ptr<TextureHolder> ContentDirectory::IconFromExtension(const std::fi
         imageTexture = AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/Folder.png");
     }
 
-    else if (extension == ".dds" || extension == ".png" || extension == ".hdr")
+    else if (extension == ".dds" || extension == ".png" || extension == ".hdr" || extension == ".jpg")
     {
         imageTexture = AssetManager::Get().LoadAsset<TextureHolder>(path);
         if (!imageTexture->isLoadedComplete)

@@ -3027,7 +3027,7 @@ void ed::FlowAnimation::Flow(ed::Link *link, float markerDistance, float speed, 
 
 void ed::FlowAnimation::Draw(ImDrawList *drawList)
 {
-    if (!IsPlaying() || !IsLinkValid() || !m_Link || !m_Link->IsVisible())
+    if (!IsPlaying() || !IsLinkValid() || !m_Link->IsVisible())
         return;
 
     if (!IsPathValid())

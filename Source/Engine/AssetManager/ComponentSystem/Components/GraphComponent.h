@@ -1,6 +1,7 @@
 #pragma once
 #include <Engine/AssetManager/ComponentSystem/Component.h>
 #include <Engine/AssetManager/Objects/BaseAssets/GraphAsset.h>
+#include <Tools/ImGui/MuninGraph/ScriptGraph/ScriptGraphPayload.h>
 
 class GraphAsset;
 
@@ -22,6 +23,7 @@ class GraphComponent : public Component
 
   private:
     std::shared_ptr<GraphAsset> m_Graph;
+    ScriptGraphPayload m_Payload;
 };
 
 REFL_AUTO(type(GraphComponent))

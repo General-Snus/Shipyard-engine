@@ -1,259 +1,83 @@
 ﻿#pragma once
-#include <functional>
-#include <memory>
-
-#include "../Graph/NodeGraphSchema.h"
+#include "MuninGraphImpl.h"
 #include "ScriptGraph.h"
-#include "ScriptGraphTypes.h"
-#include "ScriptGraphVariable.h"
+#include "ScriptGraphCommon.h"
+#include "NodeGraph/NodeGraphSchema.h"
+#include "Internal/MuninGraphCommon.h"
 
-class SGNode_SetVariable;
-class SGNode_GetVariable;
+class TypedDataContainer;
+class ScriptGraphPin;
 class ScriptGraph;
 class ScriptGraphNode;
-class ScriptGraphPin;
+struct ScriptGraphEdge;
 
-struct ScriptGraphNodeClass
+class ScriptGraphSchema : public NodeGraphSchema<ScriptGraphSchema, ScriptGraph, ScriptGraphNode, ScriptGraphEdge, ScriptGraphPin>
 {
-    std::type_index Type = typeid(std::nullptr_t);
-    std::string TypeName;
-    std::function<std::shared_ptr<ScriptGraphNode>()> New;
-    std::shared_ptr<ScriptGraphNode> DefaultObject;
+public:
 
-    bool InternalOnly = false;
-    std::string NodeTitle;
+	ScriptGraphSchema(ScriptGraph* aGraph)
+		: NodeGraphSchema(aGraph)
+	{  }
 
-    std::type_index BaseType = typeid(std::nullptr_t);
+	//~ Begin GraphEditorSchema Interface
+	std::shared_ptr<ScriptGraphNode> CreateNode(const RegisteredNodeClass& aClass) override;
+	bool RemoveNode(size_t aNodeUID) override;
+	bool CanCreateEdge(size_t aSourcePinId, size_t aTargetPinId, std::string& outMessage) const override;
+	bool CreateEdge(size_t aSourcePinId, size_t aTargetPinId) override;
+	bool DisconnectPin(size_t aPinId) override;
+	bool RemoveEdge(size_t aEdgeId) override;
+	//~ End GraphEditorSchema Interface
 
-  private:
-    static void SetupNodeType(ScriptGraphNodeClass &aNodeType, std::shared_ptr<ScriptGraphNode> &&aTempNode);
+	template<typename T>
+	std::shared_ptr<ScriptGraphNode> AddNode()
+	{
+		const std::type_index nodeType = typeid(T);
+		const RegisteredNodeClass& nodeClass = MuninGraph::Get().GetNodeClass(nodeType);
+		return CreateNode(nodeClass);
+	}
 
-  public:
-    template <typename T> static ScriptGraphNodeClass Create()
-    {
-        ScriptGraphNodeClass result;
-        result.Type = typeid(T);
-        result.New = []() {
-            auto ptr = std::make_shared<T>();
-            ptr->Init();
-            return ptr;
-        };
-        SetupNodeType(result, std::make_shared<T>());
-        return result;
-    }
+	void MarkDynamicPinForDelete(size_t aPinId);
+	void CommitDynamicPinDeletes();
 
-    template <typename T, typename B> static ScriptGraphNodeClass Create()
-    {
-        ScriptGraphNodeClass result = Create<T>();
-        result.BaseType = typeid(B);
-        return result;
-    }
+	//~ Begin Dynamic Pins
+	size_t CreateDynamicExecPin(size_t aNodeId, std::string_view aLabel, PinDirection aDirection);
+	size_t CreateDynamicExecPin(ScriptGraphNode* aNode, std::string_view aLabel, PinDirection aDirection);
+	size_t CreateDynamicDataPin(size_t aNodeId, std::string_view aLabel, PinDirection aDirection, std::type_index aType);
+	size_t CreateDynamicDataPin(ScriptGraphNode* aNode, std::string_view aLabel, PinDirection aDirection, std::type_index aType);
 
-    [[nodiscard]] bool IsA(const ScriptGraphNodeClass &aType) const
-    {
-        return Type == aType.Type || (BaseType != typeid(std::nullptr_t) && BaseType == aType.BaseType);
-    }
+	template<typename T>
+	void CreateDynamicDataPin(size_t aNodeId, std::string_view aLabel, PinDirection aDirection)
+	{
+		CreateDynamicDataPin(aNodeId, aLabel, aDirection, typeid(T));
+	}
 
-    [[nodiscard]] bool IsA(const std::type_info &aType) const
-    {
-        return Type == aType || (BaseType != typeid(std::nullptr_t) && BaseType == aType);
-    }
+	template<typename T>
+	void CreateDynamicDataPin(ScriptGraphNode* aNode, std::string_view aLabel, PinDirection aDirection)
+	{
+		CreateDynamicDataPin(aNode, aLabel, aDirection, typeid(T));
+	}
 
-    bool operator==(const ScriptGraphNodeClass &aType) const
-    {
-        return Type == aType.Type;
-    }
+	void RemoveDynamicPin(size_t aNodeId, size_t aPinID);
+	void RemoveDynamicPin(ScriptGraphNode* aNode, size_t aPinID);
+	//~ End Dynamic Pins
 
-    bool operator!=(const ScriptGraphNodeClass &aType) const
-    {
-        return Type != aType.Type;
-    }
-};
+	//~ Begin Variables
+	std::shared_ptr<ScriptGraphNode> AddNode(std::type_index aType);
+	bool AddVariable(std::string_view aVariableName, const TypedDataContainer& aDefaultValue, int aFlags = ScriptGraphVariableFlag_None);
+	void RemoveVariable(const std::string& aVariableName);
+	void SetNodeVariable(size_t aNodeUID, std::string_view aVariableName);
+	void SetNodeVariable(ScriptGraphNode* aNode, std::string_view aVariableName);
+	//~ End Variables
 
-template <> struct std::hash<ScriptGraphNodeClass>
-{
-    auto operator()(const ScriptGraphNodeClass &aType) const noexcept -> size_t
-    {
-        return std::hash<std::type_index>{}(aType.Type);
-    }
-};
+	FORCEINLINE const std::unordered_map<std::string, size_t, string_hash, std::equal_to<>>& GetEntryPoints() const { return GetGraph()->myEntryPoints; }
+	FORCEINLINE const std::unordered_map<std::string, ScriptGraphVariable, string_hash, std::equal_to<>>& GetVariables() const { return GetGraph()->myVariables; }
 
-class ScriptGraphSchema : public NodeGraphSchema
-{
-    std::shared_ptr<ScriptGraph> myGraph;
-    std::unordered_map<std::string, unsigned> myNodeTypeCounts;
-    std::vector<std::string> myGraphEntryPoints;
+private:
 
-    // Prevents static init order fiasco from happening.
-    // NOTE: This could potentially happen with registered types as well.
-    static std::unordered_map<std::string, ScriptGraphNodeClass> &MyNodeTypesMap()
-    {
-        static std::unordered_map<std::string, ScriptGraphNodeClass> myMap;
-        return myMap;
-    }
+	void CheckCyclicLink(const ScriptGraphNode* aNode, const ScriptGraphNode* aBaseNode, bool& outResult) const;
 
-    static std::unordered_map<std::type_index, std::string> &MyNodeTypeIdToName()
-    {
-        static std::unordered_map<std::type_index, std::string> myMap;
-        return myMap;
-    }
+	ScriptGraphPin& GetMutablePin(size_t aPinId);
+	void CreateEdgeInternal(ScriptGraphPin& aSourcePin, ScriptGraphPin& aTargetPin) const;
 
-    static std::unordered_map<std::string, std::string> &MyNodeNameToTypeNameMap()
-    {
-        static std::unordered_map<std::string, std::string> myMap;
-        return myMap;
-    }
-
-    static std::unordered_map<std::string, const ScriptGraphNodeClass> RegisterNodeTypes();
-    static std::unordered_map<std::string, std::string> GetNodeNames();
-    static std::shared_ptr<ScriptGraph> CreateScriptGraphInternal(bool createEmpty);
-
-    static void CreateNodeCDOs();
-
-  public:
-    template <typename N> static bool RegisterNodeType()
-    {
-        ScriptGraphNodeClass type = ScriptGraphNodeClass::Create<N>();
-        if (!type.InternalOnly)
-            MyNodeNameToTypeNameMap().insert({type.NodeTitle, type.TypeName});
-        MyNodeTypeIdToName().insert({typeid(N), type.TypeName});
-        auto It = MyNodeTypesMap().insert({type.TypeName, std::move(type)});
-        return true;
-    }
-
-    template <typename N, typename B> static bool RegisterNodeTypeWithBase()
-    {
-        ScriptGraphNodeClass type = ScriptGraphNodeClass::Create<N, B>();
-        if (!type.InternalOnly)
-            MyNodeNameToTypeNameMap().insert({type.NodeTitle, type.TypeName});
-        MyNodeTypeIdToName().insert({typeid(N), type.TypeName});
-        auto It = MyNodeTypesMap().insert({type.TypeName, std::move(type)});
-        return true;
-    }
-
-    static std::shared_ptr<ScriptGraph> CreateScriptGraph();
-    static std::shared_ptr<ScriptGraph> CreateScriptGraph(const std::shared_ptr<ScriptGraph> &aGraph);
-    static bool SerializeScriptGraph(const std::shared_ptr<ScriptGraph> &aGraph, std::string &outResult);
-    static bool DeserializeScriptGraph(std::shared_ptr<ScriptGraph> &outGraph, const std::string &inData);
-
-#pragma warning(push)
-#pragma warning(disable : 4172)
-    template <typename C> static const ScriptGraphNodeClass &GetNodeTypeByClass()
-    {
-        const std::type_index classType = typeid(C);
-        for (const auto &[nodeTypeName, nodeType] : MyNodeTypesMap())
-        {
-            if (nodeType.Type == classType)
-            {
-                return nodeType;
-            }
-        }
-
-        assert(false && "Type not found!");
-        return ScriptGraphNodeClass();
-    }
-#pragma warning(pop)
-
-  private:
-    ScriptGraphPin &GetMutablePin(size_t aPinUID);
-    bool RegisterNode(std::shared_ptr<ScriptGraphNode> aNode);
-    void RegisterEntryPointNode(std::shared_ptr<ScriptGraphNode> aNode, const std::string &aEntryHandle);
-    void CreateEdgeInternal(ScriptGraphPin &aSourcePin, ScriptGraphPin &aTargetPin) const;
-
-    void RegenerateEntryPointList();
-
-    void CheckCyclicLink(const std::shared_ptr<ScriptGraphNode> &aNode,
-                         const std::shared_ptr<ScriptGraphNode> &aBaseNode, bool &outResult) const;
-
-  public:
-    ScriptGraphSchema(const std::shared_ptr<void> &aGraph);
-
-    template <typename T> std::shared_ptr<T> AddNode()
-    {
-        if (const auto it = MyNodeTypeIdToName().find(typeid(T)); it != MyNodeTypeIdToName().end())
-        {
-            return std::dynamic_pointer_cast<T>(AddNode(it->second));
-        }
-
-        return nullptr;
-    }
-
-    std::shared_ptr<ScriptGraphNode> AddNode(const std::string &aType);
-    std::shared_ptr<ScriptGraphNode> AddNode(const ScriptGraphNodeClass &aType);
-
-    template <typename T> std::shared_ptr<T> AddEntryNode(const std::string &aEntryHandle)
-    {
-        if (const auto it = MyNodeTypeIdToName().find(typeid(T)); it != MyNodeTypeIdToName().end())
-        {
-            return std::dynamic_pointer_cast<T>(AddEntryNode(it->second, aEntryHandle));
-        }
-
-        return nullptr;
-    }
-
-    std::shared_ptr<ScriptGraphNode> AddEntryNode(const std::string &aType, const std::string &aEntryHandle);
-    std::shared_ptr<ScriptGraphNode> AddEntryNode(const ScriptGraphNodeClass &aType, const std::string &aEntryHandle);
-
-    template <typename T> void AddVariable(const std::string &aVariableName, const T &aDefaultValue = T())
-    {
-        std::shared_ptr<ScriptGraphVariable> newVariable = std::make_shared<ScriptGraphVariable>();
-        ScriptGraphDataObject::Create<T>(newVariable->Data);
-        ScriptGraphDataObject::Create<T>(newVariable->DefaultData);
-        memcpy_s(newVariable->DefaultData.Ptr, newVariable->DefaultData.TypeData->GetTypeSize(), &aDefaultValue,
-                 sizeof(T));
-        memcpy_s(newVariable->Data.Ptr, newVariable->DefaultData.TypeData->GetTypeSize(), &aDefaultValue, sizeof(T));
-        newVariable->Name = aVariableName;
-        myGraph->myVariables.insert({aVariableName, newVariable});
-    }
-
-    void AddVariable(const std::string &aVariableName, const ScriptGraphDataObject &aDataObject)
-    {
-        std::shared_ptr<ScriptGraphVariable> newVariable = std::make_shared<ScriptGraphVariable>();
-        newVariable->Data = aDataObject;
-        newVariable->DefaultData = aDataObject;
-        newVariable->Name = aVariableName;
-        myGraph->myVariables.insert({aVariableName, newVariable});
-    }
-
-    void RemoveNode(size_t aNodeUID);
-    void RemoveVariable(const std::string &aVariableName);
-
-    std::shared_ptr<SGNode_GetVariable> AddGetVariableNode(const std::string &aVariableName);
-    std::shared_ptr<SGNode_SetVariable> AddSetVariableNode(const std::string &aVariableName);
-
-    //~ Begin GraphEditorSchema Interface
-    bool CanCreateEdge(size_t aSourcePinUID, size_t aTargetPinUID, std::string &outMesssage) const override;
-    bool CreateEdge(size_t aSourcePinUID, size_t aTargetPinUID) override;
-    bool DisconnectPin(size_t aPinUID) override;
-    bool RemoveEdge(size_t aEdgeUID) override;
-    //~ End GraphEditorSchema Interface
-
-    /**
-     * \brief Workaround to update positions stored in nodes because ImNodeEd
-     * can only load the position if we're in a render pass, i.e. you need to
-     * call ImNodeEd::Begin which in turn requires you to be in an ImGui container
-     * for that to work. This lets positions be stored on the node for easy mgmt.
-     */
-    void UpdateNodePositionCache(const std::shared_ptr<ScriptGraphNode> &aNode, float x, float y, float z);
-    void GetNodePositionCache(const std::shared_ptr<ScriptGraphNode> &aNode, float &outX, float &outY, float &outZ);
-
-    FORCEINLINE std::shared_ptr<ScriptGraph> GetGraph() const
-    {
-        return myGraph;
-    }
-    FORCEINLINE const std::vector<std::string> &GetEntryPoints() const
-    {
-        return myGraphEntryPoints;
-    }
-
-    FORCEINLINE const std::unordered_map<std::string, std::shared_ptr<ScriptGraphVariable>> &GetVariables() const
-    {
-        return myGraph->myVariables;
-    }
-
-    FORCEINLINE static const std::unordered_map<std::string, ScriptGraphNodeClass> &GetSupportedNodeTypes()
-    {
-        CreateNodeCDOs();
-        return MyNodeTypesMap();
-    }
+	std::vector<size_t> myPinsToDelete;
 };

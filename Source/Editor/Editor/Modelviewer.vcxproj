@@ -117,7 +117,8 @@
     <LibraryPath>$(SolutionDir)..\Lib\$(Configuration)\;$(SolutionDir)..\Dependencies\$(Configuration)\;$(SolutionDir)..\Dependencies\$(Configuration)\PhysXLibs\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <TargetName>Shipyard_$(ProjectName)_$(Configuration)</TargetName>
-    <LinkIncremental>true</LinkIncremental>
+    <LinkIncremental>
+    </LinkIncremental>
     <IgnoreImportLibrary>true</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -126,7 +127,8 @@
     <LibraryPath>$(SolutionDir)..\Lib\$(Configuration)\;$(SolutionDir)..\Dependencies\$(Configuration)\;$(SolutionDir)..\Dependencies\$(Configuration)\PhysXLibs\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <TargetName>Shipyard_$(ProjectName)_$(Configuration)</TargetName>
-    <LinkIncremental>true</LinkIncremental>
+    <LinkIncremental>
+    </LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">
     <IncludePath>$(SolutionDir);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)Tools\ThirdParty\;$(SolutionDir)Tools\ThirdParty\dpp\;$(SolutionDir)DirectX\XTK\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include;$(IncludePath)</IncludePath>
@@ -134,7 +136,8 @@
     <LibraryPath>$(SolutionDir)..\Lib\$(Configuration)\;$(SolutionDir)..\Dependencies\$(Configuration)\;$(SolutionDir)..\Dependencies\$(Configuration)\PhysXLibs\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <TargetName>Shipyard_$(ProjectName)_$(Configuration)</TargetName>
-    <LinkIncremental>true</LinkIncremental>
+    <LinkIncremental>
+    </LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnabled>false</VcpkgEnabled>
@@ -204,15 +207,14 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;dxguid.lib;DirectXTK12.lib;DirectXTex.lib;GameLauncher.lib;GraphicsEngine.lib;PersistentSystems.lib;AssetManager.lib;Utilities.lib;Logging.lib;ImGUI.lib;OptickCore.lib;assimp-vc143-mt.lib;dbghelp.lib;dbgeng.lib;dpp.lib;windowscodecs.lib;MuninGraph.lib;PhysXCommon_static_64.lib;PhysXCooking_static_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_static_64.lib;PhysXCharacterKinematic_static_64.lib;PhysXPvdSDK_static_64.lib;PhysXVehicle_static_64.lib;PhysXVehicle2_static_64.lib;PVDRuntime_64.lib;SnippetRender_static_64.lib;SnippetUtils_static_64.lib;PhysX_static_64.lib;GFSDK_Aftermath_Lib.x64.lib;DirectXLibrary.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;dxguid.lib;DirectXTK12.lib;DirectXTex.lib;GameLauncher.lib;GraphicsEngine.lib;PersistentSystems.lib;AssetManager.lib;Utilities.lib;Logging.lib;ImGUI.lib;ScriptGraphNodes.lib;MuninGraphEditor.lib;MuninGraph.lib;OptickCore.lib;assimp-vc143-mt.lib;dbghelp.lib;dbgeng.lib;dpp.lib;windowscodecs.lib;PhysXCommon_static_64.lib;PhysXCooking_static_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_static_64.lib;PhysXCharacterKinematic_static_64.lib;PhysXPvdSDK_static_64.lib;PhysXVehicle_static_64.lib;PhysXVehicle2_static_64.lib;PVDRuntime_64.lib;SnippetRender_static_64.lib;SnippetUtils_static_64.lib;PhysX_static_64.lib;GFSDK_Aftermath_Lib.x64.lib;DirectXLibrary.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);</AdditionalLibraryDirectories>
       <TreatLinkerWarningAsErrors>false</TreatLinkerWarningAsErrors>
-      <ShowProgress>
-      </ShowProgress>
+      <ShowProgress>LinkVerbose</ShowProgress>
       <LinkStatus>
       </LinkStatus>
-      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
       <ForceFileOutput>
       </ForceFileOutput>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -257,14 +259,13 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;dxguid.lib;DirectXTK12.lib;DirectXTex.lib;GameLauncher.lib;GraphicsEngine.lib;PersistentSystems.lib;AssetManager.lib;Utilities.lib;Logging.lib;ImGUI.lib;OptickCore.lib;assimp-vc143-mt.lib;dbghelp.lib;dbgeng.lib;dpp.lib;windowscodecs.lib;MuninGraph.lib;PhysXCommon_static_64.lib;PhysXCooking_static_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_static_64.lib;PhysXCharacterKinematic_static_64.lib;PhysXPvdSDK_static_64.lib;PhysXVehicle_static_64.lib;PhysXVehicle2_static_64.lib;PVDRuntime_64.lib;SnippetRender_static_64.lib;SnippetUtils_static_64.lib;PhysX_static_64.lib;GFSDK_Aftermath_Lib.x64.lib;DirectXLibrary.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;dxguid.lib;DirectXTK12.lib;DirectXTex.lib;GameLauncher.lib;GraphicsEngine.lib;PersistentSystems.lib;AssetManager.lib;Utilities.lib;Logging.lib;ImGUI.lib;ScriptGraphNodes.lib;MuninGraphEditor.lib;MuninGraph.lib;OptickCore.lib;assimp-vc143-mt.lib;dbghelp.lib;dbgeng.lib;dpp.lib;windowscodecs.lib;PhysXCommon_static_64.lib;PhysXCooking_static_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_static_64.lib;PhysXCharacterKinematic_static_64.lib;PhysXPvdSDK_static_64.lib;PhysXVehicle_static_64.lib;PhysXVehicle2_static_64.lib;PVDRuntime_64.lib;SnippetRender_static_64.lib;SnippetUtils_static_64.lib;PhysX_static_64.lib;GFSDK_Aftermath_Lib.x64.lib;DirectXLibrary.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);</AdditionalLibraryDirectories>
       <TreatLinkerWarningAsErrors>false</TreatLinkerWarningAsErrors>
       <LinkStatus>
       </LinkStatus>
-      <ShowProgress>
-      </ShowProgress>
-      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <ShowProgress>LinkVerbose</ShowProgress>
+      <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
       <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
     </Link>
     <FxCompile>
@@ -309,13 +310,12 @@
       <OptimizeReferences>
       </OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;dxguid.lib;DirectXTK12.lib;DirectXTex.lib;GameLauncher.lib;GraphicsEngine.lib;PersistentSystems.lib;AssetManager.lib;Utilities.lib;Logging.lib;ImGUI.lib;OptickCore.lib;assimp-vc143-mt.lib;dbghelp.lib;dbgeng.lib;dpp.lib;windowscodecs.lib;MuninGraph.lib;PhysXCommon_static_64.lib;PhysXCooking_static_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_static_64.lib;PhysXCharacterKinematic_static_64.lib;PhysXPvdSDK_static_64.lib;PhysXVehicle_static_64.lib;PhysXVehicle2_static_64.lib;PVDRuntime_64.lib;SnippetRender_static_64.lib;SnippetUtils_static_64.lib;PhysX_static_64.lib;GFSDK_Aftermath_Lib.x64.lib;DirectXLibrary.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;dxguid.lib;DirectXTK12.lib;DirectXTex.lib;GameLauncher.lib;GraphicsEngine.lib;PersistentSystems.lib;AssetManager.lib;Utilities.lib;Logging.lib;ImGUI.lib;ScriptGraphNodes.lib;MuninGraphEditor.lib;MuninGraph.lib;OptickCore.lib;assimp-vc143-mt.lib;dbghelp.lib;dbgeng.lib;dpp.lib;windowscodecs.lib;PhysXCommon_static_64.lib;PhysXCooking_static_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_static_64.lib;PhysXCharacterKinematic_static_64.lib;PhysXPvdSDK_static_64.lib;PhysXVehicle_static_64.lib;PhysXVehicle2_static_64.lib;PVDRuntime_64.lib;SnippetRender_static_64.lib;SnippetUtils_static_64.lib;PhysX_static_64.lib;GFSDK_Aftermath_Lib.x64.lib;DirectXLibrary.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);</AdditionalLibraryDirectories>
       <TreatLinkerWarningAsErrors>false</TreatLinkerWarningAsErrors>
       <LinkStatus>true</LinkStatus>
-      <ShowProgress>
-      </ShowProgress>
-      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <ShowProgress>LinkVerbose</ShowProgress>
+      <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
       <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
       <TurnOffAssemblyGeneration />
       <ImageHasSafeExceptionHandlers>
@@ -338,6 +338,7 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Windows\EditorWindows\ChainGraph\GraphTool.h" />
     <ClInclude Include="Windows\EditorWindows\ColorPresets.h" />
     <ClInclude Include="Commands\CommandBuffer.h" />
     <ClInclude Include="Commands\ComponentChanged.h" />
@@ -355,22 +356,13 @@
     <ClInclude Include="Windows\EditorWindows\Inspector.h" />
     <ClInclude Include="Windows\EditorWindows\EditorWindow.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="Windows\EditorWindows\ChainGraph\GraphEditorBase.h" />
-    <ClInclude Include="Windows\EditorWindows\ChainGraph\GraphTool.h" />
-    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\Event_Icon.h" />
-    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\Function_Icon.h" />
-    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\GetGradient.h" />
-    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\Graph_Hazard.h" />
-    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\RegisterExternalNodes.h" />
-    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\RegisterExternalTypes.h" />
-    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\ScriptGraphEditor.h" />
-    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\ScriptGraphNodeGradient.h" />
     <ClInclude Include="Windows\EditorWindows\Viewport.h" />
     <ClInclude Include="Windows\Window.h" />
     <ClInclude Include="Windows\SplashWindow.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Windows\EditorWindows\ChainGraph\GraphTool.cpp" />
     <ClCompile Include="Windows\EditorWindows\Source\ColorPresets.cpp" />
     <ClCompile Include="Commands\Source\CommandBuffer.cpp" />
     <ClCompile Include="Commands\Source\ComponentChanged.cpp" />
@@ -384,10 +376,6 @@
     <ClCompile Include="Core\Source\Paths.cpp" />
     <ClCompile Include="Windows\EditorWindows\Source\Hierarchy.cpp" />
     <ClCompile Include="Windows\EditorWindows\Source\Inspector.cpp" />
-    <ClCompile Include="Windows\EditorWindows\ChainGraph\GraphEditorBase.cpp" />
-    <ClCompile Include="Windows\EditorWindows\ChainGraph\GraphTool.cpp" />
-    <ClCompile Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\RegisterExternalNodes.cpp" />
-    <ClCompile Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\ScriptGraphEditor.cpp" />
     <ClCompile Include="Windows\EditorWindows\Source\EditorWindow.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Core\Source\Editor.cpp" />

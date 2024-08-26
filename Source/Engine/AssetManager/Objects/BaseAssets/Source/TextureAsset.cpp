@@ -103,7 +103,7 @@ void TextureHolder::Init()
         }
     }
 
-    if (AssetPath.extension() == ".dds" || AssetPath.extension() == ".png")
+    if (AssetPath.extension() == ".dds" || AssetPath.extension() == ".png" || AssetPath.extension() == ".jpg")
     {
         if (!std::filesystem::exists(AssetPath))
         {

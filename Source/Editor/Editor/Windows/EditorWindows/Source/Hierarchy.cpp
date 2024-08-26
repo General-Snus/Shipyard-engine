@@ -73,6 +73,7 @@ void Hierarchy::PopupMenu(SY::UUID id)
             GameObject obj = Scene::ActiveManager().GetGameObject(id);
             const auto parentCommand = std::make_shared<GameobjectDeleted>(obj);
 
+            //TODO DELETE THE CILDS
             // for (auto const &i : obj.transform().GetAllChildren())
             //{
             //     const auto ptr =

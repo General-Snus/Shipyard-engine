@@ -71,7 +71,7 @@ std::string AssetManager::AssetType(const std::filesystem::path &path)
     {
         return refl::reflect<GraphAsset>().name.str();
     }
-    else if (extension == ".png" || extension == ".dds" || extension == ".hdr")
+    else if (extension == ".png" || extension == ".dds" || extension == ".hdr" || extension == ".jpg")
     {
         return refl::reflect<TextureHolder>().name.str();
     }

@@ -1,18 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.props" Condition="Exists('..\..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release With hotreload|Win32">
-      <Configuration>Release With hotreload</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release With hotreload|x64">
-      <Configuration>Release With hotreload</Configuration>
-      <Platform>x64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
@@ -28,9 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <VCProjectVersion>16.0</VCProjectVersion>
+    <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{1b302653-82cc-40db-920e-c979d3cfc23d}</ProjectGuid>
+    <ProjectGuid>{cab443dd-87c5-4989-a385-f45201559698}</ProjectGuid>
     <RootNamespace>MuninGraph</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -48,19 +39,11 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <EnableUnitySupport>false</EnableUnitySupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -68,15 +51,6 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <EnableUnitySupport>false</EnableUnitySupport>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
-    <EnableUnitySupport>false</EnableUnitySupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -89,35 +63,22 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <PropertyGroup Label="UserMacros">
-    <SonarQubeExclude>True</SonarQubeExclude>
-  </PropertyGroup>
+  <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir);$(ProjectDir);$(SolutionDir)Tools\ThirdParty\;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir);$(SolutionDir);</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir);$(ProjectDir);$(SolutionDir)Tools\ThirdParty\;$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">
-    <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir);$(ProjectDir);$(SolutionDir)Tools\ThirdParty\;$(IncludePath)</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir);$(SolutionDir);</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -153,37 +114,17 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|Win32'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-    </ClCompile>
-    <Link>
-      <SubSystem>
-      </SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions);WITH_EDITOR;PX_PHYSX_STATIC_LIB;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>MuninGraph.pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -193,44 +134,17 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions);WITH_EDITOR;PX_PHYSX_STATIC_LIB;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>MuninGraph.pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-    </ClCompile>
-    <Link>
-      <SubSystem>
-      </SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">
-    <ClCompile>
-      <WarningLevel>TurnOffAllWarnings</WarningLevel>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions);WITH_EDITOR;PX_PHYSX_STATIC_LIB;</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>MuninGraph.pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
-      <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -241,77 +155,53 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Graph\GraphColor.h" />
-    <ClInclude Include="Graph\GraphTypes.h" />
-    <ClInclude Include="ScriptGraph\Nodes\SGNode_DebugText.h" />
-    <ClInclude Include="ScriptGraph\Nodes\SGNode_CastToString.h" />
-    <ClInclude Include="ScriptGraph\ScriptGraphDataObject.h" />
-    <ClInclude Include="Graph\NodeGraphPin.h" />
-    <ClInclude Include="Graph\NodeGraphSchema.h" />
-    <ClInclude Include="Graph\NodeGraphNode.h" />
-    <ClInclude Include="Graph\NodeGraphEdge.h" />
-    <ClInclude Include="MuninScriptGraph.h" />
-    <ClInclude Include="ScriptGraph\Nodes\Events\SGNode_EventTick.h" />
-    <ClInclude Include="ScriptGraph\Nodes\Math\SGNode_MathOps.h" />
-    <ClInclude Include="ScriptGraph\Nodes\Events\SGNode_EventBeginPlay.h" />
-    <ClInclude Include="ScriptGraph\ScriptGraphVariable.h" />
-    <ClInclude Include="ScriptGraph\ScriptGraphPin.h" />
-    <ClInclude Include="ScriptGraph\ScriptGraphTypes.h" />
-    <ClInclude Include="Graph\NodeGraph.h" />
-    <ClInclude Include="ScriptGraph\ScriptGraph.h" />
+    <ClInclude Include="Internal\json.hpp" />
+    <ClInclude Include="Internal\MuninGraphCommon.h" />
     <ClInclude Include="MuninGraph.h" />
-    <ClInclude Include="MuninGraph.pch.h" />
-    <ClInclude Include="Graph\GlobalUID.h" />
+    <ClInclude Include="MuninGraphImpl.h" />
+    <ClInclude Include="NodeGraph\NodeGraphCommon.h" />
+    <ClInclude Include="NodeGraph\NodeGraphEdge.h" />
+    <ClInclude Include="NodeGraph\NodeGraphSchema.h" />
+    <ClInclude Include="NodeGraph\NodeGraphPin.h" />
+    <ClInclude Include="NodeGraph\NodeGraphNode.h" />
+    <ClInclude Include="NodeGraph\NodeGraph.h" />
+    <ClInclude Include="ScriptGraphNodeBases.h" />
+    <ClInclude Include="ScriptGraph\Nodes\EventNodes.h" />
+    <ClInclude Include="ScriptGraph\ScriptGraph.h" />
+    <ClInclude Include="ScriptGraph\ScriptGraphCommon.h" />
+    <ClInclude Include="ScriptGraph\ScriptGraphEdge.h" />
     <ClInclude Include="ScriptGraph\ScriptGraphNode.h" />
+    <ClInclude Include="ScriptGraph\ScriptGraphPayload.h" />
+    <ClInclude Include="ScriptGraph\ScriptGraphPin.h" />
     <ClInclude Include="ScriptGraph\ScriptGraphSchema.h" />
-    <ClInclude Include="ScriptGraph\Nodes\SGNode_Variable.h" />
-    <ClInclude Include="ScriptGraph\Types\RegisterScriptGraphTypes.h" />
-    <ClInclude Include="ScriptGraph\Nodes\Events\SGNode_EventBase.h" />
+    <ClInclude Include="ScriptGraph\ScriptGraphVariable.h" />
+    <ClInclude Include="Types\TypeRegistry.h" />
+    <ClInclude Include="NodeGraph\UID.h" />
+    <ClInclude Include="ScriptGraph\Nodes\VariableNodes.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Graph\GraphColor.cpp" />
-    <ClCompile Include="ScriptGraph\Nodes\SGNode_DebugText.cpp" />
-    <ClCompile Include="ScriptGraph\Nodes\SGNode_CastToString.cpp" />
-    <ClCompile Include="ScriptGraph\ScriptGraphDataObject.cpp" />
-    <ClCompile Include="Graph\NodeGraphPin.cpp" />
-    <ClCompile Include="Graph\NodeGraphSchema.cpp" />
-    <ClCompile Include="Graph\NodeGraphNode.cpp" />
-    <ClCompile Include="Graph\NodeGraphEdge.cpp" />
-    <ClCompile Include="ScriptGraph\Nodes\Events\SGNode_EventTick.cpp" />
-    <ClCompile Include="ScriptGraph\Nodes\Math\SGNode_MathOps.cpp" />
-    <ClCompile Include="ScriptGraph\Nodes\Events\SGNode_EventBeginPlay.cpp" />
-    <ClCompile Include="ScriptGraph\ScriptGraphTypes.cpp" />
-    <ClCompile Include="ScriptGraph\ScriptGraphVariable.cpp" />
-    <ClCompile Include="ScriptGraph\ScriptGraphPin.cpp" />
-    <ClCompile Include="Graph\NodeGraph.cpp" />
+    <ClCompile Include="Internal\MuninGraphCommon.cpp" />
+    <ClCompile Include="MuninGraph.cpp" />
+    <ClCompile Include="MuninGraphImpl.cpp" />
+    <ClCompile Include="NodeGraph\NodeGraphCommon.cpp" />
+    <ClCompile Include="NodeGraph\NodeGraphSchema.cpp" />
+    <ClCompile Include="NodeGraph\NodeGraphPin.cpp" />
+    <ClCompile Include="NodeGraph\NodeGraphNode.cpp" />
+    <ClCompile Include="NodeGraph\NodeGraph.cpp" />
+    <ClCompile Include="ScriptGraphNodeBases.cpp" />
+    <ClCompile Include="ScriptGraph\Nodes\EventNodes.cpp" />
     <ClCompile Include="ScriptGraph\ScriptGraph.cpp" />
-    <ClCompile Include="MuninGraph.pch.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">Create</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="Graph\GlobalUID.cpp" />
+    <ClCompile Include="ScriptGraph\ScriptGraphEdge.cpp" />
     <ClCompile Include="ScriptGraph\ScriptGraphNode.cpp" />
+    <ClCompile Include="ScriptGraph\ScriptGraphPayload.cpp" />
+    <ClCompile Include="ScriptGraph\ScriptGraphPin.cpp" />
     <ClCompile Include="ScriptGraph\ScriptGraphSchema.cpp" />
-    <ClCompile Include="ScriptGraph\Nodes\SGNode_Variable.cpp" />
-    <ClCompile Include="ScriptGraph\Nodes\Events\SGNode_EventBase.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="cpp.hint" />
-    <None Include="packages.config" />
+    <ClCompile Include="ScriptGraph\ScriptGraphVariable.cpp" />
+    <ClCompile Include="Types\TypeRegistry.cpp" />
+    <ClCompile Include="NodeGraph\UID.cpp" />
+    <ClCompile Include="ScriptGraph\Nodes\VariableNodes.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.targets" Condition="Exists('..\..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.targets')" />
   </ImportGroup>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.props'))" />
-    <Error Condition="!Exists('..\..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.targets'))" />
-  </Target>
 </Project>

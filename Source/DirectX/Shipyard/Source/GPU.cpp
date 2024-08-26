@@ -329,7 +329,7 @@ void GPU::ResizeDepthBuffer(unsigned width, unsigned height)
 bool GPU::LoadTexture(Texture *outTexture, const std::filesystem::path &aFileName, bool generateMips)
 {
     if (!std::filesystem::is_regular_file(aFileName) ||
-        aFileName.extension() != ".dds" && aFileName.extension() != ".png")
+        aFileName.extension() != ".dds" && aFileName.extension() != ".png" && aFileName.extension() != ".jpg")
     {
         const std::string error = "Failed to load texture: " + aFileName.string() + " does not exist!";
         Logger::Err(error);
@@ -348,7 +348,7 @@ bool GPU::LoadTexture(Texture *outTexture, const std::filesystem::path &aFileNam
                                                         outTexture->m_Resource.ReleaseAndGetAddressOf(), generateMips,
                                                         0, nullptr, &isCubeMap));
     }
-    else if (aFileName.extension() == ".png")
+    else if (aFileName.extension() == ".png" || aFileName.extension() == ".jpg")
     {
         Helpers::ThrowIfFailed(CreateWICTextureFromFile(m_Device.Get(), resourceUpload, aFileName.wstring().c_str(),
                                                         outTexture->m_Resource.ReleaseAndGetAddressOf(), generateMips));

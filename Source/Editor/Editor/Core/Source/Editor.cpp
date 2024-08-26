@@ -17,6 +17,11 @@
 #include <Tools/ImGUI/ImGUI/backends/imgui_impl_win32.h>
 #include <Tools/ImGUI/ImGUI/imgui.h>
 #include <Tools/ImGui/ImGui/backends/imgui_impl_dx12.h>
+#include <Tools/ImGui/MuninGraph/MuninGraph.h>
+#include <Tools/ImGui/MuninGraph/ScriptGraph/ScriptGraphNode.h>
+#include <Tools/ImGui/MuninGraphEditor/ScriptGraphEditor/ScriptGraphEditorTypes.h>
+#include <Tools/ImGui/ScriptGraphNodes/NodeIncludes.h>
+#include <Tools/ImGui/ScriptGraphNodes/ScriptGraphTypes.h>
 
 #include "../Editor.h"
 #include "DirectX/Shipyard/GPU.h"
@@ -342,7 +347,6 @@ bool Editor::Initialize(HWND aHandle)
     ThreadPool::Get().Init();
     // ColorManager::InitializeDefaultColors();
     ColorManager::LoadColorsFromFile("Settings/ColorManagerData.ShipyardText");
-
 #ifdef _DEBUG
     GraphicsEngine::Get().Initialize(aHandle, true);
 #else
@@ -370,6 +374,8 @@ bool Editor::Initialize(HWND aHandle)
 
     LoadFont();
     SetupImGuiStyle();
+    MuninGraph::Get().Initialize();
+    Graph::GraphTool::Init();
 
 #if PHYSX
     Shipyard_PhysX::Get().InitializePhysx();
@@ -739,6 +745,10 @@ void Editor::TopBar()
             if (ImGui::Selectable("ColorPresets"))
             {
                 g_EditorWindows.emplace_back(std::make_shared<ColorPresets>());
+            }
+            if (ImGui::Selectable("GraphTool"))
+            {
+                g_EditorWindows.emplace_back(std::make_shared<CustomFuncWindow>(&Graph::GraphTool::RunEditor));
             }
 
             ImGui::EndMenu();

@@ -1,28 +1,72 @@
-﻿#include "MuninGraph.pch.h"
-#include "ScriptGraphPin.h"
+﻿#include "ScriptGraphPin.h"
+#include "ScriptGraphEdge.h"
+#include "ScriptGraphNode.h"
 
-#include "ScriptGraphTypes.h"
-#include "../Graph/NodeGraphPin.h"
-
-void ScriptGraphPin::InitVariableBlock(const std::type_index& aType)
+ScriptGraphPin ScriptGraphPin::CreatePin(ScriptGraphNode* aOwner, std::string_view aLabel, ScriptGraphPinType aType,
+                                         PinDirection aDirection, bool aHideLabelOnNode)
 {
-	assert(myType == ScriptGraphPinType::Variable && "This is not a Variable pin!");
-	SetDataObject(ScriptGraphDataTypeRegistry::GetDataObjectOfType(aType));
+	ScriptGraphPin pin(aOwner, aLabel, aDirection, aType);
+	pin.myLabelVisible = !aHideLabelOnNode;
+	return pin;
 }
 
-bool ScriptGraphPin::GetRawData(void* outData, size_t outDataSize) const
+ScriptGraphPin ScriptGraphPin::CreateDataPin(ScriptGraphNode* aOwner, std::string_view aLabel, ScriptGraphPinType aType,
+	PinDirection aDirection, std::type_index aDataType, bool aHideLabelOnNode)
 {
-	if (outDataSize >= myData.TypeData->GetTypeSize())
+	ScriptGraphPin pin(aOwner, aLabel, aDirection, aType, aDataType);
+	pin.myLabelVisible = !aHideLabelOnNode;
+	return pin;
+}
+
+ScriptGraphPin ScriptGraphPin::CreateDynamicPin(ScriptGraphNode* aOwner, std::string_view aLabel,
+	ScriptGraphPinType aType, PinDirection aDirection)
+{
+	if((!aOwner->HasFlag(GraphNodeFlag_DynamicInputPins) && aDirection == PinDirection::Input)
+		|| (!aOwner->HasFlag(GraphNodeFlag_DynamicOutputPins) && aDirection == PinDirection::Output)
+		)
 	{
-		memcpy_s(outData, outDataSize, myData.Ptr, myData.TypeData->GetTypeSize());
+		throw std::runtime_error("Node is not configured to have dynamic pins!");
+	}
+
+	ScriptGraphPin pin(aOwner, aLabel, aDirection, aType);
+	pin.myLabelVisible = true;
+	pin.myIsDynamicPin = true;
+	return pin;
+}
+
+ScriptGraphPin ScriptGraphPin::CreateDynamicDataPin(ScriptGraphNode* aOwner, std::string_view aLabel,
+                                                    ScriptGraphPinType aType, PinDirection aDirection, std::type_index aDataType)
+{
+	if((!aOwner->HasFlag(GraphNodeFlag_DynamicInputPins) && aDirection == PinDirection::Input)
+		|| (!aOwner->HasFlag(GraphNodeFlag_DynamicOutputPins) && aDirection == PinDirection::Output)
+		)
+	{
+		throw std::runtime_error("Node is not configured to have dynamic pins!");
+	}
+
+	ScriptGraphPin pin(aOwner, aLabel, aDirection, aType, aDataType);
+	pin.myLabelVisible = true;
+	pin.myIsDynamicPin = true;
+	return pin;
+}
+
+bool ScriptGraphPin::TryChangeDataType(const RegisteredType* aType)
+{
+	if(*aType != RegisteredType::InvalidType)
+	{
+		myData = TypedDataContainer::Create(aType);
 		return true;
 	}
 
 	return false;
 }
 
-void ScriptGraphPin::SetRawData(const void* inData, size_t inDataSize)
+ScriptGraphPin::ScriptGraphPin(ScriptGraphNode* aOwner, std::string_view aLabel, PinDirection aDirection,
+                               ScriptGraphPinType aType, std::type_index aDataType): NodeGraphPin(aOwner, aLabel, aDirection), myPinType(aType)
 {
-	assert(myData.TypeData->GetTypeSize() >= inDataSize);
-	memcpy_s(myData.Ptr, myData.TypeData->GetTypeSize(), inData, inDataSize);
+	// If we get a nullptr type we defer type data construction till later.
+	if(aDataType != typeid(std::nullptr_t))
+	{
+		myData = TypedDataContainer::Create(aDataType);	
+	}	
 }

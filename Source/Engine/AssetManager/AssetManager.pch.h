@@ -8,7 +8,7 @@
 #define ASSETMANAGER_PCH_H
 
 #define NOMINMAX
-
+#define WIN32_LEAN_AND_MEAN
 // Native shipyard types,, will be moved to global include later for dependent projects
 #include "Engine/PersistentSystems/Scene.h"
 #include <Engine/AssetManager/ComponentSystem/Component.h>
@@ -38,6 +38,7 @@
 #include <cassert>
 #include <cctype>
 #include <cmath>
+#include <exception>
 #include <filesystem>
 #include <fstream>
 #include <functional>
@@ -46,6 +47,7 @@
 #include <random>
 #include <ranges>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <tuple>

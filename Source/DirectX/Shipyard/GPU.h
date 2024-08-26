@@ -13,6 +13,7 @@
 #include <DirectX/XTK/DescriptorHeap.h>
 #include <DirectX/XTK/GraphicsMemory.h>
 #include <DirectX/directx/d3d12.h>
+#include <array>
 #include <dxgi1_6.h>
 
 #include "CommandList.h"
@@ -20,7 +21,6 @@
 #include "Gpu_fwd.h"
 #include "RootSignature.h"
 #include "Texture.h"
-
 
 class GPUSupport
 {

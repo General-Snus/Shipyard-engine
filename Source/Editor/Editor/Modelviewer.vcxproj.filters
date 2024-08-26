@@ -42,36 +42,6 @@
     <ClInclude Include="Windows\EditorWindows\EditorWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\Event_Icon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\Function_Icon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\GetGradient.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\Graph_Hazard.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\RegisterExternalNodes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\RegisterExternalTypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\ScriptGraphEditor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\ScriptGraphNodeGradient.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Windows\EditorWindows\ChainGraph\GraphEditorBase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Windows\EditorWindows\ChainGraph\GraphTool.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Paths.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -111,6 +81,9 @@
     <ClInclude Include="Windows\EditorWindows\ColorPresets.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Windows\EditorWindows\ChainGraph\GraphTool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Source\Editor.cpp">
@@ -132,18 +105,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Windows\EditorWindows\Source\EditorWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\RegisterExternalNodes.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Windows\EditorWindows\ChainGraph\ScriptGraphEditor\ScriptGraphEditor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Windows\EditorWindows\ChainGraph\GraphEditorBase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Windows\EditorWindows\ChainGraph\GraphTool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Core\Source\Paths.cpp">
@@ -183,6 +144,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Windows\EditorWindows\Source\ColorPresets.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\EditorWindows\ChainGraph\GraphTool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

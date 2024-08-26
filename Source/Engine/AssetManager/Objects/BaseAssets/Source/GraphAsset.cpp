@@ -1,16 +1,18 @@
 #include "Engine/AssetManager/AssetManager.pch.h"
 
 #include "../GraphAsset.h"
-#include <Editor/Editor/Windows/EditorWindows/ChainGraph/GraphEditorBase.h>
-#include <Editor/Editor/Windows/EditorWindows/ChainGraph/GraphTool.h>
-#include <Tools/ImGui/MuninGraph/MuninScriptGraph.h>
+#include <Tools/ImGui/MuninGraph/MuninGraph.h>
+#include <Tools/ImGui/MuninGraphEditor/MuninGraphEditor.h>
 
+#include <Editor/Editor/Windows/EditorWindows/ChainGraph/GraphTool.h>
+#include <stdint.h>
 GraphAsset::GraphAsset(const std::filesystem::path &aFilePath) : AssetBase(aFilePath)
 {
 }
 
 void GraphAsset::Init()
 {
+    graphToEdit = std::make_shared<ScriptGraph>(AssetPath);
 
     if (!std::filesystem::exists(AssetPath))
     {
@@ -18,12 +20,18 @@ void GraphAsset::Init()
         return;
     }
 
-    std::ifstream file(AssetPath.string());
-    const std::string inGraph = std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
-    file.close();
-
-    ScriptGraphSchema::DeserializeScriptGraph(graphToEdit, inGraph);
-
+    std::ifstream file(AssetPath.string(), std::ios::binary);
+    if (file.is_open())
+    {
+        auto content = std::vector<uint8_t>((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+        graphToEdit->Deserialize(content);
+        file.close();
+    }
+    else
+    {
+        Logger::Err("Failed to load graph: " + AssetPath.string());
+        return;
+    }
     isLoadedComplete = true;
 }
 
@@ -40,15 +48,18 @@ bool GraphAsset::InspectorView()
         return false;
     }
 
-    auto ScriptEditor = Graph::GraphTool::Get().OpenScriptingEditor(AssetPath);
+    auto ScriptEditor = Graph::GraphTool::OpenScriptingEditor(AssetPath);
 
-    if (!ScriptEditor->IsUsingSame(graphToEdit))
+    // Brackets of trust issue
+    try
     {
-        ScriptEditor->Init(graphToEdit, AssetPath);
+        ScriptEditor->Render();
+    }
+    catch (...)
+    {
+        Logger::Err("ScriptGraph Crashed Again...");
     }
 
-    ScriptEditor->Update(Timer::GetDeltaTime());
-    ScriptEditor->Render(AssetPath.stem().string());
     return false;
 }
 

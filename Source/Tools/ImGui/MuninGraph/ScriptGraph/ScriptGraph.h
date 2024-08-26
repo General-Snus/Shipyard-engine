@@ -1,79 +1,79 @@
-﻿#pragma once
-#include <functional>
-#include <memory>
+#pragma once
+#include "Internal/MuninGraphCommon.h"
+#include "NodeGraph/NodeGraph.h"
+#include "NodeGraph/NodeGraphCommon.h"
+#include "ScriptGraph/ScriptGraphEdge.h"
+#include "Types/TypeRegistry.h"
+#include <filesystem>
 
-struct ScriptGraphNodePayload;
+class ScriptGraphPayload;
 struct ScriptGraphVariable;
-class ScriptGraphPin;
-class ScriptGraphNode;
-struct NodeGraphEdge;
 class ScriptGraphSchema;
-class ScriptGraph;
+struct ScriptGraphEdge;
+class ScriptGraphNode;
+class GraphAsset;
+class ScriptGraphPin;
 
-class ScriptGraphInternal : public NodeGraph<ScriptGraphNode, ScriptGraphPin, NodeGraphEdge, ScriptGraphSchema>
+class ScriptGraph : public NodeGraph<ScriptGraphNode, ScriptGraphPin, ScriptGraphEdge, ScriptGraphSchema>
 {
-    // All ScriptGraph private things go in here.
-    typedef NodeGraph<ScriptGraphNode, ScriptGraphPin, NodeGraphEdge, ScriptGraphSchema> Super;
-
-    // Our Schema can do whatever it wants.
-    friend ScriptGraphSchema;
-    friend ScriptGraph;
-    friend class GraphComponent;
-    ScriptGraphInternal() = default;
-
-    // A map of all nodes that can start execution flow along with a node handle.
-    // This allows you to call a specific start node at a specific point via this handle.
-    std::unordered_map<std::string, std::shared_ptr<ScriptGraphNode>> myEntryPoints;
-    // Reverse lookup to find the entry handle from the Node UId;
-    std::unordered_map<size_t, std::string> myNodeUIDToEntryHandle;
-
-    std::unordered_map<std::string, std::shared_ptr<ScriptGraphVariable>> myVariables;
-
-    std::vector<size_t> myLastExecutedPath;
-
-    bool bShouldTick = false;
+    friend class ScriptGraphSchema;
+    friend class ScriptGraphEditor;
 
   public:
-    typedef std::function<void(const class ScriptGraph &, size_t, const std::string &)>
-        ScriptGraphErrorHandlerSignature;
+    ScriptGraph(const std::filesystem::path &graphPath, void *aOwner = nullptr);
 
-  private:
-    ScriptGraphErrorHandlerSignature myErrorDelegate;
+    bool Execute(std::string_view aEntryPointHandle);
+    bool ExecuteWithPayload(std::string_view aEntryPointHandle, const ScriptGraphPayload &aPayload);
+    void Tick(float aDeltaTime);
 
-  protected:
-    // Node interface goes here
-    virtual const ScriptGraphPin &GetDataSourcePin(size_t aPinUID, bool &outErrored) const override;
+    void Stop();
 
-    void ReportEdgeFlow(size_t anEdgeUID);
+    bool Serialize(std::vector<uint8_t> &outResult) override;
+    bool Deserialize(const std::vector<uint8_t> &inData) override;
 
-    void ReportFlowError(size_t aNodeUID, const std::string &anErrorMessage) const;
-
-  public:
-    const std::vector<size_t> &GetLastExecutedPath() const
+    FORCEINLINE const std::vector<size_t> &GetLastExecutedPath() const
     {
         return myLastExecutedPath;
     }
-    void ResetLastExecutedPath()
+    FORCEINLINE size_t GetNumActiveFunctions() const
     {
-        myLastExecutedPath.clear();
+        return myNumActiveFunctions;
     }
 
-    void Tick(float aDeltaTime);
-    void SetTicking(bool bTicking);
+    typedef std::function<void(const ScriptGraph *, size_t, std::string_view)> ScriptGraphErrorHandlerSignature;
 
     void BindErrorHandler(ScriptGraphErrorHandlerSignature &&aErrorHandler);
     void UnbindErrorHandler();
 
-    bool Run(const std::string &anEntryPointHandle);
-    bool RunWithPayload(const std::string &anEntryPointHandle, const ScriptGraphNodePayload &aPayload);
+    FORCEINLINE void *GetOwner() const
+    {
+        return myOwner;
+    }
+    const std::filesystem::path &GetGraphAssetPath() const
+    {
+        return m_GraphAssetPath;
+    }
 
-    ScriptGraphInternal(const ScriptGraphInternal &anOther) = delete;
-    ScriptGraphInternal operator=(const ScriptGraphInternal &anOther) = delete;
-};
+  protected:
+    void Reset() override;
 
-class ScriptGraph : public ScriptGraphInternal
-{
-    // These classes can access Protected items in ScriptGraphInternal.
-    friend class ScriptGraphNode;
-    friend class NodeGraphNode<ScriptGraphPin, ScriptGraph, ScriptGraphSchema>;
+  private:
+    void SetupScriptGraph();
+
+    bool ExecuteInternal(ScriptGraphNode *aNode, size_t aPinId);
+    void ReportError(size_t aNodeId, std::string_view aErrorMessage) const;
+
+    std::filesystem::path m_GraphAssetPath;
+
+    bool myShouldStop;
+    size_t myNumActiveFunctions;
+    void *myOwner;
+
+    std::vector<size_t> myLastExecutedPath;
+    std::unordered_map<std::string, size_t, string_hash, std::equal_to<>> myEntryPoints;
+    std::unordered_map<size_t, std::string> myNodeIdToEntryPoint;
+
+    std::unordered_map<std::string, ScriptGraphVariable, string_hash, std::equal_to<>> myVariables;
+
+    ScriptGraphErrorHandlerSignature myErrorDelegate;
 };

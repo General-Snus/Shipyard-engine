@@ -1,185 +1,138 @@
 ﻿#pragma once
-#include <array>
-
-#include "../Graph/NodeGraphNode.h"
 #include "ScriptGraph.h"
+#include "ScriptGraphCommon.h"
 #include "ScriptGraphPin.h"
-#include "ScriptGraphSchema.h"
+#include "Tools/ImGui/MuninGraph/NodeGraph/NodeGraphCommon.h"
+#include "Tools/ImGui/MuninGraph/NodeGraph/NodeGraphNode.h"
 
+class ScriptGraphPayload;
+class ScriptGraphSchema;
 class ScriptGraph;
+class ScriptGraphPin;
 
-struct ScriptGraphNodePayload
+class ScriptGraphNode : public NodeGraphNode<ScriptGraphPin, ScriptGraph, ScriptGraphSchema>
 {
-    friend class ScriptGraphNode;
-
-  private:
-    std::unordered_map<std::string, ScriptGraphDataObject> Data;
+    friend ScriptGraphSchema;
 
   public:
-    template <typename T> void SetVariable(const std::string &aString, const T &aValue)
+    virtual NodeResult Enter(size_t anEntryPinId, NodeEntryType aEntryType);
+    virtual NodeResult DoOperation()
     {
-        if (const auto it = Data.find(aString); it != Data.end())
-        {
-            if (it->second.TypeData->GetType() != typeid(T))
-            {
-                ScriptGraphDataObject::Create<T>(it->second);
-            }
-            it->second.SetData(aValue);
-        }
-        else
-        {
-            Data.insert({aString, ScriptGraphDataObject::Create(aValue)});
-        }
+        return NoExec();
     }
 
-    template <typename T> bool TryGetVariable(const std::string &aString, T &outValue) const
-    {
-        if (const auto it = Data.find(aString); it != Data.end())
-        {
-            if (it->second.TypeData->GetType() == typeid(T))
-            {
-                outValue = it->second.GetData<T>();
-                return true;
-            }
-        }
+    const std::vector<std::type_index> &GetSupportedSchemas() const override;
 
-        return false;
-    }
-};
-
-class ScriptGraphNode : public NodeGraphNode<ScriptGraphPin, ScriptGraph, ScriptGraphSchema>,
-                        public std::enable_shared_from_this<ScriptGraphNode>
-{
-    typedef NodeGraphNode<ScriptGraphPin, ScriptGraph, ScriptGraphSchema> ParentClass;
-
-    bool isExecNode = false;
-
-    std::string myErrorMessage;
-    bool hasErrored = false;
-
-  protected:
-    template <typename DataType>
-    void CreateDataPin(const std::string &aLabel, PinDirection aDirection, bool hideLabelOnNode = false)
-    {
-        AddPin(ScriptGraphPin::CreateDataPin<DataType>(AsSharedPtr(), aLabel, ScriptGraphPinType::Data, PinIcon::Circle,
-                                                       aDirection, hideLabelOnNode));
-    }
-
-    void CreateVariablePin(const std::string &aLabel, PinDirection aDirection, bool hideLabelOnNode = false)
-    {
-        AddPin(ScriptGraphPin::CreatePin(AsSharedPtr(), aLabel, ScriptGraphPinType::Variable, PinIcon::Circle,
-                                         aDirection, hideLabelOnNode));
-    }
-
-    void CreateExecPin(const std::string &aLabel, PinDirection aDirection, bool hideLabelOnNode = false)
-    {
-        AddPin(ScriptGraphPin::CreatePin(AsSharedPtr(), aLabel, ScriptGraphPinType::Exec, PinIcon::Exec, aDirection,
-                                         hideLabelOnNode));
-        isExecNode = true;
-    }
-
-    virtual size_t Exit();
-    virtual size_t ExitViaPin(const std::string &aPinLabel);
-
-    size_t ExitWithError(const std::string &anErrorMessage);
-
-    std::shared_ptr<ScriptGraphNode> AsSharedPtr()
-    {
-        return shared_from_this();
-    }
-
-  public:
-    /**
-     * Called when this node is asked to Execute. This will ONLY happen if the node has at least one Exec Input Pin.
-     * By default this function will call DoOperation on the node but you may modify this behavior as you please.
-     * @param anEntryPinUID The Pin that caused this node to Execute (i.e. an Input Exec pin we have). If we have no
-     * input Exec pins this will be 0!
-     * @returns The Pin Index of the pin we want to exit on after performing our operation or 0 if we don't have a pin
-     * to exit on.
-     */
-    virtual size_t Exec(size_t anEntryPinUID);
-
-    virtual size_t DoOperation()
-    {
-        return Exit();
-    }
-
-    virtual void DeliverPayload(const ScriptGraphNodePayload &aPayload);
-
-    virtual ~ScriptGraphNode() override = default;
+    ~ScriptGraphNode() override = default;
 
     FORCEINLINE bool IsExecNode() const
     {
-        return isExecNode;
+        return myIsExecNode;
     }
-    FORCEINLINE virtual bool IsEntryNode() const
-    {
-        return false;
-    }
-    FORCEINLINE virtual bool IsInternalOnly() const
-    {
-        return false;
-    }
-    FORCEINLINE virtual bool IsDebugOnly() const
-    {
-        return false;
-    }
-
-    // If True, this node will draw without a header if it has no Exec Pins.
-    FORCEINLINE virtual bool IsSimpleNode() const
-    {
-        return true;
-    }
-
-    FORCEINLINE virtual std::string GetDescription() const
-    {
-        return "A ScriptGraph Node.";
-    }
-
-    virtual FORCEINLINE GraphColor GetNodeHeaderColor() const
-    {
-        return GraphColor(80, 124, 153, 255);
-    };
-
-    // Controls how many instances of this node may coexist in the same graph.
-    // If > 0 this will be enforced.
-    FORCEINLINE virtual unsigned MaxInstancesPerGraph() const
-    {
-        return 0;
-    }
-
-    FORCEINLINE virtual ScriptGraphNodeType GetNodeType() const
-    {
-        return ScriptGraphNodeType::Undefined;
-    }
-
-    FORCEINLINE bool HasError() const
-    {
-        return hasErrored;
-    }
-    FORCEINLINE const std::string &GetErrorMessage() const
+    FORCEINLINE std::string_view GetError() const
     {
         return myErrorMessage;
     }
+
+    virtual FORCEINLINE bool IsInternalOnly() const
+    {
+        return false;
+    }
+    virtual FORCEINLINE ScriptGraphNodeType GetNodeType() const
+    {
+        return ScriptGraphNodeType::Function;
+    }
+
+    void DeliverPayload(const ScriptGraphPayload &aPayload);
+
+  protected:
+    void CreateExecPin(std::string_view aLabel, PinDirection aDirection, bool showLabelOnNode = true);
+    void CreateDataPin(std::string_view aLabel, PinDirection aDirection, std::type_index aType,
+                       bool hideLabelOnNode = false);
+
+    template <typename T>
+    void CreateDataPin(std::string_view aLabel, PinDirection aDirection, bool hideLabelOnNode = false)
+    {
+        // AddPin(ScriptGraphPin::CreateDataPin(this, aLabel, ScriptGraphPinType::Data, aDirection, typeid(T),
+        // hideLabelOnNode));
+        CreateDataPin(aLabel, aDirection, typeid(T), hideLabelOnNode);
+    }
+
+    void RemovePin(size_t aPinID) override;
+
+    // Return this when the node has no Exec pins.
+    NodeResult NoExec();
+
+    // Call this to send execution out on a specific pin.
+    // This can be done multiple times, i.e. if you have a loop.
+    // Needs to be done at least once on an Exec node to continue the myGraph.
+    virtual NodeResult ExecPin(std::string_view aPinLabel, NodeResultState aState = NodeResultState::Finished);
+
+    // Return this if something goes wrong.
+    virtual NodeResult Error(std::string_view aErrorMessage);
+
+    void ClearError();
+
+    template <typename T> bool GetPinData(std::string_view aPinLabel, T &outData) const
+    {
+        const ScriptGraphPin &pin = GetPin(aPinLabel);
+        if (pin.IsConnected())
+        {
+            bool isFound = false;
+            const ScriptGraphPin &actualPin = GetDataSourcePin(pin.GetUID(), isFound);
+            if (!isFound)
+                return false;
+
+            if (actualPin.GetUID() != pin.GetUID() && !actualPin.GetOwner()->IsExecNode())
+            {
+                // If this node isn't an exec node we need to ask it to
+                // evaluate itself so we can get the data we want.
+                // Just like UE we force the node to recalculate and we
+                // do not cache any result.
+
+                // ScriptGraph design says that this node should not return
+                // a pin to continue on since it's not an exec node.
+                // Therefore we don't need to take care of that part.
+                // This should recursively call GetDataSourcePin as needed.
+                const NodeResult nodeResult = actualPin.GetOwner()->DoOperation();
+                if (nodeResult.State() == NodeResultState::Error)
+                    return false;
+            }
+
+            return actualPin.TryGetValue(outData);
+        }
+
+        return pin.TryGetValue(outData);
+    }
+
+    template <typename T> void SetPinData(std::string_view aPinLabel, const T &aData)
+    {
+        const ScriptGraphPin &pin = GetPin(aPinLabel);
+        pin.TrySetValue(aData);
+    }
+
+    bool ChangePinDataType(size_t aPinId, const RegisteredType *aType);
+
+    // Finds the correct pin to read data from by checking the connections of Pin.
+    // Will return Pin if no connections are found, or the source Pin if there is
+    // a connection.
+    virtual const ScriptGraphPin &GetDataSourcePin(size_t aPinId, bool &outFound) const;
+
+  public:
+    // These are functions triggered by the editor. Not needed in runtime.
+    // Since people seem afraid of macro defines to include things we'll
+    // just have a macro define to avoid including things x)
+#ifndef NOEDITOR
+    //~ Begin User Functions
+    virtual void OnUserChangedPinValue(ScriptGraphSchema *aSchema, size_t aPinId);
+    virtual void OnUserAddedPin(ScriptGraphSchema *aSchema, size_t aPinId);
+    virtual void OnUserRemovedPin(ScriptGraphSchema *aSchema, size_t aPinId);
+    //~
+#endif
+
+  private:
+    // Node state variables
+    bool myHasError = false;
+    bool myIsExecNode = false;
+    std::string myErrorMessage;
 };
-
-template <typename N> struct RegisterScriptNode
-{
-    static inline bool IsRegistered = ScriptGraphSchema::RegisterNodeType<N>();
-};
-
-template <typename N, typename B> struct RegisterScriptNodeWithBase
-{
-    static inline bool IsRegistered = ScriptGraphSchema::RegisterNodeTypeWithBase<N, B>();
-};
-
-// Declare a run of the mill Script Graph Node
-#define BeginScriptGraphNode(T)                                                                                        \
-    class T : public ScriptGraphNode, public RegisterScriptNode<T>, public Munin::ObjectGUID<T>
-
-// Declare a node that is intended to work as base for other Script Graph Nodes
-#define BeginScriptGraphBaseNode(T) class T : public ScriptGraphNode
-
-// Declare a node that inherits from a node declared with BeginScriptGraphBaseNode(T).
-#define BeginScriptGraphDerivedNode(T, B)                                                                              \
-    class T : public B, public RegisterScriptNodeWithBase<T, B>, public Munin::ObjectGUID<T>

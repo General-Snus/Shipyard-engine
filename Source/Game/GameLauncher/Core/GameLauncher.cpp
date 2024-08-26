@@ -109,7 +109,7 @@ void GameLauncher::Start()
 
     Object2_Room1 = GameObject::Create("Object2_Room1");
     Object2_Room1.AddComponent<cMeshRenderer>("Models/Cube.fbx");
-    Object2_Room1.AddComponent<GraphComponent>("Graphs/Main1Graph.Graph");
+    // Object2_Room1.AddComponent<GraphComponent>("Graphs/Main1Graph.Graph");
     Object2_Room1.AddComponent<cCollider>();
     Object2_Room1.transform().SetPosition(0, 4, 15);
     Object2_Room1.transform().SetScale(5, 5, 5);

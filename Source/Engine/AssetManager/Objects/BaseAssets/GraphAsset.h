@@ -15,7 +15,9 @@ class GraphAsset : public AssetBase
     bool InspectorView() override;
     std::shared_ptr<TextureHolder> GetEditorIcon() override;
 
+    
+     std::shared_ptr<ScriptGraph> GetGraph() { return graphToEdit; }
   private:
     std::shared_ptr<ScriptGraph> graphToEdit;
 };
-REFL_AUTO(type(GraphAsset))
+REFL_AUTO(type(GraphAsset));
