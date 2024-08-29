@@ -4,6 +4,7 @@
 #include "NodeGraph/NodeGraphCommon.h"
 #include "ScriptGraph/ScriptGraphEdge.h"
 #include "Types/TypeRegistry.h"
+#include <Engine/AssetManager/ComponentSystem/UUID.h>
 #include <filesystem>
 
 class ScriptGraphPayload;
@@ -24,7 +25,7 @@ class ScriptGraph : public NodeGraph<ScriptGraphNode, ScriptGraphPin, ScriptGrap
 
     bool Execute(std::string_view aEntryPointHandle);
     bool ExecuteWithPayload(std::string_view aEntryPointHandle, const ScriptGraphPayload &aPayload);
-    void Tick(float aDeltaTime);
+    void Tick(float aDeltaTime, SY::UUID id = 0);
 
     void Stop();
 

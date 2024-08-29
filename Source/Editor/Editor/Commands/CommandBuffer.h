@@ -57,7 +57,7 @@ class CommandBuffer
     // assumed complete command
     inline void AddCommand(const CommandPacket &ptr)
     {
-        if (commandList.size() > cursor && ptr.front()->Merge(commandList[cursor].back()))
+        if (ptr.empty() || commandList.size() > cursor && ptr.front()->Merge(commandList[cursor].back()))
         {
             return;
         }
@@ -97,8 +97,6 @@ class CommandBuffer
 
     inline BaseCommand *GetLastCommand()
     {
-        assert(!commandList.back().empty() && "Got nullptr back");
-        assert(commandList.back().back() != nullptr);
         if (commandList.empty() || commandList.back().empty())
         {
             return nullptr;

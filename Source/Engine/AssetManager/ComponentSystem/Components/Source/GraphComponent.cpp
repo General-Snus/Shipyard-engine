@@ -39,7 +39,7 @@ void GraphComponent::Update()
     {
         if (&m_Graph && m_Graph->isLoadedComplete && m_Graph->graphToEdit)
         {
-            m_Graph->graphToEdit->Tick(Timer::GetDeltaTime());
+            m_Graph->graphToEdit->Tick(Timer::GetDeltaTime(), myOwnerID);
         }
     }
     catch (const std::exception &e)

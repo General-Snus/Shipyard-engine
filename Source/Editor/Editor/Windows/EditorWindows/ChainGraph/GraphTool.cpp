@@ -37,12 +37,12 @@ void Graph::GraphTool::Init()
 void Graph::GraphTool::RunEditor()
 {
     auto ScriptEditor = Graph::GraphTool::OpenScriptingEditor("Autosave.Graph");
-    try
-    {
-        ScriptEditor->Render();
-    }
-    catch (...)
-    {
-        Logger::Err("ScriptGraph Crashed Again...");
-    }
+    // try
+    //{
+    ScriptEditor->Render();
+    //}
+    // catch (...)
+    //{
+    //    Logger::Err("ScriptGraph Crashed Again...");
+    //}
 }

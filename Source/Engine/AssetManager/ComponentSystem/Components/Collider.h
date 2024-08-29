@@ -19,6 +19,9 @@ class cCollider : public Component
     Vector3f GetNormalToward(Vector3f position) const;
     void Render() override;
 
+    void Destroy() override;
+
+
     eColliderType GetColliderType() const
     {
         return myCollider->GetColliderType();
@@ -36,7 +39,7 @@ class cCollider : public Component
     std::shared_ptr<T> GetColliderAssetOfType() const;
 
   private:
-    std::unordered_set<SY::UUID> currentlyCollidingObjects;
+    //std::unordered_set<SY::UUID> currentlyCollidingObjects;
     std::shared_ptr<ColliderAsset> myCollider;
     // std::vector<std::weak_ptr<Component>> myNotify;
 };

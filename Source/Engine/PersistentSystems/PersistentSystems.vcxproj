@@ -284,6 +284,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ArtificialInteligence\AICommands\AICommands.h" />
+    <ClInclude Include="System\Colission\OnCollision.h" />
     <ClInclude Include="PersistentSystems.pch.h" />
     <ClInclude Include="Physics\Raycast.h" />
     <ClInclude Include="Physics\PhysXInterpeter.h" />
@@ -302,6 +303,7 @@
     <ClCompile Include="Physics\Source\PhysXInterpeter.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneUtilities.cpp" />
+    <ClCompile Include="System\Colission\OnCollision.cpp" />
     <ClCompile Include="System\SceneGraph\WorldGraph.cpp" />
   </ItemGroup>
   <ItemGroup>

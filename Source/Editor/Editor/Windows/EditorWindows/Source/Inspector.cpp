@@ -17,7 +17,6 @@ Inspector::Inspector()
 
 void Inspector::ToFront()
 {
-    Logger::Log("Inspector::ToFront");
     toFront = true;
 }
 
@@ -98,10 +97,10 @@ void Inspector::RenderImGUi()
 
         ImGui::NewLine();
 
-        //for (const auto &i : )
+        // for (const auto &i : )
         //{
-        //    Logger::Log(i.Name());
-        //}
+        //     Logger::Log(i.Name());
+        // }
 
         // ImGui::Combo();
     }

@@ -1,6 +1,7 @@
 #include "Logging.h"
 
 #include "Windows.h"
+#include <filesystem>
 #include <iomanip>
 #include <iostream>
 #include <ostream>
@@ -79,8 +80,9 @@ void Logger::Log(const std::string &aString, const std::source_location &locatio
         {
             LogMsg msg;
             msg.messageType = LogType::message;
-            msg.message = "[" + Timestamp() + "]" + location.file_name() + "/" + location.function_name() +
-                          std::to_string(location.line()) + " [   LOG   ] " + aString;
+            std::filesystem::path sourceFile = location.file_name();
+            msg.message = std::format("[LOG] [{}] {} {} {} -> {}", Timestamp(), sourceFile.filename().string(),
+                                      location.function_name(), location.line(), aString);
             OutputDebugStringA(msg.message.c_str());
             m_Buffer.Add(msg);
         }
@@ -107,8 +109,9 @@ void Logger::Warn(const std::string &aString, const std::source_location &locati
         if (shouldPrintToOutput)
         {
             LogMsg msg;
-            msg.message = "[" + Timestamp() + "]" + location.file_name() + "/" + location.function_name() +
-                          std::to_string(location.line()) + " [ WARNING ] " + aString;
+            std::filesystem::path sourceFile = location.file_name();
+            msg.message = std::format("[WARNING] [{}] {} {} {} -> {}", Timestamp(), sourceFile.filename().string(),
+                                      location.function_name(), location.line(), aString);
             msg.messageType = LogType::warning;
 
             OutputDebugStringA(msg.message.c_str());
@@ -136,8 +139,9 @@ void Logger::Err(const std::string &aString, const std::source_location &locatio
         if (shouldPrintToOutput)
         {
             LogMsg msg;
-            msg.message = "[" + Timestamp() + "]" + location.file_name() + "/" + location.function_name() +
-                          std::to_string(location.line()) + " [  ERROR  ] " + aString;
+            std::filesystem::path sourceFile = location.file_name();
+            msg.message = std::format("[ERROR] [{}] {} {} {} -> {}", Timestamp(), sourceFile.filename().string(),
+                                      location.function_name(), location.line(), aString);
             msg.messageType = LogType::error;
 
             OutputDebugStringA(msg.message.c_str());
@@ -169,8 +173,9 @@ void Logger::Succ(const std::string &aString, const std::source_location &locati
         if (shouldPrintToOutput)
         {
             LogMsg msg;
-            msg.message = "[" + Timestamp() + "]" + location.file_name() + "/" + location.function_name() +
-                          std::to_string(location.line()) + "[ SUCCESS ] " + aString;
+            std::filesystem::path sourceFile = location.file_name();
+            msg.message = std::format("[SUCCESS] [{}] {} {} {} -> {}", Timestamp(), sourceFile.filename().string(),
+                                      location.function_name(), location.line(), aString);
             msg.messageType = LogType::success;
             OutputDebugStringA(msg.message.c_str());
             m_Buffer.Add(msg);
@@ -197,9 +202,12 @@ void Logger::Critical(const std::exception &anException, unsigned aLevel, const 
         if (shouldPrintToOutput)
         {
             LogMsg msg;
-            msg.message = "[" + Timestamp() + "]" + location.file_name() + "/" + location.function_name() +
-                          std::to_string(location.line()) + std::string(aLevel, ' ') + "[  FATAL  ] " +
-                          anException.what();
+
+            std::filesystem::path sourceFile = location.file_name();
+            msg.message =
+                std::format("[FATAL] [{}] {} {} {} \nSeverity {}\n{}", Timestamp(), sourceFile.filename().string(),
+                            location.function_name(), location.line(), aLevel, anException.what());
+
             msg.messageType = LogType::critical;
             OutputDebugStringA(msg.message.c_str());
             m_Buffer.Add(msg);
@@ -244,8 +252,10 @@ void Logger::Critical(const std::string &anExceptionText, unsigned aLevel, const
         if (shouldPrintToOutput)
         {
             LogMsg msg;
-            msg.message = "[" + Timestamp() + "]" + location.file_name() + "/" + location.function_name() +
-                          std::to_string(location.line()) + std::string(aLevel, ' ') + "[  FATAL  ] " + anExceptionText;
+            std::filesystem::path sourceFile = location.file_name();
+            msg.message =
+                std::format("[FATAL] [{}] {} {} {} \nSeverity {}\n{}", Timestamp(), sourceFile.filename().string(),
+                            location.function_name(), location.line(), aLevel, anExceptionText);
             msg.messageType = LogType::critical;
             OutputDebugStringA(msg.message.c_str());
             m_Buffer.Add(msg);

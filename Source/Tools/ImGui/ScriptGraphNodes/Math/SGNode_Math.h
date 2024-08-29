@@ -17,6 +17,246 @@ DECLARE_GRAPH_NODE(SGNode_MathAdd, ScriptGraphNode)
     NodeResult DoOperation() override;
 };
 
+DECLARE_GRAPH_NODE(SGNode_MathSubtract, ScriptGraphNode)
+{
+  public:
+    SGNode_MathSubtract();
+
+    FORCEINLINE std::string_view GetNodeTitle() const override
+    {
+        return "Subtract";
+    }
+    FORCEINLINE std::string_view GetNodeCategory() const override
+    {
+        return "Math";
+    }
+    NodeResult DoOperation() override;
+};
+
+DECLARE_GRAPH_NODE(SGNode_MathMultiply, ScriptGraphNode)
+{
+  public:
+    SGNode_MathMultiply();
+
+    FORCEINLINE std::string_view GetNodeTitle() const override
+    {
+        return "Multiply";
+    }
+    FORCEINLINE std::string_view GetNodeCategory() const override
+    {
+        return "Math";
+    }
+    NodeResult DoOperation() override;
+};
+
+DECLARE_GRAPH_NODE(SGNode_MathDivide, ScriptGraphNode)
+{
+  public:
+    SGNode_MathDivide();
+
+    FORCEINLINE std::string_view GetNodeTitle() const override
+    {
+        return "Divide";
+    }
+    FORCEINLINE std::string_view GetNodeCategory() const override
+    {
+        return "Math";
+    }
+    NodeResult DoOperation() override;
+};
+
+DECLARE_GRAPH_NODE(SGNode_MathPower, ScriptGraphNode)
+{
+  public:
+    SGNode_MathPower();
+
+    FORCEINLINE std::string_view GetNodeTitle() const override
+    {
+        return "Power";
+    }
+    FORCEINLINE std::string_view GetNodeCategory() const override
+    {
+        return "Math";
+    }
+    NodeResult DoOperation() override;
+};
+
+DECLARE_GRAPH_NODE(SGNode_MathLogarithm, ScriptGraphNode)
+{
+  public:
+    SGNode_MathLogarithm();
+
+    FORCEINLINE std::string_view GetNodeTitle() const override
+    {
+        return "Logarithm";
+    }
+    FORCEINLINE std::string_view GetNodeCategory() const override
+    {
+        return "Math";
+    }
+    NodeResult DoOperation() override;
+};
+
+DECLARE_GRAPH_NODE(SGNode_MathAbsolute, ScriptGraphNode)
+{
+  public:
+    SGNode_MathAbsolute();
+
+    FORCEINLINE std::string_view GetNodeTitle() const override
+    {
+        return "Absolute";
+    }
+    FORCEINLINE std::string_view GetNodeCategory() const override
+    {
+        return "Math";
+    }
+    NodeResult DoOperation() override;
+};
+
+DECLARE_GRAPH_NODE(SGNode_MathMinimum, ScriptGraphNode)
+{
+  public:
+    SGNode_MathMinimum();
+
+    FORCEINLINE std::string_view GetNodeTitle() const override
+    {
+        return "Min";
+    }
+    FORCEINLINE std::string_view GetNodeCategory() const override
+    {
+        return "Math";
+    }
+    NodeResult DoOperation() override;
+};
+
+DECLARE_GRAPH_NODE(SGNode_MathMaximum, ScriptGraphNode)
+{
+  public:
+    SGNode_MathMaximum();
+
+    FORCEINLINE std::string_view GetNodeTitle() const override
+    {
+        return "Max";
+    }
+    FORCEINLINE std::string_view GetNodeCategory() const override
+    {
+        return "Math";
+    }
+    NodeResult DoOperation() override;
+};
+
+DECLARE_GRAPH_NODE(SGNode_MathClamp, ScriptGraphNode)
+{
+  public:
+    SGNode_MathClamp();
+
+    FORCEINLINE std::string_view GetNodeTitle() const override
+    {
+        return "Clamp";
+    }
+    FORCEINLINE std::string_view GetNodeCategory() const override
+    {
+        return "Math";
+    }
+    NodeResult DoOperation() override;
+};
+
+DECLARE_GRAPH_NODE(SGNode_MathLessThan, ScriptGraphNode)
+{
+  public:
+    SGNode_MathLessThan();
+
+    FORCEINLINE std::string_view GetNodeTitle() const override
+    {
+        return "Less Than";
+    }
+    FORCEINLINE std::string_view GetNodeCategory() const override
+    {
+        return "Math";
+    }
+    NodeResult DoOperation() override;
+};
+
+DECLARE_GRAPH_NODE(SGNode_MathGreaterThan, ScriptGraphNode)
+{
+  public:
+    SGNode_MathGreaterThan();
+
+    FORCEINLINE std::string_view GetNodeTitle() const override
+    {
+        return "Greater Than";
+    }
+    FORCEINLINE std::string_view GetNodeCategory() const override
+    {
+        return "Math";
+    }
+    NodeResult DoOperation() override;
+};
+
+DECLARE_GRAPH_NODE(SGNode_MathEqual, ScriptGraphNode)
+{
+  public:
+    SGNode_MathEqual();
+
+    FORCEINLINE std::string_view GetNodeTitle() const override
+    {
+        return "Equals";
+    }
+    FORCEINLINE std::string_view GetNodeCategory() const override
+    {
+        return "Math";
+    }
+    NodeResult DoOperation() override;
+};
+
+DECLARE_GRAPH_NODE(SGNode_MathNotEqual, ScriptGraphNode)
+{
+  public:
+    SGNode_MathNotEqual();
+
+    FORCEINLINE std::string_view GetNodeTitle() const override
+    {
+        return "Not Equals";
+    }
+    FORCEINLINE std::string_view GetNodeCategory() const override
+    {
+        return "Math";
+    }
+    NodeResult DoOperation() override;
+};
+
+DECLARE_GRAPH_NODE(SGNode_MathSign, ScriptGraphNode)
+{
+  public:
+    SGNode_MathSign();
+
+    FORCEINLINE std::string_view GetNodeTitle() const override
+    {
+        return "Sign";
+    }
+    FORCEINLINE std::string_view GetNodeCategory() const override
+    {
+        return "Math";
+    }
+    NodeResult DoOperation() override;
+};
+
+DECLARE_GRAPH_NODE(SGNode_MathModulus, ScriptGraphNode)
+{
+  public:
+    SGNode_MathModulus();
+
+    FORCEINLINE std::string_view GetNodeTitle() const override
+    {
+        return "Modulus";
+    }
+    FORCEINLINE std::string_view GetNodeCategory() const override
+    {
+        return "Math";
+    }
+    NodeResult DoOperation() override;
+};
+
 DECLARE_GRAPH_NODE(MVNode_MakeVector, ScriptGraphNode)
 {
   public:
@@ -48,36 +288,6 @@ DECLARE_GRAPH_NODE(MVNode_BreakVector, ScriptGraphNode)
     }
     NodeResult DoOperation() override;
 };
-
-DECLARE_GRAPH_NODE(MVNode_Branch, ScriptGraphNode)
-{
-  public:
-    MVNode_Branch();
-    FORCEINLINE std::string_view GetNodeTitle() const override
-    {
-        return "Branch";
-    }
-    NodeResult DoOperation() override;
-    FORCEINLINE std::string_view GetNodeCategory() const override
-    {
-        return "Operation";
-    }
-};
-
-DECLARE_GRAPH_NODE(MVNode_ForLoop, ScriptGraphNode)
-{
-  public:
-    MVNode_ForLoop();
-    FORCEINLINE std::string_view GetNodeTitle() const override
-    {
-        return "For";
-    }
-    NodeResult DoOperation() override;
-    FORCEINLINE std::string_view GetNodeCategory() const override
-    {
-        return "Operation";
-    }
-};
 DECLARE_GRAPH_NODE(MVNode_GetGameObject, ScriptGraphNode)
 {
   public:
@@ -85,6 +295,21 @@ DECLARE_GRAPH_NODE(MVNode_GetGameObject, ScriptGraphNode)
     FORCEINLINE std::string_view GetNodeTitle() const override
     {
         return "Get GameObject";
+    }
+    NodeResult DoOperation() override;
+    FORCEINLINE std::string_view GetNodeCategory() const override
+    {
+        return "ComponentSystem";
+    }
+};
+
+DECLARE_GRAPH_NODE(MVNode_IsGameObject, ScriptGraphNode)
+{
+  public:
+    MVNode_IsGameObject();
+    FORCEINLINE std::string_view GetNodeTitle() const override
+    {
+        return "IsNameEquals";
     }
     NodeResult DoOperation() override;
     FORCEINLINE std::string_view GetNodeCategory() const override
@@ -123,6 +348,21 @@ DECLARE_GRAPH_NODE(MVNode_SetTransformPosition, ScriptGraphNode)
     }
 };
 
+DECLARE_GRAPH_NODE(MVNode_GetTransformScale, ScriptGraphNode)
+{
+  public:
+    MVNode_GetTransformScale();
+    FORCEINLINE std::string_view GetNodeTitle() const override
+    {
+        return "Get Transform Scale";
+    }
+    NodeResult DoOperation() override;
+    FORCEINLINE std::string_view GetNodeCategory() const override
+    {
+        return "Transform";
+    }
+};
+
 DECLARE_GRAPH_NODE(MVNode_SetTransformScale, ScriptGraphNode)
 {
   public:
@@ -138,6 +378,20 @@ DECLARE_GRAPH_NODE(MVNode_SetTransformScale, ScriptGraphNode)
     }
 };
 
+DECLARE_GRAPH_NODE(MVNode_GetTransformRotation, ScriptGraphNode)
+{
+  public:
+    MVNode_GetTransformRotation();
+    FORCEINLINE std::string_view GetNodeTitle() const override
+    {
+        return "Get Transform Rotation";
+    }
+    NodeResult DoOperation() override;
+    FORCEINLINE std::string_view GetNodeCategory() const override
+    {
+        return "Transform";
+    }
+};
 DECLARE_GRAPH_NODE(MVNode_SetTransformRotation, ScriptGraphNode)
 {
   public:

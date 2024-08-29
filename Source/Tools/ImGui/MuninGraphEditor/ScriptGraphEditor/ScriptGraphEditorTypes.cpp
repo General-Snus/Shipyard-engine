@@ -58,10 +58,6 @@ std::string ScriptGraphEditorType_String::ToString(const TypedDataContainer &aDa
     return *static_cast<const std::string *>(*aDataContainer);
 }
 
-static AutoRegisterEditorType<ScriptGraphEditorType_Internal_VoidPtr> zz__Internal_VoidPtrEditorTypeRegistration;
-ScriptGraphEditorType_Internal_VoidPtr::ScriptGraphEditorType_Internal_VoidPtr()
-    : ScriptGraphEditorType(TypeRegistry::Get().Resolve(typeid(void *))) {};
-
 // Bool type
 IMPLEMENT_EDITOR_TYPE(bool, Bool)
 
@@ -195,3 +191,5 @@ std::string ScriptGraphEditorType_UUID::ToString(const TypedDataContainer &aData
     SY::UUID value = *static_cast<const SY::UUID *>(*aDataContainer);
     return std::to_string(value);
 }
+
+IMPLEMENT_EDITOR_TYPE(void *, Internal_VoidPtr)

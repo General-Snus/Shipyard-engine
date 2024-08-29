@@ -51,13 +51,13 @@ bool GraphAsset::InspectorView()
     auto ScriptEditor = Graph::GraphTool::OpenScriptingEditor(AssetPath);
 
     // Brackets of trust issue
-    try
+    // try
     {
         ScriptEditor->Render();
     }
-    catch (...)
+    // catch (...)
     {
-        Logger::Err("ScriptGraph Crashed Again...");
+        // Logger::Err("ScriptGraph Crashed Again...");
     }
 
     return false;

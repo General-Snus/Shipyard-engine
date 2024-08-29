@@ -10,6 +10,7 @@ IMPLEMENT_GRAPH_NODE(SGNode_EventOnExit, ScriptGraphEventNode);
 SGNode_Tick::SGNode_Tick()
 {
     CreateDataPin<float>("Delta Time", PinDirection::Output);
+    CreateDataPin<SY::UUID>("UserID", PinDirection::Output);
 }
 
 SGNode_EventOnEnter::SGNode_EventOnEnter()

@@ -51,10 +51,11 @@ bool ScriptGraph::ExecuteWithPayload(std::string_view aEntryPointHandle, const S
     return false;
 }
 
-void ScriptGraph::Tick(float aDeltaTime)
+void ScriptGraph::Tick(float aDeltaTime, SY::UUID id)
 {
     myLastExecutedPath.clear();
     static ScriptGraphPayload thisPayload;
+    thisPayload.SetPinValue("UserID", id);
     thisPayload.SetPinValue("Delta Time", aDeltaTime);
     ExecuteWithPayload("Tick", thisPayload);
 }

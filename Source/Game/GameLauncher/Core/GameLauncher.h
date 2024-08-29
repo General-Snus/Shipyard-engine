@@ -18,4 +18,5 @@ class GameLauncher
     // Room 1
     GameObject Object1_Room1;
     GameObject Object2_Room1;
+    GameObject PlayerRoom5;
 };

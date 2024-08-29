@@ -35,6 +35,7 @@
 #include "Engine/AssetManager/ComponentSystem/Components/LightComponent.h"
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 #include "Engine/PersistentSystems/Scene.h"
+#include "Engine/PersistentSystems/System/Colission/OnCollision.h"
 #include "Engine/PersistentSystems/System/SceneGraph/WorldGraph.h"
 #include <Tools/Logging/Logging.h>
 #include <Tools/Optick/include/optick.h>
@@ -56,6 +57,7 @@
 #include <Tools/ImGui/ImGui/Font/IconsFontAwesome5.h>
 #include <json.h>
 #include <misc/cpp/WMDropManager.h>
+#include <stacktrace>
 
 void SetupImGuiStyle(bool light = false)
 {
@@ -610,6 +612,7 @@ void Editor::Update()
 
     Shipyard_PhysX::Get().StartRead();
     Scene::ActiveManager().Update();
+    CollisionChecks::CheckColliders();
 
     // Editor key checks
     if (Input::IsKeyPressed(Keys::F) && m_SelectedGameObjects.size() > 0)

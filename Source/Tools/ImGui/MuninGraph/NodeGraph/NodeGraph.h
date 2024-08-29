@@ -46,7 +46,6 @@ class NodeGraphInternal
     virtual bool Serialize(std::vector<uint8_t> &outResult);
     virtual bool Deserialize(const std::vector<uint8_t> &inData);
 
-  protected:
     [[nodiscard]] const NodePinClass &GetPinFromId(size_t aPinId) const
     {
         const auto it = myPins.find(aPinId);

@@ -14,9 +14,12 @@
 #include "Textures/Texture_NodeHeader.h"
 #include "Tools/ImGui/ImGui/Font/IconsFontAwesome5.h"
 #include "Tools/ImGui/ImGui/imgui.h"
+#include "Tools/ImGui/MuninGraph/NodeGraph/NodeGraph.h"
 #include "Tools/ImGui/MuninGraph/ScriptGraph/Nodes/VariableNodes.h"
 #include "Tools/ImGui/MuninGraphEditor/Fonts/IconsFontAwesome6.h"
 #include <DirectX/Shipyard/GPU.h>
+#include <Editor/Editor/Windows/EditorWindows/ChainGraph/GraphTool.h>
+#include <Editor/Editor/Windows/Window.h>
 #include <Engine/AssetManager/AssetManager.h>
 #include <ShObjIdl_core.h>
 
@@ -61,6 +64,10 @@ ScriptGraphEditorSettings::ScriptGraphEditorSettings()
         nodeSetting.Type = EnumAsIntegral(ScriptGraphNodeType::Variable);
         nodeSetting.UseTypeColor = true;
         nodeSetting.CenterTitle = true;
+
+        nodeSetting.Icon = std::make_shared<Texture>();
+        GPU::LoadTextureFromMemory(nodeSetting.Icon.get(), "NodeEventIcon", BuiltIn_NodeEventIcon_ByteCode,
+                                   sizeof(BuiltIn_NodeEventIcon_ByteCode));
         NodeSettings.emplace(nodeSetting.Type, nodeSetting);
     }
 }
@@ -453,7 +460,7 @@ void ScriptGraphEditor::RenderPin(const ScriptGraphPin &aPin)
 
             const TypedDataContainer &pinData = aPin.GetDataContainer();
 
-            if (pinEditorType->TypeEditWidget(aPin.GetUniqueName(), pinData))
+            if (pinEditorType && pinEditorType->TypeEditWidget(aPin.GetUniqueName(), pinData))
             {
                 aPin.GetOwner()->OnUserChangedPinValue(mySchema, aPin.GetUID());
             }
@@ -554,6 +561,274 @@ bool is_subpath_of(const std::filesystem::path &base, const std::filesystem::pat
     auto m = std::mismatch(b.begin(), b.end(), s.begin(), s.end());
 
     return m.first == b.end();
+}
+
+void ScriptGraphEditor::HandleCopyPaste()
+{
+    using namespace nlohmann;
+    if (!ImGui::IsWindowFocused())
+    {
+        return;
+    }
+
+    const ImVec2 mousePos = (ImGui::GetMousePos());
+    if (ImGui::IsKeyDown(ImGuiKey::ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey::ImGuiKey_C))
+    {
+        try
+        {
+
+            const auto selected = GetSelectedNodes();
+
+            auto ContainsNode = [&](const ImNodeEd::NodeId aNode) {
+                return std::ranges::find(selected, aNode) != selected.end();
+            };
+
+            std::string outResult;
+
+            json graphJson;
+
+            graphJson["variables"] = json::array();
+
+            for (const auto &variable : mySchema->GetVariables() | std::views::values)
+            {
+                if (variable.HasFlag(ScriptGraphVariableFlag_Internal))
+                    continue;
+
+                json varJson;
+                varJson["name"] = variable.Name;
+                varJson["type"] = variable.GetType()->GetFriendlyName();
+                varJson["flags"] = variable.GetFlags();
+
+                std::vector<uint8_t> varData;
+                variable.Default.Serialize(varData);
+                varJson["value"] = varData;
+                graphJson["variables"].emplace_back(varJson);
+            }
+
+            graphJson["nodes"] = json::array();
+            Vector2f avg{};
+            int count = 0;
+            for (const auto &[nodeId, node] : mySchema->GetNodes())
+            {
+                if (!ContainsNode(nodeId))
+                {
+                    continue;
+                }
+
+                const auto &objectUIDNode = AsObjectUIDSharedPtr(node);
+
+                json nodeJson;
+                Logger::Log(std::format("Saved {} to clipboard", objectUIDNode->GetTypeName()));
+                nodeJson["type"] = objectUIDNode->GetTypeName();
+                nodeJson["id"] = nodeId;
+                json nodePositionJson;
+                float X, Y, Z;
+                node->GetNodePosition(X, Y, Z);
+                nodePositionJson["X"] = X;
+                nodePositionJson["Y"] = Y;
+                nodePositionJson["Z"] = Z;
+
+                avg.x += X;
+                avg.y += Y;
+                count++;
+                nodeJson["position"] = nodePositionJson;
+
+                const ScriptGraphNodeType nodeType = node->GetNodeType();
+                if (nodeType == ScriptGraphNodeType::Variable)
+                {
+                    const std::shared_ptr<ScriptGraphVariableNode> varNodeBase =
+                        std::dynamic_pointer_cast<ScriptGraphVariableNode>(node);
+                    nodeJson["variable"] = varNodeBase->GetVariable()->Name;
+                }
+
+                nodeJson["pins"] = json::array();
+
+                for (const auto &[pinId, pin] : node->GetPins())
+                {
+                    if (!pin.IsDynamicPin() && pin.GetPinType() == ScriptGraphPinType::Exec)
+                        continue;
+
+                    json pinJson;
+                    pinJson["name"] = pin.GetLabel();
+                    pinJson["dynamic"] = pin.IsDynamicPin();
+
+                    if (pin.IsDynamicPin())
+                    {
+                        pinJson["type"] = pin.GetPinType() == ScriptGraphPinType::Exec ? true : false;
+                        pinJson["direction"] = pin.GetPinDirection() == PinDirection::Input ? true : false;
+                        if (pin.GetPinType() == ScriptGraphPinType::Data)
+                        {
+                            const RegisteredType *pinDataType = pin.GetPinDataType();
+                            pinJson["data"] = pinDataType->GetFriendlyName();
+                        }
+                    }
+
+                    if (pin.GetPinType() == ScriptGraphPinType::Data && pin.GetPinDirection() == PinDirection::Input)
+                    {
+                        std::vector<uint8_t> pinData;
+                        pin.GetDataContainer().Serialize(pinData);
+                        pinJson["value"] = std::move(pinData);
+                    }
+
+                    nodeJson["pins"].emplace_back(pinJson);
+                }
+
+                graphJson["nodes"].emplace_back(nodeJson);
+            }
+
+            json avgPosition;
+            avgPosition["X"] = count ? avg.x / count : 0.f;
+            avgPosition["Y"] = count ? avg.y / count : 0.f;
+            graphJson["CenterPosition"] = avgPosition;
+
+            graphJson["edges"] = json::array();
+
+            for (const auto &[edgeId, edge] : mySchema->GetEdges())
+            {
+
+                json edgeJson;
+                edgeJson["id"] = edgeId;
+
+                const ScriptGraphPin &fromPin = myGraph->GetPinFromId(edge.FromId);
+                const ScriptGraphPin &toPin = myGraph->GetPinFromId(edge.ToId);
+                const auto fromNodeId = AsObjectUIDPtr(fromPin.GetOwner());
+                const auto toNodeId = AsObjectUIDPtr(toPin.GetOwner());
+
+                if (!ContainsNode(fromNodeId->GetUID()) || !ContainsNode(toNodeId->GetUID()))
+                {
+                    continue;
+                }
+                edgeJson["sourcePin"] = fromPin.GetLabel();
+                edgeJson["sourceNode"] = fromNodeId->GetUID();
+                edgeJson["targetPin"] = toPin.GetLabel();
+                edgeJson["targetNode"] = toNodeId->GetUID();
+                graphJson["edges"].emplace_back(edgeJson);
+            }
+
+            Graph::GraphTool::CopiedNodes = graphJson.dump();
+        }
+        catch (...)
+        {
+            Logger::Log("Copy faced errors");
+            // Quality assuranse only valid for my own code..
+        }
+    }
+
+    if (ImGui::IsKeyDown(ImGuiKey::ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey::ImGuiKey_V))
+    {
+        ScriptGraphSchema &schema = *mySchema;
+
+        try
+        {
+
+            json graphJson = json::parse(Graph::GraphTool::CopiedNodes);
+            // To handle conversions from file UIDs to actual UIDs;
+            std::unordered_map<size_t, std::shared_ptr<ScriptGraphNode>> fileUIDToNode;
+            std::unordered_map<size_t, size_t> pinUIDToNode;
+            std::vector<std::string> varNames;
+            Vector2f centerPosition = {graphJson["CenterPosition"]["X"], graphJson["CenterPosition"]["Y"]};
+
+            if (graphJson.contains("variables"))
+            {
+                for (const json &varJson : graphJson["variables"])
+                {
+                    const std::string varName = varJson["name"];
+                    const std::string varType = varJson["type"];
+                    int varFlags = varJson["flags"];
+                    std::vector<uint8_t> varData = varJson["value"];
+                    const TypedDataContainer varValue =
+                        TypedDataContainer::Create(TypeRegistry::Get().Resolve(varType));
+                    varValue.Deserialize(varData);
+                    schema.AddVariable(varName, varValue, varFlags);
+                    varNames.emplace_back(varName);
+                }
+            }
+
+            for (const json &nodeJson : graphJson["nodes"])
+            {
+                const RegisteredNodeClass &nodeClass = MuninGraph::Get().GetNodeClass(nodeJson["type"]);
+                auto newNode = schema.AddNode(nodeClass.Type);
+
+                if (!newNode)
+                {
+                    continue;
+                }
+                const float X = (nodeJson["position"].at("X") - centerPosition.x) + mousePos.x;
+                ;
+                const float Y = (nodeJson["position"].at("Y") - centerPosition.y) + mousePos.y;
+                ;
+                const float Z = nodeJson["position"].at("Z");
+                newNode->SetNodePosition(X, Y, Z);
+
+                const ScriptGraphNodeType nodeType = nodeClass.GetCDO<ScriptGraphNode>()->GetNodeType();
+                if (nodeType == ScriptGraphNodeType::Variable)
+                {
+                    schema.SetNodeVariable(newNode.get(), nodeJson["variable"]);
+                }
+
+                for (const auto &pinJson : nodeJson.at("pins"))
+                {
+                    const std::string &pinName = pinJson.at("name");
+                    const bool pinIsDynamic = pinJson.at("dynamic");
+
+                    if (pinIsDynamic)
+                    {
+                        const bool isExec = pinJson.at("type");
+                        const bool isInput = pinJson.at("direction");
+                        if (isExec)
+                        {
+                            schema.CreateDynamicExecPin(newNode.get(), pinName,
+                                                        isInput ? PinDirection::Input : PinDirection::Output);
+                        }
+                        else
+                        {
+                            const std::string pinDataTypeName = pinJson.at("data");
+                            const RegisteredType *pinDataType = TypeRegistry::Get().Resolve(pinDataTypeName);
+                            schema.CreateDynamicDataPin(newNode.get(), pinName,
+                                                        isInput ? PinDirection::Input : PinDirection::Output,
+                                                        pinDataType->GetType());
+                        }
+                    }
+
+                    if (pinJson.contains("value"))
+                    {
+                        const std::vector<uint8_t> &pinValue = pinJson.at("value");
+                        if (const ScriptGraphPin &nodePin = newNode->GetPin(pinName))
+                        {
+                            nodePin.GetDataContainer().Deserialize(pinValue);
+                        }
+                    }
+                }
+
+                fileUIDToNode.emplace(nodeJson.at("id"), newNode);
+
+                Logger::Log(std::format("Pasted {} from clipboard", nodeJson["type"].dump()));
+            }
+
+            if (graphJson.contains("edges"))
+            {
+                for (const json &edgeJson : graphJson["edges"])
+                {
+                    const std::shared_ptr<ScriptGraphNode> &sourceNode = fileUIDToNode.at(edgeJson.at("sourceNode"));
+                    const std::shared_ptr<ScriptGraphNode> &targetNode = fileUIDToNode.at(edgeJson.at("targetNode"));
+
+                    const std::string &sourcePinName = edgeJson.at("sourcePin");
+                    const ScriptGraphPin &sourcePin = sourceNode->GetPin(sourcePinName);
+
+                    const std::string &targetPinName = edgeJson.at("targetPin");
+                    const ScriptGraphPin &targetPin = targetNode->GetPin(targetPinName);
+
+                    schema.CreateEdge(sourcePin.GetUID(), targetPin.GetUID());
+                }
+            }
+            myEditorState->Layout.RefreshNodePositions = true;
+        }
+        catch (...)
+        {
+            Logger::Log("Paste faced errors");
+            // Quality assuranse only valid for my own code..
+        }
+    }
 }
 
 void ScriptGraphEditor::RenderToolbar()
@@ -684,6 +959,10 @@ void ScriptGraphEditor::RenderToolbar()
         myEditorState->Layout.RefreshNodePositions = true;
     }
 
+    if (ImGui::Checkbox("Show flow:", &((ScriptGraphEditorState *)myEditorState)->ShowFlow))
+    {
+    }
+
     ScriptGraphEditor_TriggerEntryPointDialog();
     ScriptGraphEditor_EditVariablesDialog();
 }
@@ -799,7 +1078,7 @@ std::vector<GraphEditorStateBase::ContextSearchInfo::SearchMenuItem> ScriptGraph
 
 void ScriptGraphEditor::HandleBackgroundContextMenuItemClicked(const GraphEditorContextMenuItem &aItem)
 {
-    const ImVec2 mousePos = ImNodeEd::ScreenToCanvas(ImGui::GetMousePos());
+    const ImVec2 mousePos = ImNodeEd::ScreenToCanvas(ImGui::GetWindowPos());
     if (const std::shared_ptr<ScriptGraphNode> newNode = mySchema->CreateNode(*aItem.Value))
     {
         const auto uidNewNode = AsObjectUIDSharedPtr(newNode);

@@ -15,6 +15,7 @@
 #include "Tools/ImGui/ImGui/misc/cpp/imgui_stdlib.h"
 #include "Tools/ImGui/MuninGraph/MuninGraph.h"
 #include "Tools/ImGui/MuninGraph/NodeGraph/NodeGraphCommon.h"
+#include "Tools/ThirdParty/nlohmann/json.hpp"
 #include <Engine/AssetManager/Objects/BaseAssets/GraphAsset.h>
 
 namespace ImNodeEd = ax::NodeEditor;
@@ -77,7 +78,8 @@ struct GraphEditorStateBase
     size_t PinContextMenuId = 0;
 };
 
-template <typename GraphNodeClass, typename GraphEdgeClass, typename GraphPinClass, typename GraphSchemaClass>
+template <typename GraphNodeClass = ScriptGraphNode, typename GraphEdgeClass = ScriptGraphEdge,
+          typename GraphPinClass = ScriptGraphPin, typename GraphSchemaClass = ScriptGraphSchema>
 class GraphEditorBase
 {
   public:
@@ -259,6 +261,7 @@ class GraphEditorBase
 
     // If you have a Toolbar in your window you render it here.
     // By default it renders Save/Load buttons.
+    virtual void HandleCopyPaste();
     virtual void RenderToolbar();
     virtual void RenderBackgroundContextMenu();
     virtual void RenderUserBackgroundContextMenu();
@@ -278,6 +281,14 @@ class GraphEditorBase
     virtual void RenderEdge(const GraphEdgeClass &anEdge);
     virtual void RenderGraphEditor();
     //~
+    std::vector<ImNodeEd::NodeId> GetSelectedNodes() const
+    {
+
+        int selectedNodeCount = ImNodeEd::GetSelectedObjectCount();
+        std::vector<ImNodeEd::NodeId> selectedNodes(selectedNodeCount);
+        ImNodeEd::GetSelectedNodes(selectedNodes.data(), selectedNodeCount);
+        return selectedNodes;
+    };
 
     virtual void HandleImNodeCreateNode();
     virtual void HandleImNodeDeleteNode();
@@ -462,6 +473,7 @@ GraphEditorMethod(void)::RenderWindow()
         ImNodeEd::Resume();
         RenderGraphEditor();
 
+        HandleCopyPaste();
         HandleImNodeCreateNode();
         HandleImNodeDeleteNode();
         HandleUserTransaction();
@@ -475,24 +487,6 @@ GraphEditorMethod(void)::RenderWindow()
 
         RenderBackgroundContextMenu();
 
-        for (auto &pinId : mySchema->GetPins() | std::views::keys)
-        {
-            ImNodeEd::PinId id = pinId;
-            // ShowPinContextMenu returns true for all pins on the same node
-            // regardless of which one you actually clicked on. Therefore you
-            // need to check if it's the pin that is being hovered that you
-            // clicked on to get the correct context.
-            if (ImNodeEd::GetHoveredPin() == id)
-            {
-                if (ImNodeEd::ShowPinContextMenu(&id))
-                {
-                    myEditorState->PinContextMenuId = pinId;
-                    ImGui::OpenPopup("PinContextMenu");
-                    break; // Only one popup please xP
-                }
-            }
-        }
-
         RenderPinContextMenu();
 
         ImNodeEd::Resume();
@@ -504,6 +498,11 @@ GraphEditorMethod(void)::RenderWindow()
 }
 
 GraphEditorMethod(void)::RenderToolbar()
+{
+    // No default toolbar to render.
+}
+
+GraphEditorMethod(void)::HandleCopyPaste()
 {
     // No default toolbar to render.
 }

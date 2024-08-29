@@ -57,10 +57,6 @@ Viewport::~Viewport()
     {
         sceneToRender->GetGOM().DeleteGameObject(myVirtualCamera, true);
     }
-    else
-    {
-        Logger::Critical(std::logic_error("You cant destroy the main viewport!"));
-    }
 }
 
 Texture *Viewport::GetTarget() const

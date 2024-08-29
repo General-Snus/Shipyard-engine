@@ -12,6 +12,7 @@ class GraphTool
     static void RunEditor();
     static void Init();
 
+    static inline std::string CopiedNodes; 
   private:
     static inline std::unordered_map<std::filesystem::path, std::shared_ptr<ScriptGraphEditor>> myScriptEditors;
     static inline ScriptGraphEditorSettings *setting;

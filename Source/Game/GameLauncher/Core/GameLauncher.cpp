@@ -25,8 +25,8 @@ void GameLauncher::Init()
         Scene::ActiveManager().SetLastGOAsCamera();
         cameraComponent.SetActive(true);
         auto &transform = camera.AddComponent<Transform>();
-        transform.SetPosition(0, 30, 0);
-        transform.SetRotation(90, 0, 0);
+        transform.SetPosition(0, 30, -30);
+        transform.SetRotation(30, 0, 0);
 
         GameObject SkySphere = GameObject::Create("SkySphere");
         auto &mesh = SkySphere.AddComponent<cMeshRenderer>("Materials/MaterialPreviewMesh.fbx");
@@ -96,23 +96,47 @@ void GameLauncher::Start()
     }
 
     // Ett rumm för varje uppgift
-    for (int task = 0; task < 4; task++)
+    for (int task = 0; task < 2; task++)
     {
         CreateRoom({task * 40.0f, -1.f, 0.f}, {40, 40, 40});
     }
-    Object1_Room1 = GameObject::Create("Object1_Room1");
+    Object1_Room1 = GameObject::Create("Scriptbox1");
     Object1_Room1.AddComponent<cMeshRenderer>("Models/Cube.fbx");
     Object1_Room1.AddComponent<GraphComponent>("Graphs/Main1Graph.Graph");
     Object1_Room1.AddComponent<cCollider>();
     Object1_Room1.transform().SetPosition(-15, 4, 0);
     Object1_Room1.transform().SetScale(5, 5, 5);
+    Object1_Room1.SetActive(false);
 
-    Object2_Room1 = GameObject::Create("Object2_Room1");
+    Object2_Room1 = GameObject::Create("Hitbox1");
     Object2_Room1.AddComponent<cMeshRenderer>("Models/Cube.fbx");
-    // Object2_Room1.AddComponent<GraphComponent>("Graphs/Main1Graph.Graph");
     Object2_Room1.AddComponent<cCollider>();
     Object2_Room1.transform().SetPosition(0, 4, 15);
     Object2_Room1.transform().SetScale(5, 5, 5);
+    Object2_Room1.SetActive(false);
+
+    {
+
+        GameObject door = GameObject::Create("Door3");
+        door.AddComponent<cMeshRenderer>("Models/Task6Script/Door_DoorStore.fbx");
+        door.AddComponent<cCollider>();
+        door.transform().SetPosition(1 * 40.0f, 0, 0);
+        door.transform().SetScale(3, 3, 3);
+        door.AddComponent<GraphComponent>("Graphs/Task5Door.Graph");
+
+        GameObject store = GameObject::Create("Store3");
+        store.AddComponent<cMeshRenderer>("Models/Task6Script/Store_DoorStore.fbx");
+        store.AddComponent<cCollider>();
+        store.transform().SetPosition(1 * 40.0f, 0, 0);
+        store.transform().SetScale(3, 3, 3);
+
+        PlayerRoom5 = GameObject::Create("Player3");
+        PlayerRoom5.AddComponent<cMeshRenderer>("Models/C64.fbx");
+        PlayerRoom5.AddComponent<cCollider>();
+        PlayerRoom5.transform().SetScale(2, 2, 2);
+        PlayerRoom5.transform().SetPosition(1 * 40.0f + 1.5f, 2, -5);
+        PlayerRoom5.AddComponent<GraphComponent>("Graphs/Task5Player.Graph");
+    }
 
     Logger::Log("GameLauncher start");
 }
@@ -120,7 +144,7 @@ void GameLauncher::Start()
 void GameLauncher::Update(float delta)
 {
     OPTICK_EVENT();
-
+    delta;
     AIEventManager::Instance().Update();
     if (Input::IsKeyPressed(static_cast<int>(Keys::K)))
     {
@@ -144,19 +168,21 @@ void GameLauncher::Update(float delta)
         m_CustomKeyCallback.Invoke();
     }
 
-    Transform &pLight = Scene::ActiveManager().GetWorldRoot().GetComponent<Transform>();
-    constexpr float rotSpeed = 25.f;
-    if (Input::IsKeyHeld(static_cast<int>(Keys::NUMPAD6)))
+    if (Input::IsKeyPressed(Keys::F1))
     {
-        pLight.Rotate(rotSpeed * delta, 0, 0);
+        Object1_Room1.SetActive(true);
+        Object2_Room1.SetActive(true);
+        Scene::ActiveManager().GetCamera().transform().SetPosition(0, 30, -30);
+        Scene::ActiveManager().GetCamera().transform().SetRotation(30, 0, 0);
     }
-    if (Input::IsKeyHeld(static_cast<int>(Keys::NUMPAD3)))
+
+    if (Input::IsKeyPressed(Keys::F2))
     {
-        pLight.Rotate(-rotSpeed * delta, 0, 0);
+        Scene::ActiveManager().GetCamera().transform().SetPosition(40, 10, -10);
+        Scene::ActiveManager().GetCamera().transform().SetRotation(30, 0, 0);
     }
 
     constexpr float area = 7.5f;
-
     static float direction = 1;
     if (Object1_Room1.transform().GetPosition().x > area)
     {
@@ -166,7 +192,6 @@ void GameLauncher::Update(float delta)
     {
         direction = 1;
     }
-
     Object1_Room1.transform().Move(5 * direction * Timer::GetDeltaTime(), 0, 0);
 
     static float direction2 = 1;

@@ -2,6 +2,8 @@
 
 #include "SGNode_Sequence.h"
 #include "Tools/ImGui/MuninGraph/ScriptGraph/ScriptGraphPin.h"
+#include <Tools/Reflection/magic_enum/magic_enum.hpp>
+#include <Tools/Utilities/Input/Input.hpp>
 
 IMPLEMENT_GRAPH_NODE(SGNode_Sequence, ScriptGraphNode);
 
@@ -77,3 +79,129 @@ void SGNode_Sequence::RefreshExitPins()
     std::ranges::sort(myExitPins, [](const size_t &A, const size_t &B) { return A < B; });
 }
 #endif
+
+IMPLEMENT_GRAPH_NODE(MVNode_Branch, ScriptGraphNode);
+
+MVNode_Branch::MVNode_Branch()
+{
+    CreateExecPin("In", PinDirection::Input, true);
+    CreateExecPin("True", PinDirection::Output);
+    CreateExecPin("False", PinDirection::Output);
+
+    CreateDataPin<bool>("Condition", PinDirection::Input);
+}
+
+NodeResult MVNode_Branch::DoOperation()
+{
+    bool condition = false;
+    if (GetPinData("Condition", condition))
+    {
+        return ExecPin(condition ? "True" : "False");
+    }
+
+    return Error("Failed to get data");
+}
+
+IMPLEMENT_GRAPH_NODE(MVNode_IsKeyPressed, ScriptGraphNode);
+
+MVNode_IsKeyPressed::MVNode_IsKeyPressed()
+{
+    CreateExecPin("In", PinDirection::Input, true);
+    CreateExecPin("Out", PinDirection::Output);
+
+    CreateDataPin<std::string>("Key", PinDirection::Input);
+    CreateDataPin<bool>("Condition", PinDirection::Output);
+}
+
+NodeResult MVNode_IsKeyPressed::DoOperation()
+{
+    std::string key;
+
+    if (GetPinData("Key", key))
+    {
+        auto eKey = magic_enum::enum_cast<Keys>(key, magic_enum::case_insensitive);
+
+        if (!eKey.has_value())
+        {
+
+            return Error("Invalid Key");
+        }
+
+        if (Input::IsKeyPressed(eKey.value()))
+        {
+            SetPinData("Condition", true);
+            return ExecPin("Out");
+        }
+        else
+        {
+            SetPinData("Condition", false);
+            return ExecPin("Out");
+        }
+    }
+    return Error("No Key");
+}
+
+MVNode_ForLoop::MVNode_ForLoop()
+{
+    CreateExecPin("In", PinDirection::Input, true);
+    CreateExecPin("Loop", PinDirection::Output);
+
+    CreateDataPin<int>("Start", PinDirection::Input);
+    CreateDataPin<int>("End", PinDirection::Input);
+    CreateDataPin<int>("Index", PinDirection::Output);
+    CreateExecPin("Completed", PinDirection::Output);
+}
+
+IMPLEMENT_GRAPH_NODE(MVNode_ForLoop, ScriptGraphNode);
+NodeResult MVNode_ForLoop::DoOperation()
+{
+    int start = 0;
+    int end = 0;
+    if (GetPinData("Start", start) && GetPinData("End", end))
+    {
+        for (int i = start; i < end; i++)
+        {
+            SetPinData("Index", i);
+            ExecPin("Loop");
+        }
+        return ExecPin("Completed");
+    }
+    return Error("Failed to get data");
+}
+
+IMPLEMENT_GRAPH_NODE(MVNode_Timer, ScriptGraphNode);
+MVNode_Timer::MVNode_Timer()
+{
+    CreateExecPin("In", PinDirection::Input, true);
+
+    CreateDataPin<int>("Wait:", PinDirection::Input);
+    CreateDataPin<float>("Percentage", PinDirection::Output);
+    CreateExecPin("Completed", PinDirection::Output);
+    CreateExecPin("Waiting", PinDirection::Output);
+}
+
+NodeResult MVNode_Timer::DoOperation()
+{
+    static bool firstTime = true;
+    if (firstTime)
+    {
+        auto startTime = std::chrono::system_clock::now();
+        GetPinData("Wait:", sleepTimer);
+        endTime = startTime + std::chrono::milliseconds(sleepTimer);
+        firstTime = false;
+    }
+
+    const auto now = std::chrono::system_clock::now();
+    if (now < endTime)
+    {
+        const auto diff = (endTime - now);
+        const float perc =
+            (float)std::chrono::duration_cast<std::chrono::milliseconds>(diff).count() / (float)sleepTimer;
+
+        SetPinData("Percentage", perc);
+        return ExecPin("Waiting");
+    }
+
+    SetPinData("Percentage", 1.0f);
+    return ExecPin("Completed");
+}

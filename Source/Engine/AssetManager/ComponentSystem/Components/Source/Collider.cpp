@@ -3,6 +3,7 @@
 #include "Editor/Editor/Core/ApplicationState.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Collider.h"
 #include <Editor/Editor/Core/Editor.h>
+#include <Engine/PersistentSystems/System/Colission/OnCollision.h>
 #include <Tools/Utilities/LinearAlgebra/Intersection.hpp>
 
 cCollider::cCollider(const SY::UUID anOwnerId, GameObjectManager *aManager) : Component(anOwnerId, aManager)
@@ -17,39 +18,15 @@ cCollider::cCollider(const SY::UUID anOwnerId, GameObjectManager *aManager, cons
     myCollider = std::make_shared<ColliderAssetAABB>();
 }
 
+void cCollider::Destroy()
+{
+    OPTICK_EVENT();
+    CollisionChecks::RemoveCollisions(GetOwner());
+}
+
 void cCollider::Update()
 {
     OPTICK_EVENT();
-    const AABB3D<float> &thisCollider = GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB();
-    std::unordered_set<SY::UUID> newCollidingObjects;
-
-    for (const auto &otherColliders : Scene().ActiveManager().GetAllComponents<cCollider>())
-    {
-        if (otherColliders.GetOwner() == myOwnerID)
-        {
-            continue;
-        }
-
-        const auto &collider = otherColliders.GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB();
-        if (IntersectionAABB<float>(thisCollider, collider))
-        {
-            newCollidingObjects.insert(otherColliders.GetOwner());
-            if (currentlyCollidingObjects.find(otherColliders.GetOwner()) == currentlyCollidingObjects.end())
-            {
-                Scene().ActiveManager().OnColliderEnter(myOwnerID, otherColliders.GetOwner());
-            }
-        }
-    }
-
-    for (const auto &collidingObject : currentlyCollidingObjects)
-    {
-        if (!newCollidingObjects.contains(collidingObject))
-        {
-            Scene().ActiveManager().OnColliderExit(myOwnerID, collidingObject);
-        }
-    }
-
-    currentlyCollidingObjects = std::move(newCollidingObjects);
 }
 
 Vector3f cCollider::GetClosestPosition(Vector3f position) const

@@ -93,6 +93,7 @@ class ScriptGraphEditor : public GraphEditorBase<ScriptGraphNode, ScriptGraphEdg
     void ReportError(const ScriptGraph *aGraph, size_t aNodeId, std::string_view aErrorMessage);
 
   private:
+    void HandleCopyPaste() override;
     void UpdateVariablesContextMenu() const;
     void ScriptGraphEditor_TriggerEntryPointDialog() const;
     void ScriptGraphEditor_EditVariablesDialog() const;
