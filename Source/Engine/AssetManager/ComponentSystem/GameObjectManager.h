@@ -66,7 +66,8 @@ class GameObjectManager
     bool HasGameObject(SY::UUID anID) const;
     bool HasGameObject(const GameObject &anID) const;
 
-    void CollidedWith(const SY::UUID aFirstID, const SY::UUID aTargetID);
+    void OnColliderEnter(const SY::UUID aFirstID, const SY::UUID aTargetID);
+    void OnColliderExit(const SY::UUID aFirstID, const SY::UUID aTargetID);
     void SetActive(const SY::UUID aGameObjectID, const bool aState);
     void SetLayer(const SY::UUID aGameObjectID, const Layer alayer);
 

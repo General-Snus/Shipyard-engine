@@ -4,7 +4,7 @@
 class ProjectileComponent : public Component
 {
   public:
-	  MYLIB_REFLECTABLE();
+    MYLIB_REFLECTABLE();
     ProjectileComponent(const SY::UUID anOwnerID, GameObjectManager *aManager);
     ~ProjectileComponent() override = default;
     void Init() override;
@@ -12,7 +12,7 @@ class ProjectileComponent : public Component
 
     void InitWithValues(float aLifetime, GameObject aCreator);
 
-    void CollidedWith(const SY::UUID aGameObjectID) override;
+    void OnColliderEnter(const SY::UUID aGameObjectID) override;
 
   private:
     float lifetime;

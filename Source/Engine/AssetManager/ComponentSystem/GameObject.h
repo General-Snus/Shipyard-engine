@@ -80,6 +80,7 @@ __forceinline std::vector<Component*> GameObject::CopyAllComponents() const
 	assert(myID.IsValid() && "GameObject has no ID");
 	return myManager->CopyAllAttachedComponents(myID);
 }
+//TODO RENAME
 inline bool GameObject::GetActive() const
 {
 	assert(myManager != nullptr && "GameObject has no manager");

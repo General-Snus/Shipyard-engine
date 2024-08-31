@@ -17,6 +17,11 @@
 #include <Tools/ImGUI/ImGUI/backends/imgui_impl_win32.h>
 #include <Tools/ImGUI/ImGUI/imgui.h>
 #include <Tools/ImGui/ImGui/backends/imgui_impl_dx12.h>
+#include <Tools/ImGui/MuninGraph/MuninGraph.h>
+#include <Tools/ImGui/MuninGraph/ScriptGraph/ScriptGraphNode.h>
+#include <Tools/ImGui/MuninGraphEditor/ScriptGraphEditor/ScriptGraphEditorTypes.h>
+#include <Tools/ImGui/ScriptGraphNodes/NodeIncludes.h>
+#include <Tools/ImGui/ScriptGraphNodes/ScriptGraphTypes.h>
 
 #include "../Editor.h"
 #include "DirectX/Shipyard/GPU.h"
@@ -30,6 +35,7 @@
 #include "Engine/AssetManager/ComponentSystem/Components/LightComponent.h"
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 #include "Engine/PersistentSystems/Scene.h"
+#include "Engine/PersistentSystems/System/Colission/OnCollision.h"
 #include "Engine/PersistentSystems/System/SceneGraph/WorldGraph.h"
 #include <Tools/Logging/Logging.h>
 #include <Tools/Optick/include/optick.h>
@@ -45,11 +51,13 @@
 #include <CommCtrl.h>
 #include <Editor/Editor/Commands/CommandBuffer.h>
 #include <Editor/Editor/Commands/SceneAction.h>
+#include <Editor/Editor/Windows/EditorWindows/ChainGraph/GraphTool.h>
 #include <Editor/Editor/Windows/EditorWindows/CustomFuncWindow.h>
 #include <Editor/Editor/Windows/EditorWindows/History.h>
 #include <Tools/ImGui/ImGui/Font/IconsFontAwesome5.h>
 #include <json.h>
 #include <misc/cpp/WMDropManager.h>
+#include <stacktrace>
 
 void SetupImGuiStyle(bool light = false)
 {
@@ -339,9 +347,8 @@ bool Editor::Initialize(HWND aHandle)
     GetWindowRect(Window::windowHandler, &ViewportRect);
     ShowSplashScreen();
     ThreadPool::Get().Init();
-    // ColorManager::InitializeDefaultColors();
+    ColorManager::InitializeDefaultColors();
     ColorManager::LoadColorsFromFile("Settings/ColorManagerData.ShipyardText");
-
 #ifdef _DEBUG
     GraphicsEngine::Get().Initialize(aHandle, true);
 #else
@@ -369,6 +376,8 @@ bool Editor::Initialize(HWND aHandle)
 
     LoadFont();
     SetupImGuiStyle();
+    MuninGraph::Get().Initialize();
+    Graph::GraphTool::Init();
 
 #if PHYSX
     Shipyard_PhysX::Get().InitializePhysx();
@@ -385,11 +394,6 @@ bool Editor::Initialize(HWND aHandle)
     myGameLauncher.Init();
     myGameLauncher.Start();
     HideSplashScreen();
-
-#if UseScriptGraph
-    ScriptEditor = Graph::GraphTool::Get().GetScriptingEditor();
-    ScriptEditor->Init();
-#endif
 
     m_Callbacks[EditorCallback::ObjectSelected] = Event();
     m_Callbacks[EditorCallback::WM_DropFile] = Event();
@@ -510,12 +514,6 @@ void Editor::UpdateImGui()
             CommandBuffer::MainEditorCommandBuffer().Undo();
         }
     }
-
-#if UseScriptGraph
-    const float delta = Timer::GetInstance().GetDeltaTime();
-    ScriptEditor->Update(delta);
-    ScriptEditor->Render();
-#endif
 }
 
 void Editor::CheckSelectedForRemoved()
@@ -614,6 +612,7 @@ void Editor::Update()
 
     Shipyard_PhysX::Get().StartRead();
     Scene::ActiveManager().Update();
+    CollisionChecks::CheckColliders();
 
     // Editor key checks
     if (Input::IsKeyPressed(Keys::F) && m_SelectedGameObjects.size() > 0)
@@ -749,6 +748,10 @@ void Editor::TopBar()
             if (ImGui::Selectable("ColorPresets"))
             {
                 g_EditorWindows.emplace_back(std::make_shared<ColorPresets>());
+            }
+            if (ImGui::Selectable("GraphTool"))
+            {
+                g_EditorWindows.emplace_back(std::make_shared<CustomFuncWindow>(&Graph::GraphTool::RunEditor));
             }
 
             ImGui::EndMenu();

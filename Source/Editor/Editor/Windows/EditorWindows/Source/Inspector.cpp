@@ -17,7 +17,6 @@ Inspector::Inspector()
 
 void Inspector::ToFront()
 {
-    Logger::Log("Inspector::ToFront");
     toFront = true;
 }
 
@@ -95,6 +94,15 @@ void Inspector::RenderImGUi()
             cmp->InspectorView();
             ImGui::NewLine();
         }
+
+        ImGui::NewLine();
+
+        // for (const auto &i : )
+        //{
+        //     Logger::Log(i.Name());
+        // }
+
+        // ImGui::Combo();
     }
 
     ImGui::End();

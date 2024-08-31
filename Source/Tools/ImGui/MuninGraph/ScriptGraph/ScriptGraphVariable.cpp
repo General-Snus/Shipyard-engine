@@ -1,9 +1,13 @@
-#include "MuninGraph.pch.h"
-#include "ScriptGraphVariable.h"
+﻿#include "ScriptGraphVariable.h"
 
-#include "ScriptGraphTypes.h"
-
-void ScriptGraphVariable::ResetVariable()
+void ScriptGraphVariable::Reset() const
 {
-	memcpy_s(Data.Ptr, GetTypeData()->GetTypeSize(), DefaultData.Ptr, DefaultData.TypeData->GetTypeSize());
+	std::vector<uint8_t> temp;
+	Default.Serialize(temp);
+	Data.Deserialize(temp);
+}
+
+void ScriptGraphVariable::SetFlags(int aFlags)
+{
+	myFlags |= aFlags;
 }

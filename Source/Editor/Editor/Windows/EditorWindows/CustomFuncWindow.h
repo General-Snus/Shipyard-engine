@@ -23,11 +23,17 @@ class CustomFuncWindow : public EditorWindow
         }
     };
 
-    void SetWindowName(const std::string& aName);
+    void SetWindowName(const std::string &aName);
 
     void RenderImGUi()
     {
         ImGui::PushID((void *)this);
+
+        if (windowsName.empty())
+        {
+            windowsName = "Name your window you stupid mutt";
+        }
+
         ImGui::Begin(windowsName.c_str(), &m_KeepWindow);
         if (m_Func)
         {

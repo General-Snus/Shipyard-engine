@@ -2,7 +2,7 @@
 
 #include "../BaseAsset.h"
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
-#include "Tools/ImGui/ImGui/ImGuiHepers.hpp"
+#include "Tools/ImGui/ImGui/ImGuiHelpers.hpp"
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 
 AssetBase::AssetBase(const std::filesystem::path &aFilePath) : AssetPath(aFilePath), isLoadedComplete(false)

@@ -81,8 +81,6 @@ class Editor : public Singleton<Editor>
     inline static std::vector<GameObject> m_SelectedGameObjects;
     inline static std::vector<GameObject> copiedObjects;
     inline static std::shared_ptr<Scene> m_MainScene;
-
-    std::shared_ptr<ScriptGraphEditor> ScriptEditor;
     std::vector<std::shared_ptr<Viewport>> m_Viewports;
     GameLauncher myGameLauncher;
     bool IsGUIActive = true;

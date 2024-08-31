@@ -1,6 +1,7 @@
 #include "Logging.h"
 
 #include "Windows.h"
+#include <filesystem>
 #include <iomanip>
 #include <iostream>
 #include <ostream>
@@ -12,12 +13,6 @@ std::string Logger::Timestamp()
     GetLocalTime(&st);
 
     std::stringstream result;
-    result << std::setfill('0') << std::setw(2) << st.wYear;
-    result << "/";
-    result << std::setfill('0') << std::setw(2) << st.wMonth;
-    result << "/";
-    result << std::setfill('0') << std::setw(2) << st.wDay;
-    result << " - ";
     result << std::setfill('0') << std::setw(2) << st.wHour;
     result << ":";
     result << std::setfill('0') << std::setw(2) << st.wMinute;
@@ -45,9 +40,9 @@ void Logger::SetPrintToVSOutput(bool bNewValue)
     shouldPrintToOutput = bNewValue;
 }
 
-void Logger::Log(const char *aString)
+void Logger::Log(const char *aString, const std::source_location &location)
 {
-    Log(std::string(aString));
+    Log(std::string(aString), location);
 }
 
 Color Logger::GetColor(LogType type)
@@ -76,7 +71,7 @@ Color Logger::GetColor(LogType type)
     }
 }
 
-void Logger::Log(const std::string &aString)
+void Logger::Log(const std::string &aString, const std::source_location &location)
 {
     if (isInitialized)
     {
@@ -85,7 +80,9 @@ void Logger::Log(const std::string &aString)
         {
             LogMsg msg;
             msg.messageType = LogType::message;
-            msg.message = "[" + Timestamp() + "]" + myNamespace + " [   LOG   ] " + aString;
+            std::filesystem::path sourceFile = location.file_name();
+            msg.message = std::format("[LOG] [{}] {} {} {} -> {}", Timestamp(), sourceFile.filename().string(),
+                                      location.function_name(), location.line(), aString);
             OutputDebugStringA(msg.message.c_str());
             m_Buffer.Add(msg);
         }
@@ -104,7 +101,7 @@ void Logger::Log(const std::string &aString)
     }
 }
 
-void Logger::Warn(const std::string &aString)
+void Logger::Warn(const std::string &aString, const std::source_location &location)
 {
     if (isInitialized)
     {
@@ -112,7 +109,9 @@ void Logger::Warn(const std::string &aString)
         if (shouldPrintToOutput)
         {
             LogMsg msg;
-            msg.message = "[" + Timestamp() + "]" + myNamespace + " [ WARNING ] " + aString;
+            std::filesystem::path sourceFile = location.file_name();
+            msg.message = std::format("[WARNING] [{}] {} {} {} -> {}", Timestamp(), sourceFile.filename().string(),
+                                      location.function_name(), location.line(), aString);
             msg.messageType = LogType::warning;
 
             OutputDebugStringA(msg.message.c_str());
@@ -140,7 +139,9 @@ void Logger::Err(const std::string &aString, const std::source_location &locatio
         if (shouldPrintToOutput)
         {
             LogMsg msg;
-            msg.message = "[" + Timestamp() + "]" + myNamespace + " [  ERROR  ] " + aString;
+            std::filesystem::path sourceFile = location.file_name();
+            msg.message = std::format("[ERROR] [{}] {} {} {} -> {}", Timestamp(), sourceFile.filename().string(),
+                                      location.function_name(), location.line(), aString);
             msg.messageType = LogType::error;
 
             OutputDebugStringA(msg.message.c_str());
@@ -164,7 +165,7 @@ void Logger::Err(const std::string &aString, const std::source_location &locatio
     }
 }
 
-void Logger::Succ(const std::string &aString)
+void Logger::Succ(const std::string &aString, const std::source_location &location)
 {
     if (isInitialized)
     {
@@ -172,7 +173,9 @@ void Logger::Succ(const std::string &aString)
         if (shouldPrintToOutput)
         {
             LogMsg msg;
-            msg.message = "[" + Timestamp() + "]" + "[ SUCCESS ] " + aString;
+            std::filesystem::path sourceFile = location.file_name();
+            msg.message = std::format("[SUCCESS] [{}] {} {} {} -> {}", Timestamp(), sourceFile.filename().string(),
+                                      location.function_name(), location.line(), aString);
             msg.messageType = LogType::success;
             OutputDebugStringA(msg.message.c_str());
             m_Buffer.Add(msg);
@@ -199,7 +202,12 @@ void Logger::Critical(const std::exception &anException, unsigned aLevel, const 
         if (shouldPrintToOutput)
         {
             LogMsg msg;
-            msg.message = "[" + Timestamp() + "]" + std::string(aLevel, ' ') + "[  FATAL  ] " + anException.what();
+
+            std::filesystem::path sourceFile = location.file_name();
+            msg.message =
+                std::format("[FATAL] [{}] {} {} {} \nSeverity {}\n{}", Timestamp(), sourceFile.filename().string(),
+                            location.function_name(), location.line(), aLevel, anException.what());
+
             msg.messageType = LogType::critical;
             OutputDebugStringA(msg.message.c_str());
             m_Buffer.Add(msg);
@@ -244,7 +252,10 @@ void Logger::Critical(const std::string &anExceptionText, unsigned aLevel, const
         if (shouldPrintToOutput)
         {
             LogMsg msg;
-            msg.message = "[" + Timestamp() + "]" + std::string(aLevel, ' ') + "[  FATAL  ] " + anExceptionText;
+            std::filesystem::path sourceFile = location.file_name();
+            msg.message =
+                std::format("[FATAL] [{}] {} {} {} \nSeverity {}\n{}", Timestamp(), sourceFile.filename().string(),
+                            location.function_name(), location.line(), aLevel, anExceptionText);
             msg.messageType = LogType::critical;
             OutputDebugStringA(msg.message.c_str());
             m_Buffer.Add(msg);

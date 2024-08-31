@@ -2,5 +2,5 @@
 #define WorkingOnPngLoading true
 #define WorkingOnMultiThread false
 #define PHYSX true
-#define UseScriptGraph false
+#define UseScriptGraph true
 #define ThreadedAssetLoading true

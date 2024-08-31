@@ -5,7 +5,7 @@
 #include "DirectX/Shipyard/Texture.h"
 #include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
-#include <Tools/ImGui/ImGui/ImGuiHepers.hpp>
+#include <Tools/ImGui/ImGui/ImGuiHelpers.hpp>
 
 TextureHolder::TextureHolder(const std::filesystem::path &aFilePath, eTextureType aTextureType)
     : AssetBase(aFilePath), textureType(aTextureType)
@@ -103,7 +103,7 @@ void TextureHolder::Init()
         }
     }
 
-    if (AssetPath.extension() == ".dds" || AssetPath.extension() == ".png")
+    if (AssetPath.extension() == ".dds" || AssetPath.extension() == ".png" || AssetPath.extension() == ".jpg")
     {
         if (!std::filesystem::exists(AssetPath))
         {

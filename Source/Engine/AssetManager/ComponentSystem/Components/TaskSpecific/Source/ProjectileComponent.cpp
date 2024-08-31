@@ -27,7 +27,7 @@ void ProjectileComponent::InitWithValues(float aLifetime, GameObject aCreator)
     Creator = aCreator;
 }
 
-void ProjectileComponent::CollidedWith(const SY::UUID aGameObjectID)
+void ProjectileComponent::OnColliderEnter(const SY::UUID aGameObjectID)
 {
     if (aGameObjectID != Creator.GetID())
     {

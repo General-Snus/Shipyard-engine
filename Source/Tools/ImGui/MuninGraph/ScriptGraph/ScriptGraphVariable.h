@@ -1,22 +1,21 @@
-#pragma once
-#include "ScriptGraphDataObject.h"
+﻿#pragma once
+#include "ScriptGraphCommon.h"
+#include "Types/TypeRegistry.h"
 
 struct ScriptGraphVariable
 {
-	// The data during runtime.
-	ScriptGraphDataObject Data;
+	friend class ScriptGraphSchema;
 
-	// Whatever the default value is of this variable.
-	// This should be read-only during runtime and
-	// copied to Data when the graph is loaded.
-	ScriptGraphDataObject DefaultData;
+	TypedDataContainer Data;
+	TypedDataContainer Default;
 	std::string Name;
 
-	FORCEINLINE std::shared_ptr<const ScriptGraphType> GetTypeData() { return Data.TypeData; }
+	void Reset() const;
+	FORCEINLINE const RegisteredType* GetType() const { return Data.GetType(); }
+	FORCEINLINE bool HasFlag(ScriptGraphVariableFlags aFlag) const { return (myFlags & aFlag); }
+	FORCEINLINE int GetFlags() const { return myFlags; }
+	void SetFlags(int aFlags);
 
-	/**
-	 * \brief Resets the value of this Variable to its Default value.
-	 */
-	void ResetVariable();
+private:
+	int myFlags = ScriptGraphVariableFlag_None;
 };
-

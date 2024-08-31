@@ -12,197 +12,178 @@
 #include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXStaticBody.h>
 #include <Engine/AssetManager/ComponentSystem/Components/Transform.h>
 
-// Task 7 AI
-#include <Engine/AssetManager/Objects/AI/AgentSystem/AIEventManager.h>
-#include <Engine/AssetManager/Objects/AI/AgentSystem/AIPollingManager.h>
-#include <Engine/AssetManager/Objects/AI/AgentSystem/PollingStations/Target_PollingStation.h>
-#include <Engine/AssetManager/Objects/AI/AgentSystem/StateMachine/StateMachineBase.h>
-
-#include <Engine/AssetManager/Objects/AI/AgentSystem/BehaviourTree/BrainTree.h>
-#include <Engine/PersistentSystems/ArtificialInteligence/AICommands/AICommands.h>
-#include <Game/GameLauncher/TaskSpecificImplementation/BehaviourTree/BehaviorTreeController.h>
-#include <Game/GameLauncher/TaskSpecificImplementation/DecicionTree/DecisionTreeController.h>
-#include <Game/GameLauncher/TaskSpecificImplementation/StateMachine/StateMachineController.h>
+#include <Engine/AssetManager/ComponentSystem/Components/GraphComponent.h>
+#include <Engine/AssetManager/Objects/BaseAssets/GraphAsset.h>
 
 void GameLauncher::Init()
 {
     OPTICK_EVENT();
     {
-        GameObject camera = GameObject::Create();
-        camera.SetName("Camera");
+        GameObject camera = GameObject::Create("Main Camera");
         camera.AddComponent<cMeshRenderer>("Models/Camera/Camera.fbx");
         auto &cameraComponent = camera.AddComponent<cCamera>();
         Scene::ActiveManager().SetLastGOAsCamera();
         cameraComponent.SetActive(true);
         auto &transform = camera.AddComponent<Transform>();
-        transform.SetPosition(0, 30, 0);
-        transform.SetRotation(90, 0, 0);
-    }
-}
+        transform.SetPosition(0, 30, -30);
+        transform.SetRotation(30, 0, 0);
 
-void GameLauncher::Start()
-{
-    OPTICK_EVENT();
-    m_CustomKeyCallback.AddListener(std::bind(&GameLauncher::LocalFunction, this));
-#pragma region BaseSetup
-    {
+        GameObject SkySphere = GameObject::Create("SkySphere");
+        auto &mesh = SkySphere.AddComponent<cMeshRenderer>("Materials/MaterialPreviewMesh.fbx");
+        mesh.SetMaterialPath("Materials/SkySphere.json");
+        SkySphere.transform().SetScale(-100000, -100000, -100000);
+
         GameObject worldRoot = GameObject::Create();
         Scene::ActiveManager().SetLastGOAsWorld();
-        worldRoot.SetName("WordRoot");
-        // worldRoot.AddComponent<Skybox>();
+        worldRoot.SetName("Directional Light");
 
         auto &pLight = worldRoot.AddComponent<cLight>(eLightType::Directional);
         pLight.SetColor("White");
         pLight.SetPower(2.0f);
         pLight.BindDirectionToTransform(true);
     }
+}
 
-    // Decisiontree 1
-    int actorAmount = 2;
-    int wellAmount = 2;
+// Root is returned
+Transform &CreateRoom(Vector3f rootPosition, Vector3f Boundries)
+{
+    GameObject root = GameObject::Create("RoomRoot");
 
-#pragma region Collider
-    std::vector<GameObject> colliders;
-    // colliders.resize(collidersAmount);
-    auto colliderPositions = {
-        Vector3<Vector3f>(25.5f * Vector3f(1, 0, 0), Vector3f(0, 0, 0), Vector3f(1, 1, 25)),
-        Vector3<Vector3f>(25.5f * Vector3f(-1, 0, 0), Vector3f(0, 0, 0), Vector3f(1, 1, 25)),
-        Vector3<Vector3f>(25.5f * Vector3f(0, 0, 1), Vector3f(0, 0, 0), Vector3f(25, 1, 1)),
-        Vector3<Vector3f>(25.5f * Vector3f(0, 0, -1), Vector3f(0, 0, 0), Vector3f(25, 1, 1)),
-        Vector3<Vector3f>(20.f * Vector3f(0, 0, 1), Vector3f(0, 0, 0), Vector3f(1, 1, 10)),
-        Vector3<Vector3f>(20.f * Vector3f(0, 0, -1), Vector3f(0, 0, 0), Vector3f(1, 1, 10)),
+    const std::vector<Vector3f> positionList = {
+        {0, 0, 0},
+        {Boundries.x / 2, Boundries.y / 2, 0},
+        {-Boundries.x / 2, Boundries.y / 2, 0},
+        {0, Boundries.y / 2, Boundries.z / 2},
     };
 
-    for (const auto &[number, transformData] : colliderPositions | std::ranges::views::enumerate)
+    constexpr float thickness = 0.1f;
+    const std::vector<Vector3f> scaleList = {
+        {Boundries.x, thickness, Boundries.z},
+        {thickness, Boundries.y, Boundries.z},
+        {thickness, Boundries.y, Boundries.z},
+        {Boundries.x, Boundries.y, thickness},
+    };
+
+    for (auto [scale, position] : std::views::zip(scaleList, positionList))
     {
-        // Drone
-        auto object = GameObject::Create(std::format("Wall_{}", number));
+        GameObject wall = GameObject::Create("Wall");
 
-        object.transform().SetPosition(transformData[0]);
-        object.transform().SetRotation(transformData[1]);
-        object.transform().SetScale(transformData[2]);
+        wall.transform().SetPosition(position);
+        wall.transform().SetScale(scale);
+        wall.transform().SetParent(root.transform());
 
-        auto &mesh = object.AddComponent<cMeshRenderer>("Models/Cube.fbx");
-        mesh.SetMaterialPath("Materials/C64.json");
-        object.AddComponent<cCollider>();
-        colliders.push_back(object);
+        wall.AddComponent<cMeshRenderer>("Models/Cube.fbx");
+        // wall.AddComponent<cCollider>();
     }
-#pragma endregion
 
-#pragma region Entities
-    std::vector<GameObject> entities;
-    entities.resize(actorAmount);
-    int index = 0;
-    for (auto &obj : entities)
+    GameObject pointLight = GameObject::Create("light");
+    pointLight.transform().SetPosition(0, Boundries.y / 2, 0);
+    pointLight.transform().SetParent(root.transform());
+
+    auto &light = pointLight.AddComponent<cLight>(eLightType::Point);
+    light.SetRange(Boundries.y * 2);
+    light.SetPower(1000);
+
+    root.transform().SetPosition(rootPosition);
+    return root.transform();
+}
+
+void GameLauncher::Start()
+{
+    OPTICK_EVENT();
+    m_CustomKeyCallback.AddListener(std::bind(&GameLauncher::LocalFunction, this));
     {
-        // Drone
-        obj = GameObject::Create(std::format("Entitity_{}", index));
-        auto &transform = obj.AddComponent<Transform>();
-        transform.SetPosition(RandomEngine::RandomInRange<float>(-20, 20), 0,
-                              RandomEngine::RandomInRange<float>(-20, 20));
-        transform.SetRotation(0, RandomEngine::RandomInRange(0.f, 360.f), 0);
-        obj.AddComponent<cCollider>();
-        obj.SetLayer(Layer::Entities);
-        index++;
     }
-#pragma endregion
 
-#pragma region Healtwell
-    std::vector<GameObject> well;
-    well.resize(wellAmount); // Safety resize if we dont add more it wont realloc and span wont loose connection
-    index = 0;
-    for (auto &obj : well)
+    // Ett rumm för varje uppgift
+    for (int task = 0; task < 3; task++)
     {
-        float x = RandomEngine::RandomInRange(-20.0f, 20.0f);
-        float z = RandomEngine::RandomInRange(-20.0f, 20.0f);
-
-        // Drone
-        obj = GameObject::Create(std::format("Well_{}", index));
-        obj.transform().SetPosition(x, 0, z);
-        obj.transform().SetRotation(90, 0, 0);
-
-        auto &mesh = obj.AddComponent<cMeshRenderer>("Models/Well.fbx");
-        mesh.SetMaterialPath("Materials/C64Well.json");
-        index++;
+        CreateRoom({task * 40.0f, -1.f, 0.f}, {40, 40, 40});
     }
-#pragma endregion
+    Object1_Room1 = GameObject::Create("Scriptbox1");
+    Object1_Room1.AddComponent<cMeshRenderer>("Models/Cube.fbx");
+    Object1_Room1.AddComponent<GraphComponent>("Graphs/Task3/Main.Graph");
+    Object1_Room1.AddComponent<cCollider>();
+    Object1_Room1.transform().SetPosition(-15, 4, 0);
+    Object1_Room1.transform().SetScale(5, 5, 5);
+    Object1_Room1.SetActive(false);
 
-    auto colliderPollingStation = std::make_shared<MultipleTargets_PollingStation>(colliders);
-    auto formationPollingStation = std::make_shared<MultipleTargets_PollingStation>(entities);
-    auto wellPollingStation = std::make_shared<MultipleTargets_PollingStation>(well);
+    Object2_Room1 = GameObject::Create("Hitbox1");
+    Object2_Room1.AddComponent<cMeshRenderer>("Models/Cube.fbx");
+    Object2_Room1.AddComponent<cCollider>();
+    Object2_Room1.transform().SetPosition(0, 4, 15);
+    Object2_Room1.transform().SetScale(5, 5, 5);
+    Object2_Room1.SetActive(false);
 
-    AIPollingManager::Get().AddStation("Healing", wellPollingStation);
-    AIPollingManager::Get().AddStation("Colliders", colliderPollingStation);
-    AIPollingManager::Get().AddStation("Targets", formationPollingStation);
+    {
 
-    //{ // DecisionTree
-    //    auto &actor = entities[0].AddComponent<cActor>();
-    //    entities[0].SetName("DecisionTreeActor");
-    //    actor.SetController(new DecisionTreeController());
-    //    auto &mesh = entities[0].AddComponent<cMeshRenderer>("Models/C64Wanderer.fbx");
-    //    mesh.SetMaterialPath("Materials/C64Wanderer.json");
-    //}
+        GameObject door = GameObject::Create("Door3");
+        door.AddComponent<cMeshRenderer>("Models/Task6Script/Door_DoorStore.fbx");
+        door.AddComponent<cCollider>();
+        door.transform().SetPosition(1 * 40.0f, 0, 0);
+        door.transform().SetScale(3, 3, 3);
+        door.AddComponent<GraphComponent>("Graphs/Task5/Door.Graph");
 
-    { // StateMachine
-        auto &actor = entities[0].AddComponent<cActor>();
-        entities[0].SetName("StateMachineActor");
-        actor.SetController(new StateMachineController());
-        auto &mesh = entities[0].AddComponent<cMeshRenderer>("Models/C64Seeker.fbx");
-        mesh.SetMaterialPath("Materials/C64Seeker.json");
+        GameObject store = GameObject::Create("Store3");
+        store.AddComponent<cMeshRenderer>("Models/Task6Script/Store_DoorStore.fbx");
+        store.AddComponent<cCollider>();
+        store.transform().SetPosition(1 * 40.0f, 0, 0);
+        store.transform().SetScale(3, 3, 3);
+
+        GameObject player = GameObject::Create("Player3");
+        player.AddComponent<cMeshRenderer>("Models/C64.fbx");
+        player.AddComponent<cCollider>();
+        player.transform().SetScale(2, 2, 2);
+        player.transform().SetPosition(1 * 40.0f + 1.5f, 2, -8);
+        player.AddComponent<GraphComponent>("Graphs/Task5/Player.Graph");
     }
 
-    { // BehaviourTree
-        auto &actor = entities[1].AddComponent<cActor>();
-        entities[1].SetName("BehaviourTreeActor");
+    {
+        GameObject player = GameObject::Create("Player6");
+        player.AddComponent<cMeshRenderer>("Models/C64.fbx");
+        player.AddComponent<cCollider>();
+        player.transform().SetScale(.5f);
+        player.transform().SetPosition(2 * 40.0f + 1.5f, 0, -5);
+        player.AddComponent<GraphComponent>("Graphs/Task6/Player.Graph");
 
-        // clang-format off
-		using namespace BrainTree; 
-		BehaviorTree 	tree =  Builder()
-			.composite<Selector>("MainSelector")
-				.decorator<BehaviourTreeAICommands::IsDead>() 
-					.leaf<BehaviourTreeAICommands::DeathSpin>()
-				.end()
-				.decorator<BehaviourTreeAICommands::IsHealthy>()
-				    .composite<Selector>("BattleSelector") 
-					    .composite<Sequence>("BattleSequencer")
-					        .leaf<BehaviourTreeAICommands::IsTargetAlive>()
-					        .leaf<BehaviourTreeAICommands::IsTargetInRange>()
-                                .composite<Sequence>("CanFireSequencer") 
-						            .leaf<BehaviourTreeAICommands::AlignToTarget>()
-						            .leaf<BehaviourTreeAICommands::IsTargetInSight>()
-					            .end()
-					        .leaf<BehaviourTreeAICommands::ShootAtTarget>()
-                        .end()
-					    .composite<Sequence>("CanMoveFreelySequence")
-					        .decorator<BehaviourTreeAICommands::IsFullyHealed>()
-						        .leaf<BehaviourTreeAICommands::MoveFreely>()
-				            .end()
-					    .end()
-					.end()
-				.end()
-				.leaf<BehaviourTreeAICommands::Retreat>()
-			.end()
-			.build();
-        // clang-format on
+        std::string colors[] = {"Red", "Green", "Blue"};
+        for (int i = 0; i < 3; i++)
+        {
+            GameObject Button = GameObject::Create(std::format("Button_{}", i));
+            Button.AddComponent<cMeshRenderer>("Models/Well.fbx");
+            Button.AddComponent<cCollider>();
+            Button.transform().SetRotation(90, 0, 0);
+            Button.transform().SetScale(.5f);
+            Button.transform().SetPosition(2 * 40.0f + (i - 1) * 6, 0, 0);
+            Button.AddComponent<GraphComponent>(std::format("Graphs/Task6/Button{}.Graph", i));
 
-        actor.SetController(new BehaviorTreeController(tree));
-        auto &mesh = entities[1].AddComponent<cMeshRenderer>("Models/C64.fbx");
-        mesh.SetMaterialPath("Materials/C64Separatist.json");
+            GameObject lightobject = GameObject::Create(std::format("Light_{}", i));
+            auto &light = lightobject.AddComponent<cLight>(eLightType::Point);
+            light.SetColor(colors[i]);
+            light.SetPower(100.f);
+            lightobject.transform().SetPosition(2 * 40.0f + (i - 1) * 6, 1, 2);
+            lightobject.SetActive(false);
+        }
+
+        GameObject door = GameObject::Create("Door4");
+        door.AddComponent<cMeshRenderer>("Models/Task6Script/Door_DoorStore.fbx");
+        door.AddComponent<cCollider>();
+        door.transform().SetPosition(2 * 40.0f, 0, 5);
+        door.AddComponent<GraphComponent>("Graphs/Task6/Door.Graph");
+
+        GameObject store = GameObject::Create("Store3");
+        store.AddComponent<cMeshRenderer>("Models/Task6Script/Store_DoorStore.fbx");
+        store.AddComponent<cCollider>();
+        store.transform().SetPosition(2 * 40.0f, 0, 5);
     }
+
     Logger::Log("GameLauncher start");
-
-#pragma endregion
 }
 
 void GameLauncher::Update(float delta)
 {
     OPTICK_EVENT();
-
-    if (Input::IsKeyPressed(static_cast<unsigned>(Keys::I)))
-    {
-        Logger::Log(std::to_string(1.f / delta));
-    }
-    OPTICK_EVENT();
+    delta;
     AIEventManager::Instance().Update();
     if (Input::IsKeyPressed(static_cast<int>(Keys::K)))
     {
@@ -226,16 +207,49 @@ void GameLauncher::Update(float delta)
         m_CustomKeyCallback.Invoke();
     }
 
-    Transform &pLight = Scene::ActiveManager().GetWorldRoot().GetComponent<Transform>();
-    constexpr float rotSpeed = 25.f;
-    if (Input::IsKeyHeld(static_cast<int>(Keys::NUMPAD6)))
+    if (Input::IsKeyPressed(Keys::F1))
     {
-        pLight.Rotate(rotSpeed * delta, 0, 0);
+        Object1_Room1.SetActive(true);
+        Object2_Room1.SetActive(true);
+        Scene::ActiveManager().GetCamera().transform().SetPosition(0, 30, -30);
+        Scene::ActiveManager().GetCamera().transform().SetRotation(30, 0, 0);
     }
-    if (Input::IsKeyHeld(static_cast<int>(Keys::NUMPAD3)))
+
+    if (Input::IsKeyPressed(Keys::F2))
     {
-        pLight.Rotate(-rotSpeed * delta, 0, 0);
+        Scene::ActiveManager().GetCamera().transform().SetPosition(40, 10, -10);
+        Scene::ActiveManager().GetCamera().transform().SetRotation(30, 0, 0);
     }
+
+    if (Input::IsKeyPressed(Keys::F3))
+    {
+        Scene::ActiveManager().GetCamera().transform().SetPosition(80, 10, -2);
+        Scene::ActiveManager().GetCamera().transform().SetRotation(80, 0, 0);
+    }
+
+    constexpr float area = 7.5f;
+    static float direction = 1;
+    if (Object1_Room1.transform().GetPosition().x > area)
+    {
+        direction = -1;
+    }
+    if (Object1_Room1.transform().GetPosition().x < -area)
+    {
+        direction = 1;
+    }
+    Object1_Room1.transform().Move(5 * direction * Timer::GetDeltaTime(), 0, 0);
+
+    static float direction2 = 1;
+    if (Object2_Room1.transform().GetPosition().z > area)
+    {
+        direction2 = -1;
+    }
+    if (Object2_Room1.transform().GetPosition().z < -area)
+    {
+        direction2 = 1;
+    }
+
+    Object2_Room1.transform().Move(0, 0, 5 * direction2 * Timer::GetDeltaTime());
 }
 
 void GameLauncher::LocalFunction()

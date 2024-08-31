@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <xhash>
 namespace SY
 { // I fucking hate windows internals

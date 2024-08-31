@@ -14,4 +14,8 @@ class GameLauncher
 
   private:
     Event m_CustomKeyCallback;
+
+    // Room 1
+    GameObject Object1_Room1;
+    GameObject Object2_Room1; 
 };

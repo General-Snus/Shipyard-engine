@@ -695,7 +695,6 @@ void GraphicsEngine::ImGuiPass(std::shared_ptr<CommandList> commandList)
         GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_SAMPLER)]->Heap()};
     commandList->GetGraphicsCommandList()->SetDescriptorHeaps((UINT)std::size(heaps), heaps);
 
-    /*commandList->GetGraphicsCommandList()->SetDescriptorHeaps(1,ImGuiHeap);*/
     ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList->GetGraphicsCommandList().Get());
 }
 FORCEINLINE std::shared_ptr<Texture> GraphicsEngine::GetTargetTextures(eRenderTargets type) const

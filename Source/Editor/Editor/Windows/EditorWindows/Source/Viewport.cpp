@@ -5,7 +5,7 @@
 #include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
 #include "Engine/AssetManager/ComponentSystem/GameObject.h"
 #include "Engine/AssetManager/ComponentSystem/GameObjectManager.h"
-#include "ImGuiHepers.hpp"
+#include "ImGuiHelpers.hpp"
 #include "imgui_internal.h"
 
 #include <Tools/ImGui/ImGui/ImGuizmo.h>
@@ -56,10 +56,6 @@ Viewport::~Viewport()
     if (!IsMainViewPort)
     {
         sceneToRender->GetGOM().DeleteGameObject(myVirtualCamera, true);
-    }
-    else
-    {
-        Logger::Critical(std::logic_error("You cant destroy the main viewport!"));
     }
 }
 

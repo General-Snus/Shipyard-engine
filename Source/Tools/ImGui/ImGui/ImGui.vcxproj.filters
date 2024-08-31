@@ -81,7 +81,7 @@
     <ClInclude Include="ImSequencer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ImGuiHepers.hpp">
+    <ClInclude Include="ImGuiHelpers.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="backends\imgui_impl_dx12.h">

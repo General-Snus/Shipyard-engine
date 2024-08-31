@@ -3,7 +3,7 @@
 #include <Engine/AssetManager/AssetManager.h>
 #include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
 #include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
-#include <Tools/ImGui/ImGui/ImGuiHepers.hpp>
+#include <Tools/ImGui/ImGui/ImGuiHelpers.hpp>
 #include <Tools/Utilities/Input/Input.hpp>
 #include <shellapi.h>
 
@@ -18,6 +18,7 @@
 #include "Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h"
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 #include "Engine/PersistentSystems/Scene.h"
+#include <Editor/Editor/Windows/EditorWindows/CustomFuncWindow.h>
 #include <Engine/GraphicsEngine/GraphicsEngineUtilities.h>
 #include <Font/IconsFontAwesome5.h>
 #include <ShlObj.h>
@@ -71,6 +72,12 @@ void ContentDirectory::Node(const int index, const float cellWidth)
         }
         if (ImGui::Selectable("Open"))
         {
+            if (auto asset = AssetManager::TryLoadAsset(path))
+            {
+                auto newWindow = std::make_shared<CustomFuncWindow>(std::bind(&AssetBase::InspectorView, asset));
+                newWindow->SetWindowName(asset->GetAssetPath().filename().string());
+                Editor::Get().g_EditorWindows.emplace_back(newWindow);
+            }
         }
         if (ImGui::Selectable("Open External"))
         {
@@ -102,6 +109,10 @@ void ContentDirectory::Node(const int index, const float cellWidth)
         ImGui::Separator();
         if (ImGui::Selectable("ReImport"))
         {
+            if (auto asset = AssetManager::TryLoadAsset(path))
+            {
+                asset->Init();
+            }
             IsDirty = true;
         }
         ImGui::Separator();
@@ -315,7 +326,7 @@ std::shared_ptr<TextureHolder> ContentDirectory::IconFromExtension(const std::fi
         imageTexture = AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/Folder.png");
     }
 
-    else if (extension == ".dds" || extension == ".png" || extension == ".hdr")
+    else if (extension == ".dds" || extension == ".png" || extension == ".hdr" || extension == ".jpg")
     {
         imageTexture = AssetManager::Get().LoadAsset<TextureHolder>(path);
         if (!imageTexture->isLoadedComplete)
@@ -340,6 +351,11 @@ std::shared_ptr<TextureHolder> ContentDirectory::IconFromExtension(const std::fi
         {
             imageTexture = materialPreview->GetEditorIcon();
         }
+    }
+
+    else if (extension == ".Graph")
+    {
+        imageTexture = AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/Graph.png");
     }
 
     else if (extension == ".cso")

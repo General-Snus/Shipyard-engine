@@ -329,7 +329,7 @@ void GPU::ResizeDepthBuffer(unsigned width, unsigned height)
 bool GPU::LoadTexture(Texture *outTexture, const std::filesystem::path &aFileName, bool generateMips)
 {
     if (!std::filesystem::is_regular_file(aFileName) ||
-        aFileName.extension() != ".dds" && aFileName.extension() != ".png")
+        aFileName.extension() != ".dds" && aFileName.extension() != ".png" && aFileName.extension() != ".jpg")
     {
         const std::string error = "Failed to load texture: " + aFileName.string() + " does not exist!";
         Logger::Err(error);
@@ -348,7 +348,7 @@ bool GPU::LoadTexture(Texture *outTexture, const std::filesystem::path &aFileNam
                                                         outTexture->m_Resource.ReleaseAndGetAddressOf(), generateMips,
                                                         0, nullptr, &isCubeMap));
     }
-    else if (aFileName.extension() == ".png")
+    else if (aFileName.extension() == ".png" || aFileName.extension() == ".jpg")
     {
         Helpers::ThrowIfFailed(CreateWICTextureFromFile(m_Device.Get(), resourceUpload, aFileName.wstring().c_str(),
                                                         outTexture->m_Resource.ReleaseAndGetAddressOf(), generateMips));
@@ -405,13 +405,20 @@ bool GPU::LoadTextureFromMemory(Texture *outTexture, const std::filesystem::path
     if (generateMips && resourceUpload.IsSupportedForGenerateMips(outTexture->m_Resource->GetDesc().Format))
     {
         outTexture->SetView(ViewType::SRV);
-        resourceUpload.Transition(outTexture->m_Resource.Get(), D3D12_RESOURCE_STATE_COPY_DEST,
-                                  D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+        /*  resourceUpload.Transition(outTexture->m_Resource.Get(), D3D12_RESOURCE_STATE_COMMON,
+                                    D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);*/
         resourceUpload.GenerateMips(outTexture->m_Resource.Get());
     }
     const auto uploadResourcesFinished = resourceUpload.End(m_DirectCommandQueue->GetCommandQueue().Get());
     uploadResourcesFinished.wait();
 
+    const auto width = outTexture->m_Resource->GetDesc().Width;
+    const auto height = outTexture->m_Resource->GetDesc().Height;
+    outTexture->m_Rect = D3D12_RECT(0, 0, static_cast<uint32_t>(width), height);
+    outTexture->m_Viewport = D3D12_VIEWPORT(0, 0, static_cast<FLOAT>(width), static_cast<FLOAT>(height), 0, 1);
+    outTexture->m_Resource->SetName(aName.wstring().c_str());
+
+    outTexture->CheckFeatureSupport();
     outTexture->SetView(ViewType::SRV);
     return true;
 }

@@ -4,6 +4,7 @@
         "albedoColor":  [1.0,0.8,0.8,1] ,
         "UVTiling": [0.1,0.1],
         "NormalStrength" : 1.0,
+        "Roughness": 1.0,
         "Shine" : 50
     },
     "Textures" : [
