@@ -39,6 +39,8 @@ IMPLEMENT_GRAPH_NODE(MVNode_SetTransformPosition, ScriptGraphNode);
 IMPLEMENT_GRAPH_NODE(MVNode_GetTransformPosition, ScriptGraphNode);
 IMPLEMENT_GRAPH_NODE(MVNode_GetGameObject, ScriptGraphNode);
 IMPLEMENT_GRAPH_NODE(MVNode_IsGameObject, ScriptGraphNode);
+IMPLEMENT_GRAPH_NODE(MVNode_IsGameObjectActive, ScriptGraphNode);
+IMPLEMENT_GRAPH_NODE(MVNode_SetGameObjectActive, ScriptGraphNode);
 
 SGNode_MathAdd::SGNode_MathAdd()
 {
@@ -537,6 +539,58 @@ NodeResult MVNode_IsGameObject::DoOperation()
         }
 
         SetPinData("IsSame", false);
+        return ExecPin("Out");
+    }
+    return Error("Failed to get data");
+}
+
+MVNode_IsGameObjectActive::MVNode_IsGameObjectActive()
+{
+    CreateExecPin("In", PinDirection::Input);
+    CreateExecPin("Out", PinDirection::Output);
+
+    CreateDataPin<GameObject>("GameObject", PinDirection::Input);
+    CreateDataPin<bool>("Active", PinDirection::Output);
+}
+
+NodeResult MVNode_IsGameObjectActive::DoOperation()
+{
+    GameObject obj;
+    if (GetPinData("GameObject", obj))
+    {
+        if (obj.IsValid())
+        {
+            SetPinData("Active", obj.GetActive());
+            return ExecPin("Out");
+        }
+
+        SetPinData("IsSame", false);
+        return ExecPin("Out");
+    }
+    return Error("Failed to get data");
+}
+
+MVNode_SetGameObjectActive::MVNode_SetGameObjectActive()
+{
+    CreateExecPin("In", PinDirection::Input);
+    CreateExecPin("Out", PinDirection::Output);
+
+    CreateDataPin<GameObject>("GameObject", PinDirection::Input);
+    CreateDataPin<bool>("Active", PinDirection::Input);
+}
+
+NodeResult MVNode_SetGameObjectActive::DoOperation()
+{
+    GameObject obj;
+    bool active;
+    if (GetPinData("GameObject", obj) && GetPinData("Active", active))
+    {
+        if (obj.IsValid())
+        {
+            obj.SetActive(active);
+            return ExecPin("Out");
+        }
+
         return ExecPin("Out");
     }
     return Error("Failed to get data");

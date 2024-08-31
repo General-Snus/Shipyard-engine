@@ -318,6 +318,36 @@ DECLARE_GRAPH_NODE(MVNode_IsGameObject, ScriptGraphNode)
     }
 };
 
+DECLARE_GRAPH_NODE(MVNode_IsGameObjectActive, ScriptGraphNode)
+{
+  public:
+    MVNode_IsGameObjectActive();
+    FORCEINLINE std::string_view GetNodeTitle() const override
+    {
+        return "IsGameObjectActive";
+    }
+    NodeResult DoOperation() override;
+    FORCEINLINE std::string_view GetNodeCategory() const override
+    {
+        return "ComponentSystem";
+    }
+};
+
+DECLARE_GRAPH_NODE(MVNode_SetGameObjectActive, ScriptGraphNode)
+{
+  public:
+    MVNode_SetGameObjectActive();
+    FORCEINLINE std::string_view GetNodeTitle() const override
+    {
+        return " SetGameObjectActive";
+    }
+    NodeResult DoOperation() override;
+    FORCEINLINE std::string_view GetNodeCategory() const override
+    {
+        return "ComponentSystem";
+    }
+};
+
 DECLARE_GRAPH_NODE(MVNode_GetTransformPosition, ScriptGraphNode)
 {
   public:

@@ -28,7 +28,8 @@ GraphComponent::GraphComponent(const SY::UUID anOwnerID, GameObjectManager *aMan
                 cmp->SetActive(false);
             }
             aGraph;
-            Logger::Err(std::format("Graph failure at node {} with {}", aNodeUID, aMessage));
+            Logger::Err(std::format("Graph failure at node {} with {}", aGraph->GetNodeById(aNodeUID)->GetNodeTitle(),
+                                    aMessage));
             return;
         });
 }

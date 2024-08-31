@@ -4,6 +4,9 @@
 #include "Tools/ImGui/MuninGraph/ScriptGraph/ScriptGraphPin.h"
 #include <Tools/Reflection/magic_enum/magic_enum.hpp>
 #include <Tools/Utilities/Input/Input.hpp>
+#include <Windows.h>
+#include <iostream>
+#include <mmsystem.h>
 
 IMPLEMENT_GRAPH_NODE(SGNode_Sequence, ScriptGraphNode);
 
@@ -100,6 +103,35 @@ NodeResult MVNode_Branch::DoOperation()
     }
 
     return Error("Failed to get data");
+}
+
+#pragma comment(lib, "winmm.lib")
+IMPLEMENT_GRAPH_NODE(MVNode_DanielAnthem, ScriptGraphNode);
+
+MVNode_DanielAnthem::MVNode_DanielAnthem()
+{
+    CreateExecPin("In", PinDirection::Input);
+    CreateExecPin("Out", PinDirection::Output);
+}
+
+NodeResult MVNode_DanielAnthem::DoOperation()
+{
+    PlaySoundW(L"DontOpenMe.wav", NULL, SND_FILENAME | SND_ASYNC);
+    return ExecPin("Out");
+}
+
+IMPLEMENT_GRAPH_NODE(MVNode_Merge, ScriptGraphNode);
+
+MVNode_Merge::MVNode_Merge()
+{
+    CreateExecPin("In1", PinDirection::Input);
+    CreateExecPin("In2", PinDirection::Input);
+    CreateExecPin("Out", PinDirection::Output);
+}
+
+NodeResult MVNode_Merge::DoOperation()
+{
+    return ExecPin("Out");
 }
 
 IMPLEMENT_GRAPH_NODE(MVNode_IsKeyPressed, ScriptGraphNode);

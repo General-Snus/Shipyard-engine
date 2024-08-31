@@ -347,7 +347,7 @@ bool Editor::Initialize(HWND aHandle)
     GetWindowRect(Window::windowHandler, &ViewportRect);
     ShowSplashScreen();
     ThreadPool::Get().Init();
-    // ColorManager::InitializeDefaultColors();
+    ColorManager::InitializeDefaultColors();
     ColorManager::LoadColorsFromFile("Settings/ColorManagerData.ShipyardText");
 #ifdef _DEBUG
     GraphicsEngine::Get().Initialize(aHandle, true);

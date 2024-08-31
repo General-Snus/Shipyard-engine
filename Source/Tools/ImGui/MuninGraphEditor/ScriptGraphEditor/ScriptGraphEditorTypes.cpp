@@ -176,11 +176,11 @@ IMPLEMENT_EDITOR_TYPE(SY::UUID, UUID)
 bool ScriptGraphEditorType_UUID::TypeEditWidget(std::string_view aUniqueName,
                                                 const TypedDataContainer &aDataContainer) const
 {
-    SY::UUID value = *static_cast<SY::UUID *>(*aDataContainer);
-    std::string uuidStr = std::to_string(value); // Replace with actual method to convert UUID to string
-    if (ImGui::InputText(aUniqueName.data(), &uuidStr, ImGuiInputTextFlags_EnterReturnsTrue))
+    SY::UUID *value = static_cast<SY::UUID *>(*aDataContainer);
+    int arg = *value;
+    if (ImGui::InputInt(aUniqueName.data(), &arg, ImGuiInputTextFlags_EnterReturnsTrue))
     {
-        // Update UUID with new value if necessary
+        *value = std::clamp(arg, 0, INT32_MAX);
         return true;
     }
     return false;

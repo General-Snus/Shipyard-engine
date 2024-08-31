@@ -32,10 +32,21 @@ void CollisionChecks::CheckColliders()
     for (const auto &collider : listOfColliders)
     {
         const auto firstOwner = collider.GetOwner();
+        if (!collider.IsActive() || !collider.GetGameObject().GetActive())
+        {
+            index++;
+            continue;
+        }
+
         const AABB3D<float> &firstCollider = collider.GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB();
         for (size_t i = index; i < listOfColliders.size(); i++)
         {
             const auto secondOwner = listOfColliders[i].GetOwner();
+            if (!listOfColliders[i].IsActive() || !listOfColliders[i].GetGameObject().GetActive())
+            {
+                continue;
+            }
+
             const auto &secondCollider = listOfColliders[i].GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB();
 
             if (IntersectionAABB<float>(firstCollider, secondCollider))

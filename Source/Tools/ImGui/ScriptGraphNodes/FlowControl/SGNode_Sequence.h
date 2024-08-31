@@ -45,6 +45,36 @@ DECLARE_GRAPH_NODE(MVNode_Branch, ScriptGraphNode)
     }
 };
 
+DECLARE_GRAPH_NODE(MVNode_DanielAnthem, ScriptGraphNode)
+{
+  public:
+    MVNode_DanielAnthem();
+    FORCEINLINE std::string_view GetNodeTitle() const override
+    {
+        return "DanielAnthem";
+    }
+    NodeResult DoOperation() override;
+    FORCEINLINE std::string_view GetNodeCategory() const override
+    {
+        return "Audio";
+    }
+};
+
+DECLARE_GRAPH_NODE(MVNode_Merge, ScriptGraphNode)
+{
+  public:
+    MVNode_Merge();
+    FORCEINLINE std::string_view GetNodeTitle() const override
+    {
+        return "Merge";
+    }
+    NodeResult DoOperation() override;
+    FORCEINLINE std::string_view GetNodeCategory() const override
+    {
+        return "Flow Control";
+    }
+};
+
 DECLARE_GRAPH_NODE(MVNode_IsKeyPressed, ScriptGraphNode)
 {
   public:
