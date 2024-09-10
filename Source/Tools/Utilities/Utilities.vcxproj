@@ -254,6 +254,7 @@
     <ClInclude Include="DataStructures\Heap.hpp" />
     <ClInclude Include="DataStructures\PriorityQueue.hpp" />
     <ClInclude Include="DataStructures\Queue.hpp" />
+    <ClInclude Include="DataStructures\Ranges.hpp" />
     <ClInclude Include="DataStructures\Sort.hpp" />
     <ClInclude Include="DataStructures\Stack.hpp" />
     <ClInclude Include="DataStructures\VectorOnStack.hpp" />

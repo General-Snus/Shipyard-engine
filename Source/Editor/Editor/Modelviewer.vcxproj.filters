@@ -84,6 +84,9 @@
     <ClInclude Include="Windows\EditorWindows\ChainGraph\GraphTool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Windows\EditorWindows\ChatWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Source\Editor.cpp">
@@ -147,6 +150,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Windows\EditorWindows\ChainGraph\GraphTool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\EditorWindows\Source\ChatWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

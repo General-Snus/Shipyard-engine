@@ -52,6 +52,7 @@
 #include <Editor/Editor/Commands/CommandBuffer.h>
 #include <Editor/Editor/Commands/SceneAction.h>
 #include <Editor/Editor/Windows/EditorWindows/ChainGraph/GraphTool.h>
+#include <Editor/Editor/Windows/EditorWindows/ChatWindow.h>
 #include <Editor/Editor/Windows/EditorWindows/CustomFuncWindow.h>
 #include <Editor/Editor/Windows/EditorWindows/History.h>
 #include <Tools/ImGui/ImGui/Font/IconsFontAwesome5.h>
@@ -612,7 +613,7 @@ void Editor::Update()
 
     Shipyard_PhysX::Get().StartRead();
     Scene::ActiveManager().Update();
-    CollisionChecks::CheckColliders();
+    SystemCollection::UpdateSystems(delta);
 
     // Editor key checks
     if (Input::IsKeyPressed(Keys::F) && m_SelectedGameObjects.size() > 0)
@@ -754,6 +755,11 @@ void Editor::TopBar()
                 g_EditorWindows.emplace_back(std::make_shared<CustomFuncWindow>(&Graph::GraphTool::RunEditor));
             }
 
+            if (ImGui::Selectable("Chat"))
+            {
+                g_EditorWindows.emplace_back(std::make_shared<ChatWindow>());
+            }
+
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Tools"))
@@ -767,7 +773,9 @@ void Editor::TopBar()
     {
         if (windows && windows->m_KeepWindow)
         {
+            ImGui::PushID((void*)windows.get());
             windows->RenderImGUi();
+            ImGui::PopID();
         }
     }
 

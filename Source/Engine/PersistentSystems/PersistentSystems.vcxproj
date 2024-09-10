@@ -284,6 +284,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ArtificialInteligence\AICommands\AICommands.h" />
+    <ClInclude Include="System\Networked\NetworkedUpdate.h" />
     <ClInclude Include="System\Colission\OnCollision.h" />
     <ClInclude Include="PersistentSystems.pch.h" />
     <ClInclude Include="Physics\Raycast.h" />
@@ -291,9 +292,11 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneUtilities.h" />
     <ClInclude Include="System\SceneGraph\WorldGraph.h" />
+    <ClInclude Include="System\SystemBase.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ArtificialInteligence\AICommands\Source\AICommands.cpp" />
+    <ClCompile Include="System\Networked\Source\NetworkedUpdate.cpp" />
     <ClCompile Include="PersistentSystems.pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -303,8 +306,9 @@
     <ClCompile Include="Physics\Source\PhysXInterpeter.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneUtilities.cpp" />
-    <ClCompile Include="System\Colission\OnCollision.cpp" />
+    <ClCompile Include="System\Colission\Source\OnCollision.cpp" />
     <ClCompile Include="System\SceneGraph\WorldGraph.cpp" />
+    <ClCompile Include="System\SystemBase.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -262,6 +262,7 @@
     <ClInclude Include="ComponentSystem\Components\Physics\cPhysXStaticBody.h" />
     <ClInclude Include="ComponentSystem\MasterIncludeComponent.h" />
     <ClInclude Include="Enums.h" />
+    <ClInclude Include="ComponentSystem\Components\Network\NetworkSync.h" />
     <ClInclude Include="Objects\BaseAssets\GraphAsset.h" />
     <ClInclude Include="ComponentSystem\Components\GraphComponent.h" />
     <ClInclude Include="Objects\AI\AgentSystem\AIPollingManager.h" />
@@ -329,6 +330,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="ComponentSystem\Components\Network\Source\NetworkSync.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\BehaviourTree\BrainTree.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Source\AIPollingManager.cpp" />
     <ClCompile Include="AssetManagerUtills.cpp" />

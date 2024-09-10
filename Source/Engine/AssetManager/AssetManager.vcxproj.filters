@@ -189,6 +189,9 @@
     <ClInclude Include="Objects\BaseAssets\GraphAsset.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ComponentSystem\Components\Network\NetworkSync.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssetManager.pch.cpp">
@@ -348,6 +351,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ComponentSystem\Components\Source\GraphComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ComponentSystem\Components\Network\Source\NetworkSync.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

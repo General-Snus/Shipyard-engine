@@ -1,6 +1,6 @@
 #include "Engine/PersistentSystems/PersistentSystems.pch.h"
 
-#include "OnCollision.h"
+#include "../OnCollision.h"
 
 #include <Engine/AssetManager/ComponentSystem/Components/Collider.h>
 #include <Engine/AssetManager/ComponentSystem/Components/Transform.h>
@@ -16,6 +16,12 @@ void CollisionChecks::RemoveCollisions(const SY::UUID &anOwnerID)
     {
         collisions.second.erase(anOwnerID);
     }
+}
+
+void CollisionChecks::Update(float delta)
+{
+    delta;
+    CheckColliders();
 }
 
 void CollisionChecks::CheckColliders()

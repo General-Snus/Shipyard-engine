@@ -21,7 +21,7 @@ cCollider::cCollider(const SY::UUID anOwnerId, GameObjectManager *aManager, cons
 void cCollider::Destroy()
 {
     OPTICK_EVENT();
-    CollisionChecks::RemoveCollisions(GetOwner());
+    SystemCollection::GetSystem<CollisionChecks>()->RemoveCollisions(GetOwner());
 }
 
 void cCollider::Update()
