@@ -27,12 +27,13 @@ void ChatWindow::RenderImGUi()
         ImGui::Text(message.c_str());
     }
 
-    ;
     ImGui::InputText(std::format("Message##{}", id).c_str(), currentMessage, MAX_NETMESSAGE_SIZE);
     ImGui::SameLine();
-    if (ImGui::Button(std::format("Send##{}", id).c_str()))
+
+    if (const std::string message = currentMessage;
+        ImGui::Button(std::format("Send##{}", id).c_str()) && !message.empty())
     {
-        m_Client.Send(std::string(currentMessage));
+        m_Client.Send(message);
         ZeroMemory(currentMessage, 512);
     }
     ImGui::End();

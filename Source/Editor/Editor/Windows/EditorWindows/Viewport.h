@@ -31,6 +31,7 @@ public:
 	bool IsRenderReady();
 	bool IsMainViewport() const;
 	void Update();
+	void ResolutionUpdate();
 	Texture* GetTarget() const;
 
 	cCamera& GetCamera();

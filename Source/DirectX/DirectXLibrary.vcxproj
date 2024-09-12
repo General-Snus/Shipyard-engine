@@ -64,6 +64,7 @@
     <ClInclude Include="CrashHandler\NsightAftermathShaderDatabase.h" />
     <ClInclude Include="DirectXHeader.pch.h" />
     <ClInclude Include="Shipyard\CommandList.h" />
+    <ClInclude Include="Shipyard\Enums.h" />
     <ClInclude Include="Shipyard\GPU.h" />
     <ClInclude Include="Shipyard\MIPS\GenerateMipsPSO.h" />
     <ClInclude Include="Shipyard\ResourceStateTracker.h" />

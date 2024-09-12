@@ -434,6 +434,12 @@ void Editor::DoWinProc(const MSG &aMessage)
             m_Callbacks[EditorCallback::WM_DropFile].Invoke();
         break;
     }
+    case WM_SIZE:
+        for (auto &viewport : m_Viewports)
+        {
+            viewport->ResolutionUpdate();
+        }
+        break;
 
     case WM_CLOSE:
         ColorManager::DumpToFile("Settings/ColorManagerData.ShipyardText");
@@ -773,7 +779,7 @@ void Editor::TopBar()
     {
         if (windows && windows->m_KeepWindow)
         {
-            ImGui::PushID((void*)windows.get());
+            ImGui::PushID((void *)windows.get());
             windows->RenderImGUi();
             ImGui::PopID();
         }

@@ -7,7 +7,7 @@
 #ifndef DIRECTXHEADER_PCH_H
 #define DIRECTXHEADER_PCH_H
 
-#define WIN32_LEAN_AND_MEAN 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 #if defined(min)
@@ -16,46 +16,47 @@
 
 #if defined(max)
 #undef max
-#endif 
+#endif
 
-#define  USE_NSIGHT_AFTERMATH 0 
+#define USE_NSIGHT_AFTERMATH 0
 #include <wrl.h>
 using namespace Microsoft::WRL;
 
 // DirectX 12 specific headers.
-#include <dxgi1_6.h> 
-#include "DirectX/directx/d3dx12.h"  
-#include <d3dcompiler.h> 
-#include <DirectXMath.h> 
+#include "DirectX/directx/d3dx12.h"
 #include <DirectX/XTK/DescriptorHeap.h>
-#include <DirectX/XTK/GraphicsMemory.h>   
+#include <DirectX/XTK/GraphicsMemory.h>
+#include <DirectXMath.h>
+#include <d3dcompiler.h>
+#include <dxgi1_6.h>
 #include <dxgiformat.h>
-//#include <DirectXTex.h>
+// #include <DirectXTex.h>
 using namespace DirectX;
 
-//Other 
+// Other
 #include "Engine/GraphicsEngine/Shaders/Registers.h"
+#include <DirectX/Shipyard/Enums.h>
 #include <Tools/Optick/include/optick.h>
 #include <Tools/Utilities/Error.hpp>
 
 // STL Headers
-#include <cassert>
-#include <array> 
+#include <DirectX/Shipyard/Helpers.h>
 #include <algorithm>
+#include <array>
 #include <atomic>
+#include <cassert>
 #include <chrono>
 #include <condition_variable>
 #include <cstdint>
-#include <filesystem> 
-#include <map> 
-#include <memory> 
-#include <mutex>  
+#include <filesystem>
+#include <map>
+#include <memory>
+#include <mutex>
 #include <new>
 #include <stdexcept>
-#include <string> 
+#include <string>
 #include <thread>
 #include <unordered_map>
-#include <vector>   
-#include <DirectX/Shipyard/Helpers.h>
+#include <vector>
 
-#endif //DIRECTXHEADER_PCH_H
+#endif // DIRECTXHEADER_PCH_H

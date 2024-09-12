@@ -30,15 +30,13 @@
 bool GraphicsEngine::Initialize(HWND windowHandle, bool enableDeviceDebug)
 {
     myWindowHandle = windowHandle;
-    myBackBuffer = std::make_unique<Texture>();
-    myDepthBuffer = std::make_unique<Texture>();
-    if (!GPU::Initialize(myWindowHandle, enableDeviceDebug, myBackBuffer, myDepthBuffer, Window::Width(),
-                         Window::Height()))
+    if (!GPU::Initialize(myWindowHandle, enableDeviceDebug, Window::Width(), Window::Height()))
     {
         Logger::Err("Failed to initialize the DX12 GPU!");
         return false;
     }
 
+    PSOCache::InitRootSignature();
     PSOCache::InitAllStates();
 
     SetupDefaultVariables();
@@ -402,37 +400,9 @@ uint64_t GraphicsEngine::RenderFrame(Viewport &renderViewPort, GameObjectManager
 
 void GraphicsEngine::EndFrame()
 {
-    const auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
-    const auto commandList = commandQueue->GetCommandList();
-
-    OPTICK_GPU_CONTEXT(commandList->GetGraphicsCommandList().Get());
-    commandList->SetRenderTargets(1, GPU::GetCurrentBackBuffer(), nullptr);
-    ImGuiPass(commandList);
-
     OPTICK_GPU_EVENT("EndFrame");
-
-    const auto *backBuffer = GPU::GetCurrentBackBuffer();
-    commandList->TransitionBarrier(backBuffer->GetResource(), D3D12_RESOURCE_STATE_PRESENT);
-    commandQueue->ExecuteCommandList(commandList);
-
-    OPTICK_CATEGORY("Present", Optick::Category::Rendering);
-    OPTICK_GPU_FLIP(GPU::m_Swapchain->m_SwapChain.Get());
-    auto hr = GPU::m_Swapchain->m_SwapChain->Present(DXGI_SWAP_EFFECT_DISCARD, DXGI_PRESENT_ALLOW_TEARING);
-
-    if (hr == 84)
-    {
-        const auto deviceRemovalReason = GPU::m_Device->GetDeviceRemovedReason();
-        __debugbreak();
-        throw deviceRemovalReason;
-    }
-
-    Helpers::ThrowIfFailed(hr);
-
-    GPU::m_FenceValues[GPU::m_FrameIndex] = commandQueue->Signal();
-    GPU::m_FrameIndex = GPU::m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
-
-    GPU::m_GraphicsMemory->Commit(commandQueue->GetCommandQueue().Get());
-    commandQueue->WaitForFenceValue(GPU::m_FenceValues[GPU::m_FrameIndex]);
+    ImGuiPass();
+    GPU::Present();
 }
 
 void GraphicsEngine::PrepareBuffers(std::shared_ptr<CommandList> commandList, Viewport &renderViewPort,
@@ -465,18 +435,18 @@ void GraphicsEngine::PrepareBuffers(std::shared_ptr<CommandList> commandList, Vi
 
         const auto frameBuffer = renderViewPort.GetCamera().GetFrameBuffer();
         const auto &alloc0 = GPU::m_GraphicsMemory->AllocateConstant<FrameBuffer>(frameBuffer);
-        commandList->GetGraphicsCommandList()->SetGraphicsRootConstantBufferView(eRootBindings::frameBuffer,
+        commandList->GetGraphicsCommandList()->SetGraphicsRootConstantBufferView((int)eRootBindings::frameBuffer,
                                                                                  alloc0.GpuAddress());
 
         const auto cubeMap = defaultCubeMap->GetRawTexture().get();
-        commandList->SetDescriptorTable(PermanentTextures, cubeMap);
+        commandList->SetDescriptorTable((int)eRootBindings::PermanentTextures, cubeMap);
         commandList->TrackResource(cubeMap->GetResource());
 
         commandList->GetGraphicsCommandList()->SetGraphicsRootDescriptorTable(
-            Textures,
+            (int)eRootBindings::Textures,
             GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->GetFirstGpuHandle());
         commandList->GetGraphicsCommandList()->SetGraphicsRootDescriptorTable(
-            MeshBuffer,
+            (int)eRootBindings::MeshBuffer,
             GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->GetFirstGpuHandle());
     }
 }
@@ -501,7 +471,7 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
 
         auto frameBuffer = renderViewPort.GetCamera().GetFrameBuffer();
         const auto &alloc0 = GPU::m_GraphicsMemory->AllocateConstant<FrameBuffer>(frameBuffer);
-        commandList->GetGraphicsCommandList()->SetGraphicsRootConstantBufferView(eRootBindings::frameBuffer,
+        commandList->GetGraphicsCommandList()->SetGraphicsRootConstantBufferView((int)eRootBindings::frameBuffer,
                                                                                  alloc0.GpuAddress());
     }
 
@@ -649,7 +619,7 @@ void GraphicsEngine::EnvironmentLightPass(std::shared_ptr<CommandList> commandLi
             commandList->TrackResource(gBufferTextures[i]);
         }
         commandList->FlushResourceBarriers();
-        commandList->SetDescriptorTable(GbufferPasses, gBufferTextures);
+        commandList->SetDescriptorTable((int)eRootBindings::GbufferPasses, gBufferTextures);
 
         commandList->GetGraphicsCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         commandList->GetGraphicsCommandList()->IASetVertexBuffers(0, 1, nullptr);
@@ -667,7 +637,7 @@ void GraphicsEngine::ToneMapperPass(std::shared_ptr<CommandList> commandList, Te
     commandList->TrackResource(pipelineState);
 
     auto *renderTargets = PSOCache::GetState(PSOCache::ePipelineStateID::DeferredLighting)->RenderTargets();
-    commandList->SetDescriptorTable(TargetTexture, renderTargets);
+    commandList->SetDescriptorTable((int)eRootBindings::TargetTexture, renderTargets);
     commandList->FlushResourceBarriers();
 
     GPU::ClearRTV(*commandList.get(), toneMapper->RenderTargets(), toneMapper->GetNumberOfTargets());
@@ -679,9 +649,16 @@ void GraphicsEngine::ToneMapperPass(std::shared_ptr<CommandList> commandList, Te
     commandList->GetGraphicsCommandList()->DrawInstanced(6, 1, 0, 0);
 }
 
-void GraphicsEngine::ImGuiPass(std::shared_ptr<CommandList> commandList)
+void GraphicsEngine::ImGuiPass()
 {
+    const auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+    const auto commandList = commandQueue->GetCommandList();
+
+    OPTICK_GPU_CONTEXT(commandList->GetGraphicsCommandList().Get());
     OPTICK_GPU_EVENT("ImGui");
+
+    commandList->SetRenderTargets(1, GPU::GetCurrentBackBuffer(), nullptr);
+
     ImGui::Render();
     ImGuiIO &io = ImGui::GetIO();
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -696,15 +673,17 @@ void GraphicsEngine::ImGuiPass(std::shared_ptr<CommandList> commandList)
     commandList->GetGraphicsCommandList()->SetDescriptorHeaps((UINT)std::size(heaps), heaps);
 
     ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList->GetGraphicsCommandList().Get());
+    commandQueue->ExecuteCommandList(commandList);
 }
+
 FORCEINLINE std::shared_ptr<Texture> GraphicsEngine::GetTargetTextures(eRenderTargets type) const
 {
     switch (type)
     {
     case eRenderTargets::BackBuffer:
-        return myBackBuffer;
+        return std::shared_ptr<Texture>(GPU::GetCurrentBackBuffer());
     case eRenderTargets::DepthBuffer:
-        return myDepthBuffer;
+        return GPU::m_DepthBuffer;
     case eRenderTargets::SceneBuffer:
         return SceneBuffer;
     case eRenderTargets::halfSceneBuffer:

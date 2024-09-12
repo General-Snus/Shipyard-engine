@@ -113,6 +113,11 @@ void Viewport::Update()
     }
 }
 
+void Viewport::ResolutionUpdate()
+{
+    // m_RenderTarget->GetRawTexture()->AllocateTexture(resolution, "Target1");
+}
+
 cCamera &Viewport::GetCamera()
 {
     return myVirtualCamera.GetComponent<cCamera>();
@@ -187,11 +192,12 @@ void Viewport::RenderImGUi()
         IsUsed = ImGui::IsWindowFocused();
         IsVisible = ImGui::IsItemVisible();
 
-        float windowWidth = ImGui::GetWindowWidth();
-        float windowHeight = ImGui::GetWindowHeight();
-        ImGui::Image(m_RenderTarget, ImVec2(windowWidth, windowHeight));
+        float windowWidth = ImGui::GetContentRegionAvail().x;
+        float windowHeight = ImGui::GetContentRegionAvail().y;
+        ImGui::Image(m_RenderTarget, ImGui::GetContentRegionAvail());
         const bool isWindowFocused = ImGui::IsItemHovered();
         IsMouseHoverering = isWindowFocused;
+
         if (ImGui::BeginDragDropTarget())
         {
             if (const ImGuiPayload *test = ImGui::AcceptDragDropPayload("ContentAsset_Mesh"))
@@ -271,7 +277,7 @@ void Viewport::RenderImGUi()
 
 void Viewport::RenderToolbar()
 {
-    auto &style = ImGui::GetStyle();
+    auto const &style = ImGui::GetStyle();
     float textHeight = ImGui::CalcTextSize("A").y;
     // style.FramePadding can also be used here
     ImVec2 toolbarItemSize = ImVec2{textHeight * 4.0f, textHeight * 2.0f};

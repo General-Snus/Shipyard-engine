@@ -18,6 +18,7 @@
 
 #include "CommandList.h"
 #include "CommandQueue.h"
+#include "Enums.h"
 #include "Gpu_fwd.h"
 #include "RootSignature.h"
 #include "Texture.h"
@@ -34,6 +35,7 @@ class GPUSwapchain
   public:
     void Create(HWND hwnd, ComPtr<ID3D12CommandQueue>, UINT Width, UINT Height, UINT bufferCount);
     void Present();
+    void Resize(Vector2ui resolution);
     ComPtr<IDXGISwapChain4> m_SwapChain;
     DXGI_SWAP_CHAIN_DESC1 m_Desc{};
 };
@@ -41,9 +43,9 @@ class GPUSwapchain
 class GPU
 {
   public:
-    static bool Initialize(HWND aWindowHandle, bool enableDeviceDebug, const std::shared_ptr<Texture> &aBackBuffer,
-                           const std::shared_ptr<Texture> &aDepthBuffer, uint32_t width, uint32_t height);
+    static bool Initialize(HWND aWindowHandle, bool enableDeviceDebug, uint32_t width, uint32_t height);
     static bool UnInitialize();
+    static void Resize(Vector2ui resolution);
     static void Present(unsigned aSyncInterval = 0);
 
     static void UpdateBufferResource(const CommandList &commandList, ID3D12Resource **pDestinationResource,
@@ -102,7 +104,7 @@ class GPU
                                           D3D12_COMMAND_LIST_TYPE type);
     static std::shared_ptr<GPUCommandQueue> GetCommandQueue(D3D12_COMMAND_LIST_TYPE type);
 
-    static ComPtr<ID3D12Fence> CreateFence(const ComPtr<ID3D12Device> &device);
+    static ComPtr<ID3D12Fence> CreateFence();
 
     static HANDLE CreateEventHandle();
 
@@ -145,7 +147,6 @@ class GPU
     static inline GPUSupport m_DeviceSupport;
     static inline D3D12_VIEWPORT m_Viewport;
     static inline D3D12_RECT m_ScissorRect;
-    static inline std::shared_ptr<Texture> m_BackBuffer;
     static inline std::shared_ptr<Texture> m_DepthBuffer;
     static inline std::shared_ptr<DirectX::GraphicsMemory> m_GraphicsMemory;
 

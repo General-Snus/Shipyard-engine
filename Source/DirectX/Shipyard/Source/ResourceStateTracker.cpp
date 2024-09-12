@@ -238,3 +238,28 @@ void ResourceStateTracker::RemoveGlobalResourceState(ID3D12Resource *resource)
         ms_GlobalResourceState.erase(resource);
     }
 }
+
+void ResourceStateTracker::ResourceState::SetSubresourceState(UINT subresource, D3D12_RESOURCE_STATES state)
+{
+    OPTICK_GPU_EVENT("SetSubresourceState");
+    if (subresource == D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES)
+    {
+        State = state;
+        SubresourceState.clear();
+    }
+    else
+    {
+        SubresourceState[subresource] = state;
+    }
+}
+
+D3D12_RESOURCE_STATES ResourceStateTracker::ResourceState::GetSubresourceState(UINT subresource) const
+{
+    D3D12_RESOURCE_STATES state = State;
+    const auto iter = SubresourceState.find(subresource);
+    if (iter != SubresourceState.end())
+    {
+        state = iter->second;
+    }
+    return state;
+}

@@ -3,6 +3,7 @@
 #include "DirectX/Shipyard/Texture.h"
 #include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
 #include "Tools/ImGui/ImGui/imgui.h"
+#include <DirectX/Shipyard/Enums.h>
 #include <Engine/GraphicsEngine/GraphicsEngine.h>
 
 namespace ImGui

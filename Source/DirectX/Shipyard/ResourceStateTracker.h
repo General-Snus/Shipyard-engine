@@ -46,7 +46,6 @@
 
 #include <d3d12.h>
 
-#include <Tools/Optick/include/optick.h>
 #include <map>
 #include <mutex>
 #include <unordered_map>
@@ -172,34 +171,15 @@ class ResourceStateTracker
         }
 
         // Set a subresource to a particular state.
-        void SetSubresourceState(UINT subresource, D3D12_RESOURCE_STATES state)
-        {
-            OPTICK_GPU_EVENT("SetSubresourceState");
-            if (subresource == D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES)
-            {
-                State = state;
-                SubresourceState.clear();
-            }
-            else
-            {
-                SubresourceState[subresource] = state;
-            }
-        }
+        void SetSubresourceState(UINT subresource, D3D12_RESOURCE_STATES state);
+        
 
         // Get the state of a (sub)resource within the resource.
         // If the specified subresource is not found in the SubresourceState array (map)
         // then the state of the resource (D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES) is
         // returned.
-        D3D12_RESOURCE_STATES GetSubresourceState(UINT subresource) const
-        {
-            D3D12_RESOURCE_STATES state = State;
-            const auto iter = SubresourceState.find(subresource);
-            if (iter != SubresourceState.end())
-            {
-                state = iter->second;
-            }
-            return state;
-        }
+        D3D12_RESOURCE_STATES GetSubresourceState(UINT subresource) const;
+        
 
         // If the SubresourceState array (map) is empty, then the State variable defines
         // the state of all of the subresources.

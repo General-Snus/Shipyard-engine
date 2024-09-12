@@ -5,16 +5,13 @@
 #include "DirectX/Shipyard/ResourceStateTracker.h"
 #include "DirectX/Shipyard/Texture.h"
 #include "DirectX/Shipyard/eDescriptors.h"
+#include <DirectX/Shipyard/PSO.h>
 #include <DirectX/XTK/DDSTextureLoader.h>
 #include <DirectX/XTK/ResourceUploadBatch.h>
 #include <DirectX/XTK/WICTextureLoader.h>
 
-bool GPU::Initialize(HWND aWindowHandle, bool enableDeviceDebug, const std::shared_ptr<Texture> &aBackBuffer,
-                     const std::shared_ptr<Texture> &aDepthBuffer, uint32_t width, uint32_t height)
+bool GPU::Initialize(HWND aWindowHandle, bool enableDeviceDebug, uint32_t width, uint32_t height)
 {
-    m_BackBuffer = aBackBuffer;
-    m_DepthBuffer = aDepthBuffer;
-
     m_Height = height;
     m_Width = width;
 
@@ -143,18 +140,8 @@ bool GPU::Initialize(HWND aWindowHandle, bool enableDeviceDebug, const std::shar
     m_Swapchain->Create(aWindowHandle, m_DirectCommandQueue->GetCommandQueue(), width, height, m_FrameCount);
     m_FrameIndex = m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
 
-    // Create descriptor heaps.
-    // m_RtvHeap = CreateDescriptorHeap(m_Device,D3D12_DESCRIPTOR_HEAP_TYPE_RTV,m_FrameCount);
-    // m_RtvDescriptorSize = m_Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-
-    // m_DsvHeap = CreateDescriptorHeap(m_Device,D3D12_DESCRIPTOR_HEAP_TYPE_DSV,1);
-    // m_SrvHeap =
-    // CreateDescriptorHeap(m_Device,D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,1,D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
-
     // Create frame resources.
     UpdateRenderTargetViews(m_Device, m_Swapchain->m_SwapChain, nullptr);
-
-    m_BackBuffer->AllocateTexture({width, height}, "Backbuffer");
     ResizeDepthBuffer(width, height);
 
     // m_DirectCommandQueue->ExecuteCommandList(m_DirectCommandQueue->GetCommandList());
@@ -175,13 +162,51 @@ bool GPU::UnInitialize()
     return true;
 }
 
+void GPU::Resize(Vector2ui resolution)
+{
+    if (!m_Device)
+    {
+        return;
+    }
+
+    if ((m_Width != resolution.x || m_Height != resolution.y) && (resolution.x && resolution.y))
+    {
+
+        m_FenceValues[m_FrameIndex] = m_DirectCommandQueue->Signal();
+        m_FrameIndex = m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
+
+        m_DirectCommandQueue->WaitForFenceValue(m_FenceValues[m_FrameIndex]);
+
+        for (int i = 0; i < m_FrameCount; ++i)
+        {
+            if (auto res = m_renderTargets[i].GetResource())
+            {
+                ResourceStateTracker::RemoveGlobalResourceState(res.Get());
+            }
+            m_renderTargets[i].Reset();
+        }
+
+        m_Width = resolution.x;
+        m_Height = resolution.y;
+
+        m_Viewport = {0.0f,           0.0f, static_cast<float>(m_Width), static_cast<float>(m_Height), D3D12_MIN_DEPTH,
+                      D3D12_MAX_DEPTH};
+        m_ScissorRect = {0, 0, static_cast<LONG>(m_Width), static_cast<LONG>(m_Height)};
+
+        m_Swapchain->Resize(resolution);
+        m_FrameIndex = m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
+
+        UpdateRenderTargetViews(m_Device, m_Swapchain->m_SwapChain, nullptr);
+        PSOCache::InitAllStates();
+    }
+}
+
 void GPU::Present(unsigned aSyncInterval)
 {
-    const auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
-    const auto commandList = commandQueue->GetCommandList();
+    const auto commandList = m_DirectCommandQueue->GetCommandList();
 
     commandList->TransitionBarrier(m_renderTargets[m_FrameIndex].GetResource(), D3D12_RESOURCE_STATE_PRESENT);
-    commandQueue->ExecuteCommandList(commandList);
+    m_DirectCommandQueue->ExecuteCommandList(commandList);
 
 #if (USE_NSIGHT_AFTERMATH)
     auto hr = (m_Swapchain->m_SwapChain->Present(aSyncInterval, 0));
@@ -223,11 +248,11 @@ void GPU::Present(unsigned aSyncInterval)
 #else
     Helpers::ThrowIfFailed(m_Swapchain->m_SwapChain->Present(aSyncInterval, 0));
 #endif
-    m_FenceValues[m_FrameIndex] = commandQueue->Signal();
+    m_FenceValues[m_FrameIndex] = m_DirectCommandQueue->Signal();
     m_FrameIndex = m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
 
-    GraphicsMemory::Get().Commit(commandQueue->GetCommandQueue().Get());
-    commandQueue->WaitForFenceValue(m_FenceValues[m_FrameIndex]);
+    GraphicsMemory::Get().Commit(m_DirectCommandQueue->GetCommandQueue().Get());
+    m_DirectCommandQueue->WaitForFenceValue(m_FenceValues[m_FrameIndex]);
 }
 
 void GPU::UpdateBufferResource(const CommandList &commandList, ID3D12Resource **pDestinationResource,
@@ -307,6 +332,10 @@ bool GPU::CreateIndexBuffer(const std::shared_ptr<CommandList> &commandList, Ind
 
 void GPU::ResizeDepthBuffer(unsigned width, unsigned height)
 {
+    if (!m_DepthBuffer)
+    {
+        m_DepthBuffer = std::make_unique<Texture>();
+    }
     m_DirectCommandQueue->Flush();
 
     width = std::max(1u, width);
@@ -509,12 +538,12 @@ std::shared_ptr<GPUCommandQueue> GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE ty
     return commandQueue;
 }
 
-ComPtr<ID3D12Fence> GPU::CreateFence(const ComPtr<ID3D12Device> &device)
+ComPtr<ID3D12Fence> GPU::CreateFence()
 {
     OPTICK_EVENT();
     ComPtr<ID3D12Fence> fence;
 
-    Helpers::ThrowIfFailed(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
+    Helpers::ThrowIfFailed(m_Device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
 
     return fence;
 }
@@ -538,6 +567,13 @@ void GPU::UpdateRenderTargetViews(const ComPtr<ID3D12Device> &device, const ComP
     device;
     for (int i = 0; i < m_FrameCount; ++i)
     {
+        if (auto res = m_renderTargets[i].GetResource())
+        {
+            ResourceStateTracker::RemoveGlobalResourceState(res.Get());
+        }
+
+        m_renderTargets[i].Reset();
+
         ComPtr<ID3D12Resource> backBuffer;
         Helpers::ThrowIfFailed(swapChain->GetBuffer(i, IID_PPV_ARGS(&backBuffer)));
 
@@ -545,7 +581,7 @@ void GPU::UpdateRenderTargetViews(const ComPtr<ID3D12Device> &device, const ComP
 
         m_renderTargets[i].SetResource(backBuffer);
         m_renderTargets[i].SetView(ViewType::RTV);
-        m_renderTargets->myName = "backbuffer: " + std::to_string(i);
+        m_renderTargets[i].myName = "backbuffer: " + std::to_string(i);
     }
 }
 
@@ -624,6 +660,14 @@ void GPUSwapchain::Present()
     Helpers::ThrowIfFailed(GPU::m_Swapchain->m_SwapChain->Present(m_Desc.SwapEffect, m_Desc.Flags));
 }
 
+void GPUSwapchain::Resize(Vector2ui resolution)
+{
+    DXGI_SWAP_CHAIN_DESC desc = {};
+    m_SwapChain->GetDesc(&desc);
+    Helpers::ThrowIfFailed(
+        m_SwapChain->ResizeBuffers(GPU::m_FrameCount, resolution.x, resolution.y, desc.BufferDesc.Format, desc.Flags));
+}
+
 #if (USE_NSIGHT_AFTERMATH)
 // A helper for setting Aftermath event markers.
 // For maximum CPU performance, use GFSDK_Aftermath_SetEventMarker() with dataSize=0.
@@ -633,18 +677,18 @@ void GPU::setAftermathEventMarker(const std::string &markerData, bool appManaged
 {
     if (appManagedMarker)
     {
-        // App is responsible for handling marker memory, and for resolving the memory at crash dump generation time.
-        // The actual "const void* markerData" passed to Aftermath in this case can be any uniquely identifying value
-        // that the app can resolve to the marker data later. For this sample, we will use this approach to generating a
-        // unique marker value: We keep a ringbuffer with a marker history of the last c_markerFrameHistory frames
-        // (currently 4).
+        // App is responsible for handling marker memory, and for resolving the memory at crash dump generation
+        // time. The actual "const void* markerData" passed to Aftermath in this case can be any uniquely
+        // identifying value that the app can resolve to the marker data later. For this sample, we will use this
+        // approach to generating a unique marker value: We keep a ringbuffer with a marker history of the last
+        // c_markerFrameHistory frames (currently 4).
         UINT markerMapIndex = m_frameCounter % GpuCrashTracker::c_markerFrameHistory;
         auto &currentFrameMarkerMap = m_markerMap[markerMapIndex];
-        // Take the index into the ringbuffer, multiply by 10000, and add the total number of markers logged so far in
-        // the current frame, +1 to avoid a value of zero.
+        // Take the index into the ringbuffer, multiply by 10000, and add the total number of markers logged so far
+        // in the current frame, +1 to avoid a value of zero.
         size_t markerID = markerMapIndex * 10000 + currentFrameMarkerMap.size() + 1;
-        // This value is the unique identifier we will pass to Aftermath and internally associate with the marker data
-        // in the map.
+        // This value is the unique identifier we will pass to Aftermath and internally associate with the marker
+        // data in the map.
         currentFrameMarkerMap[markerID] = markerData;
         AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_SetEventMarker(m_hAftermathCommandListContext, (void *)markerID, 0));
         // For example, if we are on frame 625, markerMapIndex = 625 % 4 = 1...
@@ -653,8 +697,8 @@ void GPU::setAftermathEventMarker(const std::string &markerData, bool appManaged
         // On the next frame, 626, markerMapIndex = 626 % 4 = 2.
         // The first marker for this frame will have markerID = 2 * 10000 + 0 + 1 = 20001.
         // The 15th marker for the frame will have markerID = 2 * 10000 + 14 + 1 = 20015.
-        // So with this scheme, we can safely have up to 10000 markers per frame, and can guarantee a unique markerID
-        // for each one. There are many ways to generate and track markers and unique marker identifiers!
+        // So with this scheme, we can safely have up to 10000 markers per frame, and can guarantee a unique
+        // markerID for each one. There are many ways to generate and track markers and unique marker identifiers!
     }
     else
     {

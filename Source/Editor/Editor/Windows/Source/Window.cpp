@@ -7,6 +7,7 @@
 #include <shellapi.h>
 #include <string>
 
+#include <DirectX/Shipyard/GPU.h>
 void Window::Init(const WinInitSettings &init)
 {
 
@@ -92,12 +93,16 @@ LRESULT CALLBACK Window::WinProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wPa
 
     switch (uMsg)
     {
-    case WM_DESTROY:
+    case WM_SIZE: {
+        const auto res = Vector2ui(LOWORD(lParam), HIWORD(lParam));
+        GPU::Resize(res);
+        break;
+    }
+    case WM_DESTROY: {
         DragAcceptFiles(hWnd, FALSE);
         PostQuitMessage(0);
         return 0;
-        break;
-
+    }
     default:
         break;
     }

@@ -122,5 +122,8 @@
     <ClInclude Include="Shipyard\Gpu_fwd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Shipyard\Enums.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
