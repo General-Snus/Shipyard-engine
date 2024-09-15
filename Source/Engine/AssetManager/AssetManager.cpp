@@ -63,7 +63,7 @@ std::string AssetManager::AssetType(const std::filesystem::path &path)
         return refl::reflect<Material>().name.str();
         ;
     }
-    else if (extension == ".cso")
+    else if (extension == ".cso" || extension == ".hlsl")
     {
         return refl::reflect<ShipyardShader>().name.str();
     }

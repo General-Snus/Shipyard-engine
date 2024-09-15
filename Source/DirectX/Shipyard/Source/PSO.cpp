@@ -223,12 +223,14 @@ std::unique_ptr<PSO> PSO::CreatePSO(const std::filesystem::path &vertexShader, c
 
     if (AssetManager::Get().ForceLoadAsset<ShipyardShader>(vertexShader.string(), pso->m_vs))
     {
-        stream.VS = CD3DX12_SHADER_BYTECODE(pso->m_vs->GetBlob());
+        auto blob = pso->m_vs->GetBlob();
+        stream.VS = CD3DX12_SHADER_BYTECODE(blob->GetBufferPointer(), blob->GetBufferSize());
     }
 
     if (AssetManager::Get().ForceLoadAsset<ShipyardShader>(pixelShader.string(), pso->m_ps))
     {
-        stream.PS = CD3DX12_SHADER_BYTECODE(pso->m_ps->GetBlob());
+        auto blob = pso->m_ps->GetBlob();
+        stream.PS = CD3DX12_SHADER_BYTECODE(blob->GetBufferPointer(), blob->GetBufferSize());
     }
 
     stream.RTVFormats = rtvFormats;

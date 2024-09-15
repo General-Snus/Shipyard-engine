@@ -125,5 +125,17 @@
     <ClInclude Include="Shipyard\Enums.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DXC\d3d12shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DXC\dxcapi.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DXC\dxcerrors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DXC\dxcisense.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

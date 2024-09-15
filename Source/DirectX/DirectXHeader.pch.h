@@ -28,6 +28,7 @@ using namespace Microsoft::WRL;
 #include <DirectX/XTK/GraphicsMemory.h>
 #include <DirectXMath.h>
 #include <d3dcompiler.h>
+#include <dxcapi.h>
 #include <dxgi1_6.h>
 #include <dxgiformat.h>
 // #include <DirectXTex.h>

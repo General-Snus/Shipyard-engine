@@ -358,7 +358,7 @@ std::shared_ptr<TextureHolder> ContentDirectory::IconFromExtension(const std::fi
         imageTexture = AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/Graph.png");
     }
 
-    else if (extension == ".cso")
+    else if (extension == ".cso" || extension == ".hlsl")
     {
         imageTexture = AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/File.png");
     }

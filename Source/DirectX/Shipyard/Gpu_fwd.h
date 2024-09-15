@@ -18,7 +18,10 @@ class ResourceStateTracker;
 // struct ID3D12RootSignature;
 // struct ID3D12GraphicsCommandList2;
 // struct ID3D12Resource;
+struct IDxcLibrary;
+struct IDxcCompiler;
 struct HeapHandle;
+struct IDxcBlob;
 // struct D3D12_FEATURE_DATA_FORMAT_SUPPORT;
 
 enum class eHeapTypes;

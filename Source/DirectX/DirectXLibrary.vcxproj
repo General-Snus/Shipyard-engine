@@ -63,6 +63,10 @@
     <ClInclude Include="CrashHandler\NsightAftermathHelpers.h" />
     <ClInclude Include="CrashHandler\NsightAftermathShaderDatabase.h" />
     <ClInclude Include="DirectXHeader.pch.h" />
+    <ClInclude Include="DXC\d3d12shader.h" />
+    <ClInclude Include="DXC\dxcapi.h" />
+    <ClInclude Include="DXC\dxcerrors.h" />
+    <ClInclude Include="DXC\dxcisense.h" />
     <ClInclude Include="Shipyard\CommandList.h" />
     <ClInclude Include="Shipyard\Enums.h" />
     <ClInclude Include="Shipyard\GPU.h" />
@@ -239,6 +243,9 @@
       </SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalDependencies>dxcompiler.lib</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -263,6 +270,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalDependencies>dxcompiler.lib</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">
     <ClCompile>
@@ -288,6 +298,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalDependencies>dxcompiler.lib</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
