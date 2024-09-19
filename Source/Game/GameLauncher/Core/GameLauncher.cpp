@@ -4,8 +4,6 @@
 #include "GameLauncher.h"
 #include <Engine/AssetManager/ComponentSystem/Components/CameraComponent.h>
 #include <Engine/AssetManager/ComponentSystem/Components/Collider.h>
-#include <Engine/AssetManager/ComponentSystem/Components/DEBUGCOMPONENTS/FrameStatistics.h>
-#include <Engine/AssetManager/ComponentSystem/Components/DEBUGCOMPONENTS/RenderMode.h>
 #include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>
 #include <Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h>
 #include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXDynamicBody.h>

@@ -5,6 +5,7 @@
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 #include <Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h>
 
+#include "Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h"
 #include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
 #include <Engine/GraphicsEngine/GraphicsEngineUtilities.h>
 
@@ -158,8 +159,12 @@ bool Material::InspectorView()
     // if (ImGui::TreeNodeEx(AssetPath.filename().string().c_str()))
     {
         ImGui::Text("Shader data");
-        data.vertexShader.lock()->InspectorView();
-        data.pixelShader.lock()->InspectorView();
+
+        SwitchableAsset<ShipyardShader>(data.vertexShader, "ContentAsset_ShipyardShader", true);
+        SwitchableAsset<ShipyardShader>(data.pixelShader, "ContentAsset_ShipyardShader", true);
+
+        // data.vertexShader.lock()->InspectorView();
+        // data.pixelShader.lock()->InspectorView();
 
         ImGui::Text("Material Data");
         Reflectable::UpdateCleanValue(data.m_color, *this, "Material Color");

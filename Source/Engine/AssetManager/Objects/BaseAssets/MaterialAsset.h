@@ -33,8 +33,8 @@ class Material : public AssetBase
     MYLIB_REFLECTABLE();
     struct DataMaterial
     {
-        std::weak_ptr<ShipyardShader> vertexShader;
-        std::weak_ptr<ShipyardShader> pixelShader;
+        std::shared_ptr<ShipyardShader> vertexShader;
+        std::shared_ptr<ShipyardShader> pixelShader;
         Color m_color;
         MaterialBuffer materialData;
         std::vector<std::pair<std::filesystem::path, std::shared_ptr<TextureHolder>>> textures;

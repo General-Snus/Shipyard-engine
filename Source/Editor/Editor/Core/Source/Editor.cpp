@@ -54,6 +54,7 @@
 #include <Editor/Editor/Windows/EditorWindows/ChainGraph/GraphTool.h>
 #include <Editor/Editor/Windows/EditorWindows/ChatWindow.h>
 #include <Editor/Editor/Windows/EditorWindows/CustomFuncWindow.h>
+#include <Editor/Editor/Windows/EditorWindows/FrameStatistics.h>
 #include <Editor/Editor/Windows/EditorWindows/History.h>
 #include <Tools/ImGui/ImGui/Font/IconsFontAwesome5.h>
 #include <json.h>
@@ -764,6 +765,11 @@ void Editor::TopBar()
             if (ImGui::Selectable("Chat"))
             {
                 g_EditorWindows.emplace_back(std::make_shared<ChatWindow>());
+            }
+
+            if (ImGui::Selectable("Frame statistics"))
+            {
+                g_EditorWindows.emplace_back(std::make_shared<FrameStatistics>());
             }
 
             ImGui::EndMenu();

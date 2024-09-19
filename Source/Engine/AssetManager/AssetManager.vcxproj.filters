@@ -72,9 +72,6 @@
     <ClInclude Include="ComponentSystem\Components\CameraComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\FrameStatistics.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\RenderMode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -246,9 +243,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ComponentSystem\Components\Source\CameraComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\FrameStatistics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\RenderMode.cpp">

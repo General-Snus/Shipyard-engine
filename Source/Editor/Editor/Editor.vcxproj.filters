@@ -87,6 +87,9 @@
     <ClInclude Include="Windows\EditorWindows\ChatWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Windows\EditorWindows\FrameStatistics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Source\Editor.cpp">
@@ -155,9 +158,12 @@
     <ClCompile Include="Windows\EditorWindows\Source\ChatWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Windows\EditorWindows\Source\FrameStatistics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Modelviewer.rc">
+    <ResourceCompile Include="Editor.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>

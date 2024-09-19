@@ -15,6 +15,7 @@
 #include "Tools/Utilities/Input/Input.hpp"
 #include <Engine/AssetManager/AssetManager.h>
 #include <Engine/PersistentSystems/SceneUtilities.h>
+#include <Font/IconsFontAwesome5.h>
 
 ImGuizmo::OPERATION m_CurrentGizmoOperation = ImGuizmo::OPERATION::UNIVERSAL;
 ImGuizmo::MODE m_CurrentGizmoMode = ImGuizmo::MODE::WORLD;
@@ -167,7 +168,7 @@ Matrix &Viewport::View()
 void Viewport::RenderImGUi()
 {
     OPTICK_EVENT();
-    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar;
+    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_MenuBar;
     // const auto aspecRatio = (res.x / res.y);
     // ImGui::SetNextWindowSizeConstraints(ImVec2(0,0),ImVec2(FLT_MAX,FLT_MAX),CustomConstraints::AspectRatio,(void*)&aspecRatio);
     // // Aspect ratio
@@ -280,22 +281,19 @@ void Viewport::RenderToolbar()
     auto const &style = ImGui::GetStyle();
     float textHeight = ImGui::CalcTextSize("A").y;
     // style.FramePadding can also be used here
-    ImVec2 toolbarItemSize = ImVec2{textHeight * 4.0f, textHeight * 2.0f};
+    ImVec2 toolbarItemSize = ImVec2{textHeight * 4.0f, textHeight * 4.0f};
     ImVec2 toolbarPos = ImGui::GetWindowPos() +
                         ImVec2(2.0f * style.WindowPadding.x, 8.0f * (style.WindowPadding.y + style.FramePadding.y));
-    ImGui::SetNextWindowSize(toolbarItemSize);
     ImGui::SetNextWindowPos(toolbarPos);
 
-    ImGuiWindowFlags toolbarFlags = ImGuiWindowFlags_NoDecoration |      //
-                                    ImGuiWindowFlags_NoMove |            //
-                                    ImGuiWindowFlags_NoScrollWithMouse | //
-                                    ImGuiWindowFlags_NoSavedSettings |   //
-                                    ImGuiWindowFlags_NoBringToFrontOnFocus;
+    // ImGuiWindowFlags toolbarFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
+    //                                 ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoSavedSettings |
+    //                                 ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_MenuBar;
 
     ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_NoPadWithHalfSpacing;
+    /*
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {0.0f, 0.0f});
-
-    if (ImGui::BeginChild("##ViewportToolbar", ImVec2(toolbarItemSize.x, 0), 0, toolbarFlags))
+    if (ImGui::BeginChild("##ViewportToolbar_Vertical", ImVec2(toolbarItemSize.x, 0), 0, toolbarFlags))
     {
         // Bring the toolbar window always on top.
         ImGui::BringWindowToDisplayFront(ImGui::GetCurrentWindow());
@@ -336,6 +334,65 @@ void Viewport::RenderToolbar()
     }
     ImGui::PopStyleVar();
     ImGui::EndChild();
+    */
+    if (ImGui::BeginMenuBar())
+    {
+        // Bring the toolbar window always on top.
+        ImGui::BringWindowToDisplayFront(ImGui::GetCurrentWindow());
+        // ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
+        ImGui::Text("Gizmo Op\neration");
+        static bool arg = true;
+        ImGui::ToggleButton("Test", &arg);
+
+        if (ImGui::Selectable(ICON_FA_LOCATION_ARROW, m_CurrentGizmoOperation == ImGuizmo::OPERATION::UNIVERSAL,
+                              selectableFlags, toolbarItemSize))
+        {
+            m_CurrentGizmoOperation = ImGuizmo::OPERATION::UNIVERSAL;
+        }
+        // Move
+        if (ImGui::Selectable(ICON_FA_ARROWS_ALT, m_CurrentGizmoOperation == ImGuizmo::OPERATION::TRANSLATE,
+                              selectableFlags, toolbarItemSize))
+        {
+            m_CurrentGizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
+        }
+        // Rotate
+        if (ImGui::Selectable(ICON_FA_SYNC_ALT, m_CurrentGizmoOperation == ImGuizmo::OPERATION::ROTATE, selectableFlags,
+                              toolbarItemSize))
+        {
+            m_CurrentGizmoOperation = ImGuizmo::OPERATION::ROTATE;
+        }
+        ImGui::Separator();
+        if (ImGui::Selectable(ICON_FA_EXPAND, m_CurrentGizmoOperation == ImGuizmo::OPERATION::SCALE, selectableFlags,
+                              toolbarItemSize))
+        {
+            m_CurrentGizmoOperation = ImGuizmo::OPERATION::SCALE;
+        }
+        if (ImGui::Selectable(ICON_FA_GLOBE, false, selectableFlags, toolbarItemSize))
+        {
+            m_CurrentGizmoMode = static_cast<ImGuizmo::MODE>(!static_cast<bool>(m_CurrentGizmoMode));
+        }
+
+        // posSnapping
+        if (ImGui::Selectable(ICON_FA_BORDER_ALL, m_CurrentGizmoOperation == ImGuizmo::OPERATION::SCALE,
+                              selectableFlags, toolbarItemSize))
+        {
+            m_CurrentGizmoOperation = ImGuizmo::OPERATION::SCALE;
+        }
+        // rotSnapping
+        if (ImGui::Selectable(std::format("{}{}", ICON_FA_UNDO_ALT, "*").c_str(),
+                              m_CurrentGizmoOperation == ImGuizmo::OPERATION::SCALE, selectableFlags, toolbarItemSize))
+        {
+            m_CurrentGizmoOperation = ImGuizmo::OPERATION::SCALE;
+        }
+        // ScaleSnapping
+        if (ImGui::Selectable(ICON_FA_EXPAND_ALT, m_CurrentGizmoOperation == ImGuizmo::OPERATION::SCALE,
+                              selectableFlags, toolbarItemSize))
+        {
+            m_CurrentGizmoOperation = ImGuizmo::OPERATION::SCALE;
+        }
+        // ImGui::PopStyleVar();
+        ImGui::EndMenuBar();
+    }
 }
 
 void Viewport::TakeInput()

@@ -338,6 +338,7 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Windows\EditorWindows\FrameStatistics.h" />
     <ClInclude Include="Windows\EditorWindows\ChatWindow.h" />
     <ClInclude Include="Windows\EditorWindows\ChainGraph\GraphTool.h" />
     <ClInclude Include="Windows\EditorWindows\ColorPresets.h" />
@@ -363,6 +364,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Windows\EditorWindows\Source\FrameStatistics.cpp" />
     <ClCompile Include="Windows\EditorWindows\Source\ChatWindow.cpp" />
     <ClCompile Include="Windows\EditorWindows\ChainGraph\GraphTool.cpp" />
     <ClCompile Include="Windows\EditorWindows\Source\ColorPresets.cpp" />
@@ -387,7 +389,7 @@
     <ClCompile Include="Windows\Source\SplashWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Modelviewer.rc" />
+    <ResourceCompile Include="Editor.rc" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="EditorIcon.ico" />
