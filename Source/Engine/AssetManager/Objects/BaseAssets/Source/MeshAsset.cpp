@@ -54,7 +54,7 @@ void Mesh::FillMaterialPaths(const aiScene *scene)
         //	std::string textureAmount = std::string(aiTextureTypeToString(type)) + " " +
         // std::to_string(material->GetTextureCount(type)); 	if (material->GetTextureCount(type))
         //	{
-        //		Logger::Log(textureAmount);
+        //		Logger.Log(textureAmount);
         //	}
         // }
 
@@ -132,19 +132,19 @@ void Mesh::FillMaterialPaths(const aiScene *scene)
 
         if (!textureLoaded)
         {
-            materials[key] = GraphicsEngine::Get().GetDefaultMaterial();
+            materials[key] = GraphicsEngineInstance.GetDefaultMaterial();
             continue;
         }
         Material::CreateJson(dataMat, matPath);
-        materials[key] = AssetManager::Get().LoadAsset<Material>(matPath);
+        materials[key] = AssetManagerInstance.LoadAsset<Material>(matPath);
     }
 }
 
 std::shared_ptr<TextureHolder> Mesh::GetEditorIcon()
 {
-    auto imageTexture = AssetManager::Get().LoadAsset<TextureHolder>(
+    auto imageTexture = AssetManagerInstance.LoadAsset<TextureHolder>(
         std::format("INTERNAL_IMAGE_UI_{}", AssetPath.filename().string()));
-    std::shared_ptr<Mesh> mesh = AssetManager::Get().LoadAsset<Mesh>(AssetPath, true);
+    std::shared_ptr<Mesh> mesh = AssetManagerInstance.LoadAsset<Mesh>(AssetPath, true);
 
     if (!imageTexture->isLoadedComplete)
     {
@@ -152,11 +152,11 @@ std::shared_ptr<TextureHolder> Mesh::GetEditorIcon()
         if (!imageTexture->isBeingLoaded && meshReady)
         {
             GraphicsEngineUtilities::GenerateSceneForIcon(mesh, imageTexture,
-                                                          GraphicsEngine::Get().GetDefaultMaterial());
+                                                          GraphicsEngineInstance.GetDefaultMaterial());
         }
         else
         {
-            imageTexture = AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+            imageTexture = AssetManagerInstance.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
         }
     }
     return imageTexture;
@@ -170,9 +170,9 @@ bool Mesh::InspectorView()
     }
 
     {
-        auto imageTexture = AssetManager::Get().LoadAsset<TextureHolder>(
+        auto imageTexture = AssetManagerInstance.LoadAsset<TextureHolder>(
             std::format("INTERNAL_IMAGE_UI_{}", AssetPath.filename().string()));
-        std::shared_ptr<Mesh> mesh = AssetManager::Get().LoadAsset<Mesh>(AssetPath, true);
+        std::shared_ptr<Mesh> mesh = AssetManagerInstance.LoadAsset<Mesh>(AssetPath, true);
 
         if (!imageTexture->isLoadedComplete)
         {
@@ -180,11 +180,11 @@ bool Mesh::InspectorView()
             if (!imageTexture->isBeingLoaded && meshReady)
             {
                 GraphicsEngineUtilities::GenerateSceneForIcon(mesh, imageTexture,
-                                                              GraphicsEngine::Get().GetDefaultMaterial());
+                                                              GraphicsEngineInstance.GetDefaultMaterial());
             }
             else
             {
-                imageTexture = AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+                imageTexture = AssetManagerInstance.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
             }
         }
 
@@ -226,7 +226,7 @@ void Mesh::Init()
     OPTICK_EVENT();
     if (!std::filesystem::exists(AssetPath))
     {
-        Logger::Warn("Failed to load mesh at: " + AssetPath.string());
+        Logger.Warn("Failed to load mesh at: " + AssetPath.string());
         return;
     }
 
@@ -240,13 +240,13 @@ void Mesh::Init()
     auto exception = importer.GetErrorString();
     if (importer.GetException())
     {
-        Logger::Err(exception);
+        Logger.Err(exception);
         return;
     }
 
     if (scene->HasAnimations())
     {
-        Logger::Warn("Can not load animations as mesh: " + AssetPath.string());
+        Logger.Warn("Can not load animations as mesh: " + AssetPath.string());
         return;
     }
 
@@ -255,7 +255,7 @@ void Mesh::Init()
     {
         std::string message = "Failed to load mesh " + AssetPath.string();
         std::exception failedMeshLoad(message.c_str());
-        Logger::Critical(failedMeshLoad, 2);
+        Logger.Critical(failedMeshLoad, 2);
         return;
     }
 
@@ -349,22 +349,22 @@ void Mesh::processMesh(aiMesh *mesh, const aiScene *scene)
         }
     }
 
-    auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COPY);
+    auto commandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COPY);
     auto commandList = commandQueue->GetCommandList();
 
     OPTICK_GPU_CONTEXT(commandList->GetGraphicsCommandList().Get());
 
     VertexResource vertexRes(wname);
-    if (!GPU::CreateVertexBuffer<Vertex>(commandList, vertexRes, mdlVertices))
+    if (!GPUInstance.CreateVertexBuffer<Vertex>(commandList, vertexRes, mdlVertices))
     {
-        Logger::Err("Failed to create vertex buffer");
+        Logger.Err("Failed to create vertex buffer");
         return;
     }
 
     IndexResource indexRes(wname);
-    if (!GPU::CreateIndexBuffer(commandList, indexRes, mdlIndicies))
+    if (!GPUInstance.CreateIndexBuffer(commandList, indexRes, mdlIndicies))
     {
-        Logger::Err("Failed to create index buffer");
+        Logger.Err("Failed to create index buffer");
         return;
     }
 
@@ -401,7 +401,7 @@ void Mesh::ResizeBuffer()
     //
     // if (FAILED(result))
     //{
-    //	Logger::Log("Failed to create Instance buffer");
+    //	Logger.Log("Failed to create Instance buffer");
     //	return;
     // }
     // bufferSize = static_cast<int>(myInstances.size());

@@ -17,11 +17,6 @@
 #include <Tools/ImGUI/ImGUI/backends/imgui_impl_win32.h>
 #include <Tools/ImGUI/ImGUI/imgui.h>
 #include <Tools/ImGui/ImGui/backends/imgui_impl_dx12.h>
-#include <Tools/ImGui/MuninGraph/MuninGraph.h>
-#include <Tools/ImGui/MuninGraph/ScriptGraph/ScriptGraphNode.h>
-#include <Tools/ImGui/MuninGraphEditor/ScriptGraphEditor/ScriptGraphEditorTypes.h>
-#include <Tools/ImGui/ScriptGraphNodes/NodeIncludes.h>
-#include <Tools/ImGui/ScriptGraphNodes/ScriptGraphTypes.h>
 
 #include "../Editor.h"
 #include "DirectX/Shipyard/GPU.h"
@@ -51,12 +46,12 @@
 #include <CommCtrl.h>
 #include <Editor/Editor/Commands/CommandBuffer.h>
 #include <Editor/Editor/Commands/SceneAction.h>
-#include <Editor/Editor/Windows/EditorWindows/ChainGraph/GraphTool.h>
 #include <Editor/Editor/Windows/EditorWindows/ChatWindow.h>
 #include <Editor/Editor/Windows/EditorWindows/CustomFuncWindow.h>
 #include <Editor/Editor/Windows/EditorWindows/FrameStatistics.h>
 #include <Editor/Editor/Windows/EditorWindows/History.h>
 #include <Tools/ImGui/ImGui/Font/IconsFontAwesome5.h>
+#include <Tools/Utilities/System/ServiceLocator.h>
 #include <json.h>
 #include <misc/cpp/WMDropManager.h>
 #include <stacktrace>
@@ -266,7 +261,7 @@ void SetupImGuiStyle(bool light = false)
         catch (const nlohmann::json::exception &e)
         {
             std::string msg = std::format("Unsuccessfull loading of theme file at path: Theme.json {} ", e.what());
-            Logger::Warn(msg);
+            Logger.Warn(msg);
         }
     }
 }
@@ -310,14 +305,14 @@ void LoadFont()
 
             if (!io.Fonts->Build())
             {
-                Logger::Err("fucked up font load");
+                Logger.Err("fucked up font load");
             }
             haveLoadedFont = true;
         }
         catch (const nlohmann::json::exception &e)
         {
             std::string msg = std::format("Unsuccessfull loading of theme file at path: Theme.json {} ", e.what());
-            Logger::Warn(msg);
+            Logger.Warn(msg);
         }
     }
 
@@ -330,7 +325,7 @@ void LoadFont()
 
         if (!io.Fonts->Build())
         {
-            Logger::Err("fucked up font load");
+            Logger.Err("fucked up font load");
         }
     }
     io.Fonts->AddFontDefault();
@@ -343,18 +338,29 @@ bool Editor::Initialize(HWND aHandle)
         OPTICK_START_CAPTURE();
     }
     OPTICK_EVENT();
-    Timer::Initialize();
-    Logger::Create();
-    Logger::SetPrintToVSOutput(true);
-    GetWindowRect(Window::windowHandler, &ViewportRect);
-    ShowSplashScreen();
-    ThreadPool::Get().Init();
-    ColorManager::InitializeDefaultColors();
-    ColorManager::LoadColorsFromFile("Settings/ColorManagerData.ShipyardText");
+
+    auto &timer = ServiceLocator::Instance().ProvideService<Timer>();
+    auto &threadPool = ServiceLocator::Instance().ProvideService<ThreadPool>();
+    auto &assetManager = ServiceLocator::Instance().ProvideService<AssetManager>();
+    auto &colorManager = ServiceLocator::Instance().ProvideService<ColorManager>();
+    auto &graphicsEngine = ServiceLocator::Instance().ProvideService<GraphicsEngine>();
+    auto &physicsSystem = ServiceLocator::Instance().ProvideService<Shipyard_PhysX>();
+
+    timer.Initialize();
+    threadPool.Init();
+
+    Logger.Create();
+    Logger.SetPrintToVSOutput(true);
+
+    GetWindowRect(WindowInstance.windowHandler, &ViewportRect);
+
+    assetManager.RecursiveNameSave();
+    colorManager.InitializeDefaultColors();
+    colorManager.LoadColorsFromFile("Settings/ColorManagerData.ShipyardText");
 #ifdef _DEBUG
-    GraphicsEngine::Get().Initialize(aHandle, true);
+    graphicsEngine.Initialize(aHandle, true);
 #else
-    GraphicsEngine::Get().Initialize(aHandle, false);
+    graphicsEngine.Initialize(aHandle, false);
 #endif // Release
 
     // Setup Dear ImGui context
@@ -369,20 +375,18 @@ bool Editor::Initialize(HWND aHandle)
     io.ConfigDockingWithShift = true;
 
     ImGui_ImplWin32_Init(aHandle);
-    if (const auto &heap = GPU::m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV];
-        !ImGui_ImplDX12_Init(GPU::m_Device.Get(), GPU::m_FrameCount, DXGI_FORMAT_R8G8B8A8_UNORM, heap->Heap(),
-                             heap->GetCpuHandle(2000), heap->GetGpuHandle(2000)))
+    if (const auto &heap = GPUInstance.m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV];
+        !ImGui_ImplDX12_Init(GPUInstance.m_Device.Get(), GPUInstance.m_FrameCount, DXGI_FORMAT_R8G8B8A8_UNORM,
+                             heap->Heap(), heap->GetCpuHandle(2000), heap->GetGpuHandle(2000)))
     {
-        Logger::Err("Failed to init IMGUI Dx12");
+        Logger.Err("Failed to init IMGUI Dx12");
     }
 
     LoadFont();
     SetupImGuiStyle();
-    MuninGraph::Get().Initialize();
-    Graph::GraphTool::Init();
 
 #if PHYSX
-    Shipyard_PhysX::Get().InitializePhysx();
+    physicsSystem.InitializePhysx();
 #endif // PHYSX 0
 
     m_MainScene = std::make_shared<Scene>();
@@ -392,10 +396,6 @@ bool Editor::Initialize(HWND aHandle)
     Scene::ActiveManager().SetUpdatePriority<cPhysXDynamicBody>(ComponentManagerBase::UpdatePriority::Physics);
     // Force no write to thread after this?
     WorldGraph::InitializeWorld();
-
-    myGameLauncher.Init();
-    myGameLauncher.Start();
-    HideSplashScreen();
 
     m_Callbacks[EditorCallback::ObjectSelected] = Event();
     m_Callbacks[EditorCallback::WM_DropFile] = Event();
@@ -412,7 +412,6 @@ bool Editor::Initialize(HWND aHandle)
 
 void Editor::DoWinProc(const MSG &aMessage)
 {
-
     switch (aMessage.message)
     {
 
@@ -435,21 +434,26 @@ void Editor::DoWinProc(const MSG &aMessage)
             m_Callbacks[EditorCallback::WM_DropFile].Invoke();
         break;
     }
-    case WM_SIZE:
+    case WM_SIZE: {
+        auto &graphicsEngine = ServiceLocator::Instance().GetService<GraphicsEngine>();
+        const auto res = Vector2ui(LOWORD(aMessage.lParam), HIWORD(aMessage.lParam));
+        graphicsEngine.ResizeBuffers(res);
+
         for (auto &viewport : m_Viewports)
         {
             viewport->ResolutionUpdate();
         }
         break;
+    }
 
     case WM_CLOSE:
-        ColorManager::DumpToFile("Settings/ColorManagerData.ShipyardText");
-        ThreadPool::Get().Destroy();
-        Shipyard_PhysX::Get().ShutdownPhysx();
+        ColorManagerInstance.DumpToFile("Settings/ColorManagerData.ShipyardText");
+        ThreadPoolInstance.Destroy();
+        Shipyard_PhysXInstance.ShutdownPhysx();
         ImGui_ImplDX12_Shutdown();
         ImGui_ImplWin32_Shutdown();
         ImGui::DestroyContext();
-        GPU::UnInitialize();
+        GPUInstance.UnInitialize();
         return;
     default:
         break;
@@ -466,7 +470,7 @@ void Editor::DoWinProc(const MSG &aMessage)
 
 int Editor::Run()
 {
-    OPTICK_FRAME("MainThread", Optick::FrameType::CPU);
+    OPTICK_FRAME("MainThread");
     if (IsGUIActive)
     {
         UpdateImGui();
@@ -480,23 +484,6 @@ int Editor::Run()
     }
     Input::Update();
     return 0;
-}
-
-void Editor::ShowSplashScreen()
-{
-    OPTICK_EVENT();
-    if (!mySplashWindow)
-    {
-        mySplashWindow = std::make_unique<SplashWindow>();
-        mySplashWindow->Init(Window::moduleHandler);
-    }
-}
-
-void Editor::HideSplashScreen() const
-{
-    mySplashWindow->Close();
-    ShowWindow(Window::windowHandler, SW_SHOW);
-    SetForegroundWindow(Window::windowHandler);
 }
 
 void Editor::UpdateImGui()
@@ -573,7 +560,7 @@ void Editor::FocusObject(const GameObject &focus, bool focusWithOffset) const
         if (!viewport->IsMainViewport())
         {
             float radiusOffset = 0;
-            if (auto renderer = focus.TryGetComponent<cMeshRenderer>())
+            if (auto renderer = focus.TryGetComponent<MeshRenderer>())
             {
                 radiusOffset = renderer->GetBoundingBox().GetRadius();
             }
@@ -615,10 +602,10 @@ void Editor::AlignObject(const GameObject &focus) const
 void Editor::Update()
 {
     OPTICK_EVENT();
-    Timer::Update();
-    const float delta = Timer::GetDeltaTime();
+    TimerInstance.Update();
+    const float delta = TimerInstance.GetDeltaTime();
 
-    Shipyard_PhysX::Get().StartRead();
+    Shipyard_PhysXInstance.StartRead();
     Scene::ActiveManager().Update();
     SystemCollection::UpdateSystems(delta);
 
@@ -639,15 +626,15 @@ void Editor::Update()
 
     if (Input::IsKeyPressed(Keys::F10))
     {
-        AssetManager::Get().ClearUnused();
+        AssetManagerInstance.ClearUnused();
     }
 
     // End
 
-    myGameLauncher.Update(delta);
+    gameState.Update(delta);
     DebugDrawer::Get().Update(delta);
-    // Shipyard_PhysX::Get().Render();
-    Shipyard_PhysX::Get().EndRead(delta);
+    // Shipyard_PhysXInstance.Render();
+    Shipyard_PhysXInstance.EndRead(delta);
 }
 
 void Editor::Render()
@@ -659,7 +646,7 @@ void Editor::Render()
         test.emplace_back(viewport);
         viewport->Update();
     }
-    GraphicsEngine::Get().Render(test);
+    GraphicsEngineInstance.Render(test);
 
     //{
     //	using namespace std::chrono_literals;
@@ -757,10 +744,6 @@ void Editor::TopBar()
             {
                 g_EditorWindows.emplace_back(std::make_shared<ColorPresets>());
             }
-            if (ImGui::Selectable("GraphTool"))
-            {
-                g_EditorWindows.emplace_back(std::make_shared<CustomFuncWindow>(&Graph::GraphTool::RunEditor));
-            }
 
             if (ImGui::Selectable("Chat"))
             {
@@ -781,6 +764,30 @@ void Editor::TopBar()
         ImGui::EndMainMenuBar();
     }
 
+    if (ImGui::BeginMainMenuBar(1))
+    {
+        if (gameState.IsPlaying && !gameState.IsPaused || gameState.IsLoading)
+        {
+            if (ImGui::Button(ICON_FA_PAUSE))
+            {
+                gameState.PausePlaySession();
+            }
+        }
+        else
+        {
+            if (ImGui::Button(ICON_FA_PLAY))
+            {
+                gameState.StartPlaySession();
+            }
+        }
+
+        if (ImGui::Button(ICON_FA_STOP))
+        {
+            gameState.EndPlaySession();
+        }
+
+        ImGui::EndMainMenuBar();
+    }
     for (const auto &windows : g_EditorWindows)
     {
         if (windows && windows->m_KeepWindow)

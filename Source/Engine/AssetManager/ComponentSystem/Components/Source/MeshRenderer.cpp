@@ -15,44 +15,44 @@
 
 // Must define function EditorIcon for asset
 
-cMeshRenderer::cMeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager) : Component(anOwnerId, aManager)
+MeshRenderer::MeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager) : Component(anOwnerId, aManager)
 {
-    m_Mesh = AssetManager::Get().LoadAsset<Mesh>("default.fbx");
+    m_Mesh = AssetManagerInstance.LoadAsset<Mesh>("default.fbx");
 }
 
-inline cMeshRenderer::cMeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager,
+inline MeshRenderer::MeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager,
                                     const std::filesystem::path &aFilePath, bool useExact)
     : Component(anOwnerId, aManager)
 {
-    m_Mesh = AssetManager::Get().LoadAsset<Mesh>(aFilePath, useExact);
+    m_Mesh = AssetManagerInstance.LoadAsset<Mesh>(aFilePath, useExact);
 }
 
-void cMeshRenderer::SetNewMesh(const std::filesystem::path &aFilePath)
+void MeshRenderer::SetNewMesh(const std::filesystem::path &aFilePath)
 {
-    m_Mesh = AssetManager::Get().LoadAsset<Mesh>(aFilePath);
+    m_Mesh = AssetManagerInstance.LoadAsset<Mesh>(aFilePath);
 }
 
-void cMeshRenderer::SetNewMesh(std::shared_ptr<Mesh> aMesh)
+void MeshRenderer::SetNewMesh(std::shared_ptr<Mesh> aMesh)
 {
     m_Mesh = aMesh;
 }
 
-void cMeshRenderer::SetMaterialPath(const std::filesystem::path &aFilePath)
+void MeshRenderer::SetMaterialPath(const std::filesystem::path &aFilePath)
 {
-    SetMaterial(AssetManager::Get().LoadAsset<Material>(aFilePath), 0);
+    SetMaterial(AssetManagerInstance.LoadAsset<Material>(aFilePath), 0);
 }
 
-void cMeshRenderer::SetMaterialPath(const std::filesystem::path &aFilePath, int elementIndex)
+void MeshRenderer::SetMaterialPath(const std::filesystem::path &aFilePath, int elementIndex)
 {
-    SetMaterial(AssetManager::Get().LoadAsset<Material>(aFilePath), elementIndex);
+    SetMaterial(AssetManagerInstance.LoadAsset<Material>(aFilePath), elementIndex);
 }
 
-void cMeshRenderer::SetMaterial(const std::shared_ptr<Material> aMaterial)
+void MeshRenderer::SetMaterial(const std::shared_ptr<Material> aMaterial)
 {
     SetMaterial(aMaterial, 0);
 }
 
-void cMeshRenderer::SetMaterial(const std::shared_ptr<Material> aMaterial, int elementIndex)
+void MeshRenderer::SetMaterial(const std::shared_ptr<Material> aMaterial, int elementIndex)
 {
     if (m_OverrideMaterial.size() <= elementIndex)
     {
@@ -61,7 +61,7 @@ void cMeshRenderer::SetMaterial(const std::shared_ptr<Material> aMaterial, int e
     m_OverrideMaterial[elementIndex] = aMaterial;
 }
 
-std::shared_ptr<Material> cMeshRenderer::GetMaterial(int materialIndex) const
+std::shared_ptr<Material> MeshRenderer::GetMaterial(int materialIndex) const
 {
     assert(materialIndex >= 0);
 
@@ -84,7 +84,7 @@ std::shared_ptr<Material> cMeshRenderer::GetMaterial(int materialIndex) const
     return nullptr;
 }
 
-bool cMeshRenderer::IsDefaultMesh() const
+bool MeshRenderer::IsDefaultMesh() const
 {
     if (m_Mesh->AssetPath == L"../../Content/default.fbx") // What am i doing with my life
     {
@@ -93,7 +93,7 @@ bool cMeshRenderer::IsDefaultMesh() const
     return false;
 }
 
-std::vector<Element> &cMeshRenderer::GetElements() const
+std::vector<Element> &MeshRenderer::GetElements() const
 {
     OPTICK_EVENT();
     if (m_Mesh->isLoadedComplete)
@@ -107,12 +107,12 @@ std::vector<Element> &cMeshRenderer::GetElements() const
     }
 }
 
-std::shared_ptr<Mesh> cMeshRenderer::GetRawMesh() const
+std::shared_ptr<Mesh> MeshRenderer::GetRawMesh() const
 {
     return m_Mesh;
 }
 
-float cMeshRenderer::GetBoundingSphereRadius() const
+float MeshRenderer::GetBoundingSphereRadius() const
 {
     if (!m_Mesh)
     {
@@ -123,7 +123,7 @@ float cMeshRenderer::GetBoundingSphereRadius() const
     return m_Mesh->Bounds.GetRadius();
 }
 
-AABB3D<> cMeshRenderer::GetBoundingBox() const
+AABB3D<> MeshRenderer::GetBoundingBox() const
 {
     if (!m_Mesh)
     {
@@ -133,13 +133,13 @@ AABB3D<> cMeshRenderer::GetBoundingBox() const
     return m_Mesh->Bounds;
 }
 
-bool cMeshRenderer::InspectorView()
+bool MeshRenderer::InspectorView()
 {
     if (!Component::InspectorView())
     {
         return false;
     }
-    Reflect<cMeshRenderer>();
+    Reflect<MeshRenderer>();
     {
         if (ImGui::TreeNodeEx("Static meshes", ImGuiTreeNodeFlags_DefaultOpen)) // Replace with element name
         {
@@ -192,7 +192,7 @@ bool cMeshRenderer::InspectorView()
     return true;
 }
 
-std::shared_ptr<TextureHolder> cMeshRenderer::GetTexture(eTextureType type, unsigned materialIndex) const
+std::shared_ptr<TextureHolder> MeshRenderer::GetTexture(eTextureType type, unsigned materialIndex) const
 {
     OPTICK_EVENT();
     assert(materialIndex >= 0);
@@ -252,23 +252,23 @@ std::shared_ptr<TextureHolder> cMeshRenderer::GetTexture(eTextureType type, unsi
 }
 
 cSkeletalMeshRenderer::cSkeletalMeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager)
-    : cMeshRenderer(anOwnerId, aManager)
+    : MeshRenderer(anOwnerId, aManager)
 {
-    // cMeshRenderer creates default mesh
+    // MeshRenderer creates default mesh
 }
 
 cSkeletalMeshRenderer::cSkeletalMeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager,
                                              const std::filesystem::path &aFilePath)
-    : cMeshRenderer(anOwnerId, aManager, aFilePath)
+    : MeshRenderer(anOwnerId, aManager, aFilePath)
 {
-    mySkeleton = AssetManager::Get().LoadAsset<Skeleton>(aFilePath);
+    mySkeleton = AssetManagerInstance.LoadAsset<Skeleton>(aFilePath);
     assert(mySkeleton);
 }
 
 void cSkeletalMeshRenderer::SetNewMesh(const std::filesystem::path &aFilePath)
 {
-    m_Mesh = AssetManager::Get().LoadAsset<Mesh>(aFilePath);
-    mySkeleton = AssetManager::Get().LoadAsset<Skeleton>(aFilePath);
+    m_Mesh = AssetManagerInstance.LoadAsset<Mesh>(aFilePath);
+    mySkeleton = AssetManagerInstance.LoadAsset<Skeleton>(aFilePath);
 }
 
 void cSkeletalMeshRenderer::Render()

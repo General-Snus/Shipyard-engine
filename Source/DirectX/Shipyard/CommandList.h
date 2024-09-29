@@ -9,7 +9,7 @@
 class CommandList
 {
   public:
-    CommandList(D3D12_COMMAND_LIST_TYPE type, const std::wstring &name = L"NoName");
+    CommandList(const DeviceType &device, D3D12_COMMAND_LIST_TYPE type, const std::wstring &name = L"NoName");
 
     void CopyBuffer(GpuResource &buffer, size_t numElements, size_t elementSize, const void *bufferData,
                     D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
@@ -22,7 +22,7 @@ class CommandList
 
     template <typename T> void AllocateBuffer(eRootBindings binding, const T &var)
     {
-        const auto &alloc = GPU::m_GraphicsMemory->AllocateConstant<T>(var);
+        const auto &alloc = GPUInstance.m_GraphicsMemory->AllocateConstant(var);
         m_CommandList->SetGraphicsRootConstantBufferView((int)binding, alloc.GpuAddress());
     }
 
@@ -58,6 +58,7 @@ class CommandList
     // std::unique_ptr<DescriptorHeap> m_DescriptorHeap;
     D3D12_COMMAND_LIST_TYPE m_Type;
     DxCommandList m_CommandList;
+    DeviceType m_Device;
     ComPtr<ID3D12CommandAllocator> m_CommandAllocator;
     std::vector<ComPtr<ID3D12Object>> m_TrackedObjects;
 };

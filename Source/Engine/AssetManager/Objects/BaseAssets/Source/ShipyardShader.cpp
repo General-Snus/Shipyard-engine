@@ -24,7 +24,7 @@ void ShipyardShader::Init()
 
     if (!std::filesystem::is_regular_file(AssetPath))
     {
-        Logger::Warn("Failed to load shader at: " + AssetPath.string());
+        Logger.Warn("Failed to load shader at: " + AssetPath.string());
         isBeingLoaded = false;
         isLoadedComplete = false;
         return;
@@ -65,9 +65,13 @@ void ShipyardShader::Init()
     // Helpers::ThrowIfFailed(D3DReadFileToBlob(AssetPath.wstring().c_str(), &m_Blob));
 
     ComPtr<IDxcBlobEncoding> pSourceBlob;
-    pLibrary->CreateBlobFromFile(AssetPath.wstring().c_str(), &codePage, &pSourceBlob);
+    HRESULT hr = pLibrary->CreateBlobFromFile(AssetPath.wstring().c_str(), &codePage, &pSourceBlob);
     m_Blob = pSourceBlob;
 
+    if (FAILED(hr))
+    {
+        Logger.Err("Shader blob compilation failed");
+    }
     isBeingLoaded = false;
     isLoadedComplete = true;
 }
@@ -97,7 +101,7 @@ HRESULT ShipyardShader::CompileShader(_In_ LPCWSTR srcFile, _In_ LPCWSTR entryPo
     {
         ComPtr<IDxcBlobEncoding> pErrors;
         result->GetErrorBuffer(&pErrors);
-        Logger::Warn(("Shader Compilation failed with errors:\n%s", (char *)pErrors->GetBufferPointer()));
+        Logger.Warn(("Shader Compilation failed with errors:\n%s", (char *)pErrors->GetBufferPointer()));
         return hr;
     }
     result->GetResult(blob);
@@ -148,5 +152,5 @@ bool ShipyardShader::InspectorView()
 
 std::shared_ptr<TextureHolder> ShipyardShader::GetEditorIcon()
 {
-    return AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+    return AssetManagerInstance.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
 }

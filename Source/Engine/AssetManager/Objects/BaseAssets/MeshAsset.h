@@ -12,7 +12,7 @@ class Mesh : public AssetBase
 {
   public:
     MYLIB_REFLECTABLE();
-    friend class cMeshRenderer;
+    friend class MeshRenderer;
     friend class InstanceRenderer;
     Mesh() = default;
     Mesh(const std::filesystem::path &aFilePath);

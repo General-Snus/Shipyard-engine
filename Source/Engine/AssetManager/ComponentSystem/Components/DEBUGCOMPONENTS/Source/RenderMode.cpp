@@ -41,7 +41,7 @@ void RenderMode::Update()
             {
                 currentlyActiveTone = i;
 
-                GraphicsSettings &settings = GraphicsEngine::Get().GetSettings();
+                GraphicsSettings &settings = GraphicsEngineInstance.GetSettings();
                 settings.Tonemaptype = i;
             }
         }

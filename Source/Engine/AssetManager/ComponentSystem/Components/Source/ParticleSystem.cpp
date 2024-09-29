@@ -16,11 +16,11 @@
 //void ParticleSystem::Draw()
 //{
 //	OPTICK_EVENT();
-//	GraphicsEngine::Get().SetDepthState(GraphicsEngine::eDepthStencilStates::DSS_ReadOnly);
+//	GraphicsEngineInstance.SetDepthState(GraphicsEngine::eDepthStencilStates::DSS_ReadOnly);
 //	Transform* trns = TryGetComponent<Transform>();
 //	if(trns)
 //	{
-//		ObjectBuffer& objectBuffer = GraphicsEngine::Get().myObjectBuffer;
+//		ObjectBuffer& objectBuffer = GraphicsEngineInstance.myObjectBuffer;
 //		objectBuffer.Data.myTransform = trns->GetTransform();
 //		RHI::UpdateConstantBufferData(objectBuffer);
 //	}
@@ -28,7 +28,7 @@
 //	{
 //		i->Draw();
 //	}
-//	GraphicsEngine::Get().SetDepthState(GraphicsEngine::eDepthStencilStates::DSS_ReadWrite);
+//	GraphicsEngineInstance.SetDepthState(GraphicsEngine::eDepthStencilStates::DSS_ReadWrite);
 //}
 //
 //void ParticleSystem::AddEmitter(const ParticleEmitterTemplate& aTemplate)
@@ -40,6 +40,6 @@
 //	OPTICK_EVENT();
 //	for(auto& i : myEmitters)
 //	{
-//		i->Update(Timer::GetInstance().GetDeltaTime());
+//		i->Update(TimerInstance.GetInstance().GetDeltaTime());
 //	}
 //}

@@ -73,14 +73,14 @@ void Hierarchy::PopupMenu(SY::UUID id)
             GameObject obj = Scene::ActiveManager().GetGameObject(id);
             const auto parentCommand = std::make_shared<GameobjectDeleted>(obj);
 
-            //TODO DELETE THE CILDS
-            // for (auto const &i : obj.transform().GetAllChildren())
+            // TODO DELETE THE CILDS
+            //  for (auto const &i : obj.transform().GetAllChildren())
             //{
-            //     const auto ptr =
-            //     std::make_shared<GameobjectDeleted>(i.get().GetGameObject());
-            //     Scene::ActiveManager().DeleteGameObject(i.get().GetOwner(),
-            //     true); packet.emplace_back(ptr);
-            // }
+            //      const auto ptr =
+            //      std::make_shared<GameobjectDeleted>(i.get().GetGameObject());
+            //      Scene::ActiveManager().DeleteGameObject(i.get().GetOwner(),
+            //      true); packet.emplace_back(ptr);
+            //  }
             packet.emplace_back(parentCommand);
             Scene::ActiveManager().DeleteGameObject(id, true);
 
@@ -96,30 +96,30 @@ void Hierarchy::PopupMenu(SY::UUID id)
         ImGui::Separator();
         if (ImGui::Selectable("Copy"))
         {
-            Editor::Copy();
+            EditorInstance.Copy();
         }
         if (ImGui::Selectable("Paste"))
         {
-            Editor::Paste();
+            EditorInstance.Paste();
         }
         ImGui::Separator();
         if (ImGui::Selectable("Move camera to object", false, flag))
         {
-            Editor::Get().FocusObject(Scene::ActiveManager().GetGameObject(id));
+            EditorInstance.FocusObject(Scene::ActiveManager().GetGameObject(id));
         }
         if (ImGui::Selectable("Align With View", false, flag))
         {
             // Move object to align with scene camera
-            Editor::Get().AlignObject(Scene::ActiveManager().GetGameObject(id));
+            EditorInstance.AlignObject(Scene::ActiveManager().GetGameObject(id));
         }
         if (ImGui::Selectable("Align View to Selected", false, flag))
         {
             // Move scene camera to align with selected object
-            Editor::Get().FocusObject(Scene::ActiveManager().GetGameObject(id), false);
+            EditorInstance.FocusObject(Scene::ActiveManager().GetGameObject(id), false);
         }
         if (ImGui::Selectable("Set as Parent", false, flag))
         {
-            auto selected = Editor::GetSelectedGameObjects();
+            auto selected = EditorInstance.GetSelectedGameObjects();
 
             for (auto &child : selected)
             {
@@ -152,7 +152,7 @@ void Hierarchy::RenderNode(Transform &transform)
     const auto &data = transform.GetGameObject();
     auto id = data.GetID();
     bool isSelected = false;
-    const auto &selectedObjects = Editor::GetSelectedGameObjects();
+    const auto &selectedObjects = EditorInstance.GetSelectedGameObjects();
     for (const auto &i : selectedObjects)
     {
         if (i.GetID() == id)
@@ -187,9 +187,9 @@ void Hierarchy::RenderNode(Transform &transform)
             if (ImGui::IsItemClicked() && !isSelected || ImGui::IsItemJustReleased())
             {
                 clickedAnyNode = true;
-                Editor::Get().m_Callbacks[EditorCallback::ObjectSelected].Invoke();
+                EditorInstance.m_Callbacks[EditorCallback::ObjectSelected].Invoke();
 
-                auto &refSelected = Editor::GetSelectedGameObjects();
+                auto &refSelected = EditorInstance.GetSelectedGameObjects();
                 !Input::IsKeyHeld(Keys::SHIFT) ? refSelected.clear() : __nop();
                 refSelected.push_back(Scene::ActiveManager().GetGameObject(id));
             }
@@ -220,14 +220,14 @@ inline void Hierarchy::DragDrop(Transform &transform)
         if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("HIERARCHY_NODE"))
         {
             // TODO do we want all selected? We can guarantee that the payload is one of them
-            const auto &list = Editor::Get().GetSelectedGameObjects();
+            const auto &list = EditorInstance.GetSelectedGameObjects();
             if (!list.empty())
             {
                 for (auto &obj : list)
                 {
                     if (!obj.IsValid() && obj.GetID() != transform.GetOwner())
                     {
-                        Logger::Warn("Invalid GameObject in hierachy_dragdrop");
+                        Logger.Warn("Invalid GameObject in hierachy_dragdrop");
                         return;
                     }
 
@@ -239,7 +239,7 @@ inline void Hierarchy::DragDrop(Transform &transform)
                 GameObject obj = *(GameObject *)payload->Data;
                 if (!obj.IsValid() && obj.GetID() != transform.GetOwner())
                 {
-                    Logger::Warn("Invalid GameObject in hierachy_dragdrop");
+                    Logger.Warn("Invalid GameObject in hierachy_dragdrop");
                     return;
                 }
 
@@ -327,21 +327,21 @@ void Hierarchy::RenderImGUi()
 
     if (!clickedAnyNode && ImGui::IsItemClicked())
     {
-        Editor::GetSelectedGameObjects().clear();
+        EditorInstance.GetSelectedGameObjects().clear();
     }
 
     if (ImGui::BeginDragDropTarget())
     {
         if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("HIERARCHY_NODE"))
         {
-            const auto &list = Editor::GetSelectedGameObjects();
+            const auto &list = EditorInstance.GetSelectedGameObjects();
             if (!list.empty())
             {
                 for (auto &obj : list)
                 {
                     if (!obj.IsValid())
                     {
-                        Logger::Warn("Invalid GameObject in hierachy_dragdrop");
+                        Logger.Warn("Invalid GameObject in hierachy_dragdrop");
                         return;
                     }
 
@@ -353,7 +353,7 @@ void Hierarchy::RenderImGUi()
                 GameObject obj = *(GameObject *)payload->Data;
                 if (!obj.IsValid())
                 {
-                    Logger::Warn("Invalid GameObject in hierachy_dragdrop");
+                    Logger.Warn("Invalid GameObject in hierachy_dragdrop");
                     return;
                 }
 

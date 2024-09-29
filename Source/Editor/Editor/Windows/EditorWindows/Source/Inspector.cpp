@@ -12,7 +12,7 @@
 
 Inspector::Inspector()
 {
-    Editor::Get().m_Callbacks[EditorCallback::ObjectSelected].AddListener([this]() { this->ToFront(); });
+    EditorInstance.m_Callbacks[EditorCallback::ObjectSelected].AddListener([this]() { this->ToFront(); });
 }
 
 void Inspector::ToFront()
@@ -33,7 +33,7 @@ void Inspector::RenderImGUi()
     }
     GameObject gameobject;
 
-    const auto &selectedGameObjects = Editor::GetSelectedGameObjects();
+    const auto &selectedGameObjects = EditorInstance.GetSelectedGameObjects();
     if (!selectedGameObjects.empty())
     {
         gameobject = selectedGameObjects[0];
@@ -99,7 +99,7 @@ void Inspector::RenderImGUi()
 
         // for (const auto &i : )
         //{
-        //     Logger::Log(i.Name());
+        //     Logger.Log(i.Name());
         // }
 
         // ImGui::Combo();

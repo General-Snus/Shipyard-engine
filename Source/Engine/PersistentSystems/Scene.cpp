@@ -7,7 +7,7 @@ Scene::Scene() : m_GameObjectManager(*this)
 {
 }
 
-GameObjectManager& Scene::ActiveManager()
+GameObjectManager &Scene::ActiveManager()
 {
-	return Editor::GetMainScene()->GetGOM();
+    return EditorInstance.GetMainScene()->GetGOM();
 }

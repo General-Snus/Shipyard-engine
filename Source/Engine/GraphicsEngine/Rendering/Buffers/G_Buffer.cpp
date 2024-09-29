@@ -15,7 +15,7 @@ void G_Buffer::Init()
 		sizeof(BuiltIn_Default_VS_ByteCode)
 	);
 
-	myScreenSpaceShader = GraphicsEngine::Get().GetQuadShader();
+	myScreenSpaceShader = GraphicsEngineInstance.GetQuadShader();
 
 	RHI::CreatePixelShader(
 		myPixelShader,
@@ -160,7 +160,7 @@ void G_Buffer::SetWriteTargetToBuffer()
 		RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,i,nullptr);
 	}
 
-	RHI::SetRenderTargets(vectorOfTextures,GraphicsEngine::Get().GetTargetTextures(eRenderTargets::DepthBuffer).get());*/
+	RHI::SetRenderTargets(vectorOfTextures,GraphicsEngineInstance.GetTargetTextures(eRenderTargets::DepthBuffer).get());*/
 
 }
 
@@ -204,7 +204,7 @@ void G_Buffer::UseDebugShader()
 
 void G_Buffer::UsePointlightShader()
 {
-	//RHI::SetBlendState(GraphicsEngine::Get().GetAdditiveBlendState());
+	//RHI::SetBlendState(GraphicsEngineInstance.GetAdditiveBlendState());
 	//RHI::SetVertexShader(myScreenSpaceShader);
 	//RHI::SetPixelShader(myPointPixelShader);
 
@@ -213,7 +213,7 @@ void G_Buffer::UsePointlightShader()
 
 void G_Buffer::UseSpotlightShader()
 {
-	//RHI::SetBlendState(GraphicsEngine::Get().GetAdditiveBlendState());
+	//RHI::SetBlendState(GraphicsEngineInstance.GetAdditiveBlendState());
 	//RHI::SetVertexShader(myScreenSpaceShader);
 	//RHI::SetPixelShader(mySpotShader);
 

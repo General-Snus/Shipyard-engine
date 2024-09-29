@@ -57,21 +57,21 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <EnableUnitySupport>false</EnableUnitySupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -113,29 +113,29 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(SolutionDir);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)Tools\ThirdParty\;$(SolutionDir)Tools\ThirdParty\dpp\;$(SolutionDir)DirectX\XTK\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include;$(IncludePath)</IncludePath>
-    <OutDir>$(SolutionDir)../Bin\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
     <LibraryPath>$(SolutionDir)..\Lib\$(Configuration)\;$(SolutionDir)..\Dependencies\$(Configuration)\;$(SolutionDir)..\Dependencies\$(Configuration)\PhysXLibs\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
-    <TargetName>Shipyard_$(ProjectName)_$(Configuration)</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
     <LinkIncremental>
     </LinkIncremental>
     <IgnoreImportLibrary>true</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(SolutionDir);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)Tools\ThirdParty\;$(SolutionDir)Tools\ThirdParty\dpp\;$(SolutionDir)DirectX\XTK\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include;$(IncludePath)</IncludePath>
-    <OutDir>$(SolutionDir)../Bin\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
     <LibraryPath>$(SolutionDir)..\Lib\$(Configuration)\;$(SolutionDir)..\Dependencies\$(Configuration)\;$(SolutionDir)..\Dependencies\$(Configuration)\PhysXLibs\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
-    <TargetName>Shipyard_$(ProjectName)_$(Configuration)</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
     <LinkIncremental>
     </LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">
     <IncludePath>$(SolutionDir);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)Tools\ThirdParty\;$(SolutionDir)Tools\ThirdParty\dpp\;$(SolutionDir)DirectX\XTK\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include;$(IncludePath)</IncludePath>
-    <OutDir>$(SolutionDir)../Bin\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
     <LibraryPath>$(SolutionDir)..\Lib\$(Configuration)\;$(SolutionDir)..\Dependencies\$(Configuration)\;$(SolutionDir)..\Dependencies\$(Configuration)\PhysXLibs\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
-    <TargetName>Shipyard_$(ProjectName)_$(Configuration)</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
     <LinkIncremental>
     </LinkIncremental>
   </PropertyGroup>
@@ -227,7 +227,8 @@
       </Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>xcopy /y /d /s "$(SolutionDir)..\Dependencies\$(Configuration)\PreBuildCopy\" "$(OutDir)"</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
@@ -276,7 +277,8 @@
       </Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>xcopy /y /d /s "$(SolutionDir)..\Dependencies\$(Configuration)\PreBuildCopy\" "$(OutDir)"</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
@@ -330,7 +332,8 @@
       </Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>xcopy /y /d /s "$(SolutionDir)..\Dependencies\$(Configuration)\PreBuildCopy\" "$(OutDir)"</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
@@ -338,9 +341,9 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Core\GameState\GameState.h" />
     <ClInclude Include="Windows\EditorWindows\FrameStatistics.h" />
     <ClInclude Include="Windows\EditorWindows\ChatWindow.h" />
-    <ClInclude Include="Windows\EditorWindows\ChainGraph\GraphTool.h" />
     <ClInclude Include="Windows\EditorWindows\ColorPresets.h" />
     <ClInclude Include="Commands\CommandBuffer.h" />
     <ClInclude Include="Commands\ComponentChanged.h" />
@@ -357,16 +360,14 @@
     <ClInclude Include="Windows\EditorWindows\Hierarchy.h" />
     <ClInclude Include="Windows\EditorWindows\Inspector.h" />
     <ClInclude Include="Windows\EditorWindows\EditorWindow.h" />
-    <ClInclude Include="Resource.h" />
     <ClInclude Include="Windows\EditorWindows\Viewport.h" />
     <ClInclude Include="Windows\Window.h" />
     <ClInclude Include="Windows\SplashWindow.h" />
-    <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Core\GameState\GameState.cpp" />
     <ClCompile Include="Windows\EditorWindows\Source\FrameStatistics.cpp" />
     <ClCompile Include="Windows\EditorWindows\Source\ChatWindow.cpp" />
-    <ClCompile Include="Windows\EditorWindows\ChainGraph\GraphTool.cpp" />
     <ClCompile Include="Windows\EditorWindows\Source\ColorPresets.cpp" />
     <ClCompile Include="Commands\Source\CommandBuffer.cpp" />
     <ClCompile Include="Commands\Source\ComponentChanged.cpp" />
@@ -381,7 +382,6 @@
     <ClCompile Include="Windows\EditorWindows\Source\Hierarchy.cpp" />
     <ClCompile Include="Windows\EditorWindows\Source\Inspector.cpp" />
     <ClCompile Include="Windows\EditorWindows\Source\EditorWindow.cpp" />
-    <ClCompile Include="Main.cpp" />
     <ClCompile Include="Core\Source\Editor.cpp" />
     <ClCompile Include="TheHole\SaveLoad.cpp" />
     <ClCompile Include="Windows\EditorWindows\Source\Viewport.cpp" />
@@ -389,43 +389,12 @@
     <ClCompile Include="Windows\Source\SplashWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Editor.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="EditorIcon.ico" />
-    <Image Include="small.ico" />
-    <Image Include="SplashScreen\E1eWWsIq.bmp" />
-    <Image Include="TGPSplash.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Engine\AssetManager\AssetManager.vcxproj">
-      <Project>{eb78804e-5bf9-45d7-8e83-f03765bed7ab}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Engine\GraphicsEngine\GraphicsEngine.vcxproj">
-      <Project>{aa66e648-1c0f-41d6-b339-9058e5a85b4e}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Engine\PersistentSystems\PersistentSystems.vcxproj">
-      <Project>{79bd4629-e0fc-4d67-9977-8d581acd8861}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Game\GameLauncher\Modelviewer.vcxproj">
-      <Project>{22a9f47b-5ce9-470b-ae62-562504394512}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Tools\ImGui\ImGui\ImGui.vcxproj">
-      <Project>{68206c2f-a849-4e47-a524-b0d457d7a09f}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\..\Tools\ImGui\MuninGraph\MuninGraph.vcxproj">
       <Project>{1b302653-82cc-40db-920e-c979d3cfc23d}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Tools\Logging\Logging.vcxproj">
-      <Project>{6c8d37b4-41cf-42a1-a344-5f62fd042caf}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Tools\Utilities\Utilities.vcxproj">
-      <Project>{b7232c9e-466f-46a5-a0a4-ea832733a352}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

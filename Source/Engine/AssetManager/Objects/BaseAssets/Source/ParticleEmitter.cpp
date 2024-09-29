@@ -19,7 +19,7 @@ void ParticleEmitter::InitParticle(Particlevertex& vertex) const
 
 ParticleEmitter::ParticleEmitter(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)
 {
-	Logger::Err("NotImplementedException");
+	Logger.Err("NotImplementedException");
 	assert(false);
 }
 
@@ -27,11 +27,11 @@ ParticleEmitter::ParticleEmitter(const ParticleEmitterTemplate& aTemplate) : Ass
 {
 	if (aTemplate.EmmiterSettings.ParticleTexture.empty())
 	{
-		texture = GraphicsEngine::Get().GetDefaultTexture(eTextureType::ParticleMap);
+		texture = GraphicsEngineInstance.GetDefaultTexture(eTextureType::ParticleMap);
 	}
 	else
 	{
-		texture = AssetManager::Get().LoadAsset<TextureHolder>(aTemplate.EmmiterSettings.ParticleTexture);
+		texture = AssetManagerInstance.LoadAsset<TextureHolder>(aTemplate.EmmiterSettings.ParticleTexture);
 	}
 
 	settings = aTemplate.EmmiterSettings;
@@ -51,7 +51,7 @@ ParticleEmitter::ParticleEmitter(const ParticleEmitterTemplate& aTemplate) : Ass
 
 	//if (!RHI::CreateDynamicVertexBuffer(vertexBuffer,particles.size(),sizeof(Particlevertex)))
 	{
-		Logger::Err("Failed to create vertex buffer");
+		Logger.Err("Failed to create vertex buffer");
 		return;
 	}
 	//stride = sizeof(Particlevertex);
@@ -113,7 +113,7 @@ void ParticleEmitter::SetAsResource() const
 
 	//if (FAILED(result))
 	//{
-	//	Logger::Log("Failed to create vertex buffer for particle emitter");
+	//	Logger.Log("Failed to create vertex buffer for particle emitter");
 	//	assert(false);
 	//}
 

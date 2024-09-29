@@ -116,6 +116,7 @@
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <IncludePath>$(SolutionDir);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)DirectX\XTK\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
+    <MultiProcFXC>false</MultiProcFXC>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -213,7 +214,9 @@
       <HeaderFileOutput>
       </HeaderFileOutput>
       <PreprocessorDefinitions>_HLSL;_DEBUG</PreprocessorDefinitions>
-      <TreatWarningAsError>true</TreatWarningAsError>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <DisableOptimizations>true</DisableOptimizations>
+      <EnableDebuggingInformation>true</EnableDebuggingInformation>
     </FxCompile>
     <Lib>
       <AdditionalDependencies>DirectXTK12.lib</AdditionalDependencies>
@@ -254,6 +257,7 @@
       <HeaderFileOutput>
       </HeaderFileOutput>
       <PreprocessorDefinitions>_HLSL;</PreprocessorDefinitions>
+      <TreatWarningAsError>false</TreatWarningAsError>
     </FxCompile>
     <Lib>
       <AdditionalDependencies>DirectXTK12.lib</AdditionalDependencies>
@@ -295,6 +299,7 @@
       <HeaderFileOutput>
       </HeaderFileOutput>
       <PreprocessorDefinitions>_HLSL;</PreprocessorDefinitions>
+      <TreatWarningAsError>false</TreatWarningAsError>
     </FxCompile>
     <Lib>
       <AdditionalDependencies>DirectXTK12.lib</AdditionalDependencies>
@@ -478,12 +483,17 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">Pixel</ShaderType>
       <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</TreatWarningAsError>
-      <EnableUnboundedDescriptorTables Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</EnableUnboundedDescriptorTables>
-      <EnableUnboundedDescriptorTables Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</EnableUnboundedDescriptorTables>
-      <EnableUnboundedDescriptorTables Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">false</EnableUnboundedDescriptorTables>
+      <EnableUnboundedDescriptorTables Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </EnableUnboundedDescriptorTables>
+      <EnableUnboundedDescriptorTables Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </EnableUnboundedDescriptorTables>
+      <EnableUnboundedDescriptorTables Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">
+      </EnableUnboundedDescriptorTables>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)..\Content\Shaders\%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)..\Content\Shaders\%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">$(SolutionDir)..\Content\Shaders\%(Filename).cso</ObjectFileOutput>
+      <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">true</TreatWarningAsError>
+      <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</TreatWarningAsError>
     </FxCompile>
     <FxCompile Include="Shaders\Passes\GBuffer\GBufferPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

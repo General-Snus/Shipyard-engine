@@ -41,7 +41,7 @@ bool Material::CreateJson(const DataMaterial &data, const std::filesystem::path 
         }
     }
 
-    std::ofstream stream(AssetManager::Get().AssetPath / writePath.string());
+    std::ofstream stream(AssetManagerInstance.AssetPath / writePath.string());
     stream << std::setw(4) << json;
     stream.close();
     return true;
@@ -55,18 +55,18 @@ void Material::Init()
 {
     data.textures.resize(4);
     data.textures[static_cast<int>(eTextureType::ColorMap)].second =
-        GraphicsEngine::Get().GetDefaultTexture(eTextureType::ColorMap);
+        GraphicsEngineInstance.GetDefaultTexture(eTextureType::ColorMap);
     data.textures[static_cast<int>(eTextureType::NormalMap)].second =
-        GraphicsEngine::Get().GetDefaultTexture(eTextureType::NormalMap);
+        GraphicsEngineInstance.GetDefaultTexture(eTextureType::NormalMap);
     data.textures[static_cast<int>(eTextureType::MaterialMap)].second =
-        GraphicsEngine::Get().GetDefaultTexture(eTextureType::MaterialMap);
+        GraphicsEngineInstance.GetDefaultTexture(eTextureType::MaterialMap);
     data.textures[static_cast<int>(eTextureType::EffectMap)].second =
-        GraphicsEngine::Get().GetDefaultTexture(eTextureType::EffectMap);
+        GraphicsEngineInstance.GetDefaultTexture(eTextureType::EffectMap);
 
-    if (GraphicsEngine::Get().GetDefaultMaterial() != nullptr)
+    if (GraphicsEngineInstance.GetDefaultMaterial() != nullptr)
     {
         data.materialData =
-            GraphicsEngine::Get()
+            GraphicsEngineInstance
                 .GetDefaultMaterial()
                 ->data.materialData; // yo dawg i put some data in your data so you can data while you data
     }
@@ -75,8 +75,8 @@ void Material::Init()
         data.materialData = MaterialBuffer();
     }
 
-    data.vertexShader = GraphicsEngine::Get().GetDefaultVSShader();
-    data.pixelShader = GraphicsEngine::Get().GetDefaultPSShader();
+    data.vertexShader = GraphicsEngineInstance.GetDefaultVSShader();
+    data.pixelShader = GraphicsEngineInstance.GetDefaultPSShader();
 
     if (std::filesystem::exists(AssetPath) && AssetPath.extension() == ".json")
     {
@@ -108,7 +108,7 @@ void Material::Init()
         {
             std::string msg =
                 "Unsuccessfull loading of material data file at path: " + AssetPath.string() + " " + e.what();
-            Logger::Warn(msg);
+            Logger.Warn(msg);
             isLoadedComplete = false;
         }
 
@@ -125,7 +125,7 @@ void Material::Init()
                     continue;
                 }
 
-                texture = AssetManager::Get().LoadAsset<TextureHolder>(path);
+                texture = AssetManagerInstance.LoadAsset<TextureHolder>(path);
 
                 const int type = i["TextureType"];
                 texture->SetTextureType(static_cast<eTextureType>(type));
@@ -138,7 +138,7 @@ void Material::Init()
         {
             std::string msg =
                 "Unsuccessfull loading of material texture file at path: " + AssetPath.string() + " " + e.what();
-            Logger::Warn(msg);
+            Logger.Warn(msg);
             isLoadedComplete = false;
         }
     }
@@ -224,12 +224,12 @@ bool Material::InspectorView()
 
 std::shared_ptr<TextureHolder> Material::GetEditorIcon()
 {
-    auto imageTexture = AssetManager::Get().LoadAsset<TextureHolder>(
+    auto imageTexture = AssetManagerInstance.LoadAsset<TextureHolder>(
         std::format("INTERNAL_IMAGE_UI_{}", AssetPath.filename().string()));
     if (!imageTexture || !imageTexture->isLoadedComplete)
     {
-        std::shared_ptr<Mesh> mesh = AssetManager::Get().LoadAsset<Mesh>("Materials/MaterialPreviewMesh.fbx");
-        std::shared_ptr<Material> materialPreview = AssetManager::Get().LoadAsset<Material>(AssetPath, true);
+        std::shared_ptr<Mesh> mesh = AssetManagerInstance.LoadAsset<Mesh>("Materials/MaterialPreviewMesh.fbx");
+        std::shared_ptr<Material> materialPreview = AssetManagerInstance.LoadAsset<Material>(AssetPath, true);
 
         bool meshReady = mesh->isLoadedComplete && !mesh->isBeingLoaded;
         bool materialReady = materialPreview->isLoadedComplete && !materialPreview->isBeingLoaded;
@@ -237,11 +237,11 @@ std::shared_ptr<TextureHolder> Material::GetEditorIcon()
         if (!imageTexture->isBeingLoaded && meshReady && materialReady)
         {
             GraphicsEngineUtilities::GenerateSceneForIcon(mesh, imageTexture, materialPreview);
-            Logger::Log("Material Preview Queued up");
+            Logger.Log("Material Preview Queued up");
         }
         else
         {
-            imageTexture = AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+            imageTexture = AssetManagerInstance.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
         }
     }
     return imageTexture;
@@ -257,7 +257,7 @@ void Material::Update()
     OPTICK_EVENT();
     if (!isLoadedComplete)
     {
-        GraphicsEngine::Get().GetDefaultMaterial()->Update();
+        GraphicsEngineInstance.GetDefaultMaterial()->Update();
         return;
         // REFACTOR
         // If default material is not loaded with forced or if it erronous we will end with a overflow here, guess it
@@ -314,7 +314,7 @@ void Material::SetAsResources()
         }
         else
         {
-            RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)i->textureType,GraphicsEngine::Get().GetDefaultTexture(i->textureType)->GetRawTexture().get());
+            RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)i->textureType,GraphicsEngineInstance.GetDefaultTexture(i->textureType)->GetRawTexture().get());
         }
     }*/
 }

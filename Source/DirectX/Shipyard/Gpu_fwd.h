@@ -2,6 +2,7 @@
 #include <d3d12.h>
 #include <wrl/client.h>
 
+#include "Tools/Utilities/System/ServiceLocator.h"
 class GPU;
 class IndexResource;
 class VertexResource;
@@ -31,5 +32,8 @@ enum class eRootBindings;
 
 typedef ID3D10Blob ID3DBlob;
 
-using DxCommandList = Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2>;
+using DxCommandList = Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList3>;
+using DeviceType = Microsoft::WRL::ComPtr<ID3D12Device8>;
 using namespace Microsoft::WRL;
+
+#define GPUInstance ServiceLocator::Instance().GetService<GPU>()

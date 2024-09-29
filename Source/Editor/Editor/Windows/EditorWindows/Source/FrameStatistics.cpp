@@ -45,7 +45,7 @@ void FrameStatistics::RenderImGUi()
         myDataIndex = 0;
     }
 
-    ImGui::Begin("Frame statistics");
+    ImGui::Begin("Frame statistics", &m_KeepWindow);
     float sum = 0;
     sum = std::accumulate(myAverageFPS, myAverageFPS + MAX_DATA_COUNT, sum) / MAX_DATA_COUNT;
     ImGui::Text("FPS: (%f)\n", sum);
@@ -60,7 +60,7 @@ void FrameStatistics::RenderImGUi()
     {
         // Update the data every SKIPRATE frames
 
-        const float framerate = 1 / Timer::GetDeltaTime();
+        const float framerate = 1 / TimerInstance.GetDeltaTime();
         myAverageFPS[myDataIndex] = framerate;
 
         PROCESS_MEMORY_COUNTERS_EX pmc;
@@ -72,7 +72,7 @@ void FrameStatistics::RenderImGUi()
 
         myAverageCPUByApp[myDataIndex] = (float)App_CPU_Usage();
 
-        auto mem = GPU::m_GraphicsMemory->GetStatistics();
+        auto mem = GPUInstance.m_GraphicsMemory->GetStatistics();
         m_committedMemory[myDataIndex] = (float)mem.committedMemory;
         m_totalMemory[myDataIndex] = (float)mem.totalMemory;
         m_totalPages[myDataIndex] = (float)mem.totalPages;

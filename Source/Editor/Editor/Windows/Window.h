@@ -1,8 +1,11 @@
 #pragma once
+#include <Tools/Utilities/System/ServiceLocator.h>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
+#include <Tools/Utilities/System/SingletonTemplate.h>
 #include <functional>
 #include <string>
 #include <windows.h>
+#define WindowInstance ServiceLocator::Instance().GetService<Window>()
 
 class DropManager;
 struct WinInitSettings
@@ -12,22 +15,22 @@ struct WinInitSettings
     HINSTANCE hInstance;
 };
 
-class Window
+class Window : public Singleton
 {
   public:
-    static void Init(const WinInitSettings &init);
-    static bool Update();
+    void Init(const WinInitSettings &init);
+    bool Update();
     static LRESULT CALLBACK WinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-    static void SetCallbackFunction(const std::function<void(MSG const &msg)> &aCallback);
-    static void Destroy();
-    static void MoveConsoleToOtherMonitor();
+    void SetCallbackFunction(const std::function<void(MSG const &msg)> &aCallback);
+    void Destroy();
+    void MoveConsoleToOtherMonitor();
 
-    static unsigned int Width();
-    static unsigned int Height();
+    unsigned int Width();
+    unsigned int Height();
 
-    inline static HINSTANCE moduleHandler;
-    inline static HWND windowHandler;
+    HINSTANCE moduleHandler;
+    HWND windowHandler;
     // Cred goes to adira guy on reddit for wonderfull code
-    inline static std::function<void(const MSG &msg)> callback = nullptr;
+    std::function<void(const MSG &msg)> callback = nullptr;
 };

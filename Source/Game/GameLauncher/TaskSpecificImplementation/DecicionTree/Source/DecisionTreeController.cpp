@@ -1,14 +1,6 @@
-#include <Engine/AssetManager/AssetManager.pch.h>
+#include "ShipyardEngine.pch.h"
 
 #include "../DecisionTreeController.h"
-#include <Editor/Editor/Defines.h>
-#include <Engine/PersistentSystems/ArtificialInteligence/AICommands/AICommands.h>
-
-#include "Engine/AssetManager/ComponentSystem/Components/ActorSystem/CombatComponent.h"
-#include "Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h"
-#include "Engine/AssetManager/Objects/AI/AgentSystem/AIPollingManager.h"
-#include "Engine/AssetManager/Objects/AI/AgentSystem/PollingStations/Target_PollingStation.h"
-#include "Engine/AssetManager/Objects/AI/AgentSystem/SteeringBehaviour.h"
 
 DecisionTreeController::DecisionTreeController(const DecisionTree &decisionTree) : myTree(decisionTree)
 {
@@ -50,7 +42,7 @@ bool DecisionTreeController::Update(GameObject input)
     transform.SetPosition(newPosition);
 
     Vector3f normal;
-    Vector3f ref = AIPollingManager::Get()
+    Vector3f ref = AIPollingManagerInstance
                        .GetStation<MultipleTargets_PollingStation>("Colliders")
                        ->GetClosestPositionOnCollider(transform.GetPosition(), normal);
     DebugDrawer::Get().AddDebugLine(transform.GetPosition(), ref, Vector3f(0.0f, 1.0f, 0.01f), 0.01f);

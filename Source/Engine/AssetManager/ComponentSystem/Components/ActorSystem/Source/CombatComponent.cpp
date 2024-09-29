@@ -26,13 +26,13 @@ void CombatComponent::Init()
 
 void CombatComponent::Update()
 {
-    myAttackTimer += Timer::GetDeltaTime();
+    myAttackTimer += TimerInstance.GetDeltaTime();
 
     if (myHealth <= 0)
     {
         //'John is kill'
         //'No'
-        myDeathTimer += Timer::GetDeltaTime();
+        myDeathTimer += TimerInstance.GetDeltaTime();
         if (myDeathTimer > respawnTime)
         {
             myDeathTimer = 0.f;
@@ -63,7 +63,7 @@ void CombatComponent::FireProjectile()
         // Fire projectile
         GameObject projectile = GameObject::Create("Projectile");
         auto &kinematic = projectile.AddComponent<cPhysics_Kinematic>();
-        auto &mesh = projectile.AddComponent<cMeshRenderer>();
+        auto &mesh = projectile.AddComponent<MeshRenderer>();
         auto &collider = projectile.AddComponent<cCollider>();
         auto &projComponent = projectile.AddComponent<ProjectileComponent>();
         projComponent.InitWithValues(20.f, GetGameObject());
@@ -76,7 +76,7 @@ void CombatComponent::FireProjectile()
         projectileT.Rotate(90, 0, 0);
         kinematic.ph_velocity = actorT.GetForward() * myProjectileSpeed;
 
-        if (const auto &actorRenderer = actorT.TryGetComponent<cMeshRenderer>())
+        if (const auto &actorRenderer = actorT.TryGetComponent<MeshRenderer>())
         {
             mesh.SetMaterial(actorRenderer->GetMaterial());
         }
@@ -90,7 +90,7 @@ void CombatComponent::FireProjectile()
 
 void CombatComponent::Healing()
 {
-    decimalHPGeneration += 2.f * Timer::GetDeltaTime();
+    decimalHPGeneration += 2.f * TimerInstance.GetDeltaTime();
 
     // KEKW
     const int hpAdd = static_cast<int>(std::roundf(decimalHPGeneration));

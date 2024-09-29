@@ -18,7 +18,7 @@
 //	}
 //	else
 //	{
-//		G_Buffer& gBuffer = GraphicsEngine::Get().myG_Buffer;
+//		G_Buffer& gBuffer = GraphicsEngineInstance.myG_Buffer;
 //		gBuffer.UseGBufferShader();
 //	}
 //
@@ -27,13 +27,13 @@
 //		if (i->myMesh->isLoadedComplete)
 //		{
 //			OPTICK_EVENT("Mesh");
-//			ObjectBuffer& objectBuffer = GraphicsEngine::Get().myObjectBuffer;
+//			ObjectBuffer& objectBuffer = GraphicsEngineInstance.myObjectBuffer;
 //			objectBuffer.myTransform = Matrix();
 //			objectBuffer.MaxExtents = i->myMesh->MaxBox;
 //			objectBuffer.MinExtents = i->myMesh->MinBox;
 //			objectBuffer.hasBone = false;
 //			objectBuffer.isInstanced = true;
-//			//RHI::UpdateConstantBufferData(GraphicsEngine::Get().myObjectBuffer);
+//			//RHI::UpdateConstantBufferData(GraphicsEngineInstance.myObjectBuffer);
 //			if (!isShadowPass)
 //			{
 //				i->myMesh->UpdateInstanceBuffer();
@@ -57,7 +57,7 @@
 //						}
 //						else
 //						{
-//							GraphicsEngine::Get().defaultMaterial->Update();
+//							GraphicsEngineInstance.defaultMaterial->Update();
 //						}
 //					}
 //				}

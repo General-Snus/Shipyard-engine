@@ -56,18 +56,18 @@ void Animation::Init()
 	{
 		if (scene->mNumAnimations > 1)
 		{
-			Logger::Warn("Attempt at loading multiple animation in one file in " + AssetPath.string());
+			Logger.Warn("Attempt at loading multiple animation in one file in " + AssetPath.string());
 		}
 		if (scene->mAnimations[0]->mDuration <= 0)
 		{
-			Logger::Warn("Attempt at loading animation with a duration of zero at " + AssetPath.string());
+			Logger.Warn("Attempt at loading animation with a duration of zero at " + AssetPath.string());
 		}
 		duration = scene->mAnimations[0]->mDuration;
 
 
 		if (scene->mAnimations[0]->mTicksPerSecond == 0)
 		{
-			Logger::Warn("Attempt at loading animation with a framerate of zero at " + AssetPath.string());
+			Logger.Warn("Attempt at loading animation with a framerate of zero at " + AssetPath.string());
 		}
 
 		frameRate = static_cast<float>(scene->mAnimations[0]->mTicksPerSecond);
@@ -117,7 +117,7 @@ void Animation::Init()
 	}
 	else
 	{
-		Logger::Err("Failed to load animation from " + AssetPath.string());
+		Logger.Err("Failed to load animation from " + AssetPath.string());
 	}
 #endif
 
@@ -230,7 +230,7 @@ void Skeleton::Init()
 	}
 	else
 	{
-		Logger::Err("Failed to load skeleton from " + AssetPath.string());
+		Logger.Err("Failed to load skeleton from " + AssetPath.string());
 	}
 #endif
 }

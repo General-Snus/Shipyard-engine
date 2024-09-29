@@ -4,12 +4,12 @@
 #include <Engine/AssetManager/ComponentSystem/Component.h>
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
 
-class cCamera : public Component
+class Camera : public Component
 {
   public:
     MYLIB_REFLECTABLE();
-    explicit cCamera(const SY::UUID anOwnerId, GameObjectManager *aManager);
-    ~cCamera() override;
+    explicit Camera(const SY::UUID anOwnerId, GameObjectManager *aManager);
+    ~Camera() override;
 
     void Update() override;
     void Render() override;
@@ -52,10 +52,10 @@ class cCamera : public Component
     };
 
   private:
-    Vector2f resolution = {(float)(Window::Width()), (float)(Window::Height())};
+    Vector2f resolution = {(float)(WindowInstance.Width()), (float)(WindowInstance.Height())};
     bool IsInControll = false;
     Matrix m_Projection;
     float cameraSpeed = 25;
 };
 
-REFL_AUTO(type(cCamera), field(fow), field(farfield), field(nearField), field(isOrtho))
+REFL_AUTO(type(Camera), field(fow), field(farfield), field(nearField), field(isOrtho))

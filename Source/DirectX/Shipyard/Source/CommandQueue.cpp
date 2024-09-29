@@ -5,7 +5,7 @@
 #include "DirectX/Shipyard/ResourceStateTracker.h"
 #include <DirectX/CrashHandler/NsightAftermathGpuCrashTracker.h>
 
-bool GPUCommandQueue::Create(const ComPtr<ID3D12Device> &device, D3D12_COMMAND_LIST_TYPE type)
+bool GPUCommandQueue::Create(const DeviceType &device, D3D12_COMMAND_LIST_TYPE type)
 {
     m_Device = device;
     m_CommandListType = type;
@@ -73,16 +73,15 @@ std::shared_ptr<CommandList> GPUCommandQueue::GetCommandList(const std::wstring 
     OPTICK_EVENT();
     std::shared_ptr<CommandList> commandList;
 
-    // If there is a command list on the queue.
     if (!m_AvailableCommandLists.Empty())
     {
         m_AvailableCommandLists.TryPop(commandList);
     }
     else
     {
-        // Otherwise create a new command list.
-        commandList = std::make_shared<CommandList>(m_CommandListType, name);
+        commandList = std::make_shared<CommandList>(m_Device, m_CommandListType, name);
     }
+
 #if (USE_NSIGHT_AFTERMATH)
     // Create an Nsight Aftermath context handle for setting Aftermath event markers in this command list.
     AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_DX12_CreateContextHandle(commandList->GetGraphicsCommandList().Get(),

@@ -10,7 +10,7 @@ cAnimator::cAnimator(const SY::UUID anOwnerId,GameObjectManager* aManager)
 	mySkeleton = (this->TryGetComponent<cSkeletalMeshRenderer>())->GetRawSkeleton();
 	if (!mySkeleton)
 	{
-		Logger::Err("cSkeletalMeshRenderer component does not have a skeleton"); 
+		Logger.Err("cSkeletalMeshRenderer component does not have a skeleton"); 
 	}
 }
 
@@ -20,9 +20,9 @@ cAnimator::cAnimator(const SY::UUID anOwnerId,GameObjectManager* aManager,const 
 	mySkeleton = (this->TryGetComponent<cSkeletalMeshRenderer>())->GetRawSkeleton();
 	if (!mySkeleton)
 	{
-		Logger::Err("cSkeletalMeshRenderer component does not have a skeleton");
+		Logger.Err("cSkeletalMeshRenderer component does not have a skeleton");
 	}  
-	myAnimations.push_back(AssetManager::Get().LoadAsset<Animation>(aFilePath));
+	myAnimations.push_back(AssetManagerInstance.LoadAsset<Animation>(aFilePath));
 }
 
 void cAnimator::Update()
@@ -32,7 +32,7 @@ void cAnimator::Update()
 	if (myAnimations.size())
 	{
 		const float TimePerFrame = (1 / myAnimations[myCurrentAnimation]->frameRate);
-		myAnimationTimer += Timer::GetDeltaTime();
+		myAnimationTimer += TimerInstance.GetDeltaTime();
 		if (myAnimationTimer >= TimePerFrame)
 		{
 			float percentage = myAnimationTimer / TimePerFrame;
@@ -56,8 +56,8 @@ void cAnimator::Update()
 void cAnimator::RenderAnimation(const std::shared_ptr<Mesh>& aData,const Matrix& aTransform) const
 {
 	aData; aTransform;
-	//GraphicsEngine::Get().ShadowCommands<GfxCmd_RenderSkeletalMeshShadow>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
-	//GraphicsEngine::Get().DeferredCommand<GfxCmd_RenderSkeletalMesh>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
+	//GraphicsEngineInstance.ShadowCommands<GfxCmd_RenderSkeletalMeshShadow>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
+	//GraphicsEngineInstance.DeferredCommand<GfxCmd_RenderSkeletalMesh>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
 }
 
 void cAnimator::AddAnimation(std::shared_ptr<Animation> aAnimation)
@@ -67,7 +67,7 @@ void cAnimator::AddAnimation(std::shared_ptr<Animation> aAnimation)
 
 void cAnimator::AddAnimation(const std::filesystem::path& aFilePath)
 {
-	myAnimations.push_back(AssetManager::Get().LoadAsset<Animation>(aFilePath));
+	myAnimations.push_back(AssetManagerInstance.LoadAsset<Animation>(aFilePath));
 }
 
 void cAnimator::SetHierarchy(unsigned int aBoneID,const Matrix& aParentMatrix)
@@ -97,7 +97,7 @@ void cAnimator::SetPlayingAnimation(unsigned int aAnimationIndex)
 {
 	if (aAnimationIndex >= myAnimations.size())
 	{
-		Logger::Warn("Animation index out of range");
+		Logger.Warn("Animation index out of range");
 		return;
 	}
 	myCurrentAnimation = aAnimationIndex;

@@ -50,7 +50,7 @@ void cPhysics_Kinematic::InitPrimitive()
 void cPhysics_Kinematic::Update()
 {
     OPTICK_EVENT();
-    float delta = Timer::GetDeltaTime();
+    float delta = TimerInstance.GetDeltaTime();
     auto &transform = GetComponent<Transform>();
     ph_velocity += ph_acceleration * delta;
     ph_Angular_velocity += ph_Angular_acceleration * delta;

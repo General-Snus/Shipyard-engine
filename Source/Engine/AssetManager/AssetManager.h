@@ -41,13 +41,13 @@ class Library
     assetMap content;
 };
 
-class AssetManager : public Singleton<AssetManager>
+#include <Tools/Utilities/System/ServiceLocator.h>
+#define AssetManagerInstance ServiceLocator::Instance().GetService<AssetManager>()
+
+class AssetManager : public Singleton
 {
-    friend class Singleton<AssetManager>;
 
   public:
-    ~AssetManager() = default;
-
     template <class T> std::shared_ptr<T> LoadAsset(const std::filesystem::path &aFilePath);
     template <class T> std::shared_ptr<T> LoadAsset(const std::filesystem::path &aFilePath, bool useExact);
 
@@ -64,8 +64,8 @@ class AssetManager : public Singleton<AssetManager>
 
     // TODO just because this isnt optimal
     // Shame place, these are needed for the hopefully nieche condition of not knowing what you are loading
-    static std::string AssetType(const std::filesystem::path &path);
-    static std::shared_ptr<AssetBase> TryLoadAsset(const std::filesystem::path &path);
+    std::string AssetType(const std::filesystem::path &path);
+    std::shared_ptr<AssetBase> TryLoadAsset(const std::filesystem::path &path);
 
     static inline constexpr char exprAssetPath[15] = "../../Content";
     static inline std::filesystem::path AssetPath = exprAssetPath;
@@ -73,13 +73,13 @@ class AssetManager : public Singleton<AssetManager>
     // CAREFUL YOU FOOL
     template <class T> std::shared_ptr<Library> GetLibraryOfType();
 
+    void RecursiveNameSave();
+
   private:
-    AssetManager();
     // thread
     void ThreadedLoading();
     Queue<std::shared_ptr<AssetBase>> myAssetQueue;
     // NameToPath
-    void RecursiveNameSave();
     std::unordered_map<std::filesystem::path, std::filesystem::path> nameToPathMap;
 
     // Libraries
@@ -187,7 +187,7 @@ std::shared_ptr<T> AssetManager::LoadAsset(const std::filesystem::path &identifi
         myAssetQueue.EnqueueUnique(newObject.second);
         newObject.second->isBeingLoaded = true;
 #if ThreadedAssetLoading
-        ThreadPool::Get().SubmitWork(std::bind(&AssetManager::ThreadedLoading, this));
+        ThreadPoolInstance.SubmitWork(std::bind(&AssetManager::ThreadedLoading, this));
 #else
         ThreadedLoading();
 #endif

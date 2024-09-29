@@ -17,7 +17,6 @@ class Component : public Reflectable
 {
   public:
     MYLIB_REFLECTABLE();
-
     Component(const SY::UUID anOwnerID, GameObjectManager *aManager)
         : myOwnerID(anOwnerID), myManager(aManager), m_IsActive(true), myComponentType(eComponentType::base)
     {
@@ -93,6 +92,7 @@ class Component : public Reflectable
         IsInherited++;
     }
     void Abandon();
+    Transform &transform();
 
     SY::UUID myOwnerID;
     GameObjectManager *myManager = nullptr;
@@ -102,8 +102,6 @@ class Component : public Reflectable
     // to take care of it themselves
     int IsInherited = 0;
     bool m_IsActive = true;
-
-    Transform &transform();
 
   private:
     Component() = default;

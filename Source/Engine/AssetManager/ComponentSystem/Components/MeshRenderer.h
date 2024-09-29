@@ -12,15 +12,15 @@ class Material;
 class TextureHolder;
 class Skeleton;
 
-class cMeshRenderer : public Component
+class MeshRenderer : public Component
 {
   public:
     MYLIB_REFLECTABLE();
-    cMeshRenderer() = delete;                                             // Create a generic cube
-    cMeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager); // Create a generic cube
-    cMeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager, const std::filesystem::path &aFilePath,
+    MeshRenderer() = delete;                                             // Create a generic cube
+    MeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager); // Create a generic cube
+    MeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager, const std::filesystem::path &aFilePath,
                   bool useExact = false);
-    ~cMeshRenderer() override = default;
+    ~MeshRenderer() override = default;
 
     // Mesh
     void SetNewMesh(const std::filesystem::path &aFilePath);
@@ -50,9 +50,9 @@ class cMeshRenderer : public Component
         m_OverrideMaterial; // TODO MAKE MAP SO INSTANCE CAN KEEP ANY OVERRIDEN MATERIAL YOU MUPPET
 };
 
-REFL_AUTO(type(cMeshRenderer), field(isInstanced))
+REFL_AUTO(type(MeshRenderer), field(isInstanced))
 
-class cSkeletalMeshRenderer : public cMeshRenderer
+class cSkeletalMeshRenderer : public MeshRenderer
 {
     friend class cAnimator;
 

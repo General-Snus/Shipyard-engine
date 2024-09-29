@@ -13,7 +13,7 @@
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 #include "Tools/Utilities/Input/EnumKeys.h"
 
-cCamera::cCamera(const SY::UUID anOwnerId, GameObjectManager *aManager) : Component(anOwnerId, aManager)
+Camera::Camera(const SY::UUID anOwnerId, GameObjectManager *aManager) : Component(anOwnerId, aManager)
 {
     GetGameObject().AddComponent<Transform>();
     GetGameObject().GetComponent<Transform>().SetGizmo(false);
@@ -30,8 +30,8 @@ cCamera::cCamera(const SY::UUID anOwnerId, GameObjectManager *aManager) : Compon
     }
 
 #ifdef Flashlight
-    GetGameObject().AddComponent<cLight>(eLightType::Spot);
-    std::weak_ptr<SpotLight> pLight = GetComponent<cLight>().GetData<SpotLight>();
+    GetGameObject().AddComponent<Light>(eLightType::Spot);
+    std::weak_ptr<SpotLight> pLight = GetComponent<Light>().GetData<SpotLight>();
     pLight.lock()->Position = Vector3f(0, 0, 0);
     pLight.lock()->Color = Vector3f(1, 1, 1);
     pLight.lock()->Power = 2000.0f * Kilo;
@@ -39,15 +39,15 @@ cCamera::cCamera(const SY::UUID anOwnerId, GameObjectManager *aManager) : Compon
     pLight.lock()->Direction = {0, -1, 0};
     pLight.lock()->InnerConeAngle = 10 * DEG_TO_RAD;
     pLight.lock()->OuterConeAngle = 45 * DEG_TO_RAD;
-    GetComponent<cLight>().BindDirectionToTransform(true);
+    GetComponent<Light>().BindDirectionToTransform(true);
 #endif
 }
 
-cCamera::~cCamera()
+Camera::~Camera()
 {
 }
 
-void cCamera::Update()
+void Camera::Update()
 {
     OPTICK_EVENT();
     fow = std::clamp(fow, 0.1f, 360.f);
@@ -58,7 +58,7 @@ void cCamera::Update()
     }
 
     Transform &aTransform = this->GetGameObject().GetComponent<Transform>();
-    float aTimeDelta = Timer::GetDeltaTime();
+    float aTimeDelta = TimerInstance.GetDeltaTime();
     Vector3f mdf = cameraSpeed;
     float rotationSpeed = 20000;
     const float mousePower = 50.f;
@@ -99,7 +99,7 @@ void cCamera::Update()
         anyMouseKeyHeld = true;
         const Vector3f mouseDeltaVector = {
             0.0f, std::abs(Input::GetMousePositionDelta().x) > 0.001f ? Input::GetMousePositionDelta().x : 0.f, 0.0f};
-        // Logger::Log(std::format("mouse delta x {}",mouseDeltaVector.y));
+        // Logger.Log(std::format("mouse delta x {}",mouseDeltaVector.y));
         aTransform.Rotate(mouseDeltaVector * rotationSpeed * aTimeDelta);
 
         Vector3f newForward = aTransform.GetForward() + aTransform.GetUp();
@@ -163,16 +163,16 @@ void cCamera::Update()
 #ifdef Flashlight
     if (Input::GetInstance().IsKeyPressed((int)Keys::F))
     {
-        GetComponent<cLight>().BindDirectionToTransform(!GetComponent<cLight>().GetIsBound());
+        GetComponent<Light>().BindDirectionToTransform(!GetComponent<Light>().GetIsBound());
     }
 #endif
 }
 
-void cCamera::Render()
+void Camera::Render()
 {
 }
 
-std::array<Vector4f, 4> cCamera::GetFrustrumCorners() const
+std::array<Vector4f, 4> Camera::GetFrustrumCorners() const
 {
     const float farplane = 10000; // I dont use farplanes but some effect wants them anyway
     const float halfHeight = farplane * tanf(0.25f * FowInRad());
@@ -191,10 +191,10 @@ std::array<Vector4f, 4> cCamera::GetFrustrumCorners() const
     return corners;
 }
 
-Vector3f cCamera::GetPointerDirection(const Vector2<int> position)
+Vector3f Camera::GetPointerDirection(const Vector2<int> position)
 {
     Vector4f viewPosition;
-    auto size = Editor::GetViewportResolution();
+    auto size = EditorInstance.GetViewportResolution();
 
     viewPosition.x = ((2.0f * position.x / size.x) - 1);
     viewPosition /= m_Projection(1, 1);
@@ -210,13 +210,13 @@ Vector3f cCamera::GetPointerDirection(const Vector2<int> position)
     return Vector3f(out.x, out.y, out.z);
 }
 
-Vector3f cCamera::GetPointerDirectionNDC(const Vector2<int> position) const
+Vector3f Camera::GetPointerDirectionNDC(const Vector2<int> position) const
 {
     position;
     throw std::exception("Not implemented");
 }
 
-FrameBuffer cCamera::GetFrameBuffer()
+FrameBuffer Camera::GetFrameBuffer()
 {
     OPTICK_EVENT();
     auto &transform = GetComponent<Transform>();
@@ -224,7 +224,7 @@ FrameBuffer cCamera::GetFrameBuffer()
     auto dxMatrix = XMMatrixPerspectiveFovLH(FowInRad(), APRatio(), farfield, nearField);
     buffer.ProjectionMatrix = Matrix(&dxMatrix);
     buffer.ViewMatrix = Matrix::GetFastInverse(transform.WorldMatrix());
-    buffer.Time = Timer::GetDeltaTime();
+    buffer.Time = TimerInstance.GetDeltaTime();
     buffer.FB_RenderMode = static_cast<int>(ApplicationState::filter);
     buffer.FB_CameraPosition = transform.GetPosition();
     buffer.FB_ScreenResolution = static_cast<Vector2ui>(resolution);
@@ -232,7 +232,7 @@ FrameBuffer cCamera::GetFrameBuffer()
     return buffer;
 }
 
-Vector4f cCamera::WoldSpaceToPostProjectionSpace(Vector3f aEntity)
+Vector4f Camera::WoldSpaceToPostProjectionSpace(Vector3f aEntity)
 {
     Transform &myTransform = this->GetGameObject().GetComponent<Transform>();
 
@@ -252,13 +252,13 @@ Vector4f cCamera::WoldSpaceToPostProjectionSpace(Vector3f aEntity)
     return outPosition;
 }
 
-bool cCamera::InspectorView()
+bool Camera::InspectorView()
 {
     if (!Component::InspectorView())
     {
         return false;
     }
-    Reflect<cCamera>();
+    Reflect<Camera>();
 
     return true;
 }

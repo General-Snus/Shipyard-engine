@@ -5,13 +5,11 @@
 #include "Engine/AssetManager/ComponentSystem/Components/LightComponent.h"
 #include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
 #include "Engine/AssetManager/ComponentSystem/Components/ParticleSystem.h"
-#include "Engine/AssetManager/ComponentSystem/Components/Skybox.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
 #include "Engine/AssetManager/ComponentSystem/GameObject.h"
 
 #include "Engine/AssetManager/ComponentSystem/Components/ActorSystem/CombatComponent.h"
 #include "Engine/AssetManager/ComponentSystem/Components/ActorSystem/cActor.h"
-#include "Engine/AssetManager/ComponentSystem/Components/DEBUGCOMPONENTS/BackgroundColor.h"
 #include "Engine/AssetManager/ComponentSystem/Components/DEBUGCOMPONENTS/RenderMode.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXDynamicBody.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXStaticBody.h"

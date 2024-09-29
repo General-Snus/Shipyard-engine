@@ -263,8 +263,6 @@
     <ClInclude Include="ComponentSystem\MasterIncludeComponent.h" />
     <ClInclude Include="Enums.h" />
     <ClInclude Include="ComponentSystem\Components\Network\NetworkSync.h" />
-    <ClInclude Include="Objects\BaseAssets\GraphAsset.h" />
-    <ClInclude Include="ComponentSystem\Components\GraphComponent.h" />
     <ClInclude Include="Objects\AI\AgentSystem\AIPollingManager.h" />
     <ClInclude Include="AssetManagerUtills.hpp" />
     <ClInclude Include="Objects\AI\AgentSystem\BehaviourTree\BrainTree.h" />
@@ -295,7 +293,6 @@
     <ClInclude Include="ComponentSystem\Components\Animator.h" />
     <ClInclude Include="AssetManager.h" />
     <ClInclude Include="AssetManager.pch.h" />
-    <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\BackgroundColor.h" />
     <ClInclude Include="ComponentSystem\ComponentManager.h" />
     <ClInclude Include="ComponentSystem\GameObjectManager.h" />
     <ClInclude Include="ComponentSystem\Component.h" />
@@ -308,7 +305,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="Objects\BaseAssets\TextureAsset.h" />
-    <ClInclude Include="ComponentSystem\Components\Skybox.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\WanderController.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\AIController.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\SeparationController.h" />
@@ -323,7 +319,6 @@
     <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\CombatComponent.cpp" />
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysXDynamicBody.cpp" />
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysXStaticBody.cpp" />
-    <ClCompile Include="ComponentSystem\Components\Source\GraphComponent.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\ParticleSystem.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -333,7 +328,6 @@
     <ClCompile Include="Objects\AI\AgentSystem\BehaviourTree\BrainTree.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Source\AIPollingManager.cpp" />
     <ClCompile Include="AssetManagerUtills.cpp" />
-    <ClCompile Include="Objects\BaseAssets\Source\GraphAsset.cpp" />
     <ClCompile Include="Objects\BaseAssets\Source\ColliderAsset.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\Collider.cpp" />
     <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\cActor.cpp" />
@@ -365,7 +359,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\BackgroundColor.cpp" />
     <ClCompile Include="ComponentSystem\Source\ComponentManager.cpp" />
     <ClCompile Include="ComponentSystem\Source\GameObjectManager.cpp" />
     <ClCompile Include="ComponentSystem\Source\Component.cpp" />
@@ -378,7 +371,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Objects\BaseAssets\Source\TextureAsset.cpp" />
-    <ClCompile Include="ComponentSystem\Components\Source\Skybox.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\WanderController.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\AIController.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\SeparationController.cpp" />

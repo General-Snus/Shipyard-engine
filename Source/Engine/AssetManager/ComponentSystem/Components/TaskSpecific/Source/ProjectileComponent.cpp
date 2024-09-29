@@ -14,7 +14,7 @@ void ProjectileComponent::Init()
 
 void ProjectileComponent::Update()
 {
-    lifetime -= Timer::GetDeltaTime();
+    lifetime -= TimerInstance.GetDeltaTime();
     if (lifetime <= 0)
     {
         Scene::ActiveManager().DeleteGameObject(myOwnerID);

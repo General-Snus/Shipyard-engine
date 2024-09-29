@@ -21,8 +21,7 @@ bool IsTargetInSight(GameObject input)
     const Transform &myTransform = input.GetComponent<Transform>();
     const CombatComponent &myStats = input.GetComponent<CombatComponent>();
 
-    Vector3f closestTarget = AIPollingManager::Get()
-                                 .GetStation<MultipleTargets_PollingStation>("Targets")
+    Vector3f closestTarget = AIPollingManagerInstance.GetStation<MultipleTargets_PollingStation>("Targets")
                                  ->GetClosestAliveTarget(myTransform.GetPosition(), input)
                                  .transform()
                                  .GetPosition();
@@ -44,7 +43,7 @@ bool IsTargetInRange(GameObject input)
     const Transform &myTransform = input.GetComponent<Transform>();
     const CombatComponent &myStats = input.GetComponent<CombatComponent>();
 
-    GameObject obj = AIPollingManager::Get().GetStation<MultipleTargets_PollingStation>("Targets")->GetClosestTarget(
+    GameObject obj = AIPollingManagerInstance.GetStation<MultipleTargets_PollingStation>("Targets")->GetClosestTarget(
         myTransform.GetPosition(), input);
     Vector3f closestTarget = obj.GetComponent<Transform>().GetPosition();
     const float distance = (closestTarget - myTransform.GetPosition()).Length();
@@ -76,7 +75,7 @@ bool IsTargetAlive(GameObject input)
 
     const Transform &myTransform = input.GetComponent<Transform>();
     GameObject target =
-        AIPollingManager::Get().GetStation<MultipleTargets_PollingStation>("Targets")->GetClosestAliveTarget(
+        AIPollingManagerInstance.GetStation<MultipleTargets_PollingStation>("Targets")->GetClosestAliveTarget(
             myTransform.GetPosition(), input);
 
     return target.IsValid();
@@ -159,7 +158,7 @@ bool Retreat(GameObject input)
     auto &transform = input.GetComponent<Transform>();
 
     Vector3f closestWell =
-        AIPollingManager::Get().GetStation<MultipleTargets_PollingStation>("Healing")->GetClosestTargetPosition(
+        AIPollingManagerInstance.GetStation<MultipleTargets_PollingStation>("Healing")->GetClosestTargetPosition(
             transform.GetPosition());
     SteeringBehaviour::DampenVelocity(&physicsComponent);
     SteeringBehaviour::LookAt(&physicsComponent, physicsComponent.ph_velocity, transform.GetForward(), 5.0f);
@@ -193,7 +192,7 @@ bool MoveToward(GameObject input)
     SteeringBehaviour::DampenVelocity(&physicsComponent);
     SteeringBehaviour::LookAt(&physicsComponent, physicsComponent.ph_velocity, transform.GetForward(), 5.0f);
     Vector3f position =
-        AIPollingManager::Get().GetStation<MultipleTargets_PollingStation>("Targets")->GetClosestTargetPosition(
+        AIPollingManagerInstance.GetStation<MultipleTargets_PollingStation>("Targets")->GetClosestTargetPosition(
             transform.GetPosition(), input);
 
     SteeringBehaviour::Arrive(&physicsComponent, position, transform.GetPosition());
@@ -208,7 +207,7 @@ bool AlignToTarget(GameObject input)
     auto &transform = input.GetComponent<Transform>();
 
     GameObject closestTarget =
-        AIPollingManager::Get().GetStation<MultipleTargets_PollingStation>("Targets")->GetClosestTarget(
+        AIPollingManagerInstance.GetStation<MultipleTargets_PollingStation>("Targets")->GetClosestTarget(
             transform.GetPosition(), input);
 
     Vector3f direction = (closestTarget.transform().GetPosition() - transform.GetPosition()).GetNormalized();

@@ -27,7 +27,7 @@ struct MaterialBuffer
 
 class Material : public AssetBase
 {
-    friend class cMeshRenderer;
+    friend class MeshRenderer;
 
   public:
     MYLIB_REFLECTABLE();

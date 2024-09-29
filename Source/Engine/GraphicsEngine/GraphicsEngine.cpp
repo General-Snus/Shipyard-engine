@@ -10,7 +10,6 @@
 #include <Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h>
 #include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
 #include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
-#include <d3dcompiler.h>
 
 #include "DirectX/Shipyard/GPU.h"
 #include "DirectX/Shipyard/Helpers.h"
@@ -20,6 +19,7 @@
 #include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
 #include "Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h"
 #include "Engine/PersistentSystems/Scene.h"
+
 #include "Rendering/Passes.h"
 #include "Tools/ImGui/ImGui/ImGuizmo.h"
 #include "Tools/ImGui/ImGui/backends/imgui_impl_dx12.h"
@@ -27,17 +27,19 @@
 #include "Tools/Utilities/Input/Input.hpp"
 #include <Editor/Editor/Windows/EditorWindows/Viewport.h>
 
+#pragma optimize("", off)
+
 bool GraphicsEngine::Initialize(HWND windowHandle, bool enableDeviceDebug)
 {
-    myWindowHandle = windowHandle;
-    if (!GPU::Initialize(myWindowHandle, enableDeviceDebug, Window::Width(), Window::Height()))
+    enableDeviceDebug;
+    if (!GPUInstance.Initialize(windowHandle, true, WindowInstance.Width(), WindowInstance.Height()))
     {
-        Logger::Err("Failed to initialize the DX12 GPU!");
+        Logger.Err("Failed to initialize the DX12 GPU!");
         return false;
     }
 
-    PSOCache::InitRootSignature();
-    PSOCache::InitAllStates();
+    m_Cache.InitRootSignature();
+    m_Cache.InitAllStates();
 
     SetupDefaultVariables();
     SetupSpace3();
@@ -48,12 +50,12 @@ bool GraphicsEngine::Initialize(HWND windowHandle, bool enableDeviceDebug)
 
     InitializeCustomRenderScene();
 
-    const auto &gBufferTextures = PSOCache::GetState(PSOCache::ePipelineStateID::GBuffer)->RenderTargets();
+    const auto &gBufferTextures = m_Cache.GetState(PSOCache::ePipelineStateID::GBuffer)->RenderTargets();
 
     const size_t dataSize = gBufferTextures[5].GetWidth() * gBufferTextures[5].GetHeight() * sizeof(float) * 2;
     BufferForPicking = new uint32_t[dataSize];
-    const auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
-    OPTICK_GPU_INIT_D3D12(GPU::m_Device.Get(), commandQueue->GetCommandQueue().GetAddressOf(), 1);
+    const auto commandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+    OPTICK_GPU_INIT_D3D12(GPUInstance.m_Device.Get(), commandQueue->GetCommandQueue().GetAddressOf(), 1);
     return true;
 }
 
@@ -65,7 +67,7 @@ void GraphicsEngine::InitializeCustomRenderScene()
         Transform &transform = worldRoot.AddComponent<Transform>();
         transform.SetRotation(80, 0, 0);
         transform.SetPosition(0, 5, 0);
-        cLight &pLight = worldRoot.AddComponent<cLight>(eLightType::Directional);
+        Light &pLight = worldRoot.AddComponent<Light>(eLightType::Directional);
         pLight.SetColor(Vector3f(1, 1, 1));
         pLight.SetPower(2.0f);
         pLight.BindDirectionToTransform(true);
@@ -74,7 +76,7 @@ void GraphicsEngine::InitializeCustomRenderScene()
     const auto res = Vector2f(1920.f, 1080.f);
     {
         GameObject camera = GameObject::Create("Camera", newScene);
-        auto &cameraComponent = camera.AddComponent<cCamera>();
+        auto &cameraComponent = camera.AddComponent<Camera>();
         cameraComponent.SetResolution(res);
 
         newScene->GetGOM().SetLastGOAsCamera();
@@ -84,9 +86,22 @@ void GraphicsEngine::InitializeCustomRenderScene()
     {
         auto renderObject = GameObject::Create("RenderMesh", newScene);
         renderObject.AddComponent<Transform>();
-        renderObject.AddComponent<cMeshRenderer>();
+        renderObject.AddComponent<MeshRenderer>();
         newScene->GetGOM().SetLastGOAsPlayer();
     }
+}
+
+const PSOCache &GraphicsEngine::GetPSOCache() const
+{
+    return m_Cache;
+}
+
+bool GraphicsEngine::ResizeBuffers(Vector2ui resolution)
+{
+    GPUInstance.Resize(resolution);
+    m_Cache.InitAllStates();
+
+    return true; // TODO Makes sense to check if the resolution is supporded by the monitor
 }
 
 uint32_t GraphicsEngine::ReadPickingData(Vector2ui position)
@@ -106,27 +121,27 @@ void GraphicsEngine::SetupDefaultVariables()
 {
 
     ////Particle
-    AssetManager::Get().ForceLoadAsset<TextureHolder>(L"Textures/Default/DefaultParticle_P.dds",
-                                                      defaultParticleTexture);
+    AssetManagerInstance.ForceLoadAsset<TextureHolder>(L"Textures/Default/DefaultParticle_P.dds",
+                                                       defaultParticleTexture);
     defaultParticleTexture->SetTextureType(eTextureType::ParticleMap);
 
-    AssetManager::Get().ForceLoadAsset<TextureHolder>(L"Textures/Default/NoiseTable.dds", NoiseTable);
+    AssetManagerInstance.ForceLoadAsset<TextureHolder>(L"Textures/Default/NoiseTable.dds", NoiseTable);
 
-    AssetManager::Get().ForceLoadAsset<ShipyardShader>("Shaders/Default_VS.cso", defaultVS);
-    AssetManager::Get().ForceLoadAsset<ShipyardShader>("Shaders/Default_PS.cso", defaultPS);
-    AssetManager::Get().ForceLoadAsset<Material>("Materials/Default.json", defaultMaterial);
+    AssetManagerInstance.ForceLoadAsset<ShipyardShader>("Shaders/Default_VS.cso", defaultVS);
+    AssetManagerInstance.ForceLoadAsset<ShipyardShader>("Shaders/Default_PS.cso", defaultPS);
+    AssetManagerInstance.ForceLoadAsset<Material>("Materials/Default.json", defaultMaterial);
     defaultMaterial->SetShader(defaultVS, defaultPS);
 
-    AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultTile.dds", defaultTexture);
+    AssetManagerInstance.ForceLoadAsset<TextureHolder>("Textures/Default/DefaultTile.dds", defaultTexture);
     defaultTexture->SetTextureType(eTextureType::ColorMap);
-    AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultNormal.dds", defaultNormalTexture);
+    AssetManagerInstance.ForceLoadAsset<TextureHolder>("Textures/Default/DefaultNormal.dds", defaultNormalTexture);
     defaultNormalTexture->SetTextureType(eTextureType::NormalMap);
-    AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultMaterial.dds", defaultMatTexture);
+    AssetManagerInstance.ForceLoadAsset<TextureHolder>("Textures/Default/DefaultMaterial.dds", defaultMatTexture);
     defaultMatTexture->SetTextureType(eTextureType::MaterialMap);
-    AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultEffect.dds", defaultEffectTexture);
+    AssetManagerInstance.ForceLoadAsset<TextureHolder>("Textures/Default/DefaultEffect.dds", defaultEffectTexture);
     defaultEffectTexture->SetTextureType(eTextureType::EffectMap);
 
-    AssetManager::Get().ForceLoadAsset<Mesh>("default.fbx", defaultMesh);
+    AssetManagerInstance.ForceLoadAsset<Mesh>("default.fbx", defaultMesh);
 }
 void GraphicsEngine::SetupBlendStates()
 {
@@ -160,12 +175,12 @@ void GraphicsEngine::SetupBlendStates()
 }
 void GraphicsEngine::SetupSpace3()
 {
-    const auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+    const auto commandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
     const auto commandList = commandQueue->GetCommandList(L"RenderFrame");
     const auto graphicCommandList = commandList->GetGraphicsCommandList();
 
     // Light
-    AssetManager::Get().ForceLoadAsset<TextureHolder>("Textures/skansen_cubemap.dds", defaultCubeMap);
+    AssetManagerInstance.ForceLoadAsset<TextureHolder>("Textures/skansen_cubemap.dds", defaultCubeMap);
     defaultCubeMap->SetTextureType(eTextureType::CubeMap);
 
     const Vector2ui size = {512, 512};
@@ -175,7 +190,7 @@ void GraphicsEngine::SetupSpace3()
     commandList->SetRenderTargets(1, BRDLookUpTable.get(), nullptr);
 
     constexpr std::array rt = {DXGI_FORMAT_R16G16_FLOAT};
-    const auto brdfPSO = PSO::CreatePSO("Shaders/ScreenspaceQuad_VS.cso", "Shaders/brdfLUT_PS.cso", rt);
+    const auto brdfPSO = m_Cache.CreatePSO("Shaders/ScreenspaceQuad_VS.cso", "Shaders/brdfLUT_PS.cso", rt);
 
     const D3D12_VIEWPORT viewPort = {
         0.0f, 0.0f, static_cast<float>(size.x), static_cast<float>(size.y), D3D12_MIN_DEPTH, D3D12_MAX_DEPTH};
@@ -184,7 +199,7 @@ void GraphicsEngine::SetupSpace3()
     graphicCommandList->RSSetViewports(1, &viewPort);
     graphicCommandList->RSSetScissorRects(1, &rect);
 
-    const auto &rootSignature = PSOCache::m_RootSignature->GetRootSignature();
+    const auto &rootSignature = m_Cache.m_RootSignature->GetRootSignature();
     graphicCommandList->SetGraphicsRootSignature(rootSignature.Get());
     commandList->TrackResource(rootSignature);
 
@@ -208,7 +223,7 @@ void GraphicsEngine::SetupPostProcessing()
 
     // if (!RHI::CreateSamplerState(myNormalDepthSampleState,normalDepthSampler))
     //{
-    //	Logger::Log("Sampler state created");
+    //	Logger.Log("Sampler state created");
     //	assert(false);
     // }
 
@@ -309,18 +324,9 @@ void GraphicsEngine::SetupParticleShaders()
         sizeof(BuiltIn_ParticleShader_PS_ByteCode)
     );*/
 }
+
 void GraphicsEngine::UpdateSettings()
 {
-    myGraphicSettingsBuffer.GSB_ToneMap = myGraphicSettings.Tonemaptype;
-    myGraphicSettingsBuffer.GSB_AO_intensity = 0.35f;
-    myGraphicSettingsBuffer.GSB_AO_scale = 0.05f;
-    myGraphicSettingsBuffer.GSB_AO_bias = 0.5f;
-    myGraphicSettingsBuffer.GSB_AO_radius = 0.002f;
-    myGraphicSettingsBuffer.GSB_AO_offset = 0.707f;
-    /*
-    RHI::SetConstantBuffer(PIPELINE_STAGE_PIXEL_SHADER,REG_GraphicSettingsBuffer,myGraphicSettingsBuffer);
-    RHI::UpdateConstantBufferData(myGraphicSettingsBuffer);
-    */
 }
 
 void GraphicsEngine::AddRenderJob(std::shared_ptr<Viewport> aViewport)
@@ -362,10 +368,10 @@ void GraphicsEngine::Render(std::vector<std::shared_ptr<Viewport>> renderViewPor
 void GraphicsEngine::BeginFrame()
 {
     OPTICK_EVENT();
-    myCamera = Scene::ActiveManager().GetCamera().TryGetComponent<cCamera>();
+    myCamera = Scene::ActiveManager().GetCamera().TryGetComponent<Camera>();
     if (!myCamera)
     {
-        Logger::Err("No camera in scene. No render is possible");
+        // Logger.Err("No camera in scene. No render is possible");
     }
     UpdateSettings();
 }
@@ -375,13 +381,13 @@ uint64_t GraphicsEngine::RenderFrame(Viewport &renderViewPort, GameObjectManager
     if (renderViewPort.IsRenderReady())
     {
         OPTICK_EVENT();
-        auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+        auto commandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
         auto commandList = commandQueue->GetCommandList(L"RenderFrame");
         OPTICK_GPU_CONTEXT(commandList->GetGraphicsCommandList().Get());
 
         OPTICK_GPU_EVENT("RenderFrame");
         PrepareBuffers(commandList, renderViewPort, scene);
-        Passes::WriteShadows(commandList, scene);
+        Passes::WriteShadows(*this, commandList, scene);
         commandList->FlushResourceBarriers();
 
         DeferredRenderingPass(commandList, renderViewPort, scene);
@@ -391,9 +397,9 @@ uint64_t GraphicsEngine::RenderFrame(Viewport &renderViewPort, GameObjectManager
     }
     else
     {
-        auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+        auto commandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
         auto commandList = commandQueue->GetCommandList(L"RenderFrame");
-        GPU::ClearRTV(*commandList, renderViewPort.GetTarget());
+        GPUInstance.ClearRTV(*commandList, renderViewPort.GetTarget());
         return commandQueue->ExecuteCommandList(commandList);
     }
 }
@@ -402,7 +408,7 @@ void GraphicsEngine::EndFrame()
 {
     OPTICK_GPU_EVENT("EndFrame");
     ImGuiPass();
-    GPU::Present();
+    GPUInstance.Present();
 }
 
 void GraphicsEngine::PrepareBuffers(std::shared_ptr<CommandList> commandList, Viewport &renderViewPort,
@@ -411,30 +417,30 @@ void GraphicsEngine::PrepareBuffers(std::shared_ptr<CommandList> commandList, Vi
     OPTICK_GPU_EVENT("PrepareBuffers");
 
     // const UINT currentBackBufferIndex = chain->GetCurrentBackBufferIndex();
-    const auto *backBuffer = GPU::GetCurrentBackBuffer();
-    const auto rtv = GPU::GetCurrentRenderTargetView();
-    const auto dsv = GPU::m_DepthBuffer->GetHandle(ViewType::DSV).cpuPtr;
+    const auto *backBuffer = GPUInstance.GetCurrentBackBuffer();
+    const auto rtv = GPUInstance.GetCurrentRenderTargetView();
+    const auto dsv = GPUInstance.m_DepthBuffer->GetHandle(ViewType::DSV).cpuPtr;
     commandList->TransitionBarrier(backBuffer->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET);
     const Vector4f clearColor = {0.0f, 0.0f, 0.0f, 0.0f};
-    GPU::ClearRTV(*commandList.get(), rtv, clearColor);
-    GPU::ClearDepth(*commandList.get(), GPU::m_DepthBuffer->GetHandle(ViewType::DSV).cpuPtr);
+    GPUInstance.ClearRTV(*commandList.get(), rtv, clearColor);
+    GPUInstance.ClearDepth(*commandList.get(), GPUInstance.m_DepthBuffer->GetHandle(ViewType::DSV).cpuPtr);
 
-    const auto &rootSignature = PSOCache::m_RootSignature->GetRootSignature();
+    const auto &rootSignature = m_Cache.m_RootSignature->GetRootSignature();
     commandList->GetGraphicsCommandList()->SetGraphicsRootSignature(rootSignature.Get());
     commandList->TrackResource(rootSignature);
 
     ID3D12DescriptorHeap *heaps[] = {
-        GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->Heap(),
-        GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_SAMPLER)]->Heap()};
+        GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->Heap(),
+        GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_SAMPLER)]->Heap()};
     commandList->GetGraphicsCommandList()->SetDescriptorHeaps((UINT)std::size(heaps), heaps);
 
     {
         const LightBuffer lightBuffer = Passes::CreateLightBuffer(scene);
-        const GraphicsResource &alloc = GPU::m_GraphicsMemory->AllocateConstant<LightBuffer>(lightBuffer);
+        const GraphicsResource &alloc = GPUInstance.m_GraphicsMemory->AllocateConstant<LightBuffer>(lightBuffer);
         commandList->GetGraphicsCommandList()->SetGraphicsRootConstantBufferView(REG_LightBuffer, alloc.GpuAddress());
 
         const auto frameBuffer = renderViewPort.GetCamera().GetFrameBuffer();
-        const auto &alloc0 = GPU::m_GraphicsMemory->AllocateConstant<FrameBuffer>(frameBuffer);
+        const auto &alloc0 = GPUInstance.m_GraphicsMemory->AllocateConstant<FrameBuffer>(frameBuffer);
         commandList->GetGraphicsCommandList()->SetGraphicsRootConstantBufferView((int)eRootBindings::frameBuffer,
                                                                                  alloc0.GpuAddress());
 
@@ -444,33 +450,35 @@ void GraphicsEngine::PrepareBuffers(std::shared_ptr<CommandList> commandList, Vi
 
         commandList->GetGraphicsCommandList()->SetGraphicsRootDescriptorTable(
             (int)eRootBindings::Textures,
-            GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->GetFirstGpuHandle());
+            GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]
+                ->GetFirstGpuHandle());
         commandList->GetGraphicsCommandList()->SetGraphicsRootDescriptorTable(
             (int)eRootBindings::MeshBuffer,
-            GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->GetFirstGpuHandle());
+            GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]
+                ->GetFirstGpuHandle());
     }
 }
 void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandList, Viewport &renderViewPort,
                                            GameObjectManager &scene)
 {
     OPTICK_GPU_EVENT("DeferredRenderingPass");
-    auto &list = scene.GetAllComponents<cMeshRenderer>();
+    const auto &list = scene.GetAllComponents<MeshRenderer>();
     {
         constexpr uint32_t bufferCount = 7;
-        commandList->GetGraphicsCommandList()->RSSetViewports(1, &GPU::m_Viewport);
-        commandList->GetGraphicsCommandList()->RSSetScissorRects(1, &GPU::m_ScissorRect);
+        commandList->GetGraphicsCommandList()->RSSetViewports(1, &GPUInstance.m_Viewport);
+        commandList->GetGraphicsCommandList()->RSSetScissorRects(1, &GPUInstance.m_ScissorRect);
 
-        const auto &gbufferPSO = PSOCache::GetState(PSOCache::ePipelineStateID::GBuffer);
+        const auto &gbufferPSO = m_Cache.GetState(PSOCache::ePipelineStateID::GBuffer);
         const auto &gBufferTextures = gbufferPSO->RenderTargets();
-        GPU::ClearRTV(*commandList.get(), gBufferTextures, bufferCount);
-        commandList->SetRenderTargets(bufferCount, gBufferTextures, GPU::m_DepthBuffer.get());
+        GPUInstance.ClearRTV(*commandList.get(), gBufferTextures, bufferCount);
+        commandList->SetRenderTargets(bufferCount, gBufferTextures, GPUInstance.m_DepthBuffer.get());
 
         const auto &pipelineState = gbufferPSO->GetPipelineState().Get();
         commandList->GetGraphicsCommandList()->SetPipelineState(pipelineState);
         commandList->TrackResource(pipelineState);
 
         auto frameBuffer = renderViewPort.GetCamera().GetFrameBuffer();
-        const auto &alloc0 = GPU::m_GraphicsMemory->AllocateConstant<FrameBuffer>(frameBuffer);
+        const auto &alloc0 = GPUInstance.m_GraphicsMemory->AllocateConstant<FrameBuffer>(frameBuffer);
         commandList->GetGraphicsCommandList()->SetGraphicsRootConstantBufferView((int)eRootBindings::frameBuffer,
                                                                                  alloc0.GpuAddress());
     }
@@ -481,7 +489,7 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
     const uint32_t dtEffect = defaultEffectTexture->GetRawTexture()->GetHeapOffset();
 
     int vertCount = 0;
-    for (auto &meshRenderer : list)
+    for (const auto &meshRenderer : list)
     {
         if (!meshRenderer.IsActive())
         {
@@ -502,7 +510,8 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
         for (auto &element : meshRenderer.GetElements())
         {
             vertCount += element.VertexBuffer.GetVertexCount();
-            GPU::ConfigureInputAssembler(*commandList, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST, element.IndexResource);
+            GPUInstance.ConfigureInputAssembler(*commandList, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
+                                                element.IndexResource);
 
             const unsigned materialIndex = element.MaterialIndex;
             MaterialBuffer materialBuffer = meshRenderer.GetMaterial(materialIndex)->GetMaterialData();
@@ -531,7 +540,7 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
                         materialBuffer.emissiveTexture = heapOffset != -1 ? heapOffset : dtEffect;
                         break;
                     default:
-                        Logger::Critical("Texture type is not found or is not valid for used on deffered");
+                        Logger.Critical("Texture type is not found or is not valid for used on deffered");
                         break;
                     }
                 }
@@ -552,7 +561,7 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
                         materialBuffer.emissiveTexture = dtEffect;
                         break;
                     default:
-                        Logger::Critical("Texture type is not found or is not valid for used on deffered");
+                        Logger.Critical("Texture type is not found or is not valid for used on deffered");
                         break;
                     }
                 }
@@ -568,7 +577,7 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
             assert(materialBuffer.vertexBufferIndex != -1 && "HEAP INDEX OUT OF BOUND");
             assert(materialBuffer.vertexOffset != -1 && "HEAP INDEX OUT OF BOUND");
 
-            const auto &alloc2 = GPU::m_GraphicsMemory->AllocateConstant<MaterialBuffer>(materialBuffer);
+            const auto &alloc2 = GPUInstance.m_GraphicsMemory->AllocateConstant<MaterialBuffer>(materialBuffer);
             commandList->GetGraphicsCommandList()->SetGraphicsRootConstantBufferView(REG_DefaultMaterialBuffer,
                                                                                      alloc2.GpuAddress());
 
@@ -581,9 +590,9 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
 void GraphicsEngine::EnvironmentLightPass(std::shared_ptr<CommandList> commandList)
 {
     OPTICK_GPU_EVENT("EnvironmentLightPass");
-    auto &environmentLight = PSOCache::GetState(PSOCache::ePipelineStateID::DeferredLighting);
+    auto &environmentLight = m_Cache.GetState(PSOCache::ePipelineStateID::DeferredLighting);
     constexpr uint32_t bufferCount = 7;
-    const auto &gBufferTextures = PSOCache::GetState(PSOCache::ePipelineStateID::GBuffer)->RenderTargets();
+    const auto &gBufferTextures = m_Cache.GetState(PSOCache::ePipelineStateID::GBuffer)->RenderTargets();
 
     // TODO READBACK BUFFER
     /*
@@ -604,12 +613,13 @@ void GraphicsEngine::EnvironmentLightPass(std::shared_ptr<CommandList> commandLi
     }*/
 
     {
-        GPU::ClearRTV(*commandList.get(), environmentLight->RenderTargets(), environmentLight->GetNumberOfTargets());
+        GPUInstance.ClearRTV(*commandList.get(), environmentLight->RenderTargets(),
+                             environmentLight->GetNumberOfTargets());
         commandList->SetRenderTargets(environmentLight->GetNumberOfTargets(), environmentLight->RenderTargets(),
                                       nullptr);
 
-        const auto &pipelineState = environmentLight->GetPipelineState().Get();
-        commandList->GetGraphicsCommandList()->SetPipelineState(pipelineState);
+        const auto &pipelineState = environmentLight->GetPipelineState();
+        commandList->GetGraphicsCommandList()->SetPipelineState(pipelineState.Get());
         commandList->TrackResource(pipelineState);
 
         for (unsigned i = 0; i < bufferCount; i++)
@@ -630,17 +640,17 @@ void GraphicsEngine::EnvironmentLightPass(std::shared_ptr<CommandList> commandLi
 void GraphicsEngine::ToneMapperPass(std::shared_ptr<CommandList> commandList, Texture *target)
 {
     OPTICK_GPU_EVENT("ToneMapperPass");
-    const auto &toneMapper = PSOCache::GetState(PSOCache::ePipelineStateID::ToneMap);
+    const auto &toneMapper = m_Cache.GetState(PSOCache::ePipelineStateID::ToneMap);
 
     const auto &pipelineState = toneMapper->GetPipelineState().Get();
     commandList->GetGraphicsCommandList()->SetPipelineState(pipelineState);
     commandList->TrackResource(pipelineState);
 
-    auto *renderTargets = PSOCache::GetState(PSOCache::ePipelineStateID::DeferredLighting)->RenderTargets();
+    auto *renderTargets = m_Cache.GetState(PSOCache::ePipelineStateID::DeferredLighting)->RenderTargets();
     commandList->SetDescriptorTable((int)eRootBindings::TargetTexture, renderTargets);
     commandList->FlushResourceBarriers();
 
-    GPU::ClearRTV(*commandList.get(), toneMapper->RenderTargets(), toneMapper->GetNumberOfTargets());
+    GPUInstance.ClearRTV(*commandList.get(), toneMapper->RenderTargets(), toneMapper->GetNumberOfTargets());
     commandList->SetRenderTargets(1, target, nullptr);
     commandList->TrackResource(*target);
 
@@ -651,13 +661,13 @@ void GraphicsEngine::ToneMapperPass(std::shared_ptr<CommandList> commandList, Te
 
 void GraphicsEngine::ImGuiPass()
 {
-    const auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+    const auto commandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
     const auto commandList = commandQueue->GetCommandList();
 
     OPTICK_GPU_CONTEXT(commandList->GetGraphicsCommandList().Get());
     OPTICK_GPU_EVENT("ImGui");
 
-    commandList->SetRenderTargets(1, GPU::GetCurrentBackBuffer(), nullptr);
+    commandList->SetRenderTargets(1, GPUInstance.GetCurrentBackBuffer(), nullptr);
 
     ImGui::Render();
     ImGuiIO &io = ImGui::GetIO();
@@ -668,8 +678,8 @@ void GraphicsEngine::ImGuiPass()
     }
 
     ID3D12DescriptorHeap *heaps[] = {
-        GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->Heap(),
-        GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_SAMPLER)]->Heap()};
+        GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->Heap(),
+        GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_SAMPLER)]->Heap()};
     commandList->GetGraphicsCommandList()->SetDescriptorHeaps((UINT)std::size(heaps), heaps);
 
     ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList->GetGraphicsCommandList().Get());
@@ -681,23 +691,11 @@ FORCEINLINE std::shared_ptr<Texture> GraphicsEngine::GetTargetTextures(eRenderTa
     switch (type)
     {
     case eRenderTargets::BackBuffer:
-        return std::shared_ptr<Texture>(GPU::GetCurrentBackBuffer());
+        return std::shared_ptr<Texture>(GPUInstance.GetCurrentBackBuffer());
     case eRenderTargets::DepthBuffer:
-        return GPU::m_DepthBuffer;
+        return GPUInstance.m_DepthBuffer;
     case eRenderTargets::SceneBuffer:
         return SceneBuffer;
-    case eRenderTargets::halfSceneBuffer:
-        return halfSceneBuffer;
-    case eRenderTargets::quaterSceneBuffer1:
-        return quaterSceneBuffer1;
-    case eRenderTargets::quaterSceneBuffer2:
-        return quaterSceneBuffer2;
-    case eRenderTargets::IntermediateA:
-        return IntermediateA;
-    case eRenderTargets::IntermediateB:
-        return IntermediateB;
-    case eRenderTargets::SSAO:
-        return SSAOTexture;
     case eRenderTargets::NoiseTexture:
         return NoiseTable->GetRawTexture();
     default:

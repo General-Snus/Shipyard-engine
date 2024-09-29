@@ -2,14 +2,8 @@
 
 #include "Engine/AssetManager/Objects/BaseAssets/MasterIncludeAssets.h"
 
-#include "Objects/BaseAssets/GraphAsset.h"
 #include <DirectX/Shipyard/GPU.h>
 #include <Tools/Utilities/Game/Timer.h>
-
-AssetManager::AssetManager()
-{
-    RecursiveNameSave();
-}
 
 void AssetManager::RecursiveNameSave()
 {
@@ -41,7 +35,7 @@ void AssetManager::ClearUnused()
     {
         i.second->ClearUnused();
     }
-    GPU::m_GraphicsMemory->GarbageCollect();
+    GPUInstance.m_GraphicsMemory->GarbageCollect();
 }
 
 std::string AssetManager::AssetType(const std::filesystem::path &path)
@@ -67,10 +61,6 @@ std::string AssetManager::AssetType(const std::filesystem::path &path)
     {
         return refl::reflect<ShipyardShader>().name.str();
     }
-    else if (extension == ".graph")
-    {
-        return refl::reflect<GraphAsset>().name.str();
-    }
     else if (extension == ".png" || extension == ".dds" || extension == ".hdr" || extension == ".jpg")
     {
         return refl::reflect<TextureHolder>().name.str();
@@ -85,37 +75,32 @@ std::shared_ptr<AssetBase> AssetManager::TryLoadAsset(const std::filesystem::pat
 
     if (assetTypeByExtension == refl::reflect<Mesh>().name.str())
     {
-        return Get().LoadAsset<Mesh>(path);
+        return LoadAsset<Mesh>(path);
     }
 
     if (assetTypeByExtension == refl::reflect<Material>().name.str())
     {
-        return Get().LoadAsset<Material>(path);
+        return LoadAsset<Material>(path);
     }
 
     if (assetTypeByExtension == refl::reflect<ShipyardShader>().name.str())
     {
-        return Get().LoadAsset<ShipyardShader>(path);
+        return LoadAsset<ShipyardShader>(path);
     }
 
     if (assetTypeByExtension == refl::reflect<Animation>().name.str())
     {
-        return Get().LoadAsset<Animation>(path);
+        return LoadAsset<Animation>(path);
     }
 
     if (assetTypeByExtension == refl::reflect<Skeleton>().name.str())
     {
-        return Get().LoadAsset<Skeleton>(path);
-    }
-
-    if (assetTypeByExtension == refl::reflect<GraphAsset>().name.str())
-    {
-        return Get().LoadAsset<GraphAsset>(path);
+        return LoadAsset<Skeleton>(path);
     }
 
     if (assetTypeByExtension == refl::reflect<TextureHolder>().name.str())
     {
-        return Get().LoadAsset<TextureHolder>(path);
+        return LoadAsset<TextureHolder>(path);
     }
 
     return std::shared_ptr<AssetBase>();
@@ -134,7 +119,7 @@ void AssetManager::ThreadedLoading()
 
             if (!working)
             {
-                Logger::Err("Something shit itself when loading asset: Asset was empty!");
+                Logger.Err("Something shit itself when loading asset: Asset was empty!");
                 return;
             }
 
@@ -152,7 +137,7 @@ void AssetManager::ThreadedLoading()
 
             working->isBeingLoaded = false;
             const std::string str = "Failed to load " + working->GetAssetPath().string();
-            Logger::Warn(str);
+            Logger.Warn(str);
         }
     }
 }

@@ -1,21 +1,21 @@
 #pragma once
+
 #include "Engine/AssetManager/ComponentSystem/GameObject.h"
-
+#include <Editor/Editor/Core/GameState/GameState.h>
+#include <Executable/Executable/Export.h>
 #include <Tools/Utilities/System/Event.h>
-class GameLauncher
+#include <filesystem>
+
+class YourGameLauncher : public GameLauncher
 {
-  public:
-    GameLauncher() = default;
-    void Init();
-    void Start();
-    void Update(float delta);
-
-    void LocalFunction();
-
   private:
-    Event m_CustomKeyCallback;
-
-    // Room 1
-    GameObject Object1_Room1;
-    GameObject Object2_Room1; 
+    void Init() override;
+    void Start() override;
+    void Update(float delta) override;
+    void SyncServices(ServiceLocator &serviceLocator) override;
 };
+
+extern "C"
+{
+    GAME_API GameLauncher *EntrypointMain();
+}

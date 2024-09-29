@@ -51,7 +51,7 @@ inline PointerVarChanged<var>::PointerVarChanged(var *value, const var oldVal, c
 {
     if (!m_object)
     {
-        Logger::Err("Could not find variable");
+        Logger.Err("Could not find variable");
         return;
     }
 
@@ -75,7 +75,7 @@ template <typename var> inline void PointerVarChanged<var>::Undo()
 {
     if (!m_object)
     {
-        Logger::Warn("Could not find component to undo");
+        Logger.Warn("Could not find component to undo");
         return;
     }
 
@@ -86,7 +86,7 @@ template <typename var> inline void PointerVarChanged<var>::Do()
 {
     if (!m_object)
     {
-        Logger::Warn("Could not find component to redo");
+        Logger.Warn("Could not find component to redo");
         return;
     }
     *m_object = m_NewValue;
@@ -167,7 +167,7 @@ inline VarChanged<ComponentType, var>::VarChanged(ComponentType *object, const v
 {
     if (!object)
     {
-        Logger::Err("Could not find component");
+        Logger.Err("Could not find component");
         return;
     }
 
@@ -193,7 +193,7 @@ template <typename ComponentType, typename var> inline void VarChanged<Component
     Component *component = m_object.TryGetComponent<ComponentType>();
     if (!component)
     {
-        Logger::Warn("Could not find component to undo");
+        Logger.Warn("Could not find component to undo");
         return;
     }
 
@@ -206,7 +206,7 @@ template <typename ComponentType, typename var> inline void VarChanged<Component
     Component *component = m_object.TryGetComponent<ComponentType>();
     if (!component)
     {
-        Logger::Warn("Could not find component to redo");
+        Logger.Warn("Could not find component to redo");
         return;
     }
     const auto &address = reinterpret_cast<char *>(&*component);

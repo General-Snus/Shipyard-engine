@@ -554,7 +554,7 @@ bool Transform::SetParent(Transform &parent, bool worldPositionStays)
     }
     else
     {
-        Logger::Err("Parent Not set, gameobject was invalid");
+        Logger.Err("Parent Not set, gameobject was invalid");
         return false;
     }
 }
@@ -582,7 +582,7 @@ Transform &Transform::GetParent() const
     }
     else
     {
-        Logger::Critical("Error: No parent on " + GetGameObject().GetName());
+        Logger.Critical("Error: No parent on " + GetGameObject().GetName());
         throw;
     }
 }
@@ -627,7 +627,7 @@ Transform &Transform::GetChild(int index) const
     }
     else
     {
-        Logger::Critical("Error: No Child found on " + GetGameObject().GetName() + " at index " +
+        Logger.Critical("Error: No Child found on " + GetGameObject().GetName() + " at index " +
                          std::to_string(index));
         throw;
     }
@@ -705,7 +705,7 @@ bool Transform::AddChild(Transform &child)
     }
     else
     {
-        Logger::Err("Child not set, child is not valid gameobject");
+        Logger.Err("Child not set, child is not valid gameobject");
         child.myWorldSpaceTransform = child.WorldMatrix();
         return false;
     }

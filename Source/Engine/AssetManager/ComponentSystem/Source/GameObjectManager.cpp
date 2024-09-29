@@ -77,7 +77,7 @@ void GameObjectManager::DeleteGameObject(const SY::UUID aGameObjectID, bool forc
             }
 
             myGameObjects.erase(aGameObjectID);
-            Editor::Get().CheckSelectedForRemoved();
+            EditorInstance.CheckSelectedForRemoved();
         }
         else
         {
@@ -144,19 +144,16 @@ Layer GameObjectManager::GetLayer(const SY::UUID aGameObjectID) const
 
 GameObject GameObjectManager::GetPlayer()
 {
-    assert(myPlayer != 0 && "GameObjectManager: Player not set yet!");
     return GameObject(myPlayer, this);
 }
 
 GameObject GameObjectManager::GetWorldRoot()
 {
-    assert(myWorldRoot != 0 && "GameObjectManager: WorldRoot not set yet!");
     return GameObject(myWorldRoot, this);
 }
 
 GameObject GameObjectManager::GetCamera()
 {
-    assert(myCamera != 0 && "GameObjectManager: Camera not set yet!");
     return GameObject(myCamera, this);
 }
 
@@ -225,12 +222,12 @@ void GameObjectManager::SetLayer(const SY::UUID aGameObjectID, const Layer aLaye
 Component *GameObjectManager::AddBaseComponent(const SY::UUID aGameObjectID, const Component *aComponent)
 {
     OPTICK_EVENT();
-    if (!myComponentManagers.contains(aComponent->GetTypeInfo().TypeID()))
+    if (!myComponentManagers.contains(aComponent->GetTypeInfo().Name()))
     {
         throw std::exception("You reached a dead end of my mind because i have no clue how i should do this");
     }
 
-    return myComponentManagers[aComponent->GetTypeInfo().TypeID()]->AddComponent(aGameObjectID, aComponent);
+    return myComponentManagers[aComponent->GetTypeInfo().Name()]->AddComponent(aGameObjectID, aComponent);
 }
 
 void GameObjectManager::SetLastGOAsPlayer()
@@ -298,7 +295,7 @@ void GameObjectManager::DeleteObjects()
                 cm.second->DeleteGameObject(myObjectsToDelete[i]);
             }
             myGameObjects.erase(myObjectsToDelete[i]);
-            Editor::Get().CheckSelectedForRemoved();
+            EditorInstance.CheckSelectedForRemoved();
         }
         else
         {
@@ -363,8 +360,8 @@ void GameObjectManager::SetName(const std::string &name, const SY::UUID aGameObj
     {
         std::string stringCopy = name;
         stringCopy.resize(128);
-        Logger::Warn(std::format("Name is set to be longer then the max limit of 128, name is reduced to {}",
-                                 stringCopy)); // Why do i need to cstr this??
+        Logger.Warn(std::format("Name is set to be longer then the max limit of 128, name is reduced to {}",
+                                stringCopy)); // Why do i need to cstr this??
         myGameObjects.at(aGameObjectID).Name = stringCopy;
         return;
     }

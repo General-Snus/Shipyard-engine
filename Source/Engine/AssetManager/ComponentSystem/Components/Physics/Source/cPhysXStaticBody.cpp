@@ -27,9 +27,9 @@ void cPhysXStaticBody::Init()
 {
     auto &transform = GetComponent<Transform>();
     auto &quat = transform.GetQuatF();
-    auto *world = Shipyard_PhysX::Get().GetPhysicsWorld();
+    auto *world = Shipyard_PhysXInstance.GetPhysicsWorld();
     data = world->createRigidStatic(PxTransform(transform.GetPosition(), PxQuat(quat.x, quat.y, quat.z, quat.w)));
-    Shipyard_PhysX::Get().GetScene()->addActor(*data);
+    Shipyard_PhysXInstance.GetScene()->addActor(*data);
     UpdateFromCollider();
 }
 
@@ -52,7 +52,7 @@ void cPhysXStaticBody::UpdateFromCollider()
             const auto &aabbData = aabb->GetAABB();
             PxRigidActorExt::createExclusiveShape(
                 *data, PxBoxGeometry(aabbData.GetXSize() / 2, aabbData.GetYSize() / 2, aabbData.GetZSize() / 2),
-                *Shipyard_PhysX::Get().GetDefaultMaterial());
+                *Shipyard_PhysXInstance.GetDefaultMaterial());
             break;
         }
         // case eColliderType::SPHERE:
@@ -107,7 +107,7 @@ void cPhysXStaticBody::UpdateFromCollider()
         case eColliderType::CONVEX: {
             const auto convex = collider->GetColliderAssetOfType<ColliderAssetConvex>();
             const auto convexData = convex->GetColliderMesh();
-            // PxRigidActorExt::createExclusiveShape(*data,PxConvexMeshGeometry(Shipyard_PhysX::CookMesh(convexData)),*Shipyard_PhysX::Get().GetDefaultMaterial());
+            // PxRigidActorExt::createExclusiveShape(*data,PxConvexMeshGeometry(Shipyard_PhysX::CookMesh(convexData)),*Shipyard_PhysXInstance.GetDefaultMaterial());
             break;
         }
         case eColliderType::PLANAR: {
@@ -118,12 +118,12 @@ void cPhysXStaticBody::UpdateFromCollider()
             // PxVec3 scale = { scaleV.x,scaleV.y,scaleV.z };
             // PxRigidActorExt::createExclusiveShape(*data,
             //	PxTriangleMeshGeometry(Shipyard_PhysX::CookMesh<physx::PxTriangleMesh>(convexData),scale),
-            //	*Shipyard_PhysX::Get().GetDefaultMaterial());
+            //	*Shipyard_PhysXInstance.GetDefaultMaterial());
             // break;
         }
         default:
             PxRigidActorExt::createExclusiveShape(*data, PxBoxGeometry(1.f, 1.0f, 1.0f),
-                                                  *Shipyard_PhysX::Get().GetDefaultMaterial());
+                                                  *Shipyard_PhysXInstance.GetDefaultMaterial());
             break;
         }
     }

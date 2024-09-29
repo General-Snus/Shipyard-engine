@@ -16,9 +16,9 @@ void cPhysXDynamicBody::Init()
 {
 	const auto& transform = GetComponent<Transform>();
 
-	auto* world = Shipyard_PhysX::Get().GetPhysicsWorld();
+	auto* world = Shipyard_PhysXInstance.GetPhysicsWorld();
 	data = world->createRigidDynamic(PxTransform(transform.GetPosition()));
-	Shipyard_PhysX::Get().GetScene()->addActor(*data);
+	Shipyard_PhysXInstance.GetScene()->addActor(*data);
 
 	PxMaterial* mMaterial;
 	mMaterial = world->createMaterial(0.5f,0.5f,0.1f);

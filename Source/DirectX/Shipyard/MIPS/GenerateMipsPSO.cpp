@@ -18,7 +18,7 @@
 //
 //
 //	std::shared_ptr<ShipyardShader> CS;
-//	AssetManager::Get().ForceLoadAsset<ShipyardShader>("Shaders/GenerateMips_CS",CS);
+//	AssetManagerInstance.ForceLoadAsset<ShipyardShader>("Shaders/GenerateMips_CS",CS);
 //
 //	stream.pRootSignature = PSOCache::m_MipRootSignature->GetRootSignature().Get();
 //	stream.CS = CD3DX12_SHADER_BYTECODE(ps->GetBlob());

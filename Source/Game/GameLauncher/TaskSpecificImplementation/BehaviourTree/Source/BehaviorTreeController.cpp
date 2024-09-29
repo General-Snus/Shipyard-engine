@@ -1,9 +1,6 @@
+#include "ShipyardEngine.pch.h"
+
 #include "../BehaviorTreeController.h"
-#include <Engine/AssetManager/ComponentSystem/Components/ActorSystem/CombatComponent.h>
-#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h>
-#include <Engine/AssetManager/ComponentSystem/Components/Transform.h>
-#include <Engine/AssetManager/Objects/AI/AgentSystem/AIPollingManager.h>
-#include <Engine/AssetManager/Objects/AI/AgentSystem/SteeringBehaviour.h>
 
 BehaviorTreeController::BehaviorTreeController(BrainTree::BehaviorTree tree) : m_Tree(tree)
 
@@ -22,7 +19,7 @@ bool BehaviorTreeController::Update(GameObject input)
     transform.SetPosition(newPosition);
 
     Vector3f normal;
-    Vector3f ref = AIPollingManager::Get()
+    Vector3f ref = AIPollingManagerInstance
                        .GetStation<MultipleTargets_PollingStation>("Colliders")
                        ->GetClosestPositionOnCollider(transform.GetPosition(), normal);
     DebugDrawer::Get().AddDebugLine(transform.GetPosition(), ref, Vector3f(0.0f, 1.0f, 0.01f), 0.01f);

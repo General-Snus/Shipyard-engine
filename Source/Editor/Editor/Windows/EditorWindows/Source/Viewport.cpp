@@ -47,7 +47,7 @@ Viewport::Viewport(bool IsMainViewPort, Vector2f ViewportResolution, std::shared
         myVirtualCamera = GameObject::Create("SecondaryCamera", sceneToRender);
         sceneToRender->GetGOM().SetIsVisibleInHierarchy(myVirtualCamera, false);
 
-        auto &camera = myVirtualCamera.AddComponent<cCamera>();
+        auto &camera = myVirtualCamera.AddComponent<Camera>();
         camera.SetResolution(ViewportResolution);
     }
 }
@@ -80,7 +80,7 @@ bool Viewport::IsRenderReady()
     // if you are main and there is a active camera
     if (IsMainViewPort)
     {
-        auto camera = myVirtualCamera.TryGetComponent<cCamera>();
+        auto camera = myVirtualCamera.TryGetComponent<Camera>();
         return camera ? camera->IsActive() : false;
     }
 
@@ -99,16 +99,16 @@ void Viewport::Update()
     if (IsMainViewPort)
     {
         myVirtualCamera = sceneToRender->GetGOM().GetCamera();
-        if (auto *camera = myVirtualCamera.TryGetComponent<cCamera>())
+        if (auto *camera = myVirtualCamera.TryGetComponent<Camera>())
         {
-            camera->IsInControl(Editor::IsPlaying);
+            camera->IsInControl(EditorInstance.IsPlaying);
             camera->SetResolution(ViewportResolution);
         }
     }
     else
     {
         // myVirtualCamera.SetActive(IsSelected());
-        auto &camera = myVirtualCamera.GetComponent<cCamera>();
+        auto &camera = myVirtualCamera.GetComponent<Camera>();
         camera.IsInControl(IsSelected());
         camera.SetResolution(ViewportResolution);
     }
@@ -119,9 +119,9 @@ void Viewport::ResolutionUpdate()
     // m_RenderTarget->GetRawTexture()->AllocateTexture(resolution, "Target1");
 }
 
-cCamera &Viewport::GetCamera()
+Camera &Viewport::GetCamera()
 {
-    return myVirtualCamera.GetComponent<cCamera>();
+    return myVirtualCamera.GetComponent<Camera>();
 }
 
 Transform &Viewport::GetCameraTransform()
@@ -132,7 +132,7 @@ Transform &Viewport::GetCameraTransform()
 // ImGui did not like reverse projection so i put it back to 0-1 depth only for imgui
 Matrix Viewport::Projection()
 {
-    auto ViewportCamera = myVirtualCamera.TryGetComponent<cCamera>();
+    auto ViewportCamera = myVirtualCamera.TryGetComponent<Camera>();
     if (!ViewportCamera)
     {
         const auto dxMatrix = XMMatrixPerspectiveFovLH(90.f, 16.f / 9, 0.01f, 1000000.0f);
@@ -173,7 +173,7 @@ void Viewport::RenderImGUi()
     // ImGui::SetNextWindowSizeConstraints(ImVec2(0,0),ImVec2(FLT_MAX,FLT_MAX),CustomConstraints::AspectRatio,(void*)&aspecRatio);
     // // Aspect ratio
 
-    std::vector<GameObject> const &selectedObjects = Editor::GetSelectedGameObjects();
+    std::vector<GameObject> const &selectedObjects = EditorInstance.GetSelectedGameObjects();
 
     TakeInput();
 
@@ -204,11 +204,11 @@ void Viewport::RenderImGUi()
             if (const ImGuiPayload *test = ImGui::AcceptDragDropPayload("ContentAsset_Mesh"))
             {
                 const std::filesystem::path data = std::string((char *)test->Data, test->DataSize);
-                const std::string type = AssetManager::AssetType(data);
+                const std::string type = AssetManagerInstance.AssetType(data);
 
                 SceneUtils::AddAssetToScene(data, sceneToRender);
 
-                Logger::Log(type);
+                Logger.Log(type);
             }
             ImGui::EndDragDropTarget();
         }

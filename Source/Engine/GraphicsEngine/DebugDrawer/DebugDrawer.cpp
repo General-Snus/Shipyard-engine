@@ -41,7 +41,7 @@ bool DebugDrawer::Initialize()
 	);*/
 
 
-	auto commandQueue = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COPY);
+	auto commandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COPY);
 	auto commandList = commandQueue->GetCommandList();
 
 	std::vector<DebugVertex> vertices;
@@ -50,8 +50,8 @@ bool DebugDrawer::Initialize()
 	std::vector<uint32_t> indicies;
 	indicies.resize(65536);
 
-	GPU::CreateVertexBuffer<DebugVertex>(commandList,vertexBuffer,vertices);
-	GPU::CreateIndexBuffer(commandList,indexBuffer,indicies);
+	GPUInstance.CreateVertexBuffer<DebugVertex>(commandList,vertexBuffer,vertices);
+	GPUInstance.CreateIndexBuffer(commandList,indexBuffer,indicies);
 	commandQueue->ExecuteCommandList(commandList);
 	//// Create dynamic vertex and index buffer
 	//if (!(
@@ -59,7 +59,7 @@ bool DebugDrawer::Initialize()
 	//	RHI::CreateDynamicIndexBuffer(myLineIndexBuffer,65536)
 	//	))
 	//{
-	//	Logger::Err("Failed to initialize the myLineVertexBuffer!");
+	//	Logger.Err("Failed to initialize the myLineVertexBuffer!");
 	//	return false;
 	//}
 	return true;

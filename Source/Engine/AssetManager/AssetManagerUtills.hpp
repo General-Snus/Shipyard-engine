@@ -22,7 +22,7 @@ template <typename asset = Mesh> void PopUpContextForAsset(std::shared_ptr<asset
         const std::string keyTerm = buf;
 
         ImGui::BeginChild("test");
-        const auto &assetMap = AssetManager::Get().GetLibraryOfType<asset>()->GetContentCatalogue<asset>();
+        const auto &assetMap = AssetManagerInstance.GetLibraryOfType<asset>()->GetContentCatalogue<asset>();
 
         using localPair = std::pair<std::string, std::shared_ptr<asset>>;
         static std::vector<localPair> sortedList;
@@ -94,17 +94,17 @@ void SwitchableAsset(std::shared_ptr<assetType> &asset, std::string PayloadType,
             {
                 auto newWindow = std::make_shared<CustomFuncWindow>(std::bind(&assetType::InspectorView, asset));
                 newWindow->SetWindowName(asset->GetAssetPath().filename().string());
-                Editor::Get().g_EditorWindows.emplace_back(newWindow);
+                EditorInstance.g_EditorWindows.emplace_back(newWindow);
             }
         }
     }
     else
     {
         std::shared_ptr<TextureHolder> texture =
-            AssetManager::Get().LoadAsset<TextureHolder>("Textures\\Widgets\\File.png");
+            AssetManagerInstance.LoadAsset<TextureHolder>("Textures\\Widgets\\File.png");
         if (!texture)
         {
-            texture = GraphicsEngine::Get().GetDefaultTexture(eTextureType::MaterialMap);
+            texture = GraphicsEngineInstance.GetDefaultTexture(eTextureType::MaterialMap);
         }
 
         ImGui::ImageButton((char *)&texture, texture, {100, 100}, ImGuiButtonFlags_PressedOnDoubleClick);
@@ -115,7 +115,7 @@ void SwitchableAsset(std::shared_ptr<assetType> &asset, std::string PayloadType,
         if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(PayloadType.c_str()))
         {
             const auto path = std::string((const char *)payload->Data, payload->DataSize);
-            asset = AssetManager::Get().LoadAsset<assetType>(path);
+            asset = AssetManagerInstance.LoadAsset<assetType>(path);
         }
         ImGui::EndDragDropTarget();
     }

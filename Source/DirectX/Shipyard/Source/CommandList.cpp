@@ -9,11 +9,12 @@
 #include <DirectX/Shipyard/RootSignature.h>
 #include <DirectX/XTK/ResourceUploadBatch.h>
 
-CommandList::CommandList(D3D12_COMMAND_LIST_TYPE type, const std::wstring &name) : m_Type(type)
+CommandList::CommandList(const DeviceType &device, D3D12_COMMAND_LIST_TYPE type, const std::wstring &name)
+    : m_Type(type), m_Device(device)
 {
-    Helpers::ThrowIfFailed(GPU::m_Device->CreateCommandAllocator(type, IID_PPV_ARGS(&m_CommandAllocator)));
+    Helpers::ThrowIfFailed(m_Device->CreateCommandAllocator(type, IID_PPV_ARGS(&m_CommandAllocator)));
     Helpers::ThrowIfFailed(
-        GPU::m_Device->CreateCommandList(0, type, m_CommandAllocator.Get(), nullptr, IID_PPV_ARGS(&m_CommandList)));
+        m_Device->CreateCommandList(0, type, m_CommandAllocator.Get(), nullptr, IID_PPV_ARGS(&m_CommandList)));
 
     m_CommandAllocator->SetName((name + L"Allocator").c_str());
     m_CommandList->SetName((name + L"List").c_str());
@@ -32,9 +33,9 @@ void CommandList::CopyBuffer(GpuResource &buffer, size_t numElements, size_t ele
         {
             const auto var1 = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
             const auto var2 = CD3DX12_RESOURCE_DESC::Buffer(bufferSize, flags);
-            Helpers::ThrowIfFailed(GPU::m_Device->CreateCommittedResource(&var1, D3D12_HEAP_FLAG_NONE, &var2,
-                                                                          D3D12_RESOURCE_STATE_COMMON, nullptr,
-                                                                          IID_PPV_ARGS(&d3d12Resource)));
+            Helpers::ThrowIfFailed(m_Device->CreateCommittedResource(&var1, D3D12_HEAP_FLAG_NONE, &var2,
+                                                                     D3D12_RESOURCE_STATE_COMMON, nullptr,
+                                                                     IID_PPV_ARGS(&d3d12Resource)));
         }
 
         ResourceStateTracker::AddGlobalResourceState(d3d12Resource.Get(), D3D12_RESOURCE_STATE_COMMON);
@@ -44,9 +45,9 @@ void CommandList::CopyBuffer(GpuResource &buffer, size_t numElements, size_t ele
             ComPtr<ID3D12Resource> uploadResource;
             const auto var1 = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
             const auto var2 = CD3DX12_RESOURCE_DESC::Buffer(bufferSize);
-            Helpers::ThrowIfFailed(GPU::m_Device->CreateCommittedResource(&var1, D3D12_HEAP_FLAG_NONE, &var2,
-                                                                          D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
-                                                                          IID_PPV_ARGS(&uploadResource)));
+            Helpers::ThrowIfFailed(m_Device->CreateCommittedResource(&var1, D3D12_HEAP_FLAG_NONE, &var2,
+                                                                     D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
+                                                                     IID_PPV_ARGS(&uploadResource)));
 
             D3D12_SUBRESOURCE_DATA subresourceData = {};
             subresourceData.pData = bufferData;
@@ -73,7 +74,7 @@ void CommandList::CopyBuffer(GpuResource &buffer, size_t numElements, size_t ele
 template <typename T> void CommandList::SetConstantBuffer(unsigned slot, const T &constantBuffer)
 {
     OPTICK_GPU_EVENT("SetConstantBuffer");
-    const auto &alloc = GPU::m_GraphicsMemory->AllocateConstant<T>(constantBuffer);
+    const auto &alloc = GPUInstance.m_GraphicsMemory->AllocateConstant<T>(constantBuffer);
     m_CommandList->SetGraphicsRootConstantBufferView(slot, alloc.GpuAddress());
 }
 
@@ -94,7 +95,7 @@ void CommandList::CopyResource(const ComPtr<ID3D12Resource> &destination, const 
 //{
 //	if (m_Type == D3D12_COMMAND_LIST_TYPE_COPY)
 //	{
-//		const auto computeList = GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COMPUTE)->GetCommandList();
+//		const auto computeList = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COMPUTE)->GetCommandList();
 //		computeList->GenerateMips(texture);
 //		return;
 //	}
@@ -129,7 +130,7 @@ void CommandList::CopyResource(const ComPtr<ID3D12Resource> &destination, const 
 //	if (!texture.CheckUAVSupport() ||
 //		(resourceDesc.Flags & D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS) == 0)
 //	{
-//		auto device = GPU::m_Device;
+//		auto device = m_Device;
 //
 //		// Describe an alias resource that is used to copy the original texture.
 //		auto aliasDesc = resourceDesc;
@@ -290,7 +291,7 @@ void CommandList::CopyResource(const ComPtr<ID3D12Resource> &destination, const 
 //
 //		m_CommandList->SetGraphicsRootDescriptorTable(
 //			GenerateMips::SrcMip,
-//			GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->GetGpuHandle(texture.GetHandle(ViewType::SRV).heapOffset));
+//			GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->GetGpuHandle(texture.GetHandle(ViewType::SRV).heapOffset));
 //
 //
 //		for (uint32_t mip = 0; mip < mipCount; ++mip)
@@ -305,7 +306,7 @@ void CommandList::CopyResource(const ComPtr<ID3D12Resource> &destination, const 
 //
 //			m_CommandList->SetGraphicsRootDescriptorTable(
 //				GenerateMips::OutMip,
-//				GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->GetGpuHandle(texture.GetHandle(ViewType::UAV).heapOffset));
+//				GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->GetGpuHandle(texture.GetHandle(ViewType::UAV).heapOffset));
 //
 //			//SetUnorderedAccessView(GenerateMips::OutMip,mip,texture,D3D12_RESOURCE_STATE_UNORDERED_ACCESS,srcMip + mip
 //+ 1,1,&uavDesc);
@@ -340,7 +341,7 @@ void CommandList::TransitionBarrier(const ComPtr<ID3D12Resource> &resource, D3D1
     }
     else
     {
-        Logger::Err("Could not transition resource");
+        Logger.Err("Could not transition resource");
     }
 
     if (flushBarriers)
@@ -364,14 +365,15 @@ void CommandList::SetDescriptorTable(unsigned slot, Texture *texture)
 
     if (offset == -1)
     {
-        Logger::Warn("Texture has no heap offset: " + texture->GetName());
+        Logger.Warn("Texture has no heap offset: " + texture->GetName());
         return;
     }
 
     TransitionBarrier(texture->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
     m_CommandList->SetGraphicsRootDescriptorTable(
-        slot, GPU::m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->GetGpuHandle(offset));
+        slot,
+        GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->GetGpuHandle(offset));
 
     TrackResource(texture->GetResource());
 }

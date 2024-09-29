@@ -89,7 +89,7 @@ inline bool Input::UpdateMouseInput()
 	myLastMousePosition = myMousePosition;
 	POINT pt = { 0, 0 };
 	GetCursorPos(&pt);
-	const Vector2ui res = { Window::Width(),Window::Height() };
+        const Vector2ui res = {WindowInstance.Width(), WindowInstance.Height()};
 	myMousePosition.x = 1.f - 2.f * (static_cast<float>(pt.x) / static_cast<float>(res.x));
 	myMousePosition.y = 1.0f - 2.f * (static_cast<float>(pt.y) / static_cast<float>(res.y));
 	myMousePosition.x *= -1.f;

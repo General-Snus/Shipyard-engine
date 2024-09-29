@@ -94,7 +94,7 @@ void Shipyard_PhysX::Render()
         const Vector3f Vpos1 = {line.pos0.x, line.pos0.y, line.pos0.z};
         const Vector3f Vpos2 = {line.pos1.x, line.pos1.y, line.pos1.z};
 
-        DebugDrawer::Get().AddDebugLine(Vpos1, Vpos2, Vector3f(0, 1, 0), Timer::GetDeltaTime());
+        DebugDrawer::Get().AddDebugLine(Vpos1, Vpos2, Vector3f(0, 1, 0), TimerInstance.GetDeltaTime());
     }
 }
 
@@ -131,7 +131,7 @@ PxScene *Shipyard_PhysX::GetScene()
 //	{
 //		if (myToBeCookedMesh->isBeingLoaded == false)
 //		{
-//			AssetManager::Get().ForceLoadAsset<Mesh>(myToBeCookedMesh->GetAssetPath(),myToBeCookedMesh);
+//			AssetManagerInstance.ForceLoadAsset<Mesh>(myToBeCookedMesh->GetAssetPath(),myToBeCookedMesh);
 //		}
 //		while (myToBeCookedMesh->isLoadedComplete == false)
 //		{

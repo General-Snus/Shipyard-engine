@@ -31,7 +31,7 @@ void Window::Init(const WinInitSettings &init)
     HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
     if (FAILED(hr))
     {
-        Logger::Err("Failed to initialize COM");
+        Logger.Err("Failed to initialize COM");
         return;
     }
 
@@ -58,7 +58,7 @@ void Window::Init(const WinInitSettings &init)
 
     if (windowHandler == nullptr)
     {
-        Logger::Err("Failed to create window");
+        Logger.Err("Failed to create window");
     }
     DragAcceptFiles(windowHandler, TRUE);
 }
@@ -80,7 +80,7 @@ bool Window::Update()
 
 LRESULT CALLBACK Window::WinProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
-    if (callback)
+    if (WindowInstance.callback)
     {
         MSG msg{};
         msg.hwnd = hWnd;
@@ -88,16 +88,12 @@ LRESULT CALLBACK Window::WinProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wPa
         msg.wParam = wParam;
         msg.lParam = lParam;
 
-        callback(msg);
+        WindowInstance.callback(msg);
     }
 
     switch (uMsg)
     {
-    case WM_SIZE: {
-        const auto res = Vector2ui(LOWORD(lParam), HIWORD(lParam));
-        GPU::Resize(res);
-        break;
-    }
+    
     case WM_DESTROY: {
         DragAcceptFiles(hWnd, FALSE);
         PostQuitMessage(0);
@@ -151,7 +147,8 @@ void Window::MoveConsoleToOtherMonitor()
         }
         else if (virtualSize.top < 0) // Secondary monitor on top
         {
-            // I am too lazy too account for anything else than the taskbar being on the bottom of the screen
+            // I am too lazy too account for anything else than the taskbar being on
+            // the bottom of the screen
             RECT taskbar;
             GetWindowRect(FindWindow(L"Shell_traywnd", NULL), &taskbar);
             const int taskbarHeight = taskbar.bottom - taskbar.top;

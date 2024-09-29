@@ -9,7 +9,8 @@
 #include <Tools/Utilities/Color.h>
 #include <Tools/Utilities/TemplateHelpers.h>
 
-class Logger
+#define Logger ServiceLocator::Instance().GetService<LoggerService>()
+class LoggerService : public Singleton
 {
   public:
     enum class LogType : int32_t
@@ -42,7 +43,7 @@ class Logger
         {
             switch (msg.messageType)
             {
-                using enum Logger::LogType;
+                using enum LoggerService::LogType;
             case message:
                 messagesCount++;
                 break;
@@ -66,44 +67,41 @@ class Logger
     };
 
   public:
-    static inline logBuffer m_Buffer;
-    static bool Create();
-    static void SetConsoleHandle(void *aHandle);
-    static void SetPrintToVSOutput(bool bNewValue);
-    static void Log(const char *aString, const std::source_location &location = std::source_location::current());
-    static Color GetColor(LogType type);
+    logBuffer m_Buffer;
+    bool Create();
+    void SetConsoleHandle(void *aHandle);
+    void SetPrintToVSOutput(bool bNewValue);
+    void Log(const char *aString, const std::source_location &location = std::source_location::current());
+    Color GetColor(LogType type);
 
     template <typename T>
-    static void Log(const T &aString, const std::source_location &location = std::source_location::current())
+    void Log(const T &aString, const std::source_location &location = std::source_location::current())
     {
         Log(std::to_string(aString));
     }
 
-    static void Log(const std::string &aString, const std::source_location &location = std::source_location::current());
-    static void Warn(const std::string &aString,
-                     const std::source_location &location = std::source_location::current());
+    void Log(const std::string &aString, const std::source_location &location = std::source_location::current());
+    void Warn(const std::string &aString, const std::source_location &location = std::source_location::current());
 
-    static void Err(const std::string &aString, const std::source_location &location = std::source_location::current());
-    static void Succ(const std::string &aString,
-                     const std::source_location &location = std::source_location::current());
-    static void Critical(const std::exception &anException, unsigned aLevel = 0,
-                         const std::source_location &location = std::source_location::current());
-    static void Critical(const std::string &anExceptionText, unsigned aLevel = 0,
-                         const std::source_location &location = std::source_location::current());
-    static void NewLine();
+    void Err(const std::string &aString, const std::source_location &location = std::source_location::current());
+    void Succ(const std::string &aString, const std::source_location &location = std::source_location::current());
+    void Critical(const std::exception &anException, unsigned aLevel = 0,
+                  const std::source_location &location = std::source_location::current());
+    void Critical(const std::string &anExceptionText, unsigned aLevel = 0,
+                  const std::source_location &location = std::source_location::current());
+    void NewLine();
     void *GetHandle() const
     {
         return myHandle;
     }
 
   private:
-    static inline void *myHandle = 0;
-    static inline bool shouldPrintToOutput = false;
-    static inline bool isInitialized = false;
-    static inline std::string myNamespace;
-    static inline std::mutex readyToWrite;
-    static [[nodiscard]] std::string Timestamp();
-    Logger() = default;
+    void *myHandle = 0;
+    bool shouldPrintToOutput = false;
+    bool isInitialized = false;
+    std::string myNamespace;
+    std::mutex readyToWrite;
+    [[nodiscard]] std::string Timestamp();
 };
 
-ENABLE_ENUM_BITWISE_OPERATORS(Logger::LogType)
+ENABLE_ENUM_BITWISE_OPERATORS(LoggerService::LogType)

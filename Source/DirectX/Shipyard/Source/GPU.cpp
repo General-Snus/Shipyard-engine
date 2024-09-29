@@ -58,7 +58,7 @@ bool GPU::Initialize(HWND aWindowHandle, bool enableDeviceDebug, uint32_t width,
     ComPtr<IDXGIFactory4> factory;
     if (FAILED(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&factory))))
     {
-        Logger::Err("Failed to create DXGI factory");
+        Logger.Err("Failed to create DXGI factory");
     }
 
     ComPtr<IDXGIAdapter1> hardwareAdapter;
@@ -66,12 +66,12 @@ bool GPU::Initialize(HWND aWindowHandle, bool enableDeviceDebug, uint32_t width,
     {
         if (FAILED(factory->EnumWarpAdapter(IID_PPV_ARGS(&hardwareAdapter))))
         {
-            Logger::Err("Failed to get warp adapter");
+            Logger.Err("Failed to get warp adapter");
         }
 
         if (FAILED(D3D12CreateDevice(hardwareAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_Device))))
         {
-            Logger::Err("Failed to create warp adapter");
+            Logger.Err("Failed to create warp adapter");
         }
     }
     else
@@ -80,7 +80,7 @@ bool GPU::Initialize(HWND aWindowHandle, bool enableDeviceDebug, uint32_t width,
 
         if (FAILED(D3D12CreateDevice(hardwareAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_Device))))
         {
-            Logger::Err("Failed to create device");
+            Logger.Err("Failed to create device");
         }
     }
 
@@ -105,7 +105,7 @@ bool GPU::Initialize(HWND aWindowHandle, bool enableDeviceDebug, uint32_t width,
         if (FAILED(D3D12CreateDevice(hardwareAdapter.Get(), m_DeviceSupport.targetFeatureLevel,
                                      IID_PPV_ARGS(m_Device.ReleaseAndGetAddressOf()))))
         {
-            Logger::Err("Failed to create device");
+            Logger.Err("Failed to create device");
             return false;
         }
     }
@@ -171,7 +171,6 @@ void GPU::Resize(Vector2ui resolution)
 
     if ((m_Width != resolution.x || m_Height != resolution.y) && (resolution.x && resolution.y))
     {
-
         m_FenceValues[m_FrameIndex] = m_DirectCommandQueue->Signal();
         m_FrameIndex = m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
 
@@ -197,7 +196,6 @@ void GPU::Resize(Vector2ui resolution)
         m_FrameIndex = m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
 
         UpdateRenderTargetViews(m_Device, m_Swapchain->m_SwapChain, nullptr);
-        PSOCache::InitAllStates();
     }
 }
 
@@ -361,7 +359,7 @@ bool GPU::LoadTexture(Texture *outTexture, const std::filesystem::path &aFileNam
         aFileName.extension() != ".dds" && aFileName.extension() != ".png" && aFileName.extension() != ".jpg")
     {
         const std::string error = "Failed to load texture: " + aFileName.string() + " does not exist!";
-        Logger::Err(error);
+        Logger.Err(error);
         return false;
     }
     std::scoped_lock lock(lockForTextureLoad);
@@ -392,7 +390,7 @@ bool GPU::LoadTexture(Texture *outTexture, const std::filesystem::path &aFileNam
     else
     {
         const std::string msg = "Failed to load mips of shader that wanted a mipmap " + aFileName.filename().string();
-        Logger::Warn(msg);
+        Logger.Warn(msg);
     }
 
     outTexture->isCubeMap = isCubeMap;
@@ -498,9 +496,8 @@ Texture *GPU::GetCurrentBackBuffer()
     return &m_renderTargets[m_FrameIndex];
 }
 
-ComPtr<ID3D12DescriptorHeap> GPU::CreateDescriptorHeap(const ComPtr<ID3D12Device> &device,
-                                                       D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors,
-                                                       D3D12_DESCRIPTOR_HEAP_FLAGS flags)
+ComPtr<ID3D12DescriptorHeap> GPU::CreateDescriptorHeap(const DeviceType &device, D3D12_DESCRIPTOR_HEAP_TYPE type,
+                                                       uint32_t numDescriptors, D3D12_DESCRIPTOR_HEAP_FLAGS flags)
 {
     OPTICK_EVENT();
     ComPtr<ID3D12DescriptorHeap> descriptorHeap;
@@ -559,7 +556,7 @@ HANDLE GPU::CreateEventHandle()
     return fenceEvent;
 }
 
-void GPU::UpdateRenderTargetViews(const ComPtr<ID3D12Device> &device, const ComPtr<IDXGISwapChain4> &swapChain,
+void GPU::UpdateRenderTargetViews(const DeviceType &device, const ComPtr<IDXGISwapChain4> &swapChain,
                                   const ComPtr<ID3D12DescriptorHeap> &descriptorHeap)
 {
     OPTICK_EVENT();
@@ -643,12 +640,12 @@ void GPUSwapchain::Create(HWND hwnd, ComPtr<ID3D12CommandQueue>, UINT Width, UIN
 
     ComPtr<IDXGISwapChain1> swapChain;
     if (FAILED(dxgiFactory4->CreateSwapChainForHwnd(
-            GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT)
+            GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT)
                 ->GetCommandQueue()
                 .Get(), // Swap chain needs the queue so that it can force a flush on it.
             hwnd, &m_Desc, nullptr, nullptr, &swapChain)))
     {
-        Logger::Err("Failed to create swapchain from hwnd");
+        Logger.Err("Failed to create swapchain from hwnd");
     }
     Helpers::ThrowIfFailed(dxgiFactory4->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER));
     Helpers::ThrowIfFailed(swapChain->SetFullscreenState(FALSE, NULL));
@@ -657,7 +654,7 @@ void GPUSwapchain::Create(HWND hwnd, ComPtr<ID3D12CommandQueue>, UINT Width, UIN
 
 void GPUSwapchain::Present()
 {
-    Helpers::ThrowIfFailed(GPU::m_Swapchain->m_SwapChain->Present(m_Desc.SwapEffect, m_Desc.Flags));
+    Helpers::ThrowIfFailed(GPUInstance.m_Swapchain->m_SwapChain->Present(m_Desc.SwapEffect, m_Desc.Flags));
 }
 
 void GPUSwapchain::Resize(Vector2ui resolution)

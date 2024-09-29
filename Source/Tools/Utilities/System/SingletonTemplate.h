@@ -1,18 +1,14 @@
-#pragma once 
-template<typename T>
-class Singleton
+#pragma once
+#include <Executable/Executable/Export.h>
+
+#include "ServiceLocator.h"
+// We inherite from this to store it in the service locator
+// we can also delete the copy here
+class SHIPYARD_API Singleton
 {
-public:
-	Singleton(Singleton const&) = delete;
-	Singleton& operator=(Singleton const&) = delete;
+    friend class ServiceLocator;
 
-	static T& Get()
-	{
-		static T instance;
-		return instance;
-	}
-
-protected:
-	Singleton() = default;
-	~Singleton() = default;
+  public:
+    Singleton() = default;
+    ~Singleton() = default;
 };

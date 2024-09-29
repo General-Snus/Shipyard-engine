@@ -289,12 +289,14 @@
     <ClInclude Include="Navigation\AStar.hpp" />
     <ClInclude Include="Navigation\Dijkstra.hpp" />
     <ClInclude Include="System\Grid.h" />
+    <ClInclude Include="System\ServiceLocator.h" />
     <ClInclude Include="System\SingletonTemplate.h" />
     <ClInclude Include="System\ThreadPool.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="FileHelpers.hpp" />
+    <ClCompile Include="System\Source\ServiceLocator.cpp" />
     <ClCompile Include="System\Source\Event.cpp" />
     <ClCompile Include="Game\Camera.cpp" />
     <ClCompile Include="Game\Timer.cpp" />

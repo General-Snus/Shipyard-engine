@@ -40,26 +40,28 @@ class GPUSwapchain
     DXGI_SWAP_CHAIN_DESC1 m_Desc{};
 };
 
-class GPU
+#define GPUInstance ServiceLocator::Instance().GetService<GPU>()
+
+class GPU : public Singleton
 {
   public:
-    static bool Initialize(HWND aWindowHandle, bool enableDeviceDebug, uint32_t width, uint32_t height);
-    static bool UnInitialize();
-    static void Resize(Vector2ui resolution);
-    static void Present(unsigned aSyncInterval = 0);
+    bool Initialize(HWND aWindowHandle, bool enableDeviceDebug, uint32_t width, uint32_t height);
+    bool UnInitialize();
+    void Resize(Vector2ui resolution);
+    void Present(unsigned aSyncInterval = 0);
 
-    static void UpdateBufferResource(const CommandList &commandList, ID3D12Resource **pDestinationResource,
-                                     ID3D12Resource **pIntermediateResource, size_t numElements, size_t elementSize,
-                                     const void *bufferData, D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
+    void UpdateBufferResource(const CommandList &commandList, ID3D12Resource **pDestinationResource,
+                              ID3D12Resource **pIntermediateResource, size_t numElements, size_t elementSize,
+                              const void *bufferData, D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
 
-    static void CopyBuffer(const CommandList &aCommandList, GpuResource &buffer, size_t numElements, size_t elementSize,
-                           const void *bufferData, D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
+    void CopyBuffer(const CommandList &aCommandList, GpuResource &buffer, size_t numElements, size_t elementSize,
+                    const void *bufferData, D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
 
-    static void ConfigureInputAssembler(CommandList &commandList, D3D_PRIMITIVE_TOPOLOGY topology,
-                                        IndexResource &indexResource);
+    void ConfigureInputAssembler(CommandList &commandList, D3D_PRIMITIVE_TOPOLOGY topology,
+                                 IndexResource &indexResource);
 
-    static HeapHandle GetHeapHandle(eHeapTypes type);
-    static HeapHandle GetHeapHandle(DirectX::DescriptorPile &pile);
+    HeapHandle GetHeapHandle(eHeapTypes type);
+    HeapHandle GetHeapHandle(DirectX::DescriptorPile &pile);
 
     template <typename vertexType>
     static bool CreateVertexBuffer(const std::shared_ptr<CommandList> &commandList, VertexResource &outVxBufferView,
@@ -68,13 +70,13 @@ class GPU
     static bool CreateIndexBuffer(const std::shared_ptr<CommandList> &commandList, IndexResource &outIndexResource,
                                   const std::vector<uint32_t> &aIndexList);
 
-    static void ResizeDepthBuffer(unsigned width, unsigned height);
+    void ResizeDepthBuffer(unsigned width, unsigned height);
 
-    static bool LoadTexture(Texture *outTexture, const std::filesystem::path &aFileName, bool generateMips = true);
+    bool LoadTexture(Texture *outTexture, const std::filesystem::path &aFileName, bool generateMips = true);
 
-    static bool LoadTextureFromMemory(Texture *outTexture, const std::filesystem::path &aName,
-                                      const BYTE *someImageData, size_t anImageDataSize, bool generateMips = true,
-                                      const D3D12_SHADER_RESOURCE_VIEW_DESC *aSRVDesc = nullptr);
+    bool LoadTextureFromMemory(Texture *outTexture, const std::filesystem::path &aName, const BYTE *someImageData,
+                               size_t anImageDataSize, bool generateMips = true,
+                               const D3D12_SHADER_RESOURCE_VIEW_DESC *aSRVDesc = nullptr);
 
     static void TransitionResource(const CommandList &commandList, const ComPtr<ID3D12Resource> &resource,
                                    D3D12_RESOURCE_STATES beforeState, D3D12_RESOURCE_STATES afterState);
@@ -88,23 +90,22 @@ class GPU
 
     static void ClearDepth(const CommandList &commandList, D3D12_CPU_DESCRIPTOR_HANDLE dsv, FLOAT depth = 0);
 
-    static D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentRenderTargetView();
-    static Texture *GetCurrentBackBuffer();
+    D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentRenderTargetView();
+    Texture *GetCurrentBackBuffer();
 
-    static ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(
-        const ComPtr<ID3D12Device> &device, D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors,
+    ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(
+        const DeviceType &device, D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors,
         D3D12_DESCRIPTOR_HEAP_FLAGS flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE);
 
-    static void UpdateRenderTargetViews(const ComPtr<ID3D12Device> &device, const ComPtr<IDXGISwapChain4> &swapChain,
-                                        const ComPtr<ID3D12DescriptorHeap> &descriptorHeap);
+    void UpdateRenderTargetViews(const DeviceType &device, const ComPtr<IDXGISwapChain4> &swapChain,
+                                 const ComPtr<ID3D12DescriptorHeap> &descriptorHeap);
 
-    static ComPtr<ID3D12CommandAllocator> CreateCommandAllocator(ComPtr<ID3D12Device> device,
-                                                                 D3D12_COMMAND_LIST_TYPE type);
-    static CommandList &CreateCommandList(ComPtr<ID3D12Device> device, ComPtr<ID3D12CommandAllocator> commandAllocator,
+    static ComPtr<ID3D12CommandAllocator> CreateCommandAllocator(DeviceType device, D3D12_COMMAND_LIST_TYPE type);
+    static CommandList &CreateCommandList(DeviceType device, ComPtr<ID3D12CommandAllocator> commandAllocator,
                                           D3D12_COMMAND_LIST_TYPE type);
-    static std::shared_ptr<GPUCommandQueue> GetCommandQueue(D3D12_COMMAND_LIST_TYPE type);
+    std::shared_ptr<GPUCommandQueue> GetCommandQueue(D3D12_COMMAND_LIST_TYPE type);
 
-    static ComPtr<ID3D12Fence> CreateFence();
+    ComPtr<ID3D12Fence> CreateFence();
 
     static HANDLE CreateEventHandle();
 
@@ -115,43 +116,41 @@ class GPU
     static void setAftermathEventMarker(const std::string &markerData, bool appManagedMarker);
     static std::string createMarkerStringForFrame(const char *markerString);
 #endif
-    static constexpr UINT m_FrameCount = 2;
-    static inline constexpr bool m_useWarpDevice = false;
-    static inline UINT m_FrameIndex;
+    static const UINT m_FrameCount = 2;
+    static const bool m_useWarpDevice = false;
+    UINT m_FrameIndex;
 
-    static inline ComPtr<ID3D12Device8> m_Device;
-    static inline unsigned m_Width;
-    static inline unsigned m_Height;
-    static inline std::shared_ptr<GPUCommandQueue> m_DirectCommandQueue;
-    static inline std::shared_ptr<GPUCommandQueue> m_CopyCommandQueue;
-    static inline std::shared_ptr<GPUCommandQueue> m_ComputeCommandQueue;
+    DeviceType m_Device;
+    unsigned m_Width;
+    unsigned m_Height;
+    std::shared_ptr<GPUCommandQueue> m_DirectCommandQueue;
+    std::shared_ptr<GPUCommandQueue> m_CopyCommandQueue;
+    std::shared_ptr<GPUCommandQueue> m_ComputeCommandQueue;
 
-    static inline std::unique_ptr<GPUSwapchain> m_Swapchain;
-    static inline std::array<ComPtr<ID3D12CommandAllocator>, m_FrameCount> m_CommandAllocators;
-    static inline Texture m_renderTargets[m_FrameCount];
+    std::unique_ptr<GPUSwapchain> m_Swapchain;
+    std::array<ComPtr<ID3D12CommandAllocator>, m_FrameCount> m_CommandAllocators;
+    Texture m_renderTargets[m_FrameCount];
 
-    static inline std::mutex lockForTextureLoad;
-    static inline uint64_t m_FenceValues[m_FrameCount] = {};
-    static inline D3D_ROOT_SIGNATURE_VERSION m_FeatureData;
+    std::mutex lockForTextureLoad;
+    uint64_t m_FenceValues[m_FrameCount] = {};
+    D3D_ROOT_SIGNATURE_VERSION m_FeatureData;
 
 #if (USE_NSIGHT_AFTERMATH)
-    // App-managed marker functionality
-    static inline UINT64 m_frameCounter;
-    static inline GpuCrashTracker::MarkerMap m_markerMap;
+    UINT64 m_frameCounter;
+    GpuCrashTracker::MarkerMap m_markerMap;
 
-    // Nsight Aftermath instrumentation
-    static inline GFSDK_Aftermath_ContextHandle m_hAftermathCommandListContext;
-    static inline GpuCrashTracker *m_gpuCrashTracker;
+    GFSDK_Aftermath_ContextHandle m_hAftermathCommandListContext;
+    GpuCrashTracker *m_gpuCrashTracker;
 #endif
 
-    static inline GPUSupport m_DeviceSupport;
-    static inline D3D12_VIEWPORT m_Viewport;
-    static inline D3D12_RECT m_ScissorRect;
-    static inline std::shared_ptr<Texture> m_DepthBuffer;
-    static inline std::shared_ptr<DirectX::GraphicsMemory> m_GraphicsMemory;
+    GPUSupport m_DeviceSupport;
+    D3D12_VIEWPORT m_Viewport;
+    D3D12_RECT m_ScissorRect;
+    std::shared_ptr<Texture> m_DepthBuffer;
+    std::shared_ptr<DirectX::GraphicsMemory> m_GraphicsMemory;
 
-    static inline std::unique_ptr<DirectX::DescriptorPile> m_ResourceDescriptors[(int)eHeapTypes::HEAP_COUNT];
-    static inline std::array<size_t, (int)eHeapTypes::HEAP_COUNT> m_HeapSizes;
+    std::unique_ptr<DirectX::DescriptorPile> m_ResourceDescriptors[(int)eHeapTypes::HEAP_COUNT];
+    std::array<size_t, (int)eHeapTypes::HEAP_COUNT> m_HeapSizes;
 };
 
 template <typename vertexType>

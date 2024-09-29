@@ -19,7 +19,7 @@ class CustomFuncWindow : public EditorWindow
 
         if (!m_Func)
         {
-            Logger::Err("CustomFuncWindow::CustomFuncWindow: m_Func is empty");
+            Logger.Err("CustomFuncWindow::CustomFuncWindow: m_Func is empty");
         }
     };
 

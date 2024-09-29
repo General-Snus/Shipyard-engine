@@ -176,7 +176,7 @@ namespace Helpers
 		if (!FAILED(hr))
 		{
 			auto err = DX::com_exception(hr);
-			Logger::Err(err.what());
+			Logger.Err(err.what());
 			throw err;
 		}
 	}

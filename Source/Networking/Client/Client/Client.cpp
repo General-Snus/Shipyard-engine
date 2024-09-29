@@ -15,9 +15,11 @@ Client::~Client() = default;
 
 void Client::Setup()
 {
-    while (!SetupConnection())
+    int attemptLimit = 3;
+    while (!SetupConnection() && attemptLimit > 0)
     {
-        Logger::Log("Failed to setup connection try again");
+        Logger.Log("Failed to setup connection try again");
+        attemptLimit++;
     }
 }
 
@@ -32,13 +34,13 @@ void Client::Update()
     // switch (static_cast<NetMessageType>(inbound[0]))
     //{
     // case NetMessageType::None:
-    //     Logger::Log("MessageType was none");
+    //     Logger.Log("MessageType was none");
     //     break;
     // case NetMessageType::ChatMessage: {
     //     ChatMessage *message = reinterpret_cast<ChatMessage *>(&inbound);
     //
     //     /*std::cout << message->ReadMessage() << std::endl;*/
-    //     Editor::Get().myChatMessages.emplace_back(message->ReadMessage());
+    //     EditorInstance.myChatMessages.emplace_back(message->ReadMessage());
     // }
     // break;
     // case NetMessageType::Handshake: {
@@ -82,7 +84,7 @@ void Client::Update()
     //     //
     //     //         std::shared_ptr<MaterialAsset> material = std::make_shared<MaterialAsset>(L"TestMaterial", L"");
     //     //         material->Init(mat);
-    //     //         AssetManager::Get().AddAsset(material);
+    //     //         AssetManagerInstance.AddAsset(material);
     //     //         mesh->SetMaterial(material, 0);
     //     //         newObject.AddComponent(mesh);
     //     //
@@ -112,7 +114,7 @@ void Client::Update()
     // case NetMessageType::Count:
     //     break;
     // default:
-    //     Logger::Log("MessageType was undefined");
+    //     Logger.Log("MessageType was undefined");
     //     break;
     // }
 }
@@ -136,8 +138,6 @@ eNetMessageType Client::GetType()
     return static_cast<eNetMessageType>(inbound[0]);
 }
 
-
-
 char *Client::GetLatestMessage()
 {
     return inbound;
@@ -153,7 +153,7 @@ bool Client::SetupConnection()
 
     if (WSAStartup(MAKEWORD(2, 2), &data) != 0)
     {
-        Logger::Log("Wsa startup fail");
+        Logger.Log("Wsa startup fail");
         return false;
     }
 
@@ -161,7 +161,7 @@ bool Client::SetupConnection()
 
     if (mySocket == INVALID_SOCKET)
     {
-        Logger::Log("Could not create socket");
+        Logger.Log("Could not create socket");
         return false;
     }
 
@@ -176,7 +176,7 @@ bool Client::SetupConnection()
     in_addr address;
     if (inet_pton(AF_INET, ip.c_str(), &address) != 1)
     {
-        Logger::Log("Wrong IP");
+        Logger.Log("Wrong IP");
         return false;
     }
 
@@ -187,18 +187,18 @@ bool Client::SetupConnection()
 
     if (!SendOK())
     {
-        Logger::Log("Didnt Get response from server");
+        Logger.Log("Didnt Get response from server");
         return false;
     }
 
-    Logger::Log("Got ok from server");
+    Logger.Log("Got ok from server");
 
-    Logger::Log(".");
-    Logger::Log(".");
-    Logger::Log(".");
+    Logger.Log(".");
+    Logger.Log(".");
+    Logger.Log(".");
 
-    Logger::Log(std::format("Connected with ip: {} \t | On Port: {} ", ip, port));
-    Logger::Log("Init done");
+    Logger.Log(std::format("Connected with ip: {} \t | On Port: {} ", ip, port));
+    Logger.Log("Init done");
 
     return true;
 }
@@ -215,7 +215,7 @@ bool Client::SendOK()
 
     if (sendto(mySocket, outbound, 512, 0, reinterpret_cast<sockaddr *>(&myClient), sizeof(myClient)) == SOCKET_ERROR)
     {
-        Logger::Log("Failed to send");
+        Logger.Log("Failed to send");
     }
 
     unsigned long ul = 1;
@@ -226,7 +226,7 @@ bool Client::SendOK()
     int iterations = 0;
     bool success = false;
 
-    Logger::Log("Trying to connect");
+    Logger.Log("Trying to connect");
     while (iterations < 100)
     {
         if (recvfrom(mySocket, outbound, 512, 0, (sockaddr *)&myClient, &myLength) != SOCKET_ERROR)
@@ -243,12 +243,12 @@ bool Client::SendOK()
     if (success)
     {
 
-        Logger::Log("Success recieving from server");
+        Logger.Log("Success recieving from server");
     }
     else
     {
 
-        Logger::Log("Could not recieve from server");
+        Logger.Log("Could not recieve from server");
     }
 
     HandshakeMessage *backMessage = reinterpret_cast<HandshakeMessage *>(&outbound);
@@ -269,7 +269,7 @@ bool Client::SendOK()
 void Client::InputIpAndPort(std::string &outIp, short &outPort)
 {
     std::cin.clear();
-    Logger::Log("Input a Ip Adress (enter 0 for default 127.0.0.1) ");
+    Logger.Log("Input a Ip Adress (enter 0 for default 127.0.0.1) ");
     std::cin >> outIp;
 
     if (outIp == "0")
@@ -279,7 +279,7 @@ void Client::InputIpAndPort(std::string &outIp, short &outPort)
 
     std::cin.clear();
 
-    Logger::Log("Input a port (enter 0 for default 27015) ");
+    Logger.Log("Input a port (enter 0 for default 27015) ");
     std::cin >> outPort;
 
     if (outPort == 0)
@@ -310,7 +310,7 @@ void Client::Send(const std::string &aMessage)
         if (sendto(mySocket, outbound, MAX_NETMESSAGE_SIZE, 0, reinterpret_cast<sockaddr *>(&myClient),
                    sizeof(myClient)) == SOCKET_ERROR)
         {
-            Logger::Log("Failed to send");
+            Logger.Log("Failed to send");
         }
     }
 
@@ -325,6 +325,6 @@ void Client::Send(const std::string &aMessage)
         sendto(mySocket, outbound, MAX_NETMESSAGE_SIZE, 0, reinterpret_cast<sockaddr *>(&myClient), sizeof(myClient));
     if (result == SOCKET_ERROR)
     {
-        Logger::Log("Failed to send");
+        Logger.Log("Failed to send");
     }
 }

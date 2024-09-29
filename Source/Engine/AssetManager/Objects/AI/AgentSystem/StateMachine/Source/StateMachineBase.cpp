@@ -6,7 +6,7 @@ void StateMachineBase::Update(GameObject input)
 {
     if (myCurrentState != -1)
     {
-        mySavedStates.at(myCurrentState)->Update(Timer::GetDeltaTime(), input);
+        mySavedStates.at(myCurrentState)->Update(TimerInstance.GetDeltaTime(), input);
     }
 }
 
@@ -19,7 +19,7 @@ void StateMachineBase::ChangeState(int aStateID)
     assert(mySavedStates.find(aStateID) != mySavedStates.end() && "State does not exist");
     myCurrentState = aStateID;
     mySavedStates.at(myCurrentState)->Enter();
-    Logger::Log(std::format("Entered {} state", magic_enum::enum_name((eStates)myCurrentState)));
+    Logger.Log(std::format("Entered {} state", magic_enum::enum_name((eStates)myCurrentState)));
 }
 
 void StateMachineBase::AddState(int aStateID, std::shared_ptr<StateBase> arg)

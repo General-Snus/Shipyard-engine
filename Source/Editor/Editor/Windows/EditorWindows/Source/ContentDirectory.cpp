@@ -25,7 +25,7 @@
 
 ContentDirectory::ContentDirectory() : m_CurrentPath(AssetManager::AssetPath)
 {
-    Editor::Get().m_Callbacks[EditorCallback::WM_DropFile].AddListener([this]() { this->WMDroppedFile(); });
+    EditorInstance.m_Callbacks[EditorCallback::WM_DropFile].AddListener([this]() { this->WMDroppedFile(); });
 }
 
 void PopUpMenu()
@@ -36,7 +36,7 @@ void ContentDirectory::Node(const int index, const float cellWidth)
 {
     const std::filesystem::path &fullPath = m_CurrentDirectoryPaths[index].second;
 
-    const auto &path = std::filesystem::relative(fullPath, AssetManager::AssetPath);
+    const auto &path = std::filesystem::relative(fullPath, AssetManagerInstance.AssetPath);
     const auto &fileName = path.filename();
     const auto &extension = path.extension();
 
@@ -45,7 +45,7 @@ void ContentDirectory::Node(const int index, const float cellWidth)
     if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
     {
         const std::string payload = path.string();
-        ImGui::SetDragDropPayload(std::format("ContentAsset_{}", AssetManager::AssetType(path)).c_str(),
+        ImGui::SetDragDropPayload(std::format("ContentAsset_{}", AssetManagerInstance.AssetType(path)).c_str(),
                                   payload.c_str(), payload.size());
         ImGui::Text(fullPath.stem().string().c_str());
         ImGui::EndDragDropSource();
@@ -72,11 +72,11 @@ void ContentDirectory::Node(const int index, const float cellWidth)
         }
         if (ImGui::Selectable("Open"))
         {
-            if (auto asset = AssetManager::TryLoadAsset(path))
+          if (auto asset = AssetManagerInstance.TryLoadAsset(path))
             {
                 auto newWindow = std::make_shared<CustomFuncWindow>(std::bind(&AssetBase::InspectorView, asset));
                 newWindow->SetWindowName(asset->GetAssetPath().filename().string());
-                Editor::Get().g_EditorWindows.emplace_back(newWindow);
+                EditorInstance.g_EditorWindows.emplace_back(newWindow);
             }
         }
         if (ImGui::Selectable("Open External"))
@@ -109,7 +109,7 @@ void ContentDirectory::Node(const int index, const float cellWidth)
         ImGui::Separator();
         if (ImGui::Selectable("ReImport"))
         {
-            if (auto asset = AssetManager::TryLoadAsset(path))
+          if (auto asset = AssetManagerInstance.TryLoadAsset(path))
             {
                 asset->Init();
             }
@@ -174,7 +174,7 @@ void ContentDirectory::RenderImGUi()
 
     if (ImGui::IsWindowFocused() && Input::IsKeyHeld(Keys::CONTROL))
     {
-        cellSize += Input::GetMouseWheelDelta() * Timer::GetDeltaTime();
+        cellSize += Input::GetMouseWheelDelta() * TimerInstance.GetDeltaTime();
         cellSize = std::clamp(cellSize, 50.f, 300.f);
     }
     auto const &style = ImGui::GetStyle();
@@ -249,7 +249,7 @@ void ContentDirectory::DoMoveOperation()
         isLookingForHovered = false;
     }
 
-    auto &paths = Editor::Get().WM_DroppedPath;
+    auto &paths = EditorInstance.WM_DroppedPath;
 
     for (auto &pathToMoveFrom : paths | std::ranges::views::reverse)
     {
@@ -301,7 +301,7 @@ void ContentDirectory::DoMoveOperation()
             }
             catch (std::filesystem::filesystem_error &e)
             {
-                Logger::Err(e.what());
+                Logger.Err(e.what());
             }
             paths.pop_back();
         }
@@ -323,21 +323,21 @@ std::shared_ptr<TextureHolder> ContentDirectory::IconFromExtension(const std::fi
     std::shared_ptr<TextureHolder> imageTexture;
     if (std::filesystem::is_directory(fullPath))
     {
-        imageTexture = AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/Folder.png");
+        imageTexture = AssetManagerInstance.LoadAsset<TextureHolder>("Textures/Widgets/Folder.png");
     }
 
     else if (extension == ".dds" || extension == ".png" || extension == ".hdr" || extension == ".jpg")
     {
-        imageTexture = AssetManager::Get().LoadAsset<TextureHolder>(path);
+        imageTexture = AssetManagerInstance.LoadAsset<TextureHolder>(path);
         if (!imageTexture->isLoadedComplete)
         {
-            imageTexture = AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+            imageTexture = AssetManagerInstance.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
         }
     }
 
     else if (extension == ".fbx")
     {
-        std::shared_ptr<Mesh> mesh = AssetManager::Get().LoadAsset<Mesh>(path);
+        std::shared_ptr<Mesh> mesh = AssetManagerInstance.LoadAsset<Mesh>(path);
         if (mesh && mesh->isLoadedComplete)
         {
             imageTexture = mesh->GetEditorIcon();
@@ -346,7 +346,7 @@ std::shared_ptr<TextureHolder> ContentDirectory::IconFromExtension(const std::fi
 
     else if (extension == ".json")
     {
-        std::shared_ptr<Material> materialPreview = AssetManager::Get().LoadAsset<Material>(path);
+        std::shared_ptr<Material> materialPreview = AssetManagerInstance.LoadAsset<Material>(path);
         if (materialPreview && materialPreview->isLoadedComplete)
         {
             imageTexture = materialPreview->GetEditorIcon();
@@ -355,17 +355,17 @@ std::shared_ptr<TextureHolder> ContentDirectory::IconFromExtension(const std::fi
 
     else if (extension == ".Graph")
     {
-        imageTexture = AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/Graph.png");
+        imageTexture = AssetManagerInstance.LoadAsset<TextureHolder>("Textures/Widgets/Graph.png");
     }
 
     else if (extension == ".cso" || extension == ".hlsl")
     {
-        imageTexture = AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+        imageTexture = AssetManagerInstance.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
     }
 
     if (!imageTexture)
     {
-        imageTexture = AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+        imageTexture = AssetManagerInstance.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
     }
 
     return imageTexture;
@@ -413,7 +413,7 @@ void ContentDirectory::DirectoryBar()
 
 void ContentDirectory::WMDroppedFile()
 {
-    auto path = Editor::Get().WM_DroppedPath;
+    auto path = EditorInstance.WM_DroppedPath;
     if (!path.empty())
     {
         isLookingForHovered = true;

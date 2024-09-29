@@ -29,7 +29,7 @@ inline bool AssetBase::InspectorView()
     bool isOpened = false;
 
     float size = ImGui::CalcTextSize("A").y;
-    ImGui::Image(GraphicsEngine::Get().GetDefaultTexture(eTextureType::ColorMap), ImVec2(size, size), ImVec2(0, 0),
+    ImGui::Image(GraphicsEngineInstance.GetDefaultTexture(eTextureType::ColorMap), ImVec2(size, size), ImVec2(0, 0),
                  ImVec2(1, 1), color);
     ImGui::SameLine();
     isOpened =
@@ -40,7 +40,7 @@ inline bool AssetBase::InspectorView()
 
 std::shared_ptr<TextureHolder> AssetBase::GetEditorIcon()
 {
-    const auto file = AssetManager::Get().LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+    const auto file = AssetManagerInstance.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
 
     if (file)
     {
@@ -48,6 +48,6 @@ std::shared_ptr<TextureHolder> AssetBase::GetEditorIcon()
     }
     else
     {
-        return GraphicsEngine::Get().GetDefaultTexture(eTextureType::ColorMap);
+        return GraphicsEngineInstance.GetDefaultTexture(eTextureType::ColorMap);
     }
 }

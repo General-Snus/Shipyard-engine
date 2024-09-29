@@ -48,9 +48,9 @@ inline bool ImGuiReflect(Color &ref, const std::string &identifier)
     // if address of ref have a corresponding blend or mix, use that one,
 
     static std::vector<std::string> keys;
-    keys.reserve(ColorManager::m_NamedColor.size());
+    keys.reserve(ColorManagerInstance.m_NamedColor.size());
     keys.clear();
-    for (const auto &key : ColorManager::m_NamedColor | std::ranges::views::keys)
+    for (const auto &key : ColorManagerInstance.m_NamedColor | std::ranges::views::keys)
     {
         keys.push_back(key);
     }
@@ -74,8 +74,8 @@ inline bool ImGuiReflect(Color &ref, const std::string &identifier)
         ImGui::SameLine();
         bool var1 = selected_item1 == -1 || keys.size() < selected_item1;
         bool var2 = selected_item2 == -1 || keys.size() < selected_item2;
-        Vector4f blend1 = var1 ? Vector4f(1, 1, 1, 1) : ColorManager::GetColor(keys.at(selected_item1));
-        Vector4f blend2 = var2 ? Vector4f(1, 1, 1, 1) : ColorManager::GetColor(keys.at(selected_item2));
+        Vector4f blend1 = var1 ? Vector4f(1, 1, 1, 1) : ColorManagerInstance.GetColor(keys.at(selected_item1));
+        Vector4f blend2 = var2 ? Vector4f(1, 1, 1, 1) : ColorManagerInstance.GetColor(keys.at(selected_item2));
 
         Vector4f color = Color::RGBLerp(blend1, blend2, blendFactor);
         if (changed)
@@ -87,12 +87,12 @@ inline bool ImGuiReflect(Color &ref, const std::string &identifier)
     }
     else
     {
-        int preSelected = static_cast<int>(
-            std::distance(ColorManager::m_NamedColor.begin(), ColorManager::m_NamedColor.find(ref.m_ColorName)));
+        int preSelected = static_cast<int>(std::distance(ColorManagerInstance.m_NamedColor.begin(),
+                                                         ColorManagerInstance.m_NamedColor.find(ref.m_ColorName)));
 
         static int selected_item1 = -1;
 
-        selected_item1 = preSelected != ColorManager::m_NamedColor.size() ? preSelected : -1;
+        selected_item1 = preSelected != ColorManagerInstance.m_NamedColor.size() ? preSelected : -1;
 
         if (ImGui::ComboAutoSelect("Preset", selected_item1, keys, item_getter1, autoselect_search_vector,
                                    ImGuiComboFlags_HeightSmall) &&

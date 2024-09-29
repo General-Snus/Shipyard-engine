@@ -56,7 +56,7 @@ bool TextureHolder::InspectorView()
 
 std::shared_ptr<TextureHolder> TextureHolder::GetEditorIcon()
 {
-    const auto file = AssetManager::Get().LoadAsset<TextureHolder>(AssetPath, true);
+    const auto file = AssetManagerInstance.LoadAsset<TextureHolder>(AssetPath, true);
 
     if (file)
     {
@@ -64,7 +64,7 @@ std::shared_ptr<TextureHolder> TextureHolder::GetEditorIcon()
     }
     else
     {
-        return GraphicsEngine::Get().GetDefaultTexture(eTextureType::ColorMap);
+        return GraphicsEngineInstance.GetDefaultTexture(eTextureType::ColorMap);
     }
 }
 
@@ -107,13 +107,13 @@ void TextureHolder::Init()
     {
         if (!std::filesystem::exists(AssetPath))
         {
-            if (!AssetManager::Get().AdaptPath(AssetPath))
+            if (!AssetManagerInstance.AdaptPath(AssetPath))
             {
                 const std::string msg = "Error: Coulnt load texture at " + AssetPath.string();
-                Logger::Err(msg);
-                if (GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
+                Logger.Err(msg);
+                if (GraphicsEngineInstance.GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
                 {
-                    RawTexture = GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture();
+                    RawTexture = GraphicsEngineInstance.GetDefaultTexture(this->textureType)->GetRawTexture();
                     isLoadedComplete = true;
                     return;
                 }
@@ -122,18 +122,18 @@ void TextureHolder::Init()
             }
         }
 
-        if (!GPU::LoadTexture(RawTexture.get(), AssetPath.wstring()))
+        if (!GPUInstance.LoadTexture(RawTexture.get(), AssetPath.wstring()))
         {
             const std::string msg = "Error: Coulnt dds texture at " + AssetPath.string();
-            Logger::Err(msg);
-            if (GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
+            Logger.Err(msg);
+            if (GraphicsEngineInstance.GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
             {
-                RawTexture = GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture();
+                RawTexture = GraphicsEngineInstance.GetDefaultTexture(this->textureType)->GetRawTexture();
                 isLoadedComplete = true;
                 RawTexture->SetView(ViewType::SRV);
                 return;
             }
-            Logger::Err("Error: Default texture was not found");
+            Logger.Err("Error: Default texture was not found");
 
             isLoadedComplete = false;
             return;
@@ -144,16 +144,16 @@ void TextureHolder::Init()
     else
     {
         const std::string msg = "Error: Coulnt load generic texture at " + AssetPath.string();
-        Logger::Err(msg);
+        Logger.Err(msg);
 
-        // if (GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
+        // if (GraphicsEngineInstance.GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
         //{
-        //	RawTexture = GraphicsEngine::Get().GetDefaultTexture(this->textureType)->GetRawTexture();
+        //	RawTexture = GraphicsEngineInstance.GetDefaultTexture(this->textureType)->GetRawTexture();
         //	isLoadedComplete = true;
         //	RawTexture->SetView(ViewType::SRV);
         //	return;
         // }
-        // Logger::Err("Error: Default texture was not found");
+        // Logger.Err("Error: Default texture was not found");
         isBeingLoaded = false;
         isLoadedComplete = false;
         return;

@@ -7,7 +7,7 @@
 #include <ostream>
 #include <sstream>
 
-std::string Logger::Timestamp()
+std::string LoggerService::Timestamp()
 {
     SYSTEMTIME st;
     GetLocalTime(&st);
@@ -22,7 +22,7 @@ std::string Logger::Timestamp()
     return result.str();
 }
 
-bool Logger::Create()
+bool LoggerService::Create()
 {
     isInitialized = true;
     SetConsoleHandle(GetConsoleWindow());
@@ -30,26 +30,26 @@ bool Logger::Create()
     return true;
 }
 
-void Logger::SetConsoleHandle(void *aHandle)
+void LoggerService::SetConsoleHandle(void *aHandle)
 {
     myHandle = aHandle;
 }
 
-void Logger::SetPrintToVSOutput(bool bNewValue)
+void LoggerService::SetPrintToVSOutput(bool bNewValue)
 {
     shouldPrintToOutput = bNewValue;
 }
 
-void Logger::Log(const char *aString, const std::source_location &location)
+void LoggerService::Log(const char *aString, const std::source_location &location)
 {
     Log(std::string(aString), location);
 }
 
-Color Logger::GetColor(LogType type)
+Color LoggerService::GetColor(LogType type)
 {
     switch (type)
     {
-        using enum Logger::LogType;
+        using enum LoggerService::LogType;
     case message:
         return Color(1.0f, 1.0f, 1.0f);
         break;
@@ -71,7 +71,7 @@ Color Logger::GetColor(LogType type)
     }
 }
 
-void Logger::Log(const std::string &aString, const std::source_location &location)
+void LoggerService::Log(const std::string &aString, const std::source_location &location)
 {
     if (isInitialized)
     {
@@ -101,7 +101,7 @@ void Logger::Log(const std::string &aString, const std::source_location &locatio
     }
 }
 
-void Logger::Warn(const std::string &aString, const std::source_location &location)
+void LoggerService::Warn(const std::string &aString, const std::source_location &location)
 {
     if (isInitialized)
     {
@@ -131,7 +131,7 @@ void Logger::Warn(const std::string &aString, const std::source_location &locati
     }
 }
 
-void Logger::Err(const std::string &aString, const std::source_location &location)
+void LoggerService::Err(const std::string &aString, const std::source_location &location)
 {
     if (isInitialized)
     {
@@ -165,7 +165,7 @@ void Logger::Err(const std::string &aString, const std::source_location &locatio
     }
 }
 
-void Logger::Succ(const std::string &aString, const std::source_location &location)
+void LoggerService::Succ(const std::string &aString, const std::source_location &location)
 {
     if (isInitialized)
     {
@@ -194,7 +194,7 @@ void Logger::Succ(const std::string &aString, const std::source_location &locati
     }
 }
 
-void Logger::Critical(const std::exception &anException, unsigned aLevel, const std::source_location &location)
+void LoggerService::Critical(const std::exception &anException, unsigned aLevel, const std::source_location &location)
 {
     if (isInitialized)
     {
@@ -244,7 +244,7 @@ void Logger::Critical(const std::exception &anException, unsigned aLevel, const 
 
 // Critical error will proberly throw somewhere close, if caught and handeled like by a script holder it can still print
 // what went bad
-void Logger::Critical(const std::string &anExceptionText, unsigned aLevel, const std::source_location &location)
+void LoggerService::Critical(const std::string &anExceptionText, unsigned aLevel, const std::source_location &location)
 {
     if (isInitialized)
     {
@@ -280,7 +280,7 @@ void Logger::Critical(const std::string &anExceptionText, unsigned aLevel, const
     }
 }
 
-void Logger::NewLine()
+void LoggerService::NewLine()
 {
     std::cout << std::endl;
 }

@@ -54,7 +54,7 @@ void GPURootSignature::SetRootSignatureDesc(const D3D12_ROOT_SIGNATURE_DESC1& ro
 {
 	Destroy();
 
-	auto device = GPU::m_Device;
+	auto device = GPUInstance.m_Device;
 
 	UINT numParameters = rootSignatureDesc.NumParameters;
 	D3D12_ROOT_PARAMETER1* pParameters = numParameters > 0 ? new D3D12_ROOT_PARAMETER1[numParameters] : nullptr;
@@ -127,7 +127,7 @@ void GPURootSignature::SetRootSignatureDesc(const D3D12_ROOT_SIGNATURE_DESC1& ro
 		rootSignatureVersion,&rootSignatureBlob,&errorBlob)))
 	{
 		std::string errorString = (char*)errorBlob->GetBufferPointer();
-		Logger::Err(errorString);
+		Logger.Err(errorString);
 		throw std::exception(errorString.c_str());
 	}
 
