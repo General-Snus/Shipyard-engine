@@ -8,6 +8,21 @@
 
 namespace ImGui
 {
+class ImGuiContextHolder : public Singleton
+{
+  public:
+    ImGuiContext *ctx;
+    ImGuiMemAllocFunc v1;
+    ImGuiMemFreeFunc v2;
+    void *v3;
+};
+
+inline void InitializeOnNewContext(ImGuiContextHolder &context)
+{
+    ImGui::SetCurrentContext(context.ctx);
+    ImGui::SetAllocatorFunctions(context.v1, context.v2, context.v3);
+}
+
 inline bool BeginMainMenuBar(int barNumber)
 {
     if (barNumber == 0)

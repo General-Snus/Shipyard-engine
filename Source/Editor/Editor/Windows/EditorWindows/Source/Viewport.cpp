@@ -397,32 +397,32 @@ void Viewport::RenderToolbar()
 
 void Viewport::TakeInput()
 {
-    if (Input::IsKeyPressed(Keys::G))
+    if (Input.IsKeyPressed(Keys::G))
     {
         m_CurrentGizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
     }
 
-    if (Input::IsKeyPressed(Keys::R))
+    if (Input.IsKeyPressed(Keys::R))
     {
         m_CurrentGizmoOperation = ImGuizmo::OPERATION::ROTATE;
     }
 
-    if (Input::IsKeyPressed(Keys::S))
+    if (Input.IsKeyPressed(Keys::S))
     {
         m_CurrentGizmoOperation = ImGuizmo::OPERATION::SCALE;
     }
 
-    if (Input::IsKeyPressed(Keys::B))
+    if (Input.IsKeyPressed(Keys::B))
     {
         m_CurrentGizmoOperation = ImGuizmo::OPERATION::BOUNDS;
     }
 
-    if (Input::IsKeyPressed(Keys::V))
+    if (Input.IsKeyPressed(Keys::V))
     {
         m_CurrentGizmoMode = static_cast<ImGuizmo::MODE>(!static_cast<bool>(m_CurrentGizmoMode));
     }
 
-    if (Input::IsKeyPressed(Keys::X))
+    if (Input.IsKeyPressed(Keys::X))
     {
         if (m_CurrentGizmoOperation & ImGuizmo::OPERATION::TRANSLATE)
         {
@@ -438,7 +438,7 @@ void Viewport::TakeInput()
         }
     }
 
-    if (Input::IsKeyPressed(Keys::Y))
+    if (Input.IsKeyPressed(Keys::Y))
     {
         if (m_CurrentGizmoOperation & ImGuizmo::OPERATION::TRANSLATE)
         {
@@ -454,7 +454,7 @@ void Viewport::TakeInput()
         }
     }
 
-    if (Input::IsKeyPressed(Keys::Z))
+    if (Input.IsKeyPressed(Keys::Z))
     {
         if (m_CurrentGizmoOperation & ImGuizmo::OPERATION::TRANSLATE)
         {

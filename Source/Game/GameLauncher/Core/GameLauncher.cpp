@@ -68,6 +68,7 @@ void YourGameLauncher::Update(float delta)
 void YourGameLauncher::SyncServices(ServiceLocator &serviceLocator)
 {
     ServiceLocator::SyncInstances(serviceLocator);
+    ImGui::InitializeOnNewContext(serviceLocator.GetService<ImGui::ImGuiContextHolder>());
 };
 
 extern "C" BOOL WINAPI DllMain(HINSTANCE const instance, // handle to DLL module

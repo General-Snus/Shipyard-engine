@@ -234,19 +234,10 @@ std::unique_ptr<PSO> PSOCache::CreatePSO(const std::filesystem::path &vertexShad
         auto blob = (ID3DBlob *)pso->m_vs->GetBlob();
         stream.VS = CD3DX12_SHADER_BYTECODE(blob);
     }
-    else
-    {
-        // __debugbreak();
-    }
-
     if (AssetManagerInstance.ForceLoadAsset<ShipyardShader>(pixelShader.string(), pso->m_ps))
     {
         auto blob = (ID3DBlob *)pso->m_ps->GetBlob();
         stream.PS = CD3DX12_SHADER_BYTECODE(blob);
-    }
-    else
-    {
-        //__debugbreak();
     }
 
     stream.RTVFormats = rtvFormats;

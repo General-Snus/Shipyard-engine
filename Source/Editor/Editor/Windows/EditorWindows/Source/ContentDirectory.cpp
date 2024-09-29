@@ -172,9 +172,9 @@ void ContentDirectory::RenderImGUi()
         });
     }
 
-    if (ImGui::IsWindowFocused() && Input::IsKeyHeld(Keys::CONTROL))
+    if (ImGui::IsWindowFocused() && Input.IsKeyHeld(Keys::CONTROL))
     {
-        cellSize += Input::GetMouseWheelDelta() * TimerInstance.GetDeltaTime();
+        cellSize += Input.GetMouseWheelDelta() * TimerInstance.GetDeltaTime();
         cellSize = std::clamp(cellSize, 50.f, 300.f);
     }
     auto const &style = ImGui::GetStyle();

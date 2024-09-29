@@ -385,6 +385,14 @@ bool Editor::Initialize(HWND aHandle)
     LoadFont();
     SetupImGuiStyle();
 
+    // Set up imgui for multi context enviroment
+    // This will have to be set in the init for every new context that is
+    // loaded. You can acuire the data from the service locator
+    auto &var = ServiceLocator::Instance().ProvideService<ImGui::ImGuiContextHolder>();
+    var.ctx = ImGui::GetCurrentContext();
+    ImGui::GetAllocatorFunctions(&var.v1, &var.v2, &var.v3);
+    // End
+
 #if PHYSX
     physicsSystem.InitializePhysx();
 #endif // PHYSX 0
@@ -459,7 +467,7 @@ void Editor::DoWinProc(const MSG &aMessage)
         break;
     }
 
-    Input::UpdateEvents(aMessage.message, aMessage.wParam, aMessage.lParam);
+    Input.UpdateEvents(aMessage.message, aMessage.wParam, aMessage.lParam);
 
     extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
     if (ImGui_ImplWin32_WndProcHandler(aMessage.hwnd, aMessage.message, aMessage.wParam, aMessage.lParam))
@@ -482,7 +490,7 @@ int Editor::Run()
         Update();
         Render();
     }
-    Input::Update();
+    Input.Update();
     return 0;
 }
 
@@ -497,10 +505,10 @@ void Editor::UpdateImGui()
     ImGui::DockSpaceOverViewport();
     TopBar();
 
-    if (Input::IsKeyHeld(Keys::CONTROL) && Input::IsKeyPressed(Keys::Z))
+    if (Input.IsKeyHeld(Keys::CONTROL) && Input.IsKeyPressed(Keys::Z))
     {
 
-        if (Input::IsKeyHeld(Keys::SHIFT))
+        if (Input.IsKeyHeld(Keys::SHIFT))
         {
             CommandBuffer::MainEditorCommandBuffer().Redo();
         }
@@ -610,21 +618,21 @@ void Editor::Update()
     SystemCollection::UpdateSystems(delta);
 
     // Editor key checks
-    if (Input::IsKeyPressed(Keys::F) && m_SelectedGameObjects.size() > 0)
+    if (Input.IsKeyPressed(Keys::F) && m_SelectedGameObjects.size() > 0)
     {
         FocusObject(m_SelectedGameObjects[0]);
     }
 
-    if (Input::IsKeyHeld(Keys::CONTROL) && Input::IsKeyPressed(Keys::C))
+    if (Input.IsKeyHeld(Keys::CONTROL) && Input.IsKeyPressed(Keys::C))
     {
         Copy();
     }
-    if (Input::IsKeyHeld(Keys::CONTROL) && Input::IsKeyPressed(Keys::V))
+    if (Input.IsKeyHeld(Keys::CONTROL) && Input.IsKeyPressed(Keys::V))
     {
         Paste();
     }
 
-    if (Input::IsKeyPressed(Keys::F10))
+    if (Input.IsKeyPressed(Keys::F10))
     {
         AssetManagerInstance.ClearUnused();
     }

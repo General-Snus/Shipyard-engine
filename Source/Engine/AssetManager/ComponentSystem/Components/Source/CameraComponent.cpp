@@ -63,12 +63,12 @@ void Camera::Update()
     float rotationSpeed = 20000;
     const float mousePower = 50.f;
 
-    if (Input::IsKeyHeld(Keys::SHIFT))
+    if (Input.IsKeyHeld(Keys::SHIFT))
     {
         mdf = Vector3f();
     }
 
-    if (Input::IsKeyHeld(Keys::LCONTROL))
+    if (Input.IsKeyHeld(Keys::LCONTROL))
     {
         mdf = Vector3f();
         rotationSpeed = 0;
@@ -76,39 +76,39 @@ void Camera::Update()
 
     bool anyMouseKeyHeld = false;
 
-    if (Input::IsKeyHeld(Keys::MBUTTON))
+    if (Input.IsKeyHeld(Keys::MBUTTON))
     {
         anyMouseKeyHeld = true;
-        const Vector3f movementUp = GlobalUp * Input::GetMousePositionDelta().y * mousePower;
-        const Vector3f movementRight = aTransform.GetRight() * Input::GetMousePositionDelta().x * mousePower;
+        const Vector3f movementUp = GlobalUp * Input.GetMousePositionDelta().y * mousePower;
+        const Vector3f movementRight = aTransform.GetRight() * Input.GetMousePositionDelta().x * mousePower;
         aTransform.Move((movementUp + movementRight) * aTimeDelta * mdf);
     }
 
-    if (Input::IsKeyHeld(Keys::MOUSERBUTTON))
+    if (Input.IsKeyHeld(Keys::MOUSERBUTTON))
     {
         anyMouseKeyHeld = true;
         const Vector3f mouseDeltaVector = {
-            std::abs(Input::GetMousePositionDelta().y) > 0.001f ? -Input::GetMousePositionDelta().y : 0.f,
-            std::abs(Input::GetMousePositionDelta().x) > 0.001f ? Input::GetMousePositionDelta().x : 0.f, 0.0f};
+            std::abs(Input.GetMousePositionDelta().y) > 0.001f ? -Input.GetMousePositionDelta().y : 0.f,
+            std::abs(Input.GetMousePositionDelta().x) > 0.001f ? Input.GetMousePositionDelta().x : 0.f, 0.0f};
 
         aTransform.Rotate(mouseDeltaVector * rotationSpeed * aTimeDelta);
     }
 
-    if (Input::IsKeyHeld(Keys::MOUSELBUTTON))
+    if (Input.IsKeyHeld(Keys::MOUSELBUTTON))
     {
         anyMouseKeyHeld = true;
         const Vector3f mouseDeltaVector = {
-            0.0f, std::abs(Input::GetMousePositionDelta().x) > 0.001f ? Input::GetMousePositionDelta().x : 0.f, 0.0f};
+            0.0f, std::abs(Input.GetMousePositionDelta().x) > 0.001f ? Input.GetMousePositionDelta().x : 0.f, 0.0f};
         // Logger.Log(std::format("mouse delta x {}",mouseDeltaVector.y));
         aTransform.Rotate(mouseDeltaVector * rotationSpeed * aTimeDelta);
 
         Vector3f newForward = aTransform.GetForward() + aTransform.GetUp();
         newForward.y = 0;
         newForward.Normalize();
-        aTransform.Move(newForward * Input::GetMousePositionDelta().y * mousePower * aTimeDelta * mdf);
+        aTransform.Move(newForward * Input.GetMousePositionDelta().y * mousePower * aTimeDelta * mdf);
     }
 
-    if (Input::GetMouseWheelDelta() > Input::g_MouseWheelDeadZone)
+    if (Input.GetMouseWheelDelta() > Input.g_MouseWheelDeadZone)
     {
         if (anyMouseKeyHeld)
         {
@@ -120,7 +120,7 @@ void Camera::Update()
             aTransform.Move(aTransform.GetForward() * 5.0f * aTimeDelta * mdf);
         }
     }
-    if (Input::GetMouseWheelDelta() < -Input::g_MouseWheelDeadZone)
+    if (Input.GetMouseWheelDelta() < -Input.g_MouseWheelDeadZone)
     {
         if (anyMouseKeyHeld)
         {
@@ -133,35 +133,35 @@ void Camera::Update()
     }
     if (anyMouseKeyHeld)
     {
-        if (Input::IsKeyHeld(Keys::W))
+        if (Input.IsKeyHeld(Keys::W))
         {
             aTransform.Move(aTransform.GetForward() * aTimeDelta * mdf);
         }
-        if (Input::IsKeyHeld(Keys::S))
+        if (Input.IsKeyHeld(Keys::S))
         {
             aTransform.Move(-aTransform.GetForward() * aTimeDelta * mdf);
         }
-        if (Input::IsKeyHeld(Keys::D))
+        if (Input.IsKeyHeld(Keys::D))
         {
             aTransform.Move(aTransform.GetRight() * aTimeDelta * mdf);
         }
-        if (Input::IsKeyHeld(Keys::A))
+        if (Input.IsKeyHeld(Keys::A))
         {
             aTransform.Move(-aTransform.GetRight() * aTimeDelta * mdf);
         }
 
-        if (Input::IsKeyHeld(Keys::E))
+        if (Input.IsKeyHeld(Keys::E))
         {
             aTransform.Move(GlobalUp * aTimeDelta * mdf);
         }
 
-        if (Input::IsKeyHeld(Keys::Q))
+        if (Input.IsKeyHeld(Keys::Q))
         {
             aTransform.Move(-GlobalUp * aTimeDelta * mdf);
         }
     }
 #ifdef Flashlight
-    if (Input::GetInstance().IsKeyPressed((int)Keys::F))
+    if (Input.GetInstance().IsKeyPressed((int)Keys::F))
     {
         GetComponent<Light>().BindDirectionToTransform(!GetComponent<Light>().GetIsBound());
     }

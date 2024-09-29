@@ -190,7 +190,7 @@ void Hierarchy::RenderNode(Transform &transform)
                 EditorInstance.m_Callbacks[EditorCallback::ObjectSelected].Invoke();
 
                 auto &refSelected = EditorInstance.GetSelectedGameObjects();
-                !Input::IsKeyHeld(Keys::SHIFT) ? refSelected.clear() : __nop();
+                !Input.IsKeyHeld(Keys::SHIFT) ? refSelected.clear() : __nop();
                 refSelected.push_back(Scene::ActiveManager().GetGameObject(id));
             }
         }

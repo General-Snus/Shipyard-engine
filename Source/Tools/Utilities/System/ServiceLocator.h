@@ -38,8 +38,7 @@ class ServiceLocator
         auto it = services.find(std::type_index(typeid(T)));
         if (it == services.end())
         {
-            auto service = std::make_unique<T>();
-            services[std::type_index(typeid(T))] = std::move(service);
+            return ProvideService<T>();
         }
         return *static_cast<T *>(services[std::type_index(typeid(T))].get());
     }
