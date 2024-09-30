@@ -229,12 +229,12 @@ std::unique_ptr<PSO> PSOCache::CreatePSO(const std::filesystem::path &vertexShad
     stream.pRootSignature = m_RootSignature->GetRootSignature().Get();
     stream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
-    if (AssetManagerInstance.ForceLoadAsset<ShipyardShader>(vertexShader.string(), pso->m_vs))
+    if (EngineResources.ForceLoadAsset<ShipyardShader>(vertexShader.string(), pso->m_vs))
     {
         auto blob = (ID3DBlob *)pso->m_vs->GetBlob();
         stream.VS = CD3DX12_SHADER_BYTECODE(blob);
     }
-    if (AssetManagerInstance.ForceLoadAsset<ShipyardShader>(pixelShader.string(), pso->m_ps))
+    if (EngineResources.ForceLoadAsset<ShipyardShader>(pixelShader.string(), pso->m_ps))
     {
         auto blob = (ID3DBlob *)pso->m_ps->GetBlob();
         stream.PS = CD3DX12_SHADER_BYTECODE(blob);

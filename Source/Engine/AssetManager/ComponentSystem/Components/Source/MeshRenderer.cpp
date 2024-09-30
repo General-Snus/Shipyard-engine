@@ -17,19 +17,19 @@
 
 MeshRenderer::MeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager) : Component(anOwnerId, aManager)
 {
-    m_Mesh = AssetManagerInstance.LoadAsset<Mesh>("default.fbx");
+    m_Mesh = EngineResources.LoadAsset<Mesh>("default.fbx");
 }
 
 inline MeshRenderer::MeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager,
                                     const std::filesystem::path &aFilePath, bool useExact)
     : Component(anOwnerId, aManager)
 {
-    m_Mesh = AssetManagerInstance.LoadAsset<Mesh>(aFilePath, useExact);
+    m_Mesh = EngineResources.LoadAsset<Mesh>(aFilePath, useExact);
 }
 
 void MeshRenderer::SetNewMesh(const std::filesystem::path &aFilePath)
 {
-    m_Mesh = AssetManagerInstance.LoadAsset<Mesh>(aFilePath);
+    m_Mesh = EngineResources.LoadAsset<Mesh>(aFilePath);
 }
 
 void MeshRenderer::SetNewMesh(std::shared_ptr<Mesh> aMesh)
@@ -39,12 +39,12 @@ void MeshRenderer::SetNewMesh(std::shared_ptr<Mesh> aMesh)
 
 void MeshRenderer::SetMaterialPath(const std::filesystem::path &aFilePath)
 {
-    SetMaterial(AssetManagerInstance.LoadAsset<Material>(aFilePath), 0);
+    SetMaterial(EngineResources.LoadAsset<Material>(aFilePath), 0);
 }
 
 void MeshRenderer::SetMaterialPath(const std::filesystem::path &aFilePath, int elementIndex)
 {
-    SetMaterial(AssetManagerInstance.LoadAsset<Material>(aFilePath), elementIndex);
+    SetMaterial(EngineResources.LoadAsset<Material>(aFilePath), elementIndex);
 }
 
 void MeshRenderer::SetMaterial(const std::shared_ptr<Material> aMaterial)
@@ -261,14 +261,14 @@ cSkeletalMeshRenderer::cSkeletalMeshRenderer(const SY::UUID anOwnerId, GameObjec
                                              const std::filesystem::path &aFilePath)
     : MeshRenderer(anOwnerId, aManager, aFilePath)
 {
-    mySkeleton = AssetManagerInstance.LoadAsset<Skeleton>(aFilePath);
+    mySkeleton = EngineResources.LoadAsset<Skeleton>(aFilePath);
     assert(mySkeleton);
 }
 
 void cSkeletalMeshRenderer::SetNewMesh(const std::filesystem::path &aFilePath)
 {
-    m_Mesh = AssetManagerInstance.LoadAsset<Mesh>(aFilePath);
-    mySkeleton = AssetManagerInstance.LoadAsset<Skeleton>(aFilePath);
+    m_Mesh = EngineResources.LoadAsset<Mesh>(aFilePath);
+    mySkeleton = EngineResources.LoadAsset<Skeleton>(aFilePath);
 }
 
 void cSkeletalMeshRenderer::Render()

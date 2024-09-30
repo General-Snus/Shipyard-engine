@@ -56,7 +56,7 @@ bool TextureHolder::InspectorView()
 
 std::shared_ptr<TextureHolder> TextureHolder::GetEditorIcon()
 {
-    const auto file = AssetManagerInstance.LoadAsset<TextureHolder>(AssetPath, true);
+    const auto file = EngineResources.LoadAsset<TextureHolder>(AssetPath, true);
 
     if (file)
     {
@@ -107,7 +107,7 @@ void TextureHolder::Init()
     {
         if (!std::filesystem::exists(AssetPath))
         {
-            if (!AssetManagerInstance.AdaptPath(AssetPath))
+            if (!EngineResources.AdaptPath(AssetPath))
             {
                 const std::string msg = "Error: Coulnt load texture at " + AssetPath.string();
                 Logger.Err(msg);

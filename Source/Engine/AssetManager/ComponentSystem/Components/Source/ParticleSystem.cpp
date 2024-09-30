@@ -10,7 +10,7 @@
 //{
 //	aFilePath;
 //	//myEmitters.reserve(1);
-//	//AssetManager::GetInstance().LoadAsset<ParticleEmitter>(aFilePath,myEmitters[0]);
+//	//EngineResourceLoader::GetInstance().LoadAsset<ParticleEmitter>(aFilePath,myEmitters[0]);
 //}
 //
 //void ParticleSystem::Draw()

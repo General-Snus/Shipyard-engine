@@ -35,7 +35,7 @@ void ColorManager::InitializeDefaultColors()
 
 void ColorManager::LoadColorsFromFile(const std::filesystem::path &path)
 {
-    auto contentPath = AssetManager::AssetPath / path;
+    auto contentPath = EngineResources.Directory() / path;
     if (!std::filesystem::exists(contentPath))
     {
         Logger.Warn("Color file not found: " + contentPath.string());
@@ -65,7 +65,7 @@ void ColorManager::LoadColorsFromFile(const std::filesystem::path &path)
 
 void ColorManager::DumpToFile(const std::filesystem::path &path)
 {
-    auto contentPath = AssetManager::AssetPath / path;
+    auto contentPath = EngineResources.Directory() / path;
 
     if (!std::filesystem::exists(contentPath))
     {
@@ -173,8 +173,7 @@ Color &Color::operator=(const std::string &hex)
 
 Vector4f Color::operator()() const
 {
-    return !m_ColorName.empty() ? ColorManagerInstance.GetColor(m_ColorName)
-                                : ColorManagerInstance.GetColor(m_Context);
+    return !m_ColorName.empty() ? ColorManagerInstance.GetColor(m_ColorName) : ColorManagerInstance.GetColor(m_Context);
 }
 
 Vector3f Color::GetRGB() const
@@ -199,8 +198,7 @@ bool Color::operator==(const Color &other) const
 
 Vector4f Color::GetRGBA() const
 {
-    return !m_ColorName.empty() ? ColorManagerInstance.GetColor(m_ColorName)
-                                : ColorManagerInstance.GetColor(m_Context);
+    return !m_ColorName.empty() ? ColorManagerInstance.GetColor(m_ColorName) : ColorManagerInstance.GetColor(m_Context);
 }
 
 float *Color::GetM_RGBA() const

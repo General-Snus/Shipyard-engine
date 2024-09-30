@@ -8,7 +8,7 @@
 
 bool SceneUtils::AddAssetToScene(const std::filesystem::path &aPath, const std::shared_ptr<Scene> &aScene)
 {
-    const std::string type = AssetManagerInstance.AssetType(aPath);
+    const std::string type = EngineResources.AssetType(aPath);
 
     if (type == "")
     {
@@ -45,7 +45,7 @@ bool SceneUtils::AddAssetToScene(const std::filesystem::path &aPath, const std::
 
 bool SceneUtils::AddAssetToObject(const std::filesystem::path &aPath, GameObject &aScene)
 {
-    const std::string type = AssetManagerInstance.AssetType(aPath);
+    const std::string type = EngineResources.AssetType(aPath);
 
     if (type == "")
     {

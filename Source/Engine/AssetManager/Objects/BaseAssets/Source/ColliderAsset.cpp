@@ -124,7 +124,7 @@ ColliderAssetPlanar::ColliderAssetPlanar(const std::shared_ptr<Mesh> &rf) : Coll
 }
 ColliderAssetPlanar::ColliderAssetPlanar(const std::filesystem::path &path) : ColliderAsset(eColliderType::PLANAR)
 {
-    AssetManagerInstance.ForceLoadAsset<Mesh>(path, aColliderMesh);
+    EngineResources.ForceLoadAsset<Mesh>(path, aColliderMesh);
     path;
     // assert(false && "Not implemented");
 }

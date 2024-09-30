@@ -22,7 +22,7 @@ cAnimator::cAnimator(const SY::UUID anOwnerId,GameObjectManager* aManager,const 
 	{
 		Logger.Err("cSkeletalMeshRenderer component does not have a skeleton");
 	}  
-	myAnimations.push_back(AssetManagerInstance.LoadAsset<Animation>(aFilePath));
+	myAnimations.push_back(EngineResources.LoadAsset<Animation>(aFilePath));
 }
 
 void cAnimator::Update()
@@ -67,7 +67,7 @@ void cAnimator::AddAnimation(std::shared_ptr<Animation> aAnimation)
 
 void cAnimator::AddAnimation(const std::filesystem::path& aFilePath)
 {
-	myAnimations.push_back(AssetManagerInstance.LoadAsset<Animation>(aFilePath));
+	myAnimations.push_back(EngineResources.LoadAsset<Animation>(aFilePath));
 }
 
 void cAnimator::SetHierarchy(unsigned int aBoneID,const Matrix& aParentMatrix)

@@ -84,7 +84,7 @@ void Client::Update()
     //     //
     //     //         std::shared_ptr<MaterialAsset> material = std::make_shared<MaterialAsset>(L"TestMaterial", L"");
     //     //         material->Init(mat);
-    //     //         AssetManagerInstance.AddAsset(material);
+    //     //         EngineResources.AddAsset(material);
     //     //         mesh->SetMaterial(material, 0);
     //     //         newObject.AddComponent(mesh);
     //     //

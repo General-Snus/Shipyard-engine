@@ -3,10 +3,10 @@
 #include <Tools/Utilities/Math.hpp>
 #include <Windows.h>
 #include <cassert>
+#include <map>
 #include <memory>
 #include <stdexcept>
 #include <typeindex>
-#include <unordered_map>
 
 // Plan B active, implement shared memory for this service locator
 
@@ -50,7 +50,7 @@ class ServiceLocator
     }
 
   private:
-    std::unordered_map<std::type_index, std::unique_ptr<Singleton>> services;
+    std::map<std::type_index, std::unique_ptr<Singleton>> services;
 
     static inline ServiceLocator *instance;
     static constexpr DWORD sharedMemorySize = 1024 * 1024;

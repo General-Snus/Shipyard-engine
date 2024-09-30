@@ -152,5 +152,5 @@ bool ShipyardShader::InspectorView()
 
 std::shared_ptr<TextureHolder> ShipyardShader::GetEditorIcon()
 {
-    return AssetManagerInstance.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+    return EngineResources.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
 }

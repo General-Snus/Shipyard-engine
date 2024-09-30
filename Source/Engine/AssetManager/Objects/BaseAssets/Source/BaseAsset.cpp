@@ -40,7 +40,7 @@ inline bool AssetBase::InspectorView()
 
 std::shared_ptr<TextureHolder> AssetBase::GetEditorIcon()
 {
-    const auto file = AssetManagerInstance.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+    const auto file = EngineResources.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
 
     if (file)
     {

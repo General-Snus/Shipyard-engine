@@ -23,7 +23,7 @@
 #include <Font/IconsFontAwesome5.h>
 #include <ShlObj.h>
 
-ContentDirectory::ContentDirectory() : m_CurrentPath(AssetManager::AssetPath)
+ContentDirectory::ContentDirectory() : m_CurrentPath(EngineResources.Directory())
 {
     EditorInstance.m_Callbacks[EditorCallback::WM_DropFile].AddListener([this]() { this->WMDroppedFile(); });
 }
@@ -36,7 +36,7 @@ void ContentDirectory::Node(const int index, const float cellWidth)
 {
     const std::filesystem::path &fullPath = m_CurrentDirectoryPaths[index].second;
 
-    const auto &path = std::filesystem::relative(fullPath, AssetManagerInstance.AssetPath);
+    const auto &path = std::filesystem::relative(fullPath, EngineResources.Directory());
     const auto &fileName = path.filename();
     const auto &extension = path.extension();
 
@@ -45,7 +45,7 @@ void ContentDirectory::Node(const int index, const float cellWidth)
     if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
     {
         const std::string payload = path.string();
-        ImGui::SetDragDropPayload(std::format("ContentAsset_{}", AssetManagerInstance.AssetType(path)).c_str(),
+        ImGui::SetDragDropPayload(std::format("ContentAsset_{}", EngineResources.AssetType(path)).c_str(),
                                   payload.c_str(), payload.size());
         ImGui::Text(fullPath.stem().string().c_str());
         ImGui::EndDragDropSource();
@@ -72,7 +72,7 @@ void ContentDirectory::Node(const int index, const float cellWidth)
         }
         if (ImGui::Selectable("Open"))
         {
-          if (auto asset = AssetManagerInstance.TryLoadAsset(path))
+          if (auto asset = EngineResources.TryLoadAsset(path))
             {
                 auto newWindow = std::make_shared<CustomFuncWindow>(std::bind(&AssetBase::InspectorView, asset));
                 newWindow->SetWindowName(asset->GetAssetPath().filename().string());
@@ -109,7 +109,7 @@ void ContentDirectory::Node(const int index, const float cellWidth)
         ImGui::Separator();
         if (ImGui::Selectable("ReImport"))
         {
-          if (auto asset = AssetManagerInstance.TryLoadAsset(path))
+          if (auto asset = EngineResources.TryLoadAsset(path))
             {
                 asset->Init();
             }
@@ -225,7 +225,7 @@ void ContentDirectory::FillPaths(const std::string &keyTerm)
     m_CurrentDirectoryPaths.clear();
     if (!keyTerm.empty())
     {
-        for (const auto &it : std::filesystem::recursive_directory_iterator(AssetManager::AssetPath))
+        for (const auto &it : std::filesystem::recursive_directory_iterator(EngineResources.Directory()))
         {
             const std::string name = it.path().filename().string();
             m_CurrentDirectoryPaths.emplace_back(name, it.path());
@@ -323,21 +323,21 @@ std::shared_ptr<TextureHolder> ContentDirectory::IconFromExtension(const std::fi
     std::shared_ptr<TextureHolder> imageTexture;
     if (std::filesystem::is_directory(fullPath))
     {
-        imageTexture = AssetManagerInstance.LoadAsset<TextureHolder>("Textures/Widgets/Folder.png");
+        imageTexture = EngineResources.LoadAsset<TextureHolder>("Textures/Widgets/Folder.png");
     }
 
     else if (extension == ".dds" || extension == ".png" || extension == ".hdr" || extension == ".jpg")
     {
-        imageTexture = AssetManagerInstance.LoadAsset<TextureHolder>(path);
+        imageTexture = EngineResources.LoadAsset<TextureHolder>(path);
         if (!imageTexture->isLoadedComplete)
         {
-            imageTexture = AssetManagerInstance.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+            imageTexture = EngineResources.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
         }
     }
 
     else if (extension == ".fbx")
     {
-        std::shared_ptr<Mesh> mesh = AssetManagerInstance.LoadAsset<Mesh>(path);
+        std::shared_ptr<Mesh> mesh = EngineResources.LoadAsset<Mesh>(path);
         if (mesh && mesh->isLoadedComplete)
         {
             imageTexture = mesh->GetEditorIcon();
@@ -346,7 +346,7 @@ std::shared_ptr<TextureHolder> ContentDirectory::IconFromExtension(const std::fi
 
     else if (extension == ".json")
     {
-        std::shared_ptr<Material> materialPreview = AssetManagerInstance.LoadAsset<Material>(path);
+        std::shared_ptr<Material> materialPreview = EngineResources.LoadAsset<Material>(path);
         if (materialPreview && materialPreview->isLoadedComplete)
         {
             imageTexture = materialPreview->GetEditorIcon();
@@ -355,17 +355,17 @@ std::shared_ptr<TextureHolder> ContentDirectory::IconFromExtension(const std::fi
 
     else if (extension == ".Graph")
     {
-        imageTexture = AssetManagerInstance.LoadAsset<TextureHolder>("Textures/Widgets/Graph.png");
+        imageTexture = EngineResources.LoadAsset<TextureHolder>("Textures/Widgets/Graph.png");
     }
 
     else if (extension == ".cso" || extension == ".hlsl")
     {
-        imageTexture = AssetManagerInstance.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+        imageTexture = EngineResources.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
     }
 
     if (!imageTexture)
     {
-        imageTexture = AssetManagerInstance.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+        imageTexture = EngineResources.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
     }
 
     return imageTexture;
@@ -378,7 +378,7 @@ void ContentDirectory::DirectoryBar()
         IsDirty = true;
     }
     ImGui::SameLine();
-    if (ImGui::ArrowButton("##BackButton", ImGuiDir_Up) && m_CurrentPath != AssetManager::AssetPath)
+    if (ImGui::ArrowButton("##BackButton", ImGuiDir_Up) && m_CurrentPath != EngineResources.Directory())
     {
         IsDirty = true;
         m_CurrentPath = m_CurrentPath.parent_path();
@@ -386,15 +386,15 @@ void ContentDirectory::DirectoryBar()
 
     ImGui::SameLine();
     std::filesystem::path recursivePath = m_CurrentPath;
-    if (ImGui::Button(AssetManager::AssetPath.string().c_str()))
+    if (ImGui::Button(EngineResources.Directory().string().c_str()))
     {
         IsDirty = true;
-        m_CurrentPath = AssetManager::AssetPath;
+        m_CurrentPath = EngineResources.Directory();
     }
 
     ImGui::SameLine();
     std::vector<std::filesystem::path> pathList;
-    while (recursivePath != AssetManager::AssetPath)
+    while (recursivePath != EngineResources.Directory())
     {
         pathList.emplace_back(recursivePath);
         recursivePath = recursivePath.parent_path();

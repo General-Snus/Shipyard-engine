@@ -171,7 +171,7 @@ void SetupImGuiStyle(bool light = false)
     style.Colors[ImGuiCol_ModalWindowDimBg] =
         ImVec4(0.1450980454683304f, 0.1450980454683304f, 0.1490196138620377f, 1.0f);
 
-    auto path = AssetManager::AssetPath / "Theme.json";
+    auto path = EngineResources.Directory() / "Theme.json";
     if (std::filesystem::exists(path))
     {
         std::ifstream file(path);
@@ -270,7 +270,7 @@ void LoadFont()
     bool haveLoadedFont = false;
     ImGuiIO &io = ImGui::GetIO();
 
-    auto path = AssetManager::AssetPath / "Theme.json";
+    auto path = EngineResources.Directory() / "Theme.json";
     if (std::filesystem::exists(path))
     {
         std::ifstream file(path);
@@ -284,9 +284,9 @@ void LoadFont()
             float fontSize = json["FontSize"];
             std::filesystem::path FontPath = json["FontPath"];
 
-            const std::string backupFont = AssetManager::AssetPath.string() + "/Fonts/roboto/Roboto-Light.ttf";
-            const std::string awsomeFont = AssetManager::AssetPath.string() + "/Fonts/FontAwesome/fa-solid-900.ttf";
-            const std::string font_path = AssetManager::AssetPath.string() + (FontPath).string();
+            const std::string backupFont = EngineResources.Directory().string() + "/Fonts/roboto/Roboto-Light.ttf";
+            const std::string awsomeFont = EngineResources.Directory().string() + "/Fonts/FontAwesome/fa-solid-900.ttf";
+            const std::string font_path = EngineResources.Directory().string() + (FontPath).string();
 
             if (!io.Fonts->AddFontFromFileTTF(font_path.c_str(), fontSize))
             {
@@ -319,7 +319,7 @@ void LoadFont()
     if (!haveLoadedFont)
     {
         ImFontConfig font_config{};
-        const std::string backupFont = AssetManager::AssetPath.string() + "/Fonts/roboto/Roboto-Light.ttf";
+        const std::string backupFont = EngineResources.Directory().string() + "/Fonts/roboto/Roboto-Light.ttf";
         io.Fonts->AddFontFromFileTTF(backupFont.c_str(), 16.0f, &font_config);
         font_config.MergeMode = true;
 
@@ -341,7 +341,10 @@ bool Editor::Initialize(HWND aHandle)
 
     auto &timer = ServiceLocator::Instance().ProvideService<Timer>();
     auto &threadPool = ServiceLocator::Instance().ProvideService<ThreadPool>();
-    auto &assetManager = ServiceLocator::Instance().ProvideService<AssetManager>();
+
+    auto &engineResources = ServiceLocator::Instance().ProvideService<EngineResourcesLoader>();
+    engineResources.SetWorkingDirectory("../../Content");
+
     auto &colorManager = ServiceLocator::Instance().ProvideService<ColorManager>();
     auto &graphicsEngine = ServiceLocator::Instance().ProvideService<GraphicsEngine>();
     auto &physicsSystem = ServiceLocator::Instance().ProvideService<Shipyard_PhysX>();
@@ -354,7 +357,7 @@ bool Editor::Initialize(HWND aHandle)
 
     GetWindowRect(WindowInstance.windowHandler, &ViewportRect);
 
-    assetManager.RecursiveNameSave();
+    engineResources.RecursiveNameSave();
     colorManager.InitializeDefaultColors();
     colorManager.LoadColorsFromFile("Settings/ColorManagerData.ShipyardText");
 #ifdef _DEBUG
@@ -634,7 +637,7 @@ void Editor::Update()
 
     if (Input.IsKeyPressed(Keys::F10))
     {
-        AssetManagerInstance.ClearUnused();
+        EngineResources.ClearUnused();
     }
 
     // End

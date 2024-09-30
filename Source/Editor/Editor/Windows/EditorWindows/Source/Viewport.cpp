@@ -204,7 +204,7 @@ void Viewport::RenderImGUi()
             if (const ImGuiPayload *test = ImGui::AcceptDragDropPayload("ContentAsset_Mesh"))
             {
                 const std::filesystem::path data = std::string((char *)test->Data, test->DataSize);
-                const std::string type = AssetManagerInstance.AssetType(data);
+                const std::string type = EngineResources.AssetType(data);
 
                 SceneUtils::AddAssetToScene(data, sceneToRender);
 

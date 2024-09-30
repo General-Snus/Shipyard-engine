@@ -22,7 +22,7 @@ template <typename asset = Mesh> void PopUpContextForAsset(std::shared_ptr<asset
         const std::string keyTerm = buf;
 
         ImGui::BeginChild("test");
-        const auto &assetMap = AssetManagerInstance.GetLibraryOfType<asset>()->GetContentCatalogue<asset>();
+        const auto &assetMap = EngineResources.GetLibraryOfType<asset>()->GetContentCatalogue<asset>();
 
         using localPair = std::pair<std::string, std::shared_ptr<asset>>;
         static std::vector<localPair> sortedList;
@@ -101,7 +101,7 @@ void SwitchableAsset(std::shared_ptr<assetType> &asset, std::string PayloadType,
     else
     {
         std::shared_ptr<TextureHolder> texture =
-            AssetManagerInstance.LoadAsset<TextureHolder>("Textures\\Widgets\\File.png");
+            EngineResources.LoadAsset<TextureHolder>("Textures\\Widgets\\File.png");
         if (!texture)
         {
             texture = GraphicsEngineInstance.GetDefaultTexture(eTextureType::MaterialMap);
@@ -115,7 +115,7 @@ void SwitchableAsset(std::shared_ptr<assetType> &asset, std::string PayloadType,
         if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(PayloadType.c_str()))
         {
             const auto path = std::string((const char *)payload->Data, payload->DataSize);
-            asset = AssetManagerInstance.LoadAsset<assetType>(path);
+            asset = EngineResources.LoadAsset<assetType>(path);
         }
         ImGui::EndDragDropTarget();
     }
@@ -129,7 +129,7 @@ void SwitchableAsset(std::shared_ptr<assetType> &asset, std::string PayloadType,
 //
 // class AssetCallbackMaster
 //{
-//	friend class AssetManager;
+//	friend class EngineResourceLoader;
 // public:
 //	struct Message
 //	{

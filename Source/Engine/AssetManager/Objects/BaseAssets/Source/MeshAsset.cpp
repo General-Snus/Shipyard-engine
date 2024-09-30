@@ -136,15 +136,15 @@ void Mesh::FillMaterialPaths(const aiScene *scene)
             continue;
         }
         Material::CreateJson(dataMat, matPath);
-        materials[key] = AssetManagerInstance.LoadAsset<Material>(matPath);
+        materials[key] = EngineResources.LoadAsset<Material>(matPath);
     }
 }
 
 std::shared_ptr<TextureHolder> Mesh::GetEditorIcon()
 {
-    auto imageTexture = AssetManagerInstance.LoadAsset<TextureHolder>(
+    auto imageTexture = EngineResources.LoadAsset<TextureHolder>(
         std::format("INTERNAL_IMAGE_UI_{}", AssetPath.filename().string()));
-    std::shared_ptr<Mesh> mesh = AssetManagerInstance.LoadAsset<Mesh>(AssetPath, true);
+    std::shared_ptr<Mesh> mesh = EngineResources.LoadAsset<Mesh>(AssetPath, true);
 
     if (!imageTexture->isLoadedComplete)
     {
@@ -156,7 +156,7 @@ std::shared_ptr<TextureHolder> Mesh::GetEditorIcon()
         }
         else
         {
-            imageTexture = AssetManagerInstance.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+            imageTexture = EngineResources.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
         }
     }
     return imageTexture;
@@ -170,9 +170,9 @@ bool Mesh::InspectorView()
     }
 
     {
-        auto imageTexture = AssetManagerInstance.LoadAsset<TextureHolder>(
+        auto imageTexture = EngineResources.LoadAsset<TextureHolder>(
             std::format("INTERNAL_IMAGE_UI_{}", AssetPath.filename().string()));
-        std::shared_ptr<Mesh> mesh = AssetManagerInstance.LoadAsset<Mesh>(AssetPath, true);
+        std::shared_ptr<Mesh> mesh = EngineResources.LoadAsset<Mesh>(AssetPath, true);
 
         if (!imageTexture->isLoadedComplete)
         {
@@ -184,7 +184,7 @@ bool Mesh::InspectorView()
             }
             else
             {
-                imageTexture = AssetManagerInstance.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+                imageTexture = EngineResources.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
             }
         }
 

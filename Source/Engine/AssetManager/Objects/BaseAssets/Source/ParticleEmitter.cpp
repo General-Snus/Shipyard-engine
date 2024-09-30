@@ -31,7 +31,7 @@ ParticleEmitter::ParticleEmitter(const ParticleEmitterTemplate& aTemplate) : Ass
 	}
 	else
 	{
-		texture = AssetManagerInstance.LoadAsset<TextureHolder>(aTemplate.EmmiterSettings.ParticleTexture);
+		texture = EngineResources.LoadAsset<TextureHolder>(aTemplate.EmmiterSettings.ParticleTexture);
 	}
 
 	settings = aTemplate.EmmiterSettings;

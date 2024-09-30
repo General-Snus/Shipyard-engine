@@ -121,27 +121,27 @@ void GraphicsEngine::SetupDefaultVariables()
 {
 
     ////Particle
-    AssetManagerInstance.ForceLoadAsset<TextureHolder>(L"Textures/Default/DefaultParticle_P.dds",
+    EngineResources.ForceLoadAsset<TextureHolder>(L"Textures/Default/DefaultParticle_P.dds",
                                                        defaultParticleTexture);
     defaultParticleTexture->SetTextureType(eTextureType::ParticleMap);
 
-    AssetManagerInstance.ForceLoadAsset<TextureHolder>(L"Textures/Default/NoiseTable.dds", NoiseTable);
+    EngineResources.ForceLoadAsset<TextureHolder>(L"Textures/Default/NoiseTable.dds", NoiseTable);
 
-    AssetManagerInstance.ForceLoadAsset<ShipyardShader>("Shaders/Default_VS.cso", defaultVS);
-    AssetManagerInstance.ForceLoadAsset<ShipyardShader>("Shaders/Default_PS.cso", defaultPS);
-    AssetManagerInstance.ForceLoadAsset<Material>("Materials/Default.json", defaultMaterial);
+    EngineResources.ForceLoadAsset<ShipyardShader>("Shaders/Default_VS.cso", defaultVS);
+    EngineResources.ForceLoadAsset<ShipyardShader>("Shaders/Default_PS.cso", defaultPS);
+    EngineResources.ForceLoadAsset<Material>("Materials/Default.json", defaultMaterial);
     defaultMaterial->SetShader(defaultVS, defaultPS);
 
-    AssetManagerInstance.ForceLoadAsset<TextureHolder>("Textures/Default/DefaultTile.dds", defaultTexture);
+    EngineResources.ForceLoadAsset<TextureHolder>("Textures/Default/DefaultTile.dds", defaultTexture);
     defaultTexture->SetTextureType(eTextureType::ColorMap);
-    AssetManagerInstance.ForceLoadAsset<TextureHolder>("Textures/Default/DefaultNormal.dds", defaultNormalTexture);
+    EngineResources.ForceLoadAsset<TextureHolder>("Textures/Default/DefaultNormal.dds", defaultNormalTexture);
     defaultNormalTexture->SetTextureType(eTextureType::NormalMap);
-    AssetManagerInstance.ForceLoadAsset<TextureHolder>("Textures/Default/DefaultMaterial.dds", defaultMatTexture);
+    EngineResources.ForceLoadAsset<TextureHolder>("Textures/Default/DefaultMaterial.dds", defaultMatTexture);
     defaultMatTexture->SetTextureType(eTextureType::MaterialMap);
-    AssetManagerInstance.ForceLoadAsset<TextureHolder>("Textures/Default/DefaultEffect.dds", defaultEffectTexture);
+    EngineResources.ForceLoadAsset<TextureHolder>("Textures/Default/DefaultEffect.dds", defaultEffectTexture);
     defaultEffectTexture->SetTextureType(eTextureType::EffectMap);
 
-    AssetManagerInstance.ForceLoadAsset<Mesh>("default.fbx", defaultMesh);
+    EngineResources.ForceLoadAsset<Mesh>("default.fbx", defaultMesh);
 }
 void GraphicsEngine::SetupBlendStates()
 {
@@ -180,7 +180,7 @@ void GraphicsEngine::SetupSpace3()
     const auto graphicCommandList = commandList->GetGraphicsCommandList();
 
     // Light
-    AssetManagerInstance.ForceLoadAsset<TextureHolder>("Textures/skansen_cubemap.dds", defaultCubeMap);
+    EngineResources.ForceLoadAsset<TextureHolder>("Textures/skansen_cubemap.dds", defaultCubeMap);
     defaultCubeMap->SetTextureType(eTextureType::CubeMap);
 
     const Vector2ui size = {512, 512};

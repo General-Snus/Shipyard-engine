@@ -41,7 +41,7 @@ bool Material::CreateJson(const DataMaterial &data, const std::filesystem::path 
         }
     }
 
-    std::ofstream stream(AssetManagerInstance.AssetPath / writePath.string());
+    std::ofstream stream(EngineResources.Directory() / writePath.string());
     stream << std::setw(4) << json;
     stream.close();
     return true;
@@ -66,8 +66,7 @@ void Material::Init()
     if (GraphicsEngineInstance.GetDefaultMaterial() != nullptr)
     {
         data.materialData =
-            GraphicsEngineInstance
-                .GetDefaultMaterial()
+            GraphicsEngineInstance.GetDefaultMaterial()
                 ->data.materialData; // yo dawg i put some data in your data so you can data while you data
     }
     else
@@ -125,7 +124,7 @@ void Material::Init()
                     continue;
                 }
 
-                texture = AssetManagerInstance.LoadAsset<TextureHolder>(path);
+                texture = EngineResources.LoadAsset<TextureHolder>(path);
 
                 const int type = i["TextureType"];
                 texture->SetTextureType(static_cast<eTextureType>(type));
@@ -224,12 +223,12 @@ bool Material::InspectorView()
 
 std::shared_ptr<TextureHolder> Material::GetEditorIcon()
 {
-    auto imageTexture = AssetManagerInstance.LoadAsset<TextureHolder>(
-        std::format("INTERNAL_IMAGE_UI_{}", AssetPath.filename().string()));
+    auto imageTexture =
+        EngineResources.LoadAsset<TextureHolder>(std::format("INTERNAL_IMAGE_UI_{}", AssetPath.filename().string()));
     if (!imageTexture || !imageTexture->isLoadedComplete)
     {
-        std::shared_ptr<Mesh> mesh = AssetManagerInstance.LoadAsset<Mesh>("Materials/MaterialPreviewMesh.fbx");
-        std::shared_ptr<Material> materialPreview = AssetManagerInstance.LoadAsset<Material>(AssetPath, true);
+        std::shared_ptr<Mesh> mesh = EngineResources.LoadAsset<Mesh>("Materials/MaterialPreviewMesh.fbx");
+        std::shared_ptr<Material> materialPreview = EngineResources.LoadAsset<Material>(AssetPath, true);
 
         bool meshReady = mesh->isLoadedComplete && !mesh->isBeingLoaded;
         bool materialReady = materialPreview->isLoadedComplete && !materialPreview->isBeingLoaded;
@@ -241,7 +240,7 @@ std::shared_ptr<TextureHolder> Material::GetEditorIcon()
         }
         else
         {
-            imageTexture = AssetManagerInstance.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+            imageTexture = EngineResources.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
         }
     }
     return imageTexture;

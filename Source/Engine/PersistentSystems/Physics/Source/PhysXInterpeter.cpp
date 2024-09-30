@@ -131,7 +131,7 @@ PxScene *Shipyard_PhysX::GetScene()
 //	{
 //		if (myToBeCookedMesh->isBeingLoaded == false)
 //		{
-//			AssetManagerInstance.ForceLoadAsset<Mesh>(myToBeCookedMesh->GetAssetPath(),myToBeCookedMesh);
+//			EngineResources.ForceLoadAsset<Mesh>(myToBeCookedMesh->GetAssetPath(),myToBeCookedMesh);
 //		}
 //		while (myToBeCookedMesh->isLoadedComplete == false)
 //		{
