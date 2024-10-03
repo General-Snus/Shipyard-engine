@@ -53,20 +53,22 @@ class Editor : public Singleton
 
     std::vector<GameObject> &GetSelectedGameObjects()
     {
+        // Todo ensure saftey from other steps
+        const auto &invalidArray =
+            std::ranges::remove_if(m_SelectedGameObjects, [](GameObject obj) { return !obj.IsValid(); });
+        m_SelectedGameObjects.erase(invalidArray.begin(), invalidArray.end());
+
         return m_SelectedGameObjects;
     }
     void CheckSelectedForRemoved();
     void Copy();
     void Paste();
 
-    static inline bool IsPlaying = false;
-
     void FocusObject(const GameObject &focus, bool focusWithOffset = true) const;
     void AlignObject(const GameObject &focus) const;
-    std::shared_ptr<Scene> GetMainScene()
-    {
-        return m_MainScene;
-    }
+
+    void SetActiveScene(const std::shared_ptr<Scene> scene);
+    std::shared_ptr<Scene> GetActiveScene();
 
     std::unordered_map<EditorCallback, Event> m_Callbacks;
     GameState gameState;
@@ -77,7 +79,7 @@ class Editor : public Singleton
     RECT ViewportRect;
     std::vector<GameObject> m_SelectedGameObjects;
     std::vector<GameObject> copiedObjects;
-    std::shared_ptr<Scene> m_MainScene;
+    std::shared_ptr<Scene> m_ActiveScene;
 
     std::vector<std::shared_ptr<Viewport>> m_Viewports;
     bool IsGUIActive = true;

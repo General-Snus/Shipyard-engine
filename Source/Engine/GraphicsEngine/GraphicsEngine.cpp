@@ -61,7 +61,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle, bool enableDeviceDebug)
 
 void GraphicsEngine::InitializeCustomRenderScene()
 {
-    newScene = std::make_shared<Scene>();
+    newScene = std::make_shared<Scene>("Custom renderer Scene");
     {
         GameObject worldRoot = GameObject::Create("WordRoot", newScene);
         Transform &transform = worldRoot.AddComponent<Transform>();
@@ -121,8 +121,7 @@ void GraphicsEngine::SetupDefaultVariables()
 {
 
     ////Particle
-    EngineResources.ForceLoadAsset<TextureHolder>(L"Textures/Default/DefaultParticle_P.dds",
-                                                       defaultParticleTexture);
+    EngineResources.ForceLoadAsset<TextureHolder>(L"Textures/Default/DefaultParticle_P.dds", defaultParticleTexture);
     defaultParticleTexture->SetTextureType(eTextureType::ParticleMap);
 
     EngineResources.ForceLoadAsset<TextureHolder>(L"Textures/Default/NoiseTable.dds", NoiseTable);
@@ -353,7 +352,7 @@ void GraphicsEngine::Render(std::vector<std::shared_ptr<Viewport>> renderViewPor
 
     for (auto &viewport : renderViewPorts)
     {
-        RenderFrame(*viewport, viewport->sceneToRender->GetGOM());
+        RenderFrame(*viewport, viewport->GetAttachedScene()->GetGOM());
     }
     EndFrame();
 

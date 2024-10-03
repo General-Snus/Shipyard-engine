@@ -400,7 +400,7 @@ bool Editor::Initialize(HWND aHandle)
     physicsSystem.InitializePhysx();
 #endif // PHYSX 0
 
-    m_MainScene = std::make_shared<Scene>();
+    m_ActiveScene = std::make_shared<Scene>("Editor Scene");
 
     Scene::ActiveManager().SetUpdatePriority<Transform>(ComponentManagerBase::UpdatePriority::Transform);
     Scene::ActiveManager().SetUpdatePriority<cPhysics_Kinematic>(ComponentManagerBase::UpdatePriority::Physics);
@@ -428,15 +428,17 @@ void Editor::DoWinProc(const MSG &aMessage)
 
     case WM_DROPFILES: {
         HDROP hDrop = (HDROP)aMessage.wParam;
-        UINT numFiles = DragQueryFileW(hDrop, 0xFFFFFFFF, NULL, 0); // Get the number of dropped files
+        UINT numFiles = DragQueryFileW(hDrop, 0xFFFFFFFF, NULL,
+                                       0); // Get the number of dropped files
         WM_DroppedPath.clear();
         for (UINT i = 0; i < numFiles; i++)
         {
             UINT filePathLength = DragQueryFile(hDrop, i, NULL, 0); // Get the length of the file path
 
             std::wstring filePath;
-            filePath.resize(filePathLength + 1);                          // Create a buffer to hold the file path
-            DragQueryFile(hDrop, i, filePath.data(), filePathLength + 1); // Get the file path
+            filePath.resize(filePathLength + 1); // Create a buffer to hold the file path
+            DragQueryFile(hDrop, i, filePath.data(),
+                          filePathLength + 1); // Get the file path
             WM_DroppedPath.emplace_back(filePath);
         }
 
@@ -608,6 +610,16 @@ void Editor::AlignObject(const GameObject &focus) const
             focus.transform().SetPosition(position);
         }
     }
+}
+
+void Editor::SetActiveScene(const std::shared_ptr<Scene> scene)
+{
+    m_ActiveScene = scene;
+}
+
+std::shared_ptr<Scene> Editor::GetActiveScene()
+{
+    return m_ActiveScene;
 }
 
 void Editor::Update()

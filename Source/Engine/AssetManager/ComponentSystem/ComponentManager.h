@@ -14,6 +14,7 @@ class Component;
 class ComponentManagerBase
 {
   public:
+    friend class GameObjectManager;
     enum class UpdatePriority
     {
         Transform,
@@ -26,17 +27,22 @@ class ComponentManagerBase
     ComponentManagerBase(GameObjectManager *manager, std::string typeName);
     virtual ~ComponentManagerBase() = default;
     virtual void Destroy() = 0;
+    virtual std::shared_ptr<ComponentManagerBase> Clone() const = 0;
+
+    virtual Component *DeepCopy(const Component *cmp) = 0;
+    virtual Component *DeepCopy(const SY::UUID aGameObjectID) = 0;
+    virtual void Merge(const ComponentManagerBase *other, SY::UUID gameobjectRebaseIndex) = 0;
+    virtual void RebaseSelf(SY::UUID gameobjectRebaseIndex, GameObjectManager *newManager) = 0;
+
     virtual void Update() = 0;
     virtual void Render() = 0;
     virtual void DeleteGameObject(const SY::UUID aGameObjectID) = 0;
     virtual void OnColliderEnter(const SY::UUID aFirstID, const SY::UUID aTargetID) = 0;
     virtual void OnColliderExit(const SY::UUID aFirstID, const SY::UUID aTargetID) = 0;
     virtual void OnSiblingChanged(const SY::UUID aGameObjectID, const std::type_info *SourceClass = nullptr) = 0;
-
     // Bad, Not knowing type forces dynamic cast for type
     virtual Component *AddComponent(SY::UUID aGameObjectID, const Component *aComponent) = 0;
     virtual bool ValidComponentType(const Component *cmp);
-
     void SetUpdatePriority(const UpdatePriority aPriority)
     {
         myUpdatePriority = aPriority;
@@ -49,9 +55,6 @@ class ComponentManagerBase
     // Cost: 1 Contains,1 Get, 1 reintp cast
     virtual Component *TryGetBaseComponent(const SY::UUID aGameObjectID) = 0;
 
-    virtual Component *DeepCopy(const Component *cmp) = 0;
-    virtual Component *DeepCopy(const SY::UUID aGameObjectID) = 0;
-
     std::string GetType() const
     {
         return Comparator;
@@ -60,6 +63,8 @@ class ComponentManagerBase
   protected:
     std::string Comparator;
     GameObjectManager *myManager = nullptr;
+    std::unordered_map<SY::UUID, unsigned int> myGameObjectIDtoVectorIndex;
+    std::unordered_map<unsigned int, SY::UUID> myVectorIndexToGameObjectID;
 
   private:
     UpdatePriority myUpdatePriority = ComponentManagerBase::UpdatePriority::Normal;
@@ -70,26 +75,30 @@ template <class T> class ComponentManager : public ComponentManagerBase
   public:
     ComponentManager(GameObjectManager *manager) : ComponentManagerBase(manager, refl::reflect<T>().name.str()) {};
     ~ComponentManager() = default;
-
     void Destroy() override;
+
+    std::shared_ptr<ComponentManagerBase> Clone() const override
+    {
+        return std::make_shared<ComponentManager<T>>(*this);
+    }
+
+    void Merge(const ComponentManagerBase *other, SY::UUID gameobjectRebaseIndex) override;
+    void RebaseSelf(SY::UUID gameobjectRebaseIndex, GameObjectManager *newManager) override;
+    Component *DeepCopy(const Component *cmp) override;
+    Component *DeepCopy(const SY::UUID aGameObjectID) override;
+
     // Bad, Not knowing type forces dynamic cast for type checking
     Component *AddComponent(SY::UUID aGameObjectID, const Component *aComponent) override;
     T &AddComponent(const SY::UUID aGameObjectID);
     T &AddComponent(const SY::UUID aGameObjectID, const T &aComponent);
     template <typename... Args> T &AddComponent(const SY::UUID aGameObjectID, Args... someParameters);
 
-    Component *TryGetBaseComponent(const SY::UUID aGameObjectID) override;
-
     const bool HasComponent(const SY::UUID aGameObjectID) const;
-    // Cost: 1 Get,
-    std::vector<T> &GetAllComponents();
-    // Cost: 1 Get,
-    T &GetComponent(const SY::UUID aGameObjectID);
-    // Cost: 1 Contains,1 Get,
-    T *TryGetComponent(const SY::UUID aGameObjectID);
 
-    Component *DeepCopy(const Component *cmp) override;
-    Component *DeepCopy(const SY::UUID aGameObjectID) override;
+    std::vector<T> &GetAllComponents();
+    Component *TryGetBaseComponent(const SY::UUID aGameObjectID) override;
+    T &GetComponent(const SY::UUID aGameObjectID);
+    T *TryGetComponent(const SY::UUID aGameObjectID);
 
     void Update() override;
     void Render() override;
@@ -99,8 +108,6 @@ template <class T> class ComponentManager : public ComponentManagerBase
     void OnSiblingChanged(const SY::UUID aGameObjectID, const std::type_info *SourceClass = nullptr) override;
 
   private:
-    std::unordered_map<SY::UUID, unsigned int> myGameObjectIDtoVectorIndex;
-    std::unordered_map<unsigned int, SY::UUID> myVectorIndexToGameObjectID;
     std::vector<T> myComponents;
 };
 
@@ -109,6 +116,47 @@ template <class T> inline void ComponentManager<T>::Destroy()
     myGameObjectIDtoVectorIndex.clear();
     myVectorIndexToGameObjectID.clear();
     myComponents.clear();
+}
+
+template <class T> void ComponentManager<T>::Merge(const ComponentManagerBase *other, SY::UUID gameobjectRebaseIndex)
+{
+    const ComponentManager<T> *copieSource = dynamic_cast<const ComponentManager<T> *>(other);
+
+    const auto startEndpoint = (unsigned)myComponents.size();
+    myComponents.reserve(startEndpoint + (unsigned)copieSource->myComponents.size());
+
+    for (const T &i : copieSource->myComponents)
+    {
+        myComponents.emplace_back((i));
+        myComponents.back().Rebase(gameobjectRebaseIndex, myManager);
+    }
+
+    for (auto &[id, vectorIndex] : copieSource->myGameObjectIDtoVectorIndex)
+    {
+        myGameObjectIDtoVectorIndex.emplace(id + gameobjectRebaseIndex, vectorIndex + startEndpoint);
+        myVectorIndexToGameObjectID.emplace(vectorIndex + startEndpoint, id + gameobjectRebaseIndex);
+    }
+}
+
+template <class T> void ComponentManager<T>::RebaseSelf(SY::UUID gameobjectRebaseIndex, GameObjectManager *newManager)
+{
+    myManager = newManager;
+
+    for (T &i : myComponents)
+    {
+        i.Rebase(gameobjectRebaseIndex, myManager);
+    }
+
+    std::unordered_map<SY::UUID, unsigned int> newIDToVector;
+
+    for (auto &[id, vectorIndex] : myGameObjectIDtoVectorIndex)
+    {
+        newIDToVector.emplace(id + gameobjectRebaseIndex, vectorIndex);
+        myVectorIndexToGameObjectID.at(vectorIndex) = id + gameobjectRebaseIndex;
+    }
+
+    myGameObjectIDtoVectorIndex.clear();
+    myGameObjectIDtoVectorIndex = newIDToVector;
 }
 
 template <class T> Component *ComponentManager<T>::TryGetBaseComponent(const SY::UUID aGameObjectID)
@@ -188,7 +236,8 @@ template <class T> inline std::vector<T> &ComponentManager<T>::GetAllComponents(
 template <class T> inline T &ComponentManager<T>::GetComponent(const SY::UUID aGameObjectID)
 {
     assert(myGameObjectIDtoVectorIndex.find(aGameObjectID) != myGameObjectIDtoVectorIndex.end() &&
-           "ComponentManager::GetComponent(...) tried to get a missing component. Maybe it's best if you use "
+           "ComponentManager::GetComponent(...) tried to get a missing "
+           "component. Maybe it's best if you use "
            "TryGetComponent instead.");
     return myComponents[myGameObjectIDtoVectorIndex[aGameObjectID]];
 }

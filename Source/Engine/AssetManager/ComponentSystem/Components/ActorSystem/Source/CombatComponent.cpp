@@ -54,7 +54,7 @@ void CombatComponent::Respawn()
     transform().SetPosition(RandomEngine::RandomInRange<float>(-20, 20), 0,
                             RandomEngine::RandomInRange<float>(-20, 20));
 }
-#pragma optimize("", off)
+
 void CombatComponent::FireProjectile()
 {
     if (myAttackTimer > myAttackSpeed)

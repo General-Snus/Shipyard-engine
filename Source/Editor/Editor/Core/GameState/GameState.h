@@ -2,6 +2,7 @@
 #include <Tools/Utilities/System/ServiceLocator.h>
 #include <filesystem>
 
+class Scene;
 class GameLauncher
 {
     // If we do it like this we can then make the user have the gamelaunchers
@@ -59,8 +60,15 @@ class GameState
     bool IsPaused = false;
     bool IsPlaying = false;
     bool IsLoading = false;
+    std::shared_ptr<Scene> m_GameScene;
+    std::shared_ptr<Scene> m_EditorBackupScene;
+
     GameLauncher *m_GameLauncher;
     std::filesystem::path pathToProjectFolder;
+
+    HMODULE dllHandle;
+    typedef GameLauncher *(*EntryPoint)();
+    EntryPoint dllFunction;
 };
 
 // #define DefineContext(P)

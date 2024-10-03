@@ -40,12 +40,12 @@ Viewport::Viewport(bool IsMainViewPort, Vector2f ViewportResolution, std::shared
 
     if (IsMainViewPort)
     {
-        myVirtualCamera = GameObject::Create("MainCamera", sceneToRender);
+        myVirtualCamera = GameObject::Create("MainCamera", GetAttachedScene());
     }
     else
     {
-        myVirtualCamera = GameObject::Create("SecondaryCamera", sceneToRender);
-        sceneToRender->GetGOM().SetIsVisibleInHierarchy(myVirtualCamera, false);
+        myVirtualCamera = GameObject::Create("SecondaryCamera", GetAttachedScene());
+        GetAttachedScene()->GetGOM().SetIsVisibleInHierarchy(myVirtualCamera, false);
 
         auto &camera = myVirtualCamera.AddComponent<Camera>();
         camera.SetResolution(ViewportResolution);
@@ -56,8 +56,13 @@ Viewport::~Viewport()
 {
     if (!IsMainViewPort)
     {
-        sceneToRender->GetGOM().DeleteGameObject(myVirtualCamera, true);
+        GetAttachedScene()->GetGOM().DeleteGameObject(myVirtualCamera, true);
     }
+}
+
+std::shared_ptr<Scene> Viewport::GetAttachedScene()
+{
+    return sceneToRender ? sceneToRender : EditorInstance.GetActiveScene();
 }
 
 Texture *Viewport::GetTarget() const
@@ -98,10 +103,10 @@ void Viewport::Update()
     OPTICK_EVENT();
     if (IsMainViewPort)
     {
-        myVirtualCamera = sceneToRender->GetGOM().GetCamera();
+        myVirtualCamera = GetAttachedScene()->GetGOM().GetCamera();
         if (auto *camera = myVirtualCamera.TryGetComponent<Camera>())
         {
-            camera->IsInControl(EditorInstance.IsPlaying);
+            camera->IsInControl(EditorInstance.gameState.LauncherIsPlaying());
             camera->SetResolution(ViewportResolution);
         }
     }

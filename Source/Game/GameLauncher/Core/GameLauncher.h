@@ -13,6 +13,9 @@ class YourGameLauncher : public GameLauncher
     void Start() override;
     void Update(float delta) override;
     void SyncServices(ServiceLocator &serviceLocator) override;
+
+  private:
+    GameObject player;
 };
 
 extern "C"

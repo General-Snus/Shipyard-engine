@@ -15,7 +15,8 @@ class GameObject;
 
 class GameObjectManager
 {
-  private:
+    friend class Scene;
+
   public:
     struct GameObjectData
     {
@@ -89,6 +90,7 @@ class GameObjectManager
     void OnSiblingChanged(SY::UUID anID, const std::type_info *SourceClass = nullptr);
 
   private:
+    void Merge(const GameObjectManager &other);
     std::string GetName(const SY::UUID aGameObjectID);
     void SetName(const std::string &name, const SY::UUID aGameObjectID);
 
@@ -109,9 +111,9 @@ class GameObjectManager
     std::vector<SY::UUID> myObjectsToDelete = {};
     std::vector<SY::UUID> myObjectsToAdd = {};
     unsigned int myLastID = 1;
-    unsigned int myWorldRoot{};
-    unsigned int myPlayer{};
-    unsigned int myCamera{};
+    SY::UUID myWorldRoot{};
+    SY::UUID myPlayer{};
+    SY::UUID myCamera{};
 
   private:
 #define ReflectedComponentName(T) refl::reflect<T>().name.str()

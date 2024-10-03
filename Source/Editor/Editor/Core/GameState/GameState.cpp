@@ -1,4 +1,6 @@
 #include "GameState.h"
+#include <Editor/Editor/Core/Editor.h>
+#include <Engine/PersistentSystems/Scene.h>
 #include <Tools/Logging/Logging.h>
 #include <Windows.h>
 #include <libloaderapi.h>
@@ -15,16 +17,14 @@ GameState::GameState(std::filesystem::path pathToProjectFolder)
 
 bool GameState::AttemptDllLoad()
 {
-    HMODULE dllHandle = LoadLibrary(L"GameLauncher.dll");
+    dllHandle = LoadLibrary(L"GameLauncher.dll");
     if (!dllHandle)
     {
         Logger.Err("Failed to load DLL!");
         return false;
     }
 
-    // Get the entry point function from the DLL
-    typedef GameLauncher *(*EntryPoint)();
-    EntryPoint dllFunction = (EntryPoint)GetProcAddress(dllHandle, "EntrypointMain");
+    dllFunction = (EntryPoint)GetProcAddress(dllHandle, "EntrypointMain");
     if (!dllFunction)
     {
         Logger.Err("Failed to get DLL function !");
@@ -38,6 +38,13 @@ bool GameState::AttemptDllLoad()
 
 void GameState::StartPlaySession()
 {
+    m_GameScene = std::make_shared<Scene>("GameScene");
+
+    m_EditorBackupScene = EditorInstance.GetActiveScene();
+    m_GameScene->Merge(*m_EditorBackupScene);
+    EditorInstance.SetActiveScene(m_GameScene);
+
+    // If you start here, all the copied gameobjects now point to the wrong scene and causes issue
     IsLoading = true;
     AttemptDllLoad();
     IsPlaying = true;
@@ -45,8 +52,23 @@ void GameState::StartPlaySession()
 
 void GameState::EndPlaySession()
 {
+
+    if (dllFunction)
+    {
+        Logger.Err("Failed to get DLL function !");
+        FreeLibrary(dllHandle);
+        dllFunction = nullptr;
+    }
+
+    if (!IsPlaying)
+    {
+        return;
+    }
+
     IsPlaying = false;
     IsPaused = false;
+
+    EditorInstance.SetActiveScene(m_EditorBackupScene);
 }
 
 void GameState::PausePlaySession()
@@ -56,18 +78,36 @@ void GameState::PausePlaySession()
 
 void GameState::Init()
 {
-    if (m_GameLauncher)
+    try
     {
-        m_GameLauncher->SyncServices(ServiceLocator::Instance());
-        m_GameLauncher->Init();
+        if (m_GameLauncher)
+        {
+            m_GameLauncher->SyncServices(ServiceLocator::Instance());
+            m_GameLauncher->Init();
+        }
+    }
+    catch (const std::exception &e)
+    {
+        IsLoading = false;
+        IsPlaying = false;
+        Logger.Err(e.what());
     }
 }
 
 void GameState::Start()
 {
-    if (m_GameLauncher)
+    try
     {
-        m_GameLauncher->Start();
+        if (m_GameLauncher)
+        {
+            m_GameLauncher->Start();
+        }
+    }
+    catch (const std::exception &e)
+    {
+        IsLoading = false;
+        IsPlaying = false;
+        Logger.Err(e.what());
     }
 }
 

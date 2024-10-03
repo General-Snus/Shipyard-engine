@@ -8,6 +8,7 @@
 
 GameObjectManager::~GameObjectManager()
 {
+
     for (auto &[key, cm] : myComponentManagers)
     {
         cm->Destroy();
@@ -335,6 +336,35 @@ void GameObjectManager::OnSiblingChanged(SY::UUID anID, const std::type_info *So
     {
         cm.second->OnSiblingChanged(anID, SourceClass);
     }
+}
+
+void GameObjectManager::Merge(const GameObjectManager &other)
+{
+    OPTICK_EVENT();
+
+    unsigned maxId = myLastID;
+    for (const auto &[key, value] : other.myGameObjects)
+    {
+        myGameObjects.emplace(myLastID + key, value);
+        maxId = std::max(maxId, myLastID + key);
+    }
+    for (const auto &[key, value] : other.myComponentManagers)
+    {
+        if (myComponentManagers.contains(key))
+        {
+            myComponentManagers.at(key)->Merge(value.get(), myLastID);
+        }
+        else
+        {
+            myComponentManagers[key] = value->Clone();
+            myComponentManagers[key]->RebaseSelf(SY::UUID(myLastID), this);
+            SortUpdateOrder();
+        }
+    }
+    myLastID = maxId;
+    myWorldRoot ? myWorldRoot : other.myWorldRoot;
+    myPlayer ? myPlayer : other.myPlayer;
+    myCamera ? myCamera : other.myCamera;
 }
 
 std::string GameObjectManager::GetName(const SY::UUID aGameObjectID)

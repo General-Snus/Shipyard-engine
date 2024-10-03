@@ -30,6 +30,13 @@ void YourGameLauncher::Init()
         }
 
         {
+            player = GameObject::Create("Player");
+            Scene::ActiveManager().SetLastGOAsPlayer();
+
+            player.AddComponent<MeshRenderer>("Models/C64.fbx");
+        }
+
+        {
             GameObject SkySphere = GameObject::Create("SkySphere");
 
             auto &mesh = SkySphere.AddComponent<MeshRenderer>("Materials/MaterialPreviewMesh.fbx");

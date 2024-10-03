@@ -63,7 +63,7 @@ void CollisionChecks::CheckColliders()
                 }
                 else
                 {
-                    Scene().ActiveManager().OnColliderEnter(firstOwner, secondOwner);
+                    Scene::ActiveManager().OnColliderEnter(firstOwner, secondOwner);
                 }
 
                 activeCollisions[firstOwner][secondOwner] = true;
@@ -72,7 +72,7 @@ void CollisionChecks::CheckColliders()
             {
                 if (activeCollisions[firstOwner][secondOwner] == true)
                 {
-                    Scene().ActiveManager().OnColliderExit(collider.GetOwner(), secondOwner);
+                    Scene::ActiveManager().OnColliderExit(collider.GetOwner(), secondOwner);
                     activeCollisions[collider.GetOwner()][secondOwner] = false;
                 }
             }

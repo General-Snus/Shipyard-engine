@@ -21,6 +21,7 @@ class Component : public Reflectable
         : myOwnerID(anOwnerID), myManager(aManager), m_IsActive(true), myComponentType(eComponentType::base)
     {
     }
+
     Component(const SY::UUID anOwnerID, GameObjectManager *aManager, eComponentType aComponentType)
         : myOwnerID(anOwnerID), myManager(aManager), m_IsActive(true), myComponentType(aComponentType)
     {
@@ -103,11 +104,16 @@ class Component : public Reflectable
     int IsInherited = 0;
     bool m_IsActive = true;
 
+    virtual void Rebase(const SY::UUID newBase, GameObjectManager *aManager)
+    {
+        SetOwnerID(myOwnerID + newBase);
+        SetManager(aManager);
+    }
+
   private:
     Component() = default;
 
     template <class T> friend class ComponentManager;
-
     void SetOwnerID(const SY::UUID anOwnerID)
     {
         myOwnerID = anOwnerID;

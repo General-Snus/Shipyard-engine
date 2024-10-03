@@ -21,7 +21,7 @@ class Viewport : public EditorWindow
     // MainViewport is will render from the MainCamera and if no such camera exist it will be black
     explicit Viewport(bool IsMainViewPort,
                       Vector2f ViewportResolution = {(float)WindowInstance.Width(), (float)WindowInstance.Height()},
-                      std::shared_ptr<Scene> sceneToRender = EditorInstance.GetMainScene(),
+                      std::shared_ptr<Scene> sceneToRender = nullptr,
                       std::shared_ptr<TextureHolder> RenderTexture = nullptr);
 
     ~Viewport() override;
@@ -31,8 +31,9 @@ class Viewport : public EditorWindow
     bool IsMainViewport() const;
     void Update();
     void ResolutionUpdate();
-    Texture *GetTarget() const;
 
+    std::shared_ptr<Scene> GetAttachedScene();
+    Texture *GetTarget() const;
     Camera &GetCamera();
     Transform &GetCameraTransform();
 
@@ -44,9 +45,9 @@ class Viewport : public EditorWindow
     std::shared_ptr<TextureHolder> m_RenderTarget;
     Vector2f ViewportResolution;
     int ViewportIndex = 0;
-    std::shared_ptr<Scene> sceneToRender;
 
   private:
+    std::shared_ptr<Scene> sceneToRender;
     void TakeInput();
     void RenderToolbar();
 
