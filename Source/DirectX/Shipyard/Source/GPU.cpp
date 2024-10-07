@@ -348,7 +348,7 @@ void GPU::ResizeDepthBuffer(unsigned width, unsigned height)
         &heapProperties, D3D12_HEAP_FLAG_NONE, &depthStencilDesc, D3D12_RESOURCE_STATE_DEPTH_WRITE,
         &depthOptimizedClearValue, IID_PPV_ARGS(&m_DepthBuffer->m_Resource)));
     m_DepthBuffer->m_Resource->SetName(L"DepthBuffer");
-
+    m_DepthBuffer->m_Format = DXGI_FORMAT_D32_FLOAT;
     m_DepthBuffer->CheckFeatureSupport();
     m_DepthBuffer->SetView(ViewType::DSV);
 }

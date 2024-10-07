@@ -409,6 +409,8 @@ bool Editor::Initialize(HWND aHandle)
     WorldGraph::InitializeWorld();
 
     m_Callbacks[EditorCallback::ObjectSelected] = Event();
+    m_Callbacks[EditorCallback::SceneChange] = Event();
+    m_Callbacks[EditorCallback::SceneChange].AddListener([]() { EditorInstance.GetSelectedGameObjects().clear(); });
     m_Callbacks[EditorCallback::WM_DropFile] = Event();
 
     AddViewPort();
@@ -581,7 +583,7 @@ void Editor::FocusObject(const GameObject &focus, bool focusWithOffset) const
             const Vector3f position = focus.transform().GetPosition(WORLD);
 
             Transform &ref = viewport->GetCameraTransform();
-            const Vector3f cameraPosition = ref.transform().GetPosition(WORLD);
+            const Vector3f cameraPosition = ref.GetPosition(WORLD);
             const Vector3f direction = (position - cameraPosition).GetNormalized();
 
             if (!focusWithOffset)
@@ -590,8 +592,8 @@ void Editor::FocusObject(const GameObject &focus, bool focusWithOffset) const
             }
             const Vector3f offset = -direction * radiusOffset;
             const Vector3f newPosition = position + offset;
-            ref.transform().LookAt(position);
-            ref.transform().SetPosition(newPosition);
+            ref.LookAt(position);
+            ref.SetPosition(newPosition);
         }
     }
 }
@@ -614,6 +616,7 @@ void Editor::AlignObject(const GameObject &focus) const
 
 void Editor::SetActiveScene(const std::shared_ptr<Scene> scene)
 {
+    m_Callbacks[EditorCallback::SceneChange].Invoke();
     m_ActiveScene = scene;
 }
 
@@ -656,7 +659,6 @@ void Editor::Update()
 
     gameState.Update(delta);
     DebugDrawer::Get().Update(delta);
-    // Shipyard_PhysXInstance.Render();
     Shipyard_PhysXInstance.EndRead(delta);
 }
 

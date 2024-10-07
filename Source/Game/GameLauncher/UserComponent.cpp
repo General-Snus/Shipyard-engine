@@ -12,10 +12,24 @@ void UserComponent::Start()
 
 void UserComponent::Update()
 {
+    transform().Move(0, 0, -.25f * TimerInstance.GetDeltaTime());
+
+    if (Input.IsKeyHeld(Keys::UP))
+    {
+        transform().Move(0, 0, 1.f * TimerInstance.GetDeltaTime());
+    }
 }
 
 bool UserComponent::InspectorView()
 {
+    OPTICK_EVENT();
+    if (!Component::InspectorView())
+    {
+        return false;
+    }
+
+    Reflect<UserComponent>();
+
     return false;
 }
 

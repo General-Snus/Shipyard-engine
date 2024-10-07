@@ -70,15 +70,3 @@ class GameState
     typedef GameLauncher *(*EntryPoint)();
     EntryPoint dllFunction;
 };
-
-// #define DefineContext(P)
-// static P *GameContext()
-//{
-//     auto launcher = (P)EditorInstance.gameState.GetGameLauncher();
-//     assert(launcher != nullptr);
-//     assert(launcher.ReportErrors() == false);
-//     assert(launcher.LauncherIsPlaying() == false);
-//     assert(launcher.LauncherIsLoading() == false);
-//
-//     return launcher;
-// };

@@ -23,9 +23,9 @@ ImGuizmo::MODE m_CurrentGizmoMode = ImGuizmo::MODE::WORLD;
 Viewport::Viewport(bool IsMainViewPort, Vector2f ViewportResolution, std::shared_ptr<Scene> aScene,
                    std::shared_ptr<TextureHolder> RenderTexture)
     : m_RenderTarget(RenderTexture), ViewportResolution(ViewportResolution), sceneToRender(aScene),
-      IsMainViewPort(IsMainViewPort)
+      IsMainViewPort(IsMainViewPort), editorCamera(0, nullptr)
 {
-
+    editorCamera.Init();
     const auto resolution = static_cast<Vector2ui>(ViewportResolution);
     if (!m_RenderTarget)
     {
@@ -37,27 +37,10 @@ Viewport::Viewport(bool IsMainViewPort, Vector2f ViewportResolution, std::shared
     {
         m_RenderTarget->GetRawTexture()->AllocateTexture(resolution, "Target1");
     }
-
-    if (IsMainViewPort)
-    {
-        myVirtualCamera = GameObject::Create("MainCamera", GetAttachedScene());
-    }
-    else
-    {
-        myVirtualCamera = GameObject::Create("SecondaryCamera", GetAttachedScene());
-        GetAttachedScene()->GetGOM().SetIsVisibleInHierarchy(myVirtualCamera, false);
-
-        auto &camera = myVirtualCamera.AddComponent<Camera>();
-        camera.SetResolution(ViewportResolution);
-    }
 }
 
 Viewport::~Viewport()
 {
-    if (!IsMainViewPort)
-    {
-        GetAttachedScene()->GetGOM().DeleteGameObject(myVirtualCamera, true);
-    }
 }
 
 std::shared_ptr<Scene> Viewport::GetAttachedScene()
@@ -85,7 +68,7 @@ bool Viewport::IsRenderReady()
     // if you are main and there is a active camera
     if (IsMainViewPort)
     {
-        auto camera = myVirtualCamera.TryGetComponent<Camera>();
+        auto camera = GetAttachedScene()->GetGOM().GetCamera().TryGetComponent<Camera>();
         return camera ? camera->IsActive() : false;
     }
 
@@ -103,8 +86,7 @@ void Viewport::Update()
     OPTICK_EVENT();
     if (IsMainViewPort)
     {
-        myVirtualCamera = GetAttachedScene()->GetGOM().GetCamera();
-        if (auto *camera = myVirtualCamera.TryGetComponent<Camera>())
+        if (auto *camera = GetAttachedScene()->GetGOM().GetCamera().TryGetComponent<Camera>())
         {
             camera->IsInControl(EditorInstance.gameState.LauncherIsPlaying());
             camera->SetResolution(ViewportResolution);
@@ -112,10 +94,9 @@ void Viewport::Update()
     }
     else
     {
-        // myVirtualCamera.SetActive(IsSelected());
-        auto &camera = myVirtualCamera.GetComponent<Camera>();
-        camera.IsInControl(IsSelected());
-        camera.SetResolution(ViewportResolution);
+        editorCamera.Update();
+        editorCamera.IsInControl(IsSelected());
+        editorCamera.SetResolution(ViewportResolution);
     }
 }
 
@@ -126,48 +107,45 @@ void Viewport::ResolutionUpdate()
 
 Camera &Viewport::GetCamera()
 {
-    return myVirtualCamera.GetComponent<Camera>();
+    if (IsMainViewPort)
+    {
+        if (auto *camera = GetAttachedScene()->GetGOM().GetCamera().TryGetComponent<Camera>())
+        {
+            return *camera;
+        }
+        else
+        {
+            return editorCamera;
+        }
+    }
+    else
+    {
+        return editorCamera;
+    }
 }
 
 Transform &Viewport::GetCameraTransform()
 {
-    return myVirtualCamera.GetComponent<Transform>();
+    return GetCamera().LocalTransform();
 }
 
 // ImGui did not like reverse projection so i put it back to 0-1 depth only for imgui
 Matrix Viewport::Projection()
 {
-    auto ViewportCamera = myVirtualCamera.TryGetComponent<Camera>();
-    if (!ViewportCamera)
-    {
-        const auto dxMatrix = XMMatrixPerspectiveFovLH(90.f, 16.f / 9, 0.01f, 1000000.0f);
-        return Matrix(&dxMatrix);
-    }
-
-    const auto dxMatrix = XMMatrixPerspectiveFovLH(ViewportCamera->FowInRad(), ViewportCamera->APRatio(),
-                                                   ViewportCamera->nearField, ViewportCamera->farfield);
+    const auto ViewportCamera = GetCamera();
+    const auto dxMatrix = XMMatrixPerspectiveFovLH(ViewportCamera.FowInRad(), ViewportCamera.APRatio(),
+                                                   ViewportCamera.nearField, ViewportCamera.farfield);
     return Matrix(&dxMatrix);
 }
 
 Matrix Viewport::ViewInverse()
 {
-    auto ViewportCameraTransform = myVirtualCamera.TryGetComponent<Transform>();
-    if (!ViewportCameraTransform)
-    {
-        return Matrix();
-    }
-    return ViewportCameraTransform->GetMutableTransform().GetInverse();
+    return GetCamera().LocalTransform().GetMutableTransform().GetInverse();
 }
 
 Matrix &Viewport::View()
 {
-    auto ViewportCameraTransform = myVirtualCamera.TryGetComponent<Transform>();
-    if (!ViewportCameraTransform)
-    {
-        static Matrix noReturn;
-        return noReturn;
-    }
-    return ViewportCameraTransform->GetMutableTransform();
+    return GetCamera().LocalTransform().GetMutableTransform();
 }
 
 void Viewport::RenderImGUi()

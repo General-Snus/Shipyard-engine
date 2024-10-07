@@ -2,6 +2,7 @@
 #include "Editor/Editor/Windows/Window.h"
 #include "Engine/GraphicsEngine/Rendering/Buffers/FrameBuffer.h"
 #include <Engine/AssetManager/ComponentSystem/Component.h>
+#include <Engine/AssetManager/ComponentSystem/Components/Transform.h>
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
 
 class Camera : public Component
@@ -9,7 +10,6 @@ class Camera : public Component
   public:
     MYLIB_REFLECTABLE();
     explicit Camera(const SY::UUID anOwnerId, GameObjectManager *aManager);
-    ~Camera() override;
 
     void Update() override;
     void Render() override;
@@ -30,6 +30,7 @@ class Camera : public Component
         return m_Projection;
     };
     FrameBuffer GetFrameBuffer();
+    Transform &LocalTransform();
 
     float fow = 90.0f;
     float farfield = 1000000.0f;
@@ -52,6 +53,7 @@ class Camera : public Component
     };
 
   private:
+    Transform localTransform;
     Vector2f resolution = {(float)(WindowInstance.Width()), (float)(WindowInstance.Height())};
     bool IsInControll = false;
     Matrix m_Projection;

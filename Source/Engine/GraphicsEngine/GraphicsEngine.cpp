@@ -27,8 +27,6 @@
 #include "Tools/Utilities/Input/Input.hpp"
 #include <Editor/Editor/Windows/EditorWindows/Viewport.h>
 
-#pragma optimize("", off)
-
 bool GraphicsEngine::Initialize(HWND windowHandle, bool enableDeviceDebug)
 {
     enableDeviceDebug;

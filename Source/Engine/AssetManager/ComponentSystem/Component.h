@@ -55,7 +55,7 @@ class Component : public Reflectable
     }
     GameObject GetGameObject() const
     {
-        return myManager->GetGameObject(myOwnerID);
+      return myManager ? myManager->GetGameObject(myOwnerID) : GameObject();
     }
 
     template <class T> T &GetComponent();
@@ -129,7 +129,7 @@ REFL_AUTO(type(Component), field(myOwnerID), field(m_IsActive))
 
 template <class T> bool Component::HasComponent() const
 {
-    return myManager->HasComponent<T>(myOwnerID);
+    return myManager ? myManager->HasComponent<T>(myOwnerID) : false;
 }
 
 template <class T> T &Component::GetComponent()
@@ -139,7 +139,7 @@ template <class T> T &Component::GetComponent()
 
 template <class T> T *Component::TryGetComponent()
 {
-    return myManager->TryGetComponent<T>(myOwnerID);
+    return myManager ? myManager->TryGetComponent<T>(myOwnerID) : nullptr;
 }
 
 template <class T> T *Component::TryGetAddComponent()

@@ -50,11 +50,20 @@ void Transform::Update()
     if (GetIsDirty())
     {
         MakeClean();
-        this->GetGameObject().OnSiblingChanged(&typeid(Transform));
+        const auto obj = GetGameObject();
+        if (obj.IsValid())
+        {
+            obj.OnSiblingChanged(&typeid(Transform));
+        }
     }
 #else
     MakeClean();
-    this->GetGameObject().OnSiblingChanged(&typeid(Transform));
+
+    const auto obj = GetGameObject();
+    if (obj.IsValid())
+    {
+        obj.OnSiblingChanged(&typeid(Transform));
+    }
 #endif //
 }
 
@@ -627,8 +636,7 @@ Transform &Transform::GetChild(int index) const
     }
     else
     {
-        Logger.Critical("Error: No Child found on " + GetGameObject().GetName() + " at index " +
-                         std::to_string(index));
+        Logger.Critical("Error: No Child found on " + GetGameObject().GetName() + " at index " + std::to_string(index));
         throw;
     }
 }

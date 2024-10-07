@@ -17,6 +17,7 @@ class Scene;
 enum class EditorCallback
 {
     ObjectSelected,
+    SceneChange,
     WM_DropFile,
 };
 

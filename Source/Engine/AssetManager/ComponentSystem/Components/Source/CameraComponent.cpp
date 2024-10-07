@@ -13,11 +13,10 @@
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 #include "Tools/Utilities/Input/EnumKeys.h"
 
-Camera::Camera(const SY::UUID anOwnerId, GameObjectManager *aManager) : Component(anOwnerId, aManager)
+Camera::Camera(const SY::UUID anOwnerId, GameObjectManager *aManager)
+    : Component(anOwnerId, aManager), localTransform(0, nullptr)
 {
-    GetGameObject().AddComponent<Transform>();
-    GetGameObject().GetComponent<Transform>().SetGizmo(false);
-
+    localTransform.Init();
     if (!isOrtho)
     {
         const auto dxMatrix = XMMatrixPerspectiveFovLH(FowInRad(), APRatio(), farfield, nearField);
@@ -39,25 +38,25 @@ Camera::Camera(const SY::UUID anOwnerId, GameObjectManager *aManager) : Componen
     pLight.lock()->Direction = {0, -1, 0};
     pLight.lock()->InnerConeAngle = 10 * DEG_TO_RAD;
     pLight.lock()->OuterConeAngle = 45 * DEG_TO_RAD;
-    GetComponent<Light>().BindDirectionToTransform(true);
 #endif
-}
-
-Camera::~Camera()
-{
 }
 
 void Camera::Update()
 {
     OPTICK_EVENT();
+    localTransform.Update();
     fow = std::clamp(fow, 0.1f, 360.f);
 
     if (!IsInControll)
     {
         return;
     }
+    Transform &aTransform = localTransform;
+    if (HasComponent<Transform>())
+    {
+        aTransform = this->GetGameObject().GetComponent<Transform>();
+    }
 
-    Transform &aTransform = this->GetGameObject().GetComponent<Transform>();
     float aTimeDelta = TimerInstance.GetDeltaTime();
     Vector3f mdf = cameraSpeed;
     float rotationSpeed = 20000;
@@ -219,7 +218,7 @@ Vector3f Camera::GetPointerDirectionNDC(const Vector2<int> position) const
 FrameBuffer Camera::GetFrameBuffer()
 {
     OPTICK_EVENT();
-    auto &transform = GetComponent<Transform>();
+    auto &transform = LocalTransform();
     FrameBuffer buffer;
     auto dxMatrix = XMMatrixPerspectiveFovLH(FowInRad(), APRatio(), farfield, nearField);
     buffer.ProjectionMatrix = Matrix(&dxMatrix);
@@ -230,6 +229,15 @@ FrameBuffer Camera::GetFrameBuffer()
     buffer.FB_ScreenResolution = static_cast<Vector2ui>(resolution);
     // buffer.Data.FB_FrustrumCorners = { Vector4f(),Vector4f(),Vector4f(),Vector4f() };;
     return buffer;
+}
+
+Transform &Camera::LocalTransform()
+{
+    if (HasComponent<Transform>())
+    {
+        return GetComponent<Transform>();
+    }
+    return localTransform;
 }
 
 Vector4f Camera::WoldSpaceToPostProjectionSpace(Vector3f aEntity)

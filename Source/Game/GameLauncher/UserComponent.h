@@ -6,7 +6,9 @@ class UserComponent : public Component
 
   public:
     MYLIB_REFLECTABLE();
-
+    UserComponent(const SY::UUID anOwnerID, GameObjectManager *aManager) : Component(anOwnerID, aManager)
+    {
+    }
     void Init() override;
     void Start();
 

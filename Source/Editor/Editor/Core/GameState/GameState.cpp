@@ -38,6 +38,13 @@ bool GameState::AttemptDllLoad()
 
 void GameState::StartPlaySession()
 {
+    if (IsLoading || IsPlaying || IsPaused)
+    {
+        IsPaused = false;
+        IsPlaying = true;
+        return;
+    }
+
     m_GameScene = std::make_shared<Scene>("GameScene");
 
     m_EditorBackupScene = EditorInstance.GetActiveScene();
@@ -53,8 +60,11 @@ void GameState::StartPlaySession()
 void GameState::EndPlaySession()
 {
 
+    EditorInstance.SetActiveScene(m_EditorBackupScene);
     if (dllFunction)
     {
+        m_GameScene = std::make_shared<Scene>("GameScene");
+
         Logger.Err("Failed to get DLL function !");
         FreeLibrary(dllHandle);
         dllFunction = nullptr;
@@ -67,8 +77,6 @@ void GameState::EndPlaySession()
 
     IsPlaying = false;
     IsPaused = false;
-
-    EditorInstance.SetActiveScene(m_EditorBackupScene);
 }
 
 void GameState::PausePlaySession()

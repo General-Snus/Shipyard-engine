@@ -1,35 +1,34 @@
 #include "Engine/AssetManager/AssetManager.pch.h"
-#include "../GameObject.h" 
-#include "Engine/AssetManager/ComponentSystem/Components/Transform.h" 
+
+#include "../GameObject.h"
+#include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
 #include "Engine/PersistentSystems/Scene.h"
 
-GameObject GameObject::Create(const std::string& name, std::shared_ptr<Scene> ref)
+GameObject GameObject::Create(const std::string &name, std::shared_ptr<Scene> ref)
 {
-	const auto object = ref ? ref->GetGOM().CreateGameObject() : Scene::ActiveManager().CreateGameObject();
-	object.SetName(name);
-	return object;
+    const auto object = ref ? ref->GetGOM().CreateGameObject() : Scene::ActiveManager().CreateGameObject();
+    object.SetName(name);
+    return object;
 }
-Transform& GameObject::transform() const
+Transform &GameObject::transform() const
 {
-	return GetComponent<Transform>();
-}
-
-Scene& GameObject::scene() const
-{
-	return myManager->m_OwnerScene;
+    return GetComponent<Transform>();
 }
 
-
-Component* GameObject::AddBaseComponent(const Component* aComponent)  const
+Scene &GameObject::scene() const
 {
-	assert(myManager != nullptr && "GameObject has no manager");
-	assert(myID.IsValid() && "GameObject has no ID"); 
-	return myManager->AddBaseComponent(myID, aComponent);
-}
-std::vector<Component*> GameObject::GetAllComponents() const
-{
-	assert(myManager != nullptr && "GameObject has no manager");
-	assert(myID.IsValid() && "GameObject has no ID");
-	return myManager->GetAllAttachedComponents(myID);
+    return myManager->m_OwnerScene;
 }
 
+Component *GameObject::AddBaseComponent(const Component *aComponent) const
+{
+    assert(myManager != nullptr && "GameObject has no manager");
+    assert(myID.IsValid() && "GameObject has no ID");
+    return myManager->AddBaseComponent(myID, aComponent);
+}
+std::vector<Component *> GameObject::GetAllComponents() const
+{
+    assert(myManager != nullptr && "GameObject has no manager");
+    assert(myID.IsValid() && "GameObject has no ID");
+    return myManager->GetAllAttachedComponents(myID);
+}

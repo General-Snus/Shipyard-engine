@@ -3,11 +3,11 @@
 #include "Editor/Editor/Core/Editor.h"
 #include "Editor/Editor/Windows/Window.h"
 #include "EditorWindow.h"
+#include "Engine/AssetManager/ComponentSystem/Components/CameraComponent.h"
 #include "Engine/AssetManager/ComponentSystem/GameObject.h"
 #include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
 
-class Camera;
 class Transform;
 
 class Viewport : public EditorWindow
@@ -55,5 +55,5 @@ class Viewport : public EditorWindow
     bool IsVisible = true;
     bool IsUsed = false;
     bool IsMouseHoverering = false;
-    GameObject myVirtualCamera;
+    Camera editorCamera;
 };

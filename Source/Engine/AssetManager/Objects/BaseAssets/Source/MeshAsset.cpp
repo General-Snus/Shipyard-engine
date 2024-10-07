@@ -142,8 +142,8 @@ void Mesh::FillMaterialPaths(const aiScene *scene)
 
 std::shared_ptr<TextureHolder> Mesh::GetEditorIcon()
 {
-    auto imageTexture = EngineResources.LoadAsset<TextureHolder>(
-        std::format("INTERNAL_IMAGE_UI_{}", AssetPath.filename().string()));
+    auto imageTexture =
+        EngineResources.LoadAsset<TextureHolder>(std::format("INTERNAL_IMAGE_UI_{}", AssetPath.filename().string()));
     std::shared_ptr<Mesh> mesh = EngineResources.LoadAsset<Mesh>(AssetPath, true);
 
     if (!imageTexture->isLoadedComplete)
@@ -292,13 +292,6 @@ void Mesh::processMesh(aiMesh *mesh, const aiScene *scene)
         auto position = Vector3f(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
         auto color = Vector4f(RandomEngine::RandomInRange<float>(0, 1), RandomEngine::RandomInRange<float>(0, 1),
                               RandomEngine::RandomInRange<float>(0, 1), 1.0f);
-
-        // auto boneId = Vector4<unsigned int>(
-        //	vert.BoneIDs[0],
-        //	vert.BoneIDs[1],
-        //	vert.BoneIDs[2],
-        //	vert.BoneIDs[3]
-        //);
 
         auto boneId = Vector4<unsigned int>(0, 0, 0, 0);
 

@@ -1,8 +1,7 @@
 #include "ShipyardEngine.pch.h"
 
 #include "GameLauncher.h"
-
-#pragma optimize("", off)
+#include <UserComponent.h>
 
 extern "C"
 {
@@ -22,23 +21,21 @@ void YourGameLauncher::Init()
 
             camera.AddComponent<MeshRenderer>("Models/Camera/Camera.fbx");
 
-            auto &cameraComponent = camera.AddComponent<Camera>();
-            cameraComponent.SetActive(true);
-
-            cameraComponent.transform().SetPosition(0, 30, -30);
-            camera.transform().SetRotation(30, 0, 0);
+            camera.AddComponent<Camera>();
+            camera.transform().SetPosition(0, 5, 0);
+            camera.transform().SetRotation(90, 0, 0);
         }
 
         {
             player = GameObject::Create("Player");
             Scene::ActiveManager().SetLastGOAsPlayer();
-
             player.AddComponent<MeshRenderer>("Models/C64.fbx");
+            player.AddComponent<UserComponent>();
+            Scene::ActiveManager().GetCamera().transform().SetParent(player.transform());
         }
 
         {
             GameObject SkySphere = GameObject::Create("SkySphere");
-
             auto &mesh = SkySphere.AddComponent<MeshRenderer>("Materials/MaterialPreviewMesh.fbx");
             mesh.SetMaterialPath("Materials/SkySphere.json");
 
@@ -49,7 +46,7 @@ void YourGameLauncher::Init()
             GameObject worldRoot = GameObject::Create();
             Scene::ActiveManager().SetLastGOAsWorld();
 
-            worldRoot.SetName("Directional Light");
+            worldRoot.SetName("SkyLight");
 
             auto &light = worldRoot.AddComponent<Light>(eLightType::Directional);
             light.SetColor("White");
@@ -69,7 +66,8 @@ void YourGameLauncher::Update(float delta)
 {
     OPTICK_EVENT();
     UNREFERENCED_PARAMETER(delta);
-    AIEventManager::Instance().Update();
+
+    
 }
 
 void YourGameLauncher::SyncServices(ServiceLocator &serviceLocator)
