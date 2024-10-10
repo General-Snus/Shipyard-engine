@@ -164,6 +164,7 @@ void LoggerService::Err(const std::string &aString, const std::source_location &
                    << location.function_name() << std::endl;
     }
 }
+#pragma optimize("", off)
 
 void LoggerService::Succ(const std::string &aString, const std::source_location &location)
 {

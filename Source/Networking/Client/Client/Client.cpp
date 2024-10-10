@@ -234,9 +234,6 @@ bool Client::SendOK()
             success = true;
             break;
         }
-
-        Sleep(1);
-
         iterations++;
     }
 

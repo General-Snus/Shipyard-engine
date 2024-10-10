@@ -352,6 +352,7 @@ bool Editor::Initialize(HWND aHandle)
     timer.Initialize();
     threadPool.Init();
 
+    ServiceLocator::Instance().ProvideService<LoggerService>();
     Logger.Create();
     Logger.SetPrintToVSOutput(true);
 

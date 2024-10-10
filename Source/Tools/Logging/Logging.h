@@ -13,6 +13,7 @@
 class LoggerService : public Singleton
 {
   public:
+    LoggerService() = default;
     enum class LogType : int32_t
     {
         none = 0,
