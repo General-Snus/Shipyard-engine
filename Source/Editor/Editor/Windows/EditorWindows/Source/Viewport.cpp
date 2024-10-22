@@ -35,7 +35,13 @@ Viewport::Viewport(bool IsMainViewPort, Vector2f ViewportResolution, std::shared
     if (!m_RenderTarget->GetRawTexture() || m_RenderTarget->GetRawTexture()->GetWidth() != resolution.x &&
                                                 m_RenderTarget->GetRawTexture()->GetHeight() != resolution.y)
     {
-        m_RenderTarget->GetRawTexture()->AllocateTexture(resolution, "Target1");
+
+        auto clearColor = Vector4f(0, 0, 1, 1);
+        if (!ColorManagerInstance.GetColor("ClearColor", clearColor))
+        {
+            ColorManagerInstance.CreateColor("ClearColor", clearColor);
+        }
+        m_RenderTarget->GetRawTexture()->AllocateTexture(resolution, "Target1", clearColor);
     }
 }
 

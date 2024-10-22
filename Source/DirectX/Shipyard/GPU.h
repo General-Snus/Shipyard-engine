@@ -84,6 +84,10 @@ class GPU : public Singleton
     static void ClearRTV(const CommandList &commandList, D3D12_CPU_DESCRIPTOR_HANDLE rtv,
                          Vector4f clearColor = {0, 0, 0, 0});
 
+    void ClearRTV(const CommandList &commandList, Texture *rtv, Vector4f clearColor);
+
+    void ClearRTV(const CommandList &commandList, Texture *rtv, unsigned textureCount, Vector4f clearColor);
+
     static void ClearRTV(const CommandList &commandList, Texture *rtv, unsigned textureCount = 1);
 
     static void ClearDepth(const CommandList &commandList, Texture *texture);
@@ -91,7 +95,7 @@ class GPU : public Singleton
     static void ClearDepth(const CommandList &commandList, D3D12_CPU_DESCRIPTOR_HANDLE dsv, FLOAT depth = 0);
 
     D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentRenderTargetView();
-    Texture *GetCurrentBackBuffer();
+    Texture &GetCurrentBackBuffer();
 
     ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(
         const DeviceType &device, D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors,

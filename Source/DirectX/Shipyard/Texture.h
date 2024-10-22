@@ -27,7 +27,9 @@ class Texture : public GpuResource
     std::string myName;
 
     // Default state is render target
-    bool AllocateTexture(const Vector2ui dimentions, const std::filesystem::path &name = "UnnamedTexture",
+    bool AllocateTexture(const Vector2ui dimentions,
+                         const std::filesystem::path &name = "UnnamedTexture", 
+                         const Vector4f &ClearColor = Vector4f(), 
                          DXGI_FORMAT Format = DXGI_FORMAT_R8G8B8A8_UNORM,
                          D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET |
                                                       D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS,

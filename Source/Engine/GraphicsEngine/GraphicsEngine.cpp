@@ -182,7 +182,7 @@ void GraphicsEngine::SetupSpace3()
 
     const Vector2ui size = {512, 512};
     BRDLookUpTable = std::make_shared<Texture>();
-    BRDLookUpTable->AllocateTexture(size, L"brdfLUT", DXGI_FORMAT_R16G16_FLOAT);
+    BRDLookUpTable->AllocateTexture(size, L"brdfLUT", Vector4f(), DXGI_FORMAT_R16G16_FLOAT);
     BRDLookUpTable->SetView(ViewType::SRV);
     commandList->SetRenderTargets(1, BRDLookUpTable.get(), nullptr);
 
@@ -414,12 +414,10 @@ void GraphicsEngine::PrepareBuffers(std::shared_ptr<CommandList> commandList, Vi
     OPTICK_GPU_EVENT("PrepareBuffers");
 
     // const UINT currentBackBufferIndex = chain->GetCurrentBackBufferIndex();
-    const auto *backBuffer = GPUInstance.GetCurrentBackBuffer();
-    const auto rtv = GPUInstance.GetCurrentRenderTargetView();
-    const auto dsv = GPUInstance.m_DepthBuffer->GetHandle(ViewType::DSV).cpuPtr;
-    commandList->TransitionBarrier(backBuffer->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET);
-    const Vector4f clearColor = {0.0f, 0.0f, 0.0f, 0.0f};
-    GPUInstance.ClearRTV(*commandList.get(), rtv, clearColor);
+    commandList->TransitionBarrier(GPUInstance.GetCurrentBackBuffer().GetResource(),
+                                   D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+    GPUInstance.ClearRTV(*commandList.get(), GPUInstance.GetCurrentRenderTargetView());
     GPUInstance.ClearDepth(*commandList.get(), GPUInstance.m_DepthBuffer->GetHandle(ViewType::DSV).cpuPtr);
 
     const auto &rootSignature = m_Cache.m_RootSignature->GetRootSignature();
@@ -664,7 +662,7 @@ void GraphicsEngine::ImGuiPass()
     OPTICK_GPU_CONTEXT(commandList->GetGraphicsCommandList().Get());
     OPTICK_GPU_EVENT("ImGui");
 
-    commandList->SetRenderTargets(1, GPUInstance.GetCurrentBackBuffer(), nullptr);
+    commandList->SetRenderTargets(1, &GPUInstance.GetCurrentBackBuffer(), nullptr);
 
     ImGui::Render();
     ImGuiIO &io = ImGui::GetIO();
@@ -681,21 +679,4 @@ void GraphicsEngine::ImGuiPass()
 
     ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList->GetGraphicsCommandList().Get());
     commandQueue->ExecuteCommandList(commandList);
-}
-
-FORCEINLINE std::shared_ptr<Texture> GraphicsEngine::GetTargetTextures(eRenderTargets type) const
-{
-    switch (type)
-    {
-    case eRenderTargets::BackBuffer:
-        return std::shared_ptr<Texture>(GPUInstance.GetCurrentBackBuffer());
-    case eRenderTargets::DepthBuffer:
-        return GPUInstance.m_DepthBuffer;
-    case eRenderTargets::SceneBuffer:
-        return SceneBuffer;
-    case eRenderTargets::NoiseTexture:
-        return NoiseTable->GetRawTexture();
-    default:
-        return nullptr;
-    }
 }

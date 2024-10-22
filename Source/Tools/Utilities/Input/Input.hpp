@@ -10,6 +10,7 @@
 #include <bitset>
 
 #define Input ServiceLocator::Instance().GetService<InputManager>()
+
 class InputManager : public Singleton
 {
   public:
@@ -21,8 +22,8 @@ class InputManager : public Singleton
     bool IsKeyPressed(Keys aKeyCode);
     bool IsKeyReleased(const int aKeyCode);
     bool IsKeyReleased(Keys aKeyCode);
-    Vector2<float> GetMousePosition();
-    Vector2<float> GetMousePositionDelta();
+    Vector2f GetMousePosition();
+    Vector2f GetMousePositionDelta();
     bool UpdateMouseInput();
     // Positive is forward away from user
     float GetMouseWheelDelta();

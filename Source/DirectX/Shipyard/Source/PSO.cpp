@@ -221,7 +221,8 @@ std::unique_ptr<PSO> PSOCache::CreatePSO(const std::filesystem::path &vertexShad
     for (size_t i = 0; i < renderTargetFormat.size(); i++)
     {
         pso->m_renderTargets[i].AllocateTexture(
-            {GPUInstance.m_Width, GPUInstance.m_Height}, std::format("RenderLayer {}", i), renderTargetFormat[i],
+          {GPUInstance.m_Width, GPUInstance.m_Height},
+          std::format("RenderLayer {}", i), Vector4f(), renderTargetFormat[i],
             D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS);
         rtvFormats.RTFormats[i] = pso->m_renderTargets[i].GetResource()->GetDesc().Format;
     }

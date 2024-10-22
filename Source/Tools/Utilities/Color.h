@@ -23,6 +23,10 @@ class ColorManager : public Singleton
     Vector4f &CreateColor(const size_t &color, Vector4f colorValue);
     Vector4f CreateColor(const std::string &identifier, Vector4f colorValue, bool lock = false);
 
+    bool GetColor(const size_t &color, Vector4f &outColor);
+
+    bool GetColor(const std::string &identifier, Vector4f &outColor);
+
     Vector4f &GetColor(const size_t &color);
     Vector4f &GetColor(const std::string &identifier);
 

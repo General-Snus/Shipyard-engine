@@ -66,8 +66,6 @@ void YourGameLauncher::Update(float delta)
 {
     OPTICK_EVENT();
     UNREFERENCED_PARAMETER(delta);
-
-    
 }
 
 void YourGameLauncher::SyncServices(ServiceLocator &serviceLocator)

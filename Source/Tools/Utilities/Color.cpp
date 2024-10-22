@@ -101,6 +101,30 @@ Vector4f ColorManager::CreateColor(const std::string &identifier, Vector4f color
     return m_NamedColor[identifier] = colorValue;
 }
 
+bool ColorManager::GetColor(const size_t &color, Vector4f &outColor)
+{
+    if (m_UnNamedColor.contains(color))
+    {
+        outColor = m_UnNamedColor[color];
+        return true;
+    }
+    return false;
+}
+
+bool ColorManager::GetColor(const std::string &identifier, Vector4f &outColor)
+{
+    bool isLocked = m_Locks.contains(identifier);
+
+    isLocked;
+    // TODO FIX locked colors from change during runtime
+    if (m_NamedColor.contains(identifier))
+    {
+        outColor = m_NamedColor[identifier];
+        return true;
+    }
+    return false;
+}
+
 Vector4f &ColorManager::GetColor(const size_t &color)
 {
     if (m_UnNamedColor.contains(color))

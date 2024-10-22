@@ -185,6 +185,9 @@ void GPU::Resize(Vector2ui resolution)
             m_renderTargets[i].Reset();
         }
 
+        ResourceStateTracker::RemoveGlobalResourceState(m_DepthBuffer->GetResource().Get());
+        m_DepthBuffer->Reset();
+
         m_Width = resolution.x;
         m_Height = resolution.y;
 
@@ -196,6 +199,7 @@ void GPU::Resize(Vector2ui resolution)
         m_FrameIndex = m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
 
         UpdateRenderTargetViews(m_Device, m_Swapchain->m_SwapChain, nullptr);
+        ResizeDepthBuffer(m_Width, m_Height);
     }
 }
 
@@ -466,6 +470,23 @@ void GPU::ClearRTV(const CommandList &commandList, D3D12_CPU_DESCRIPTOR_HANDLE r
     commandList.GetGraphicsCommandList()->ClearRenderTargetView(rtv, &clearColor.x, 0, nullptr);
 }
 
+void GPU::ClearRTV(const CommandList &commandList, Texture *rtv, Vector4f clearColor)
+{
+    OPTICK_EVENT();
+    commandList.GetGraphicsCommandList()->ClearRenderTargetView(rtv->GetHandle(ViewType::RTV).cpuPtr, &clearColor.x, 0,
+                                                                nullptr);
+}
+
+void GPU::ClearRTV(const CommandList &commandList, Texture *rtv, unsigned textureCount, Vector4f clearColor)
+{
+    OPTICK_EVENT();
+    for (unsigned i = 0; i < textureCount; ++i)
+    {
+        commandList.GetGraphicsCommandList()->ClearRenderTargetView(rtv[i].GetHandle(ViewType::RTV).cpuPtr,
+                                                                    &clearColor.x, 0, nullptr);
+    }
+}
+
 void GPU::ClearRTV(const CommandList &commandList, Texture *rtv, unsigned textureCount)
 {
     OPTICK_EVENT();
@@ -491,9 +512,9 @@ D3D12_CPU_DESCRIPTOR_HANDLE GPU::GetCurrentRenderTargetView()
     return m_renderTargets[m_FrameIndex].GetHandle(ViewType::RTV).cpuPtr;
 }
 
-Texture *GPU::GetCurrentBackBuffer()
+Texture &GPU::GetCurrentBackBuffer()
 {
-    return &m_renderTargets[m_FrameIndex];
+    return m_renderTargets[m_FrameIndex];
 }
 
 ComPtr<ID3D12DescriptorHeap> GPU::CreateDescriptorHeap(const DeviceType &device, D3D12_DESCRIPTOR_HEAP_TYPE type,
@@ -575,7 +596,6 @@ void GPU::UpdateRenderTargetViews(const DeviceType &device, const ComPtr<IDXGISw
         Helpers::ThrowIfFailed(swapChain->GetBuffer(i, IID_PPV_ARGS(&backBuffer)));
 
         ResourceStateTracker::AddGlobalResourceState(backBuffer.Get(), D3D12_RESOURCE_STATE_COMMON);
-
         m_renderTargets[i].SetResource(backBuffer);
         m_renderTargets[i].SetView(ViewType::RTV);
         m_renderTargets[i].myName = "backbuffer: " + std::to_string(i);
@@ -647,6 +667,15 @@ void GPUSwapchain::Create(HWND hwnd, ComPtr<ID3D12CommandQueue>, UINT Width, UIN
     {
         Logger.Err("Failed to create swapchain from hwnd");
     }
+
+    auto clearcolor = Vector4f(0, 0, 1, 1);
+    if (!ColorManagerInstance.GetColor("ClearColor", clearcolor))
+    {
+        ColorManagerInstance.CreateColor("ClearColor", clearcolor);
+    }
+
+    auto hr = swapChain->SetBackgroundColor((DXGI_RGBA *)&clearcolor.x);
+    hr;
     Helpers::ThrowIfFailed(dxgiFactory4->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER));
     Helpers::ThrowIfFailed(swapChain->SetFullscreenState(FALSE, NULL));
     Helpers::ThrowIfFailed(swapChain.As(&m_SwapChain));
