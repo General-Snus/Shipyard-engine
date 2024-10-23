@@ -1,7 +1,27 @@
 #include "../../Headers/ShaderStructs.hlsli"  
 
+struct GBufferOutput
+{
+    float4 Albedo : SV_TARGET0;
+    float4 Normal : SV_TARGET1;
+    float4 Material : SV_TARGET2;
+    float4 Effect : SV_TARGET3;
+    float4 VertexNormal : SV_TARGET4;
+    float4 WorldPosition : SV_TARGET5; 
+    float4 packedData : SV_TARGET6;   // xy = velocity, zw = id 
+};
 
+float4 PackData(float2 velocity, uint id )
+{ 
+    float packedID =  asfloat(id);
+    return float4(velocity, packedID, 0);
+}
 
+void UnpackData(float4 packedData, out float2 velocity, out uint id, out float depth)
+{
+    velocity = packedData.xy;
+    id = asuint(packedData.z); 
+}
 
 GBufferOutput main(DefaultVertexToPixel input)
 {
@@ -47,9 +67,8 @@ GBufferOutput main(DefaultVertexToPixel input)
 	result.VertexNormal.w = 1;
 
 	result.WorldPosition = input.WorldPosition;
-	result.Depth.x = (length(cameraDirection));
-	result.Depth.y = g_ObjectBuffer.OB_ID;
-	result.Depth.zw = 0;
+	
+	result.packedData = PackData(float2(0.1,0.1),g_ObjectBuffer.OB_ID); 
 
 	return result;
 }

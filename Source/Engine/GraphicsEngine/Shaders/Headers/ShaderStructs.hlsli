@@ -13,16 +13,7 @@ struct GSOutput
 {
     float4 posCS : SV_POSITION;
 };
-struct GBufferOutput
-{
-    float4 Albedo : SV_TARGET0;
-    float4 Normal : SV_TARGET1;
-    float4 Material : SV_TARGET2;
-    float4 Effect : SV_TARGET3;
-    float4 VertexNormal : SV_TARGET4;
-    float4 WorldPosition : SV_TARGET5;
-    float4 Depth : SV_TARGET6;
-};
+
 
 struct Vertex
 {
@@ -35,21 +26,8 @@ struct Vertex
 
 struct DefaultVertexInput
 {
-    //float4 Position : POSITION;
-    //float4 VxColor : COLOR;
-    //float2 UV : UV;
-    //float3 Normal : NORMAL;
-    //float3 Tangent : TANGENT;
-    //uint4 BoneIds : BONEIDS;
-    //float4 BoneWeights : BONEWEIGHTS;
-    
-    //float4x4 World : WORLD;
-    //uint InstanceID : SV_InstanceID;
-
-    
     uint vertexID : SV_VertexID;
     uint instanceID : SV_InstanceID;
-
 };
 struct DefaultVertexToPixel
 {

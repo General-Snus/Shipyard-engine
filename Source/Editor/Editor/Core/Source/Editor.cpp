@@ -49,6 +49,7 @@
 #include <Editor/Editor/Windows/EditorWindows/ChatWindow.h>
 #include <Editor/Editor/Windows/EditorWindows/CustomFuncWindow.h>
 #include <Editor/Editor/Windows/EditorWindows/FrameStatistics.h>
+#include <Editor/Editor/Windows/EditorWindows/GraphicsDebugger.h>
 #include <Editor/Editor/Windows/EditorWindows/History.h>
 #include <Tools/ImGui/ImGui/Font/IconsFontAwesome5.h>
 #include <Tools/Utilities/System/ServiceLocator.h>
@@ -666,18 +667,11 @@ void Editor::Update()
 void Editor::Render()
 {
     OPTICK_EVENT();
-    std::vector<std::shared_ptr<Viewport>> test;
     for (auto &viewport : m_Viewports)
     {
-        test.emplace_back(viewport);
         viewport->Update();
     }
-    GraphicsEngineInstance.Render(test);
-
-    //{
-    //	using namespace std::chrono_literals;
-    //	std::this_thread::sleep_for(std::chrono::milliseconds(8));
-    //}
+    GraphicsEngineInstance.Render(m_Viewports);
 }
 
 void Editor::AddViewPort()
@@ -766,7 +760,7 @@ void Editor::TopBar()
                 g_EditorWindows.emplace_back(std::make_shared<History>());
             }
 
-            if (ImGui::Selectable("ColorPresets"))
+            if (ImGui::Selectable("Color Presets"))
             {
                 g_EditorWindows.emplace_back(std::make_shared<ColorPresets>());
             }
@@ -776,15 +770,20 @@ void Editor::TopBar()
                 g_EditorWindows.emplace_back(std::make_shared<ChatWindow>());
             }
 
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Tools"))
+        {
+            if (ImGui::Selectable("Graphics debugger"))
+            {
+                g_EditorWindows.emplace_back(std::make_shared<GraphicsDebugger>());
+            }
+
             if (ImGui::Selectable("Frame statistics"))
             {
                 g_EditorWindows.emplace_back(std::make_shared<FrameStatistics>());
             }
 
-            ImGui::EndMenu();
-        }
-        if (ImGui::BeginMenu("Tools"))
-        {
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();

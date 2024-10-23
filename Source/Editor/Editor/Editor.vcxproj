@@ -337,6 +337,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Core\GameState\GameState.h" />
+    <ClInclude Include="Windows\EditorWindows\GraphicsDebugger.h" />
     <ClInclude Include="Windows\EditorWindows\FrameStatistics.h" />
     <ClInclude Include="Windows\EditorWindows\ChatWindow.h" />
     <ClInclude Include="Windows\EditorWindows\ColorPresets.h" />
@@ -361,6 +362,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\GameState\GameState.cpp" />
+    <ClCompile Include="Windows\EditorWindows\Source\GraphicsDebugger.cpp" />
     <ClCompile Include="Windows\EditorWindows\Source\FrameStatistics.cpp" />
     <ClCompile Include="Windows\EditorWindows\Source\ChatWindow.cpp" />
     <ClCompile Include="Windows\EditorWindows\Source\ColorPresets.cpp" />

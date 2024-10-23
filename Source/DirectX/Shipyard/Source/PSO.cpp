@@ -10,6 +10,7 @@
 void PSOCache::InitAllStates()
 {
     {
+        //TODO PACK THIS SUCKER UP
         constexpr std::array rtvFormats = {
             DXGI_FORMAT_R8G8B8A8_UNORM,     // Albedo
             DXGI_FORMAT_R16G16B16A16_SNORM, // Normal
@@ -17,7 +18,7 @@ void PSOCache::InitAllStates()
             DXGI_FORMAT_R8G8B8A8_UNORM,     // Effect(R)
             DXGI_FORMAT_R16G16B16A16_SNORM, // Vertex Normal
             DXGI_FORMAT_R32G32B32A32_FLOAT, // World position
-            DXGI_FORMAT_R32G32_FLOAT        // Depth(R)
+            DXGI_FORMAT_R32G32_FLOAT        // Motionvector + id
         };
         auto pso = CreatePSO("Shaders/Default_VS.cso", "Shaders/GBufferPS.cso", rtvFormats, DXGI_FORMAT_D32_FLOAT,
                              CD3DX12_BLEND_DESC(CD3DX12_DEFAULT()), L"G Buffer");
