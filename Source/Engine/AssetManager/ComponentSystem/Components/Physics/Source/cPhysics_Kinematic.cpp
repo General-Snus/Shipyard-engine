@@ -1,5 +1,5 @@
 #include "../cPhysics_Kinematic.h"
-#include "Engine/AssetManager/AssetManager.pch.h"
+#include "AssetManager.pch.h"
 
 cPhysics_Kinematic::cPhysics_Kinematic(const SY::UUID anOwnerId, GameObjectManager *aManager)
     : Component(anOwnerId, aManager)

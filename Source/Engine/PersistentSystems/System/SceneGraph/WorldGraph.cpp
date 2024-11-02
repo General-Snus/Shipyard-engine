@@ -1,11 +1,11 @@
-#include "Engine\PersistentSystems\PersistentSystems.pch.h"
-#include "WorldGraph.h"
+#include "PersistentSystems.pch.h"
 
 #include "Tools/Utilities/System/Grid.h"
+#include "WorldGraph.h"
 
 void WorldGraph::InitializeWorld()
 {
-	WorldGrid = new Grid(0,0,100);
+	WorldGrid = new Grid(0, 0, 100);
 }
 
 void WorldGraph::Update()

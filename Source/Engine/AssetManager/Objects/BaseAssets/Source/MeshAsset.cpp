@@ -1,14 +1,14 @@
 #include "../MeshAsset.h"
-#include "Engine/AssetManager/AssetManager.pch.h"
+#include "AssetManager.pch.h"
 #include <Tools/Utilities/Math.hpp>
 
-#include "DirectX/Shipyard/GPU.h"
-#include "DirectX/Shipyard/Helpers.h"
+#include "DirectX/DX12/Graphics/GPU.h"
+#include "DirectX/DX12/Graphics/Helpers.h"
 #include "Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h"
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 #include <Engine/GraphicsEngine/GraphicsEngineUtilities.h>
 #include <Engine/PersistentSystems/SceneUtilities.h>
-#include <Tools/ImGui/ImGui/ImGuiHelpers.hpp>
+#include <Tools/ImGui/ImGuiHelpers.hpp>
 
 Mesh::Mesh(const std::filesystem::path &aFilePath) : AssetBase(aFilePath)
 {

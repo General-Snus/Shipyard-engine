@@ -8,7 +8,7 @@
 #include "ImGuiHelpers.hpp"
 #include "imgui_internal.h"
 
-#include <Tools/ImGui/ImGui/ImGuizmo.h>
+#include <Tools/ImGui/ImGuizmo.h>
 
 #include "Engine/PersistentSystems/Scene.h"
 #include "Tools/Logging/Logging.h"

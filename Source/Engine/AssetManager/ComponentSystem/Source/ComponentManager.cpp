@@ -1,5 +1,5 @@
 #include "../ComponentManager.h"
-#include "Engine/AssetManager/AssetManager.pch.h"
+#include "AssetManager.pch.h"
 
 ComponentManagerBase::ComponentManagerBase(GameObjectManager *manager, std::string typeName)
     : myManager(manager), Comparator(typeName)

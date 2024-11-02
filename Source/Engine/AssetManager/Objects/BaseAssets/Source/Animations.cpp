@@ -1,4 +1,4 @@
-#include "Engine/AssetManager/AssetManager.pch.h"
+#include "AssetManager.pch.h"
 
 #include "Engine/AssetManager/Objects/BaseAssets/Animations.h"
 

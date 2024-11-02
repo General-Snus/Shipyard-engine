@@ -1,7 +1,7 @@
 #include "../ColorPresets.h"
 
-#include "Tools/ImGui/ImGui/misc/cpp/imgui-combo-filter.h"
-#include "Tools/ImGui/ImGui/misc/cpp/imgui_stdlib.h"
+#include "Tools/ImGui/misc/cpp/imgui-combo-filter.h"
+#include "Tools/ImGui/misc/cpp/imgui_stdlib.h"
 #include "Tools/Utilities/Color.h"
 #include "imgui.h"
 #include <Tools/Optick/include/optick.h>

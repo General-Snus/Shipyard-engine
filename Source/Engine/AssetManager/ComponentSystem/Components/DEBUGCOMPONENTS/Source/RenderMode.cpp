@@ -1,6 +1,6 @@
 #include "../RenderMode.h"
-#include "Engine/AssetManager/AssetManager.pch.h"
-#include <Tools/ImGui/ImGui/imgui.h>
+#include "AssetManager.pch.h"
+#include <Tools/ImGui/imgui.h>
 
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 

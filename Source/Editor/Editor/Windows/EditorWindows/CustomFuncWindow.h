@@ -1,6 +1,6 @@
 #pragma once
 #include "EditorWindow.h"
-#include <Tools/ImGui/ImGui/imgui.h>
+#include <Tools/ImGui/imgui.h>
 #include <Tools/Logging/Logging.h>
 #include <functional>
 #include <future>

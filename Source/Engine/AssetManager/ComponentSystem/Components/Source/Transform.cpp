@@ -1,11 +1,11 @@
-#include "Engine/AssetManager/AssetManager.pch.h"
+#include "AssetManager.pch.h"
 
 #include "../Transform.h"
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
 #include <Tools/Utilities/Math.hpp>
 
-#include "Tools/ImGui/ImGui/imgui.h"
-#include <Tools/ImGui/ImGui/ImGuiHelpers.hpp>
+#include "Tools/ImGui/imgui.h"
+#include <Tools/ImGui/ImGuiHelpers.hpp>
 
 #include <Editor/Editor/Commands/CommandBuffer.h>
 #include <Editor/Editor/Commands/VarChanged.h>

@@ -13,6 +13,15 @@
 #include <stdio.h>
 #include <wchar.h>
 
+extern "C"
+{
+    __declspec(dllexport) extern const UINT D3D12SDKVersion = 715;
+}
+
+extern "C"
+{
+    __declspec(dllexport) extern const char *D3D12SDKPath = ".\\D3D12\\";
+}
 // #define GuardedMain
 
 LONG WINAPI ExceptionFilterFunction(_EXCEPTION_POINTERS *aExceptionP);
@@ -46,7 +55,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
 int Run(HINSTANCE &hInstance)
 {
-
     auto &window = ServiceLocator::Instance().ProvideService<Window>();
     ServiceLocator::Instance().ProvideService<Editor>();
 
@@ -54,24 +62,20 @@ int Run(HINSTANCE &hInstance)
     settings.hInstance = hInstance;
     settings.windowSize = {1920, 1080};
     settings.windowTitle = L"Shipyard";
-
     window.Init(settings);
+
     Editor &editor = ServiceLocator::Instance().GetService<Editor>();
-
-    // auto mySplashWindow = std::make_unique<SplashWindow>();
-
     editor.Initialize(window.windowHandler);
     window.SetCallbackFunction([&editor](MSG const &msg_data) { editor.DoWinProc(msg_data); });
-    // mySplashWindow->Init(WindowInstance.moduleHandler);
 
     ShowWindow(WindowInstance.windowHandler, SW_SHOW);
     SetForegroundWindow(WindowInstance.windowHandler);
-    // mySplashWindow->Close();
 
     while (window.Update())
     {
         editor.Run();
     }
+
     window.Destroy();
     return 1;
 };

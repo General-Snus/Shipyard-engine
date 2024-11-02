@@ -11,6 +11,7 @@
 #define WIN32_LEAN_AND_MEAN
 // Native shipyard types,, will be moved to global include later for dependent projects
 #include "Engine/PersistentSystems/Scene.h"
+#include "Tools/Utilities/Color.h"
 #include <Engine/AssetManager/ComponentSystem/Component.h>
 #include <Engine/AssetManager/ComponentSystem/GameObject.h>
 #include <Engine/AssetManager/ComponentSystem/MasterIncludeComponent.h>
@@ -18,7 +19,7 @@
 
 // add headers that you want to pre-compile here
 #include "Engine/AssetManager/Reflection/ReflectionTemplate.h"
-#include "Tools/ImGui/ImGui/imgui.h"
+#include "Tools/ImGui/imgui.h"
 #include "Tools/Logging/Logging.h"
 #include <Tools/Optick/include/optick.h>
 #include <Tools/Reflection/refl.hpp>
@@ -32,9 +33,9 @@
 // STL Headers
 #include <algorithm>
 #include <assert.h>
-#include <assimp/Importer.hpp>  // C++ importer interface
+#include <assimp/Importer.hpp>	// C++ importer interface
 #include <assimp/postprocess.h> // Post processing flags
-#include <assimp/scene.h>       // Output data structure
+#include <assimp/scene.h>		// Output data structure
 #include <cassert>
 #include <cctype>
 #include <cmath>

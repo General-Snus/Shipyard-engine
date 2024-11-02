@@ -27,9 +27,6 @@
     <ClInclude Include="GraphicsEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Rendering\Buffers\ConstantBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Rendering\Vertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -72,9 +69,6 @@
     <ClInclude Include="Objects\DataObjects\Default_FX.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Rendering\Buffers\G_Buffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Shaders\Include\PointLightShadow_PS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -88,9 +82,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\Buffers\GraphicSettingsBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\ParticleRenderer\ParticleRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\ParticleRenderer\ParticleVertex.h">
@@ -116,9 +107,6 @@
     <ClCompile Include="GraphicsEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Rendering\Buffers\ConstantBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Rendering\Vertex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -128,13 +116,7 @@
     <ClCompile Include="DebugDrawer\DebugDrawer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Rendering\Buffers\G_Buffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Rendering\InstanceRenderer\InstanceRenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Rendering\ParticleRenderer\ParticleRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\ParticleRenderer\ParticleVertex.cpp">
@@ -163,8 +145,9 @@
     <None Include="Shaders\Passes\LineDrawer\LineDrawerStructs.hlsli" />
     <None Include="Shaders\Headers\ParticleStruct.hlsli" />
     <None Include="Shaders\Headers\Tonemaps.hlsli" />
-    <None Include="packages.config" />
     <None Include="Shaders\Headers\SceneGraph.hlsli" />
+    <None Include="Shaders\Headers\DebugLog.hlsli" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\DefaultShaders\Default_VS.hlsl" />

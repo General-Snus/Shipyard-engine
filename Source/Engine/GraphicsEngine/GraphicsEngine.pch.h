@@ -9,23 +9,19 @@
 #define NOMINMAX
 
 // add headers that you want to pre-compile here
-#include "GraphicsEngine.h"
-#include "Rendering/Buffers/FrameBuffer.h"
-#include "Rendering/Buffers/G_buffer.h"
-#include "Rendering/Buffers/LightBuffer.h"
-#include "Rendering/Buffers/LineBuffer.h"
-#include "Rendering/Buffers/ObjectBuffer.h"
-#include "Rendering/ParticleRenderer/ParticleVertex.h"
-#include "Rendering/Vertex.h"
-#include "Shaders/Registers.h"
-#include "Tools/Logging/Logging.h"
+
+// #include "GraphicsEngine.h"
+//
+// #include "Shaders/Registers.h"
 #include "wrl/client.h"
-#include <Tools/ImGui/ImGui/imgui.h>
-#include <Tools/Optick/include/optick.h>
-#include <Tools/Utilities/Game/Timer.h>
-#include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
+//
+// #include "Tools/Logging/Logging.h"
+// #include <Tools/ImGui/imgui.h>
+// #include <Tools/Optick/include/optick.h>
+// #include <Tools/Utilities/Game/Timer.h>
+// #include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
+
 #include <Windows.h>
-#include <d3dcompiler.h>
 #include <filesystem>
 #include <map>
 #include <memory>

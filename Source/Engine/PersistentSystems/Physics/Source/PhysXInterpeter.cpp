@@ -1,4 +1,4 @@
-#include "Engine\PersistentSystems\PersistentSystems.pch.h"
+#include "PersistentSystems.pch.h"
 
 #include "../PhysXInterpeter.h"
 #include <Editor/Editor/Defines.h>
@@ -26,101 +26,101 @@ static PxPvd *gPvd = NULL;
 #pragma region hide this shit
 void threeaxisrot(float r11, float r12, float r21, float r31, float r32, float res[])
 {
-    res[0] = atan2(r31, r32);
-    res[1] = asin(r21);
-    res[2] = atan2(r11, r12);
+	res[0] = atan2(r31, r32);
+	res[1] = asin(r21);
+	res[2] = atan2(r11, r12);
 }
 
 void quaternion2Euler(const physx::PxQuat &q, float res[])
 {
-    threeaxisrot(-2 * (q.y * q.z - q.w * q.x), q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
-                 2 * (q.x * q.z + q.w * q.y), -2 * (q.x * q.y - q.w * q.z),
-                 q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z, res);
+	threeaxisrot(-2 * (q.y * q.z - q.w * q.x), q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
+				 2 * (q.x * q.z + q.w * q.y), -2 * (q.x * q.y - q.w * q.z),
+				 q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z, res);
 }
 #pragma endregion
 
 int Shipyard_PhysX::InitializePhysx()
 {
-    OPTICK_EVENT();
-    gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
+	OPTICK_EVENT();
+	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
 
-    gPvd = PxCreatePvd(*gFoundation);
-    PxPvdTransport *transport = PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 100);
-    gPvd->connect(*transport, PxPvdInstrumentationFlag::eALL);
+	gPvd = PxCreatePvd(*gFoundation);
+	PxPvdTransport *transport = PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 100);
+	gPvd->connect(*transport, PxPvdInstrumentationFlag::eALL);
 
-    gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, PxTolerancesScale(), true, gPvd);
-    gDispatcher = PxDefaultCpuDispatcherCreate(2);
+	gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, PxTolerancesScale(), true, gPvd);
+	gDispatcher = PxDefaultCpuDispatcherCreate(2);
 
-    PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
-    sceneDesc.gravity = PxVec3(0.0f, -9.82f, 0.0f);
-    sceneDesc.cpuDispatcher = gDispatcher;
-    sceneDesc.filterShader = PxDefaultSimulationFilterShader;
+	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
+	sceneDesc.gravity = PxVec3(0.0f, -9.82f, 0.0f);
+	sceneDesc.cpuDispatcher = gDispatcher;
+	sceneDesc.filterShader = PxDefaultSimulationFilterShader;
 
-    gScene = gPhysics->createScene(sceneDesc);
-    gScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
-    gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES, true);
+	gScene = gPhysics->createScene(sceneDesc);
+	gScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
+	gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES, true);
 
-    gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
+	gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
 
-    gScene->simulate(.1f);
+	gScene->simulate(.1f);
 
-    gScene->fetchResults(true);
-    return 0;
+	gScene->fetchResults(true);
+	return 0;
 }
 
 void Shipyard_PhysX::StartRead() const
 {
 #if PHYSX
-    OPTICK_EVENT();
-    gScene->fetchResults(true);
+	OPTICK_EVENT();
+	gScene->fetchResults(true);
 #endif
 }
 
 void Shipyard_PhysX::EndRead(float deltaTime)
 {
-    deltaTime;
+	deltaTime;
 #if PHYSX
-    OPTICK_EVENT();
-    gScene->simulate(deltaTime);
+	OPTICK_EVENT();
+	gScene->simulate(deltaTime);
 #endif
 }
 
 void Shipyard_PhysX::Render()
 {
-    const PxRenderBuffer &rb = gScene->getRenderBuffer();
-    for (PxU32 i = 0; i < rb.getNbLines(); i++)
-    {
-        const PxDebugLine &line = rb.getLines()[i];
-        const Vector3f Vpos1 = {line.pos0.x, line.pos0.y, line.pos0.z};
-        const Vector3f Vpos2 = {line.pos1.x, line.pos1.y, line.pos1.z};
+	const PxRenderBuffer &rb = gScene->getRenderBuffer();
+	for (PxU32 i = 0; i < rb.getNbLines(); i++)
+	{
+		const PxDebugLine &line = rb.getLines()[i];
+		const Vector3f Vpos1 = {line.pos0.x, line.pos0.y, line.pos0.z};
+		const Vector3f Vpos2 = {line.pos1.x, line.pos1.y, line.pos1.z};
 
-        DebugDrawer::Get().AddDebugLine(Vpos1, Vpos2, Vector3f(0, 1, 0), TimerInstance.GetDeltaTime());
-    }
+		DebugDrawer::Get().AddDebugLine(Vpos1, Vpos2, Vector3f(0, 1, 0), TimerInstance.GetDeltaTime());
+	}
 }
 
 void Shipyard_PhysX::ShutdownPhysx()
 {
-    PX_RELEASE(gScene);
-    PX_RELEASE(gDispatcher);
-    PX_RELEASE(gPhysics);
-    if (gPvd)
-    {
-        PxPvdTransport *transport = gPvd->getTransport();
-        gPvd->release();
-        gPvd = NULL;
-        PX_RELEASE(transport);
-    }
-    PX_RELEASE(gFoundation);
+	PX_RELEASE(gScene);
+	PX_RELEASE(gDispatcher);
+	PX_RELEASE(gPhysics);
+	if (gPvd)
+	{
+		PxPvdTransport *transport = gPvd->getTransport();
+		gPvd->release();
+		gPvd = NULL;
+		PX_RELEASE(transport);
+	}
+	PX_RELEASE(gFoundation);
 }
 
 PxPhysics *Shipyard_PhysX::GetPhysicsWorld()
 {
-    return gPhysics;
+	return gPhysics;
 }
 
 PxScene *Shipyard_PhysX::GetScene()
 {
-    return gScene;
+	return gScene;
 }
 
 // Walter white component
@@ -186,5 +186,5 @@ PxScene *Shipyard_PhysX::GetScene()
 // }
 physx::PxMaterial *Shipyard_PhysX::GetDefaultMaterial()
 {
-    return gMaterial;
+	return gMaterial;
 }

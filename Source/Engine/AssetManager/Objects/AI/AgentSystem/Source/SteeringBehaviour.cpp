@@ -1,4 +1,4 @@
-#include "Engine/AssetManager/AssetManager.pch.h"
+#include "AssetManager.pch.h"
 
 #include "../SteeringBehaviour.h"
 #include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h>

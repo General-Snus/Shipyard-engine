@@ -1,13 +1,13 @@
 #include "../Window.h"
 #include "Tools/Logging/Logging.h"
 #include "Windows.h"
-#include <Tools/ImGui/ImGui/misc/cpp/WMDropManager.h>
+#include <Tools/ImGui/misc/cpp/WMDropManager.h>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 #include <combaseapi.h>
 #include <shellapi.h>
 #include <string>
 
-#include <DirectX/Shipyard/GPU.h>
+#include <DirectX/DX12/Graphics/GPU.h>
 void Window::Init(const WinInitSettings &init)
 {
 

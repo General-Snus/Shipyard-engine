@@ -1,6 +1,6 @@
 #pragma once
 #include "BaseAsset.h"
-#include "DirectX/Shipyard/Texture.h"
+#include "DirectX/DX12/Graphics/Texture.h"
 class Texture;
 
 class TextureHolder : public AssetBase

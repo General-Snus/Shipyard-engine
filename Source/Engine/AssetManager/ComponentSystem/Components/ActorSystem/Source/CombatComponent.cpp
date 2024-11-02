@@ -1,5 +1,5 @@
 #include "../CombatComponent.h"
-#include "Engine/AssetManager/AssetManager.pch.h"
+#include "AssetManager.pch.h"
 #include <Engine/AssetManager/ComponentSystem/Components/TaskSpecific/ProjectileComponent.h>
 
 #include "Engine/AssetManager/ComponentSystem/Components/Collider.h"

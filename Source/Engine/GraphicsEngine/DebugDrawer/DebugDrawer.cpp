@@ -1,7 +1,7 @@
-#include "Engine/GraphicsEngine/GraphicsEngine.pch.h"
+#include "GraphicsEngine.pch.h"
 
 #include "DebugDrawer.h" 
-#include "DirectX/Shipyard/GPU.h"
+#include "DirectX/DX12/Graphics/GPU.h"
 
 DebugDrawer& DebugDrawer::Get()
 {

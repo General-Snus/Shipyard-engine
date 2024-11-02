@@ -1,12 +1,12 @@
 #include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
-#include "Engine/AssetManager/AssetManager.pch.h"
+#include "AssetManager.pch.h"
 
 #include "Engine/AssetManager/ComponentSystem/Components/Animator.h"
 #include "Engine/AssetManager/Objects/BaseAssets/Animations.h"
 #include "Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h"
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
-#include "Tools/ImGui/ImGui/ImGuiHelpers.hpp"
-#include "Tools/ImGui/ImGui/imgui.h"
+#include "Tools/ImGui/ImGuiHelpers.hpp"
+#include "Tools/ImGui/imgui.h"
 #include <Engine/GraphicsEngine/GraphicsEngineUtilities.h>
 #include <unordered_set>
 

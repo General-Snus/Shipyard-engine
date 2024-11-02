@@ -3,7 +3,7 @@
 #include <Engine/AssetManager/AssetManager.h>
 #include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
 #include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
-#include <Tools/ImGui/ImGui/ImGuiHelpers.hpp>
+#include <Tools/ImGui/ImGuiHelpers.hpp>
 #include <Tools/Utilities/Input/Input.hpp>
 #include <shellapi.h>
 

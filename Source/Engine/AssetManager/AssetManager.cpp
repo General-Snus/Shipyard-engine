@@ -1,8 +1,8 @@
-#include "Engine/AssetManager/AssetManager.pch.h"
+#include "AssetManager.pch.h"
 
-#include "Engine/AssetManager/Objects/BaseAssets/MasterIncludeAssets.h"
+#include "Objects/BaseAssets/MasterIncludeAssets.h"
 
-#include <DirectX/Shipyard/GPU.h>
+#include <DirectX/DX12/Graphics/GPU.h>
 #include <Tools/Utilities/Game/Timer.h>
 
 void Library::ClearUnused()
@@ -46,7 +46,7 @@ void ResourceLoaderBase::ClearUnused()
     {
         i.second->ClearUnused();
     }
-    GPUInstance.m_GraphicsMemory->GarbageCollect();
+   // GPUInstance.m_GraphicsMemory->GarbageCollect();
 }
 void ResourceLoaderBase::ThreadedLoading()
 {

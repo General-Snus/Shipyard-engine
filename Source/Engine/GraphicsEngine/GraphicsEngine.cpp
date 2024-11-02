@@ -1,9 +1,8 @@
-#include "Engine/GraphicsEngine/GraphicsEngine.pch.h"
+#include "GraphicsEngine.pch.h"
 
-#include "DirectX/Shipyard/CommandList.h"
-#include <DirectX/XTK/DDSTextureLoader.h>
-#include <DirectX/directx/d3dx12_pipeline_state_stream.h>
-#include <DirectX/directx/d3dx12_root_signature.h>
+#include "DirectX/DX12/Graphics/CommandList.h"
+#include <DirectX/DirectXTex/DirectXTex.h>
+
 #include <Engine/AssetManager/AssetManager.h>
 #include <Engine/AssetManager/ComponentSystem/Components/CameraComponent.h>
 #include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>
@@ -11,9 +10,9 @@
 #include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
 #include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
 
-#include "DirectX/Shipyard/GPU.h"
-#include "DirectX/Shipyard/Helpers.h"
-#include "DirectX/Shipyard/PSO.h"
+#include "DirectX/DX12/Graphics/GPU.h"
+#include "DirectX/DX12/Graphics/Helpers.h"
+#include "DirectX/DX12/Graphics/PSO.h"
 #include "Editor/Editor/Windows/Window.h"
 #include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
@@ -21,11 +20,12 @@
 #include "Engine/PersistentSystems/Scene.h"
 
 #include "Rendering/Passes.h"
-#include "Tools/ImGui/ImGui/ImGuizmo.h"
-#include "Tools/ImGui/ImGui/backends/imgui_impl_dx12.h"
-#include "Tools/ImGui/ImGui/imgui_internal.h"
+#include "Tools/ImGui/ImGuizmo.h"
+#include "Tools/ImGui/backends/imgui_impl_dx12.h"
+#include "Tools/ImGui/imgui_internal.h"
 #include "Tools/Utilities/Input/Input.hpp"
 #include <Editor/Editor/Windows/EditorWindows/Viewport.h>
+#include <Rendering/Buffers/ObjectBuffer.h>
 
 bool GraphicsEngine::Initialize(HWND windowHandle, bool enableDeviceDebug)
 {
@@ -36,8 +36,9 @@ bool GraphicsEngine::Initialize(HWND windowHandle, bool enableDeviceDebug)
         return false;
     }
 
-    m_Cache.InitRootSignature();
-    m_Cache.InitAllStates();
+    m_Cache = std::make_shared<PSOCache>();
+    m_Cache->InitRootSignature();
+    m_Cache->InitAllStates();
 
     SetupDefaultVariables();
     SetupSpace3();
@@ -48,7 +49,7 @@ bool GraphicsEngine::Initialize(HWND windowHandle, bool enableDeviceDebug)
 
     InitializeCustomRenderScene();
 
-    const auto &gBufferTextures = m_Cache.GetState(PSOCache::ePipelineStateID::GBuffer)->RenderTargets();
+    const auto &gBufferTextures = m_Cache->GetState(PSOCache::ePipelineStateID::GBuffer)->RenderTargets();
 
     const size_t dataSize = gBufferTextures[5].GetWidth() * gBufferTextures[5].GetHeight() * sizeof(float) * 2;
     BufferForPicking = new uint32_t[dataSize];
@@ -91,13 +92,13 @@ void GraphicsEngine::InitializeCustomRenderScene()
 
 const PSOCache &GraphicsEngine::GetPSOCache() const
 {
-    return m_Cache;
+    return *m_Cache;
 }
 
 bool GraphicsEngine::ResizeBuffers(Vector2ui resolution)
 {
     GPUInstance.Resize(resolution);
-    m_Cache.InitAllStates();
+    m_Cache->InitAllStates();
 
     return true; // TODO Makes sense to check if the resolution is supporded by the monitor
 }
@@ -187,7 +188,8 @@ void GraphicsEngine::SetupSpace3()
     commandList->SetRenderTargets(1, BRDLookUpTable.get(), nullptr);
 
     constexpr std::array rt = {DXGI_FORMAT_R16G16_FLOAT};
-    const auto brdfPSO = m_Cache.CreatePSO("Shaders/ScreenspaceQuad_VS.cso", "Shaders/brdfLUT_PS.cso", rt);
+    const auto brdfPSO = m_Cache->CreatePSO("Shaders/ScreenspaceQuad_VS.cso",
+                                            "Shaders/brdfLUT_PS.cso", rt);
 
     const D3D12_VIEWPORT viewPort = {
         0.0f, 0.0f, static_cast<float>(size.x), static_cast<float>(size.y), D3D12_MIN_DEPTH, D3D12_MAX_DEPTH};
@@ -196,7 +198,7 @@ void GraphicsEngine::SetupSpace3()
     graphicCommandList->RSSetViewports(1, &viewPort);
     graphicCommandList->RSSetScissorRects(1, &rect);
 
-    const auto &rootSignature = m_Cache.m_RootSignature->GetRootSignature();
+    const auto &rootSignature = m_Cache->m_RootSignature->GetRootSignature();
     graphicCommandList->SetGraphicsRootSignature(rootSignature.Get());
     commandList->TrackResource(rootSignature);
 
@@ -412,15 +414,13 @@ void GraphicsEngine::PrepareBuffers(std::shared_ptr<CommandList> commandList, Vi
                                     GameObjectManager &scene)
 {
     OPTICK_GPU_EVENT("PrepareBuffers");
-
-    // const UINT currentBackBufferIndex = chain->GetCurrentBackBufferIndex();
     commandList->TransitionBarrier(GPUInstance.GetCurrentBackBuffer().GetResource(),
                                    D3D12_RESOURCE_STATE_RENDER_TARGET);
 
     GPUInstance.ClearRTV(*commandList.get(), GPUInstance.GetCurrentRenderTargetView());
     GPUInstance.ClearDepth(*commandList.get(), GPUInstance.m_DepthBuffer->GetHandle(ViewType::DSV).cpuPtr);
 
-    const auto &rootSignature = m_Cache.m_RootSignature->GetRootSignature();
+    const auto &rootSignature = m_Cache->m_RootSignature->GetRootSignature();
     commandList->GetGraphicsCommandList()->SetGraphicsRootSignature(rootSignature.Get());
     commandList->TrackResource(rootSignature);
 
@@ -463,7 +463,7 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
         commandList->GetGraphicsCommandList()->RSSetViewports(1, &GPUInstance.m_Viewport);
         commandList->GetGraphicsCommandList()->RSSetScissorRects(1, &GPUInstance.m_ScissorRect);
 
-        const auto &gbufferPSO = m_Cache.GetState(PSOCache::ePipelineStateID::GBuffer);
+        const auto &gbufferPSO = m_Cache->GetState(PSOCache::ePipelineStateID::GBuffer);
         const auto &gBufferTextures = gbufferPSO->RenderTargets();
         GPUInstance.ClearRTV(*commandList.get(), gBufferTextures, bufferCount);
         commandList->SetRenderTargets(bufferCount, gBufferTextures, GPUInstance.m_DepthBuffer.get());
@@ -562,8 +562,8 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
                 }
             }
             materialBuffer.vertexBufferIndex = element.VertexBuffer.GetHandle(ViewType::SRV).heapOffset;
-            materialBuffer.vertexOffset =
-                0; // vertex offset is part of drawcall, if i ever use this i need to set it here
+            materialBuffer.vertexOffset = 0;
+            // vertex offset is part of drawcall, if i ever use this i need to set it here
 
             assert(materialBuffer.albedoTexture != -1 && "HEAP INDEX OUT OF BOUND");
             assert(materialBuffer.normalTexture != -1 && "HEAP INDEX OUT OF BOUND");
@@ -577,6 +577,7 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
                                                                                      alloc2.GpuAddress());
 
             OPTICK_GPU_EVENT("Draw");
+            // TODO Circular index buffer for pre allocs one day -_-
             commandList->GetGraphicsCommandList()->DrawIndexedInstanced(element.IndexResource.GetIndexCount(), 1, 0, 0,
                                                                         0);
         }
@@ -585,9 +586,9 @@ void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandL
 void GraphicsEngine::EnvironmentLightPass(std::shared_ptr<CommandList> commandList)
 {
     OPTICK_GPU_EVENT("EnvironmentLightPass");
-    auto &environmentLight = m_Cache.GetState(PSOCache::ePipelineStateID::DeferredLighting);
+    auto &environmentLight = m_Cache->GetState(PSOCache::ePipelineStateID::DeferredLighting);
     constexpr uint32_t bufferCount = 7;
-    const auto &gBufferTextures = m_Cache.GetState(PSOCache::ePipelineStateID::GBuffer)->RenderTargets();
+    const auto &gBufferTextures = m_Cache->GetState(PSOCache::ePipelineStateID::GBuffer)->RenderTargets();
 
     // TODO READBACK BUFFER
     /*
@@ -635,13 +636,13 @@ void GraphicsEngine::EnvironmentLightPass(std::shared_ptr<CommandList> commandLi
 void GraphicsEngine::ToneMapperPass(std::shared_ptr<CommandList> commandList, Texture *target)
 {
     OPTICK_GPU_EVENT("ToneMapperPass");
-    const auto &toneMapper = m_Cache.GetState(PSOCache::ePipelineStateID::ToneMap);
+    const auto &toneMapper = m_Cache->GetState(PSOCache::ePipelineStateID::ToneMap);
 
     const auto &pipelineState = toneMapper->GetPipelineState().Get();
     commandList->GetGraphicsCommandList()->SetPipelineState(pipelineState);
     commandList->TrackResource(pipelineState);
 
-    auto *renderTargets = m_Cache.GetState(PSOCache::ePipelineStateID::DeferredLighting)->RenderTargets();
+    auto *renderTargets = m_Cache->GetState(PSOCache::ePipelineStateID::DeferredLighting)->RenderTargets();
     commandList->SetDescriptorTable((int)eRootBindings::TargetTexture, renderTargets);
     commandList->FlushResourceBarriers();
 

@@ -1,11 +1,10 @@
-#include "Engine/AssetManager/AssetManager.pch.h"
+#include "AssetManager.pch.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "DirectX/Shipyard/GPU.h"
-#include "DirectX/Shipyard/Texture.h"
+#include "DirectX/DX12/Graphics/GPU.h"
+#include "DirectX/DX12/Graphics/Texture.h"
 #include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
-#include <Tools/ImGui/ImGui/ImGuiHelpers.hpp>
+#include <Tools/ImGui/ImGuiHelpers.hpp>
 
 TextureHolder::TextureHolder(const std::filesystem::path &aFilePath, eTextureType aTextureType)
     : AssetBase(aFilePath), textureType(aTextureType)

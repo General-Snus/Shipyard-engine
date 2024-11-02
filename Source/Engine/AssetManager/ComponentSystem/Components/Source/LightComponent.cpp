@@ -1,12 +1,12 @@
-#include "Engine/AssetManager/AssetManager.pch.h"
+#include "AssetManager.pch.h"
 
 #include "../LightComponent.h"
 // #include <Editor/Editor/Core/Editor.h>
 #include <Tools/Optick/include/optick.h>
 #include <Tools/Utilities/Math.hpp>
 
-#include "DirectX/Shipyard/GPU.h"
-#include "DirectX/Shipyard/Texture.h"
+#include "DirectX/DX12/Graphics/GPU.h"
+#include "DirectX/DX12/Graphics/Texture.h"
 #include "Engine/AssetManager/Objects/BaseAssets/LightDataBase.h"
 
 Light::Light(const SY::UUID anOwnerId, GameObjectManager *aManager) : Component(anOwnerId, aManager)

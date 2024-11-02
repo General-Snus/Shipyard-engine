@@ -1,8 +1,8 @@
-#include "Engine/AssetManager/AssetManager.pch.h"
+#include "AssetManager.pch.h"
 
 #include "../BaseAsset.h"
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
-#include "Tools/ImGui/ImGui/ImGuiHelpers.hpp"
+#include "Tools/ImGui/ImGuiHelpers.hpp"
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 
 AssetBase::AssetBase(const std::filesystem::path &aFilePath) : AssetPath(aFilePath), isLoadedComplete(false)

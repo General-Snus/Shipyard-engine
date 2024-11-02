@@ -1,11 +1,13 @@
 #pragma once
+#include "Engine/GraphicsEngine/Rendering/Buffers/LightBuffer.h"
+#include <memory>
 
 class CommandList;
-class Passes
+class GraphicsEngine;
+class GameObjectManager;
+
+namespace Passes
 {
-  public:
-    friend class GraphicsEngine;
-    static void WriteShadows(const GraphicsEngine &instance, std::shared_ptr<CommandList> &commandList,
-                             GameObjectManager &scene);
-    static LightBuffer CreateLightBuffer(GameObjectManager &scene);
-};
+void WriteShadows(const GraphicsEngine &instance, std::shared_ptr<CommandList> &commandList, GameObjectManager &scene);
+LightBuffer CreateLightBuffer(GameObjectManager &scene);
+}; // namespace Passes

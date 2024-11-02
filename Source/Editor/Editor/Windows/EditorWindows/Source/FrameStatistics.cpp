@@ -1,8 +1,8 @@
 #include "../FrameStatistics.h"
 
-#include <DirectX/Shipyard/GPU.h>
+#include <DirectX/DX12/Graphics/GPU.h>
 #include <TCHAR.h>
-#include <Tools/ImGui/ImGui/imgui.h>
+#include <Tools/ImGui/imgui.h>
 #include <Tools/Utilities/Math.hpp>
 #include <conio.h>
 #include <numeric>

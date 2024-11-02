@@ -1,8 +1,8 @@
 #include "Engine/AssetManager/Objects/BaseAssets/ColliderAsset.h"
-#include "Engine/AssetManager/AssetManager.pch.h"
+#include "AssetManager.pch.h"
 #include "Engine/AssetManager/Objects/BaseAssets/MeshAsset.h"
 
-#include <Tools/ImGui/ImGui/ImGuizmo.h>
+#include <Tools/ImGui/ImGuizmo.h>
 #include <Tools/Utilities/LinearAlgebra/AABB3D.hpp>
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>

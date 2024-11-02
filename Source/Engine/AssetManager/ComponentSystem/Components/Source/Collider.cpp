@@ -1,4 +1,4 @@
-#include "Engine/AssetManager/AssetManager.pch.h"
+#include "AssetManager.pch.h"
 
 #include "Editor/Editor/Core/ApplicationState.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Collider.h"

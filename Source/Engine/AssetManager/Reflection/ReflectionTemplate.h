@@ -7,9 +7,9 @@
 #include <type_traits>
 #include <typeinfo>
 
-#include "Tools/ImGui/ImGui/imgui.h"
-#include "Tools/ImGui/ImGui/imgui_internal.h"
-#include "Tools/ImGui/ImGui/misc/cpp/imgui-combo-filter.h"
+#include "Tools/ImGui/imgui.h"
+#include "Tools/ImGui/imgui_internal.h"
+#include "Tools/ImGui/misc/cpp/imgui-combo-filter.h"
 
 #include "Tools/Reflection/refl.hpp"
 #include "Tools/Utilities/LinearAlgebra/Vectors.hpp"

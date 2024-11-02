@@ -1,9 +1,9 @@
 #pragma once
-#include "BaseAsset.h" // fuck you for bad naming
-#include <DirectX/Shipyard/Gpu_fwd.h>
+#include "BaseAsset.h"
+#include <DirectX/DX12/Graphics/Gpu_fwd.h>
 #include <dxcapi.h>
 
-class ShipyardShader : public AssetBase // <---
+class ShipyardShader : public AssetBase
 {
   public:
     MYLIB_REFLECTABLE();

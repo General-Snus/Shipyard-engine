@@ -1,4 +1,4 @@
-#include "Engine/AssetManager/AssetManager.pch.h"
+#include "AssetManager.pch.h"
 #include "../Controller.h"
 
 void Controller::Recieve(const AIEvent& aEvent)

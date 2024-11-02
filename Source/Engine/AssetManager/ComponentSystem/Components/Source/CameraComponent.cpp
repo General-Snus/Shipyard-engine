@@ -1,16 +1,10 @@
-#include "Engine/AssetManager/AssetManager.pch.h"
+#include "AssetManager.pch.h"
 
-#include "../CameraComponent.h"
-#include <DirectXMath.h>
+#include "../CameraComponent.h" 
 #include <Editor/Editor/Core/Editor.h>
 #include <Tools/Utilities/Input/Input.hpp>
 
-#include <ResourceUploadBatch.h>
-
-#include "DirectX/Shipyard/CommandList.h"
-#include "DirectX/Shipyard/GPU.h"
-#include "Editor/Editor/Core/ApplicationState.h"
-#include "Engine/GraphicsEngine/GraphicsEngine.h"
+#include "Editor/Editor/Core/ApplicationState.h" 
 #include "Tools/Utilities/Input/EnumKeys.h"
 
 Camera::Camera(const SY::UUID anOwnerId, GameObjectManager *aManager)

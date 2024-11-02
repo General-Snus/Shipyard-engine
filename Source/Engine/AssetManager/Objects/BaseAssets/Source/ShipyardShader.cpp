@@ -1,7 +1,7 @@
-#include "Engine/AssetManager/AssetManager.pch.h"
+#include "AssetManager.pch.h"
 
 #include "../ShipyardShader.h"
-#include "DirectX/Shipyard/Helpers.h"
+#include "DirectX/DX12/Graphics/Helpers.h"
 #include <d3dcompiler.h>
 #include <dxcapi.h>
 
