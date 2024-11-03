@@ -68,5 +68,7 @@ class GameState
 
     HMODULE dllHandle;
     typedef GameLauncher *(*EntryPoint)();
+	typedef void (*ExitPoint)(HMODULE handle);
     EntryPoint dllFunction;
+	ExitPoint dllFunctionExit;
 };

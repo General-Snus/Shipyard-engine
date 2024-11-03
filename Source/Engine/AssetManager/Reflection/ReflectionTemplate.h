@@ -245,8 +245,7 @@ class Reflectable
     template <typename T0 = Component> void Reflect(this auto &aReflectedObject);
     template <typename T0 = Component> void Reflect(T0 &aReflectedObject);
     template <typename T0, typename C> static void UpdateValue(T0 &member, C &aReflectedObject, const std::string &arg);
-    template <typename T0, typename C>
-    static void UpdateCleanValue(T0 &member, C &aReflectedObject, const std::string &arg);
+    template <typename T0, typename C> static bool ReflectSingleValue(T0 &member, C &aReflectedObject, const std::string &arg);
 };
 
 #define MYLIB_REFLECTABLE()                                                                                            \
@@ -291,12 +290,11 @@ inline void Reflectable::Reflect(this auto &aReflectedObject)
 
         ImGui::Columns(1);
         ImGui::PopID();
-        ImGui::Indent(16.f);
-        ImGui::Unindent(16.0f);
     };
     refl::util::for_each(refl::reflect(aReflectedObject).members, imp);
     ImGui::Separator();
 }
+
 template <typename T0, typename C>
 inline void Reflectable::UpdateValue(T0 &member, C &aReflectedObject, const std::string &arg)
 {
@@ -390,19 +388,27 @@ inline void Reflectable::UpdateValue(T0 &member, C &aReflectedObject, const std:
         }
     }
 }
+//Todo document the shit out of this, i have no clue what i have written when looking back
+//More static asserts
 template <typename T0, typename C>
-inline void Reflectable::UpdateCleanValue(T0 &member, C &aReflectedObject, const std::string &arg)
+inline void Reflectable::ReflectSingleValue(T0 &member, C &aReflectedObject, const std::string &arg)
 {
+	ImGui::PushID(arg.c_str());
+	ImGui::Columns(2);
+	ImGui::SetColumnWidth(0, 200);
+	ImGui::Text(arg.data());
+	ImGui::NextColumn(); 
+
     using MemberType = std::remove_reference_t<decltype(unwrapPointer(member))>;
     using componentType = std::remove_reference_t<decltype(unwrapPointer(aReflectedObject))>;
     using declType = decltype(member);
-
+    
     using ptrType = std::add_pointer_t<MemberType>;
     using cmpType = std::add_pointer_t<T0>;
-
+    
     const auto oldValue = member;
     const bool changed = Reflection::ImGuiReflect(member, arg);
-
+    
     constexpr bool isConvertible = std::is_convertible_v<cmpType, Component *>;
     constexpr bool isBase = std::is_base_of_v<Component, T0>;
     if constexpr (isConvertible && isBase)
@@ -434,7 +440,7 @@ inline void Reflectable::UpdateCleanValue(T0 &member, C &aReflectedObject, const
                 componentType *unwrappedComponent = &(aReflectedObject);
                 const MemberType old = oldValue;
                 const MemberType neww = newValue;
-
+    
                 const auto ptr = std::make_shared<VarChanged<componentType, MemberType>>(unwrappedComponent, unwrapped,
                                                                                          old, neww, arg);
                 CommandBuffer::MainEditorCommandBuffer().AddCommand(ptr);
@@ -447,7 +453,7 @@ inline void Reflectable::UpdateCleanValue(T0 &member, C &aReflectedObject, const
     }
     else
     {
-
+    
         if constexpr (!isReflectableClass<MemberType>())
         {
             if (changed)
@@ -482,6 +488,10 @@ inline void Reflectable::UpdateCleanValue(T0 &member, C &aReflectedObject, const
             }
         }
     }
+	ImGui::Columns(1);
+	ImGui::PopID();
+
+    return changed;
 };
 
 template <typename T0> __forceinline void Reflectable::Reflect(T0 &aReflectedObject)
@@ -517,8 +527,6 @@ template <typename T0> __forceinline void Reflectable::Reflect(T0 &aReflectedObj
         UpdateValue(member, aReflectedObject, arg);
         ImGui::Columns(1);
         ImGui::PopID();
-        ImGui::Indent(16.f);
-        ImGui::Unindent(16.0f);
     };
     refl::util::for_each(refl::reflect(aReflectedObject).members, imp);
     ImGui::Separator();

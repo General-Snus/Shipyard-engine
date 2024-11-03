@@ -76,7 +76,7 @@ class PSO
     {
         return m_numRenderTargets;
     };
-    ComPtr<ID3D12PipelineState> &GetPipelineState();
+    const ComPtr<ID3D12PipelineState> &GetPipelineState() const;
 
   private:
     D3D12_GRAPHICS_PIPELINE_STATE_DESC m_psoDescription = {};

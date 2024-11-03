@@ -71,8 +71,8 @@ class GraphicsEngine : public Singleton
 
 	bool ResizeBuffers(Vector2ui resolution);
 
-  private:
 	std::shared_ptr<PSOCache> m_Cache;
+  private:
 
 	uint32_t *BufferForPicking;
 	bool WantPickingData = false;

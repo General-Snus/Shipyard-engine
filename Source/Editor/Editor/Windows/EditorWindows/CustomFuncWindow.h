@@ -26,8 +26,7 @@ class CustomFuncWindow : public EditorWindow
     void SetWindowName(const std::string &aName);
 
     void RenderImGUi()
-    {
-        ImGui::PushID((void *)this);
+    { 
 
         if (windowsName.empty())
         {
@@ -39,9 +38,7 @@ class CustomFuncWindow : public EditorWindow
         {
             m_Func();
         }
-        ImGui::End();
-
-        ImGui::PopID();
+        ImGui::End(); 
     };
 
   private:

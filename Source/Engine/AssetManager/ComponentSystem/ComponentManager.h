@@ -95,7 +95,8 @@ template <class T> class ComponentManager : public ComponentManagerBase
 
     const bool HasComponent(const SY::UUID aGameObjectID) const;
 
-    std::vector<T> &GetAllComponents();
+    std::vector<T> &GetAllComponents(); 
+    const std::vector<T> &GetAllComponents() const; 
     Component *TryGetBaseComponent(const SY::UUID aGameObjectID) override;
     T &GetComponent(const SY::UUID aGameObjectID);
     T *TryGetComponent(const SY::UUID aGameObjectID);
@@ -232,7 +233,11 @@ template <class T> inline std::vector<T> &ComponentManager<T>::GetAllComponents(
 {
     return myComponents;
 }
-
+template <class T> inline const std::vector<T> &ComponentManager<T>::GetAllComponents() const
+{
+	return myComponents;
+}
+  
 template <class T> inline T &ComponentManager<T>::GetComponent(const SY::UUID aGameObjectID)
 {
     assert(myGameObjectIDtoVectorIndex.find(aGameObjectID) != myGameObjectIDtoVectorIndex.end() &&

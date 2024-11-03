@@ -25,7 +25,8 @@ bool GameState::AttemptDllLoad()
     }
 
     dllFunction = (EntryPoint)GetProcAddress(dllHandle, "EntrypointMain");
-    if (!dllFunction)
+    dllFunctionExit = (ExitPoint)GetProcAddress(dllHandle, "ExitPoint");
+	if (!(dllFunction && dllFunctionExit))
     {
         Logger.Err("Failed to get DLL function !");
         FreeLibrary(dllHandle);
@@ -64,10 +65,15 @@ void GameState::EndPlaySession()
     if (dllFunction)
     {
         m_GameScene = std::make_shared<Scene>("GameScene");
-
-        Logger.Err("Failed to get DLL function !");
-        FreeLibrary(dllHandle);
-        dllFunction = nullptr;
+		try
+		{
+            Logger.Err("Failed to get DLL function !");
+            dllFunction = nullptr;
+		}
+		catch (const std::exception &e )
+		{
+			Logger.Critical(e,0);
+		}
     }
 
     if (!IsPlaying)

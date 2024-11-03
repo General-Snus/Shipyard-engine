@@ -56,11 +56,3 @@ REFL_AUTO(type(AssetBase), field(AssetPath), field(isLoadedComplete), field(isBe
 //{
 //	std::unordered_map<std::string,Matrix > myTransforms;
 // };
-
-struct Element
-{
-    VertexResource VertexBuffer;
-    IndexResource IndexResource;
-    UINT Stride = 0;
-    unsigned int MaterialIndex = 0;
-};

@@ -6,10 +6,9 @@
 class GraphicsDebugger : public EditorWindow
 {
   public:
-    void RenderImGUi() override;
+	void RenderImGUi() override;
 
   private:
-    int currentlyActiveTone = 0;
-    int currentlyActiveLayer = 0;
-    std::array<bool, static_cast<int>(DebugFilter::count)> myRenderMode = {false};
+	int currentlyActiveTone = 0;
+	int currentlyActiveLayer = 0;
 };

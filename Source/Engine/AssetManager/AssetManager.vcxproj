@@ -279,7 +279,6 @@
     <ClInclude Include="Objects\AI\AgentSystem\DecisionTree\DecisionTree.h" />
     <ClInclude Include="Objects\AI\AgentSystem\PollingStations\PollingStation.h" />
     <ClInclude Include="Objects\AI\NavMesh\NavMesh.h" />
-    <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\RenderMode.h" />
     <ClInclude Include="ComponentSystem\Components\CameraComponent.h" />
     <ClInclude Include="ComponentSystem\Components\LightComponent.h" />
     <ClInclude Include="Objects\BaseAssets\LightDataBase.h" />
@@ -340,7 +339,6 @@
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\Source\PollingController.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\PollingStations\Source\PollingStation.cpp" />
     <ClCompile Include="Objects\AI\NavMesh\Source\NavMesh.cpp" />
-    <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\RenderMode.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\CameraComponent.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\LightComponent.cpp" />
     <ClCompile Include="Objects\BaseAssets\Source\MaterialAsset.cpp" />

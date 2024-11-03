@@ -12,5 +12,4 @@ struct FrameBuffer
 	int FB_RenderMode = 0;
 	Vector2ui FB_ScreenResolution = {1920, 1080};
 	float padding = 0;
-	// std::array<Vector4f,4> FB_FrustrumCorners = { Vector4f(),Vector4f(),Vector4f(),Vector4f() };
 };

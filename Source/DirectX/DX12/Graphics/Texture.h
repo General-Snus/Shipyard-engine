@@ -9,6 +9,7 @@ using namespace Microsoft::WRL;
 class Texture : public GpuResource
 {
     friend class GPU;
+    friend class CommandList;
     friend class TextureHolder;
     friend class Material;
 

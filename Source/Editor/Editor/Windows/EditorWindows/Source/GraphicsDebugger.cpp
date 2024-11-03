@@ -1,44 +1,36 @@
 #include "../GraphicsDebugger.h"
 
 #include "imgui.h"
-// #include <Engine/GraphicsEngine/GraphicsEngine.h>
 
-static inline std::array<std::string, 5> tonemaps = {"No tonemap", "Tonemap_Reinhard2", "Tonemap_UnrealEngine",
-													 "Tonemap_ACES", "Tonemap_Lottes"};
+#include <Core/Editor.h>
+#include <Engine/AssetManager/ComponentSystem/Components/CameraComponent.h>
+#include <Windows/EditorWindows/Viewport.h>
 
 void GraphicsDebugger::RenderImGUi()
 {
 	ImGui::Begin("Debug Filter", &m_KeepWindow);
+
+	constexpr auto &debugFilter = magic_enum::enum_names<DebugFilter>();
+	constexpr int enumCount = (int)magic_enum::enum_count<DebugFilter>();
+
+	std::vector<const char *> testArray;
+	for_sequence<enumCount>([&testArray](auto i) constexpr { testArray.emplace_back(debugFilter[i].data()); });
+
 	for (int i = 0; i < (int)DebugFilter::count; i++)
 	{
 		if (currentlyActiveLayer == i)
 		{
-			ImGui::RadioButton(ApplicationState::layerNames[i].c_str(), true);
+			ImGui::RadioButton(testArray[i], true);
 		}
 		else
 		{
-			if (ImGui::RadioButton(ApplicationState::layerNames[i].c_str(), false))
+			if (ImGui::RadioButton(testArray[i], false))
 			{
 				currentlyActiveLayer = i;
-				ApplicationState::filter = static_cast<DebugFilter>(i);
-			}
-		}
-	}
-	ImGui::Separator();
-	for (int i = 0; i < 5; i++)
-	{
-		if (currentlyActiveTone == i)
-		{
-			ImGui::RadioButton(tonemaps[i].c_str(), true);
-		}
-		else
-		{
-			if (ImGui::RadioButton(tonemaps[i].c_str(), false))
-			{
-				currentlyActiveTone = i;
-
-				// GraphicsSettings &settings = GraphicsEngineInstance.GetSettings();
-				// settings.Tonemaptype = i;
+				if (auto viewport = EditorInstance.GetMainViewport())
+				{
+					viewport->GetCamera().GetComponent<Camera>().filter = (DebugFilter)currentlyActiveLayer;
+				}
 			}
 		}
 	}

@@ -6,6 +6,8 @@
 #ifndef incCommandList
 #define incCommandList
 
+class PSO;
+
 class CommandList
 {
   public:
@@ -27,6 +29,14 @@ class CommandList
     }
 
     void SetRenderTargets(unsigned numberOfTargets, Texture *renderTargets, Texture *depthBuffer);
+	void ClearRenderTargets(unsigned numberOfTargets, Texture *rtv);
+
+	void ClearRenderTarget(Texture rtv);
+	void SetPipelineState(const PSO &pso);
+
+	void SetViewports(const D3D12_VIEWPORT &viewPort, unsigned num = 1);
+	void SetSissorRect(const D3D12_RECT &sissorRect, unsigned num = 1);
+
 
     DxCommandList GetGraphicsCommandList() const
     {

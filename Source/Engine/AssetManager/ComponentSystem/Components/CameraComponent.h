@@ -5,59 +5,87 @@
 #include <Engine/AssetManager/ComponentSystem/Components/Transform.h>
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
 
+enum class DebugFilter
+{
+	NoFilter = 0,
+	WorldPosition,
+	VertetexWorldNormal,
+	AlbedoMap,
+	NormalMap,
+	WorldPixelNormal,
+	AmbientOcclusion,
+	Roughness,
+	Metallic,
+	Emission,
+	Depth,
+	DirectionLight,
+	AmbientLight,
+	PointLight,
+	SpotLight,
+	ShadowMap,
+	TexCoord0,
+	TexCoord1,
+	TexCoord2,
+	TexCoord3,
+	TexCoord4,
+	TexCoord5,
+	count
+};
+
 class Camera : public Component
 {
   public:
-    MYLIB_REFLECTABLE();
-    explicit Camera(const SY::UUID anOwnerId, GameObjectManager *aManager);
+	MYLIB_REFLECTABLE();
+	explicit Camera(const SY::UUID anOwnerId, GameObjectManager *aManager);
 
-    void Update() override;
-    void Render() override;
-    bool InspectorView() override;
+	void Update() override;
+	void Render() override;
+	bool InspectorView() override;
 
-    std::array<Vector4f, 4> GetFrustrumCorners() const;
-    Vector3f GetPointerDirection(const Vector2<int> position);
-    Vector3f GetPointerDirectionNDC(const Vector2<int> position) const;
-    Vector4f WoldSpaceToPostProjectionSpace(Vector3f aEntity);
+	std::array<Vector4f, 4> GetFrustrumCorners() const;
+	Vector3f GetPointerDirection(const Vector2<int> position);
+	Vector3f GetPointerDirectionNDC(const Vector2<int> position) const;
+	Vector4f WoldSpaceToPostProjectionSpace(Vector3f aEntity);
 
-    inline void IsInControl(bool aIsInControl)
-    {
-        IsInControll = aIsInControl;
-    };
+	inline void IsInControl(bool aIsInControl)
+	{
+		IsInControll = aIsInControl;
+	};
 
-    inline Matrix GetProjection()
-    {
-        return m_Projection;
-    };
-    FrameBuffer GetFrameBuffer();
-    Transform &LocalTransform();
+	inline Matrix GetProjection()
+	{
+		return m_Projection;
+	};
+	FrameBuffer GetFrameBuffer();
+	Transform &LocalTransform();
 
-    float fow = 90.0f;
-    float farfield = 1000000.0f;
-    float nearField = 0.01f;
-    bool isOrtho = false;
+	float fow = 90.0f;
+	float farfield = 1000000.0f;
+	float nearField = 0.01f;
+	bool isOrtho = false;
+	DebugFilter filter = DebugFilter::NoFilter;
 
-    inline float FowInRad() const
-    {
-        return DEG_TO_RAD * fow;
-    };
+	inline float FowInRad() const
+	{
+		return DEG_TO_RAD * fow;
+	};
 
-    inline float APRatio() const
-    {
-        return resolution.x / resolution.y;
-    };
+	inline float APRatio() const
+	{
+		return resolution.x / resolution.y;
+	};
 
-    inline void SetResolution(Vector2f aResolution)
-    {
-        resolution = aResolution;
-    };
+	inline void SetResolution(Vector2f aResolution)
+	{
+		resolution = aResolution;
+	};
 
   private:
-    Transform localTransform;
-    Vector2f resolution = {(float)(WindowInstance.Width()), (float)(WindowInstance.Height())};
-    bool IsInControll = false;
-    Matrix m_Projection;
-    float cameraSpeed = 25;
+	Transform localTransform;
+	Vector2f resolution = {(float)(WindowInstance.Width()), (float)(WindowInstance.Height())};
+	bool IsInControll = false;
+	Matrix m_Projection;
+	float cameraSpeed = 25;
 };
 
 REFL_AUTO(type(Camera), field(fow), field(farfield), field(nearField), field(isOrtho))

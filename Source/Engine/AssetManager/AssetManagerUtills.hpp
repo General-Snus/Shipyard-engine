@@ -84,7 +84,7 @@ void SwitchableAsset(std::shared_ptr<assetType> &asset, std::string PayloadType,
 
     if (asset)
     {
-        if (ImGui::ImageButton((char *)&asset, asset->GetEditorIcon(), {100, 100},
+		if (ImGui::ImageButton(std::format("##EmptyWindow_ID:{}",(char *)&asset).c_str(), asset->GetEditorIcon(), {100, 100},
                                ImGuiButtonFlags_PressedOnDoubleClick) &&
             supportInspector)
         {

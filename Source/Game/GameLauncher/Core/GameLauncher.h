@@ -21,4 +21,5 @@ class YourGameLauncher : public GameLauncher
 extern "C"
 {
     GAME_API GameLauncher *EntrypointMain();
+	GAME_API void ExitPoint(HMODULE handle);
 }

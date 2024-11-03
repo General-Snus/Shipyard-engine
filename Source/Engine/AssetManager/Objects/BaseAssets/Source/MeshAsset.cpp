@@ -135,6 +135,7 @@ void Mesh::FillMaterialPaths(const aiScene *scene)
             materials[key] = GraphicsEngineInstance.GetDefaultMaterial();
             continue;
         }
+
         Material::CreateJson(dataMat, matPath);
         materials[key] = EngineResources.LoadAsset<Material>(matPath);
     }
@@ -261,12 +262,15 @@ void Mesh::Init()
 
     for (size_t i = 0; i < scene->mNumMeshes; i++)
     {
-        processMesh(scene->mMeshes[i], scene);
-        const AABB3D<float> newBound = {
-            Vector3f(scene->mMeshes[i]->mAABB.mMin.x, scene->mMeshes[i]->mAABB.mMin.y, scene->mMeshes[i]->mAABB.mMin.z),
-            Vector3f(scene->mMeshes[i]->mAABB.mMax.x, scene->mMeshes[i]->mAABB.mMax.y,
-                     scene->mMeshes[i]->mAABB.mMax.z)};
-        Bounds.Extend(newBound);
+		Element element;
+		bool succeded = processMesh(scene->mMeshes[i], scene, element);
+
+        if (succeded)
+        {
+		    idToMaterial.try_emplace(element.MaterialIndex, "");
+            Bounds.Extend(element.Bounds);
+		    Elements.emplace_back(element);
+        }
     }
 
     // FillMatPath
@@ -275,10 +279,11 @@ void Mesh::Init()
     return;
 }
 
-void Mesh::processMesh(aiMesh *mesh, const aiScene *scene)
+bool Mesh::processMesh(aiMesh *mesh, const aiScene *scene, Element& outElement)
 {
     scene;
-    OPTICK_EVENT();
+    OPTICK_EVENT(); 
+
     std::vector<Vertex> mdlVertices;
     mdlVertices.reserve(mesh->mNumVertices);
     std::vector<uint32_t> mdlIndicies;
@@ -351,33 +356,31 @@ void Mesh::processMesh(aiMesh *mesh, const aiScene *scene)
     if (!GPUInstance.CreateVertexBuffer<Vertex>(commandList, vertexRes, mdlVertices))
     {
         Logger.Err("Failed to create vertex buffer");
-        return;
+        return false;
     }
 
     IndexResource indexRes(wname);
     if (!GPUInstance.CreateIndexBuffer(commandList, indexRes, mdlIndicies))
     {
         Logger.Err("Failed to create index buffer");
-        return;
+        return false;
     }
 
     auto fenceValue = commandQueue->ExecuteCommandList(commandList);
     commandQueue->WaitForFenceValue(fenceValue);
     commandQueue->Flush();
 
-    Element toAdd;
+    outElement.VertexBuffer = vertexRes;
+    outElement.IndexResource = indexRes;
+    outElement.Stride = sizeof(Vertex);
+    outElement.MaterialIndex = mesh->mMaterialIndex;
+     
+	outElement.Bounds = {
+		Vector3f(mesh->mAABB.mMin.x, mesh->mAABB.mMin.y, mesh->mAABB.mMin.z),
+		Vector3f(mesh->mAABB.mMax.x, mesh->mAABB.mMax.y, mesh->mAABB.mMax.z)
+    };
 
-    toAdd.VertexBuffer = vertexRes;
-    toAdd.IndexResource = indexRes;
-    toAdd.Stride = sizeof(Vertex);
-    toAdd.MaterialIndex = mesh->mMaterialIndex;
-    idToMaterial.try_emplace(mesh->mMaterialIndex, "");
-
-    Elements.emplace_back(toAdd);
-    mdlVertices.clear();
-    mdlIndicies.clear();
-
-    return;
+    return true;
 }
 
 void Mesh::ResizeBuffer()

@@ -413,6 +413,7 @@ bool Editor::Initialize(HWND aHandle)
 	m_Callbacks[EditorCallback::ObjectSelected] = Event();
 	m_Callbacks[EditorCallback::SceneChange] = Event();
 	m_Callbacks[EditorCallback::SceneChange].AddListener([]() { EditorInstance.GetSelectedGameObjects().clear(); });
+
 	m_Callbacks[EditorCallback::WM_DropFile] = Event();
 
 	AddViewPort();
@@ -625,6 +626,18 @@ void Editor::SetActiveScene(const std::shared_ptr<Scene> scene)
 std::shared_ptr<Scene> Editor::GetActiveScene()
 {
 	return m_ActiveScene;
+}
+
+std::shared_ptr<Viewport> Editor::GetMainViewport()
+{
+	for (auto &view : m_Viewports)
+	{
+		if (view->IsMainViewport())
+		{
+			return view;
+		}
+	}
+	return nullptr;
 }
 
 void Editor::Update()

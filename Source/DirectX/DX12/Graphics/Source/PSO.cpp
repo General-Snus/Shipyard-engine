@@ -270,7 +270,7 @@ std::unique_ptr<PSO> PSOCache::CreatePSO(const std::filesystem::path &vertexShad
     return pso;
 }
 
-ComPtr<ID3D12PipelineState> &PSO::GetPipelineState()
+const ComPtr<ID3D12PipelineState> &PSO::GetPipelineState() const 
 {
     return m_PipelineState;
 }

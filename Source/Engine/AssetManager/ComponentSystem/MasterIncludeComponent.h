@@ -10,7 +10,6 @@
 
 #include "Engine/AssetManager/ComponentSystem/Components/ActorSystem/CombatComponent.h"
 #include "Engine/AssetManager/ComponentSystem/Components/ActorSystem/cActor.h"
-#include "Engine/AssetManager/ComponentSystem/Components/DEBUGCOMPONENTS/RenderMode.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXDynamicBody.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXStaticBody.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h"
