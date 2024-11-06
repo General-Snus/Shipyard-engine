@@ -28,7 +28,7 @@ template <typename asset = Mesh> void PopUpContextForAsset(std::shared_ptr<asset
         static std::vector<localPair> sortedList;
         for (const auto &[path, content] : assetMap)
         {
-            if (!content)
+			if (!content || path == "")
             {
                 continue;
             }
@@ -49,29 +49,24 @@ template <typename asset = Mesh> void PopUpContextForAsset(std::shared_ptr<asset
             });
         }
 
-        ImGui::BeginTable(replace->GetTypeInfo().Name().c_str(), 2);
-        ImGui::TableSetColumnWidth(0, 50);
-        ImGui::TableSetColumnWidth(1, 125);
         ImGuiListClipper clipper;
         clipper.Begin((int)sortedList.size());
         while (clipper.Step())
-        {
-            ImGui::TableNextColumn();
+		{ 
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
-            {
-                const auto &[path, content] = sortedList[row];
-                ImGui::TextWrapped(path.c_str());
-                ImGui::TableNextColumn();
+			{ 
+				const auto &[path, content] = sortedList[row]; 
+				ImGui::TextWrapped(path.c_str());
+				ImGui::SameLine(); 
                 if (ImGui::ImageButton(("PopUpContextMenu" + path).c_str(), content->GetEditorIcon(), {100, 100}))
                 {
                     replace = content;
                     ZeroMemory(buf, 128);
                     ImGui::CloseCurrentPopup();
                 }
-                ImGui::TableNextColumn();
+				ImGui::Separator();
             }
         }
-        ImGui::EndTable();
         ImGui::EndChild();
         ImGui::EndPopup();
         sortedList.clear();

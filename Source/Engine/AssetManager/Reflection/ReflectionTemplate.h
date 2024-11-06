@@ -391,7 +391,7 @@ inline void Reflectable::UpdateValue(T0 &member, C &aReflectedObject, const std:
 //Todo document the shit out of this, i have no clue what i have written when looking back
 //More static asserts
 template <typename T0, typename C>
-inline void Reflectable::ReflectSingleValue(T0 &member, C &aReflectedObject, const std::string &arg)
+inline bool Reflectable::ReflectSingleValue(T0 &member, C &aReflectedObject, const std::string &arg)
 {
 	ImGui::PushID(arg.c_str());
 	ImGui::Columns(2);

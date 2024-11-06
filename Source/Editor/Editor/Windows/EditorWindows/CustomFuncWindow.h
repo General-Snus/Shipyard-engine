@@ -4,6 +4,7 @@
 #include <Tools/Logging/Logging.h>
 #include <functional>
 #include <future>
+#include <array>
 
 class CustomFuncWindow : public EditorWindow
 {
@@ -15,6 +16,11 @@ class CustomFuncWindow : public EditorWindow
     explicit CustomFuncWindow(const CallbackFunction &&callback, Args... someArguments)
 
     {
+		for (auto &letter : uniqueID)
+		{
+			letter = (char)(rand() & 255);  
+		}
+
         m_Func = [=]() { callback(someArguments...); };
 
         if (!m_Func)
@@ -33,7 +39,7 @@ class CustomFuncWindow : public EditorWindow
             windowsName = "Name your window you stupid mutt";
         }
 
-        ImGui::Begin(windowsName.c_str(), &m_KeepWindow);
+        ImGui::Begin(std::format("{}###{}", windowsName, uniqueID).c_str(), &m_KeepWindow);
         if (m_Func)
         {
             m_Func();
@@ -44,4 +50,5 @@ class CustomFuncWindow : public EditorWindow
   private:
     std::function<void()> m_Func;
     std::string windowsName;
+    std::array<unsigned char,8> uniqueID;
 };

@@ -95,7 +95,9 @@ class RandomEngine
     template <typename T = float> static T RandomNormal(const T &a = 0.0f, const T &b = 1.0f);
 
     template <typename T = float> static T RandomBinomial();
+	template <typename T = float> static T RandomNumberOfType();
 };
+
 template <typename T> inline bool IsApproximate(const T &lhv, const T &rhv)
 {
     return std::abs(lhv - rhv) < std::numeric_limits<T>::epsilon();
@@ -113,6 +115,27 @@ template <class T> inline T RandomEngine::RandomInRange(const T &a, const T &b)
 {
     std::uniform_real_distribution<T> dist{a, b};
     return dist(engineInstance());
+}
+
+//no support for chars or lower than 16 bit sorry 
+template <class T> inline T RandomEngine::RandomNumberOfType()
+{ 
+    if constexpr (std::is_integral_v<T>)
+	{
+		static std::uniform_int_distribution<T> staticUniformDistribution;
+
+		return T(staticUniformDistribution(engineInstance()));
+	}
+	else if constexpr (std::is_floating_point_v<T>)
+	{
+		static std::uniform_real_distribution<T> staticUniformDistribution;
+
+		return T(staticUniformDistribution(engineInstance()));
+	}
+	else
+	{
+		static_assert(false, "RandomNumberOfType only supports integral and floating point types");
+	} 
 }
 
 template <class T> inline T RandomEngine::RandomNormal(const T &a, const T &b)
