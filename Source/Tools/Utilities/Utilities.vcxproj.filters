@@ -153,6 +153,9 @@
     <ClInclude Include="System\ServiceLocator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="LinearAlgebra\VectorX.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game\Camera.cpp">
@@ -180,9 +183,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="System\Source\ServiceLocator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\AppData\Local\Temp\tmpBD06.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

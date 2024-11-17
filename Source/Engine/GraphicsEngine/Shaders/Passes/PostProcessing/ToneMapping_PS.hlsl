@@ -8,14 +8,15 @@ void UnpackData(float4 packedData, out float2 velocity, out uint id, out float d
     velocity = packedData.xy;
     id = (uint)packedData.zw; 
 }
-PostProcessPixelOutput main(BRDF_VS_to_PS input)
+PostProcessPixelOutput main(SS_VStoPS input)
 {
     PostProcessPixelOutput result;
-    const float3 color = Target0_Texture.Sample(defaultSampler, input.UV).rgb;
+    const float2 dimention = float2(dim(Target0_Texture));
+    //const float2 uv = input.UV * float2(dimention.x / renderTargetSize.x, dimention.y / renderTargetSize.y);
+    const float2 uv = input.UV;
+    const float3 color = Target0_Texture.Sample(defaultSampler, uv).rgb;
     result.Color.rgb = (Tonemap_UnrealEngine(color));
 
-
-    const float2 uv = input.UV;
     const float4 albedo = colorPass.Sample(defaultSampler, uv);
     const float4 Normal = normalPass.Sample(defaultSampler, uv);
     const float4 Material = materialPass.Sample(defaultSampler, uv);

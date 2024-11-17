@@ -72,11 +72,11 @@ void GraphicsEngine::InitializeCustomRenderScene()
 		pLight.BindDirectionToTransform(true);
 	}
 
-	const auto res = Vector2f(1920.f, 1080.f);
+	const auto res = WindowInstance.Resolution();
 	{
 		GameObject camera = GameObject::Create("Camera", newScene);
 		auto &cameraComponent = camera.AddComponent<Camera>();
-		cameraComponent.SetResolution(res);
+		cameraComponent.SetResolution((Vector2f)res);
 
 		newScene->GetGOM().SetLastGOAsCamera();
 		cameraComponent.SetActive(true);
@@ -518,10 +518,8 @@ void GraphicsEngine::ToneMapperPass(std::shared_ptr<CommandList> commandList, Te
 {
 	OPTICK_GPU_EVENT("ToneMapperPass");
 	const auto &toneMapper = m_Cache->GetState(PSOCache::ePipelineStateID::ToneMap);
-
-	const auto &pipelineState = toneMapper->GetPipelineState().Get();
-	commandList->GetGraphicsCommandList()->SetPipelineState(pipelineState);
-	commandList->TrackResource(pipelineState);
+	 
+	commandList->SetPipelineState(*toneMapper); 
 
 	auto *renderTargets = m_Cache->GetState(PSOCache::ePipelineStateID::DeferredLighting)->RenderTargets();
 	commandList->SetDescriptorTable((int)eRootBindings::TargetTexture, renderTargets);

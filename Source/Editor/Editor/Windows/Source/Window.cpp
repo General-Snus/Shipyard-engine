@@ -171,16 +171,23 @@ void Window::MoveConsoleToOtherMonitor()
     }
 }
 
-unsigned int Window::Width()
+unsigned int Window::Width() const
 {
     RECT rect{};
     GetClientRect(windowHandler, &rect);
     return static_cast<unsigned int>(rect.right - rect.left);
 }
 
-unsigned int Window::Height()
+unsigned int Window::Height() const
 {
     RECT rect{};
     GetClientRect(windowHandler, &rect);
     return static_cast<unsigned int>(rect.bottom - rect.top);
+}
+ 
+Vector2ui Window::Resolution() const
+{
+	RECT rect{};
+	GetClientRect(windowHandler, &rect);
+	return Vector2ui(rect.right - rect.left, rect.bottom - rect.top);
 }

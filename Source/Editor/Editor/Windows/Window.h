@@ -26,8 +26,9 @@ class Window : public Singleton
     void Destroy();
     void MoveConsoleToOtherMonitor();
 
-    unsigned int Width();
-    unsigned int Height();
+    unsigned int Width() const;
+	unsigned int Height() const;
+	Vector2ui Resolution() const;
 
     HINSTANCE moduleHandler;
     HWND windowHandler;

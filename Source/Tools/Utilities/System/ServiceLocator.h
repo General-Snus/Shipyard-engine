@@ -1,6 +1,7 @@
 #pragma once
 #include "Executable/Executable/Export.h"
 #include <Tools/Utilities/Math.hpp>
+#include <Tools/Optick/include/optick.h>
 #include <Windows.h>
 #include <cassert>
 #include <map>
@@ -34,7 +35,8 @@ class ServiceLocator
     }
 
     template <typename T> T &GetService()
-    {
+	{
+		OPTICK_EVENT();
         auto it = services.find(std::type_index(typeid(T)));
         if (it == services.end())
         {
@@ -44,7 +46,8 @@ class ServiceLocator
     }
 
     template <typename T> T &ProvideService()
-    {
+	{
+		OPTICK_EVENT();
         services[std::type_index(typeid(T))] = std::make_unique<T>();
         return *static_cast<T *>(services[std::type_index(typeid(T))].get());
     }
@@ -56,11 +59,11 @@ class ServiceLocator
     static constexpr DWORD sharedMemorySize = 1024 * 1024;
     static HANDLE OpenOrCreateSharedMemory()
     {
-        HANDLE hMapFile = CreateFileMappingW(INVALID_HANDLE_VALUE, // Use the paging file
-                                             NULL,                 // Default security
-                                             PAGE_READWRITE,       // Read/write access
-                                             0,                    // Max. object size (high-order DWORD)
-                                             sharedMemorySize,     // Max. object size (low-order DWORD)
+        HANDLE hMapFile = CreateFileMappingW(INVALID_HANDLE_VALUE,
+                                             NULL,                
+                                             PAGE_READWRITE,      
+                                             0,                   
+                                             sharedMemorySize,    
                                              L"ServiceLocatorSharedMemory");
 
         if (hMapFile == NULL || hMapFile == INVALID_HANDLE_VALUE)

@@ -20,8 +20,11 @@ bool GraphicsEngineUtilities::GenerateSceneForIcon(std::shared_ptr<Mesh> meshAss
 	}
 
 	renderTarget->isBeingLoaded = true;
+	const auto res = Vector2f(1920, 1080.f);
 	{
-		auto &transform = GraphicsEngineInstance.newScene->GetGOM().GetCamera().GetComponent<Transform>();
+		auto& camera = GraphicsEngineInstance.newScene->GetGOM().GetCamera().GetComponent<Camera>();
+		camera.SetResolution(res);
+		auto &transform = camera.transform();
 		const Vector3f position = meshAsset->Bounds.GetCenter() + Vector3f(0, 0, -meshAsset->Bounds.GetRadius());
 		transform.SetPosition(position);
 		transform.Update();
@@ -34,7 +37,6 @@ bool GraphicsEngineUtilities::GenerateSceneForIcon(std::shared_ptr<Mesh> meshAss
 		mr.SetMaterial(material);
 	}
 
-	const auto res = Vector2f(1920.f, 1080.f);
 	auto newViewport = std::make_shared<Viewport>(true, res, GraphicsEngineInstance.newScene, renderTarget);
 	GraphicsEngineInstance.AddRenderJob(newViewport);
 	return true;

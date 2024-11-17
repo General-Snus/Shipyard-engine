@@ -18,6 +18,13 @@ int GetNumMips(TextureCube mipMap)
     return iNumMips;
 }
 
+float2 dim(Texture2D textureObj)
+{
+    uint width;
+    uint height;
+    textureObj.GetDimensions(width, height);
+    return float2(width, height);
+}
 
 
 float3 LinearToGamma(float3 aColor)

@@ -44,6 +44,7 @@ Index of this file:
 
 // System includes
 #include <stdint.h> // intptr_t
+#include <Tools/Optick/include/optick.h>
 
 //-------------------------------------------------------------------------
 // Warnings
@@ -1153,6 +1154,7 @@ bool ImGui::ScrollbarEx(const ImRect &bb_frame, ImGuiID id, ImGuiAxis axis, ImS6
 void ImGui::Image(ImTextureID user_texture_id, const ImVec2 &image_size, const ImVec2 &uv0, const ImVec2 &uv1,
                   const ImVec4 &tint_col, const ImVec4 &border_col)
 {
+	OPTICK_EVENT();
     ImGuiWindow *window = GetCurrentWindow();
     if (window->SkipItems)
         return;

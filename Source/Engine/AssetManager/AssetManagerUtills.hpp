@@ -76,14 +76,12 @@ template <typename asset = Mesh> void PopUpContextForAsset(std::shared_ptr<asset
 template <typename assetType = Mesh>
 void SwitchableAsset(std::shared_ptr<assetType> &asset, std::string PayloadType, bool supportInspector = true)
 {
-
     if (asset)
     {
 		if (ImGui::ImageButton(std::format("##EmptyWindow_ID:{}",(char *)&asset).c_str(), asset->GetEditorIcon(), {100, 100},
                                ImGuiButtonFlags_PressedOnDoubleClick) &&
             supportInspector)
         {
-
             if constexpr (SupportOwnWindow<std::shared_ptr<assetType>> ||
                           SupportOwnWindowPtr<std::shared_ptr<assetType>>)
             {

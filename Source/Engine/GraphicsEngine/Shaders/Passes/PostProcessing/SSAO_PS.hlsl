@@ -9,7 +9,7 @@ float SSAO(float2 screenUV, float2 uv, float3 pxViewPos, float3 pxViewNrm, float
     return occ;
 }
 
-PostProcessPixelOutput main(BRDF_VS_to_PS input)
+PostProcessPixelOutput main(SS_VStoPS input)
 {
     PostProcessPixelOutput result;
      

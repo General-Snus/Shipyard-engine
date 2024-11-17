@@ -11,6 +11,7 @@ AssetBase::AssetBase(const std::filesystem::path &aFilePath) : AssetPath(aFilePa
 
 inline bool AssetBase::InspectorView()
 {
+	OPTICK_EVENT();
     Vector4f color; // Color asset status indicator
     if (isLoadedComplete)
     {

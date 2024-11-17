@@ -4,6 +4,7 @@
 #include <source_location>
 #include <string>
 #include <vector>
+#include <stacktrace>
 
 #include "Tools/Utilities/LinearAlgebra/Vector3.hpp"
 #include <Tools/Utilities/Color.h>
@@ -25,12 +26,13 @@ class LoggerService : public Singleton
 		All = INT32_MAX
 	};
 
-  private:
 	struct LogMsg
 	{
 		LogType messageType;
 		std::string message;
+		std::stacktrace trace;
 	};
+  private:
 	struct logBuffer
 	{
 		std::vector<LogMsg> LoggedMessages;
@@ -85,6 +87,8 @@ class LoggerService : public Singleton
 	void Warn(const std::string &aString, const std::source_location &location = std::source_location::current());
 
 	void Err(const std::string &aString, const std::source_location &location = std::source_location::current());
+	void ErrTrace(const std::string &aString, const std::stacktrace &trace = std::stacktrace::current(),
+			 const std::source_location &location = std::source_location::current());
 	void Succ(const std::string &aString, const std::source_location &location = std::source_location::current());
 	void Critical(const std::exception &anException, unsigned aLevel = 0,
 				  const std::source_location &location = std::source_location::current());

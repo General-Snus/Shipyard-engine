@@ -1,6 +1,6 @@
 #include "../../Headers/ShaderStructs.hlsli"
 
-BRDF_VS_to_PS main(unsigned int aVertexIndex : SV_VertexID)
+SS_VStoPS main(unsigned int aVertexIndex : SV_VertexID)
 {
     const float4 pos[6] =
     {
@@ -24,7 +24,7 @@ BRDF_VS_to_PS main(unsigned int aVertexIndex : SV_VertexID)
     float2(0.0f, 0.0f)
     };
     
-    BRDF_VS_to_PS returnValue;
+    SS_VStoPS returnValue;
     returnValue.position = pos[aVertexIndex];
     returnValue.UV = uv[aVertexIndex];
     return returnValue;

@@ -43,7 +43,7 @@ struct PostProcessVertexToPixel
 {
     float2 UV : UV;
 };
-struct BRDF_VS_to_PS
+struct SS_VStoPS
 {
     float4 position : SV_POSITION;
     float2 UV : UV;

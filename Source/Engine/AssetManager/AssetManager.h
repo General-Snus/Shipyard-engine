@@ -1,6 +1,7 @@
 #pragma once
 #define AsUINT(v) static_cast<unsigned>(v)
 
+#include <Tools/Utilities/System/ServiceLocator.h>
 #include <Editor/Editor/Defines.h>
 #include <Engine/AssetManager/ComponentSystem/UUID.h>
 #include <Engine/AssetManager/Objects/BaseAssets/BaseAsset.h>
@@ -70,7 +71,6 @@ template <class T> std::map<std::filesystem::path, std::shared_ptr<T>> Library::
     return newOutMap;
 }
 
-#include <Tools/Utilities/System/ServiceLocator.h>
 #define EngineResources ServiceLocator::Instance().GetService<EngineResourcesLoader>()
 #define Resources ServiceLocator::Instance().GetService<GameResourcesLoader>()
 
@@ -106,6 +106,7 @@ class ResourceLoaderBase : public Singleton
 
 template <class T> std::shared_ptr<Library> ResourceLoaderBase::GetLibraryOfType()
 {
+	OPTICK_EVENT();
     const std::type_info *typeInfo = &typeid(T);
     auto it = myLibraries.find(typeInfo);
     if (it != myLibraries.end())
@@ -142,6 +143,7 @@ template <class T>
 bool EngineResourcesLoader::ForceLoadAsset(const std::filesystem::path &identifierPath, const bool useExact,
                                            std::shared_ptr<T> &outAsset)
 {
+	OPTICK_EVENT();
     const std::type_info *typeInfo = &typeid(T);
     std::shared_ptr<Library> library = GetLibraryOfType<T>();
 
@@ -190,6 +192,7 @@ template <class T> std::shared_ptr<T> EngineResourcesLoader::LoadAsset(const std
 template <class T>
 std::shared_ptr<T> EngineResourcesLoader::LoadAsset(const std::filesystem::path &identifierPath, const bool useExact)
 {
+	OPTICK_EVENT();
     const std::type_info *typeInfo = &typeid(T);
     std::shared_ptr<Library> library = GetLibraryOfType<T>();
 
@@ -230,6 +233,7 @@ std::shared_ptr<T> EngineResourcesLoader::LoadAsset(const std::filesystem::path 
 template <class T>
 bool EngineResourcesLoader::HasAsset(const std::filesystem::path &identifierPath, const bool useExact) const
 {
+	OPTICK_EVENT();
     const std::type_info *typeInfo = &typeid(T);
     std::shared_ptr<Library> library = GetLibraryOfType<T>();
 

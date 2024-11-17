@@ -2,7 +2,7 @@
 #include "../Headers/PBRFunctions.hlsli"
 
 
-DefaultPixelOutput main(BRDF_VS_to_PS input)
+DefaultPixelOutput main(SS_VStoPS input)
 {
 
 	DefaultPixelOutput result;

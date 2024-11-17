@@ -34,25 +34,28 @@ void PopUpMenu()
 
 void ContentDirectory::Node(const int index, const float cellWidth)
 {
-    const std::filesystem::path &fullPath = m_CurrentDirectoryPaths[index].second;
+	OPTICK_EVENT();
+    const pathData &data = m_CurrentDirectoryPaths[index];
+     
+	const auto &path = data.fullPath;
+	const auto &fileName = data.fullPath.filename();
+	const auto &extension = path.extension();
 
-    const auto &path = std::filesystem::relative(fullPath, EngineResources.Directory());
-    const auto &fileName = path.filename();
-    const auto &extension = path.extension();
-
-    const std::shared_ptr<TextureHolder> imageTexture = IconFromExtension(fullPath, extension, path);
-    ImGui::ImageButton(fileName.string().c_str(), imageTexture, {cellWidth, cellWidth});
+    const std::shared_ptr<TextureHolder> imageTexture = IconFromExtension(extension, path, data.isDirectory);
+	ImGui::ImageButton(fileName.string().c_str(), imageTexture, {cellWidth, cellWidth});
     if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
-    {
+	{
+		OPTICK_EVENT("BeginDragDropSource");
         const std::string payload = path.string();
         ImGui::SetDragDropPayload(std::format("ContentAsset_{}", EngineResources.AssetType(path)).c_str(),
                                   payload.c_str(), payload.size());
-        ImGui::Text(fullPath.stem().string().c_str());
+		ImGui::Text(path.stem().string().c_str());
         ImGui::EndDragDropSource();
     }
 
     if (ImGui::BeginPopupContextItem(path.string().c_str()))
-    {
+	{
+		OPTICK_EVENT("BeginPopupContextItem");
         if (ImGui::BeginMenu("Create"))
         {
             if (ImGui::Selectable("Material Asset"))
@@ -63,7 +66,8 @@ void ContentDirectory::Node(const int index, const float cellWidth)
         }
         if (ImGui::Selectable("Show in Explorer"))
         {
-            PIDLIST_ABSOLUTE pidl = ILCreateFromPathW(std::filesystem::absolute(fullPath).wstring().c_str());
+			PIDLIST_ABSOLUTE pidl = ILCreateFromPathW(
+				std::filesystem::absolute(EngineResources.Directory() / path).wstring().c_str());
             if (pidl)
             {
                 SHOpenFolderAndSelectItems(pidl, 0, 0, 0);
@@ -81,11 +85,11 @@ void ContentDirectory::Node(const int index, const float cellWidth)
         }
         if (ImGui::Selectable("Open External"))
         {
-            ShellExecute(0, 0, fullPath.wstring().c_str(), 0, 0, SW_SHOW);
+			ShellExecute(0, 0, (EngineResources.Directory() / path).wstring().c_str(), 0, 0, SW_SHOW);
         }
         if (ImGui::Selectable("Delete"))
         {
-            std::filesystem::remove(std::filesystem::absolute(fullPath));
+			std::filesystem::remove(std::filesystem::absolute((EngineResources.Directory() / path)));
             IsDirty = true;
         }
         ImGui::Separator();
@@ -96,7 +100,7 @@ void ContentDirectory::Node(const int index, const float cellWidth)
         ImGui::Separator();
         if (ImGui::Selectable("Copy Path"))
         {
-            const char *output = std::filesystem::absolute(fullPath).string().c_str();
+			const char *output = std::filesystem::absolute((EngineResources.Directory() / path)).string().c_str();
             const size_t len = strlen(output) + 1;
             HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, len);
             memcpy(GlobalLock(hMem), output, len);
@@ -124,20 +128,21 @@ void ContentDirectory::Node(const int index, const float cellWidth)
     if (isHovered && isLookingForHovered)
     {
         isLookingForHovered = false;
-        m_hoveredPath = fullPath;
+		m_hoveredPath = (EngineResources.Directory() / path);
     }
     if (isHovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-    {
-        if (std::filesystem::is_directory(fullPath))
+	{
+		OPTICK_EVENT("IsMouseDoubleClicked");
+        if (data.isDirectory)
         {
-            m_CurrentPath = fullPath;
+			m_CurrentPath = (EngineResources.Directory() / path);
 
             ZeroMemory(buf, 128);
             IsDirty = true;
         }
         else
         {
-            ShellExecute(0, 0, fullPath.wstring().c_str(), 0, 0, SW_SHOW);
+			ShellExecute(0, 0, (EngineResources.Directory() / path).wstring().c_str(), 0, 0, SW_SHOW);
         }
     }
     ImGui::Text(fileName.string().c_str());
@@ -145,21 +150,26 @@ void ContentDirectory::Node(const int index, const float cellWidth)
 
 void ContentDirectory::RenderImGUi()
 {
-    OPTICK_EVENT();
+    OPTICK_EVENT(); 
     ImGui::Begin("ContentFolder", &m_KeepWindow, ImGuiWindowFlags_MenuBar);
 
     if (ImGui::BeginMenuBar())
-    {
+	{
+		OPTICK_EVENT("BeginMenuBar");
+		ImGui::Spacing();
         ImGui::SetNextItemWidth(150);
         IsDirty |= ImGui::InputText("Search", buf, IM_ARRAYSIZE(buf));
         DirectoryBar();
+		ImGui::Spacing();
 
         ImGui::EndMenuBar();
     }
     const std::string keyTerm = buf;
 
     if (IsDirty)
-    {
+	{
+		OPTICK_EVENT("fillPath");
+
         FillPaths(keyTerm);
         IsDirty = false;
     }
@@ -167,8 +177,9 @@ void ContentDirectory::RenderImGUi()
     // Sort if searching
     if (!keyTerm.empty())
     {
+		OPTICK_EVENT("sorting");
         std::ranges::sort(m_CurrentDirectoryPaths, [=](const auto &a, const auto &b) {
-            return Levenstein::Distance(a.first, keyTerm) < Levenstein::Distance(b.first, keyTerm);
+			return Levenstein::Distance(a.name, keyTerm) < Levenstein::Distance(b.name, keyTerm);
         });
     }
 
@@ -187,7 +198,8 @@ void ContentDirectory::RenderImGUi()
     const int clipperSize = std::max((int)std::round((float)m_CurrentDirectoryPaths.size() / columnCount), 1);
 
     if (ImGui::BeginTable("Table", columnCount))
-    {
+	{
+		OPTICK_EVENT("BeginTable");
         ImGuiListClipper clipper;
         clipper.Begin(clipperSize, cellHeight);
         while (clipper.Step())
@@ -197,7 +209,8 @@ void ContentDirectory::RenderImGUi()
             {
                 ImGui::TableNextRow();
                 for (int collumn = 0; collumn < columnCount; collumn++)
-                {
+				{
+					OPTICK_EVENT("TableNextColumn");
                     ImGui::TableNextColumn();
                     const int index = row * columnCount + collumn;
                     if (index >= m_CurrentDirectoryPaths.size())
@@ -213,7 +226,8 @@ void ContentDirectory::RenderImGUi()
     }
 
     if (isMoveOperationUnderway)
-    {
+	{
+		OPTICK_EVENT("DoMoveOperation");
         DoMoveOperation();
     }
 
@@ -222,27 +236,37 @@ void ContentDirectory::RenderImGUi()
 
 void ContentDirectory::FillPaths(const std::string &keyTerm)
 {
+	OPTICK_EVENT();
     m_CurrentDirectoryPaths.clear();
     if (!keyTerm.empty())
     {
         for (const auto &it : std::filesystem::recursive_directory_iterator(EngineResources.Directory()))
-        {
-            const std::string name = it.path().filename().string();
-            m_CurrentDirectoryPaths.emplace_back(name, it.path());
+		{
+			OPTICK_EVENT("Iteration");
+			const std::string name = it.path().filename().string();
+			const auto relativePath = std::filesystem::relative(it.path(), EngineResources.Directory());
+
+			std::filesystem::is_directory(it.path()) ? m_CurrentDirectoryPaths.emplace_back(name, relativePath, true)
+													 : m_CurrentDirectoryPaths.emplace_back(name, relativePath, false); 
         }
     }
     else
     {
         for (const auto &it : std::filesystem::directory_iterator(m_CurrentPath))
-        {
-            const std::string name = it.path().filename().string();
-            m_CurrentDirectoryPaths.emplace_back(name, it.path());
+		{
+			OPTICK_EVENT("Iteration");
+			const std::string name = it.path().filename().string();
+			const auto relativePath = std::filesystem::relative(it.path(), EngineResources.Directory());
+
+			std::filesystem::is_directory(it.path()) ? m_CurrentDirectoryPaths.emplace_back(name, relativePath, true)
+													 : m_CurrentDirectoryPaths.emplace_back(name, relativePath, false); 
         }
     }
 }
 
 void ContentDirectory::DoMoveOperation()
 {
+	OPTICK_EVENT();
     if (isLookingForHovered && m_hoveredPath.empty())
     {
         m_hoveredPath = std::filesystem::absolute(m_CurrentPath);
@@ -316,12 +340,12 @@ void ContentDirectory::DoMoveOperation()
     IsDirty = true;
 }
 
-std::shared_ptr<TextureHolder> ContentDirectory::IconFromExtension(const std::filesystem::path &fullPath,
-                                                                   const std::filesystem::path &extension,
-                                                                   const std::filesystem::path &path)
+std::shared_ptr<TextureHolder> ContentDirectory::IconFromExtension(const std::filesystem::path &extension,
+                                                                   const std::filesystem::path &path, bool isDirectory)
 {
+	OPTICK_EVENT();
     std::shared_ptr<TextureHolder> imageTexture;
-    if (std::filesystem::is_directory(fullPath))
+	if (isDirectory)
     {
         imageTexture = EngineResources.LoadAsset<TextureHolder>("Textures/Widgets/Folder.png");
     }

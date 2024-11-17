@@ -253,6 +253,7 @@
     <ClInclude Include="DataStructures\Stack.hpp" />
     <ClInclude Include="DataStructures\VectorOnStack.hpp" />
     <ClInclude Include="Error.hpp" />
+    <ClInclude Include="LinearAlgebra\VectorX.hpp" />
     <ClInclude Include="System\Event.h" />
     <ClInclude Include="Files\Images\stb_image.h" />
     <ClInclude Include="Files\Images\stb_image_resize2.h" />

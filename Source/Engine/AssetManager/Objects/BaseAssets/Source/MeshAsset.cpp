@@ -143,6 +143,7 @@ void Mesh::FillMaterialPaths(const aiScene *scene)
 
 std::shared_ptr<TextureHolder> Mesh::GetEditorIcon()
 {
+	OPTICK_EVENT();
     auto imageTexture =
         EngineResources.LoadAsset<TextureHolder>(std::format("INTERNAL_IMAGE_UI_{}", AssetPath.filename().string()));
     std::shared_ptr<Mesh> mesh = EngineResources.LoadAsset<Mesh>(AssetPath, true);
@@ -165,6 +166,7 @@ std::shared_ptr<TextureHolder> Mesh::GetEditorIcon()
 
 bool Mesh::InspectorView()
 {
+	OPTICK_EVENT();
     if (!AssetBase::InspectorView())
     {
         return false;

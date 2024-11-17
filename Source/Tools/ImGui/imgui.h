@@ -70,6 +70,7 @@ Index of this file:
 //-----------------------------------------------------------------------------
 
 // Includes
+#include <initializer_list>
 #include <float.h>                  // FLT_MIN, FLT_MAX
 #include <stdarg.h>                 // va_list, va_start, va_end
 #include <stddef.h>                 // ptrdiff_t, NULL

@@ -6,7 +6,12 @@ class Mesh;
 class TextureHolder;
 class Material;
 class Scene;
-
+struct pathData
+{
+	std::string name;
+	std::filesystem::path fullPath;
+	bool isDirectory;
+};
 class ContentDirectory : public EditorWindow
 {
   public:
@@ -21,14 +26,13 @@ class ContentDirectory : public EditorWindow
     void WMDroppedFile();
 
   private:
-    std::shared_ptr<TextureHolder> IconFromExtension(const std::filesystem::path &fullPath,
-                                                     const std::filesystem::path &extension,
-                                                     const std::filesystem::path &path);
+    std::shared_ptr<TextureHolder> IconFromExtension(const std::filesystem::path &extension,
+                                                     const std::filesystem::path &path, bool isDirectory);
     void DirectoryBar();
 
-    std::filesystem::path m_CurrentPath;
-    using pathPair = std::pair<std::string, std::filesystem::path>;
-    std::vector<pathPair> m_CurrentDirectoryPaths;
+    std::filesystem::path m_CurrentPath; 
+
+    std::vector<pathData> m_CurrentDirectoryPaths;
     float cellSize = 128.f;
     bool IsDirty = true;
 

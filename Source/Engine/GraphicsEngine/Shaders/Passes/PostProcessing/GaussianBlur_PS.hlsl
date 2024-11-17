@@ -1,7 +1,7 @@
  #include "../../Headers/ShaderStructs.hlsli"
  #include "../../Headers/Common.hlsli"
  
-PostProcessPixelOutput main(BRDF_VS_to_PS input)
+PostProcessPixelOutput main(SS_VStoPS input)
 {
     PostProcessPixelOutput output;
     //Values are fucked cuz it looks like shit with values from presentation
