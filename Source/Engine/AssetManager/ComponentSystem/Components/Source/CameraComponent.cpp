@@ -41,10 +41,20 @@ void Camera::Update()
 	localTransform.Update();
 	fow = std::clamp(fow, 0.1f, 360.f);
 
-	if (!IsInControll)
+	if (IsInControll)
 	{
-		return;
+		EditorCameraControlls();
+#ifdef Flashlight
+		if (Input.GetInstance().IsKeyPressed((int)Keys::F))
+		{
+			GetComponent<Light>().BindDirectionToTransform(!GetComponent<Light>().GetIsBound());
+		}
+#endif
 	}
+}
+
+void Camera::EditorCameraControlls()
+{
 	Transform &aTransform = localTransform;
 	if (HasComponent<Transform>())
 	{
@@ -153,16 +163,6 @@ void Camera::Update()
 			aTransform.Move(-GlobalUp * aTimeDelta * mdf);
 		}
 	}
-#ifdef Flashlight
-	if (Input.GetInstance().IsKeyPressed((int)Keys::F))
-	{
-		GetComponent<Light>().BindDirectionToTransform(!GetComponent<Light>().GetIsBound());
-	}
-#endif
-}
-
-void Camera::Render()
-{
 }
 
 std::array<Vector4f, 4> Camera::GetFrustrumCorners() const

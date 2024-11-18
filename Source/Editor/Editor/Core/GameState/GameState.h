@@ -1,7 +1,6 @@
 #pragma once
 #include <Tools/Utilities/System/ServiceLocator.h>
 #include <filesystem>
-
 class Scene;
 class GameLauncher
 {
@@ -66,9 +65,9 @@ class GameState
     GameLauncher *m_GameLauncher;
     std::filesystem::path pathToProjectFolder;
 
-    HMODULE dllHandle;
+    void* dllHandle;
     typedef GameLauncher *(*EntryPoint)();
-	typedef void (*ExitPoint)(HMODULE handle);
+	typedef void (*ExitPoint)(void *handle);
     EntryPoint dllFunction;
 	ExitPoint dllFunctionExit;
 };

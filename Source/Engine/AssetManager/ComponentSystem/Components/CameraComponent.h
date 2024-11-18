@@ -39,7 +39,7 @@ class Camera : public Component
 	explicit Camera(const SY::UUID anOwnerId, GameObjectManager *aManager);
 
 	void Update() override;
-	void Render() override;
+	void EditorCameraControlls();
 	bool InspectorView() override;
 
 	std::array<Vector4f, 4> GetFrustrumCorners() const;

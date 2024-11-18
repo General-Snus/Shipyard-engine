@@ -246,9 +246,7 @@ bool Client::SendOK()
     {
 
         Logger.Log("Could not recieve from server");
-    }
-	constexpr auto test = {1.0f, 21.0f};
-	test.begin() + 1;
+    } 
     HandshakeMessage *backMessage = reinterpret_cast<HandshakeMessage *>(&outbound);
 
     std::string joinMessage = "User: ";

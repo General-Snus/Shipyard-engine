@@ -12,6 +12,7 @@
 #include <d3d12.h>
 #include <dxgi1_6.h>
 
+#include <Tools/Utilities/System/SingletonTemplate.h>
 #include <DirectX/XTK/Inc/DescriptorHeap.h>
 #include <DirectX/XTK/Inc/GraphicsMemory.h>
 #include <array>

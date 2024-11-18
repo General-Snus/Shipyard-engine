@@ -319,3 +319,13 @@ void LoggerService::NewLine()
 {
 	std::cout << std::endl;
 }
+
+void LoggerService::Clear()
+{
+	m_Buffer.LoggedMessages.clear();
+	m_Buffer.criticalCount = 0;
+	m_Buffer.errCount = 0;
+	m_Buffer.messagesCount = 0;
+	m_Buffer.successCount = 0;
+	m_Buffer.warnCount = 0;
+}

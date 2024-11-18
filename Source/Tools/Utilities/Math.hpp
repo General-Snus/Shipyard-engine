@@ -1,5 +1,4 @@
-#pragma once
-#include "Game/Timer.h"
+#pragma once 
 #include "LinearAlgebra/Vectors.hpp"
 #include <DirectXMath.h>
 #include <algorithm>

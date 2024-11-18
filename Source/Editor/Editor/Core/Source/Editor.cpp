@@ -51,11 +51,12 @@
 #include <Editor/Editor/Windows/EditorWindows/FrameStatistics.h>
 #include <Editor/Editor/Windows/EditorWindows/GraphicsDebugger.h>
 #include <Editor/Editor/Windows/EditorWindows/History.h>
-#include <Tools/ImGui/Font/IconsFontAwesome5.h>
+#include <Tools/ImGui/Font/IconsFontAwesome6.h>
 #include <Tools/ThirdParty/nlohmann/json.hpp>
 #include <Tools/Utilities/System/ServiceLocator.h>
 #include <misc/cpp/WMDropManager.h>
 #include <stacktrace> 
+#include <imgui_notify.h>
 
 enum Theme
 {
@@ -546,6 +547,7 @@ void Editor::CheckSelectedForRemoved()
 void Editor::Copy()
 {
 	copiedObjects = Editor::GetSelectedGameObjects();
+	ImGui::Notify({ImGuiToastType::Success, 3000, "Copied %i objects", copiedObjects.size()});
 }
 
 void Editor::Paste()

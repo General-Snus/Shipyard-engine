@@ -32,7 +32,7 @@ void Transform::Init()
     {
         auto children = m_Children;
         m_Children.clear();
-        for (auto &child : children)
+        for (const auto &child : children)
         {
             if (child.IsValid())
             {
@@ -102,14 +102,6 @@ void Transform::MakeClean()
 
 #ifdef _DEBUGDRAW
     DebugDrawer::Get().SetDebugPrimitiveTransform(primitive, myTransform);
-#endif // _DEBUGDRAW
-}
-
-void Transform::Render()
-{
-#ifdef _DEBUGDRAW
-    OPTICK_EVENT();
-
 #endif // _DEBUGDRAW
 }
 

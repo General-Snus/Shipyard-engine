@@ -3,9 +3,7 @@
 #include <Engine/PersistentSystems/Scene.h>
 #include <Tools/Logging/Logging.h>
 #include <Windows.h>
-#include <libloaderapi.h>
-
-#pragma optimize("", off)
+#include <libloaderapi.h> 
 
 GameState::GameState()
 {
@@ -24,12 +22,12 @@ bool GameState::AttemptDllLoad()
         return false;
     }
 
-    dllFunction = (EntryPoint)GetProcAddress(dllHandle, "EntrypointMain");
-    dllFunctionExit = (ExitPoint)GetProcAddress(dllHandle, "ExitPoint");
+    dllFunction = (EntryPoint)GetProcAddress((HMODULE)dllHandle, "EntrypointMain");
+	dllFunctionExit = (ExitPoint)GetProcAddress((HMODULE)dllHandle, "ExitPoint");
 	if (!(dllFunction && dllFunctionExit))
     {
         Logger.Err("Failed to get DLL function !");
-        FreeLibrary(dllHandle);
+		FreeLibrary((HMODULE)dllHandle);
         return false;
     }
 

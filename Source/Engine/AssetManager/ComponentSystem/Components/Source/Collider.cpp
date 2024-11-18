@@ -51,20 +51,6 @@ Vector3f cCollider::GetNormalToward(Vector3f position) const
     return norm;
 }
 
-void cCollider::Render()
-{
-    OPTICK_EVENT();
-    if (ApplicationState::drawDebugLines == false)
-    {
-        return;
-    }
-
-    if (auto *transform = TryGetComponent<Transform>())
-    {
-        myCollider->RenderDebugLines(*transform);
-    }
-}
-
 void cCollider::OnSiblingChanged(const std::type_info *SourceClass)
 {
     OPTICK_EVENT();

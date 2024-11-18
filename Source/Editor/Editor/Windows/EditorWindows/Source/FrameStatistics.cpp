@@ -10,6 +10,7 @@
 #include <psapi.h>
 #include <stdio.h>
 #include <windows.h>
+#include <Tools/Utilities/Game/Timer.h>
 
 #pragma comment(lib, "pdh.lib")
 static ULARGE_INTEGER lastCPU, lastSysCPU, lastUserCPU;

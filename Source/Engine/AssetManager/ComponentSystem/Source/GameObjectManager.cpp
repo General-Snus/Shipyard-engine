@@ -264,10 +264,6 @@ void GameObjectManager::Update()
     {
         myUpdateOrder[i].second->Update();
     }
-    for (size_t i = 0; i < myUpdateOrder.size(); i++)
-    {
-        myUpdateOrder[i].second->Render();
-    }
 }
 
 void GameObjectManager::SortUpdateOrder()

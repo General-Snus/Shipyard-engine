@@ -95,6 +95,7 @@ class LoggerService : public Singleton
 	void Critical(const std::string &anExceptionText, unsigned aLevel = 0,
 				  const std::source_location &location = std::source_location::current());
 	void NewLine();
+	void Clear();
 	void *GetHandle() const
 	{
 		return myHandle;

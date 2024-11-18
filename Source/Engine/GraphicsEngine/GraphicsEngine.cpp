@@ -26,6 +26,7 @@
 #include "Tools/Utilities/Input/Input.hpp"
 #include <Editor/Editor/Windows/EditorWindows/Viewport.h>
 #include <Rendering/Buffers/ObjectBuffer.h>
+#include <Tools/ImGui/imgui_notify.h>
 
 bool GraphicsEngine::Initialize(HWND windowHandle, bool enableDeviceDebug)
 {
@@ -544,6 +545,7 @@ void GraphicsEngine::ImGuiPass()
 
 	commandList->SetRenderTargets(1, &GPUInstance.GetCurrentBackBuffer(), nullptr);
 
+	ImGui::RenderNotifications();
 	ImGui::Render();
 	ImGuiIO &io = ImGui::GetIO();
 	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)

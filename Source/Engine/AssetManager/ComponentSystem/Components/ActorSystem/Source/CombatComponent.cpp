@@ -41,10 +41,6 @@ void CombatComponent::Update()
     }
 }
 
-void CombatComponent::Render()
-{
-}
-
 void CombatComponent::Respawn()
 {
     auto &physicsComponent = GetGameObject().GetComponent<cPhysics_Kinematic>();

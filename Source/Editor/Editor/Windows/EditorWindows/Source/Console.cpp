@@ -12,7 +12,7 @@ void Console::RenderImGUi()
 	{ // TODO clipper
 		using enum LoggerService::LogType;
 		const auto &style = ImGui::GetStyle();
-
+		const auto &buffer = Logger.m_Buffer;
 		auto getButtonColor = [&](LoggerService::LogType val, LoggerService::LogType buttonType) {
 			if ((val & buttonType) == none)
 			{
@@ -36,48 +36,44 @@ void Console::RenderImGUi()
 			}
 		}
 		ImGui::SameLine();
-		ImGui::Text(std::format("All: {}", Logger.m_Buffer.LoggedMessages.size()).c_str());
+		ImGui::Text(std::format("All: {}", buffer.LoggedMessages.size()).c_str());
 		ImGui::SameLine();
 
 		ImGui::ColorButton("Messages:", getButtonColor(filter, message)) ? filter ^= message : none;
 		ImGui::SameLine();
-		ImGui::Text(std::format("Messages: {}", Logger.m_Buffer.messagesCount).c_str());
+		ImGui::Text(std::format("Messages: {}", buffer.messagesCount).c_str());
 		ImGui::SameLine();
 
 		ImGui::ColorButton("Warnings: ", getButtonColor(filter, warning)) ? filter ^= warning : none;
 		ImGui::SameLine();
-		ImGui::Text(std::format("Warnings: {}", Logger.m_Buffer.warnCount).c_str());
+		ImGui::Text(std::format("Warnings: {}", buffer.warnCount).c_str());
 		ImGui::SameLine();
 
 		ImGui::ColorButton("Error: ", getButtonColor(filter, error)) ? filter ^= error : none;
 		ImGui::SameLine();
-		ImGui::Text(std::format("Error: {}", Logger.m_Buffer.errCount).c_str());
+		ImGui::Text(std::format("Error: {}", buffer.errCount).c_str());
 		ImGui::SameLine();
 
 		ImGui::ColorButton("Critical: ", getButtonColor(filter, critical)) ? filter ^= critical : none;
 		ImGui::SameLine();
-		ImGui::Text(std::format("Critical: {}", Logger.m_Buffer.criticalCount).c_str());
+		ImGui::Text(std::format("Critical: {}", buffer.criticalCount).c_str());
 		ImGui::SameLine();
 
 		ImGui::ColorButton("Success: ", getButtonColor(filter, success)) ? filter ^= success : none;
 		ImGui::SameLine();
-		ImGui::Text(std::format("Success: {}", Logger.m_Buffer.successCount).c_str());
+		ImGui::Text(std::format("Success: {}", buffer.successCount).c_str());
 		ImGui::SameLine();
 
 		if (ImGui::Button("Clear"))
 		{
-			Logger.m_Buffer.LoggedMessages.clear();
-			Logger.m_Buffer.criticalCount = 0;
-			Logger.m_Buffer.errCount = 0;
-			Logger.m_Buffer.messagesCount = 0;
-			Logger.m_Buffer.successCount = 0;
-			Logger.m_Buffer.warnCount = 0;
+			Logger.Clear();
+			pickedMessage = LoggerService::LogMsg();
 		}
-		Vector2f spaceAvail = {ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.75f};
 
+		Vector2f spaceAvail = {ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.75f};
 		if (ImGui::BeginChild("ScrollingRegion", (ImVec2)spaceAvail))
 		{
-			for (const auto &[index, logEntity] : std::ranges::views::enumerate(Logger.m_Buffer.LoggedMessages))
+			for (const auto &[index, logEntity] : buffer.LoggedMessages | std::ranges::views::enumerate)
 			{
 				const auto &[type, message, trace] = logEntity;
 
@@ -91,23 +87,30 @@ void Console::RenderImGUi()
 				const ImVec4 &textColor = color;
 				ImGui::PushStyleColor(ImGuiCol_Text, textColor);
 				Vector2f space = {ImGui::GetContentRegionAvail().x, ImGui::GetTextLineHeight()};
-				ImGui::Spacing();
+
 				ImGui::Separator();
-				ImGui::Spacing();
+				auto textBeginCursor = ImGui::GetCursorPos();
 				ImGui::Text(message.c_str());
-				if (ImGui::InvisibleButton(std::format("ConsoleChildWindowButton{}", index).c_str(),
-										   ImGui::GetItemRectSize()))
+
+				auto textArea = ImGui::GetItemRectSize();
+				auto textEndCursor = ImGui::GetCursorPos();
+
+				ImGui::SetCursorPos(textBeginCursor);
+				if (ImGui::InvisibleButton(std::format("ConsoleChildWindowButton{}", index).c_str(), textArea))
 				{
 					pickedMessage = logEntity;
 				}
+
+				ImGui::SetCursorPos(textEndCursor);
+
 				ImGui::PopStyleColor();
 			}
 
 			static int size = 0;
-			if (size != Logger.m_Buffer.LoggedMessages.size())
+			if (size != buffer.LoggedMessages.size())
 			{
 				ImGui::SetScrollHereY(1.0f);
-				size = (int)Logger.m_Buffer.LoggedMessages.size();
+				size = (int)buffer.LoggedMessages.size();
 			}
 		}
 		ImGui::EndChild();

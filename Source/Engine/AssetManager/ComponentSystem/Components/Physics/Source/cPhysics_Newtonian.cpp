@@ -14,10 +14,6 @@ void cPhysics_Newtonian::Update()
 {
 }
 
-void cPhysics_Newtonian::Render()
-{
-}
-
 bool cPhysics_Newtonian::InspectorView()
 {
     if (!Component::InspectorView())

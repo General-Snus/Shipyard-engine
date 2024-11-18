@@ -16,9 +16,7 @@ class cCollider : public Component
     cCollider(const SY::UUID anOwnerId, GameObjectManager *aManager, const std::filesystem::path &aPath);
     void Update() override;
     Vector3f GetClosestPosition(Vector3f position) const;
-    Vector3f GetNormalToward(Vector3f position) const;
-    void Render() override;
-
+    Vector3f GetNormalToward(Vector3f position) const; 
     void Destroy() override;
 
 

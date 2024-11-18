@@ -86,19 +86,6 @@ void cPhysics_Kinematic::Update()
     transform.Move(ph_velocity * delta);
 }
 
-void cPhysics_Kinematic::Render()
-{
-    // Render gizmo for velocity and acceleration
-#ifdef _DEBUGDRAW
-
-    if (auto *transform = TryGetComponent<Transform>())
-    {
-        InitPrimitive();
-    }
-
-#endif // _DEBUGDRAW
-}
-
 bool cPhysics_Kinematic::InspectorView()
 {
     if (!Component::InspectorView())

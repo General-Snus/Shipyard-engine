@@ -96,7 +96,10 @@
     <ClInclude Include="misc\cpp\WMDropManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Font\IconsFontAwesome5.h">
+    <ClInclude Include="imgui_notify.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Font\IconsFontAwesome6.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

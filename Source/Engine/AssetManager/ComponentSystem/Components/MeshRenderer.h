@@ -64,8 +64,7 @@ class cSkeletalMeshRenderer : public MeshRenderer
                           const std::filesystem::path &aFilePath);
     ~cSkeletalMeshRenderer() override = default;
 
-    void SetNewMesh(const std::filesystem::path &aFilePath);
-    void Render() override;
+    void SetNewMesh(const std::filesystem::path &aFilePath); 
     bool InspectorView() override;
 
     FORCEINLINE const std::shared_ptr<Skeleton> GetRawSkeleton() const

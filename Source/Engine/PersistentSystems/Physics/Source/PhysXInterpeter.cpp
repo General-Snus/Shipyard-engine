@@ -4,6 +4,7 @@
 #include <Editor/Editor/Defines.h>
 #include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
 #include <Tools/Utilities/Math.hpp>
+#include <Tools/Utilities/Game/Timer.h>
 #include <pvd/PxPvdTransport.h>
 
 #include "Engine/AssetManager/AssetManager.h"

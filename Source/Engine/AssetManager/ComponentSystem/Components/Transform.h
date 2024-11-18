@@ -23,8 +23,7 @@ class Transform : public Component
     Transform(const SY::UUID anOwnerId, GameObjectManager *aManager);
     void Destroy() override;
     void Init() override;
-    void Update() override;
-    void Render() override;
+    void Update() override; 
     // Be ware, the matrix is built by the transform, changes wont carry but you can use this to avoid making copies of
     // the orignal matrix
     Matrix &GetMutableTransform();

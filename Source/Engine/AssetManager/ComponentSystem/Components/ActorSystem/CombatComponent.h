@@ -9,8 +9,6 @@ class CombatComponent : public Component
     ~CombatComponent() override = default;
     void Init() override;
     void Update() override;
-    void Render() override;
-
     void Respawn();
     void FireProjectile();
     void Healing();

@@ -22,6 +22,7 @@
 #include <Engine/GraphicsEngine/GraphicsEngineUtilities.h>
 #include <Font/IconsFontAwesome5.h>
 #include <ShlObj.h>
+#include <Tools/Utilities/Game/Timer.h>
 
 ContentDirectory::ContentDirectory() : m_CurrentPath(EngineResources.Directory())
 {

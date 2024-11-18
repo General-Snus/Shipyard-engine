@@ -29,7 +29,7 @@ void GraphicsDebugger::RenderImGUi()
 				currentlyActiveLayer = i;
 				if (auto viewport = EditorInstance.GetMainViewport())
 				{
-					viewport->GetCamera().GetComponent<Camera>().filter = (DebugFilter)currentlyActiveLayer;
+					viewport->GetCamera().filter = (DebugFilter)currentlyActiveLayer;
 				}
 			}
 		}

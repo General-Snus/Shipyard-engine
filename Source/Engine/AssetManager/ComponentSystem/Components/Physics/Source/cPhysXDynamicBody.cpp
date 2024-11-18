@@ -121,10 +121,6 @@ void cPhysXDynamicBody::Update()
 	transform.SetRotation(rotation);
 }
 
-void cPhysXDynamicBody::Render()
-{
-}
-
 void cPhysXDynamicBody::Destroy()
 {
 	if (data)

@@ -10,8 +10,7 @@ class cPhysXStaticBody : public Component
 
     void Init() override;
     void UpdateFromCollider();
-    void Update() override;
-    void Render() override;
+    void Update() override; 
     void Destroy() override;
     void OnSiblingChanged(const std::type_info *SourceClass) override;
 

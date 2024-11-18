@@ -137,10 +137,6 @@ void cPhysXStaticBody::Update()
 {
 }
 
-void cPhysXStaticBody::Render()
-{
-}
-
 void cPhysXStaticBody::Destroy()
 {
     if (data)
