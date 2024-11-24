@@ -22,7 +22,7 @@
 
 namespace Passes
 {
-void WriteShadows(const GraphicsEngine &instance, std::shared_ptr<CommandList> &commandList, GameObjectManager &scene)
+void ShadowPass(const GraphicsEngine &instance, std::shared_ptr<CommandList> &commandList, GameObjectManager &scene)
 {
 	OPTICK_GPU_EVENT("WriteShadows");
 

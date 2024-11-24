@@ -30,9 +30,6 @@
     <ClInclude Include="Rendering\Vertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Rendering\ForwardRenderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Rendering\Buffers\FrameBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -93,7 +90,7 @@
     <ClInclude Include="InterOp\GPUBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Rendering\Passes.h">
+    <ClInclude Include="Passes\Passes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GraphicsEngineUtilities.h">
@@ -108,9 +105,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\Vertex.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Rendering\ForwardRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DebugDrawer\DebugDrawer.cpp">
@@ -128,7 +122,7 @@
     <ClCompile Include="InterOp\Source\GPUBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Rendering\Passes.cpp">
+    <ClCompile Include="Passes\Passes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GraphicsEngineUtilities.cpp">

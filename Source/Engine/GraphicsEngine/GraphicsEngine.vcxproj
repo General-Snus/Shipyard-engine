@@ -294,7 +294,7 @@
     </ClInclude>
     <ClInclude Include="InterOp\RHI.h" />
     <ClInclude Include="InterOp\ShaderInfo.h" />
-    <ClInclude Include="Rendering\Passes.h" />
+    <ClInclude Include="Passes\Passes.h" />
     <ClInclude Include="Rendering\Buffers\GraphicSettingsBuffer.h" />
     <ClInclude Include="Rendering\InstanceRenderer\InstanceRenderer.h" />
     <ClInclude Include="Rendering\Buffers\LightBuffer.h" />
@@ -307,7 +307,6 @@
     <ClInclude Include="Objects\DataObjects\Default_FX.h" />
     <ClInclude Include="Objects\DataObjects\Default_M.h" />
     <ClInclude Include="Objects\DataObjects\Default_N.h" />
-    <ClInclude Include="Rendering\ForwardRenderer.h" />
     <ClInclude Include="Rendering\Buffers\ObjectBuffer.h" />
     <ClInclude Include="Rendering\Buffers\FrameBuffer.h" />
     <ClInclude Include="GraphicsEngine.h" />
@@ -327,9 +326,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="InterOp\Source\RHI.cpp" />
-    <ClCompile Include="Rendering\Passes.cpp" />
+    <ClCompile Include="Passes\Passes.cpp" />
     <ClCompile Include="Rendering\InstanceRenderer\InstanceRenderer.cpp" />
-    <ClCompile Include="Rendering\ForwardRenderer.cpp" />
     <ClCompile Include="GraphicsEngine.cpp" />
     <ClCompile Include="GraphicsEngine.pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

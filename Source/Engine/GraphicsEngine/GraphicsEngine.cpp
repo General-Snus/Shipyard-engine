@@ -19,7 +19,7 @@
 #include "Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h"
 #include "Engine/PersistentSystems/Scene.h"
 
-#include "Rendering/Passes.h"
+#include "Passes/Passes.h"
 #include "Tools/ImGui/ImGuizmo.h"
 #include "Tools/ImGui/backends/imgui_impl_dx12.h"
 #include "Tools/ImGui/imgui_internal.h"
@@ -386,10 +386,14 @@ uint64_t GraphicsEngine::RenderFrame(Viewport &renderViewPort, GameObjectManager
 
 		OPTICK_GPU_EVENT("RenderFrame");
 		PrepareBuffers(commandList, renderViewPort, scene);
-		Passes::WriteShadows(*this, commandList, scene);
+		Passes::ShadowPass(*this, commandList, scene);
 		commandList->FlushResourceBarriers();
 
-		DeferredRenderingPass(commandList, renderViewPort, scene);
+		OPTICK_GPU_EVENT("DeferredRenderingPass");
+		auto frameBuffer = renderViewPort.GetCamera().GetFrameBuffer();
+		commandList->AllocateBuffer(eRootBindings::frameBuffer, frameBuffer);
+		GBuffer::Render(*this, commandList, scene);
+
 		EnvironmentLightPass(commandList);
 		ToneMapperPass(commandList, renderViewPort.GetTarget());
 		return commandQueue->ExecuteCommandList(commandList);
@@ -424,20 +428,18 @@ void GraphicsEngine::PrepareBuffers(std::shared_ptr<CommandList> commandList, Vi
 	commandList->GetGraphicsCommandList()->SetGraphicsRootSignature(rootSignature.Get());
 	commandList->TrackResource(rootSignature);
 
-	ID3D12DescriptorHeap *heaps[] = {
+	std::array<ID3D12DescriptorHeap*,2> heaps = {
 		GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->Heap(),
 		GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_SAMPLER)]->Heap()};
-	commandList->GetGraphicsCommandList()->SetDescriptorHeaps((UINT)std::size(heaps), heaps);
+
+	commandList->GetGraphicsCommandList()->SetDescriptorHeaps((UINT)std::size(heaps), heaps.data());
 
 	{
 		const LightBuffer lightBuffer = Passes::CreateLightBuffer(scene);
-		const GraphicsResource &alloc = GPUInstance.m_GraphicsMemory->AllocateConstant<LightBuffer>(lightBuffer);
-		commandList->GetGraphicsCommandList()->SetGraphicsRootConstantBufferView(REG_LightBuffer, alloc.GpuAddress());
-
+		commandList->AllocateBuffer(eRootBindings::lightBuffer, lightBuffer);  
+		
 		const auto frameBuffer = renderViewPort.GetCamera().GetFrameBuffer();
-		const auto &alloc0 = GPUInstance.m_GraphicsMemory->AllocateConstant<FrameBuffer>(frameBuffer);
-		commandList->GetGraphicsCommandList()->SetGraphicsRootConstantBufferView((int)eRootBindings::frameBuffer,
-																				 alloc0.GpuAddress());
+		commandList->AllocateBuffer(eRootBindings::frameBuffer, frameBuffer); 
 
 		const auto cubeMap = defaultCubeMap->GetRawTexture().get();
 		commandList->SetDescriptorTable((int)eRootBindings::PermanentTextures, cubeMap);
@@ -447,24 +449,15 @@ void GraphicsEngine::PrepareBuffers(std::shared_ptr<CommandList> commandList, Vi
 			(int)eRootBindings::Textures,
 			GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]
 				->GetFirstGpuHandle());
+
 		commandList->GetGraphicsCommandList()->SetGraphicsRootDescriptorTable(
 			(int)eRootBindings::MeshBuffer,
 			GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]
 				->GetFirstGpuHandle());
 	}
 }
-void GraphicsEngine::DeferredRenderingPass(std::shared_ptr<CommandList> commandList, Viewport &renderViewPort,
-										   GameObjectManager &scene)
-{
-	OPTICK_GPU_EVENT("DeferredRenderingPass"); 
-	auto frameBuffer = renderViewPort.GetCamera().GetFrameBuffer();
-	const auto &alloc0 = GPUInstance.m_GraphicsMemory->AllocateConstant<FrameBuffer>(frameBuffer);
-	commandList->GetGraphicsCommandList()->SetGraphicsRootConstantBufferView((int)eRootBindings::frameBuffer,
-																			 alloc0.GpuAddress());
 
-	GBuffer::Render(*this, commandList, scene);
-	
-}
+
 void GraphicsEngine::EnvironmentLightPass(std::shared_ptr<CommandList> commandList)
 {
 	OPTICK_GPU_EVENT("EnvironmentLightPass");
@@ -508,13 +501,14 @@ void GraphicsEngine::EnvironmentLightPass(std::shared_ptr<CommandList> commandLi
 		}
 		commandList->FlushResourceBarriers();
 		commandList->SetDescriptorTable((int)eRootBindings::GbufferPasses, gBufferTextures);
-
+		 
 		commandList->GetGraphicsCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		commandList->GetGraphicsCommandList()->IASetVertexBuffers(0, 1, nullptr);
 		commandList->GetGraphicsCommandList()->IASetIndexBuffer(nullptr);
 		commandList->GetGraphicsCommandList()->DrawInstanced(6, 1, 0, 0);
 	}
 }
+
 void GraphicsEngine::ToneMapperPass(std::shared_ptr<CommandList> commandList, Texture *target)
 {
 	OPTICK_GPU_EVENT("ToneMapperPass");
@@ -526,7 +520,7 @@ void GraphicsEngine::ToneMapperPass(std::shared_ptr<CommandList> commandList, Te
 	commandList->SetDescriptorTable((int)eRootBindings::TargetTexture, renderTargets);
 	commandList->FlushResourceBarriers();
 
-	GPUInstance.ClearRTV(*commandList.get(), toneMapper->RenderTargets(), toneMapper->GetNumberOfTargets());
+	commandList->ClearRenderTargets(toneMapper->GetNumberOfTargets(), toneMapper->RenderTargets());
 	commandList->SetRenderTargets(1, target, nullptr);
 	commandList->TrackResource(*target);
 
@@ -552,7 +546,7 @@ void GraphicsEngine::ImGuiPass()
 	{
 		ImGui::UpdatePlatformWindows();
 		ImGui::RenderPlatformWindowsDefault();
-	}
+	} 
 
 	ID3D12DescriptorHeap *heaps[] = {
 		GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->Heap(),

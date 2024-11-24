@@ -117,9 +117,7 @@ class GraphicsEngine : public Singleton
 	void EndFrame();
 
 	void PrepareBuffers(std::shared_ptr<CommandList> commandList, Viewport &renderViewPort, GameObjectManager &scene);
-	void DeferredRenderingPass(std::shared_ptr<CommandList> commandList, Viewport &renderViewPort,
-							   GameObjectManager &scene);
-	void EnvironmentLightPass(std::shared_ptr<CommandList> commandList);
+ 	void EnvironmentLightPass(std::shared_ptr<CommandList> commandList);
 	void ToneMapperPass(std::shared_ptr<CommandList> commandList, Texture *target);
 	void ImGuiPass();
 
