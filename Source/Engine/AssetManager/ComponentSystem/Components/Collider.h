@@ -5,15 +5,15 @@
 #include <filesystem>
 #include <memory>
 #include <unordered_set>
-class cCollider : public Component
+class Collider : public Component
 {
     friend class ColliderAsset;
 
   public:
-    MYLIB_REFLECTABLE();
-    cCollider() = delete; // Create a generic cube
-    cCollider(const SY::UUID anOwnerId, GameObjectManager *aManager);
-    cCollider(const SY::UUID anOwnerId, GameObjectManager *aManager, const std::filesystem::path &aPath);
+    ReflectableTypeRegistration();
+    Collider() = delete; // Create a generic cube
+    Collider(const SY::UUID anOwnerId, GameObjectManager *aManager);
+    Collider(const SY::UUID anOwnerId, GameObjectManager *aManager, const std::filesystem::path &aPath);
     void Update() override;
     Vector3f GetClosestPosition(Vector3f position) const;
     Vector3f GetNormalToward(Vector3f position) const; 
@@ -31,7 +31,7 @@ class cCollider : public Component
     bool InspectorView() override;
 
     // void AddToNotify(std::weak_ptr<Component> aComponent) { myNotify.push_back(aComponent); }
-    // void Notify(std::weak_ptr<cCollider> notifier) { for(auto& i : myNotify) i.lock()->CollidedWith(notifier); }
+    // void Notify(std::weak_ptr<Collider> notifier) { for(auto& i : myNotify) i.lock()->CollidedWith(notifier); }
 
     template <typename T> // add inheritance check here when not lazy stupid
     std::shared_ptr<T> GetColliderAssetOfType() const;
@@ -41,14 +41,14 @@ class cCollider : public Component
     std::shared_ptr<ColliderAsset> myCollider;
     // std::vector<std::weak_ptr<Component>> myNotify;
 };
-REFL_AUTO(type(cCollider))
+REFL_AUTO(type(Collider))
 
-template <typename T, typename... Args> inline void cCollider::SetColliderType(Args... someParameters)
+template <typename T, typename... Args> inline void Collider::SetColliderType(Args... someParameters)
 {
     myCollider = std::make_shared<T>(someParameters...);
 }
 
-template <typename T> inline std::shared_ptr<T> cCollider::GetColliderAssetOfType() const
+template <typename T> inline std::shared_ptr<T> Collider::GetColliderAssetOfType() const
 {
     return std::reinterpret_pointer_cast<T>(myCollider);
 }

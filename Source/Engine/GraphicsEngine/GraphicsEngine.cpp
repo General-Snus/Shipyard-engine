@@ -126,11 +126,6 @@ void GraphicsEngine::SetupDefaultVariables()
 
 	EngineResources.ForceLoadAsset<TextureHolder>(L"Textures/Default/NoiseTable.dds", NoiseTable);
 
-	EngineResources.ForceLoadAsset<ShipyardShader>("Shaders/Default_VS.cso", defaultVS);
-	EngineResources.ForceLoadAsset<ShipyardShader>("Shaders/Default_PS.cso", defaultPS);
-	EngineResources.ForceLoadAsset<Material>("Materials/Default.json", defaultMaterial);
-	defaultMaterial->SetShader(defaultVS, defaultPS);
-
 	EngineResources.ForceLoadAsset<TextureHolder>("Textures/Default/DefaultTile.dds", defaultTexture);
 	defaultTexture->SetTextureType(eTextureType::ColorMap);
 	EngineResources.ForceLoadAsset<TextureHolder>("Textures/Default/DefaultNormal.dds", defaultNormalTexture);
@@ -139,6 +134,12 @@ void GraphicsEngine::SetupDefaultVariables()
 	defaultMatTexture->SetTextureType(eTextureType::MaterialMap);
 	EngineResources.ForceLoadAsset<TextureHolder>("Textures/Default/DefaultEffect.dds", defaultEffectTexture);
 	defaultEffectTexture->SetTextureType(eTextureType::EffectMap);
+
+	EngineResources.ForceLoadAsset<ShipyardShader>("Shaders/Default_VS.cso", defaultVS);
+	EngineResources.ForceLoadAsset<ShipyardShader>("Shaders/Default_PS.cso", defaultPS);
+	EngineResources.ForceLoadAsset<Material>("Materials/Default.json", defaultMaterial);
+	defaultMaterial->SetShader(defaultVS, defaultPS);
+
 
 	EngineResources.ForceLoadAsset<Mesh>("default.fbx", defaultMesh);
 }

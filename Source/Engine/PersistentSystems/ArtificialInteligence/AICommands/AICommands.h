@@ -35,7 +35,7 @@ namespace BehaviourTreeAICommands
 class IsTargetInSight : public BrainTree::Leaf
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     using BrainTree::Leaf::Leaf;
 
     Status update() override;
@@ -46,7 +46,7 @@ class IsTargetInSight : public BrainTree::Leaf
 class IsTargetInRange : public BrainTree::Leaf
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     using BrainTree::Leaf::Leaf;
 
     Status update() override;
@@ -55,7 +55,7 @@ class IsTargetInRange : public BrainTree::Leaf
 class IsTargetAlive : public BrainTree::Leaf
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     using BrainTree::Leaf::Leaf;
 
     Status update() override;
@@ -66,7 +66,7 @@ class IsTargetAlive : public BrainTree::Leaf
 class IsDead : public BrainTree::Decorator
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     Status update() override;
 
   private:
@@ -75,7 +75,7 @@ class IsDead : public BrainTree::Decorator
 class IsHealthy : public BrainTree::Decorator
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
 
     Status update() override;
 
@@ -86,7 +86,7 @@ class IsHealthy : public BrainTree::Decorator
 class ShootAtTarget : public BrainTree::Leaf
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     using BrainTree::Leaf::Leaf;
 
     Status update() override;
@@ -94,7 +94,7 @@ class ShootAtTarget : public BrainTree::Leaf
 class Retreat : public BrainTree::Leaf
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     using BrainTree::Leaf::Leaf;
 
     Status update() override;
@@ -102,7 +102,7 @@ class Retreat : public BrainTree::Leaf
 class MoveFreely : public BrainTree::Leaf
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     using BrainTree::Leaf::Leaf;
 
     Status update() override;
@@ -110,7 +110,7 @@ class MoveFreely : public BrainTree::Leaf
 class AlignToTarget : public BrainTree::Leaf
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     using BrainTree::Leaf::Leaf;
 
     Status update() override;
@@ -118,7 +118,7 @@ class AlignToTarget : public BrainTree::Leaf
 class DeathSpin : public BrainTree::Leaf
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     using BrainTree::Leaf::Leaf;
 
     Status update() override;
@@ -126,7 +126,7 @@ class DeathSpin : public BrainTree::Leaf
 class IsFullyHealed : public BrainTree::Decorator
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     Status update() override;
 };
 

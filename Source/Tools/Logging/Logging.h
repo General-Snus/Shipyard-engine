@@ -2,9 +2,9 @@
 #include <format>
 #include <mutex>
 #include <source_location>
+#include <stacktrace>
 #include <string>
 #include <vector>
-#include <stacktrace>
 
 #include "Tools/Utilities/LinearAlgebra/Vector3.hpp"
 #include <Tools/Utilities/Color.h>
@@ -32,6 +32,7 @@ class LoggerService : public Singleton
 		std::string message;
 		std::stacktrace trace;
 	};
+
   private:
 	struct logBuffer
 	{
@@ -74,26 +75,40 @@ class LoggerService : public Singleton
 	bool Create();
 	void SetConsoleHandle(void *aHandle);
 	void SetPrintToVSOutput(bool bNewValue);
-	void Log(const char *aString, const std::source_location &location = std::source_location::current());
+	void Log(const char *aString, bool withNotice = false,
+			 const std::source_location &location = std::source_location::current());
 	Color GetColor(LogType type);
 
 	template <typename T>
-	void Log(const T &aString, const std::source_location &location = std::source_location::current())
+	void Log(const T &aString, bool withNotice = false,
+			 const std::source_location &location = std::source_location::current())
 	{
-		Log(std::to_string(aString));
+		Log(std::to_string(aString), withNotice, location);
 	}
 
-	void Log(const std::string &aString, const std::source_location &location = std::source_location::current());
-	void Warn(const std::string &aString, const std::source_location &location = std::source_location::current());
-
-	void Err(const std::string &aString, const std::source_location &location = std::source_location::current());
-	void ErrTrace(const std::string &aString, const std::stacktrace &trace = std::stacktrace::current(),
+	void Log(const std::string &aString, bool withNotice = false,
 			 const std::source_location &location = std::source_location::current());
-	void Succ(const std::string &aString, const std::source_location &location = std::source_location::current());
-	void Critical(const std::exception &anException, unsigned aLevel = 0,
+
+	void Warn(const std::string &aString, bool withNotice = false,
+			  const std::source_location &location = std::source_location::current());
+
+
+	void Err(const std::string &aString, bool withNotice = false,
+			 const std::source_location &location = std::source_location::current());
+
+	void ErrTrace(const std::string &aString, bool withNotice = false,
+				  const std::stacktrace &trace = std::stacktrace::current(),
 				  const std::source_location &location = std::source_location::current());
-	void Critical(const std::string &anExceptionText, unsigned aLevel = 0,
+
+	void Succ(const std::string &aString, bool withNotice = false,
+			  const std::source_location &location = std::source_location::current());
+
+	void Critical(const std::exception &anException, unsigned aLevel = 0, bool withNotice = false,
 				  const std::source_location &location = std::source_location::current());
+
+	void Critical(const std::string &anExceptionText, unsigned aLevel = 0, bool withNotice = false,
+				  const std::source_location &location = std::source_location::current());
+
 	void NewLine();
 	void Clear();
 	void *GetHandle() const

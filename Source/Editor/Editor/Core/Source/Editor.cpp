@@ -546,8 +546,7 @@ void Editor::CheckSelectedForRemoved()
 
 void Editor::Copy()
 {
-	copiedObjects = Editor::GetSelectedGameObjects();
-	ImGui::Notify({ImGuiToastType::Success, 3000, "Copied %i objects", copiedObjects.size()});
+	Logger.Succ(std::format("Copied %i objects", GetSelectedGameObjects().size()), true);
 }
 
 void Editor::Paste()

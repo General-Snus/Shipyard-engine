@@ -2,7 +2,7 @@
 class cPhysics_Newtonian : public Component
 {
 public:
-	MYLIB_REFLECTABLE();
+	ReflectableTypeRegistration();
     cPhysics_Newtonian(const SY::UUID anOwnerId, GameObjectManager *aManager);
     void Init() override;
     void Update() override; 

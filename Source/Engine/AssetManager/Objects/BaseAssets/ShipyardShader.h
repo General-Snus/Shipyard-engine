@@ -6,7 +6,7 @@
 class ShipyardShader : public AssetBase
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     ShipyardShader(const std::filesystem::path &aFilePath);
     void Init() override;
 

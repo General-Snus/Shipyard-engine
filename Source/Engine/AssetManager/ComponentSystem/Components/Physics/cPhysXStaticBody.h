@@ -5,7 +5,7 @@
 class cPhysXStaticBody : public Component
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     cPhysXStaticBody(const SY::UUID anOwnerId, GameObjectManager *aManager);
 
     void Init() override;

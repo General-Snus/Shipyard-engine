@@ -25,7 +25,7 @@ class Light : public Component
     friend class EnvironmentLightPSO;
 
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     Light() = delete;                                             // Create a generic cube
     Light(const SY::UUID anOwnerId, GameObjectManager *aManager); // Create a generic cube
     Light(const SY::UUID anOwnerId, GameObjectManager *aManager, const eLightType type);

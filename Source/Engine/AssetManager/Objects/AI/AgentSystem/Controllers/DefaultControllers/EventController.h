@@ -6,7 +6,7 @@
 class EventController : public Controller
 {
   public:
-    MYLIB_REFLECTABLE()
+    ReflectableTypeRegistration()
     explicit EventController();
     bool Update(GameObject aPosition) override;
     void Recieve(const AIEvent &aEvent) override;

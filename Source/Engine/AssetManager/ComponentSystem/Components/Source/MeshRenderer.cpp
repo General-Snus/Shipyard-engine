@@ -1,6 +1,6 @@
-#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
 #include "AssetManager.pch.h"
 
+#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h" 
 #include "Engine/AssetManager/ComponentSystem/Components/Animator.h"
 #include "Engine/AssetManager/Objects/BaseAssets/Animations.h"
 #include "Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h"
@@ -148,7 +148,6 @@ bool MeshRenderer::InspectorView()
 			ImGui::Text("Static Mesh");
 			ImGui::TableNextColumn();
 			SwitchableAsset<Mesh>(m_Mesh, "ContentAsset_Mesh");
-			ImGui::SetItemTooltip("Replace mesh");
 			ImGui::EndTable();
 			ImGui::Separator();
 			ImGui::TreePop();

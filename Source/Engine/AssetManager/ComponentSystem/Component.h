@@ -16,7 +16,7 @@ class Transform;
 class Component : public Reflectable
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     Component(const SY::UUID anOwnerID, GameObjectManager *aManager)
         : myOwnerID(anOwnerID), myManager(aManager), m_IsActive(true), myComponentType(eComponentType::base)
     {

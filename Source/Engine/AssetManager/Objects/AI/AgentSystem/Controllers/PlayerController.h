@@ -5,7 +5,7 @@
 class PlayerController : public Controller
 {
 public:
-	MYLIB_REFLECTABLE()
+	ReflectableTypeRegistration()
 	explicit PlayerController();
 	bool Update(GameObject input) override;
 

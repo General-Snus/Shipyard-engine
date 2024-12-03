@@ -1,6 +1,8 @@
 #include "Logging.h"
 
 #include "Windows.h"
+#include "Tools/ImGui/imgui_notify.h"
+
 #include <filesystem>
 #include <iomanip>
 #include <iostream>
@@ -40,9 +42,9 @@ void LoggerService::SetPrintToVSOutput(bool bNewValue)
 	shouldPrintToOutput = bNewValue;
 }
 
-void LoggerService::Log(const char *aString, const std::source_location &location)
+void LoggerService::Log(const char *aString, bool withNotice, const std::source_location &location)
 {
-	Log(std::string(aString), location);
+	Log(std::string(aString), withNotice, location);
 }
 
 Color LoggerService::GetColor(LogType type)
@@ -71,11 +73,17 @@ Color LoggerService::GetColor(LogType type)
 	}
 }
 
-void LoggerService::Log(const std::string &aString, const std::source_location &location)
+void LoggerService::Log(const std::string &aString, bool withNotice, const std::source_location &location)
 {
 	if (isInitialized)
 	{
 		std::scoped_lock lock(readyToWrite);
+
+		if (withNotice)
+		{
+			ImGui::Notify({ImGuiToastType::Info, aString.c_str()});
+		}
+
 		if (shouldPrintToOutput)
 		{
 			LogMsg msg;
@@ -101,11 +109,18 @@ void LoggerService::Log(const std::string &aString, const std::source_location &
 	}
 }
 
-void LoggerService::Warn(const std::string &aString, const std::source_location &location)
+void LoggerService::Warn(const std::string &aString, bool withNotice, const std::source_location &location)
 {
 	if (isInitialized)
 	{
 		std::scoped_lock lock(readyToWrite);
+
+		
+		if (withNotice)
+		{
+			ImGui::Notify({ImGuiToastType::Warning, aString.c_str()});
+		}
+
 		if (shouldPrintToOutput)
 		{
 			LogMsg msg;
@@ -131,11 +146,17 @@ void LoggerService::Warn(const std::string &aString, const std::source_location 
 	}
 }
 
-void LoggerService::Err(const std::string &aString, const std::source_location &location)
+void LoggerService::Err(const std::string &aString, bool withNotice, const std::source_location &location)
 {
 	if (isInitialized)
 	{
 		std::scoped_lock lock(readyToWrite);
+
+		if (withNotice)
+		{
+			ImGui::Notify({ImGuiToastType::Error, aString.c_str()});
+		}
+
 		if (shouldPrintToOutput)
 		{
 			LogMsg msg;
@@ -164,12 +185,18 @@ void LoggerService::Err(const std::string &aString, const std::source_location &
 				   << location.function_name() << std::endl;
 	}
 }
-void LoggerService::ErrTrace(const std::string &aString, const std::stacktrace &trace,
+void LoggerService::ErrTrace(const std::string &aString, bool withNotice, const std::stacktrace &trace,
 							 const std::source_location &location)
 {
 	if (isInitialized)
 	{
 		std::scoped_lock lock(readyToWrite);
+
+		if (withNotice)
+		{
+			ImGui::Notify({ImGuiToastType::Error, aString.c_str()});
+		}
+
 		if (shouldPrintToOutput)
 		{
 			LogMsg msg;
@@ -200,11 +227,17 @@ void LoggerService::ErrTrace(const std::string &aString, const std::stacktrace &
 	}
 } 
 
-void LoggerService::Succ(const std::string &aString, const std::source_location &location)
+void LoggerService::Succ(const std::string &aString, bool withNotice, const std::source_location &location)
 {
 	if (isInitialized)
 	{
 		std::scoped_lock lock(readyToWrite);
+
+		if (withNotice)
+		{
+			ImGui::Notify({ImGuiToastType::Success, aString.c_str()});
+		}
+
 		if (shouldPrintToOutput)
 		{
 			LogMsg msg;
@@ -229,11 +262,17 @@ void LoggerService::Succ(const std::string &aString, const std::source_location 
 	}
 }
 
-void LoggerService::Critical(const std::exception &anException, unsigned aLevel, const std::source_location &location)
+void LoggerService::Critical(const std::exception &anException, unsigned aLevel,
+							 bool withNotice, const std::source_location &location)
 {
 	if (isInitialized)
 	{
 		std::scoped_lock lock(readyToWrite);
+
+		if (withNotice)
+		{
+		ImGui::Notify({ImGuiToastType::Error, anException.what()}); 
+		}
 		if (shouldPrintToOutput)
 		{
 			LogMsg msg;
@@ -279,20 +318,30 @@ void LoggerService::Critical(const std::exception &anException, unsigned aLevel,
 
 // Critical error will proberly throw somewhere close, if caught and handeled like by a script holder it can still print
 // what went bad
-void LoggerService::Critical(const std::string &anExceptionText, unsigned aLevel, const std::source_location &location)
+void LoggerService::Critical(const std::string &anExceptionText, unsigned aLevel, bool withNotice,
+							 const std::source_location &location)
 {
 	if (isInitialized)
 	{
 		std::scoped_lock lock(readyToWrite);
+
+		std::filesystem::path sourceFile = location.file_name();
+		std::string strMsg =
+			std::format("[FATAL] [{}] {} Severity {}\n{} {} {}", Timestamp(), anExceptionText,
+						sourceFile.filename().string(), location.function_name(), location.line(), aLevel);
+
+		
+		if (withNotice)
+		{
+			ImGui::Notify({ImGuiToastType::Error, anExceptionText.c_str()});
+		}
+
 		if (shouldPrintToOutput)
 		{
 			LogMsg msg;
-			std::filesystem::path sourceFile = location.file_name();
-			msg.message =
-				std::format("[FATAL] [{}] {} Severity {}\n{} {} {}", Timestamp(), anExceptionText,
-							sourceFile.filename().string(), location.function_name(), location.line(), aLevel);
+			msg.message = strMsg; 
 			msg.messageType = LogType::critical;
-			OutputDebugStringA(msg.message.c_str());
+			OutputDebugStringA(strMsg.c_str());
 			m_Buffer.Add(msg);
 		}
 		else
@@ -306,10 +355,9 @@ void LoggerService::Critical(const std::string &anExceptionText, unsigned aLevel
 			SetConsoleTextAttribute(myHandle, FOREGROUND_RED | FOREGROUND_INTENSITY);
 			std::wcout << " " << anExceptionText.c_str() << "\n";
 			SetConsoleTextAttribute(myHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+			std::wcout << "file: " << location.file_name() << '(' << location.line() << ':' << location.column() << ") `"
+					   << location.function_name() << std::endl;
 		}
-
-		std::wcout << "file: " << location.file_name() << '(' << location.line() << ':' << location.column() << ") `"
-				   << location.function_name() << std::endl;
 
 		throw anExceptionText;
 	}

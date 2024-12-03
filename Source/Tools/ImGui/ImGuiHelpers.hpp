@@ -3,6 +3,8 @@
 #include "DirectX/DX12/Graphics/Texture.h"
 #include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
 #include "Tools/ImGui/imgui.h"
+#include "Tools/Utilities/Input/Input.hpp" 
+
 #include <DirectX/DX12/Graphics/Enums.h>
 #include <Engine/GraphicsEngine/GraphicsEngine.h>
 
@@ -104,6 +106,16 @@ inline bool ToggleButton(const char *str_id, bool *v)
 							   radius - 1.5f, IM_COL32(255, 255, 255, 255));
 
 	return returnValue;
+}
+
+inline Vector2f CursorPositionInWindow()
+{
+	const ImVec2 screen_pos = ImGui::GetCursorScreenPos();
+	const ImVec2 screen_size = ImGui::GetWindowSize();
+	const auto mp = Input.GetMousePosition();
+
+	return {std::clamp((2.0f * (mp.x - screen_pos.x) / screen_size.x) - 1.0f, -1.0f, 1.0f),
+			std::clamp((2.0f * (screen_pos.y - mp.y) / screen_size.y) - 1.0f, -1.0f, 1.0f)};
 }
 
 inline void Image(::Texture &aTexture, const ImVec2 &image_size, const ImVec2 &uv0 = ImVec2(0, 0),

@@ -298,7 +298,7 @@ Vector3f MultipleTargets_PollingStation::GetClosestPositionOnCollider(Vector3f p
     Vector3f closestPosition = position;
     for (auto &g : targets)
     {
-        const Vector3f coll = g.GetComponent<cCollider>().GetClosestPosition(position);
+        const Vector3f coll = g.GetComponent<Collider>().GetClosestPosition(position);
         const float dist = (coll - position).LengthSqr();
         if (dist < closestDistance)
         {
@@ -315,7 +315,7 @@ Vector3f MultipleTargets_PollingStation::GetClosestPositionOnCollider(Vector3f p
     Vector3f closestPosition = position;
     for (auto &g : targets)
     {
-        const auto &collider = g.GetComponent<cCollider>();
+        const auto &collider = g.GetComponent<Collider>();
         const Vector3f coll = collider.GetClosestPosition(position);
         const float dist = (coll - position).LengthSqr();
         if (dist < closestDistance)

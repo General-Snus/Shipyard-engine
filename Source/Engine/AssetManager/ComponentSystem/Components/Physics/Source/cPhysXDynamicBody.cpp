@@ -27,7 +27,7 @@ void cPhysXDynamicBody::Init()
 		assert(false && "Material creation failed!");
 	}
 
-	if (auto* collider = TryGetAddComponent<cCollider>())
+	if (auto* collider = TryGetAddComponent<Collider>())
 	{
 		switch (collider->GetColliderType())
 		{
@@ -132,7 +132,7 @@ void cPhysXDynamicBody::Destroy()
 void cPhysXDynamicBody::OnSiblingChanged(const std::type_info* SourceClass)
 {
 	OPTICK_EVENT();
-	if (SourceClass == &typeid(cCollider))
+	if (SourceClass == &typeid(Collider))
 	{
 		///UpdateFromCollider();
 	}

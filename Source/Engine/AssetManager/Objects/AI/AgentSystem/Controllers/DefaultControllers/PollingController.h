@@ -7,7 +7,7 @@ class PollingStation;
 class PollingController : public Controller
 {
 public:
-	MYLIB_REFLECTABLE()
+	ReflectableTypeRegistration()
 	explicit PollingController(PollingStation* aPollingStation);
 	bool Update(GameObject input) override;
 

@@ -248,7 +248,7 @@ class Reflectable
     template <typename T0, typename C> static bool ReflectSingleValue(T0 &member, C &aReflectedObject, const std::string &arg);
 };
 
-#define MYLIB_REFLECTABLE()                                                                                            \
+#define ReflectableTypeRegistration()                                                                                            \
     virtual const TypeInfo &GetTypeInfo() const override                                                               \
     {                                                                                                                  \
         return TypeInfo::Get<::refl::trait::remove_qualifiers_t<decltype(*this)>>();                                   \

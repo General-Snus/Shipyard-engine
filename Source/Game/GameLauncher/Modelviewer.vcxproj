@@ -272,11 +272,13 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="PillarGame\PillarGameComponents.h" />
     <ClInclude Include="ShipyardEngine.pch.h" />
     <ClInclude Include="Core\GameLauncher.h" />
     <ClInclude Include="UserComponent.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="PillarGame\PillarGameComponents.cpp" />
     <ClCompile Include="ShipyardEngine.pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">Create</PrecompiledHeader>
@@ -289,6 +291,7 @@
     <Image Include="GameIcon.ico" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="cpp.hint" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

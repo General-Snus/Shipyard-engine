@@ -122,7 +122,7 @@ void SteeringBehaviour::Separation(const std::vector<MultipleTargets_PollingStat
         float distance = direction.Length();
 
         // Try closest AABB point
-        if (auto collider = Scene::ActiveManager().TryGetComponent<cCollider>(i.sourceObject))
+        if (auto collider = Scene::ActiveManager().TryGetComponent<Collider>(i.sourceObject))
         {
         }
 

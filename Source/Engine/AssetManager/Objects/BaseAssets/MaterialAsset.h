@@ -30,7 +30,7 @@ class Material : public AssetBase
     friend class MeshRenderer;
 
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     struct DataMaterial
     {
         std::shared_ptr<ShipyardShader> vertexShader;
@@ -45,10 +45,11 @@ class Material : public AssetBase
     bool InspectorView() override;
 
     MaterialBuffer &GetMaterialData();
-    void Update();
+
+	void SetColor(const Color &aColor);
+	void SetColor(const Vector4f &aColor);
     void SetShader(const std::shared_ptr<ShipyardShader> &aVertexShader,
-                   const std::shared_ptr<ShipyardShader> &aPixelShader);
-    void SetAsResources();
+                   const std::shared_ptr<ShipyardShader> &aPixelShader); 
     std::shared_ptr<TextureHolder> GetEditorIcon() override;
 
   private:

@@ -13,7 +13,7 @@ class TextureHolder;
 class AssetBase : public Reflectable
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     AssetBase(const std::filesystem::path &aFilePath);
     virtual ~AssetBase() = default;
     // When overriding you have the responisiblitity to set the isloadedcomplete flag
@@ -33,6 +33,31 @@ class AssetBase : public Reflectable
         return false;
     };
 
+
+    //Warning,this is a blocking operation, timeout is seconds, negative is infinite block
+    void WaitForReady(float timeout = 100.0f)
+    {
+		assert(isBeingLoaded &&
+			   "You really should already be trying to load the bloody asset if you wait to wait for it to be ready");
+
+		typedef std::chrono::duration<float> fsec;
+		if (timeout > 0.0f)
+		{
+			const auto startTime = std::chrono::system_clock::now();
+			float countdown = 0.0f; 
+            while (countdown > timeout && isLoadedComplete == false)
+			{
+				auto diff = std::chrono::system_clock::now() - startTime;
+				countdown = std::chrono::duration_cast<fsec>(diff).count();
+			}
+			return; 
+		}
+
+		while (isLoadedComplete == false)
+		{
+		}
+    }
+
     std::filesystem::path AssetPath;
     bool isLoadedComplete = false;
     bool isBeingLoaded = false;
@@ -42,17 +67,3 @@ class AssetBase : public Reflectable
 };
 
 REFL_AUTO(type(AssetBase), field(AssetPath), field(isLoadedComplete), field(isBeingLoaded))
-
-// struct Bone
-//{
-//	Matrix BindPoseInverse;
-//	int ParentIdx = -1;
-//	std::string Name;
-//	std::vector<unsigned> Children;
-// };
-//
-//
-// struct Frame
-//{
-//	std::unordered_map<std::string,Matrix > myTransforms;
-// };

@@ -16,7 +16,7 @@ enum class eControllerType : int
 class Controller : public Reflectable
 {
   public:
-    MYLIB_REFLECTABLE()
+    ReflectableTypeRegistration()
     virtual bool Update(GameObject input) = 0;
     virtual void Recieve(const AIEvent &aEvent);
     virtual bool ComponentRequirement(GameObject input);

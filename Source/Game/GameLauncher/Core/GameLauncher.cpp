@@ -1,6 +1,10 @@
 #include "ShipyardEngine.pch.h"
 
 #include "GameLauncher.h"
+
+#include "Editor/Editor/Windows/EditorWindows/Viewport.h"
+#include "Engine/PersistentSystems/Physics/Raycast.h"
+#include "PillarGame/PillarGameComponents.h" 
 #include <UserComponent.h>
 
 extern "C"
@@ -21,26 +25,7 @@ extern "C"
 void YourGameLauncher::Init()
 {
 	OPTICK_EVENT();
-	{
-		{
-			GameObject camera = GameObject::Create("Test Camera");
-			Scene::ActiveManager().SetLastGOAsCamera();
-
-			camera.AddComponent<MeshRenderer>("Models/Camera/Camera.fbx");
-
-			camera.AddComponent<Camera>();
-			camera.transform().SetPosition(0, 5, 0);
-			camera.transform().SetRotation(90, 0, 0);
-		}
-
-		{
-			player = GameObject::Create("Player");
-			Scene::ActiveManager().SetLastGOAsPlayer();
-			player.AddComponent<MeshRenderer>("Models/C64.fbx");
-			player.AddComponent<UserComponent>();
-			Scene::ActiveManager().GetCamera().transform().SetParent(player.transform());
-		}
-
+	{ 
 		{
 			GameObject SkySphere = GameObject::Create("SkySphere");
 			auto &mesh = SkySphere.AddComponent<MeshRenderer>("Materials/MaterialPreviewMesh.fbx");
@@ -54,19 +39,20 @@ void YourGameLauncher::Init()
 			Scene::ActiveManager().SetLastGOAsWorld();
 
 			worldRoot.SetName("SkyLight");
-
+			worldRoot.transform().SetRotation(45, 45, 0);
 			auto &light = worldRoot.AddComponent<Light>(eLightType::Directional);
+			light.SetIsShadowCaster(true);
 			light.SetColor("White");
 			light.SetPower(2.0f);
 			light.BindDirectionToTransform(true);
 		}
 
-		{
-			GameObject sponza = GameObject::Create("sponza");
-			sponza.AddComponent<MeshRenderer>("Models/Sponza/Sponza.fbx");
-
-			sponza.transform().SetScale(.01f);
-		}
+		const float pillarRadius = 1.0f;
+		auto groundPos = Vector3f(0, -.5f, 0);
+		SpawnGround(groundPos);
+		SpawnPillar(groundPos);
+		SpawnHooks(50, pillarRadius, groundPos);
+		SpawnPlayer(0, pillarRadius, {groundPos.x, -0.35f, groundPos.z});
 	}
 }
 
@@ -80,6 +66,39 @@ void YourGameLauncher::Update(float delta)
 {
 	OPTICK_EVENT();
 	UNREFERENCED_PARAMETER(delta);
+	auto& manager = Scene::ActiveManager();
+	for (auto& element : manager.GetAllComponents<PlayerComponent>())
+	{
+		if (Input.IsKeyHeld(Keys::RIGHT))
+		{
+			element.transform().Rotate(0, -50.0f * delta, 0);
+		}
+
+		if (Input.IsKeyHeld(Keys::LEFT))
+		{
+			element.transform().Rotate(0, 50.0f * delta, 0);
+		}
+
+		if (Input.IsKeyPressed(Keys::SPACE))
+		{
+			Physics::RaycastHit hit;
+			const auto &cameraTransform = manager.GetCamera().transform();
+ 			const auto &camera = manager.GetCamera().GetComponent<Camera>();
+
+			auto coord = EditorInstance.GetMainViewport()->getCursorInWindowPostion();
+			if (Physics::Raycast(cameraTransform.GetPosition(), camera.GetPointerDirection(coord),
+								 hit))
+			{
+				Logger.Log("You hit something", true);
+			}
+		}
+	}
+
+
+
+
+
+
 }
 
 void YourGameLauncher::SyncServices(ServiceLocator &serviceLocator)

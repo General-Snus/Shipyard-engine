@@ -63,7 +63,7 @@ void Material::Init()
 	data.textures[static_cast<int>(eTextureType::EffectMap)].second =
 		GraphicsEngineInstance.GetDefaultTexture(eTextureType::EffectMap);
 
-	if (GraphicsEngineInstance.GetDefaultMaterial() != nullptr)
+	if (GraphicsEngineInstance.GetDefaultMaterial())
 	{
 		data.materialData =
 			GraphicsEngineInstance.GetDefaultMaterial()
@@ -87,7 +87,6 @@ void Material::Init()
 
 			json = nlohmann::json::parse(file);
 			file.close();
-			isLoadedComplete = true; // will be set to faalse if failing any where, bad but im not gonna be bothered
 
 			nlohmann::json &js = json["MaterialBuffer"];
 
@@ -109,6 +108,7 @@ void Material::Init()
 				"Unsuccessfull loading of material data file at path: " + AssetPath.string() + " " + e.what();
 			Logger.Warn(msg);
 			isLoadedComplete = false;
+			return;
 		}
 
 		try
@@ -139,12 +139,11 @@ void Material::Init()
 				"Unsuccessfull loading of material texture file at path: " + AssetPath.string() + " " + e.what();
 			Logger.Warn(msg);
 			isLoadedComplete = false;
+			return;
 		}
 	}
-	else
-	{
-		isLoadedComplete = false;
-	}
+
+	isLoadedComplete = true;
 }
 
 bool Material::InspectorView()
@@ -166,30 +165,29 @@ bool Material::InspectorView()
 		// data.pixelShader.lock()->InspectorView();
 
 		ImGui::Text("Material Data");
-		if(Reflectable::ReflectSingleValue(data.m_color, *this, "Material Color"))
+		if (ReflectSingleValue(data.m_color, *this, "Material Color"))
 		{
 			data.materialData.albedoColor = data.m_color.GetRGBA();
 		}
 
-		Reflectable::ReflectSingleValue(data.materialData.UVTiling, *this, "UV scaling");
+		ReflectSingleValue(data.materialData.UVTiling, *this, "UV scaling");
 
-		Reflectable::ReflectSingleValue(data.materialData.NormalStrength, *this, "Normal Strength");
+		ReflectSingleValue(data.materialData.NormalStrength, *this, "Normal Strength");
 
-		Reflectable::ReflectSingleValue(data.materialData.Shine, *this, "Shine Strength");
+		ReflectSingleValue(data.materialData.Shine, *this, "Shine Strength");
 
-		Reflectable::ReflectSingleValue(data.materialData.Roughness, *this, "Roughness Strength");
+		ReflectSingleValue(data.materialData.Roughness, *this, "Roughness Strength");
 		ImGui::Separator();
 		ImGui::Spacing();
 		for (const auto &[index, pair] : data.textures | std::ranges::views::enumerate)
 		{
-			auto &[path, texture] = pair;
-			if (texture)
+			if (auto &[path, texture] = pair; texture)
 			{
 				ImGui::TextCentered(std::string(magic_enum::enum_name(eTextureType(index))));
 				ImGui::Separator();
 				ImGui::Columns(2);
 				ImGui::SetColumnWidth(0, 128);
-				SwitchableAsset<TextureHolder>(texture, "ContentAsset_TextureHolder", true); 
+				SwitchableAsset<TextureHolder>(texture, "ContentAsset_TextureHolder", true);
 				// ImGui::ImageButton(std::format("##{}", AssetPath.string()).c_str(), *RawTexture, {128, 128});
 				ImGui::NextColumn();
 
@@ -200,7 +198,7 @@ bool Material::InspectorView()
 				DXGI_FORMAT format{};
 				D3D12_RESOURCE_DIMENSION dim{};
 				D3D12_RESOURCE_FLAGS flags{};
-				if (texture; const auto &raw = texture->GetRawTexture())
+				if (const auto &raw = texture->GetRawTexture())
 				{
 					res = raw->GetResolution();
 					format = raw->m_Format;
@@ -254,24 +252,6 @@ MaterialBuffer &Material::GetMaterialData()
 	return data.materialData;
 }
 
-void Material::Update()
-{
-	OPTICK_EVENT();
-	if (!isLoadedComplete)
-	{
-		GraphicsEngineInstance.GetDefaultMaterial()->Update();
-		return;
-		// REFACTOR
-		// If default material is not loaded with forced or if it erronous we will end with a overflow here, guess it
-		// guarantees defaults works atleast
-	}
-
-	/*RHI::UpdateConstantBufferData(data.materialData);
-	RHI::SetConstantBuffer(PIPELINE_STAGE_VERTEX_SHADER |
-	PIPELINE_STAGE_PIXEL_SHADER,REG_DefaultMaterialBuffer,data.materialData);*/
-	SetAsResources();
-}
-
 std::shared_ptr<TextureHolder> Material::GetTexture(eTextureType type)
 {
 	OPTICK_EVENT();
@@ -290,33 +270,21 @@ std::shared_ptr<TextureHolder> Material::GetTexture(eTextureType type)
 	return nullptr;
 }
 
+void Material::SetColor(const Color & aColor)
+{
+	data.m_color = aColor;
+	data.materialData.albedoColor = data.m_color.GetRGBA();
+}
+void Material::SetColor(const Vector4f &aColor)
+{
+
+	data.m_color = aColor;
+	data.materialData.albedoColor = data.m_color.GetRGBA(); 
+}
+
 void Material::SetShader(const std::shared_ptr<ShipyardShader> &aVertexShader,
-						 const std::shared_ptr<ShipyardShader> &aPixelShader)
+                         const std::shared_ptr<ShipyardShader> &aPixelShader)
 {
 	data.vertexShader = aVertexShader;
 	data.pixelShader = aPixelShader;
-}
-
-void Material::SetAsResources()
-{
-	/*RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)eTextureType::ColorMap,nullptr);
-	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)eTextureType::NormalMap,nullptr);
-	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)eTextureType::MaterialMap,nullptr);
-	RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)eTextureType::EffectMap,nullptr);
-	for (const auto& [path,i] : data.textures)
-	{
-		if (!i)
-		{
-			continue;
-		}
-
-		if (i->isLoadedComplete)
-		{
-			RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)i->textureType,i->GetRawTexture().get());
-		}
-		else
-		{
-			RHI::SetTextureResource(PIPELINE_STAGE_PIXEL_SHADER,(int)i->textureType,GraphicsEngineInstance.GetDefaultTexture(i->textureType)->GetRawTexture().get());
-		}
-	}*/
 }

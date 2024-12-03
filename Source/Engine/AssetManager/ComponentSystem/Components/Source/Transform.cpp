@@ -480,9 +480,9 @@ void Transform::SetRotation(Vector3f angularRotation)
 
 void Transform::LookAt(Vector3f target, Vector3f Up)
 {
-    Up;
-    myQuaternion = Quaternionf::RotationFromTo(myPosition, target) * myQuaternion;
-    myRotation = myQuaternion.GetEulerAngles() * DEG_TO_RAD;
+	Up;
+	myQuaternion = Quaternionf::LookAt(myPosition, target, GetForward(WORLD), GetUp(WORLD));
+    myRotation = myQuaternion.GetEulerAngles() * RAD_TO_DEG;
     SetDirty(true);
 }
 

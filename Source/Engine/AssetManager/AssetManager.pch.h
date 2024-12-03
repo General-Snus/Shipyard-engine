@@ -29,6 +29,7 @@
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 #include <Tools/Utilities/Math.hpp>
+#include <Tools/Utilities/Color.h>
 
 // STL Headers
 #include <algorithm>

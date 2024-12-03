@@ -5,7 +5,7 @@ class UserComponent : public Component
 {
 
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     UserComponent(const SY::UUID anOwnerID, GameObjectManager *aManager) : Component(anOwnerID, aManager)
     {
     }

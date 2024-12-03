@@ -5,7 +5,7 @@
 class alignas(16) SpotLight : public Reflectable
 {
   private:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     int64_t alignment{};
 
   public:
@@ -59,7 +59,7 @@ struct aligned_int // I love 16 byte alignment
 class alignas(16) PointLight : Reflectable
 {
   private:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     int64_t alignment{};
 
   public:
@@ -87,7 +87,7 @@ REFL_AUTO(type(PointLight), field(Power), field(Range))
 class alignas(16) DirectionalLight : public Reflectable
 {
   private:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     int64_t alignment{};
 
   public:

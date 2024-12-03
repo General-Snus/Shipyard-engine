@@ -26,7 +26,7 @@ bool Raycast(Vector3f origin, Vector3f direction, RaycastHit &outHitInfo, GameOb
 
 	float distance = std::powf(maxDistance, 2);
 	Vector3f hitPoint;
-	for (auto &i : Scene::ActiveManager().GetAllComponents<cCollider>()) // Observe crabLiftingBar.jpeg
+	for (auto &i : Scene::ActiveManager().GetAllComponents<Collider>()) // Observe crabLiftingBar.jpeg
 	{
 		Layer a = layerMask;
 		Layer b = i.GetGameObject().GetLayer();
@@ -70,7 +70,7 @@ bool Raycast(Vector3f origin, Vector3f direction, RaycastHit &outHitInfo, Layer 
 
 	float distance = std::powf(maxDistance, 2);
 	Vector3f hitPoint;
-	for (auto &i : Scene::ActiveManager().GetAllComponents<cCollider>())
+	for (auto &i : Scene::ActiveManager().GetAllComponents<Collider>())
 	{
 		auto &collider = i.GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB();
 
@@ -103,7 +103,7 @@ bool Raycast(Vector3f origin, Vector3f direction, Layer layerMask, float maxDist
 	float distance = std::powf(maxDistance, 2);
 	Vector3f hitPoint;
 	// Observe crabLiftingBar.jpeg
-	for (auto &i : Scene::ActiveManager().GetAllComponents<cCollider>())
+	for (auto &i : Scene::ActiveManager().GetAllComponents<Collider>())
 	{
 		auto collider = i.GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB();
 

@@ -28,7 +28,7 @@ struct PrimitiveHandle;
 class ColliderAsset : public AssetBase
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     ColliderAsset() = delete; // Always tell the type stupid
     explicit ColliderAsset(eColliderType type);
     explicit ColliderAsset(const std::filesystem::path &aFilePath);
@@ -60,7 +60,7 @@ REFL_AUTO(type(ColliderAsset))
 class ColliderAssetAABB : public ColliderAsset
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     explicit ColliderAssetAABB();
     explicit ColliderAssetAABB(const AABB3D<float> &rf);
     void RenderDebugLines(Transform &data) override;
@@ -89,7 +89,7 @@ REFL_AUTO(type(ColliderAssetAABB))
 class ColliderAssetSphere : public ColliderAsset
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     explicit ColliderAssetSphere();
     explicit ColliderAssetSphere(const Sphere<float> &rf);
     void RenderDebugLines(Transform &data) override;
@@ -102,7 +102,7 @@ REFL_AUTO(type(ColliderAssetSphere))
 class ColliderAssetConvex : public ColliderAsset
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     explicit ColliderAssetConvex();
     explicit ColliderAssetConvex(const std::shared_ptr<Mesh> &rf);
     explicit ColliderAssetConvex(const std::filesystem::path &path);
@@ -120,7 +120,7 @@ REFL_AUTO(type(ColliderAssetConvex))
 class ColliderAssetPlanar : public ColliderAsset
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     explicit ColliderAssetPlanar();
     explicit ColliderAssetPlanar(const std::shared_ptr<Mesh> &rf);
     explicit ColliderAssetPlanar(const std::filesystem::path &path);

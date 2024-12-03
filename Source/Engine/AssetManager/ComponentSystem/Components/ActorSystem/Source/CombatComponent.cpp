@@ -60,7 +60,7 @@ void CombatComponent::FireProjectile()
         GameObject projectile = GameObject::Create("Projectile");
         auto &kinematic = projectile.AddComponent<cPhysics_Kinematic>();
         auto &mesh = projectile.AddComponent<MeshRenderer>();
-        auto &collider = projectile.AddComponent<cCollider>();
+        auto &collider = projectile.AddComponent<Collider>();
         auto &projComponent = projectile.AddComponent<ProjectileComponent>();
         projComponent.InitWithValues(20.f, GetGameObject());
 

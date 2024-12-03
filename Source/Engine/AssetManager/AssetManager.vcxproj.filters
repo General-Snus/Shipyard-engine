@@ -174,6 +174,12 @@
     <ClInclude Include="ComponentSystem\Components\Network\NetworkSync.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GameResourcesLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Loader\LoaderBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssetManager.pch.cpp">
@@ -318,6 +324,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ComponentSystem\Components\Network\Source\NetworkSync.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameResourcesLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Loader\LoaderBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

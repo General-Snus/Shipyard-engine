@@ -8,7 +8,7 @@
 class NetworkSync : public Component
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     NetworkSync() = delete; // Create a generic cube
     NetworkSync(const SY::UUID anOwnerId, GameObjectManager *aManager);
     bool InspectorView() override;

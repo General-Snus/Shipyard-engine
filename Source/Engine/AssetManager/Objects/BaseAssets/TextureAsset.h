@@ -8,7 +8,7 @@ class TextureHolder : public AssetBase
     friend class Material;
 
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     void Init() override;
     TextureHolder(const std::filesystem::path &aFilePath);
     TextureHolder(const std::filesystem::path &aFilePath, eTextureType atextureType);

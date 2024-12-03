@@ -5,7 +5,7 @@
 class AIController : public PollingController
 {
 public:
-	MYLIB_REFLECTABLE()
+	ReflectableTypeRegistration()
 	explicit AIController(MultipleTargets_PollingStation* aTargetsPollingStation,MultipleTargets_PollingStation* formationStation);
 	bool Update(GameObject input) override;
 	void Recieve(const AIEvent& aEvent) override;

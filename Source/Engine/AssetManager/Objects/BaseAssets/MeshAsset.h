@@ -21,7 +21,7 @@ struct Element
 class Mesh : public AssetBase
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     friend class MeshRenderer;
     friend class InstanceRenderer;
     Mesh() = default;

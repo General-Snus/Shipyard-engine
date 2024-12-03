@@ -18,7 +18,7 @@ enum eSpace
 class Transform : public Component
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     Transform() = delete;
     Transform(const SY::UUID anOwnerId, GameObjectManager *aManager);
     void Destroy() override;

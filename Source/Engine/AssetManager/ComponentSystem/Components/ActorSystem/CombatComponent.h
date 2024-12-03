@@ -4,7 +4,7 @@
 class CombatComponent : public Component
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     CombatComponent(const SY::UUID anOwnerID, GameObjectManager *aManager);
     ~CombatComponent() override = default;
     void Init() override;

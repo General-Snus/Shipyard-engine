@@ -4,7 +4,7 @@
 class ProjectileComponent : public Component
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     ProjectileComponent(const SY::UUID anOwnerID, GameObjectManager *aManager);
     ~ProjectileComponent() override = default;
     void Init() override;

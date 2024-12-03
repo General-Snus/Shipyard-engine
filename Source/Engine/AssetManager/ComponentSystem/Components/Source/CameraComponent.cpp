@@ -184,26 +184,28 @@ std::array<Vector4f, 4> Camera::GetFrustrumCorners() const
 	return corners;
 }
 
-Vector3f Camera::GetPointerDirection(const Vector2<int> position)
+Vector3f Camera::GetPointerDirection(const Vector2f position) const
 {
 	Vector4f viewPosition;
-	auto size = EditorInstance.GetViewportResolution();
 
-	viewPosition.x = ((2.0f * position.x / size.x) - 1);
+	viewPosition.x = position.x;
+
+	//viewPosition.x = ((2.0f * position.x / resolution.x) - 1);
 	viewPosition /= m_Projection(1, 1);
 
-	viewPosition.y = ((-2.0f * position.y / size.y) - 1);
+	//viewPosition.y = ((-2.0f * position.y / resolution.y) - 1);
+	viewPosition.y = position.y;
 	viewPosition /= m_Projection(2, 2);
 
 	viewPosition.z = 1;
 	viewPosition.w = 0;
 
-	const Matrix myTransform = GetGameObject().GetComponent<Transform>().GetTransform();
+	const Matrix myTransform = GetGameObject().GetComponent<Transform>().WorldMatrix();
 	const Vector4f out = viewPosition * Matrix::GetFastInverse(myTransform);
-	return Vector3f(out.x, out.y, out.z);
+	return Vector3f(out.x, out.y, out.z).GetNormalized();
 }
 
-Vector3f Camera::GetPointerDirectionNDC(const Vector2<int> position) const
+Vector3f Camera::GetPointerDirectionNDC(const Vector2f position) const
 {
 	position;
 	throw std::exception("Not implemented");

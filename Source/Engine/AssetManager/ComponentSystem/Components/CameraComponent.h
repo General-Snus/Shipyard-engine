@@ -35,7 +35,7 @@ enum class DebugFilter
 class Camera : public Component
 {
   public:
-	MYLIB_REFLECTABLE();
+	ReflectableTypeRegistration();
 	explicit Camera(const SY::UUID anOwnerId, GameObjectManager *aManager);
 
 	void Update() override;
@@ -43,8 +43,8 @@ class Camera : public Component
 	bool InspectorView() override;
 
 	std::array<Vector4f, 4> GetFrustrumCorners() const;
-	Vector3f GetPointerDirection(const Vector2<int> position);
-	Vector3f GetPointerDirectionNDC(const Vector2<int> position) const;
+	Vector3f GetPointerDirection(const Vector2f position) const;
+	Vector3f GetPointerDirectionNDC(const Vector2f position) const;
 	Vector4f WoldSpaceToPostProjectionSpace(Vector3f aEntity);
 
 	inline void IsInControl(bool aIsInControl)

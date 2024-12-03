@@ -15,7 +15,7 @@ class Skeleton;
 class MeshRenderer : public Component
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     MeshRenderer() = delete;                                             // Create a generic cube
     MeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager); // Create a generic cube
     MeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager, const std::filesystem::path &aFilePath,
@@ -57,7 +57,7 @@ class cSkeletalMeshRenderer : public MeshRenderer
     friend class cAnimator;
 
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     cSkeletalMeshRenderer() = delete;
     cSkeletalMeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager);
     cSkeletalMeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager,
