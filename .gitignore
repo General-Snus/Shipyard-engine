@@ -418,3 +418,4 @@ Content/Materials/Temporary/*.json
 !Optick.exe
 *.scor
 .aider*
+Source/DirectX/XTK/Src/Shaders/Compiled
