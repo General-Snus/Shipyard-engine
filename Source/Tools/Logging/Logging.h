@@ -43,7 +43,7 @@ class LoggerService : public Singleton
 		unsigned criticalCount{};
 		unsigned successCount{};
 
-		void Add(LogMsg msg)
+		void Add(const LogMsg& msg)
 		{
 			switch (msg.messageType)
 			{
@@ -77,7 +77,7 @@ class LoggerService : public Singleton
 	void SetPrintToVSOutput(bool bNewValue);
 	void Log(const char *aString, bool withNotice = false,
 			 const std::source_location &location = std::source_location::current());
-	Color GetColor(LogType type);
+	static Color GetColor(LogType type);
 
 	template <typename T>
 	void Log(const T &aString, bool withNotice = false,
@@ -100,7 +100,7 @@ class LoggerService : public Singleton
 				  const std::stacktrace &trace = std::stacktrace::current(),
 				  const std::source_location &location = std::source_location::current());
 
-	void Succ(const std::string &aString, bool withNotice = false,
+	void Success(const std::string &aString, bool withNotice = false,
 			  const std::source_location &location = std::source_location::current());
 
 	void Critical(const std::exception &anException, unsigned aLevel = 0, bool withNotice = false,
@@ -109,7 +109,7 @@ class LoggerService : public Singleton
 	void Critical(const std::string &anExceptionText, unsigned aLevel = 0, bool withNotice = false,
 				  const std::source_location &location = std::source_location::current());
 
-	void NewLine();
+	static void NewLine();
 	void Clear();
 	void *GetHandle() const
 	{
@@ -117,12 +117,12 @@ class LoggerService : public Singleton
 	}
 
   private:
-	void *myHandle = 0;
-	bool shouldPrintToOutput = false;
-	bool isInitialized = false;
-	std::string myNamespace;
-	std::mutex readyToWrite;
-	[[nodiscard]] std::string Timestamp();
+	void *                           myHandle = nullptr;
+	bool                             shouldPrintToOutput = false;
+	bool                             isInitialized = false;
+	std::string                      myNamespace;
+	std::mutex                       readyToWrite;
+	[[nodiscard]] static std::string Timestamp();
 };
 
 ENABLE_ENUM_BITWISE_OPERATORS(LoggerService::LogType)

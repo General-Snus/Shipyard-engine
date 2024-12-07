@@ -28,7 +28,7 @@ bool LoggerService::Create()
 {
 	isInitialized = true;
 	SetConsoleHandle(GetConsoleWindow());
-	Succ("Logging started");
+	Success("Logging started");
 	return true;
 }
 
@@ -53,23 +53,17 @@ Color LoggerService::GetColor(LogType type)
 	{
 		using enum LoggerService::LogType;
 	case message:
-		return Color(1.0f, 1.0f, 1.0f);
-		break;
+		return {1.0f, 1.0f, 1.0f}; 
 	case warning:
-		return Color(1.0f, 1.0f, 0.0f);
-		break;
+		return {1.0f, 1.0f, 0.0f};
 	case error:
-		return Color(1.0f, 0.0f, 0.0f);
-		break;
+		return {1.0f, 0.5f, 0.5f};
 	case critical:
-		return Color(1.0f, 0.0f, 0.0f);
-		break;
+		return {1.0f, 0.0f, 0.0f};
 	case success:
-		return Color(0.0f, 1.0f, 0.0f);
-		break;
+		return {0.0f, 1.0f, 0.0f};
 	default:
 		std::unreachable();
-		break;
 	}
 }
 
@@ -227,7 +221,7 @@ void LoggerService::ErrTrace(const std::string &aString, bool withNotice, const 
 	}
 } 
 
-void LoggerService::Succ(const std::string &aString, bool withNotice, const std::source_location &location)
+void LoggerService::Success(const std::string &aString, bool withNotice, const std::source_location &location)
 {
 	if (isInitialized)
 	{
@@ -310,13 +304,10 @@ void LoggerService::Critical(const std::exception &anException, unsigned aLevel,
 		{
 			Critical(nestedException, aLevel + 1);
 		}
-		catch (...)
-		{
-		} // Catch all other cases.
 	}
 }
 
-// Critical error will proberly throw somewhere close, if caught and handeled like by a script holder it can still print
+// Critical error will probably throw somewhere close, if caught and handled like by a script holder it can still print
 // what went bad
 void LoggerService::Critical(const std::string &anExceptionText, unsigned aLevel, bool withNotice,
 							 const std::source_location &location)
@@ -359,7 +350,7 @@ void LoggerService::Critical(const std::string &anExceptionText, unsigned aLevel
 					   << location.function_name() << std::endl;
 		}
 
-		throw anExceptionText;
+		throw std::exception(anExceptionText.c_str());
 	}
 }
 
