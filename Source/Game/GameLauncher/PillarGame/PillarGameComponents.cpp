@@ -34,7 +34,7 @@ void SpawnHooks(int amount, float radius, Vector3f base)
 {
 	for (int i = 0; i < amount; ++i)
 	{
-		GameObject attachment = GameObject::Create("Attachment");
+		GameObject attachment = GameObject::Create(std::format("Hook_{}", i));
 		attachment.AddComponent<HookComponent>();
 
 		auto& renderer = attachment.AddComponent<MeshRenderer>("Models/PillarClimb/AttachmentPost.fbx");
