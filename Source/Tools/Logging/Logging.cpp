@@ -82,7 +82,7 @@ void LoggerService::Log(const std::string &aString, bool withNotice, const std::
 		{
 			LogMsg msg;
 			msg.messageType = LogType::message;
-			std::filesystem::path sourceFile = location.file_name();
+			const std::filesystem::path sourceFile = location.file_name();
 			msg.message = std::format("[LOG] [{}] {}\n{} {} {}", Timestamp(), aString, sourceFile.filename().string(),
 									  location.function_name(), location.line());
 			OutputDebugStringA(msg.message.c_str());
@@ -118,7 +118,7 @@ void LoggerService::Warn(const std::string &aString, bool withNotice, const std:
 		if (shouldPrintToOutput)
 		{
 			LogMsg msg;
-			std::filesystem::path sourceFile = location.file_name();
+			const std::filesystem::path sourceFile = location.file_name();
 			msg.message = std::format("[WARNING][{}] {}\n{} {} {}", Timestamp(), aString,
 									  sourceFile.filename().string(), location.function_name(), location.line());
 			msg.messageType = LogType::warning;
@@ -154,7 +154,7 @@ void LoggerService::Err(const std::string &aString, bool withNotice, const std::
 		if (shouldPrintToOutput)
 		{
 			LogMsg msg;
-			std::filesystem::path sourceFile = location.file_name();
+			const std::filesystem::path sourceFile = location.file_name();
 			msg.message = std::format("[ERROR] [{}] {} \n{} {} {}", Timestamp(), aString,
 									  sourceFile.filename().string(), location.function_name(), location.line());
 			msg.messageType = LogType::error;
@@ -194,7 +194,7 @@ void LoggerService::ErrTrace(const std::string &aString, bool withNotice, const 
 		if (shouldPrintToOutput)
 		{
 			LogMsg msg;
-			std::filesystem::path sourceFile = location.file_name();
+			const std::filesystem::path sourceFile = location.file_name();
 			msg.message = std::format("[ERROR] [{}] {} \n{} {} {}", Timestamp(), aString,
 									  sourceFile.filename().string(), location.function_name(), location.line());
 			msg.trace = trace;
@@ -235,7 +235,7 @@ void LoggerService::Success(const std::string &aString, bool withNotice, const s
 		if (shouldPrintToOutput)
 		{
 			LogMsg msg;
-			std::filesystem::path sourceFile = location.file_name();
+			const std::filesystem::path sourceFile = location.file_name();
 			msg.message = std::format("[SUCCESS] [{}] {} \n{} {} {}", Timestamp(), aString,
 									  sourceFile.filename().string(), location.function_name(), location.line());
 			msg.messageType = LogType::success;
@@ -271,7 +271,7 @@ void LoggerService::Critical(const std::exception &anException, unsigned aLevel,
 		{
 			LogMsg msg;
 
-			std::filesystem::path sourceFile = location.file_name();
+			const std::filesystem::path sourceFile = location.file_name();
 			msg.message =
 				std::format("[FATAL] [{}] {}  Severity {} \n{} {} ", Timestamp(), anException.what(),
 							sourceFile.filename().string(), location.function_name(), location.line(), aLevel);
@@ -316,8 +316,8 @@ void LoggerService::Critical(const std::string &anExceptionText, unsigned aLevel
 	{
 		std::scoped_lock lock(readyToWrite);
 
-		std::filesystem::path sourceFile = location.file_name();
-		std::string strMsg =
+		const std::filesystem::path sourceFile = location.file_name();
+		const std::string strMsg =
 			std::format("[FATAL] [{}] {} Severity {}\n{} {} {}", Timestamp(), anExceptionText,
 						sourceFile.filename().string(), location.function_name(), location.line(), aLevel);
 

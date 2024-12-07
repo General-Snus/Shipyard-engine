@@ -1,100 +1,104 @@
 #pragma once
 #define NOMINMAX
+#include <bitset>
+#include <Windows.h>
+#include <WinUser.h>
+#include <Tools/Utilities/System/ServiceLocator.h>
+#include "EnumKeys.h"
 #include "../LinearAlgebra/Vector2.hpp"
 #include "Editor/Editor/Windows/Window.h"
-#include "EnumKeys.h"
 #include "Tools/Logging/Logging.h"
-#include <Tools/Utilities/System/ServiceLocator.h>
-#include <WinUser.h>
-#include <Windows.h>
-#include <bitset>
 
 #define Input ServiceLocator::Instance().GetService<InputManager>()
 
 class InputManager : public Singleton
 {
-  public:
+public:
 	InputManager() = default;
 
-	bool IsKeyHeld(const int aKeyCode) const;
-	bool IsKeyHeld(Keys aKeyCode) const;
-	bool IsKeyPressed(const int aKeyCode);
-	bool IsKeyPressed(Keys aKeyCode);
-	bool IsKeyReleased(const int aKeyCode);
-	bool IsKeyReleased(Keys aKeyCode);
-	Vector2<float> GetMousePositionNDC();
-	static Vector2<float> GetMousePositionNDC(const Vector2<float> &mp);
-	Vector2f GetMousePosition();
-	Vector2f GetMousePositionDelta();
-	bool UpdateMouseInput();
+	bool                  IsKeyHeld(int aKeyCode) const;
+	bool                  IsKeyHeld(Keys aKeyCode) const;
+	bool                  IsKeyPressed(int aKeyCode) const;
+	bool                  IsKeyPressed(Keys aKeyCode) const;
+	bool                  IsKeyReleased(int aKeyCode) const;
+	bool                  IsKeyReleased(Keys aKeyCode) const;
+	Vector2<float>        GetMousePositionNDC() const;
+	static Vector2<float> GetMousePositionNDC(const Vector2<float>& mp);
+	Vector2f              GetMousePosition() const;
+	Vector2f              GetMousePositionDelta() const;
+	bool                  UpdateMouseInput();
 	// Positive is forward away from user
-	float GetMouseWheelDelta();
-	unsigned int GetLastPressedKey();
-	bool UpdateEvents(UINT message, WPARAM wParam, LPARAM lParam);
-	void Update();
-	float g_MouseWheelDeadZone = 10;
+	float        GetMouseWheelDelta() const;
+	unsigned int GetLastPressedKey() const;
+	bool         UpdateEvents(UINT message, WPARAM wParam, LPARAM lParam);
+	void         Update();
+	float        g_MouseWheelDeadZone = 10;
 
-  private:
+private:
 	std::bitset<256> currentFrameUpdate;
 	std::bitset<256> liveKeyUpdate;
 	std::bitset<256> lastFrameUpdate;
-	unsigned int lastPressedKey;
-	float myMouseWheelDelta;
-	Vector2<float> myMousePosition;
-	Vector2<float> myLastMousePosition;
+	unsigned int     lastPressedKey;
+	float            myMouseWheelDelta;
+	Vector2<float>   myMousePosition;
+	Vector2<float>   myLastMousePosition;
 };
 
 inline bool InputManager::IsKeyHeld(const int aKeyCode) const
 {
 	return (currentFrameUpdate[aKeyCode] && lastFrameUpdate[aKeyCode]);
 }
+
 inline bool InputManager::IsKeyHeld(const Keys aKeyCode) const
 {
-	return (currentFrameUpdate[(int)aKeyCode] && lastFrameUpdate[(int)aKeyCode]);
+	return (currentFrameUpdate[static_cast<int>(aKeyCode)] && lastFrameUpdate[static_cast<int>(aKeyCode)]);
 }
 
-inline bool InputManager::IsKeyPressed(const int aKeyCode)
+inline bool InputManager::IsKeyPressed(const int aKeyCode) const
 {
 	return (currentFrameUpdate[aKeyCode] && !lastFrameUpdate[aKeyCode]);
 }
 
-inline bool InputManager::IsKeyPressed(const Keys aKeyCode)
+inline bool InputManager::IsKeyPressed(const Keys aKeyCode) const
 {
-	return (currentFrameUpdate[(int)aKeyCode] && !lastFrameUpdate[(int)aKeyCode]);
+	return (currentFrameUpdate[static_cast<int>(aKeyCode)] && !lastFrameUpdate[static_cast<int>(aKeyCode)]);
 }
 
-inline bool InputManager::IsKeyReleased(const int aKeyCode)
+inline bool InputManager::IsKeyReleased(const int aKeyCode) const
 {
 	return (!currentFrameUpdate[aKeyCode] && lastFrameUpdate[aKeyCode]);
 }
-inline bool InputManager::IsKeyReleased(const Keys aKeyCode)
+
+inline bool InputManager::IsKeyReleased(const Keys aKeyCode) const
 {
-	return (!currentFrameUpdate[(int)aKeyCode] && lastFrameUpdate[(int)aKeyCode]);
+	return (!currentFrameUpdate[static_cast<int>(aKeyCode)] && lastFrameUpdate[static_cast<int>(aKeyCode)]);
 }
 
-inline Vector2<float> InputManager::GetMousePositionNDC()
+inline Vector2<float> InputManager::GetMousePositionNDC() const
 {
 	const Vector2ui res = {WindowInstance.Width(), WindowInstance.Height()};
 	return Vector2f(std::clamp(2.f * (myMousePosition.x / static_cast<float>(res.x)) - 1.0f, -1.0f, 1.0f),
-					std::clamp(1.0f - 2.f * (myMousePosition.y / static_cast<float>(res.y)), -1.0f, 1.0f)); 
+	                std::clamp(1.0f - 2.f * (myMousePosition.y / static_cast<float>(res.y)), -1.0f, 1.0f));
 }
-inline Vector2<float> InputManager::GetMousePositionNDC(const Vector2<float> & mp)
+
+inline Vector2<float> InputManager::GetMousePositionNDC(const Vector2<float>& mp)
 {
 	const Vector2ui res = {WindowInstance.Width(), WindowInstance.Height()};
 	return Vector2f(std::clamp(2.f * (mp.x / static_cast<float>(res.x)) - 1.0f, -1.0f, 1.0f),
-					std::clamp(1.0f - 2.f * (mp.y / static_cast<float>(res.y)), -1.0f, 1.0f));
+	                std::clamp(1.0f - 2.f * (mp.y / static_cast<float>(res.y)), -1.0f, 1.0f));
 }
 
-inline Vector2<float> InputManager::GetMousePosition()
+inline Vector2<float> InputManager::GetMousePosition() const
 {
 	return myMousePosition;
 }
 
-inline Vector2<float> InputManager::GetMousePositionDelta()
+inline Vector2<float> InputManager::GetMousePositionDelta() const
 {
 	return (GetMousePositionNDC(myMousePosition) - GetMousePositionNDC(myLastMousePosition));
 }
-inline float InputManager::GetMouseWheelDelta()
+
+inline float InputManager::GetMouseWheelDelta() const
 {
 	return myMouseWheelDelta;
 }
@@ -111,7 +115,7 @@ inline bool InputManager::UpdateMouseInput()
 	return true;
 }
 
-inline unsigned int InputManager::GetLastPressedKey()
+inline unsigned int InputManager::GetLastPressedKey() const
 {
 	return lastPressedKey;
 }
@@ -123,7 +127,7 @@ inline bool InputManager::UpdateEvents(UINT message, WPARAM wParam, LPARAM lPara
 	{
 	case WM_KEYDOWN:
 		liveKeyUpdate[wParam] = true;
-		lastPressedKey = (unsigned int)wParam;
+		lastPressedKey = static_cast<unsigned int>(wParam);
 		return true;
 	case WM_KEYUP:
 		liveKeyUpdate[wParam] = false;

@@ -48,15 +48,15 @@ void ColliderAssetAABB::RenderDebugLines(Transform &data)
 
     myHandles.clear();
     // Velocity
-    DebugDrawer::PrimitiveHandle handle = DebugDrawer::Get().AddDebugBox(myAABB.GetMin(), myAABB.GetMax());
+    const DebugDrawer::PrimitiveHandle handle = DebugDrawer::Get().AddDebugBox(myAABB.GetMin(), myAABB.GetMax());
     DebugDrawer::Get().SetDebugPrimitiveTransform(handle, data.GetTransform());
     myHandles.push_back(handle);
 }
 
 void ColliderAssetAABB::UpdateWithTransform(const Matrix &matrix)
 {
-    Vector4f minPoint = Vector4f(myOriginalAABB.GetMin() * .5f, 1) * matrix;
-    Vector4f maxPoint = Vector4f(myOriginalAABB.GetMax() * .5f, 1) * matrix;
+    const Vector4f minPoint = Vector4f(myOriginalAABB.GetMin() * .5f, 1) * matrix;
+    const Vector4f maxPoint = Vector4f(myOriginalAABB.GetMax() * .5f, 1) * matrix;
 
     const Vector3f minV3 = Vector3f(minPoint.x, minPoint.y, minPoint.z);
     const Vector3f maxV3 = Vector3f(maxPoint.x, maxPoint.y, maxPoint.z);
@@ -85,7 +85,7 @@ void ColliderAssetSphere::RenderDebugLines(Transform &data)
     const Vector3f max = Vector3f(1.0f, 1.0f, 1.0f).GetNormalized();
 
     // Velocity
-    DebugDrawer::PrimitiveHandle handle =
+    const DebugDrawer::PrimitiveHandle handle =
         DebugDrawer::Get().AddDebugBox(mySphere.GetCenter() + data.GetPosition() + min * mySphere.GetRadius(),
                                        mySphere.GetCenter() + data.GetPosition() + max * mySphere.GetRadius());
     DebugDrawer::Get().SetDebugPrimitiveTransform(handle, data.GetTransform());

@@ -15,8 +15,8 @@ void ThrowIfFailed(HRESULT hr)
             hr = GPUInstance.m_Device->GetDeviceRemovedReason();
         }
 
-        _com_error err(hr);
-        std::wstring errMsg = (err.ErrorMessage());
+        const _com_error err(hr);
+        const std::wstring errMsg = (err.ErrorMessage());
         Logger.Err(Helpers::string_cast<std::string>(errMsg));
         throw std::exception(Helpers::string_cast<std::string>(errMsg).c_str());
     }

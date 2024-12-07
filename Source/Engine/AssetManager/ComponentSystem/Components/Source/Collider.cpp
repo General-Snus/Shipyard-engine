@@ -8,7 +8,7 @@
 
 Collider::Collider(const SY::UUID anOwnerId, GameObjectManager *aManager) : Component(anOwnerId, aManager)
 {
-	if (auto renderer = TryGetComponent<MeshRenderer>())
+	if (const auto renderer = TryGetComponent<MeshRenderer>())
 	{
 		myCollider = std::make_shared<ColliderAssetAABB>(renderer->GetBoundingBox());
 	}
@@ -23,7 +23,7 @@ Collider::Collider(const SY::UUID anOwnerId, GameObjectManager *aManager, const 
 {
     aPath;
 
-	if (auto renderer = TryGetComponent<MeshRenderer>())
+	if (const auto renderer = TryGetComponent<MeshRenderer>())
 	{
 		myCollider = std::make_shared<ColliderAssetAABB>(renderer->GetBoundingBox());
 	}
@@ -62,7 +62,7 @@ Vector3f Collider::GetNormalToward(Vector3f position) const
 {
     const Transform &otherObj = GetComponent<Transform>();
     const auto collider = GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB();
-    Vector3f norm = roundToBasis((collider.ClosestPoint(position) - otherObj.GetPosition()).GetNormalized());
+    const Vector3f norm = roundToBasis((collider.ClosestPoint(position) - otherObj.GetPosition()).GetNormalized());
     return norm;
 }
 

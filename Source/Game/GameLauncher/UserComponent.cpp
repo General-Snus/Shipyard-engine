@@ -12,33 +12,33 @@ void UserComponent::Start()
 
 void UserComponent::Update()
 {
-    transform().Move(0, 0, -.25f * TimerInstance.GetDeltaTime());
+	transform().Move(0, 0, -.25f * TimerInstance.getDeltaTime());
 
-    if (Input.IsKeyHeld(Keys::UP))
-    {
-        transform().Move(0, 0, 1.f * TimerInstance.GetDeltaTime());
-    }
+	if (Input.IsKeyHeld(Keys::UP))
+	{
+		transform().Move(0, 0, 1.f * TimerInstance.getDeltaTime());
+	}
 }
 
 bool UserComponent::InspectorView()
 {
-    OPTICK_EVENT();
-    if (!Component::InspectorView())
-    {
-        return false;
-    }
+	OPTICK_EVENT();
+	if (!Component::InspectorView())
+	{
+		return false;
+	}
 
-    Reflect<UserComponent>();
+	Reflect<UserComponent>();
 
-    return false;
+	return false;
 }
 
 void UserComponent::OnColliderEnter(const SY::UUID aGameObjectID)
 {
-    UNREFERENCED_PARAMETER(aGameObjectID);
+	UNREFERENCED_PARAMETER(aGameObjectID);
 }
 
 void UserComponent::OnColliderExit(const SY::UUID aGameObjectID)
 {
-    UNREFERENCED_PARAMETER(aGameObjectID);
+	UNREFERENCED_PARAMETER(aGameObjectID);
 }

@@ -3,27 +3,27 @@
 #include "../PhysXInterpeter.h"
 #include <Editor/Editor/Defines.h>
 #include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
+#include <pvd/PxPvdTransport.h>
 #include <Tools/Utilities/Math.hpp>
 #include <Tools/Utilities/Game/Timer.h>
-#include <pvd/PxPvdTransport.h>
 
-#include "Engine/AssetManager/AssetManager.h"
-#include "Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h"
 #include "PxPhysics.h"
 #include "PxPhysicsAPI.h"
 #include "cooking/PxCooking.h"
-#include "geometry\PxTriangleMeshGeometry.h"
+#include "Engine/AssetManager/AssetManager.h"
+#include "Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h"
+#include "geometry/PxTriangleMeshGeometry.h"
 
 using namespace physx;
 
-static PxDefaultAllocator gAllocator;
-static PxDefaultErrorCallback gErrorCallback;
-static PxFoundation *gFoundation = NULL;
-static PxPhysics *gPhysics = NULL;
-static PxDefaultCpuDispatcher *gDispatcher = NULL;
-static PxScene *gScene = NULL;
-static PxMaterial *gMaterial = NULL;
-static PxPvd *gPvd = NULL;
+static PxDefaultAllocator      gAllocator;
+static PxDefaultErrorCallback  gErrorCallback;
+static PxFoundation*           gFoundation = nullptr;
+static PxPhysics*              gPhysics = nullptr;
+static PxDefaultCpuDispatcher* gDispatcher = nullptr;
+static PxScene*                gScene = nullptr;
+static PxMaterial*             gMaterial = nullptr;
+static PxPvd*                  gPvd = nullptr;
 #pragma region hide this shit
 void threeaxisrot(float r11, float r12, float r21, float r31, float r32, float res[])
 {
@@ -32,11 +32,11 @@ void threeaxisrot(float r11, float r12, float r21, float r31, float r32, float r
 	res[2] = atan2(r11, r12);
 }
 
-void quaternion2Euler(const physx::PxQuat &q, float res[])
+void quaternion2Euler(const PxQuat& q, float res[])
 {
 	threeaxisrot(-2 * (q.y * q.z - q.w * q.x), q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
-				 2 * (q.x * q.z + q.w * q.y), -2 * (q.x * q.y - q.w * q.z),
-				 q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z, res);
+	             2 * (q.x * q.z + q.w * q.y), -2 * (q.x * q.y - q.w * q.z),
+	             q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z, res);
 }
 #pragma endregion
 
@@ -46,7 +46,7 @@ int Shipyard_PhysX::InitializePhysx()
 	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
 
 	gPvd = PxCreatePvd(*gFoundation);
-	PxPvdTransport *transport = PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 100);
+	PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 100);
 	gPvd->connect(*transport, PxPvdInstrumentationFlag::eALL);
 
 	gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, PxTolerancesScale(), true, gPvd);
@@ -88,14 +88,14 @@ void Shipyard_PhysX::EndRead(float deltaTime)
 
 void Shipyard_PhysX::Render()
 {
-	const PxRenderBuffer &rb = gScene->getRenderBuffer();
+	const PxRenderBuffer& rb = gScene->getRenderBuffer();
 	for (PxU32 i = 0; i < rb.getNbLines(); i++)
 	{
-		const PxDebugLine &line = rb.getLines()[i];
-		const Vector3f Vpos1 = {line.pos0.x, line.pos0.y, line.pos0.z};
-		const Vector3f Vpos2 = {line.pos1.x, line.pos1.y, line.pos1.z};
+		const PxDebugLine& line = rb.getLines()[i];
+		const Vector3f     Vpos1 = {line.pos0.x, line.pos0.y, line.pos0.z};
+		const Vector3f     Vpos2 = {line.pos1.x, line.pos1.y, line.pos1.z};
 
-		DebugDrawer::Get().AddDebugLine(Vpos1, Vpos2, Vector3f(0, 1, 0), TimerInstance.GetDeltaTime());
+		DebugDrawer::Get().AddDebugLine(Vpos1, Vpos2, Vector3f(0, 1, 0), TimerInstance.getDeltaTime());
 	}
 }
 
@@ -106,20 +106,20 @@ void Shipyard_PhysX::ShutdownPhysx()
 	PX_RELEASE(gPhysics);
 	if (gPvd)
 	{
-		PxPvdTransport *transport = gPvd->getTransport();
+		PxPvdTransport* transport = gPvd->getTransport();
 		gPvd->release();
-		gPvd = NULL;
+		gPvd = nullptr;
 		PX_RELEASE(transport);
 	}
 	PX_RELEASE(gFoundation);
 }
 
-PxPhysics *Shipyard_PhysX::GetPhysicsWorld()
+PxPhysics* Shipyard_PhysX::GetPhysicsWorld()
 {
 	return gPhysics;
 }
 
-PxScene *Shipyard_PhysX::GetScene()
+PxScene* Shipyard_PhysX::GetScene()
 {
 	return gScene;
 }
@@ -185,7 +185,7 @@ PxScene *Shipyard_PhysX::GetScene()
 // std::endl;
 //	// error processing implementation
 // }
-physx::PxMaterial *Shipyard_PhysX::GetDefaultMaterial()
+PxMaterial* Shipyard_PhysX::GetDefaultMaterial()
 {
 	return gMaterial;
 }

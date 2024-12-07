@@ -29,7 +29,7 @@ inline bool AssetBase::InspectorView()
     const TypeInfo &typeInfo = this->GetTypeInfo(); // get custom type info
     bool isOpened = false;
 
-    float size = ImGui::CalcTextSize("A").y;
+    const float size = ImGui::CalcTextSize("A").y;
     ImGui::Image(GraphicsEngineInstance.GetDefaultTexture(eTextureType::ColorMap), ImVec2(size, size), ImVec2(0, 0),
                  ImVec2(1, 1), color);
     ImGui::SameLine();

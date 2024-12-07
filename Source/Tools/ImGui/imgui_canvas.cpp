@@ -216,35 +216,35 @@ void ImGuiEx::Canvas::SetView(const CanvasView& view)
 
 void ImGuiEx::Canvas::CenterView(const ImVec2& canvasPoint)
 {
-    auto view = CalcCenterView(canvasPoint);
+    const auto view = CalcCenterView(canvasPoint);
     SetView(view);
 }
 
 ImGuiEx::CanvasView ImGuiEx::Canvas::CalcCenterView(const ImVec2& canvasPoint) const
 {
-    auto localCenter = ToLocal(m_WidgetPosition + m_WidgetSize * 0.5f);
-    auto localOffset = canvasPoint - localCenter;
-    auto offset      = FromLocalV(localOffset);
+    const auto localCenter = ToLocal(m_WidgetPosition + m_WidgetSize * 0.5f);
+    const auto localOffset = canvasPoint - localCenter;
+    const auto offset      = FromLocalV(localOffset);
 
     return CanvasView{ m_View.Origin - offset, m_View.Scale };
 }
 
 void ImGuiEx::Canvas::CenterView(const ImRect& canvasRect)
 {
-    auto view = CalcCenterView(canvasRect);
+    const auto view = CalcCenterView(canvasRect);
 
     SetView(view);
 }
 
 ImGuiEx::CanvasView ImGuiEx::Canvas::CalcCenterView(const ImRect& canvasRect) const
 {
-    auto canvasRectSize = canvasRect.GetSize();
+    const auto canvasRectSize = canvasRect.GetSize();
 
     if (canvasRectSize.x <= 0.0f || canvasRectSize.y <= 0.0f)
         return View();
 
-    auto widgetAspectRatio     = m_WidgetSize.y   > 0.0f ? m_WidgetSize.x   / m_WidgetSize.y   : 0.0f;
-    auto canvasRectAspectRatio = canvasRectSize.y > 0.0f ? canvasRectSize.x / canvasRectSize.y : 0.0f;
+    const auto widgetAspectRatio     = m_WidgetSize.y   > 0.0f ? m_WidgetSize.x   / m_WidgetSize.y   : 0.0f;
+    const auto canvasRectAspectRatio = canvasRectSize.y > 0.0f ? canvasRectSize.x / canvasRectSize.y : 0.0f;
 
     if (widgetAspectRatio <= 0.0f || canvasRectAspectRatio <= 0.0f)
         return View();
@@ -350,7 +350,7 @@ void ImGuiEx::Canvas::UpdateViewTransformPosition()
 
 void ImGuiEx::Canvas::SaveInputState()
 {
-    auto& io = ImGui::GetIO();
+    const auto& io = ImGui::GetIO();
     m_MousePosBackup = io.MousePos;
     m_MousePosPrevBackup = io.MousePosPrev;
     for (auto i = 0; i < IM_ARRAYSIZE(m_MouseClickedPosBackup); ++i)
@@ -369,7 +369,7 @@ void ImGuiEx::Canvas::RestoreInputState()
 void ImGuiEx::Canvas::SaveViewportState()
 {
 # if defined(IMGUI_HAS_VIEWPORT)
-    auto window = ImGui::GetCurrentWindow();
+    const auto window = ImGui::GetCurrentWindow();
     auto viewport = ImGui::GetWindowViewport();
 
     m_WindowPosBackup = window->Pos;
@@ -388,7 +388,7 @@ void ImGuiEx::Canvas::SaveViewportState()
 void ImGuiEx::Canvas::RestoreViewportState()
 {
 # if defined(IMGUI_HAS_VIEWPORT)
-    auto window = ImGui::GetCurrentWindow();
+    const auto window = ImGui::GetCurrentWindow();
     auto viewport = ImGui::GetWindowViewport();
 
     window->Pos = m_WindowPosBackup;
@@ -448,7 +448,7 @@ void ImGuiEx::Canvas::EnterLocalSpace()
     m_DrawListFirstCommandIndex = ImMax(m_DrawList->CmdBuffer.Size - 1, 0);
 
 # if defined(IMGUI_HAS_VIEWPORT)
-    auto window = ImGui::GetCurrentWindow();
+    const auto window = ImGui::GetCurrentWindow();
     window->Pos = ImVec2(0.0f, 0.0f);
 
     auto viewport_min = m_ViewportPosBackup;
@@ -512,7 +512,7 @@ void ImGuiEx::Canvas::LeaveLocalSpace()
 
     // Move vertices to screen space.
     auto vertex    = m_DrawList->VtxBuffer.Data + m_DrawListStartVertexIndex;
-    auto vertexEnd = m_DrawList->VtxBuffer.Data + m_DrawList->_VtxCurrentIdx + ImVtxOffsetRef(m_DrawList);
+    const auto vertexEnd = m_DrawList->VtxBuffer.Data + m_DrawList->_VtxCurrentIdx + ImVtxOffsetRef(m_DrawList);
 
     // If canvas view is not scaled take a faster path.
     if (m_View.Scale != 1.0f)

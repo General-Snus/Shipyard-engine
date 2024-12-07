@@ -1,5 +1,7 @@
-#include "Vectors.hpp" 
-template<class T = float>
+#pragma once
+#include "Vectors.hpp"
+
+template <class T = float>
 class Ray
 {
 public:
@@ -10,57 +12,62 @@ public:
 	Ray(const Ray<T>& aRay);
 	// Constructor that takes two points that define the ray, the direction is
 	// aPoint - aOrigin and the origin is aOrigin.
-	Ray(const Vector3<T>& aOrigin,const Vector3<T>& aPoint);
+	Ray(const Vector3<T>& aOrigin, const Vector3<T>& aPoint);
 	// Init the ray with two points, the same as the constructor above.
-	void InitWith2Points(const Vector3<T>& aOrigin,const Vector3<T>& aPoint);
+	void InitWith2Points(const Vector3<T>& aOrigin, const Vector3<T>& aPoint);
 	// Init the ray with an origin and a direction.
-	void InitWithOriginAndDirection(const Vector3<T>& aOrigin,const Vector3<T>& aDirection);
+	void       InitWithOriginAndDirection(const Vector3<T>& aOrigin, const Vector3<T>& aDirection);
 	Vector3<T> GetOrigin() const;
 	Vector3<T> GetUnitVector() const;
-
 
 private:
 	Vector3<T> Origin;
 	Vector3<T> UnitVector;
 };
 
-template<class T>
-inline Ray<T>::Ray()
+template <class T>
+Ray<T>::Ray()
 {
-	Origin = Vector3<T>(0,0,0);
-	UnitVector = Vector3<T>(0,0,0);
+	Origin = Vector3<T>(0, 0, 0);
+	UnitVector = Vector3<T>(0, 0, 0);
 }
-template<class T>
-inline Ray<T>::Ray(const Ray<T>& aRay)
+
+template <class T>
+Ray<T>::Ray(const Ray<T>& aRay)
 {
 	Origin = aRay.Origin;
 	UnitVector = aRay.UnitVector;
 }
-template<class T>
-inline Ray<T>::Ray(const Vector3<T>& aOrigin,const Vector3<T>& aPoint)
+
+template <class T>
+Ray<T>::Ray(const Vector3<T>& aOrigin, const Vector3<T>& aPoint)
 {
 	Origin = aOrigin;
 	UnitVector = (aPoint - aOrigin).GetNormalized();
 }
-template<class T>
-inline void Ray<T>::InitWith2Points(const Vector3<T>& aOrigin,const Vector3<T>& aPoint)
+
+template <class T>
+void Ray<T>::InitWith2Points(const Vector3<T>& aOrigin, const Vector3<T>& aPoint)
 {
 	Origin = aOrigin;
 	UnitVector = (aPoint - aOrigin).GetNormalized();
 }
-template<class T>
-inline void Ray<T>::InitWithOriginAndDirection(const Vector3<T>& aOrigin,const Vector3<T>& aDirection)
+
+template <class T>
+void Ray<T>::InitWithOriginAndDirection(const Vector3<T>& aOrigin, const Vector3<T>& aDirection)
 {
 	Origin = aOrigin;
 	UnitVector = aDirection.GetNormalized();
 }
-template<class T>
-inline Vector3<T> Ray<T>::GetOrigin() const
+
+template <class T>
+Vector3<T> Ray<T>::GetOrigin() const
 {
-	return  Origin;
+	return Origin;
 }
-template<class T>
-inline Vector3<T> Ray<T>::GetUnitVector() const
+
+template <class T>
+Vector3<T> Ray<T>::GetUnitVector() const
 {
 	return UnitVector;
 }

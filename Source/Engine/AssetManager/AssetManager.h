@@ -123,7 +123,7 @@ bool EngineResourcesLoader::HasAsset(const std::filesystem::path &identifierPath
 {
 	OPTICK_EVENT();
 	const std::type_info *typeInfo = &typeid(T);
-	std::shared_ptr<Library> library = GetLibraryOfType<T>();
+	const std::shared_ptr<Library> library = GetLibraryOfType<T>();
 
 	if (!library)
 	{

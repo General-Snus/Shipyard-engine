@@ -28,7 +28,7 @@ void CollisionChecks::CheckColliders()
 {
     OPTICK_EVENT();
     int index = 1;
-    auto listOfColliders = Scene::ActiveManager().GetAllComponents<Collider>();
+    const auto listOfColliders = Scene::ActiveManager().GetAllComponents<Collider>();
 
     if (listOfColliders.size() <= 1)
     {

@@ -118,7 +118,7 @@ const value &value::operator[](const string &key) const
     if (is_object())
     {
         auto &o = *object_ptr(m_Storage);
-        auto it = o.find(key);
+        const auto it = o.find(key);
         CRUDE_ASSERT(it != o.end());
         return it->second;
     }
@@ -132,7 +132,7 @@ bool value::contains(const string &key) const
     if (is_object())
     {
         auto &o = *object_ptr(m_Storage);
-        auto it = o.find(key);
+        const auto it = o.find(key);
         return it != o.end();
     }
 
@@ -179,7 +179,7 @@ size_t value::erase(const string &key)
         return 0;
 
     auto &o = *object_ptr(m_Storage);
-    auto it = o.find(key);
+    const auto it = o.find(key);
 
     if (it == o.end())
         return 0;
@@ -345,7 +345,7 @@ void value::dump(dump_context_t &context, int level) const
         if (string_ptr(m_Storage)->find_first_of("\"\\/\b\f\n\r") != string::npos ||
             string_ptr(m_Storage)->find('\0') != string::npos)
         {
-            for (auto c : *string_ptr(m_Storage))
+            for (const auto c : *string_ptr(m_Storage))
             {
                 if (c == '\"')
                     context.out << "\\\"";
@@ -401,7 +401,7 @@ struct value::parser
         value v;
 
         // Switch to C locale to make strtod and strtol work as expected
-        auto previous_locale = std::setlocale(LC_NUMERIC, "C");
+        const auto previous_locale = std::setlocale(LC_NUMERIC, "C");
 
         // Accept single value only when end of the stream is reached.
         if (!accept_element(v) || !eof())
@@ -635,7 +635,7 @@ struct value::parser
         if (s(accept('u') && accept_hex(hex) && accept_hex(hex) && accept_hex(hex) && accept_hex(hex)))
         {
             char *end = nullptr;
-            auto v = std::strtol(hex.c_str(), &end, 16);
+            const auto v = std::strtol(hex.c_str(), &end, 16);
             if (end != hex.c_str() + hex.size())
                 return false;
 
@@ -651,7 +651,7 @@ struct value::parser
         if (accept_digit(result))
             return true;
 
-        auto c = peek();
+        const auto c = peek();
         if ((c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'))
         {
             advance();
@@ -670,7 +670,7 @@ struct value::parser
         if (s(accept_int(n) && accept_frac(n) && accept_exp(n)))
         {
             char *end = nullptr;
-            auto v = std::strtod(n.c_str(), &end);
+            const auto v = std::strtod(n.c_str(), &end);
             if (end != n.c_str() + n.size())
                 return false;
 
@@ -750,7 +750,7 @@ struct value::parser
 
     bool accept_onenine(string &result)
     {
-        auto c = peek();
+        const auto c = peek();
         if (c >= '1' && c <= '9')
         {
             result.push_back(static_cast<char>(c));
@@ -849,7 +849,7 @@ struct value::parser
 
     bool accept(const char *str)
     {
-        auto last = m_Cursor;
+        const auto last = m_Cursor;
 
         while (*str)
         {
@@ -931,7 +931,7 @@ std::pair<value, bool> value::load(const string &path)
         return {value{}, false};
 
     fseek(file.get(), 0, SEEK_END);
-    auto size = static_cast<size_t>(ftell(file.get()));
+    const auto size = static_cast<size_t>(ftell(file.get()));
     fseek(file.get(), 0, SEEK_SET);
 
     string data;
@@ -961,7 +961,7 @@ bool value::save(const string &path, const int indent, const char indent_char) c
     if (!file)
         return false;
 
-    auto data = dump(indent, indent_char);
+    const auto data = dump(indent, indent_char);
 
     if (fwrite(data.data(), data.size(), 1, file.get()) != 1)
         return false;

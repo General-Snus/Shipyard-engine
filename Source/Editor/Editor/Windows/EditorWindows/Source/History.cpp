@@ -11,7 +11,7 @@ void History::RenderImGUi()
         // if (ImGui::BeginChild("ScrollingRegion"))
         {
             int size = 0;
-            int cursor = CommandBuffer::MainEditorCommandBuffer().GetCursor();
+            const int cursor = CommandBuffer::MainEditorCommandBuffer().GetCursor();
             for (const auto &command : CommandBuffer::MainEditorCommandBuffer().GetCommandList())
             {
                 auto text = command.front()->GetDescription();

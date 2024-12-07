@@ -41,8 +41,8 @@ bool DebugDrawer::Initialize()
 	);*/
 
 
-	auto commandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COPY);
-	auto commandList = commandQueue->GetCommandList();
+	const auto commandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COPY);
+	const auto commandList = commandQueue->GetCommandList();
 
 	std::vector<DebugVertex> vertices;
 	vertices.resize(65536);
@@ -202,8 +202,8 @@ DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugBox(const Vector3f& aMin,const
 {
 	Primitive primitive{};
 
-	Vector3f min = aMin;
-	Vector3f max = aMax;
+	const Vector3f min = aMin;
+	const Vector3f max = aMax;
 	Vector3f vertex = min;
 
 	primitive.Vertices.reserve(8);
@@ -544,7 +544,7 @@ DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugGrid(const Vector3f& aCenter,c
 
 	DebugVertex vertex(Vector3f(),Vector4f(aColor,1.0f));
 
-	float offset = (anExtent * 2.f) / static_cast<float>(someNumCells);
+	const float offset = (anExtent * 2.f) / static_cast<float>(someNumCells);
 
 	auto aStartPos = Vector4f(aCenter.x,aCenter.y,aCenter.z,1.0f);
 	aStartPos.x -= anExtent;

@@ -6,7 +6,7 @@
 
 TEST(TestCaseName, TestName)
 {
-	auto intVec = VectorX<int, 3>({1, 2, 3});
+	const auto intVec = VectorX<int, 3>({1, 2, 3});
 	auto expandedIntVec = intVec.swizzle<0, 1, 2, 3, -3>();
 
 	auto floatVec = Vector3f(1.5f, 2.5f, 3.5f);

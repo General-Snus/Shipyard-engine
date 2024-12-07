@@ -10,7 +10,7 @@ PlayerController::PlayerController()
 
 bool PlayerController::Update(GameObject input)
 {
-    auto *transform = input.TryGetComponent<Transform>();
+    const auto *transform = input.TryGetComponent<Transform>();
 
     InputPosition(transform->GetPosition());
 

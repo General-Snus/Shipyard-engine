@@ -288,9 +288,9 @@ void GBuffer::Render(const GraphicsEngine &instance, std::shared_ptr<CommandList
 			for (int i = 0; i < static_cast<int>(eTextureType::EffectMap) + 1; i++)
 			{
 				OPTICK_GPU_EVENT("SetTextures");
-				if (auto textureAsset = meshRenderer.GetTexture(static_cast<eTextureType>(i), materialIndex))
+				if (const auto textureAsset = meshRenderer.GetTexture(static_cast<eTextureType>(i), materialIndex))
 				{
-					auto tex = textureAsset->GetRawTexture();
+					const auto tex = textureAsset->GetRawTexture();
 					tex->SetView(ViewType::SRV);
 					commandList->TrackResource(tex->GetResource());
 					const auto heapOffset = tex->GetHeapOffset();

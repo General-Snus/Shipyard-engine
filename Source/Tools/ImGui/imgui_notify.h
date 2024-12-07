@@ -546,10 +546,10 @@ inline void RenderNotifications()
 		SetNextWindowBgAlpha(opacity);
 
 #if NOTIFY_RENDER_OUTSIDE_MAIN_WINDOW
-		short mainMonitorId = static_cast<ImGuiViewportP *>(GetMainViewport())->PlatformMonitor;
+		const short mainMonitorId = static_cast<ImGuiViewportP *>(GetMainViewport())->PlatformMonitor;
 
 		ImGuiPlatformIO &platformIO = GetPlatformIO();
-		ImGuiPlatformMonitor &monitor = platformIO.Monitors[mainMonitorId];
+		const ImGuiPlatformMonitor &monitor = platformIO.Monitors[mainMonitorId];
 
 		// Set notification window position to bottom right corner of the monitor
 		SetNextWindowPos(ImVec2(monitor.WorkPos.x + monitor.WorkSize.x - NOTIFY_PADDING_X,

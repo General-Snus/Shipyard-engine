@@ -327,7 +327,7 @@ void GpuResource::CheckFeatureSupport()
     OPTICK_EVENT();
     if (m_Resource)
     {
-        auto desc = m_Resource->GetDesc();
+        const auto desc = m_Resource->GetDesc();
 
         m_FormatSupport.Format = desc.Format;
         Helpers::ThrowIfFailed(GPUInstance.m_Device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &m_FormatSupport,

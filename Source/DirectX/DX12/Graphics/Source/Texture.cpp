@@ -37,7 +37,7 @@ bool Texture::AllocateTexture(const Vector2ui dimentions, const std::filesystem:
 
     const CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_DEFAULT);
 
-    CD3DX12_CLEAR_VALUE clearValue = {Format, &m_ClearColor.x};
+    const CD3DX12_CLEAR_VALUE clearValue = {Format, &m_ClearColor.x};
 
     Helpers::ThrowIfFailed(GPUInstance.m_Device->CreateCommittedResource(
         &heapProps, D3D12_HEAP_FLAG_NONE, &txtDesc, D3D12_RESOURCE_STATE_COPY_DEST, &clearValue,
@@ -64,7 +64,7 @@ bool Texture::AllocateTexture(const Vector2ui dimentions, const std::filesystem:
     resourceUpload.Upload(m_Resource.Get(), 0, &textureData, 1);
     resourceUpload.Transition(m_Resource.Get(), D3D12_RESOURCE_STATE_COPY_DEST, targetResourceState);
 
-    auto uploadResourcesFinished =
+    const auto uploadResourcesFinished =
         resourceUpload.End(GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT)->GetCommandQueue().Get());
 
     uploadResourcesFinished.wait();
@@ -91,7 +91,7 @@ void Texture::SetView(D3D12_SHADER_RESOURCE_VIEW_DESC view)
         return;
     }
 
-    HeapHandle handle = GPUInstance.GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
+    const HeapHandle handle = GPUInstance.GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
     GPUInstance.m_Device->CreateShaderResourceView(m_Resource.Get(), &view, handle.cpuPtr);
     m_DescriptorHandles[ViewType::SRV] = handle;
 }

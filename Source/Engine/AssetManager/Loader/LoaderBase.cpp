@@ -45,7 +45,7 @@ bool ResourceLoaderBase::AdaptPath(std::filesystem::path &path)
 
 void ResourceLoaderBase::ClearUnused()
 {
-	for (auto &i : myLibraries)
+	for (const auto &i : myLibraries)
 	{
 		i.second->ClearUnused();
 	}

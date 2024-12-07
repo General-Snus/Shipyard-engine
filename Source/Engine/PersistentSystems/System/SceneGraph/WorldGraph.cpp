@@ -1,7 +1,7 @@
 #include "PersistentSystems.pch.h"
 
-#include "Tools/Utilities/System/Grid.h"
 #include "WorldGraph.h"
+#include "Tools/Utilities/System/Grid.h"
 
 void WorldGraph::InitializeWorld()
 {
@@ -12,7 +12,7 @@ void WorldGraph::Update()
 {
 	if (ShouldUpdateGrid())
 	{
-		WorldGrid->Update();
+		WorldGrid->update();
 	}
 }
 

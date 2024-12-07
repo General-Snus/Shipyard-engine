@@ -30,7 +30,7 @@ void Transform::Init()
 
     if (!m_Children.empty())
     {
-        auto children = m_Children;
+        const auto children = m_Children;
         m_Children.clear();
         for (const auto &child : children)
         {
@@ -545,7 +545,7 @@ bool Transform::SetParent(Transform &parent, bool worldPositionStays)
 {
     UNREFERENCED_PARAMETER(worldPositionStays);
     // TODO make sure position stays after parenting
-    auto obj = parent.GetGameObject();
+    const auto obj = parent.GetGameObject();
     if (obj.IsValid() && obj.GetID() != myOwnerID)
     {
         Detach();
@@ -723,7 +723,7 @@ bool Transform::AddChildren(std::vector<std::reference_wrapper<Transform>> &chil
 
 bool Transform::RemoveChild(Transform &child)
 {
-    auto id = child.myOwnerID;
+    const auto id = child.myOwnerID;
     int indexToRemove = -1;
 
     int index = 0;

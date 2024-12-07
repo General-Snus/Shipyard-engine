@@ -35,7 +35,7 @@ void ColorManager::InitializeDefaultColors()
 
 void ColorManager::LoadColorsFromFile(const std::filesystem::path &path)
 {
-    auto contentPath = EngineResources.Directory() / path;
+    const auto contentPath = EngineResources.Directory() / path;
     if (!std::filesystem::exists(contentPath))
     {
         Logger.Warn("Color file not found: " + contentPath.string());
@@ -65,7 +65,7 @@ void ColorManager::LoadColorsFromFile(const std::filesystem::path &path)
 
 void ColorManager::DumpToFile(const std::filesystem::path &path)
 {
-    auto contentPath = EngineResources.Directory() / path;
+    const auto contentPath = EngineResources.Directory() / path;
 
     if (!std::filesystem::exists(contentPath))
     {
@@ -113,7 +113,7 @@ bool ColorManager::GetColor(const size_t &color, Vector4f &outColor)
 
 bool ColorManager::GetColor(const std::string &identifier, Vector4f &outColor)
 {
-    bool isLocked = m_Locks.contains(identifier);
+    const bool isLocked = m_Locks.contains(identifier);
 
     isLocked;
     // TODO FIX locked colors from change during runtime
@@ -136,7 +136,7 @@ Vector4f &ColorManager::GetColor(const size_t &color)
 
 Vector4f &ColorManager::GetColor(const std::string &identifier)
 {
-    bool isLocked = m_Locks.contains(identifier);
+    const bool isLocked = m_Locks.contains(identifier);
 
     isLocked;
     // TODO FIX locked colors from change during runtime
@@ -240,10 +240,10 @@ std::string Color::GetHex() const
 {
     const auto color = GetRGBA();
 
-    auto ri = static_cast<int>(color.x * 255.0f);
-    auto gi = static_cast<int>(color.y * 255.0f);
-    auto bi = static_cast<int>(color.z * 255.0f);
-    auto ai = static_cast<int>(color.w * 255.0f);
+    const auto ri = static_cast<int>(color.x * 255.0f);
+    const auto gi = static_cast<int>(color.y * 255.0f);
+    const auto bi = static_cast<int>(color.z * 255.0f);
+    const auto ai = static_cast<int>(color.w * 255.0f);
     char hex[10];
     snprintf(hex, sizeof(hex), "#%02x%02x%02x%02x", ri, gi, bi, ai);
     return std::string(hex);
@@ -259,15 +259,15 @@ void Color::SetColor(Vector4f color)
 Vector4f Color::RGBtoHSV(const Color &colorIn)
 {
     const auto color = colorIn.GetRGBA();
-    float rgbMin = std::min(std::min(color.x, color.y), color.z);
-    float rgbMax = std::max(std::max(color.x, color.y), color.z);
+    const float rgbMin = std::min(std::min(color.x, color.y), color.z);
+    const float rgbMax = std::max(std::max(color.x, color.y), color.z);
 
     float h = 0.0f;
     float s;
     float v;
     v = rgbMax;
 
-    float d = rgbMax - rgbMin;
+    const float d = rgbMax - rgbMin;
     s = rgbMax == 0 ? 0 : d / rgbMax;
 
     if (rgbMax == rgbMin)
@@ -295,8 +295,8 @@ Vector4f Color::RGBtoHSV(const Color &colorIn)
 
 Vector4f Color::RGBLerp(const Color &colorIn1, const Color &colorIn2, float blend)
 {
-    Vector4f a = colorIn1.GetRGBA();
-    Vector4f b = colorIn2.GetRGBA();
+    const Vector4f a = colorIn1.GetRGBA();
+    const Vector4f b = colorIn2.GetRGBA();
     Vector4f c{};
 
     blend = std::clamp(blend, 0.f, 1.f);
@@ -356,10 +356,10 @@ Color Color::FromHex(const std::string &hex)
         throw std::invalid_argument("Invalid hex color format");
     }
 
-    float r = static_cast<float>(std::stoi(hex.substr(1, 2), nullptr, 16)) / 255.0f;
-    float g = static_cast<float>(std::stoi(hex.substr(3, 2), nullptr, 16)) / 255.0f;
-    float b = static_cast<float>(std::stoi(hex.substr(5, 2), nullptr, 16)) / 255.0f;
-    float a = hex.length() == 9 ? static_cast<float>(std::stoi(hex.substr(7, 2), nullptr, 16)) / 255.0f : 1.0f;
+    const float r = static_cast<float>(std::stoi(hex.substr(1, 2), nullptr, 16)) / 255.0f;
+    const float g = static_cast<float>(std::stoi(hex.substr(3, 2), nullptr, 16)) / 255.0f;
+    const float b = static_cast<float>(std::stoi(hex.substr(5, 2), nullptr, 16)) / 255.0f;
+    const float a = hex.length() == 9 ? static_cast<float>(std::stoi(hex.substr(7, 2), nullptr, 16)) / 255.0f : 1.0f;
 
     return Color(r, g, b, a);
 }

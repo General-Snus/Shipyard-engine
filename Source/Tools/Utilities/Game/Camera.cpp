@@ -75,7 +75,7 @@ void MainCamera::UpdatePositionVectors()
 void MainCamera::Update(float aTimeDelta)
 {
 	UpdatePositionVectors();
-	float mdf = 5;
+	const float mdf = 5;
 	if (GetAsyncKeyState('W'))
 	{
 		for (int i = 1; i <= 3; i++)
@@ -121,7 +121,7 @@ void MainCamera::Update(float aTimeDelta)
 	}
 }
 
-Vector4f MainCamera::WoldSpaceToPostProjectionSpace(Vector3f aEntity)
+Vector4f MainCamera::WoldSpaceToPostProjectionSpace(Vector3f aEntity) const
 {
 	//Get actuall world space coordinate
 	Vector4f outPosition = { aEntity.x,aEntity.y,aEntity.z,1 };

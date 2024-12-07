@@ -21,12 +21,12 @@ bool IsTargetInSight(GameObject input)
 	const Transform &myTransform = input.GetComponent<Transform>();
 	const CombatComponent &myStats = input.GetComponent<CombatComponent>();
 
-	Vector3f closestTarget = AIPollingManagerInstance.GetStation<MultipleTargets_PollingStation>("Targets")
+	const Vector3f closestTarget = AIPollingManagerInstance.GetStation<MultipleTargets_PollingStation>("Targets")
 								 ->GetClosestAliveTarget(myTransform.GetPosition(), input)
 								 .transform()
 								 .GetPosition();
 
-	Vector3f direction = (closestTarget - myTransform.GetPosition()).GetNormalized();
+	const Vector3f direction = (closestTarget - myTransform.GetPosition()).GetNormalized();
 
 	if (direction.Dot(myTransform.GetForward()) > cos(DEG_TO_RAD * myStats.myAttackCone)) // 10 degrees artificial
 																						  // spread
@@ -43,9 +43,9 @@ bool IsTargetInRange(GameObject input)
 	const Transform &myTransform = input.GetComponent<Transform>();
 	const CombatComponent &myStats = input.GetComponent<CombatComponent>();
 
-	GameObject obj = AIPollingManagerInstance.GetStation<MultipleTargets_PollingStation>("Targets")->GetClosestTarget(
+	const GameObject obj = AIPollingManagerInstance.GetStation<MultipleTargets_PollingStation>("Targets")->GetClosestTarget(
 		myTransform.GetPosition(), input);
-	Vector3f closestTarget = obj.GetComponent<Transform>().GetPosition();
+	const Vector3f closestTarget = obj.GetComponent<Transform>().GetPosition();
 	const float distance = (closestTarget - myTransform.GetPosition()).Length();
 
 	if (distance < myStats.myVisionRange)
@@ -74,7 +74,7 @@ bool IsTargetAlive(GameObject input)
 	(input);
 
 	const Transform &myTransform = input.GetComponent<Transform>();
-	GameObject target =
+	const GameObject target =
 		AIPollingManagerInstance.GetStation<MultipleTargets_PollingStation>("Targets")->GetClosestAliveTarget(
 			myTransform.GetPosition(), input);
 
@@ -155,9 +155,9 @@ bool Retreat(GameObject input)
 	(input);
 
 	auto &physicsComponent = input.GetComponent<cPhysics_Kinematic>();
-	auto &transform = input.GetComponent<Transform>();
+	const auto &transform = input.GetComponent<Transform>();
 
-	Vector3f closestWell =
+	const Vector3f closestWell =
 		AIPollingManagerInstance.GetStation<MultipleTargets_PollingStation>("Healing")->GetClosestTargetPosition(
 			transform.GetPosition());
 	SteeringBehaviour::DampenVelocity(&physicsComponent);
@@ -173,7 +173,7 @@ bool Retreat(GameObject input)
 bool MoveFreely(GameObject input)
 {
 	auto &physicsComponent = input.GetComponent<cPhysics_Kinematic>();
-	auto &transform = input.GetComponent<Transform>();
+	const auto &transform = input.GetComponent<Transform>();
 
 	SteeringBehaviour::LookAt(&physicsComponent, physicsComponent.ph_velocity, transform.GetForward(), 50.0f);
 	SteeringBehaviour::Wander(&physicsComponent, transform.GetForward(), 5.f);
@@ -187,11 +187,11 @@ bool MoveToward(GameObject input)
 	(input);
 
 	auto &physicsComponent = input.GetComponent<cPhysics_Kinematic>();
-	auto &transform = input.GetComponent<Transform>();
+	const auto &transform = input.GetComponent<Transform>();
 
 	SteeringBehaviour::DampenVelocity(&physicsComponent);
 	SteeringBehaviour::LookAt(&physicsComponent, physicsComponent.ph_velocity, transform.GetForward(), 5.0f);
-	Vector3f position =
+	const Vector3f position =
 		AIPollingManagerInstance.GetStation<MultipleTargets_PollingStation>("Targets")->GetClosestTargetPosition(
 			transform.GetPosition(), input);
 
@@ -204,14 +204,14 @@ bool AlignToTarget(GameObject input)
 	(input);
 
 	auto &physicsComponent = input.GetComponent<cPhysics_Kinematic>();
-	auto &transform = input.GetComponent<Transform>();
+	const auto &transform = input.GetComponent<Transform>();
 
-	GameObject closestTarget =
+	const GameObject closestTarget =
 		AIPollingManagerInstance.GetStation<MultipleTargets_PollingStation>("Targets")->GetClosestTarget(
 			transform.GetPosition(), input);
 
-	Vector3f direction = (closestTarget.transform().GetPosition() - transform.GetPosition()).GetNormalized();
-	Vector3f fwd = transform.GetForward();
+	const Vector3f direction = (closestTarget.transform().GetPosition() - transform.GetPosition()).GetNormalized();
+	const Vector3f fwd = transform.GetForward();
 
 	SteeringBehaviour::LookAt(&physicsComponent, direction, fwd, 10.0f);
 	SteeringBehaviour::DampenVelocity(&physicsComponent, 5);
@@ -227,7 +227,7 @@ using nd = BrainTree::Node;
 
 nd::Status IsTargetInSight::update()
 {
-	GameObject object = getBlackboard()->getGameObject("interatingGameobject");
+	const GameObject object = getBlackboard()->getGameObject("interatingGameobject");
 
 	if (GeneralizedAICommands::IsTargetInSight(object))
 	{
@@ -238,7 +238,7 @@ nd::Status IsTargetInSight::update()
 
 nd::Status IsTargetInRange::update()
 {
-	GameObject object = getBlackboard()->getGameObject("interatingGameobject");
+	const GameObject object = getBlackboard()->getGameObject("interatingGameobject");
 
 	if (GeneralizedAICommands::IsTargetInRange(object))
 	{
@@ -249,7 +249,7 @@ nd::Status IsTargetInRange::update()
 
 nd::Status IsTargetAlive::update()
 {
-	GameObject object = getBlackboard()->getGameObject("interatingGameobject");
+	const GameObject object = getBlackboard()->getGameObject("interatingGameobject");
 
 	if (GeneralizedAICommands::IsTargetAlive(object))
 	{
@@ -261,7 +261,7 @@ nd::Status IsTargetAlive::update()
 nd::Status IsDead::update()
 {
 
-	GameObject object = getBlackboard()->getGameObject("interatingGameobject");
+	const GameObject object = getBlackboard()->getGameObject("interatingGameobject");
 	if (GeneralizedAICommands::IsDead(object))
 	{
 		return child->tick();
@@ -272,7 +272,7 @@ nd::Status IsDead::update()
 
 nd::Status IsHealthy::update()
 {
-	GameObject object = getBlackboard()->getGameObject("interatingGameobject");
+	const GameObject object = getBlackboard()->getGameObject("interatingGameobject");
 
 	if (GeneralizedAICommands::IsHealthy(object))
 	{
@@ -283,14 +283,14 @@ nd::Status IsHealthy::update()
 
 nd::Status ShootAtTarget::update()
 {
-	GameObject object = getBlackboard()->getGameObject("interatingGameobject");
+	const GameObject object = getBlackboard()->getGameObject("interatingGameobject");
 	GeneralizedAICommands::ShootAtTarget(object);
 	return Status::Success;
 }
 
 nd::Status Retreat::update()
 {
-	GameObject object = getBlackboard()->getGameObject("interatingGameobject");
+	const GameObject object = getBlackboard()->getGameObject("interatingGameobject");
 	if (GeneralizedAICommands::Retreat(object))
 	{
 		return Status::Success;
@@ -300,14 +300,14 @@ nd::Status Retreat::update()
 
 nd::Status MoveFreely::update()
 {
-	GameObject object = getBlackboard()->getGameObject("interatingGameobject");
+	const GameObject object = getBlackboard()->getGameObject("interatingGameobject");
 	GeneralizedAICommands::MoveFreely(object);
 	return Status::Success;
 }
 
 nd::Status AlignToTarget::update()
 {
-	GameObject object = getBlackboard()->getGameObject("interatingGameobject");
+	const GameObject object = getBlackboard()->getGameObject("interatingGameobject");
 	if (GeneralizedAICommands::AlignToTarget(object))
 	{
 		return Status::Success;
@@ -317,14 +317,14 @@ nd::Status AlignToTarget::update()
 
 nd::Status DeathSpin::update()
 {
-	GameObject object = getBlackboard()->getGameObject("interatingGameobject");
+	const GameObject object = getBlackboard()->getGameObject("interatingGameobject");
 	GeneralizedAICommands::DeathSpin(object);
 	return Status::Running;
 }
 
 nd::Status IsFullyHealed::update()
 {
-	GameObject object = getBlackboard()->getGameObject("interatingGameobject");
+	const GameObject object = getBlackboard()->getGameObject("interatingGameobject");
 
 	if (GeneralizedAICommands::IsFullyHealed(object))
 	{

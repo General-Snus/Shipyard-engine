@@ -7,7 +7,7 @@
 #include "Editor/Editor/Core/ApplicationState.h"
 #include "Tools/Utilities/Input/EnumKeys.h"
 
-Camera::Camera(const SY::UUID anOwnerId, GameObjectManager *aManager)
+Camera::Camera(const SY::UUID anOwnerId, GameObjectManager* aManager)
 	: Component(anOwnerId, aManager), localTransform(0, nullptr)
 {
 	localTransform.Init();
@@ -55,16 +55,16 @@ void Camera::Update()
 
 void Camera::EditorCameraControlls()
 {
-	Transform &aTransform = localTransform;
+	Transform& aTransform = localTransform;
 	if (HasComponent<Transform>())
 	{
 		aTransform = this->GetGameObject().GetComponent<Transform>();
 	}
 
-	float aTimeDelta = TimerInstance.GetDeltaTime();
-	Vector3f mdf = cameraSpeed;
-	float rotationSpeed = 20000;
-	const float mousePower = 50.f;
+	const float           aTimeDelta = TimerInstance.getDeltaTime();
+	Vector3f        mdf = cameraSpeed;
+	float           rotationSpeed = 20000;
+	constexpr float mousePower = 50.f;
 
 	if (Input.IsKeyHeld(Keys::SHIFT))
 	{
@@ -92,7 +92,8 @@ void Camera::EditorCameraControlls()
 		anyMouseKeyHeld = true;
 		const Vector3f mouseDeltaVector = {
 			std::abs(Input.GetMousePositionDelta().y) > 0.001f ? -Input.GetMousePositionDelta().y : 0.f,
-			std::abs(Input.GetMousePositionDelta().x) > 0.001f ? Input.GetMousePositionDelta().x : 0.f, 0.0f};
+			std::abs(Input.GetMousePositionDelta().x) > 0.001f ? Input.GetMousePositionDelta().x : 0.f, 0.0f
+		};
 
 		aTransform.Rotate(mouseDeltaVector * rotationSpeed * aTimeDelta);
 	}
@@ -101,7 +102,8 @@ void Camera::EditorCameraControlls()
 	{
 		anyMouseKeyHeld = true;
 		const Vector3f mouseDeltaVector = {
-			0.0f, std::abs(Input.GetMousePositionDelta().x) > 0.001f ? Input.GetMousePositionDelta().x : 0.f, 0.0f};
+			0.0f, std::abs(Input.GetMousePositionDelta().x) > 0.001f ? Input.GetMousePositionDelta().x : 0.f, 0.0f
+		};
 		// Logger.Log(std::format("mouse delta x {}",mouseDeltaVector.y));
 		aTransform.Rotate(mouseDeltaVector * rotationSpeed * aTimeDelta);
 
@@ -119,7 +121,6 @@ void Camera::EditorCameraControlls()
 		}
 		else
 		{
-
 			aTransform.Move(aTransform.GetForward() * 5.0f * aTimeDelta * mdf);
 		}
 	}
@@ -167,16 +168,16 @@ void Camera::EditorCameraControlls()
 
 std::array<Vector4f, 4> Camera::GetFrustrumCorners() const
 {
-	const float farplane = 10000; // I dont use farplanes but some effect wants them anyway
-	const float halfHeight = farplane * tanf(0.25f * FowInRad());
-	const float halfWidth = APRatio() * halfHeight;
+	constexpr float         farplane = 10000; // I dont use farplanes but some effect wants them anyway
+	const float             halfHeight = farplane * tanf(0.25f * FowInRad());
+	const float             halfWidth = APRatio() * halfHeight;
 	std::array<Vector4f, 4> corners;
 	corners[0] = {-halfWidth, -halfHeight, farplane, 0.0f};
 	corners[1] = {-halfWidth, halfHeight, farplane, 0.0f};
 	corners[2] = {halfWidth, +halfHeight, farplane, 0.0f};
 	corners[3] = {+halfWidth, -halfHeight, farplane, 0.0f};
 
-	for (auto &i : corners)
+	for (auto& i : corners)
 	{
 		i.Normalize();
 	}
@@ -200,7 +201,7 @@ Vector3f Camera::GetPointerDirection(const Vector2f position) const
 	viewPosition.z = 1;
 	viewPosition.w = 0;
 
-	const Matrix myTransform = GetGameObject().GetComponent<Transform>().WorldMatrix();
+	const Matrix   myTransform = GetGameObject().GetComponent<Transform>().WorldMatrix();
 	const Vector4f out = viewPosition * Matrix::GetFastInverse(myTransform);
 	return Vector3f(out.x, out.y, out.z).GetNormalized();
 }
@@ -214,12 +215,12 @@ Vector3f Camera::GetPointerDirectionNDC(const Vector2f position) const
 FrameBuffer Camera::GetFrameBuffer()
 {
 	OPTICK_EVENT();
-	auto &transform = LocalTransform();
+	auto&       transform = LocalTransform();
 	FrameBuffer buffer;
-	auto dxMatrix = XMMatrixPerspectiveFovLH(FowInRad(), APRatio(), farfield, nearField);
+	auto        dxMatrix = XMMatrixPerspectiveFovLH(FowInRad(), APRatio(), farfield, nearField);
 	buffer.ProjectionMatrix = Matrix(&dxMatrix);
 	buffer.ViewMatrix = Matrix::GetFastInverse(transform.WorldMatrix());
-	buffer.Time = TimerInstance.GetDeltaTime();
+	buffer.Time = TimerInstance.getDeltaTime();
 	buffer.FB_RenderMode = static_cast<int>(filter);
 	buffer.FB_CameraPosition = transform.GetPosition();
 	buffer.FB_ScreenResolution = static_cast<Vector2ui>(resolution);
@@ -227,7 +228,7 @@ FrameBuffer Camera::GetFrameBuffer()
 	return buffer;
 }
 
-Transform &Camera::LocalTransform()
+Transform& Camera::LocalTransform()
 {
 	if (HasComponent<Transform>())
 	{
@@ -238,7 +239,7 @@ Transform &Camera::LocalTransform()
 
 Vector4f Camera::WoldSpaceToPostProjectionSpace(Vector3f aEntity)
 {
-	Transform &myTransform = this->GetGameObject().GetComponent<Transform>();
+	Transform& myTransform = this->GetGameObject().GetComponent<Transform>();
 
 	// Get actuall world space coordinate
 	Vector4f outPosition = {aEntity.x, aEntity.y, aEntity.z, 1};

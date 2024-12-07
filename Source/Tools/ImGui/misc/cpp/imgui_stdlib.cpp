@@ -25,7 +25,7 @@ struct InputTextCallback_UserData
 
 static int InputTextCallback(ImGuiInputTextCallbackData* data)
 {
-    InputTextCallback_UserData* user_data = (InputTextCallback_UserData*)data->UserData;
+    const InputTextCallback_UserData* user_data = (InputTextCallback_UserData*)data->UserData;
     if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
     {
         // Resize string callback

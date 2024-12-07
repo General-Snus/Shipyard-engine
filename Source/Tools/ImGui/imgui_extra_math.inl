@@ -88,7 +88,7 @@ inline ImVec2 ImRect_ClosestPoint(const ImRect& rect, const ImVec2& p, bool snap
 
 inline ImVec2 ImRect_ClosestPoint(const ImRect& rect, const ImVec2& p, bool snap_to_edge, float radius)
 {
-    auto point = ImRect_ClosestPoint(rect, p, snap_to_edge);
+    const auto point = ImRect_ClosestPoint(rect, p, snap_to_edge);
 
     const auto offset      = p - point;
     const auto distance_sq = offset.x * offset.x + offset.y * offset.y;

@@ -31,13 +31,13 @@ bool GraphicsEngineUtilities::GenerateSceneForIcon(std::shared_ptr<Mesh> meshAss
 	}
 
 	{
-		auto target = GraphicsEngineInstance.newScene->GetGOM().GetPlayer();
+		const auto target = GraphicsEngineInstance.newScene->GetGOM().GetPlayer();
 		auto &mr = target.GetComponent<MeshRenderer>();
 		mr.SetNewMesh(meshAsset);
 		mr.SetMaterial(material);
 	}
 
-	auto newViewport = std::make_shared<Viewport>(true, res, GraphicsEngineInstance.newScene, renderTarget);
+	const auto newViewport = std::make_shared<Viewport>(true, res, GraphicsEngineInstance.newScene, renderTarget);
 	GraphicsEngineInstance.AddRenderJob(newViewport);
 	return true;
 }

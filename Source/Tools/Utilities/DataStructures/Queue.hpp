@@ -1,7 +1,7 @@
 #pragma once
 #include <assert.h>
-#include <vector>
 #include <mutex>
+#include <vector>
 
 template <class T>
 class Queue
@@ -23,46 +23,53 @@ public:
 	//Tar bort elementet längst fram i kön och returnerar det. Kraschar med en
 	//assert om kön är tom.
 	T Dequeue();
+
 private:
-	T* myContainer;
+	T*  myContainer;
 	int myFront;
 
-	int mySize;
-	int myAllocated;
+	int        mySize;
+	int        myAllocated;
 	std::mutex dequeMutex;
 };
-template<class T>
-inline Queue<T>::Queue()
+
+template <class T>
+Queue<T>::Queue()
 {
 	myAllocated = 10;
 	myContainer = new T[myAllocated];
 	myFront = 0;
 	mySize = 0;
 }
-template<class T>
-inline Queue<T>::~Queue()
+
+template <class T>
+Queue<T>::~Queue()
 {
 	delete[] myContainer;
 }
-template<class T>
-inline int Queue<T>::GetSize() const
+
+template <class T>
+int Queue<T>::GetSize() const
 {
 	return mySize;
 }
-template<class T>
-inline const T& Queue<T>::GetFront() const
+
+template <class T>
+const T& Queue<T>::GetFront() const
 {
 	assert(mySize > 0 && "Queue is empty, can not get element");
 	return myContainer[myFront];
 }
-template<class T>
-inline T& Queue<T>::GetFront()
+
+template <class T>
+T& Queue<T>::GetFront()
 {
 	assert(mySize > 0 && "Queue is empty, can not get element");
 	return myContainer[myFront];
 }
-template<class T>
-inline void Queue<T>::EnqueueUnique(const T& aValue)
+
+template <class T>
+void Queue<T>::EnqueueUnique(const T& aValue)
 {
 	for (size_t i = 0; i < mySize; i++)
 	{
@@ -74,8 +81,8 @@ inline void Queue<T>::EnqueueUnique(const T& aValue)
 	Enqueue(aValue);
 }
 
-template<class T>
-inline void Queue<T>::Enqueue(const T& aValue)
+template <class T>
+void Queue<T>::Enqueue(const T& aValue)
 {
 	if (mySize == myAllocated) // array is full, allocate more memory
 	{
@@ -96,10 +103,11 @@ inline void Queue<T>::Enqueue(const T& aValue)
 	myContainer[(myFront + mySize) % myAllocated] = aValue;
 	mySize++;
 }
-template<class T>
-inline T Queue<T>::Dequeue()
+
+template <class T>
+T Queue<T>::Dequeue()
 {
-	std::scoped_lock deQueueLock(dequeMutex); 
+	std::scoped_lock deQueueLock(dequeMutex);
 	assert(mySize > 0 && "Queue is empty, can not dequeue");
 	int returnValue = myFront;
 	myFront = (myFront + 1) % myAllocated;

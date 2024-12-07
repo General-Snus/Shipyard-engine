@@ -1,49 +1,49 @@
 #define NOMINMAX
 
 // TODO Un-yikes the includes
-#include <Windows.h>
 #include <assert.h>
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <Windows.h>
 
 #include <Editor/Editor/Windows/Window.h>
-#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXDynamicBody.h>
-#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h>
-#include <Engine/AssetManager/ComponentSystem/Components/Transform.h>
 #include <Engine/AssetManager/ComponentSystem/GameObject.h>
+#include <Engine/AssetManager/ComponentSystem/Components/Transform.h>
+#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h>
+#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXDynamicBody.h>
 
-#include "ImGuizmo.h"
+#include <Tools/ImGui/imgui.h>
 #include <Tools/ImGui/backends/imgui_impl_dx12.h>
 #include <Tools/ImGui/backends/imgui_impl_win32.h>
-#include <Tools/ImGui/imgui.h>
+#include "ImGuizmo.h"
 
 #include "../Editor.h"
-#include "DirectX/DX12/Graphics/GPU.h"
-#include "Editor/Editor/Windows/EditorWindows/Console.h"
-#include "Editor/Editor/Windows/EditorWindows/ContentDirectory.h"
-#include "Editor/Editor/Windows/EditorWindows/Hierarchy.h"
-#include "Editor/Editor/Windows/EditorWindows/Inspector.h"
-#include "Editor/Editor/Windows/EditorWindows/Viewport.h"
-#include "Editor/Editor/Windows/SplashWindow.h"
-#include "Engine/AssetManager/AssetManager.h"
-#include "Engine/AssetManager/ComponentSystem/Components/LightComponent.h"
-#include "Engine/GraphicsEngine/GraphicsEngine.h"
-#include "Engine/PersistentSystems/Scene.h"
-#include "Engine/PersistentSystems/System/Colission/OnCollision.h"
-#include "Engine/PersistentSystems/System/SceneGraph/WorldGraph.h"
 #include <Tools/Logging/Logging.h>
 #include <Tools/Optick/include/optick.h>
 #include <Tools/Utilities/Color.h>
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/Input/Input.hpp>
 #include <Tools/Utilities/System/ThreadPool.hpp>
+#include "DirectX/DX12/Graphics/GPU.h"
+#include "Editor/Editor/Windows/SplashWindow.h"
+#include "Editor/Editor/Windows/EditorWindows/Console.h"
+#include "Editor/Editor/Windows/EditorWindows/ContentDirectory.h"
+#include "Editor/Editor/Windows/EditorWindows/Hierarchy.h"
+#include "Editor/Editor/Windows/EditorWindows/Inspector.h"
+#include "Editor/Editor/Windows/EditorWindows/Viewport.h"
+#include "Engine/AssetManager/AssetManager.h"
+#include "Engine/AssetManager/ComponentSystem/Components/LightComponent.h"
+#include "Engine/GraphicsEngine/GraphicsEngine.h"
+#include "Engine/PersistentSystems/Scene.h"
+#include "Engine/PersistentSystems/System/Colission/OnCollision.h"
+#include "Engine/PersistentSystems/System/SceneGraph/WorldGraph.h"
 #if PHYSX
 #include <Engine/PersistentSystems/Physics/PhysXInterpeter.h>
 #endif // PHYSX 0
-#include "Editor/Editor/Windows/EditorWindows/ColorPresets.h"
-#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
 #include <CommCtrl.h>
+#include <imgui_notify.h>
+#include <stacktrace>
 #include <Editor/Editor/Commands/CommandBuffer.h>
 #include <Editor/Editor/Commands/SceneAction.h>
 #include <Editor/Editor/Windows/EditorWindows/ChatWindow.h>
@@ -54,9 +54,11 @@
 #include <Tools/ImGui/Font/IconsFontAwesome6.h>
 #include <Tools/ThirdParty/nlohmann/json.hpp>
 #include <Tools/Utilities/System/ServiceLocator.h>
+#include "Editor/Editor/Windows/EditorWindows/ColorPresets.h"
+#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
+
+#include <shellapi.h>
 #include <misc/cpp/WMDropManager.h>
-#include <stacktrace> 
-#include <imgui_notify.h>
 
 enum Theme
 {
@@ -69,7 +71,7 @@ void SetupImGuiStyle(Theme theme)
 {
 	OPTICK_EVENT();
 	ImGuizmo::AllowAxisFlip(false);
-	auto &guizmoStyle = ImGuizmo::GetStyle();
+	auto& guizmoStyle = ImGuizmo::GetStyle();
 
 	guizmoStyle.TranslationLineThickness = 6.0f;
 	guizmoStyle.TranslationLineArrowSize = 8.0f;
@@ -79,8 +81,8 @@ void SetupImGuiStyle(Theme theme)
 	guizmoStyle.ScaleLineCircleSize = 7.0f;
 	guizmoStyle.HatchedAxisLineThickness = 6.0f;
 	guizmoStyle.CenterCircleSize = 8.0f;
-	 
-	ImGuiStyle &style = ImGui::GetStyle();
+
+	ImGuiStyle& style = ImGui::GetStyle();
 
 	style.Alpha = 1.0f;
 	style.DisabledAlpha = 0.6000000238418579f;
@@ -113,7 +115,7 @@ void SetupImGuiStyle(Theme theme)
 	style.ButtonTextAlign = ImVec2(0.5f, 0.5f);
 	style.SelectableTextAlign = ImVec2(0.0f, 0.0f);
 
-	ImVec4 *colors = ImGui::GetStyle().Colors;
+	ImVec4* colors = ImGui::GetStyle().Colors;
 	colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
 	colors[ImGuiCol_TextDisabled] = ImVec4(0.59f, 0.59f, 0.59f, 1.00f);
 	colors[ImGuiCol_WindowBg] = ImVec4(0.13f, 0.13f, 0.13f, 1.00f);
@@ -121,7 +123,7 @@ void SetupImGuiStyle(Theme theme)
 	colors[ImGuiCol_PopupBg] = ImVec4(0.24f, 0.24f, 0.24f, 1.00f);
 	colors[ImGuiCol_Border] = ImVec4(0.24f, 0.25f, 0.27f, 1.00f);
 	colors[ImGuiCol_BorderShadow] = ImVec4(0.31f, 0.31f, 0.31f, 1.00f);
-	colors[ImGuiCol_FrameBg] = ImVec4(0.35f, 0.35f, 0.35f, 1.00f); 
+	colors[ImGuiCol_FrameBg] = ImVec4(0.35f, 0.35f, 0.35f, 1.00f);
 	colors[ImGuiCol_FrameBgHovered] = ImVec4(1.00f, 1.00f, 1.00f, 0.16f);
 	colors[ImGuiCol_FrameBgActive] = ImVec4(1.00f, 1.00f, 1.00f, 0.63f);
 	colors[ImGuiCol_TitleBg] = ImVec4(0.13f, 0.13f, 0.13f, 1.00f);
@@ -129,7 +131,7 @@ void SetupImGuiStyle(Theme theme)
 	colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.13f, 0.13f, 0.13f, 1.00f);
 	colors[ImGuiCol_MenuBarBg] = ImVec4(0.24f, 0.24f, 0.24f, 1.00f);
 	colors[ImGuiCol_ScrollbarBg] = ImVec4(0.24f, 0.25f, 0.27f, 0.00f);
-	colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.21f, 0.21f, 0.21f, 1.00f);  
+	colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.21f, 0.21f, 0.21f, 1.00f);
 	colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.33f, 0.33f, 0.33f, 1.00f);
 	colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.35f, 0.35f, 0.35f, 1.00f);
 	colors[ImGuiCol_CheckMark] = ImVec4(0.82f, 0.56f, 0.33f, 1.00f);
@@ -170,10 +172,10 @@ void SetupImGuiStyle(Theme theme)
 	colors[ImGuiCol_NavHighlight] = ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
 	colors[ImGuiCol_NavWindowingHighlight] = ImVec4(0.83f, 0.41f, 0.41f, 0.70f);
 	colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
-	colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.15f, 0.15f, 0.15f, 1.00f); 
+	colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
 
 	auto path = EngineResources.Directory() / "Theme.json";
-	if (theme != builtIn && std::filesystem::exists(path))
+	if (theme != builtIn && exists(path))
 	{
 		std::ifstream file(path);
 		assert(file.is_open());
@@ -200,8 +202,8 @@ void SetupImGuiStyle(Theme theme)
 			auto active = Color(js["Active/Loaded"]);
 			auto inactive = Color(js["Inactive/Unloaded"]);
 
-			const float onClick = .9f;
-			const float onHover = 1.1f;
+			constexpr float onClick = .9f;
+			constexpr float onHover = 1.1f;
 
 			style.Colors[ImGuiCol_WindowBg] = primary.GetRGBA();
 			style.Colors[ImGuiCol_TitleBgActive] = primary.GetRGBA();
@@ -259,20 +261,21 @@ void SetupImGuiStyle(Theme theme)
 			style.Colors[ImGuiCol_PlotHistogram] = Detail.GetRGBA();
 			style.Colors[ImGuiCol_PlotHistogramHovered] = Detail.GetRGBA() * onHover;
 		}
-		catch (const nlohmann::json::exception &e)
+		catch (const nlohmann::json::exception& e)
 		{
 			std::string msg = std::format("Unsuccessfull loading of theme file at path: Theme.json {} ", e.what());
 			Logger.Warn(msg);
 		}
 	}
 }
+
 void LoadFont()
 {
-	bool haveLoadedFont = false;
-	ImGuiIO &io = ImGui::GetIO();
+	bool     haveLoadedFont = false;
+	ImGuiIO& io = ImGui::GetIO();
 
 	auto path = EngineResources.Directory() / "Theme.json";
-	if (std::filesystem::exists(path))
+	if (exists(path))
 	{
 		std::ifstream file(path);
 		assert(file.is_open());
@@ -282,7 +285,7 @@ void LoadFont()
 
 		try
 		{
-			float fontSize = json["FontSize"];
+			float                 fontSize = json["FontSize"];
 			std::filesystem::path FontPath = json["FontPath"];
 
 			const std::string backupFont = EngineResources.Directory().string() + "/Fonts/roboto/Roboto-Light.ttf";
@@ -294,8 +297,8 @@ void LoadFont()
 				io.Fonts->AddFontFromFileTTF(backupFont.c_str(), 16.0f);
 			}
 
-			static const ImWchar icons_ranges[] = {ICON_MIN_FA, ICON_MAX_16_FA, 0};
-			ImFontConfig icons_config;
+			static constexpr ImWchar icons_ranges[] = {ICON_MIN_FA, ICON_MAX_16_FA, 0};
+			ImFontConfig             icons_config;
 			icons_config.MergeMode = true;
 			icons_config.PixelSnapH = true;
 			icons_config.GlyphMinAdvanceX = fontSize * (2.f / 3.f);
@@ -310,7 +313,7 @@ void LoadFont()
 			}
 			haveLoadedFont = true;
 		}
-		catch (const nlohmann::json::exception &e)
+		catch (const nlohmann::json::exception& e)
 		{
 			std::string msg = std::format("Unsuccessfull loading of theme file at path: Theme.json {} ", e.what());
 			Logger.Warn(msg);
@@ -319,7 +322,7 @@ void LoadFont()
 
 	if (!haveLoadedFont)
 	{
-		ImFontConfig font_config{};
+		ImFontConfig      font_config{};
 		const std::string backupFont = EngineResources.Directory().string() + "/Fonts/roboto/Roboto-Light.ttf";
 		io.Fonts->AddFontFromFileTTF(backupFont.c_str(), 16.0f, &font_config);
 		font_config.MergeMode = true;
@@ -341,17 +344,17 @@ bool Editor::Initialize(HWND aHandle)
 	OPTICK_EVENT();
 
 
-	auto &timer = ServiceLocator::Instance().ProvideService<Timer>();
-	auto &threadPool = ServiceLocator::Instance().ProvideService<ThreadPool>();
+	auto& timer = ServiceLocator::Instance().ProvideService<Timer>();
+	auto& threadPool = ServiceLocator::Instance().ProvideService<ThreadPool>();
 
-	auto &engineResources = ServiceLocator::Instance().ProvideService<EngineResourcesLoader>();
+	auto& engineResources = ServiceLocator::Instance().ProvideService<EngineResourcesLoader>();
 	engineResources.SetWorkingDirectory("../../Content");
 
-	auto &colorManager = ServiceLocator::Instance().ProvideService<ColorManager>();
-	auto &graphicsEngine = ServiceLocator::Instance().ProvideService<GraphicsEngine>();
-	auto &physicsSystem = ServiceLocator::Instance().ProvideService<Shipyard_PhysX>();
+	auto& colorManager = ServiceLocator::Instance().ProvideService<ColorManager>();
+	auto& graphicsEngine = ServiceLocator::Instance().ProvideService<GraphicsEngine>();
+	auto& physicsSystem = ServiceLocator::Instance().ProvideService<Shipyard_PhysX>();
 
-	timer.Initialize();
+	timer.initialize();
 	threadPool.Init();
 
 	ServiceLocator::Instance().ProvideService<LoggerService>();
@@ -372,7 +375,7 @@ bool Editor::Initialize(HWND aHandle)
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGuiIO &io = ImGui::GetIO();
+	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -381,9 +384,9 @@ bool Editor::Initialize(HWND aHandle)
 	io.ConfigDockingWithShift = true;
 
 	ImGui_ImplWin32_Init(aHandle);
-	if (const auto &heap = GPUInstance.m_ResourceDescriptors[(int)eHeapTypes::HEAP_TYPE_CBV_SRV_UAV];
+	if (const auto& heap = GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)];
 		!ImGui_ImplDX12_Init(GPUInstance.m_Device.Get(), GPUInstance.m_FrameCount, DXGI_FORMAT_R8G8B8A8_UNORM,
-							 heap->Heap(), heap->GetCpuHandle(2000), heap->GetGpuHandle(2000)))
+		                     heap->Heap(), heap->GetCpuHandle(2000), heap->GetGpuHandle(2000)))
 	{
 		Logger.Err("Failed to init IMGUI Dx12");
 	}
@@ -394,7 +397,7 @@ bool Editor::Initialize(HWND aHandle)
 	// Set up imgui for multi context enviroment
 	// This will have to be set in the init for every new context that is
 	// loaded. You can acuire the data from the service locator
-	auto &var = ServiceLocator::Instance().ProvideService<ImGui::ImGuiContextHolder>();
+	auto& var = ServiceLocator::Instance().ProvideService<ImGui::ImGuiContextHolder>();
 	var.ctx = ImGui::GetCurrentContext();
 	ImGui::GetAllocatorFunctions(&var.v1, &var.v2, &var.v3);
 	// End
@@ -427,43 +430,46 @@ bool Editor::Initialize(HWND aHandle)
 	return true;
 }
 
-void Editor::DoWinProc(const MSG &aMessage)
+void Editor::DoWinProc(const MSG& aMessage)
 {
 	switch (aMessage.message)
 	{
-
-	case WM_DROPFILES: {
-		HDROP hDrop = (HDROP)aMessage.wParam;
-		UINT numFiles = DragQueryFileW(hDrop, 0xFFFFFFFF, NULL,
-									   0); // Get the number of dropped files
-		WM_DroppedPath.clear();
-		for (UINT i = 0; i < numFiles; i++)
+	case WM_DROPFILES:
 		{
-			UINT filePathLength = DragQueryFile(hDrop, i, NULL, 0); // Get the length of the file path
+			const auto hDrop = reinterpret_cast<HDROP>(aMessage.wParam);
+			const UINT numFiles = DragQueryFileW(hDrop, 0xFFFFFFFF, nullptr,
+			                               0); // Get the number of dropped files
+			WM_DroppedPath.clear();
+			for (UINT i = 0; i < numFiles; i++)
+			{
+				const UINT filePathLength = DragQueryFile(hDrop, i, nullptr, 0); // Get the length of the file path
 
-			std::wstring filePath;
-			filePath.resize(filePathLength + 1); // Create a buffer to hold the file path
-			DragQueryFile(hDrop, i, filePath.data(),
-						  filePathLength + 1); // Get the file path
-			WM_DroppedPath.emplace_back(filePath);
+				std::wstring filePath;
+				filePath.resize(filePathLength + 1); // Create a buffer to hold the file path
+				DragQueryFile(hDrop, i, filePath.data(),
+				              filePathLength + 1); // Get the file path
+				WM_DroppedPath.emplace_back(filePath);
+			}
+
+			DragFinish(hDrop); // Release the dropped files handle
+			if (!WM_DroppedPath.empty())
+			{
+				m_Callbacks[EditorCallback::WM_DropFile].Invoke();
+			}
+			break;
 		}
-
-		DragFinish(hDrop); // Release the dropped files handle
-		if (!WM_DroppedPath.empty())
-			m_Callbacks[EditorCallback::WM_DropFile].Invoke();
-		break;
-	}
-	case WM_SIZE: {
-		auto &graphicsEngine = ServiceLocator::Instance().GetService<GraphicsEngine>();
-		const auto res = Vector2ui(LOWORD(aMessage.lParam), HIWORD(aMessage.lParam));
-		graphicsEngine.ResizeBuffers(res);
-
-		for (auto &viewport : m_Viewports)
+	case WM_SIZE:
 		{
-			viewport->ResolutionUpdate();
+			auto&      graphicsEngine = ServiceLocator::Instance().GetService<GraphicsEngine>();
+			const auto res = Vector2ui(LOWORD(aMessage.lParam), HIWORD(aMessage.lParam));
+			graphicsEngine.ResizeBuffers(res);
+
+			for (const auto& viewport : m_Viewports)
+			{
+				viewport->ResolutionUpdate();
+			}
+			break;
 		}
-		break;
-	}
 
 	case WM_CLOSE:
 		ColorManagerInstance.DumpToFile("Settings/ColorManagerData.ShipyardText");
@@ -483,7 +489,6 @@ void Editor::DoWinProc(const MSG &aMessage)
 	extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	if (ImGui_ImplWin32_WndProcHandler(aMessage.hwnd, aMessage.message, aMessage.wParam, aMessage.lParam))
 	{
-		return;
 	}
 }
 
@@ -518,7 +523,6 @@ void Editor::UpdateImGui()
 
 	if (Input.IsKeyHeld(Keys::CONTROL) && Input.IsKeyPressed(Keys::Z))
 	{
-
 		if (Input.IsKeyHeld(Keys::SHIFT))
 		{
 			CommandBuffer::MainEditorCommandBuffer().Redo();
@@ -533,7 +537,7 @@ void Editor::UpdateImGui()
 void Editor::CheckSelectedForRemoved()
 {
 	OPTICK_EVENT();
-	for (auto &selected : m_SelectedGameObjects)
+	for (auto& selected : m_SelectedGameObjects)
 	{
 		if (!selected.scene().GetGOM().HasGameObject(selected.GetID()))
 		{
@@ -546,18 +550,18 @@ void Editor::CheckSelectedForRemoved()
 
 void Editor::Copy()
 {
-	Logger.Succ(std::format("Copied %i objects", GetSelectedGameObjects().size()), true);
+	Logger.Success(std::format("Copied %i objects", GetSelectedGameObjects().size()), true);
 }
 
 void Editor::Paste()
 {
-	auto selected = Editor::GetSelectedGameObjects();
+	auto          selected = GetSelectedGameObjects();
 	CommandPacket packet;
-	for (auto &object : copiedObjects)
+	for (auto& object : copiedObjects)
 	{
 		auto components = object.CopyAllComponents();
 		auto newObject = GameObject::Create(object.GetName() + "_1");
-		for (auto &i : components)
+		for (const auto& i : components)
 		{
 			newObject.AddBaseComponent(i);
 		}
@@ -566,27 +570,27 @@ void Editor::Paste()
 	}
 
 	CommandBuffer::MainEditorCommandBuffer().AddCommand(packet);
-	if (auto ptr = CommandBuffer::MainEditorCommandBuffer().GetLastCommand())
+	if (const auto ptr = CommandBuffer::MainEditorCommandBuffer().GetLastCommand())
 	{
 		ptr->SetMergeBlocker(true);
 	}
 }
 
-void Editor::FocusObject(const GameObject &focus, bool focusWithOffset) const
+void Editor::FocusObject(const GameObject& focus, bool focusWithOffset) const
 {
-	for (auto &viewport : m_Viewports)
+	for (auto& viewport : m_Viewports)
 	{
 		if (!viewport->IsMainViewport())
 		{
 			float radiusOffset = 0;
-			if (auto renderer = focus.TryGetComponent<MeshRenderer>())
+			if (const auto renderer = focus.TryGetComponent<MeshRenderer>())
 			{
 				radiusOffset = renderer->GetBoundingBox().GetRadius();
 			}
 
 			const Vector3f position = focus.transform().GetPosition(WORLD);
 
-			Transform &ref = viewport->GetCameraTransform();
+			Transform&     ref = viewport->GetCameraTransform();
 			const Vector3f cameraPosition = ref.GetPosition(WORLD);
 			const Vector3f direction = (position - cameraPosition).GetNormalized();
 
@@ -602,13 +606,13 @@ void Editor::FocusObject(const GameObject &focus, bool focusWithOffset) const
 	}
 }
 
-void Editor::AlignObject(const GameObject &focus) const
+void Editor::AlignObject(const GameObject& focus) const
 {
-	for (auto &viewport : m_Viewports)
+	for (auto& viewport : m_Viewports)
 	{
 		if (!viewport->IsMainViewport())
 		{
-			Transform &ref = viewport->GetCameraTransform();
+			Transform&     ref = viewport->GetCameraTransform();
 			const Vector3f position = ref.GetPosition(WORLD);
 			const Vector3f rotation = ref.GetRotation();
 
@@ -631,7 +635,7 @@ std::shared_ptr<Scene> Editor::GetActiveScene()
 
 std::shared_ptr<Viewport> Editor::GetMainViewport()
 {
-	for (auto &view : m_Viewports)
+	for (auto& view : m_Viewports)
 	{
 		if (view->IsMainViewport())
 		{
@@ -644,8 +648,8 @@ std::shared_ptr<Viewport> Editor::GetMainViewport()
 void Editor::Update()
 {
 	OPTICK_EVENT();
-	TimerInstance.Update();
-	const float delta = TimerInstance.GetDeltaTime();
+	TimerInstance.update();
+	const float delta = TimerInstance.getDeltaTime();
 
 	Shipyard_PhysXInstance.StartRead();
 	Scene::ActiveManager().Update();
@@ -681,7 +685,7 @@ void Editor::Update()
 void Editor::Render()
 {
 	OPTICK_EVENT();
-	for (auto &viewport : m_Viewports)
+	for (const auto& viewport : m_Viewports)
 	{
 		viewport->Update();
 	}
@@ -692,7 +696,7 @@ void Editor::AddViewPort()
 {
 	OPTICK_EVENT();
 	static int ViewportIndex = 0;
-	auto viewport = std::make_shared<Viewport>(!static_cast<bool>(ViewportIndex));
+	auto       viewport = std::make_shared<Viewport>(!static_cast<bool>(ViewportIndex));
 	viewport->ViewportIndex = ViewportIndex;
 	ViewportIndex++;
 	m_Viewports.emplace_back(viewport);
@@ -725,7 +729,7 @@ void Editor::TopBar()
 		{
 			if (ImGui::Selectable("ImGuiDemoWindow"))
 			{
-				auto window = std::make_shared<CustomFuncWindow>(&ImGui::ShowDemoWindow, (bool *)0);
+				auto window = std::make_shared<CustomFuncWindow>(&ImGui::ShowDemoWindow, static_cast<bool*>(nullptr));
 				window->SetWindowName("ImGui demo holder");
 				g_EditorWindows.emplace_back(window);
 			}
@@ -827,11 +831,11 @@ void Editor::TopBar()
 
 		ImGui::EndMainMenuBar();
 	}
-	for (const auto &windows : g_EditorWindows)
+	for (const auto& windows : g_EditorWindows)
 	{
 		if (windows && windows->m_KeepWindow)
 		{
-			ImGui::PushID((void *)windows.get());
+			ImGui::PushID(windows.get());
 			windows->RenderImGUi();
 			ImGui::PopID();
 		}
@@ -839,7 +843,7 @@ void Editor::TopBar()
 
 	const auto [first, last] =
 		std::ranges::remove_if(g_EditorWindows.begin(), g_EditorWindows.end(),
-							   [](const std::shared_ptr<EditorWindow> &window) { return !window->m_KeepWindow; });
+		                       [](const std::shared_ptr<EditorWindow>& window) { return !window->m_KeepWindow; });
 
 	g_EditorWindows.erase(first, last);
 }

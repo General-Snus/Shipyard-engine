@@ -49,10 +49,10 @@ inline bool BeginMainMenuBar(int barNumber)
 	// Nowadays consoles have support for TV calibration in OS settings.
 	g.NextWindowData.MenuBarOffsetMinVal = ImVec2(
 		g.Style.DisplaySafeAreaPadding.x, ImMax(g.Style.DisplaySafeAreaPadding.y - g.Style.FramePadding.y, 0.0f));
-	ImGuiWindowFlags window_flags =
+	const ImGuiWindowFlags window_flags =
 		ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar;
-	float height = GetFrameHeight();
-	bool is_open = BeginViewportSideBar(std::format("##MainMenuBar{}", barNumber).c_str(), viewport, ImGuiDir_Up,
+	const float height = GetFrameHeight();
+	const bool is_open = BeginViewportSideBar(std::format("##MainMenuBar{}", barNumber).c_str(), viewport, ImGuiDir_Up,
 										height, window_flags);
 	g.NextWindowData.MenuBarOffsetMinVal = ImVec2(0.0f, 0.0f);
 
@@ -67,13 +67,13 @@ inline bool ToggleButton(const char *str_id, bool *v)
 {
 	OPTICK_EVENT();
 	bool returnValue = false;
-	ImVec4 *colors = ImGui::GetStyle().Colors;
-	ImVec2 p = ImGui::GetCursorScreenPos();
+	const ImVec4 *colors = ImGui::GetStyle().Colors;
+	const ImVec2 p = ImGui::GetCursorScreenPos();
 	ImDrawList *draw_list = ImGui::GetWindowDrawList();
 
-	float height = ImGui::GetFrameHeight();
-	float width = height * 1.55f;
-	float radius = height * 0.50f;
+	const float height = ImGui::GetFrameHeight();
+	const float width = height * 1.55f;
+	const float radius = height * 0.50f;
 
 	ImGui::InvisibleButton(str_id, ImVec2(width, height));
 	if (ImGui::IsItemClicked())
@@ -82,7 +82,7 @@ inline bool ToggleButton(const char *str_id, bool *v)
 		returnValue = true;
 	}
 
-	ImGuiContext &gg = *GImGui;
+	const ImGuiContext &gg = *GImGui;
 	// float ANIM_SPEED = 0.085f;
 	if (gg.LastActiveId == gg.CurrentWindow->GetID(str_id)) // && g.LastActiveIdTimer < ANIM_SPEED)
 	{
@@ -144,7 +144,7 @@ inline bool ImageButton(const char *strId, std::shared_ptr<TextureHolder> aTextu
 						const ImVec4 &bg_col = ImVec4(0, 0, 0, 0), const ImVec4 &tint_col = ImVec4(1, 1, 1, 1))
 {
 	OPTICK_EVENT();
-	ImGuiContext &g = *GImGui;
+	const ImGuiContext &g = *GImGui;
 	ImGuiWindow *window = g.CurrentWindow;
 	if (window->SkipItems)
 		return false;
@@ -156,7 +156,7 @@ inline bool ImageButton(const char *strId, std::shared_ptr<TextureHolder> aTextu
 	}
 	else
 	{
-		auto newId = GraphicsEngineInstance.GetDefaultTexture(eTextureType::ColorMap)
+		const auto newId = GraphicsEngineInstance.GetDefaultTexture(eTextureType::ColorMap)
 						 ->GetRawTexture()
 						 ->GetHandle(ViewType::SRV)
 						 .gpuPtr.ptr;
@@ -171,7 +171,7 @@ inline bool ImageButton(const char *strId, ::Texture &aTexture, const ImVec2 &im
 						const ImVec4 &bg_col = ImVec4(0, 0, 0, 0), const ImVec4 &tint_col = ImVec4(1, 1, 1, 1))
 {
 	OPTICK_EVENT();
-	ImGuiContext &g = *GImGui;
+	const ImGuiContext &g = *GImGui;
 	ImGuiWindow *window = g.CurrentWindow;
 	if (window->SkipItems)
 		return false;
@@ -183,7 +183,7 @@ inline bool ImageButton(const char *strId, ::Texture &aTexture, const ImVec2 &im
 	}
 	else
 	{
-		auto newId = GraphicsEngineInstance.GetDefaultTexture(eTextureType::ColorMap)
+		const auto newId = GraphicsEngineInstance.GetDefaultTexture(eTextureType::ColorMap)
 						 ->GetRawTexture()
 						 ->GetHandle(ViewType::SRV)
 						 .gpuPtr.ptr;
@@ -195,8 +195,8 @@ inline bool ImageButton(const char *strId, ::Texture &aTexture, const ImVec2 &im
 inline void TextCentered(std::string text)
 {
 	OPTICK_EVENT();
-	auto windowWidth = ImGui::GetWindowSize().x;
-	auto textWidth = ImGui::CalcTextSize(text.c_str()).x;
+	const auto windowWidth = ImGui::GetWindowSize().x;
+	const auto textWidth = ImGui::CalcTextSize(text.c_str()).x;
 
 	ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
 	ImGui::Text(text.c_str());
@@ -205,8 +205,8 @@ inline void TextCentered(std::string text)
 inline void TextCentered(const char *text)
 {
 	OPTICK_EVENT();
-	auto windowWidth = ImGui::GetWindowSize().x;
-	auto textWidth = ImGui::CalcTextSize(text).x;
+	const auto windowWidth = ImGui::GetWindowSize().x;
+	const auto textWidth = ImGui::CalcTextSize(text).x;
 
 	ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
 	ImGui::Text(text);

@@ -54,12 +54,12 @@ void GPURootSignature::SetRootSignatureDesc(const D3D12_ROOT_SIGNATURE_DESC1& ro
 {
 	Destroy();
 
-	auto device = GPUInstance.m_Device;
+	const auto device = GPUInstance.m_Device;
 
-	UINT numParameters = rootSignatureDesc.NumParameters;
+	const UINT numParameters = rootSignatureDesc.NumParameters;
 	D3D12_ROOT_PARAMETER1* pParameters = numParameters > 0 ? new D3D12_ROOT_PARAMETER1[numParameters] : nullptr;
 
-	D3D12_ROOT_SIGNATURE_FLAGS flags = rootSignatureDesc.Flags;
+	const D3D12_ROOT_SIGNATURE_FLAGS flags = rootSignatureDesc.Flags;
 	m_RootSignatureDesc.Flags = flags;
 
 	for (UINT i = 0; i < numParameters; ++i)
@@ -69,7 +69,7 @@ void GPURootSignature::SetRootSignatureDesc(const D3D12_ROOT_SIGNATURE_DESC1& ro
 
 		if (rootParameter.ParameterType == D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE)
 		{
-			UINT numDescriptorRanges = rootParameter.DescriptorTable.NumDescriptorRanges;
+			const UINT numDescriptorRanges = rootParameter.DescriptorTable.NumDescriptorRanges;
 			D3D12_DESCRIPTOR_RANGE1* pDescriptorRanges = numDescriptorRanges > 0 ? new D3D12_DESCRIPTOR_RANGE1[numDescriptorRanges] : nullptr;
 
 			memcpy(pDescriptorRanges,rootParameter.DescriptorTable.pDescriptorRanges,
@@ -105,7 +105,7 @@ void GPURootSignature::SetRootSignatureDesc(const D3D12_ROOT_SIGNATURE_DESC1& ro
 	m_RootSignatureDesc.NumParameters = numParameters;
 	m_RootSignatureDesc.pParameters = pParameters;
 
-	UINT numStaticSamplers = rootSignatureDesc.NumStaticSamplers;
+	const UINT numStaticSamplers = rootSignatureDesc.NumStaticSamplers;
 	D3D12_STATIC_SAMPLER_DESC* pStaticSamplers = numStaticSamplers > 0 ? new D3D12_STATIC_SAMPLER_DESC[numStaticSamplers] : nullptr;
 
 	if (pStaticSamplers)
@@ -126,7 +126,7 @@ void GPURootSignature::SetRootSignatureDesc(const D3D12_ROOT_SIGNATURE_DESC1& ro
 	if (FAILED(D3DX12SerializeVersionedRootSignature(&versionRootSignatureDesc,
 		rootSignatureVersion,&rootSignatureBlob,&errorBlob)))
 	{
-		std::string errorString = (char*)errorBlob->GetBufferPointer();
+		const std::string errorString = (char*)errorBlob->GetBufferPointer();
 		Logger.Err(errorString);
 		throw std::exception(errorString.c_str());
 	}

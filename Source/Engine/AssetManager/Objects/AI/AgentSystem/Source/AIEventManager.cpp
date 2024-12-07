@@ -46,7 +46,7 @@ bool AIEventManager::CheckForHackingEvent()
 
 void AIEventManager::DispatchEvent(const AIEvent& aEvent)
 {
-	for(auto& i : this->eventListener[aEvent.type])
+	for(const auto& i : this->eventListener[aEvent.type])
 	{
 		i->Recieve(aEvent);
 	}

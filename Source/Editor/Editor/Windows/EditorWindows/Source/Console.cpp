@@ -70,7 +70,7 @@ void Console::RenderImGUi()
 			pickedMessage = LoggerService::LogMsg();
 		}
 
-		Vector2f spaceAvail = {ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.75f};
+		const Vector2f spaceAvail = {ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.75f};
 		if (ImGui::BeginChild("ScrollingRegion", (ImVec2)spaceAvail))
 		{
 			for (const auto &[index, logEntity] : buffer.LoggedMessages | std::ranges::views::enumerate)

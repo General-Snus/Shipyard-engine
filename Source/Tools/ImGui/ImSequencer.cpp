@@ -37,17 +37,17 @@ namespace ImSequencer
 #endif
    static bool SequencerAddDelButton(ImDrawList* draw_list, ImVec2 pos, bool add = true)
    {
-      ImGuiIO& io = ImGui::GetIO();
+      const ImGuiIO& io = ImGui::GetIO();
       ImRect btnRect(pos, ImVec2(pos.x + 16, pos.y + 16));
-      bool overBtn = btnRect.Contains(io.MousePos);
-      bool containedClick = overBtn && btnRect.Contains(io.MouseClickedPos[0]);
-      bool clickedBtn = containedClick && io.MouseReleased[0];
-      int btnColor = overBtn ? 0xAAEAFFAA : 0x77A3B2AA;
+      const bool overBtn = btnRect.Contains(io.MousePos);
+      const bool containedClick = overBtn && btnRect.Contains(io.MouseClickedPos[0]);
+      const bool clickedBtn = containedClick && io.MouseReleased[0];
+      const int btnColor = overBtn ? 0xAAEAFFAA : 0x77A3B2AA;
       if (containedClick && io.MouseDownDuration[0] > 0)
          btnRect.Expand(2.0f);
 
-      float midy = pos.y + 16 / 2 - 0.5f;
-      float midx = pos.x + 16 / 2 - 0.5f;
+      const float midy = pos.y + 16 / 2 - 0.5f;
+      const float midx = pos.x + 16 / 2 - 0.5f;
       draw_list->AddRect(btnRect.Min, btnRect.Max, btnColor, 4);
       draw_list->AddLine(ImVec2(btnRect.Min.x + 3, midy), ImVec2(btnRect.Max.x - 3, midy), btnColor, 2);
       if (add)
@@ -226,11 +226,11 @@ namespace ImSequencer
          int halfModFrameCount = modFrameCount / 2;
 
          auto drawLine = [&](int i, int regionHeight) {
-            bool baseIndex = ((i % modFrameCount) == 0) || (i == sequence->GetFrameMax() || i == sequence->GetFrameMin());
-            bool halfIndex = (i % halfModFrameCount) == 0;
-            int px = (int)canvas_pos.x + int(i * framePixelWidth) + legendWidth - int(firstFrameUsed * framePixelWidth);
-            int tiretStart = baseIndex ? 4 : (halfIndex ? 10 : 14);
-            int tiretEnd = baseIndex ? regionHeight : ItemHeight;
+            const bool baseIndex = ((i % modFrameCount) == 0) || (i == sequence->GetFrameMax() || i == sequence->GetFrameMin());
+            const bool halfIndex = (i % halfModFrameCount) == 0;
+            const int px = (int)canvas_pos.x + int(i * framePixelWidth) + legendWidth - int(firstFrameUsed * framePixelWidth);
+            const int tiretStart = baseIndex ? 4 : (halfIndex ? 10 : 14);
+            const int tiretEnd = baseIndex ? regionHeight : ItemHeight;
 
             if (px <= (canvas_size.x + canvas_pos.x) && px >= (canvas_pos.x + legendWidth))
             {
@@ -249,9 +249,9 @@ namespace ImSequencer
          };
 
          auto drawLineContent = [&](int i, int /*regionHeight*/) {
-            int px = (int)canvas_pos.x + int(i * framePixelWidth) + legendWidth - int(firstFrameUsed * framePixelWidth);
-            int tiretStart = int(contentMin.y);
-            int tiretEnd = int(contentMax.y);
+            const int px = (int)canvas_pos.x + int(i * framePixelWidth) + legendWidth - int(firstFrameUsed * framePixelWidth);
+            const int tiretStart = int(contentMin.y);
+            const int tiretEnd = int(contentMax.y);
 
             if (px <= (canvas_size.x + canvas_pos.x) && px >= (canvas_pos.x + legendWidth))
             {

@@ -239,10 +239,10 @@ inline ImCubicBezierSplitResultT<T> ImCubicBezierSplit(const ImCubicBezierPoints
 
 inline ImRect ImCubicBezierBoundingRect(const ImVec2& p0, const ImVec2& p1, const ImVec2& p2, const ImVec2& p3)
 {
-    auto a = 3 * p3 - 9 * p2 + 9 * p1 - 3 * p0;
-    auto b = 6 * p0 - 12 * p1 + 6 * p2;
-    auto c = 3 * p1 - 3 * p0;
-    auto delta_squared = ImMul(b, b) - 4 * ImMul(a, c);
+    const auto a = 3 * p3 - 9 * p2 + 9 * p1 - 3 * p0;
+    const auto b = 6 * p0 - 12 * p1 + 6 * p2;
+    const auto c = 3 * p1 - 3 * p0;
+    const auto delta_squared = ImMul(b, b) - 4 * ImMul(a, c);
 
     auto tl = ImMin(p0, p3);
     auto rb = ImMax(p0, p3);
@@ -256,20 +256,20 @@ inline ImRect ImCubicBezierBoundingRect(const ImVec2& p0, const ImVec2& p1, cons
 
         if (IM_VEC2_INDEX(delta_squared, i) >= 0)
         {
-            auto delta = ImSqrt(IM_VEC2_INDEX(delta_squared, i));
+            const auto delta = ImSqrt(IM_VEC2_INDEX(delta_squared, i));
 
-            auto t0 = (-IM_VEC2_INDEX(b, i) + delta) / (2 * IM_VEC2_INDEX(a, i));
+            const auto t0 = (-IM_VEC2_INDEX(b, i) + delta) / (2 * IM_VEC2_INDEX(a, i));
             if (t0 > 0 && t0 < 1)
             {
-                auto p = ImCubicBezier(IM_VEC2_INDEX(p0, i), IM_VEC2_INDEX(p1, i), IM_VEC2_INDEX(p2, i), IM_VEC2_INDEX(p3, i), t0);
+                const auto p = ImCubicBezier(IM_VEC2_INDEX(p0, i), IM_VEC2_INDEX(p1, i), IM_VEC2_INDEX(p2, i), IM_VEC2_INDEX(p3, i), t0);
                 IM_VEC2_INDEX(tl, i) = ImMin(IM_VEC2_INDEX(tl, i), p);
                 IM_VEC2_INDEX(rb, i) = ImMax(IM_VEC2_INDEX(rb, i), p);
             }
 
-            auto t1 = (-IM_VEC2_INDEX(b, i) - delta) / (2 * IM_VEC2_INDEX(a, i));
+            const auto t1 = (-IM_VEC2_INDEX(b, i) - delta) / (2 * IM_VEC2_INDEX(a, i));
             if (t1 > 0 && t1 < 1)
             {
-                auto p = ImCubicBezier(IM_VEC2_INDEX(p0, i), IM_VEC2_INDEX(p1, i), IM_VEC2_INDEX(p2, i), IM_VEC2_INDEX(p3, i), t1);
+                const auto p = ImCubicBezier(IM_VEC2_INDEX(p0, i), IM_VEC2_INDEX(p1, i), IM_VEC2_INDEX(p2, i), IM_VEC2_INDEX(p3, i), t1);
                 IM_VEC2_INDEX(tl, i) = ImMin(IM_VEC2_INDEX(tl, i), p);
                 IM_VEC2_INDEX(rb, i) = ImMax(IM_VEC2_INDEX(rb, i), p);
             }
@@ -301,10 +301,10 @@ inline ImProjectResult ImProjectOnCubicBezier(const ImVec2& point, const ImVec2&
     // Step 1: Coarse check
     for (int i = 0; i < subdivisions; ++i)
     {
-        auto t = i * fixed_step;
+        const auto t = i * fixed_step;
         auto p = ImCubicBezier(p0, p1, p2, p3, t);
         auto s = point - p;
-        auto d = ImDot(s, s);
+        const auto d = ImDot(s, s);
 
         if (d < result.Distance)
         {
@@ -321,15 +321,15 @@ inline ImProjectResult ImProjectOnCubicBezier(const ImVec2& point, const ImVec2&
     }
 
     // Step 2: Fine check
-    auto left  = result.Time - fixed_step;
-    auto right = result.Time + fixed_step;
-    auto step  = fixed_step * 0.1f;
+    const auto left  = result.Time - fixed_step;
+    const auto right = result.Time + fixed_step;
+    const auto step  = fixed_step * 0.1f;
 
     for (auto t = left; t < right + step; t += step)
     {
         auto p = ImCubicBezier(p0, p1, p2, p3, t);
         auto s = point - p;
-        auto d = ImDot(s, s);
+        const auto d = ImDot(s, s);
 
         if (d < result.Distance)
         {
@@ -357,23 +357,23 @@ inline ImCubicBezierIntersectResult ImCubicBezierLineIntersect(const ImVec2& p0,
 
         auto sign = [](float x) -> float { return x < 0 ? -1.0f : 1.0f; };
 
-        auto A = b / a;
-        auto B = c / a;
-        auto C = d / a;
+        const auto A = b / a;
+        const auto B = c / a;
+        const auto C = d / a;
 
-        auto Q = (3 * B - ImPow(A, 2)) / 9;
-        auto R = (9 * A * B - 27 * C - 2 * ImPow(A, 3)) / 54;
-        auto D = ImPow(Q, 3) + ImPow(R, 2);               // polynomial discriminant
+        const auto Q = (3 * B - ImPow(A, 2)) / 9;
+        const auto R = (9 * A * B - 27 * C - 2 * ImPow(A, 3)) / 54;
+        const auto D = ImPow(Q, 3) + ImPow(R, 2);               // polynomial discriminant
 
         if (D >= 0) // complex or duplicate roots
         {
-            auto S = sign(R + ImSqrt(D)) * ImPow(ImFabs(R + ImSqrt(D)), (1.0f / 3.0f));
-            auto T = sign(R - ImSqrt(D)) * ImPow(ImFabs(R - ImSqrt(D)), (1.0f / 3.0f));
+            const auto S = sign(R + ImSqrt(D)) * ImPow(ImFabs(R + ImSqrt(D)), (1.0f / 3.0f));
+            const auto T = sign(R - ImSqrt(D)) * ImPow(ImFabs(R - ImSqrt(D)), (1.0f / 3.0f));
 
             roots[0] = -A / 3 + (S + T);                // real root
             roots[1] = -A / 3 - (S + T) / 2;            // real part of complex root
             roots[2] = -A / 3 - (S + T) / 2;            // real part of complex root
-            auto Im = ImFabs(ImSqrt(3) * (S - T) / 2);  // complex part of root pair
+            const auto Im = ImFabs(ImSqrt(3) * (S - T) / 2);  // complex part of root pair
 
                                                         // discard complex roots
             if (Im != 0)
@@ -383,7 +383,7 @@ inline ImCubicBezierIntersectResult ImCubicBezierLineIntersect(const ImVec2& p0,
         }
         else                                            // distinct real roots
         {
-            auto th = ImAcos(R / ImSqrt(-ImPow(Q, 3)));
+            const auto th = ImAcos(R / ImSqrt(-ImPow(Q, 3)));
 
             roots[0] = 2 * ImSqrt(-Q) * ImCos(th / 3) - A / 3;
             roots[1] = 2 * ImSqrt(-Q) * ImCos((th + 2 * IM_PI) / 3) - A / 3;
@@ -408,20 +408,20 @@ inline ImCubicBezierIntersectResult ImCubicBezierLineIntersect(const ImVec2& p0,
     //             c3                  c2                c1       c0
 
     // Calculate the coefficients
-    auto c3 =     -p0 + 3 * p1 - 3 * p2 + p3;
-    auto c2 =  3 * p0 - 6 * p1 + 3 * p2;
-    auto c1 = -3 * p0 + 3 * p1;
-    auto c0 =      p0;
+    const auto c3 =     -p0 + 3 * p1 - 3 * p2 + p3;
+    const auto c2 =  3 * p0 - 6 * p1 + 3 * p2;
+    const auto c1 = -3 * p0 + 3 * p1;
+    const auto c0 =      p0;
 
     // Convert line to normal form: ax + by + c = 0
-    auto a = a1.y - a0.y;
-    auto b = a0.x - a1.x;
-    auto c = a0.x * (a0.y - a1.y) + a0.y * (a1.x - a0.x);
+    const auto a = a1.y - a0.y;
+    const auto b = a0.x - a1.x;
+    const auto c = a0.x * (a0.y - a1.y) + a0.y * (a1.x - a0.x);
 
     // Rotate each cubic coefficient using line for new coordinate system?
     // Find roots of rotated cubic
     float roots[3];
-    auto rootCount = cubic_roots(
+    const auto rootCount = cubic_roots(
         a * c3.x + b * c3.y,
         a * c2.x + b * c2.y,
         a * c1.x + b * c1.y,
@@ -432,21 +432,21 @@ inline ImCubicBezierIntersectResult ImCubicBezierLineIntersect(const ImVec2& p0,
     // might not be on the line segment.
     // Find intersections and calculate point coordinates
 
-    auto min = ImMin(a0, a1);
-    auto max = ImMax(a0, a1);
+    const auto min = ImMin(a0, a1);
+    const auto max = ImMax(a0, a1);
 
     ImCubicBezierIntersectResult result;
     auto points = result.Points;
 
     for (int i = 0; i < rootCount; ++i)
     {
-        auto root = roots[i];
+        const auto root = roots[i];
 
         if (0 <= root && root <= 1)
         {
             // We're within the Bezier curve
             // Find point on Bezier
-            auto p = ImCubicBezier(p0, p1, p2, p3, root);
+            const auto p = ImCubicBezier(p0, p1, p2, p3, root);
 
             // See if point is on line segment
             // Had to make special cases for vertical and horizontal lines due
@@ -502,8 +502,8 @@ inline void ImCubicBezierSubdivide(ImCubicBezierSubdivideCallback callback, void
 
         void Subdivide(const ImCubicBezierPoints& curve, int level = 0)
         {
-            float dx = curve.P3.x - curve.P0.x;
-            float dy = curve.P3.y - curve.P0.y;
+            const float dx = curve.P3.x - curve.P0.x;
+            const float dy = curve.P3.y - curve.P0.y;
             float d2 = ((curve.P1.x - curve.P3.x) * dy - (curve.P1.y - curve.P3.y) * dx);
             float d3 = ((curve.P2.x - curve.P3.x) * dy - (curve.P2.y - curve.P3.y) * dx);
             d2 = (d2 >= 0) ? d2 : -d2;

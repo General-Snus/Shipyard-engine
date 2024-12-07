@@ -10,7 +10,7 @@ LRESULT SplashWinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 void SplashWindow::CreateAndShowWindow()
 {
     bmp = LoadBitmap(myHInstance, MAKEINTRESOURCE(IDB_SPLASHLOGO));
-    DWORD LastError = GetLastError();
+    const DWORD LastError = GetLastError();
     LastError;
     WNDCLASS splashClass = {};
     splashClass.style = 0;
@@ -32,7 +32,7 @@ void SplashWindow::CreateAndShowWindow()
     SIZE splashScreenSize = {b.bmWidth, b.bmHeight};
 
     POINT ptZero = {0};
-    HMONITOR hmonPrimary = MonitorFromPoint(ptZero, MONITOR_DEFAULTTOPRIMARY);
+    const HMONITOR hmonPrimary = MonitorFromPoint(ptZero, MONITOR_DEFAULTTOPRIMARY);
     MONITORINFO monitorinfo = {0};
     monitorinfo.cbSize = sizeof(monitorinfo);
     GetMonitorInfo(hmonPrimary, &monitorinfo);
@@ -42,9 +42,9 @@ void SplashWindow::CreateAndShowWindow()
     ptOrigin.x = rcWork.left + (rcWork.right - rcWork.left - splashScreenSize.cx) / 2;
     ptOrigin.y = rcWork.top + (rcWork.bottom - rcWork.top - splashScreenSize.cy) / 2;
 
-    HDC hdcScreen = GetDC(NULL);
-    HDC hdcMem = CreateCompatibleDC(hdcScreen);
-    HBITMAP hbmpOld = (HBITMAP)SelectObject(hdcMem, bmp);
+    const HDC hdcScreen = GetDC(NULL);
+    const HDC hdcMem = CreateCompatibleDC(hdcScreen);
+    const HBITMAP hbmpOld = (HBITMAP)SelectObject(hdcMem, bmp);
 
     BLENDFUNCTION blend = {0};
     blend.BlendOp = AC_SRC_OVER;

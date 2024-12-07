@@ -72,12 +72,12 @@ inline bool ImGuiReflect(Color &ref, const std::string &identifier)
         static float blendFactor = 0.5f;
         changed |= ImGui::SliderFloat("Blend", &blendFactor, 0.0f, 1.0f);
         ImGui::SameLine();
-        bool var1 = selected_item1 == -1 || keys.size() < selected_item1;
-        bool var2 = selected_item2 == -1 || keys.size() < selected_item2;
-        Vector4f blend1 = var1 ? Vector4f(1, 1, 1, 1) : ColorManagerInstance.GetColor(keys.at(selected_item1));
-        Vector4f blend2 = var2 ? Vector4f(1, 1, 1, 1) : ColorManagerInstance.GetColor(keys.at(selected_item2));
+        const bool var1 = selected_item1 == -1 || keys.size() < selected_item1;
+        const bool var2 = selected_item2 == -1 || keys.size() < selected_item2;
+        const Vector4f blend1 = var1 ? Vector4f(1, 1, 1, 1) : ColorManagerInstance.GetColor(keys.at(selected_item1));
+        const Vector4f blend2 = var2 ? Vector4f(1, 1, 1, 1) : ColorManagerInstance.GetColor(keys.at(selected_item2));
 
-        Vector4f color = Color::RGBLerp(blend1, blend2, blendFactor);
+        const Vector4f color = Color::RGBLerp(blend1, blend2, blendFactor);
         if (changed)
         {
             ref.SetColor(color);
@@ -87,7 +87,7 @@ inline bool ImGuiReflect(Color &ref, const std::string &identifier)
     }
     else
     {
-        int preSelected = static_cast<int>(std::distance(ColorManagerInstance.m_NamedColor.begin(),
+        const int preSelected = static_cast<int>(std::distance(ColorManagerInstance.m_NamedColor.begin(),
                                                          ColorManagerInstance.m_NamedColor.find(ref.m_ColorName)));
 
         static int selected_item1 = -1;

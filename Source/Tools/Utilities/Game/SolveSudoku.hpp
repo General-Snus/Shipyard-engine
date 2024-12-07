@@ -10,14 +10,14 @@ bool SudokuSolver(Board& aBoard);
 
 bool CheckCollumn(const Board& aBoard,const Position aPosition)
 {
-	int checkedValue = aBoard[aPosition];
+	const int checkedValue = aBoard[aPosition];
 
 	if(checkedValue == 0)
 	{
 		return true;
 	}
 
-	int positionInArray = aPosition + 1; //APosition is now the position in a array that starts at 1
+	const int positionInArray = aPosition + 1; //APosition is now the position in a array that starts at 1
 	int Xposition = positionInArray % 9;
 
 	if(Xposition == 0)
@@ -27,7 +27,7 @@ bool CheckCollumn(const Board& aBoard,const Position aPosition)
 
 	for(int i = 1; i <= 9; i++)
 	{
-		int place = (i - 1) * 9 + Xposition;
+		const int place = (i - 1) * 9 + Xposition;
 
 		if(place != positionInArray)
 		{
@@ -42,19 +42,19 @@ bool CheckCollumn(const Board& aBoard,const Position aPosition)
 
 bool CheckRow(const Board& aBoard,const Position aPosition)
 {
-	int checkedValue = aBoard[aPosition];
+	const int checkedValue = aBoard[aPosition];
 
 	if(checkedValue == 0)
 	{
 		return true;
 	}
 
-	int positionInArray = aPosition + 1; //APosition is now the position in a array that starts at 1
-	int Yposition = static_cast<int>(ceil(positionInArray / 9.0f));
+	const int positionInArray = aPosition + 1; //APosition is now the position in a array that starts at 1
+	const int Yposition = static_cast<int>(ceil(positionInArray / 9.0f));
 
 	for(int i = 1; i <= 9; i++)
 	{
-		int place = (Yposition - 1) * 9 + i;
+		const int place = (Yposition - 1) * 9 + i;
 
 		if((place) != positionInArray)
 		{
@@ -69,14 +69,14 @@ bool CheckRow(const Board& aBoard,const Position aPosition)
 
 bool CheckBox(const Board& aBoard,const Position aPosition)
 {
-	int checkedValue = static_cast<int>(aBoard[aPosition]);
+	const int checkedValue = static_cast<int>(aBoard[aPosition]);
 
 	if(checkedValue == 0)
 	{
 		return true;
 	}
 
-	int positionInArray = aPosition + 1; //APosition is now the position in a array that starts at 1
+	const int positionInArray = aPosition + 1; //APosition is now the position in a array that starts at 1
 
 	int Xposition = positionInArray % 9;
 
@@ -85,12 +85,12 @@ bool CheckBox(const Board& aBoard,const Position aPosition)
 		Xposition = 9;
 	}
 
-	int Yposition = static_cast<int>(ceil(positionInArray / 9.0f));
+	const int Yposition = static_cast<int>(ceil(positionInArray / 9.0f));
 
-	int XBox = static_cast<int>(ceil(Xposition / 3.0f));
-	int YBox = static_cast<int>(ceil(Yposition / 3.0f));
+	const int XBox = static_cast<int>(ceil(Xposition / 3.0f));
+	const int YBox = static_cast<int>(ceil(Yposition / 3.0f));
 
-	int Center = static_cast<int>((3 * XBox - 1.0f) + 9 + ((YBox - 1) * 3 * 9));
+	const int Center = static_cast<int>((3 * XBox - 1.0f) + 9 + ((YBox - 1) * 3 * 9));
 
 	int mdf[] =
 	{
@@ -99,9 +99,9 @@ bool CheckBox(const Board& aBoard,const Position aPosition)
 		  8,  9, 10
 	};
 
-	for(auto mod : mdf)
+	for(const auto mod : mdf)
 	{
-		int place = Center + mod;
+		const int place = Center + mod;
 		if(place != positionInArray)
 		{
 			if(aBoard[place - 1] == checkedValue)

@@ -357,7 +357,7 @@ void GraphicsEngine::Render(std::vector<std::shared_ptr<Viewport>> renderViewPor
 	}
 	EndFrame();
 
-	for (auto &viewport : m_CustomSceneRenderPasses)
+	for (const auto &viewport : m_CustomSceneRenderPasses)
 	{
 		viewport->m_RenderTarget->isBeingLoaded = false;
 		viewport->m_RenderTarget->isLoadedComplete = true;
@@ -381,7 +381,7 @@ uint64_t GraphicsEngine::RenderFrame(Viewport &renderViewPort, GameObjectManager
 	if (renderViewPort.IsRenderReady())
 	{
 		OPTICK_EVENT();
-		auto commandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+		const auto commandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 		auto commandList = commandQueue->GetCommandList(L"RenderFrame");
 		OPTICK_GPU_CONTEXT(commandList->GetGraphicsCommandList().Get());
 
@@ -391,7 +391,7 @@ uint64_t GraphicsEngine::RenderFrame(Viewport &renderViewPort, GameObjectManager
 		commandList->FlushResourceBarriers();
 
 		OPTICK_GPU_EVENT("DeferredRenderingPass");
-		auto frameBuffer = renderViewPort.GetCamera().GetFrameBuffer();
+		const auto frameBuffer = renderViewPort.GetCamera().GetFrameBuffer();
 		commandList->AllocateBuffer(eRootBindings::frameBuffer, frameBuffer);
 		GBuffer::Render(*this, commandList, scene);
 
@@ -401,8 +401,8 @@ uint64_t GraphicsEngine::RenderFrame(Viewport &renderViewPort, GameObjectManager
 	}
 	else
 	{
-		auto commandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
-		auto commandList = commandQueue->GetCommandList(L"RenderFrame");
+		const auto commandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+		const auto commandList = commandQueue->GetCommandList(L"RenderFrame");
 		GPUInstance.ClearRTV(*commandList, renderViewPort.GetTarget());
 		return commandQueue->ExecuteCommandList(commandList);
 	}
@@ -429,7 +429,7 @@ void GraphicsEngine::PrepareBuffers(std::shared_ptr<CommandList> commandList, Vi
 	commandList->GetGraphicsCommandList()->SetGraphicsRootSignature(rootSignature.Get());
 	commandList->TrackResource(rootSignature);
 
-	std::array<ID3D12DescriptorHeap*,2> heaps = {
+	const std::array<ID3D12DescriptorHeap*,2> heaps = {
 		GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->Heap(),
 		GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_SAMPLER)]->Heap()};
 
@@ -462,7 +462,7 @@ void GraphicsEngine::PrepareBuffers(std::shared_ptr<CommandList> commandList, Vi
 void GraphicsEngine::EnvironmentLightPass(std::shared_ptr<CommandList> commandList)
 {
 	OPTICK_GPU_EVENT("EnvironmentLightPass");
-	auto &environmentLight = m_Cache->GetState(PSOCache::ePipelineStateID::DeferredLighting);
+	const auto &environmentLight = m_Cache->GetState(PSOCache::ePipelineStateID::DeferredLighting);
 	constexpr uint32_t bufferCount = 7;
 	const auto &gBufferTextures = m_Cache->GetState(PSOCache::ePipelineStateID::GBuffer)->RenderTargets();
 
@@ -542,7 +542,7 @@ void GraphicsEngine::ImGuiPass()
 
 	ImGui::RenderNotifications();
 	ImGui::Render();
-	ImGuiIO &io = ImGui::GetIO();
+	const ImGuiIO &io = ImGui::GetIO();
 	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 	{
 		ImGui::UpdatePlatformWindows();

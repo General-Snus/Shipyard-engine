@@ -23,7 +23,7 @@ class ServiceLocator
 	template <typename T> T &GetService()
 	{
 		OPTICK_EVENT();
-		auto it = services.find(std::type_index(typeid(T)));
+		const auto it = services.find(std::type_index(typeid(T)));
 		if (it == services.end())
 		{
 			return ProvideService<T>();

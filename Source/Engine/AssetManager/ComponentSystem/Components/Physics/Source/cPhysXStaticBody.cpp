@@ -42,12 +42,12 @@ void cPhysXStaticBody::UpdateFromCollider()
         return;
     }
 
-    if (auto *collider = TryGetAddComponent<Collider>())
+    if (const auto *collider = TryGetAddComponent<Collider>())
     {
         switch (collider->GetColliderType())
         {
         case eColliderType::AABB: {
-            auto aabb = collider->GetColliderAssetOfType<ColliderAssetAABB>();
+            const auto aabb = collider->GetColliderAssetOfType<ColliderAssetAABB>();
             aabb->UpdateWithTransform(transform.GetTransform());
             const auto &aabbData = aabb->GetAABB();
             PxRigidActorExt::createExclusiveShape(

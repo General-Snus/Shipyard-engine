@@ -16,8 +16,8 @@ void NavMesh::Triangulate(const std::vector<int>& poly,int index,std::vector<std
 	int newIndex = index - 1;
 	for (int i = index; i < 3 + index; i++)
 	{
-		int a = i % 3;
-		int b = i % poly.size();
+		const int a = i % 3;
+		const int b = i % poly.size();
 		newPoly[a] = poly[b];
 		newIndex++;
 	}
@@ -167,9 +167,9 @@ NavMesh::Path NavMesh::PathFind(Vector3f Start,Vector3f End)
 {
 	if (!IsReady) return Path();
 
-	int startPoly = ClosestTriangleToPoint(Start);
-	int endPoly = ClosestTriangleToPoint(End);
-	std::vector<int> intPath = AStar(startPoly,endPoly);
+	const int startPoly = ClosestTriangleToPoint(Start);
+	const int endPoly = ClosestTriangleToPoint(End);
+	const std::vector<int> intPath = AStar(startPoly,endPoly);
 
 	if (!intPath.size())
 	{
@@ -207,7 +207,7 @@ void NavMesh::DrawDebug()
 		//debugDrawer.DrawCircle({i.CenterPosition.x,i.CenterPosition.y},1);
 		for (auto& edge : i.Edges)
 		{
-			int index = myEdges[edge].Neighbors[0];
+			const int index = myEdges[edge].Neighbors[0];
 			if (index == -1)
 			{
 				continue;
@@ -279,9 +279,9 @@ int NavMesh::ClosestTriangleToPoint(Vector3f point)
 bool NavMesh::RayIntersectsTriangle(Vector3f rayOrigin,Vector3f rayVector,const Polygon* inTriangle,Vector3f& outIntersectionPoint)
 {
 	const float EPSILON = 0.0000001f;
-	Vector3f vertex0 = GetPoint(0,*inTriangle);
-	Vector3f vertex1 = GetPoint(1,*inTriangle);
-	Vector3f vertex2 = GetPoint(2,*inTriangle);
+	const Vector3f vertex0 = GetPoint(0,*inTriangle);
+	const Vector3f vertex1 = GetPoint(1,*inTriangle);
+	const Vector3f vertex2 = GetPoint(2,*inTriangle);
 
 	Vector3f edge1;
 	Vector3f edge2;
@@ -313,7 +313,7 @@ bool NavMesh::RayIntersectsTriangle(Vector3f rayOrigin,Vector3f rayVector,const 
 	if (v < 0.0 || u + v > 1.0)
 		return false;
 
-	float t = f * edge2.Dot(q);
+	const float t = f * edge2.Dot(q);
 
 	if (t > EPSILON)
 	{
@@ -336,10 +336,10 @@ Vector3f NavMesh::GetPoint(int index,const Polygon& poly)
 inline float NavMesh::h(int node1,int nodeGoal)
 {
 	//For now we go polycenter then closest edge point
-	Vector3f node1Pos = myPolygons[node1].CenterPosition;
-	Vector3f nodeGoalPos = myPolygons[nodeGoal].CenterPosition;
+	const Vector3f node1Pos = myPolygons[node1].CenterPosition;
+	const Vector3f nodeGoalPos = myPolygons[nodeGoal].CenterPosition;
 
-	float d = 1;
+	const float d = 1;
 
 	return d * (node1Pos - nodeGoalPos).LengthSqr();
 }

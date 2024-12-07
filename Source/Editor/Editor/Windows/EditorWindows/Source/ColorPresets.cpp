@@ -65,9 +65,9 @@ void ColorPresets::RenderImGUi()
             ImGui::SliderFloat("Blend", &blendFactor, 0.0f, 1.0f);
             ImGui::SameLine();
 
-            Vector4f blend1 =
+            const Vector4f blend1 =
                 selected_item1 == -1 ? Vector4f(1, 1, 1, 1) : ColorManagerInstance.GetColor(keys.at(selected_item1));
-            Vector4f blend2 =
+            const Vector4f blend2 =
                 selected_item2 == -1 ? Vector4f(1, 1, 1, 1) : ColorManagerInstance.GetColor(keys.at(selected_item2));
 
             activeColor = Color::RGBLerp(blend1, blend2, blendFactor);

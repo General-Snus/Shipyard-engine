@@ -44,7 +44,7 @@ bool GPUCommandQueue::Create(const DeviceType &device, D3D12_COMMAND_LIST_TYPE t
 uint64_t GPUCommandQueue::Signal()
 {
 	OPTICK_GPU_EVENT("Signal");
-	uint64_t fenceValueForSignal = ++m_FenceValue;
+	const uint64_t fenceValueForSignal = ++m_FenceValue;
 	Helpers::ThrowIfFailed(m_CommandQueue->Signal(m_Fence.Get(), fenceValueForSignal));
 	return fenceValueForSignal;
 }
@@ -58,7 +58,7 @@ void GPUCommandQueue::WaitForFenceValue(uint64_t fenceValue)
 {
 	if (!IsFenceComplete(fenceValue))
 	{
-		auto event = ::CreateEvent(NULL, FALSE, FALSE, NULL);
+		const auto event = ::CreateEvent(NULL, FALSE, FALSE, NULL);
 		assert(event && "Failed to create fence event handle.");
 
 		m_Fence->SetEventOnCompletion(fenceValue, event);
@@ -120,7 +120,7 @@ uint64_t GPUCommandQueue::ExecuteCommandList(const std::vector<std::shared_ptr<C
 	for (auto commandList : commandLists)
 	{
 		auto pendingCommandList = GetCommandList();
-		bool hasPendingBarriers = commandList->Close(*pendingCommandList);
+		const bool hasPendingBarriers = commandList->Close(*pendingCommandList);
 		pendingCommandList->Close();
 		// If there are no pending barriers on the pending command list, there is no reason to
 		// execute an empty command list on the command queue.
@@ -140,7 +140,7 @@ uint64_t GPUCommandQueue::ExecuteCommandList(const std::vector<std::shared_ptr<C
 		// }
 	}
 
-	UINT numCommandLists = static_cast<UINT>(d3d12CommandLists.size());
+	const UINT numCommandLists = static_cast<UINT>(d3d12CommandLists.size());
 	OPTICK_GPU_EVENT("ListExecution");
 	m_CommandQueue->ExecuteCommandLists(numCommandLists, d3d12CommandLists.data());
 	uint64_t fenceValue = Signal();
@@ -178,8 +178,8 @@ void GPUCommandQueue::ProccessInFlightCommandLists()
 		lock.lock();
 		while (m_InFlightCommandLists.TryPop(commandListEntry))
 		{
-			auto fenceValue = std::get<0>(commandListEntry);
-			auto commandList = std::get<1>(commandListEntry);
+			const auto fenceValue = std::get<0>(commandListEntry);
+			const auto commandList = std::get<1>(commandListEntry);
 
 			WaitForFenceValue(fenceValue);
 

@@ -110,10 +110,10 @@ void ResourceStateTracker::AliasBarrier(const GpuResource *resourceBefore, const
 void ResourceStateTracker::FlushResourceBarriers(CommandList &commandList)
 {
     OPTICK_GPU_EVENT("FlushResourceBarriers");
-    UINT numBarriers = static_cast<UINT>(m_ResourceBarriers.size());
+    const UINT numBarriers = static_cast<UINT>(m_ResourceBarriers.size());
     if (numBarriers > 0)
     {
-        auto d3d12CommandList = commandList.GetGraphicsCommandList();
+        const auto d3d12CommandList = commandList.GetGraphicsCommandList();
         d3d12CommandList->ResourceBarrier(numBarriers, m_ResourceBarriers.data());
         m_ResourceBarriers.clear();
     }
@@ -162,7 +162,7 @@ uint32_t ResourceStateTracker::FlushPendingResourceBarriers(CommandList &command
                 else
                 {
                     // No (sub)resources need to be transitioned. Just add a single transition barrier (if needed).
-                    auto globalState = (iter->second).GetSubresourceState(pendingTransition.Subresource);
+                    const auto globalState = (iter->second).GetSubresourceState(pendingTransition.Subresource);
                     if (pendingTransition.StateAfter != globalState)
                     {
                         // Fix-up the before state based on current global state of the resource.
@@ -174,10 +174,10 @@ uint32_t ResourceStateTracker::FlushPendingResourceBarriers(CommandList &command
         }
     }
 
-    auto numBarriers = static_cast<UINT>(resourceBarriers.size());
+    const auto numBarriers = static_cast<UINT>(resourceBarriers.size());
     if (numBarriers > 0)
     {
-        auto d3d12CommandList = commandList.GetGraphicsCommandList();
+        const auto d3d12CommandList = commandList.GetGraphicsCommandList();
         d3d12CommandList->ResourceBarrier(numBarriers, resourceBarriers.data());
     }
 

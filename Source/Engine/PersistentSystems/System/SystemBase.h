@@ -42,7 +42,7 @@ class SystemCollection
 
     static void UpdateSystems(float delta)
     {
-        for (auto &system : m_Systems)
+        for (const auto &system : m_Systems)
         {
             system.second->Update(delta);
         }

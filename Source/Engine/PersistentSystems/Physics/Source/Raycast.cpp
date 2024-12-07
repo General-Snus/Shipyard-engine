@@ -31,7 +31,7 @@ bool Raycast(Vector3f origin, Vector3f direction, RaycastHit &outHitInfo, GameOb
 		Layer a = layerMask;
 		Layer b = i.GetGameObject().GetLayer();
 
-		bool f = (static_cast<int>(a) & static_cast<int>(b));
+		const bool f = (static_cast<int>(a) & static_cast<int>(b));
 		if (!f // plz fix u stupid bastard
 			|| !i.IsActive() || i.GetOwner() == filter.GetID())
 		{
@@ -100,8 +100,8 @@ bool Raycast(Vector3f origin, Vector3f direction, Layer layerMask, float maxDist
 	// but i am bad at programming and even worse at getting up in the morning so it is not done
 	//  yet
 
-	float distance = std::powf(maxDistance, 2);
-	Vector3f hitPoint;
+	const float distance = std::powf(maxDistance, 2);
+	const Vector3f hitPoint;
 	// Observe crabLiftingBar.jpeg
 	for (auto &i : Scene::ActiveManager().GetAllComponents<Collider>())
 	{

@@ -464,7 +464,7 @@ class Selector : public Composite
 
         while (it != children.end())
         {
-            auto status = (*it)->tick();
+            const auto status = (*it)->tick();
 
             if (status != Status::Failure)
             {
@@ -497,7 +497,7 @@ class Sequence : public Composite
 
         while (it != children.end())
         {
-            auto status = (*it)->tick();
+            const auto status = (*it)->tick();
 
             if (status != Status::Success)
             {
@@ -525,7 +525,7 @@ class StatefulSelector : public Composite
 
         while (it != children.end())
         {
-            auto status = (*it)->tick();
+            const auto status = (*it)->tick();
 
             if (status != Status::Failure)
             {
@@ -554,7 +554,7 @@ class StatefulSequence : public Composite
 
         while (it != children.end())
         {
-            auto status = (*it)->tick();
+            const auto status = (*it)->tick();
 
             if (status != Status::Success)
             {
@@ -612,9 +612,9 @@ class ParallelSequence : public Composite
         int total_success = 0;
         int total_fail = 0;
 
-        for (auto &child : children)
+        for (const auto &child : children)
         {
-            auto status = child->tick();
+            const auto status = child->tick();
             if (status == Status::Success)
             {
                 total_success++;
@@ -677,7 +677,7 @@ class Inverter : public Decorator
     ReflectableTypeRegistration();
     Status update() override
     {
-        auto s = child->tick();
+        const auto s = child->tick();
 
         if (s == Status::Success)
         {
@@ -732,7 +732,7 @@ class UntilSuccess : public Decorator
     {
         while (1)
         {
-            auto status = child->tick();
+            const auto status = child->tick();
 
             if (status == Status::Success)
             {
@@ -751,7 +751,7 @@ class UntilFailure : public Decorator
     {
         while (1)
         {
-            auto status = child->tick();
+            const auto status = child->tick();
 
             if (status == Status::Failure)
             {

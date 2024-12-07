@@ -57,7 +57,7 @@ int main(int argc, char** argv)
         }
     }
 
-    bool ret = binary_to_compressed_c(argv[argn], argv[argn + 1], use_base85_encoding, use_compression, use_static);
+    const bool ret = binary_to_compressed_c(argv[argn], argv[argn + 1], use_base85_encoding, use_compression, use_static);
     if (!ret)
         fprintf(stderr, "Error opening or reading file: '%s'\n", argv[argn]);
     return ret ? 0 : 1;
@@ -82,9 +82,9 @@ bool binary_to_compressed_c(const char* filename, const char* symbol, bool use_b
     fclose(f);
 
     // Compress
-    int maxlen = data_sz + 512 + (data_sz >> 2) + sizeof(int); // total guess
+    const int maxlen = data_sz + 512 + (data_sz >> 2) + sizeof(int); // total guess
     char* compressed = use_compression ? new char[maxlen] : data;
-    int compressed_sz = use_compression ? stb_compress((stb_uchar*)compressed, (stb_uchar*)data, data_sz) : data_sz;
+    const int compressed_sz = use_compression ? stb_compress((stb_uchar*)compressed, (stb_uchar*)data, data_sz) : data_sz;
     if (use_compression)
         memset(compressed + compressed_sz, 0, maxlen - compressed_sz);
 
@@ -104,7 +104,7 @@ bool binary_to_compressed_c(const char* filename, const char* symbol, bool use_b
             unsigned int d = *(unsigned int*)(compressed + src_i);
             for (unsigned int n5 = 0; n5 < 5; n5++, d /= 85)
             {
-                char c = Encode85Byte(d);
+                const char c = Encode85Byte(d);
                 fprintf(out, (c == '?' && prev_c == '?') ? "\\%c" : "%c", c);
                 prev_c = c;
             }
@@ -120,7 +120,7 @@ bool binary_to_compressed_c(const char* filename, const char* symbol, bool use_b
         int column = 0;
         for (int i = 0; i < compressed_sz; i += 4)
         {
-            unsigned int d = *(unsigned int*)(compressed + i);
+            const unsigned int d = *(unsigned int*)(compressed + i);
             if ((column++ % 12) == 0)
                 fprintf(out, "\n    0x%08x, ", d);
             else
@@ -246,7 +246,7 @@ static int stb_compress_chunk(stb_uchar *history,
     stb_uint mask)
 {
     (void)history;
-    int window = stb__window;
+    const int window = stb__window;
     stb_uint match_max;
     stb_uchar *lit_start = start - *pending_literals;
     stb_uchar *q = start;

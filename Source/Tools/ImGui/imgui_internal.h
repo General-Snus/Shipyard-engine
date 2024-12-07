@@ -735,7 +735,7 @@ static inline float ImLengthSqr(const ImVec4 &lhs)
 }
 static inline float ImInvLength(const ImVec2 &lhs, float fail_value)
 {
-    float d = (lhs.x * lhs.x) + (lhs.y * lhs.y);
+    const float d = (lhs.x * lhs.x) + (lhs.y * lhs.y);
     if (d > 0.0f)
         return ImRsqrt(d);
     return fail_value;
@@ -1016,17 +1016,17 @@ inline void ImBitArrayClearAllBits(ImU32 *arr, int bitcount)
 }
 inline bool ImBitArrayTestBit(const ImU32 *arr, int n)
 {
-    ImU32 mask = (ImU32)1 << (n & 31);
+    const ImU32 mask = (ImU32)1 << (n & 31);
     return (arr[n >> 5] & mask) != 0;
 }
 inline void ImBitArrayClearBit(ImU32 *arr, int n)
 {
-    ImU32 mask = (ImU32)1 << (n & 31);
+    const ImU32 mask = (ImU32)1 << (n & 31);
     arr[n >> 5] &= ~mask;
 }
 inline void ImBitArraySetBit(ImU32 *arr, int n)
 {
-    ImU32 mask = (ImU32)1 << (n & 31);
+    const ImU32 mask = (ImU32)1 << (n & 31);
     arr[n >> 5] |= mask;
 }
 inline void ImBitArraySetBitRange(ImU32 *arr, int n, int n2) // Works on range [n..n2)
@@ -1034,9 +1034,9 @@ inline void ImBitArraySetBitRange(ImU32 *arr, int n, int n2) // Works on range [
     n2--;
     while (n <= n2)
     {
-        int a_mod = (n & 31);
-        int b_mod = (n2 > (n | 31) ? 31 : (n2 & 31)) + 1;
-        ImU32 mask = (ImU32)(((ImU64)1 << b_mod) - 1) & ~(ImU32)(((ImU64)1 << a_mod) - 1);
+        const int a_mod = (n & 31);
+        const int b_mod = (n2 > (n | 31) ? 31 : (n2 & 31)) + 1;
+        const ImU32 mask = (ImU32)(((ImU64)1 << b_mod) - 1) & ~(ImU32)(((ImU64)1 << a_mod) - 1);
         arr[n >> 5] |= mask;
         n = (n + 32) & ~31;
     }
@@ -1363,7 +1363,7 @@ template <typename T> struct ImPool
     } // It is the map we need iterate to find valid items, since we don't have "alive" storage anywhere
     T *TryGetMapData(ImPoolIdx n)
     {
-        int idx = Map.Data[n].val_i;
+        const int idx = Map.Data[n].val_i;
         if (idx == -1)
             return NULL;
         return GetByIndex(idx);
@@ -1393,23 +1393,23 @@ template <typename T> struct ImChunkStream
     }
     T *alloc_chunk(size_t sz)
     {
-        size_t HDR_SZ = 4;
+        const size_t HDR_SZ = 4;
         sz = IM_MEMALIGN(HDR_SZ + sz, 4u);
-        int off = Buf.Size;
+        const int off = Buf.Size;
         Buf.resize(off + (int)sz);
         ((int *)(void *)(Buf.Data + off))[0] = (int)sz;
         return (T *)(void *)(Buf.Data + off + (int)HDR_SZ);
     }
     T *begin()
     {
-        size_t HDR_SZ = 4;
+        const size_t HDR_SZ = 4;
         if (!Buf.Data)
             return NULL;
         return (T *)(void *)(Buf.Data + HDR_SZ);
     }
     T *next_chunk(T *p)
     {
-        size_t HDR_SZ = 4;
+        const size_t HDR_SZ = 4;
         IM_ASSERT(p >= begin() && p < end());
         p = (T *)(void *)((char *)(void *)p + chunk_size(p));
         if (p == (T *)(void *)((char *)end() + HDR_SZ))
@@ -2535,12 +2535,12 @@ struct ImGuiListClipperRange
 
     static ImGuiListClipperRange FromIndices(int min, int max)
     {
-        ImGuiListClipperRange r = {min, max, false, 0, 0};
+        const ImGuiListClipperRange r = {min, max, false, 0, 0};
         return r;
     }
     static ImGuiListClipperRange FromPositions(float y1, float y2, int off_min, int off_max)
     {
-        ImGuiListClipperRange r = {(int)y1, (int)y2, true, (ImS8)off_min, (ImS8)off_max};
+        const ImGuiListClipperRange r = {(int)y1, (int)y2, true, (ImS8)off_min, (ImS8)off_max};
         return r;
     }
 };
@@ -3134,8 +3134,8 @@ struct ImGuiViewportP : public ImGuiViewport
     }
     ImRect GetBuildWorkRect() const
     {
-        ImVec2 pos = CalcWorkRectPos(BuildWorkOffsetMin);
-        ImVec2 size = CalcWorkRectSize(BuildWorkOffsetMin, BuildWorkOffsetMax);
+        const ImVec2 pos = CalcWorkRectPos(BuildWorkOffsetMin);
+        const ImVec2 size = CalcWorkRectSize(BuildWorkOffsetMin, BuildWorkOffsetMax);
         return ImRect(pos.x, pos.y, pos.x + size.x, pos.y + size.y);
     }
 };
@@ -4290,7 +4290,7 @@ struct IMGUI_API ImGuiWindow
     }
     float CalcFontSize() const
     {
-        ImGuiContext &g = *Ctx;
+        const ImGuiContext &g = *Ctx;
         float scale = g.FontBaseSize * FontWindowScale * FontDpiScale;
         if (ParentWindow)
             scale *= ParentWindow->FontWindowScale;
@@ -4302,7 +4302,7 @@ struct IMGUI_API ImGuiWindow
     }
     ImRect MenuBarRect() const
     {
-        float y1 = Pos.y + TitleBarHeight;
+        const float y1 = Pos.y + TitleBarHeight;
         return ImRect(Pos.x, y1, Pos.x + SizeFull.x, y1 + MenuBarHeight);
     }
 };
@@ -4774,12 +4774,12 @@ namespace ImGui
 // which is also illegal.
 inline ImGuiWindow *GetCurrentWindowRead()
 {
-    ImGuiContext &g = *GImGui;
+    const ImGuiContext &g = *GImGui;
     return g.CurrentWindow;
 }
 inline ImGuiWindow *GetCurrentWindow()
 {
-    ImGuiContext &g = *GImGui;
+    const ImGuiContext &g = *GImGui;
     g.CurrentWindow->WriteAccessed = true;
     return g.CurrentWindow;
 }
@@ -4804,17 +4804,17 @@ inline void SetWindowParentWindowForFocusRoute(ImGuiWindow *window, ImGuiWindow 
 } // You may also use SetNextWindowClass()'s FocusRouteParentWindowId field.
 inline ImRect WindowRectAbsToRel(ImGuiWindow *window, const ImRect &r)
 {
-    ImVec2 off = window->DC.CursorStartPos;
+    const ImVec2 off = window->DC.CursorStartPos;
     return ImRect(r.Min.x - off.x, r.Min.y - off.y, r.Max.x - off.x, r.Max.y - off.y);
 }
 inline ImRect WindowRectRelToAbs(ImGuiWindow *window, const ImRect &r)
 {
-    ImVec2 off = window->DC.CursorStartPos;
+    const ImVec2 off = window->DC.CursorStartPos;
     return ImRect(r.Min.x + off.x, r.Min.y + off.y, r.Max.x + off.x, r.Max.y + off.y);
 }
 inline ImVec2 WindowPosRelToAbs(ImGuiWindow *window, const ImVec2 &p)
 {
-    ImVec2 off = window->DC.CursorStartPos;
+    const ImVec2 off = window->DC.CursorStartPos;
     return ImVec2(p.x + off.x, p.y + off.y);
 }
 
@@ -4836,7 +4836,7 @@ IMGUI_API void SetNextWindowRefreshPolicy(ImGuiWindowRefreshFlags flags);
 IMGUI_API void SetCurrentFont(ImFont *font);
 inline ImFont *GetDefaultFont()
 {
-    ImGuiContext &g = *GImGui;
+    const ImGuiContext &g = *GImGui;
     return g.IO.FontDefault ? g.IO.FontDefault : g.IO.Fonts->Fonts[0];
 }
 inline ImDrawList *GetForegroundDrawList(ImGuiWindow *window)
@@ -4893,7 +4893,7 @@ IMGUI_API void ClearWindowSettings(const char *name);
 IMGUI_API void LocalizeRegisterEntries(const ImGuiLocEntry *entries, int count);
 inline const char *LocalizeGetMsg(ImGuiLocKey key)
 {
-    ImGuiContext &g = *GImGui;
+    const ImGuiContext &g = *GImGui;
     const char *msg = g.LocalizationTable[key];
     return msg ? msg : "*Missing Text*";
 }
@@ -4918,22 +4918,22 @@ inline void ScrollToBringRectIntoView(ImGuiWindow *window, const ImRect &rect)
 // Basic Accessors
 inline ImGuiItemStatusFlags GetItemStatusFlags()
 {
-    ImGuiContext &g = *GImGui;
+    const ImGuiContext &g = *GImGui;
     return g.LastItemData.StatusFlags;
 }
 inline ImGuiItemFlags GetItemFlags()
 {
-    ImGuiContext &g = *GImGui;
+    const ImGuiContext &g = *GImGui;
     return g.LastItemData.InFlags;
 }
 inline ImGuiID GetActiveID()
 {
-    ImGuiContext &g = *GImGui;
+    const ImGuiContext &g = *GImGui;
     return g.ActiveId;
 }
 inline ImGuiID GetFocusID()
 {
-    ImGuiContext &g = *GImGui;
+    const ImGuiContext &g = *GImGui;
     return g.NavId;
 }
 IMGUI_API void SetActiveID(ImGuiID id, ImGuiWindow *window);
@@ -5119,7 +5119,7 @@ IMGUI_API void TeleportMousePos(const ImVec2 &pos);
 IMGUI_API void SetActiveIdUsingAllKeyboardKeys();
 inline bool IsActiveIdUsingNavDir(ImGuiDir dir)
 {
-    ImGuiContext &g = *GImGui;
+    const ImGuiContext &g = *GImGui;
     return (g.ActiveIdUsingNavDirMask & (1 << dir)) != 0;
 }
 
@@ -5264,7 +5264,7 @@ inline ImGuiID DockNodeGetWindowMenuButtonId(const ImGuiDockNode *node)
 }
 inline ImGuiDockNode *GetWindowDockNode()
 {
-    ImGuiContext &g = *GImGui;
+    const ImGuiContext &g = *GImGui;
     return g.CurrentWindow->DockNode;
 }
 IMGUI_API bool GetWindowAlwaysWantOwnTabBar(ImGuiWindow *window);
@@ -5324,7 +5324,7 @@ IMGUI_API void PushFocusScope(ImGuiID id);
 IMGUI_API void PopFocusScope();
 inline ImGuiID GetCurrentFocusScope()
 {
-    ImGuiContext &g = *GImGui;
+    const ImGuiContext &g = *GImGui;
     return g.CurrentFocusScopeId;
 } // Focus scope we are outputting into, set by PushFocusScope()
 
@@ -5375,7 +5375,7 @@ IMGUI_API void TableAngledHeadersRowEx(ImGuiID row_id, float angle, float max_la
 // Tables: Internals
 inline ImGuiTable *GetCurrentTable()
 {
-    ImGuiContext &g = *GImGui;
+    const ImGuiContext &g = *GImGui;
     return g.CurrentTable;
 }
 IMGUI_API ImGuiTable *TableFindByID(ImGuiID id);
@@ -5433,7 +5433,7 @@ IMGUI_API ImGuiTableSettings *TableSettingsFindByID(ImGuiID id);
 // Tab Bars
 inline ImGuiTabBar *GetCurrentTabBar()
 {
-    ImGuiContext &g = *GImGui;
+    const ImGuiContext &g = *GImGui;
     return g.CurrentTabBar;
 }
 IMGUI_API bool BeginTabBarEx(ImGuiTabBar *tab_bar, const ImRect &bb, ImGuiTabBarFlags flags);
@@ -5583,7 +5583,7 @@ IMGUI_API bool TempInputScalar(const ImRect &bb, ImGuiID id, const char *label, 
                                const char *format, const void *p_clamp_min = NULL, const void *p_clamp_max = NULL);
 inline bool TempInputIsActive(ImGuiID id)
 {
-    ImGuiContext &g = *GImGui;
+    const ImGuiContext &g = *GImGui;
     return (g.ActiveId == id && g.TempInputId == id);
 }
 inline ImGuiInputTextState *GetInputTextState(ImGuiID id)

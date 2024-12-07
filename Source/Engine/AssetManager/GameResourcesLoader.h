@@ -18,14 +18,14 @@ template <class T> bool GameResourcesLoader::Find(const std::filesystem::path &a
 {
 	OPTICK_EVENT();
 	const std::type_info *typeInfo = &typeid(T);
-	std::shared_ptr<Library> library = GetLibraryOfType<T>();
+	const std::shared_ptr<Library> library = GetLibraryOfType<T>();
 
 	if (!library)
 	{
 		return false;
 	}
 
-	std::filesystem::path Identifier = aFilePath;
+	const std::filesystem::path Identifier = aFilePath;
 	std::filesystem::path loadObjectFrom = workingDirectory / aFilePath;
 
 	return library->Has(Identifier);

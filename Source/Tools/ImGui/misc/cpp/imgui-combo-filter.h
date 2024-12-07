@@ -218,7 +218,7 @@ namespace ImGui
 	bool ComboAutoSelect(const char* combo_label, int& selected_item, const T1& items, ComboItemGetterCallback<T2> item_getter, ComboAutoSelectSearchCallback<T2> autoselect_callback, ImGuiComboFlags flags)
 	{
 		ImGui::BeginDisabled(Internal::IsContainerEmpty(items));
-		bool ret = Internal::ComboAutoSelectEX(combo_label, selected_item, items, item_getter, autoselect_callback, flags);
+		const bool ret = Internal::ComboAutoSelectEX(combo_label, selected_item, items, item_getter, autoselect_callback, flags);
 		ImGui::EndDisabled();
 
 		return ret;
@@ -372,7 +372,7 @@ namespace ImGui
 
 			// Open on click
 			bool hovered, held;
-			bool pressed = ButtonBehavior(bb, combo_id, &hovered, &held);
+			const bool pressed = ButtonBehavior(bb, combo_id, &hovered, &held);
 			bool popupIsAlreadyOpened = IsPopupOpen(combo_id, ImGuiPopupFlags_None);
 			bool popupJustOpened = false;
 
@@ -389,8 +389,8 @@ namespace ImGui
 					window->DrawList->AddRectFilled(bb.Min, ImVec2(value_x2, bb.Max.y), frame_col, style.FrameRounding, (flags & ImGuiComboFlags_NoArrowButton) ? ImDrawFlags_RoundCornersAll : ImDrawFlags_RoundCornersLeft);
 			}
 			if (!(flags & ImGuiComboFlags_NoArrowButton)) {
-				ImU32 bg_col = GetColorU32((popupIsAlreadyOpened || hovered) ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
-				ImU32 text_col = GetColorU32(ImGuiCol_Text);
+				const ImU32 bg_col = GetColorU32((popupIsAlreadyOpened || hovered) ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+				const ImU32 text_col = GetColorU32(ImGuiCol_Text);
 				window->DrawList->AddRectFilled(ImVec2(value_x2, bb.Min.y), bb.Max, bg_col, style.FrameRounding, (w <= arrow_size) ? ImDrawFlags_RoundCornersAll : ImDrawFlags_RoundCornersRight);
 				if (value_x2 + arrow_size - style.FramePadding.x <= bb.Max.x)
 					RenderArrow(window->DrawList, ImVec2(value_x2 + style.FramePadding.y, bb.Min.y + style.FramePadding.y), text_col, popupIsAlreadyOpened ? ImGuiDir_Up : ImGuiDir_Down, 1.0f);
@@ -435,9 +435,9 @@ namespace ImGui
 			if (ImGuiWindow* popup_window = FindWindowByName(name)) {
 				if (popup_window->WasActive) {
 					// Always override 'AutoPosLastDirection' to not leave a chance for a past value to affect us.
-					ImVec2 size_expected = CalcWindowNextAutoFitSize(popup_window);
+					const ImVec2 size_expected = CalcWindowNextAutoFitSize(popup_window);
 					popup_window->AutoPosLastDirection = (flags & ImGuiComboFlags_PopupAlignLeft) ? ImGuiDir_Left : ImGuiDir_Down; // Left = "Below, Toward Left", Down = "Below, Toward Right (default)"
-					ImRect r_outer = GetPopupAllowedExtentRect(popup_window);
+					const ImRect r_outer = GetPopupAllowedExtentRect(popup_window);
 					ImVec2 pos = FindBestWindowPosForPopupEx(bb.GetBL(), size_expected, &popup_window->AutoPosLastDirection, r_outer, bb, ImGuiPopupPositionPolicy_ComboBox);
 					const float ypos_offset = flags & ImGuiComboFlags_NoPreview ? 0.0f : label_size.y + (style.FramePadding.y * 2.0f);
 					if (pos.y < bb.Min.y)
@@ -492,7 +492,7 @@ namespace ImGui
 				char select_item_id[128];
 				while (list_clipper.Step()) {
 					for (int n = list_clipper.DisplayStart; n < list_clipper.DisplayEnd; n++) {
-						bool is_selected = n == combo_data->CurrentSelection;
+						const bool is_selected = n == combo_data->CurrentSelection;
 						const char* select_value = item_getter(items, n);
 
 						// allow empty item / in case of duplicate item name on different index
@@ -592,7 +592,7 @@ namespace ImGui
 
 			// Open on click
 			bool hovered, held;
-			bool pressed = ButtonBehavior(bb, combo_id, &hovered, &held);
+			const bool pressed = ButtonBehavior(bb, combo_id, &hovered, &held);
 			bool popup_open = IsPopupOpen(combo_id, ImGuiPopupFlags_None);
 			bool popup_just_opened = false;
 			if (pressed && !popup_open)
@@ -610,8 +610,8 @@ namespace ImGui
 				window->DrawList->AddRectFilled(bb.Min, ImVec2(value_x2, bb.Max.y), frame_col, style.FrameRounding, (flags & ImGuiComboFlags_NoArrowButton) ? ImDrawFlags_RoundCornersAll : ImDrawFlags_RoundCornersLeft);
 			if (!(flags & ImGuiComboFlags_NoArrowButton))
 			{
-				ImU32 bg_col = GetColorU32((popup_open || hovered) ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
-				ImU32 text_col = GetColorU32(ImGuiCol_Text);
+				const ImU32 bg_col = GetColorU32((popup_open || hovered) ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+				const ImU32 text_col = GetColorU32(ImGuiCol_Text);
 				window->DrawList->AddRectFilled(ImVec2(value_x2, bb.Min.y), bb.Max, bg_col, style.FrameRounding, (w <= arrow_size) ? ImDrawFlags_RoundCornersAll : ImDrawFlags_RoundCornersRight);
 				if (value_x2 + arrow_size - style.FramePadding.x <= bb.Max.x)
 					RenderArrow(window->DrawList, ImVec2(value_x2 + style.FramePadding.y, bb.Min.y + style.FramePadding.y), text_col, popup_open ? ImGuiDir_Up : ImGuiDir_Down, 1.0f);
@@ -648,10 +648,10 @@ namespace ImGui
 				if (popup_window->WasActive)
 				{
 					// Always override 'AutoPosLastDirection' to not leave a chance for a past value to affect us.
-					ImVec2 size_expected = CalcWindowNextAutoFitSize(popup_window);
+					const ImVec2 size_expected = CalcWindowNextAutoFitSize(popup_window);
 					popup_window->AutoPosLastDirection = (flags & ImGuiComboFlags_PopupAlignLeft) ? ImGuiDir_Left : ImGuiDir_Down; // Left = "Below, Toward Left", Down = "Below, Toward Right (default)"
-					ImRect r_outer = GetPopupAllowedExtentRect(popup_window);
-					ImVec2 pos = FindBestWindowPosForPopupEx(bb.GetBL(), size_expected, &popup_window->AutoPosLastDirection, r_outer, bb, ImGuiPopupPositionPolicy_ComboBox);
+					const ImRect r_outer = GetPopupAllowedExtentRect(popup_window);
+					const ImVec2 pos = FindBestWindowPosForPopupEx(bb.GetBL(), size_expected, &popup_window->AutoPosLastDirection, r_outer, bb, ImGuiPopupPositionPolicy_ComboBox);
 					SetNextWindowPos(pos);
 				}
 			}
@@ -702,7 +702,7 @@ namespace ImGui
 				char select_item_id[128];
 				while (listclipper.Step()) {
 					for (int i = listclipper.DisplayStart; i < listclipper.DisplayEnd; ++i) {
-						bool is_selected = i == combo_data->CurrentSelection;
+						const bool is_selected = i == combo_data->CurrentSelection;
 						const char* select_value = item_getter2(i);
 
 						ImFormatString(select_item_id, 128, "%s##id%d", select_value, i);
@@ -803,10 +803,10 @@ inline static bool fuzzy_score(const char* str1, const char* str2, int& score)
 	int maxerrors = 0;
 
 	while (*str1 && *str2) {
-		int is_leading = (*str1 & 64) && !(str1[1] & 64);
+		const int is_leading = (*str1 & 64) && !(str1[1] & 64);
 		if ((*str1 & ~32) == (*str2 & ~32)) {
-			int had_separator = (str1[-1] <= 32);
-			int x = had_separator || is_leading ? 10 : consecutive * 5;
+			const int had_separator = (str1[-1] <= 32);
+			const int x = had_separator || is_leading ? 10 : consecutive * 5;
 			consecutive = 1;
 			score += x;
 			++str2;
@@ -834,7 +834,7 @@ inline int autoselect_search(const ImGui::ComboAutoSelectSearchCallbackData<T>& 
 	if (cbd.SearchString[0] == '\0')
 		return -1;
 
-	int items_count = static_cast<int>(std::size(cbd.Items));
+	const int items_count = static_cast<int>(std::size(cbd.Items));
 	int best = -1;
 	int i = 0;
 	int score;
@@ -866,7 +866,7 @@ inline int autoselect_search_vector(const ImGui::ComboAutoSelectSearchCallbackDa
 	if (cbd.SearchString[0] == '\0')
 		return -1;
 
-	int items_count = static_cast<int>(cbd.Items.size());
+	const int items_count = static_cast<int>(cbd.Items.size());
 	int best = -1;
 	int i = 0;
 	int score;

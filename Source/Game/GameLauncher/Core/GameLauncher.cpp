@@ -85,7 +85,7 @@ void YourGameLauncher::Update(float delta)
 			const auto &cameraTransform = manager.GetCamera().transform();
  			const auto &camera = manager.GetCamera().GetComponent<Camera>();
 
-			auto coord = EditorInstance.GetMainViewport()->getCursorInWindowPostion();
+			const auto coord = EditorInstance.GetMainViewport()->getCursorInWindowPostion();
 			if (Physics::Raycast(cameraTransform.GetPosition(), camera.GetPointerDirection(coord),
 								 hit))
 			{

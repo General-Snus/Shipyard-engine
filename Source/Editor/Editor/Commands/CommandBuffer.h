@@ -109,7 +109,7 @@ class CommandBuffer
         if (!commandList.empty() && cursor >= 0)
         {
             Logger.Log(std::format("Undoing command at {}", cursor));
-            for (auto &command : commandList[cursor])
+            for (const auto &command : commandList[cursor])
             {
                 command->Undo();
             }
@@ -122,7 +122,7 @@ class CommandBuffer
         if (commandList.size() > cursor + 1)
         {
             Logger.Log(std::format("Redoing command at {}", cursor));
-            for (auto &command : commandList[cursor + 1])
+            for (const auto &command : commandList[cursor + 1])
             {
                 command->Do();
             }

@@ -71,13 +71,13 @@ namespace ImCurveEdit
 
    static float distance(float x, float y, float x1, float y1, float x2, float y2)
    {
-      float A = x - x1;
-      float B = y - y1;
-      float C = x2 - x1;
-      float D = y2 - y1;
+      const float A = x - x1;
+      const float B = y - y1;
+      const float C = x2 - x1;
+      const float D = y2 - y1;
 
-      float dot = A * C + B * D;
-      float len_sq = C * C + D * D;
+      const float dot = A * C + B * D;
+      const float len_sq = C * C + D * D;
       float param = -1.f;
       if (len_sq > FLT_EPSILON)
          param = dot / len_sq;
@@ -97,15 +97,15 @@ namespace ImCurveEdit
          yy = y1 + param * D;
       }
 
-      float dx = x - xx;
-      float dy = y - yy;
+      const float dx = x - xx;
+      const float dy = y - yy;
       return sqrtf(dx * dx + dy * dy);
    }
 
    static int DrawPoint(ImDrawList* draw_list, ImVec2 pos, const ImVec2 size, const ImVec2 offset, bool edited)
    {
       int ret = 0;
-      ImGuiIO& io = ImGui::GetIO();
+      const ImGuiIO& io = ImGui::GetIO();
 
       static const ImVec2 localOffsets[4] = { ImVec2(1,0), ImVec2(0,1), ImVec2(-1,0), ImVec2(0,-1) };
       ImVec2 offsets[4];

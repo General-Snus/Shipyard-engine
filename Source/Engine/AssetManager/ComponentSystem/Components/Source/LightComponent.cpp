@@ -529,7 +529,7 @@ void Light::Update()
 void Light::ConformToTransform()
 {
     OPTICK_EVENT();
-    Transform *transform = this->TryGetComponent<Transform>();
+    const Transform *transform = this->TryGetComponent<Transform>();
     if (transform == nullptr)
     {
         std::cout << "Light component has no transform component" << std::endl;
@@ -622,7 +622,7 @@ void Light::RedrawPointMap()
 void Light::RedrawSpotMap()
 {
     OPTICK_EVENT();
-    Vector3f lightPosition = mySpotLightData->Position;
+    const Vector3f lightPosition = mySpotLightData->Position;
     mySpotLightData->lightView =
         Matrix::LookAt(lightPosition, lightPosition + mySpotLightData->Direction.GetNormalized(),
                        {0, 1, 0}); // REFACTOR, Magic value up
@@ -644,7 +644,7 @@ void Light::BindDirectionToTransform(const bool active)
 
 Matrix Light::GetLightViewMatrix(const int number) const
 {
-    Vector3f lightPos = myPointLightData->Position;
+    const Vector3f lightPos = myPointLightData->Position;
     assert(number < 6 && "There are only 6 faces to a cubemap");
     assert(myLightType == eLightType::Point && "Use only for point lights");
     switch (number)

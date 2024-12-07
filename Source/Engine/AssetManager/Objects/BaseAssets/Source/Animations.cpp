@@ -102,7 +102,7 @@ void Animation::Init()
 					channel->mPositionKeys[j].mValue.z
 				};
 				mat *= Matrix::CreateTranslationMatrix(transform);
-				auto frameNumber = static_cast<int>(channel->mPositionKeys[j].mTime);
+				const auto frameNumber = static_cast<int>(channel->mPositionKeys[j].mTime);
 
 				if (const size_t pos = name.find_last_of(':'); pos != std::string::npos)
 				{
@@ -185,7 +185,7 @@ void Skeleton::Init()
 			for (unsigned int j = 0; j < scene->mMeshes[i]->mNumBones; j++)
 			{
 				unsigned int boneIndex = 0;
-				aiNode* skeletonBone = scene->mMeshes[i]->mBones[j]->mNode;
+				const aiNode* skeletonBone = scene->mMeshes[i]->mBones[j]->mNode;
 				std::string name = skeletonBone->mName.C_Str();
 
 				if (!BoneNameToIndex.contains(name))
@@ -207,7 +207,7 @@ void Skeleton::Init()
 
 			for (unsigned int j = 0; j < scene->mMeshes[i]->mNumBones; j++)
 			{
-				aiNode* skeletonBone = scene->mMeshes[i]->mBones[j]->mNode;
+				const aiNode* skeletonBone = scene->mMeshes[i]->mBones[j]->mNode;
 				std::string name = skeletonBone->mName.C_Str();
 
 				if (BoneNameToIndex.contains(skeletonBone->mParent->mName.C_Str())) // hidden nodes sits above the skeleton stopping me from checking if root

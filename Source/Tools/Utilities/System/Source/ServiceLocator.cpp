@@ -7,7 +7,7 @@ ServiceLocator &ServiceLocator::Instance()
 {
 	if (!instance)
 	{
-		HANDLE hMapFile = OpenOrCreateSharedMemory();
+		const HANDLE hMapFile = OpenOrCreateSharedMemory();
 		void *pBuf = MapSharedMemory(hMapFile);
 		instance = new (pBuf) ServiceLocator();
 	}
@@ -22,7 +22,7 @@ void ServiceLocator::SyncInstances(ServiceLocator &locator)
 
 void* ServiceLocator::OpenOrCreateSharedMemory()
 {
-	HANDLE hMapFile = CreateFileMappingW(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sharedMemorySize,
+	const HANDLE hMapFile = CreateFileMappingW(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sharedMemorySize,
 										 L"ServiceLocatorSharedMemory");
 
 	if (hMapFile == NULL || hMapFile == INVALID_HANDLE_VALUE)
@@ -42,7 +42,7 @@ void *ServiceLocator::MapSharedMemory(void *hMapFile)
 	if (pBuf == NULL)
 	{
 		CloseHandle(hMapFile);
-		auto reson = GetLastError();
+		const auto reson = GetLastError();
 		throw std::runtime_error("Could not create map shared memory." + reson);
 	}
 

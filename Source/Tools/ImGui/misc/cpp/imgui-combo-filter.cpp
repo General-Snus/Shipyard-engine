@@ -35,7 +35,7 @@ T* AddComboData(const char* window_label, const char* combo_label)
 {
     ImGuiWindow* window = ImGui::FindWindowByName(window_label);
     IM_ASSERT(window && "Queried window does not exist!");
-    ImGuiID id = window->GetID(combo_label);
+    const ImGuiID id = window->GetID(combo_label);
     return AddComboData<T>(id);
 }
 
@@ -43,7 +43,7 @@ template<class T>
 T* AddComboData(const char* combo_label)
 {
     ImGuiWindow* window = ImGui::GetCurrentWindow();
-    ImGuiID id = window->GetID(combo_label);
+    const ImGuiID id = window->GetID(combo_label);
     return AddComboData<T>(id);
 }
 
@@ -61,7 +61,7 @@ T* GetComboData(const char* window_label, const char* combo_label)
 {
     ImGuiWindow* window = ImGui::FindWindowByName(window_label);
     IM_ASSERT(window && "Queried window does not exist!");
-    ImGuiID id = window->GetID(combo_label);
+    const ImGuiID id = window->GetID(combo_label);
     return GetComboData<T>(id);
 }
 
@@ -69,14 +69,14 @@ template<class T>
 T* GetComboData(const char* combo_label)
 {
     ImGuiWindow* window = ImGui::GetCurrentWindow();
-    ImGuiID id = window->GetID(combo_label);
+    const ImGuiID id = window->GetID(combo_label);
     return GetComboData<T>(id);
 }
 
 template<class T>
 T* GetComboData(ImGuiID combo_id)
 {
-    auto it = Internal::gComboHashMap.find(combo_id);
+    const auto it = Internal::gComboHashMap.find(combo_id);
     IM_ASSERT((it == Internal::gComboHashMap.end() || dynamic_cast<T*>(it->second.get())) && "Incorrect ComboData type!");
     return it == Internal::gComboHashMap.end() ? nullptr : static_cast<T*>(it->second.get());
 }
@@ -90,14 +90,14 @@ void ClearComboData(const char* window_label, const char* combo_label)
 {
     ImGuiWindow* window = ImGui::FindWindowByName(window_label);
     IM_ASSERT(window && "Queried window does not exist!");
-    ImGuiID id = window->GetID(combo_label);
+    const ImGuiID id = window->GetID(combo_label);
     ClearComboData(id);
 }
 
 void ClearComboData(const char* combo_label)
 {
     ImGuiWindow* window = ImGui::GetCurrentWindow();
-    ImGuiID id = window->GetID(combo_label);
+    const ImGuiID id = window->GetID(combo_label);
     ClearComboData(id);
 }
 
@@ -202,17 +202,17 @@ float CalcComboItemHeight(int item_count, float offset_multiplier)
 void SetScrollToComboItemJump(ImGuiWindow* listbox_window, int index)
 {
     const ImGuiContext& g = *GImGui;
-    float spacing_y = ImMax(listbox_window->WindowPadding.y, g.Style.ItemSpacing.y);
-    float temp_pos = (g.Font->FontSize + g.Style.ItemSpacing.y) * index;
-    float new_pos = ImLerp(temp_pos - spacing_y, temp_pos + g.FontSize + g.Style.ItemSpacing.y + spacing_y, 0.5f) - listbox_window->Scroll.y;
+    const float spacing_y = ImMax(listbox_window->WindowPadding.y, g.Style.ItemSpacing.y);
+    const float temp_pos = (g.Font->FontSize + g.Style.ItemSpacing.y) * index;
+    const float new_pos = ImLerp(temp_pos - spacing_y, temp_pos + g.FontSize + g.Style.ItemSpacing.y + spacing_y, 0.5f) - listbox_window->Scroll.y;
     ImGui::SetScrollFromPosY(listbox_window, new_pos + 2.50f, 0.5f);
 }
 
 void SetScrollToComboItemUp(ImGuiWindow* listbox_window, int index)
 {
     const ImGuiContext& g = *GImGui;
-    float item_pos = (g.FontSize + g.Style.ItemSpacing.y) * index;
-    float diff = item_pos - listbox_window->Scroll.y;
+    const float item_pos = (g.FontSize + g.Style.ItemSpacing.y) * index;
+    const float diff = item_pos - listbox_window->Scroll.y;
     if (diff < 0.0f)
         listbox_window->Scroll.y += diff - 1.0f;
 }
@@ -245,7 +245,7 @@ static bool FuzzySearchRecursive(const char* pattern, const char* src, int& outS
 bool FuzzySearchEX(char const* pattern, char const* haystack, int& out_score, unsigned char matches[], int max_matches, int& out_matches)
 {
 	int recursionCount = 0;
-	int recursionLimit = 10;
+	const int recursionLimit = 10;
     out_matches = 0;
 	return FuzzySearchRecursive(pattern, haystack, out_score, haystack, nullptr, matches, max_matches, out_matches, recursionCount, recursionLimit);
 }
@@ -312,7 +312,7 @@ static bool FuzzySearchRecursive(const char* pattern, const char* src, int& outS
     }
 
     // Determine if full pattern was matched
-    bool matched = *pattern == '\0';
+    const bool matched = *pattern == '\0';
 
     // Calculate score
     if (matched) {
@@ -341,15 +341,15 @@ static bool FuzzySearchRecursive(const char* pattern, const char* src, int& outS
         outScore += penalty;
 
         // Apply unmatched penalty
-        int unmatched = (int)(src - strBegin) - nextMatch;
+        const int unmatched = (int)(src - strBegin) - nextMatch;
         outScore += unmatchedLetterPenalty * unmatched;
 
         // Apply ordering bonuses
         for (int i = 0; i < nextMatch; ++i) {
-            unsigned char currIdx = newMatches[i];
+            const unsigned char currIdx = newMatches[i];
 
             if (i > 0) {
-                unsigned char prevIdx = newMatches[i - 1];
+                const unsigned char prevIdx = newMatches[i - 1];
 
                 // Sequential
                 if (currIdx == (prevIdx + 1))
@@ -359,14 +359,14 @@ static bool FuzzySearchRecursive(const char* pattern, const char* src, int& outS
             // Check for bonuses based on neighbor character value
             if (currIdx > 0) {
                 // Camel case
-                char neighbor = strBegin[currIdx - 1];
-                char curr = strBegin[currIdx];
+                const char neighbor = strBegin[currIdx - 1];
+                const char curr = strBegin[currIdx];
                 if (::islower(neighbor) && ::isupper(curr)) {
                     outScore += camelBonus;
                 }
 
                 // Separator
-                bool neighborSeparator = neighbor == '_' || neighbor == ' ';
+                const bool neighborSeparator = neighbor == '_' || neighbor == ' ';
                 if (neighborSeparator) {
                     outScore += separatorBonus;
                 }

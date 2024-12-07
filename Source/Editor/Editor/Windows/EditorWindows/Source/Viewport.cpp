@@ -73,7 +73,7 @@ bool Viewport::IsRenderReady()
 	// if you are main and there is a active camera
 	if (IsMainViewPort)
 	{
-		auto camera = GetAttachedScene()->GetGOM().GetCamera().TryGetComponent<Camera>();
+		const auto camera = GetAttachedScene()->GetGOM().GetCamera().TryGetComponent<Camera>();
 		return camera ? camera->IsActive() : false;
 	}
 
@@ -161,7 +161,7 @@ Matrix &Viewport::View()
 void Viewport::RenderImGUi()
 {
 	OPTICK_EVENT();
-	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_MenuBar;
+	const ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_MenuBar;
 	// const auto aspecRatio = (res.x / res.y);
 	// ImGui::SetNextWindowSizeConstraints(ImVec2(0,0),ImVec2(FLT_MAX,FLT_MAX),CustomConstraints::AspectRatio,(void*)&aspecRatio);
 	// // Aspect ratio
@@ -229,7 +229,7 @@ void Viewport::RenderImGUi()
 				auto &transform = gameObject.transform();
 				Matrix mat = transform.WorldMatrix();
 
-				bool transformed = ImGuizmo::Manipulate(&cameraView, &cameraProjection, m_CurrentGizmoOperation,
+				const bool transformed = ImGuizmo::Manipulate(&cameraView, &cameraProjection, m_CurrentGizmoOperation,
 														m_CurrentGizmoMode, &mat);
 
 				if (transformed)
@@ -277,10 +277,10 @@ void Viewport::RenderImGUi()
 void Viewport::RenderToolbar()
 {
 	auto const &style = ImGui::GetStyle();
-	float textHeight = ImGui::CalcTextSize("A").y;
+	const float textHeight = ImGui::CalcTextSize("A").y;
 	// style.FramePadding can also be used here
-	ImVec2 toolbarItemSize = ImVec2{textHeight * 4.0f, textHeight * 4.0f};
-	ImVec2 toolbarPos = ImGui::GetWindowPos() +
+	const ImVec2 toolbarItemSize = ImVec2{textHeight * 4.0f, textHeight * 4.0f};
+	const ImVec2 toolbarPos = ImGui::GetWindowPos() +
 						ImVec2(2.0f * style.WindowPadding.x, 8.0f * (style.WindowPadding.y + style.FramePadding.y));
 	ImGui::SetNextWindowPos(toolbarPos);
 
@@ -288,7 +288,7 @@ void Viewport::RenderToolbar()
 	//                                 ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoSavedSettings |
 	//                                 ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_MenuBar;
 
-	ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_NoPadWithHalfSpacing;
+	const ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_NoPadWithHalfSpacing;
 	/*
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {0.0f, 0.0f});
 	if (ImGui::BeginChild("##ViewportToolbar_Vertical", ImVec2(toolbarItemSize.x, 0), 0, toolbarFlags))

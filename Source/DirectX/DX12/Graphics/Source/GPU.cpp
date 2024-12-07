@@ -674,7 +674,7 @@ void GPUSwapchain::Create(HWND hwnd, ComPtr<ID3D12CommandQueue>, UINT Width, UIN
         ColorManagerInstance.CreateColor("ClearColor", clearcolor);
     }
 
-    auto hr = swapChain->SetBackgroundColor((DXGI_RGBA *)&clearcolor.x);
+    const auto hr = swapChain->SetBackgroundColor((DXGI_RGBA *)&clearcolor.x);
     hr;
     Helpers::ThrowIfFailed(dxgiFactory4->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER));
     Helpers::ThrowIfFailed(swapChain->SetFullscreenState(FALSE, NULL));

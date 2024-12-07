@@ -104,7 +104,7 @@ void Material::Init()
 		}
 		catch (const std::exception &e)
 		{
-			std::string msg =
+			const std::string msg =
 				"Unsuccessfull loading of material data file at path: " + AssetPath.string() + " " + e.what();
 			Logger.Warn(msg);
 			isLoadedComplete = false;
@@ -135,7 +135,7 @@ void Material::Init()
 		}
 		catch (const std::exception &e)
 		{
-			std::string msg =
+			const std::string msg =
 				"Unsuccessfull loading of material texture file at path: " + AssetPath.string() + " " + e.what();
 			Logger.Warn(msg);
 			isLoadedComplete = false;
@@ -228,11 +228,11 @@ std::shared_ptr<TextureHolder> Material::GetEditorIcon()
 		EngineResources.LoadAsset<TextureHolder>(std::format("INTERNAL_IMAGE_UI_{}", AssetPath.filename().string()));
 	if (!imageTexture || !imageTexture->isLoadedComplete)
 	{
-		std::shared_ptr<Mesh> mesh = EngineResources.LoadAsset<Mesh>("Materials/MaterialPreviewMesh.fbx");
-		std::shared_ptr<Material> materialPreview = EngineResources.LoadAsset<Material>(AssetPath, true);
+		const std::shared_ptr<Mesh> mesh = EngineResources.LoadAsset<Mesh>("Materials/MaterialPreviewMesh.fbx");
+		const std::shared_ptr<Material> materialPreview = EngineResources.LoadAsset<Material>(AssetPath, true);
 
-		bool meshReady = mesh->isLoadedComplete && !mesh->isBeingLoaded;
-		bool materialReady = materialPreview->isLoadedComplete && !materialPreview->isBeingLoaded;
+		const bool meshReady = mesh->isLoadedComplete && !mesh->isBeingLoaded;
+		const bool materialReady = materialPreview->isLoadedComplete && !materialPreview->isBeingLoaded;
 
 		if (!imageTexture->isBeingLoaded && meshReady && materialReady)
 		{

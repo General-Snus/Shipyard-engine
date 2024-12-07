@@ -27,13 +27,13 @@ void cPhysXDynamicBody::Init()
 		assert(false && "Material creation failed!");
 	}
 
-	if (auto* collider = TryGetAddComponent<Collider>())
+	if (const auto* collider = TryGetAddComponent<Collider>())
 	{
 		switch (collider->GetColliderType())
 		{
 		case eColliderType::AABB:
 		{
-			auto aabb = collider->GetColliderAssetOfType<ColliderAssetAABB>();
+			const auto aabb = collider->GetColliderAssetOfType<ColliderAssetAABB>();
 			const auto& aabbData = aabb->GetAABB();
 			PxRigidActorExt::createExclusiveShape(*data,PxBoxGeometry(aabbData.GetXSize() / 2,aabbData.GetYSize() / 2,aabbData.GetZSize() / 2),*mMaterial);
 			break;

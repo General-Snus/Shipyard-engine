@@ -52,13 +52,13 @@ ax::NodeEditor::EditorContext* ax::NodeEditor::CreateEditor(const Config* config
 
 void ax::NodeEditor::DestroyEditor(EditorContext* ctx)
 {
-	auto lastContext = GetCurrentEditor();
+	const auto lastContext = GetCurrentEditor();
 
 	// Set context we're about to destroy as current, to give callback valid context
 	if(lastContext != ctx)
 		SetCurrentEditor(ctx);
 
-	auto editor = reinterpret_cast<ax::NodeEditor::Detail::EditorContext*>(ctx);
+	const auto editor = reinterpret_cast<ax::NodeEditor::Detail::EditorContext*>(ctx);
 
 	delete editor;
 
@@ -73,7 +73,7 @@ const ax::NodeEditor::Config& ax::NodeEditor::GetConfig(EditorContext* ctx)
 
 	if(ctx)
 	{
-		auto editor = reinterpret_cast<ax::NodeEditor::Detail::EditorContext*>(ctx);
+		const auto editor = reinterpret_cast<ax::NodeEditor::Detail::EditorContext*>(ctx);
 
 		return editor->GetConfig();
 	}
@@ -234,7 +234,7 @@ void ax::NodeEditor::EndGroupHint()
 
 ImDrawList* ax::NodeEditor::GetNodeBackgroundDrawList(NodeId nodeId)
 {
-	if(auto node = s_Editor->FindNode(nodeId))
+	if(const auto node = s_Editor->FindNode(nodeId))
 		return s_Editor->GetNodeBuilder().GetUserBackgroundDrawList(node);
 	else
 		return nullptr;
@@ -247,7 +247,7 @@ bool ax::NodeEditor::Link(LinkId id,PinId startPinId,PinId endPinId,const ImVec4
 
 void ax::NodeEditor::Flow(LinkId linkId,FlowDirection direction)
 {
-	if(auto link = s_Editor->FindLink(linkId))
+	if(const auto link = s_Editor->FindLink(linkId))
 		s_Editor->Flow(link,direction);
 }
 
@@ -279,7 +279,7 @@ bool ax::NodeEditor::QueryNewLink(PinId* startId,PinId* endId,const ImVec4& colo
 
 	auto& context = s_Editor->GetItemCreator();
 
-	auto result = context.QueryLink(startId,endId);
+	const auto result = context.QueryLink(startId,endId);
 	if(result != Result::Indeterminate)
 		context.SetStyle(ImColor(color),thickness);
 
@@ -301,7 +301,7 @@ bool ax::NodeEditor::QueryNewNode(PinId* pinId,const ImVec4& color,float thickne
 
 	auto& context = s_Editor->GetItemCreator();
 
-	auto result = context.QueryNode(pinId);
+	const auto result = context.QueryNode(pinId);
 	if(result != Result::Indeterminate)
 		context.SetStyle(ImColor(color),thickness);
 
@@ -323,7 +323,7 @@ bool ax::NodeEditor::AcceptNewItem(const ImVec4& color,float thickness)
 
 	auto& context = s_Editor->GetItemCreator();
 
-	auto result = context.AcceptItem();
+	const auto result = context.AcceptItem();
 	if(result != Result::Indeterminate)
 		context.SetStyle(ImColor(color),thickness);
 
@@ -418,7 +418,7 @@ ImVec2 ax::NodeEditor::GetNodeSize(NodeId nodeId)
 
 void ax::NodeEditor::CenterNodeOnScreen(NodeId nodeId)
 {
-	if(auto node = s_Editor->FindNode(nodeId))
+	if(const auto node = s_Editor->FindNode(nodeId))
 		node->CenterOnScreenInNextFrame();
 }
 
@@ -434,7 +434,7 @@ float ax::NodeEditor::GetNodeZPosition(NodeId nodeId)
 
 void ax::NodeEditor::RestoreNodeState(NodeId nodeId)
 {
-	if(auto node = s_Editor->FindNode(nodeId))
+	if(const auto node = s_Editor->FindNode(nodeId))
 		s_Editor->MarkNodeToRestoreState(node);
 }
 
@@ -486,7 +486,7 @@ int ax::NodeEditor::GetSelectedLinks(LinkId* links,int size)
 
 bool ax::NodeEditor::IsNodeSelected(NodeId nodeId)
 {
-	if(auto node = s_Editor->FindNode(nodeId))
+	if(const auto node = s_Editor->FindNode(nodeId))
 		return s_Editor->IsSelected(node);
 	else
 		return false;
@@ -494,7 +494,7 @@ bool ax::NodeEditor::IsNodeSelected(NodeId nodeId)
 
 bool ax::NodeEditor::IsLinkSelected(LinkId linkId)
 {
-	if(auto link = s_Editor->FindLink(linkId))
+	if(const auto link = s_Editor->FindLink(linkId))
 		return s_Editor->IsSelected(link);
 	else
 		return false;
@@ -507,7 +507,7 @@ void ax::NodeEditor::ClearSelection()
 
 void ax::NodeEditor::SelectNode(NodeId nodeId,bool append)
 {
-	if(auto node = s_Editor->FindNode(nodeId))
+	if(const auto node = s_Editor->FindNode(nodeId))
 	{
 		if(append)
 			s_Editor->SelectObject(node);
@@ -518,7 +518,7 @@ void ax::NodeEditor::SelectNode(NodeId nodeId,bool append)
 
 void ax::NodeEditor::SelectLink(LinkId linkId,bool append)
 {
-	if(auto link = s_Editor->FindLink(linkId))
+	if(const auto link = s_Editor->FindLink(linkId))
 	{
 		if(append)
 			s_Editor->SelectObject(link);
@@ -529,19 +529,19 @@ void ax::NodeEditor::SelectLink(LinkId linkId,bool append)
 
 void ax::NodeEditor::DeselectNode(NodeId nodeId)
 {
-	if(auto node = s_Editor->FindNode(nodeId))
+	if(const auto node = s_Editor->FindNode(nodeId))
 		s_Editor->DeselectObject(node);
 }
 
 void ax::NodeEditor::DeselectLink(LinkId linkId)
 {
-	if(auto link = s_Editor->FindLink(linkId))
+	if(const auto link = s_Editor->FindLink(linkId))
 		s_Editor->DeselectObject(link);
 }
 
 bool ax::NodeEditor::DeleteNode(NodeId nodeId)
 {
-	if(auto node = s_Editor->FindNode(nodeId))
+	if(const auto node = s_Editor->FindNode(nodeId))
 		return s_Editor->GetItemDeleter().Add(node);
 	else
 		return false;
@@ -549,7 +549,7 @@ bool ax::NodeEditor::DeleteNode(NodeId nodeId)
 
 bool ax::NodeEditor::DeleteLink(LinkId linkId)
 {
-	if(auto link = s_Editor->FindLink(linkId))
+	if(const auto link = s_Editor->FindLink(linkId))
 		return s_Editor->GetItemDeleter().Add(link);
 	else
 		return false;
@@ -728,7 +728,7 @@ ImGuiMouseButton ax::NodeEditor::GetBackgroundDoubleClickButtonIndex()
 
 bool ax::NodeEditor::GetLinkPins(LinkId linkId,PinId* startPinId,PinId* endPinId)
 {
-	auto link = s_Editor->FindLink(linkId);
+	const auto link = s_Editor->FindLink(linkId);
 	if(!link)
 		return false;
 

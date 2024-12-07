@@ -93,7 +93,7 @@ class ThreadPool : public Singleton
         }
         ThreadPool *pool;
 
-        void operator()()
+        void operator()() const
         {
             std::unique_lock<std::mutex> lock(pool->conditional_mutex);
             while (!pool->ShouldClose || (!pool->workerQueue.empty() && pool->ShouldClose))

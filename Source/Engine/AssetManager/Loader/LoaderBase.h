@@ -98,7 +98,7 @@ template <class T> std::shared_ptr<Library> ResourceLoaderBase::GetLibraryOfType
 {
 	OPTICK_EVENT();
 	const std::type_info *typeInfo = &typeid(T);
-	auto it = myLibraries.find(typeInfo);
+	const auto it = myLibraries.find(typeInfo);
 	if (it != myLibraries.end())
 	{
 		return it->second;

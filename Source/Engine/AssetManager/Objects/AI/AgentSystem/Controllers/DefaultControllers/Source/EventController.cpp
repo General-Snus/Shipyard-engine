@@ -11,7 +11,7 @@ EventController::EventController()
 
 bool EventController::Update(GameObject input)
 {
-	auto* transform = input.TryGetComponent<Transform>();
+	const auto* transform = input.TryGetComponent<Transform>();
 
 	if (pathToTarget)
 	{

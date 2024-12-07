@@ -65,7 +65,7 @@ void ShipyardShader::Init()
     // Helpers::ThrowIfFailed(D3DReadFileToBlob(AssetPath.wstring().c_str(), &m_Blob));
 
     ComPtr<IDxcBlobEncoding> pSourceBlob;
-    HRESULT hr = pLibrary->CreateBlobFromFile(AssetPath.wstring().c_str(), &codePage, &pSourceBlob);
+    const HRESULT hr = pLibrary->CreateBlobFromFile(AssetPath.wstring().c_str(), &codePage, &pSourceBlob);
     m_Blob = pSourceBlob;
 
     if (FAILED(hr))

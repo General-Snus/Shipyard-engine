@@ -40,11 +40,11 @@ namespace ImGradient
 
    static int DrawPoint(ImDrawList* draw_list, ImVec4 color, const ImVec2 size, bool editing, ImVec2 pos)
    {
-      ImGuiIO& io = ImGui::GetIO();
+      const ImGuiIO& io = ImGui::GetIO();
 
-      ImVec2 p1 = ImLerp(pos, ImVec2(pos + ImVec2(size.x - size.y, 0.f)), color.w) + ImVec2(3, 3);
-      ImVec2 p2 = ImLerp(pos + ImVec2(size.y, size.y), ImVec2(pos + size), color.w) - ImVec2(3, 3);
-      ImRect rc(p1, p2);
+      const ImVec2 p1 = ImLerp(pos, ImVec2(pos + ImVec2(size.x - size.y, 0.f)), color.w) + ImVec2(3, 3);
+      const ImVec2 p2 = ImLerp(pos + ImVec2(size.y, size.y), ImVec2(pos + size), color.w) - ImVec2(3, 3);
+      const ImRect rc(p1, p2);
 
       color.w = 1.f;
       draw_list->AddRectFilled(p1, p2, ImColor(color));
@@ -65,7 +65,7 @@ namespace ImGradient
    bool Edit(Delegate& delegate, const ImVec2& size, int& selection)
    {
       bool ret = false;
-      ImGuiIO& io = ImGui::GetIO();
+      const ImGuiIO& io = ImGui::GetIO();
       ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
       ImGui::BeginChildFrame(137, size);
 
@@ -89,7 +89,7 @@ namespace ImGradient
       }
       for (size_t i = 0; i < delegate.GetPointCount(); i++)
       {
-         int ptSel = DrawPoint(draw_list, pts[i], size, i == currentSelection, offset);
+         const int ptSel = DrawPoint(draw_list, pts[i], size, i == currentSelection, offset);
          if (ptSel == 2)
          {
             currentSelection = int(i);
@@ -100,10 +100,10 @@ namespace ImGradient
             movingPt = int(i);
          }
       }
-      ImRect rc(offset, offset + size);
+      const ImRect rc(offset, offset + size);
       if (rc.Contains(io.MousePos) && io.MouseDoubleClicked[0])
       {
-         float t = (io.MousePos.x - offset.x) / size.x;
+         const float t = (io.MousePos.x - offset.x) / size.x;
          delegate.AddPoint(delegate.GetPoint(t));
          ret = true;
       }

@@ -72,7 +72,7 @@ void GameObjectManager::DeleteGameObject(const SY::UUID aGameObjectID, bool forc
 	{
 		if (myGameObjects.contains(aGameObjectID))
 		{
-			for (auto &cm : myComponentManagers)
+			for (const auto &cm : myComponentManagers)
 			{
 				cm.second->DeleteGameObject(aGameObjectID);
 			}
@@ -189,7 +189,7 @@ bool GameObjectManager::HasGameObject(const GameObject &anID) const
 void GameObjectManager::OnColliderEnter(const SY::UUID aFirstID, const SY::UUID aTargetID)
 {
 	OPTICK_EVENT();
-	for (auto &cm : myComponentManagers | std::views::values)
+	for (const auto &cm : myComponentManagers | std::views::values)
 	{
 		cm->OnColliderEnter(aFirstID, aTargetID);
 	}
@@ -198,7 +198,7 @@ void GameObjectManager::OnColliderEnter(const SY::UUID aFirstID, const SY::UUID 
 void GameObjectManager::OnColliderExit(const SY::UUID aFirstID, const SY::UUID aTargetID)
 {
 	OPTICK_EVENT();
-	for (auto &cm : myComponentManagers | std::views::values)
+	for (const auto &cm : myComponentManagers | std::views::values)
 	{
 		cm->OnColliderExit(aFirstID, aTargetID);
 	}
@@ -289,7 +289,7 @@ void GameObjectManager::DeleteObjects()
 	{
 		if (myGameObjects.contains(myObjectsToDelete[i]))
 		{
-			for (auto &cm : myComponentManagers)
+			for (const auto &cm : myComponentManagers)
 			{
 				cm.second->DeleteGameObject(myObjectsToDelete[i]);
 			}
@@ -330,7 +330,7 @@ void GameObjectManager::SetIsVisibleInHierarchy(const SY::UUID aGameObjectID, bo
 void GameObjectManager::OnSiblingChanged(SY::UUID anID, const std::type_info *SourceClass)
 {
 	OPTICK_EVENT();
-	for (auto &cm : myComponentManagers)
+	for (const auto &cm : myComponentManagers)
 	{
 		cm.second->OnSiblingChanged(anID, SourceClass);
 	}
