@@ -15,7 +15,7 @@ class Skeleton;
 class MeshRenderer : public Component
 {
   public:
-    ReflectableTypeRegistration();
+	ReflectableTypeRegistration();
     MeshRenderer() = delete;                                             // Create a generic cube
     MeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager); // Create a generic cube
     MeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager, const std::filesystem::path &aFilePath,

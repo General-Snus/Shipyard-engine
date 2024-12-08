@@ -24,7 +24,7 @@ void PopUpContextForAsset(std::shared_ptr<asset>& replace)
 		const std::string keyTerm = buf;
 
 		ImGui::BeginChild("test");
-		const auto& assetMap = EngineResources.GetLibraryOfType<asset>()->GetContentCatalogue<asset>();
+		const auto& assetMap = ENGINE_RESOURCES.GetLibraryOfType<asset>()->GetContentCatalogue<asset>();
 
 		using localPair = std::pair<std::string, std::shared_ptr<asset>>;
 		static std::vector<localPair> sortedList;
@@ -92,14 +92,14 @@ void SwitchableAsset(std::shared_ptr<assetType>& asset, std::string PayloadType,
 			{
 				auto newWindow = std::make_shared<CustomFuncWindow>(std::bind(&assetType::InspectorView, asset));
 				newWindow->SetWindowName(asset->GetAssetPath().filename().string());
-				EditorInstance.g_EditorWindows.emplace_back(newWindow);
+				EDITOR_INSTANCE.g_EditorWindows.emplace_back(newWindow);
 			}
 		}
 	}
 	else
 	{
 		std::shared_ptr<TextureHolder> texture =
-			EngineResources.LoadAsset<TextureHolder>("Textures\\Widgets\\File.png");
+			ENGINE_RESOURCES.LoadAsset<TextureHolder>("Textures\\Widgets\\File.png");
 		if (!texture)
 		{
 			texture = GraphicsEngineInstance.GetDefaultTexture(eTextureType::MaterialMap);
@@ -119,7 +119,7 @@ void SwitchableAsset(std::shared_ptr<assetType>& asset, std::string PayloadType,
 		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(PayloadType.c_str()))
 		{
 			const auto path = std::string(static_cast<const char*>(payload->Data), payload->DataSize);
-			asset = EngineResources.LoadAsset<assetType>(path);
+			asset = ENGINE_RESOURCES.LoadAsset<assetType>(path);
 		}
 		ImGui::EndDragDropTarget();
 	}

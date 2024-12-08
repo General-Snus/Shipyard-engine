@@ -1,11 +1,11 @@
 #pragma once
-#include "../Windows/SplashWindow.h"
 #include <Editor/Editor/Defines.h>
 #include <Game/GameLauncher/Core/GameLauncher.h>
 #include <Tools/Utilities/DataStructures/Queue.hpp>
 #include <Tools/Utilities/LinearAlgebra/Sphere.hpp>
 #include <Tools/Utilities/System/ServiceLocator.h>
 #include <Tools/Utilities/System/SingletonTemplate.h>
+#include "../Windows/SplashWindow.h"
 
 class Viewport;
 class CommandBuffer;
@@ -21,7 +21,8 @@ enum class EditorCallback
 	WM_DropFile
 };
 
-#define EditorInstance ServiceLocator::Instance().GetService<Editor>()
+#define EDITOR_INSTANCE ServiceLocator::Instance().GetService<Editor>()
+
 class Editor : public Singleton
 {
 	friend class LoggerService;
@@ -34,55 +35,57 @@ class Editor : public Singleton
 	void AddViewPort();
 	void TopBar();
 
-  public:
-	int Run();
+public:
+	int  Run();
 	bool Initialize(HWND aHandle);
-	void DoWinProc(const MSG &msg);
+	void DoWinProc(const MSG& msg);
 
-	RECT GetViewportRECT();
+	RECT                  GetViewportRECT();
 	Vector2<unsigned int> GetViewportResolution();
 
 	bool GetIsGUIActive() const
 	{
 		return IsGUIActive;
 	};
+
 	void SetIsGUIActive(bool set)
 	{
 		IsGUIActive = set;
 	};
 	std::vector<std::shared_ptr<EditorWindow>> g_EditorWindows;
 
-	std::vector<GameObject> &GetSelectedGameObjects()
+	std::vector<GameObject>& GetSelectedGameObjects()
 	{
 		// Todo ensure saftey from other steps
-		const auto &invalidArray =
+		const auto& invalidArray =
 			std::ranges::remove_if(m_SelectedGameObjects, [](GameObject obj) { return !obj.IsValid(); });
 		m_SelectedGameObjects.erase(invalidArray.begin(), invalidArray.end());
 
 		return m_SelectedGameObjects;
 	}
+
 	void CheckSelectedForRemoved();
 	void Copy();
 	void Paste();
 
-	void FocusObject(const GameObject &focus, bool focusWithOffset = true) const;
-	void AlignObject(const GameObject &focus) const;
+	void FocusObject(const GameObject& focus, bool focusWithOffset = true) const;
+	void AlignObject(const GameObject& focus) const;
 
-	void SetActiveScene(const std::shared_ptr<Scene> scene);
-	std::shared_ptr<Scene> GetActiveScene();
+	void                      SetActiveScene(std::shared_ptr<Scene> scene);
+	std::shared_ptr<Scene>    GetActiveScene();
 	std::shared_ptr<Viewport> GetMainViewport();
 
 	std::unordered_map<EditorCallback, Event> m_Callbacks;
-	GameState gameState;
+	GameState                                 gameState;
 
-  private:
+private:
 	std::vector<std::filesystem::path> WM_DroppedPath;
 
-	RECT ViewportRect;
+	RECT                    ViewportRect;
 	std::vector<GameObject> m_SelectedGameObjects;
 	std::vector<GameObject> copiedObjects;
-	std::shared_ptr<Scene> m_ActiveScene;
+	std::shared_ptr<Scene>  m_ActiveScene;
 
 	std::vector<std::shared_ptr<Viewport>> m_Viewports;
-	bool IsGUIActive = true;
+	bool                                   IsGUIActive = true;
 };

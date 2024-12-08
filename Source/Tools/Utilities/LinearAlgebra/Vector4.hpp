@@ -29,6 +29,14 @@ public:
 	// Destructor (compiler generated)
 	~Vector4<T>() = default;
 
+
+	static constexpr std::size_t size() { return {4}; };
+
+	T* begin() { return &x; };
+	T* end() { return &x + size(); };
+	T* begin() const { return &x; };
+	T* end() const { return &x + size(); };
+
 	operator std::initializer_list<T>() const
 	{
 		return {x, y, z, w};
@@ -64,16 +72,6 @@ public:
 	// Returns the dot product of this and aVector
 	T Dot(const Vector4<T>& aVector) const;
 };
-
-template <class T>
-Vector4<T> Lerp(Vector4<T> start_value, Vector4<T> end_value, float t)
-{
-	const float val = std::clamp<float>(t, 0, 1); // assures that the given parameter "t" is between 0 and 1
-
-	return Vector4<T>(
-		start_value.x + (end_value.x - start_value.x) * val, start_value.y + (end_value.y - start_value.y) * val,
-		start_value.z + (end_value.z - start_value.z) * val, start_value.w + (end_value.w - start_value.w) * val);
-}
 
 template <class T>
 Vector4<T> MinVector(const Vector4<T>& a, const Vector4<T>& b)
@@ -165,6 +163,7 @@ void operator/=(Vector4<T>& aVector, const T& aScalar)
 	aVector.z = aVector.z / aScalar;
 	aVector.w = aVector.w / aScalar;
 }
+
 
 template <class T>
 Vector4<T>& Vector4<T>::operator=(const T& aTypeT)
@@ -321,8 +320,8 @@ struct std::hash<Vector4f>
 {
 	std::size_t operator()(const Vector4f& vector) const noexcept
 	{
-		std::size_t      seed = 0;
-		const std::hash<float> hasher;
+		std::size_t                seed = 0;
+		constexpr std::hash<float> hasher;
 
 		seed ^= hasher(vector.x) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 		seed ^= hasher(vector.y) + 0x9e3779b9 + (seed << 6) + (seed >> 2);

@@ -138,7 +138,7 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 		}
 
 		Material::CreateJson(dataMat, matPath);
-		materials[key] = EngineResources.LoadAsset<Material>(matPath);
+		materials[key] = ENGINE_RESOURCES.LoadAsset<Material>(matPath);
 	}
 }
 
@@ -146,8 +146,8 @@ std::shared_ptr<TextureHolder> Mesh::GetEditorIcon()
 {
 	OPTICK_EVENT();
 	auto imageTexture =
-		EngineResources.LoadAsset<TextureHolder>(std::format("INTERNAL_IMAGE_UI_{}", AssetPath.filename().string()));
-	const std::shared_ptr<Mesh> mesh = EngineResources.LoadAsset<Mesh>(AssetPath, true);
+		ENGINE_RESOURCES.LoadAsset<TextureHolder>(std::format("INTERNAL_IMAGE_UI_{}", AssetPath.filename().string()));
+	const std::shared_ptr<Mesh> mesh = ENGINE_RESOURCES.LoadAsset<Mesh>(AssetPath, true);
 
 	if (!imageTexture->isLoadedComplete)
 	{
@@ -159,7 +159,7 @@ std::shared_ptr<TextureHolder> Mesh::GetEditorIcon()
 		}
 		else
 		{
-			imageTexture = EngineResources.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+			imageTexture = ENGINE_RESOURCES.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
 		}
 	}
 	return imageTexture;
@@ -174,9 +174,9 @@ bool Mesh::InspectorView()
 	}
 
 	{
-		auto imageTexture = EngineResources.LoadAsset<TextureHolder>(
+		auto imageTexture = ENGINE_RESOURCES.LoadAsset<TextureHolder>(
 			std::format("INTERNAL_IMAGE_UI_{}", AssetPath.filename().string()));
-		const std::shared_ptr<Mesh> mesh = EngineResources.LoadAsset<Mesh>(AssetPath, true);
+		const std::shared_ptr<Mesh> mesh = ENGINE_RESOURCES.LoadAsset<Mesh>(AssetPath, true);
 
 		if (!imageTexture->isLoadedComplete)
 		{
@@ -188,7 +188,7 @@ bool Mesh::InspectorView()
 			}
 			else
 			{
-				imageTexture = EngineResources.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+				imageTexture = ENGINE_RESOURCES.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
 			}
 		}
 
@@ -230,7 +230,7 @@ void Mesh::Init()
 	OPTICK_EVENT();
 	if (!exists(AssetPath))
 	{
-		Logger.Warn("Failed to load mesh at: " + AssetPath.string());
+		LOGGER.Warn("Failed to load mesh at: " + AssetPath.string());
 		return;
 	}
 
@@ -244,13 +244,13 @@ void Mesh::Init()
 	const auto exception = importer.GetErrorString();
 	if (importer.GetException())
 	{
-		Logger.Err(exception);
+		LOGGER.Err(exception);
 		return;
 	}
 
 	if (scene->HasAnimations())
 	{
-		Logger.Warn("Can not load animations as mesh: " + AssetPath.string());
+		LOGGER.Warn("Can not load animations as mesh: " + AssetPath.string());
 		return;
 	}
 
@@ -259,14 +259,14 @@ void Mesh::Init()
 	{
 		const std::string    message = "Failed to load mesh " + AssetPath.string();
 		const std::exception failedMeshLoad(message.c_str());
-		Logger.Critical(failedMeshLoad, 2);
+		LOGGER.Critical(failedMeshLoad, 2);
 		return;
 	}
 
 	for (size_t i = 0; i < scene->mNumMeshes; i++)
 	{
-		Element element;
-		const bool    succeded = processMesh(scene->mMeshes[i], scene, element);
+		Element    element;
+		const bool succeded = processMesh(scene->mMeshes[i], scene, element);
 
 		if (succeded)
 		{
@@ -357,14 +357,14 @@ bool Mesh::processMesh(aiMesh* mesh, const aiScene* scene, Element& outElement)
 	VertexResource vertexRes(wname);
 	if (!GPUInstance.CreateVertexBuffer<Vertex>(commandList, vertexRes, mdlVertices))
 	{
-		Logger.Err("Failed to create vertex buffer");
+		LOGGER.Err("Failed to create vertex buffer");
 		return false;
 	}
 
 	IndexResource indexRes(wname);
 	if (!GPUInstance.CreateIndexBuffer(commandList, indexRes, mdlIndicies))
 	{
-		Logger.Err("Failed to create index buffer");
+		LOGGER.Err("Failed to create index buffer");
 		return false;
 	}
 

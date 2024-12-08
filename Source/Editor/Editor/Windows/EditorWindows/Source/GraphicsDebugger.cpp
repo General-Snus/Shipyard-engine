@@ -10,13 +10,13 @@ void GraphicsDebugger::RenderImGUi()
 {
 	ImGui::Begin("Debug Filter", &m_KeepWindow);
 
-	constexpr auto &debugFilter = magic_enum::enum_names<DebugFilter>();
-	constexpr int enumCount = (int)magic_enum::enum_count<DebugFilter>();
+	constexpr auto& debugFilter = magic_enum::enum_names<DebugFilter>();
+	constexpr auto  enumCount = magic_enum::enum_count<DebugFilter>();
 
-	std::vector<const char *> testArray;
+	std::vector<const char*> testArray;
 	for_sequence<enumCount>([&testArray](auto i) constexpr { testArray.emplace_back(debugFilter[i].data()); });
 
-	for (int i = 0; i < (int)DebugFilter::count; i++)
+	for (int i = 0; i < static_cast<int>(DebugFilter::count); i++)
 	{
 		if (currentlyActiveLayer == i)
 		{
@@ -27,9 +27,9 @@ void GraphicsDebugger::RenderImGUi()
 			if (ImGui::RadioButton(testArray[i], false))
 			{
 				currentlyActiveLayer = i;
-				if (const auto viewport = EditorInstance.GetMainViewport())
+				if (const auto viewport = EDITOR_INSTANCE.GetMainViewport())
 				{
-					viewport->GetCamera().filter = (DebugFilter)currentlyActiveLayer;
+					viewport->GetCamera().filter = static_cast<DebugFilter>(currentlyActiveLayer);
 				}
 			}
 		}

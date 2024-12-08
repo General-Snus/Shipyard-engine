@@ -1,6 +1,6 @@
 #pragma once
-#define WorkingOnPngLoading true
-#define WorkingOnMultiThread false
+#define WORKING_ON_PNG_LOADING true
+#define WORKING_ON_MULTI_THREAD false
 #define PHYSX true
-#define UseScriptGraph true
-#define ThreadedAssetLoading true
+#define USE_SCRIPT_GRAPH true
+#define THREADED_ASSET_LOADING true

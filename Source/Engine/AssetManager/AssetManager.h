@@ -1,38 +1,42 @@
 #pragma once
 #define AsUINT(v) static_cast<unsigned>(v)
 
-#include "Loader/LoaderBase.h" 
 #include <Editor/Editor/Defines.h>
 #include <Engine/AssetManager/ComponentSystem/UUID.h>
 #include <Tools/Utilities/System/ServiceLocator.h>
 #include <Tools/Utilities/System/ThreadPool.hpp>
+#include "Loader/LoaderBase.h"
 
-#define EngineResources ServiceLocator::Instance().GetService<EngineResourcesLoader>()
+#define ENGINE_RESOURCES ServiceLocator::Instance().GetService<EngineResourcesLoader>()
 
 class EngineResourcesLoader : public ResourceLoaderBase
 {
-  public:
-	template <class T> bool HasAsset(const std::filesystem::path &aFilePath, bool useExact) const;
-	template <class T> std::shared_ptr<T> LoadAsset(const std::filesystem::path &aFilePath);
-	template <class T> std::shared_ptr<T> LoadAsset(const std::filesystem::path &aFilePath, bool useExact);
-	template <class T> bool ForceLoadAsset(const std::filesystem::path &aFilePath, std::shared_ptr<T> &outAsset);
+public:
 	template <class T>
-	bool ForceLoadAsset(const std::filesystem::path &aFilePath, bool useExact, std::shared_ptr<T> &outAsset);
-	std::shared_ptr<AssetBase> TryLoadAsset(const std::filesystem::path &path);
+	bool HasAsset(const std::filesystem::path& aFilePath, bool useExact) const;
+	template <class T>
+	std::shared_ptr<T> LoadAsset(const std::filesystem::path& aFilePath);
+	template <class T>
+	std::shared_ptr<T> LoadAsset(const std::filesystem::path& aFilePath, bool useExact);
+	template <class T>
+	bool ForceLoadAsset(const std::filesystem::path& aFilePath, std::shared_ptr<T>& outAsset);
+	template <class T>
+	bool ForceLoadAsset(const std::filesystem::path& aFilePath, bool useExact, std::shared_ptr<T>& outAsset);
+	std::shared_ptr<AssetBase> TryLoadAsset(const std::filesystem::path& path);
 };
 
 template <class T>
-bool EngineResourcesLoader::ForceLoadAsset(const std::filesystem::path &aFilePath, std::shared_ptr<T> &outAsset)
+bool EngineResourcesLoader::ForceLoadAsset(const std::filesystem::path& aFilePath, std::shared_ptr<T>& outAsset)
 {
 	return ForceLoadAsset<T>(aFilePath, false, outAsset);
 }
 
 template <class T>
-bool EngineResourcesLoader::ForceLoadAsset(const std::filesystem::path &identifierPath, const bool useExact,
-										   std::shared_ptr<T> &outAsset)
+bool EngineResourcesLoader::ForceLoadAsset(const std::filesystem::path& identifierPath, const bool useExact,
+                                           std::shared_ptr<T>&          outAsset)
 {
 	OPTICK_EVENT();
-	const std::type_info *typeInfo = &typeid(T);
+	const std::type_info*    typeInfo = &typeid(T);
 	std::shared_ptr<Library> library = GetLibraryOfType<T>();
 
 	if (!library)
@@ -46,8 +50,8 @@ bool EngineResourcesLoader::ForceLoadAsset(const std::filesystem::path &identifi
 
 	if (useExact)
 	{
-		Identifier = std::filesystem::relative(identifierPath, workingDirectory); // Might invoke unexpected behaviour
-																				  // but stops you from duplication
+		Identifier = relative(identifierPath, workingDirectory); // Might invoke unexpected behaviour
+		// but stops you from duplication
 
 		// TODO FIgure out if use exact is even a good thing to have? Can i automate
 		// without any sliver of doubt?
@@ -71,17 +75,18 @@ bool EngineResourcesLoader::ForceLoadAsset(const std::filesystem::path &identifi
 }
 
 // Is threaded, dont expect immediate results
-template <class T> std::shared_ptr<T> EngineResourcesLoader::LoadAsset(const std::filesystem::path &aFilePath)
+template <class T>
+std::shared_ptr<T> EngineResourcesLoader::LoadAsset(const std::filesystem::path& aFilePath)
 {
 	return LoadAsset<T>(aFilePath, false);
 }
 
 // Is threaded, dont expect immediate results
 template <class T>
-std::shared_ptr<T> EngineResourcesLoader::LoadAsset(const std::filesystem::path &identifierPath, const bool useExact)
+std::shared_ptr<T> EngineResourcesLoader::LoadAsset(const std::filesystem::path& identifierPath, const bool useExact)
 {
 	OPTICK_EVENT();
-	const std::type_info *typeInfo = &typeid(T);
+	const std::type_info*    typeInfo = &typeid(T);
 	std::shared_ptr<Library> library = GetLibraryOfType<T>();
 
 	if (!library)
@@ -94,7 +99,7 @@ std::shared_ptr<T> EngineResourcesLoader::LoadAsset(const std::filesystem::path 
 
 	if (useExact)
 	{
-		Identifier = std::filesystem::relative(identifierPath, workingDirectory);
+		Identifier = relative(identifierPath, workingDirectory);
 	}
 	else
 	{
@@ -109,7 +114,7 @@ std::shared_ptr<T> EngineResourcesLoader::LoadAsset(const std::filesystem::path 
 		ptr = library->Add(newObject);
 		myAssetQueue.EnqueueUnique(newObject.second);
 		newObject.second->isBeingLoaded = true;
-#if ThreadedAssetLoading
+#if THREADED_ASSET_LOADING
 		ThreadPoolInstance.SubmitWork(std::bind(&EngineResourcesLoader::ThreadedLoading, this));
 #else
 		ThreadedLoading();
@@ -119,10 +124,10 @@ std::shared_ptr<T> EngineResourcesLoader::LoadAsset(const std::filesystem::path 
 }
 
 template <class T>
-bool EngineResourcesLoader::HasAsset(const std::filesystem::path &identifierPath, const bool useExact) const
+bool EngineResourcesLoader::HasAsset(const std::filesystem::path& identifierPath, const bool useExact) const
 {
 	OPTICK_EVENT();
-	const std::type_info *typeInfo = &typeid(T);
+	const std::type_info*          typeInfo = &typeid(T);
 	const std::shared_ptr<Library> library = GetLibraryOfType<T>();
 
 	if (!library)
@@ -134,7 +139,7 @@ bool EngineResourcesLoader::HasAsset(const std::filesystem::path &identifierPath
 
 	if (useExact)
 	{
-		Identifier = std::filesystem::relative(identifierPath, workingDirectory);
+		Identifier = relative(identifierPath, workingDirectory);
 	}
 	else
 	{

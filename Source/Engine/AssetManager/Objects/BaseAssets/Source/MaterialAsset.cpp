@@ -2,18 +2,18 @@
 
 #include <Engine/GraphicsEngine/Shaders/Registers.h>
 
-#include "Engine/GraphicsEngine/GraphicsEngine.h"
 #include <Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h>
+#include "Engine/GraphicsEngine/GraphicsEngine.h"
 
+#include <Engine/GraphicsEngine/GraphicsEngineUtilities.h>
 #include "Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h"
 #include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
-#include <Engine/GraphicsEngine/GraphicsEngineUtilities.h>
 
-bool Material::CreateJson(const DataMaterial &data, const std::filesystem::path &writePath)
+bool Material::CreateJson(const DataMaterial& data, const std::filesystem::path& writePath)
 {
-	nlohmann::json json = nlohmann::json::basic_json();
+	auto json = nlohmann::json::basic_json();
 	{
-		nlohmann::json &js = json["MaterialBuffer"];
+		nlohmann::json& js = json["MaterialBuffer"];
 		js["albedoColor"][0] = data.materialData.albedoColor[0];
 		js["albedoColor"][1] = data.materialData.albedoColor[1];
 		js["albedoColor"][2] = data.materialData.albedoColor[2];
@@ -29,7 +29,7 @@ bool Material::CreateJson(const DataMaterial &data, const std::filesystem::path 
 
 	{
 		int i = 0;
-		for (auto &[path, ptr] : data.textures)
+		for (auto& [path, ptr] : data.textures)
 		{
 			nlohmann::json arr;
 			arr["TextureName"] = path.filename();
@@ -41,13 +41,13 @@ bool Material::CreateJson(const DataMaterial &data, const std::filesystem::path 
 		}
 	}
 
-	std::ofstream stream(EngineResources.Directory() / writePath.string());
+	std::ofstream stream(ENGINE_RESOURCES.Directory() / writePath.string());
 	stream << std::setw(4) << json;
 	stream.close();
 	return true;
 }
 
-Material::Material(const std::filesystem::path &aFilePath) : AssetBase(aFilePath)
+Material::Material(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)
 {
 }
 
@@ -77,7 +77,7 @@ void Material::Init()
 	data.vertexShader = GraphicsEngineInstance.GetDefaultVSShader();
 	data.pixelShader = GraphicsEngineInstance.GetDefaultPSShader();
 
-	if (std::filesystem::exists(AssetPath) && AssetPath.extension() == ".json")
+	if (exists(AssetPath) && AssetPath.extension() == ".json")
 	{
 		nlohmann::json json;
 		try
@@ -88,7 +88,7 @@ void Material::Init()
 			json = nlohmann::json::parse(file);
 			file.close();
 
-			nlohmann::json &js = json["MaterialBuffer"];
+			nlohmann::json& js = json["MaterialBuffer"];
 
 			data.materialData.albedoColor[0] = js["albedoColor"][0];
 			data.materialData.albedoColor[1] = js["albedoColor"][1];
@@ -102,29 +102,29 @@ void Material::Init()
 			data.materialData.Roughness = js["Roughness"];
 			data.materialData.Shine = js["Shine"];
 		}
-		catch (const std::exception &e)
+		catch (const std::exception& e)
 		{
 			const std::string msg =
 				"Unsuccessfull loading of material data file at path: " + AssetPath.string() + " " + e.what();
-			Logger.Warn(msg);
+			LOGGER.Warn(msg);
 			isLoadedComplete = false;
 			return;
 		}
 
 		try
 		{
-			nlohmann::json &js = json["Textures"];
-			for (const auto &i : js)
+			nlohmann::json& js = json["Textures"];
+			for (const auto& i : js)
 			{
 				std::shared_ptr<TextureHolder> texture;
-				const std::filesystem::path path = i["TexturePath"];
+				const std::filesystem::path    path = i["TexturePath"];
 
 				if (path.empty())
 				{
 					continue;
 				}
 
-				texture = EngineResources.LoadAsset<TextureHolder>(path);
+				texture = ENGINE_RESOURCES.LoadAsset<TextureHolder>(path);
 
 				const int type = i["TextureType"];
 				texture->SetTextureType(static_cast<eTextureType>(type));
@@ -133,11 +133,11 @@ void Material::Init()
 				data.textures[type].second = texture;
 			}
 		}
-		catch (const std::exception &e)
+		catch (const std::exception& e)
 		{
 			const std::string msg =
 				"Unsuccessfull loading of material texture file at path: " + AssetPath.string() + " " + e.what();
-			Logger.Warn(msg);
+			LOGGER.Warn(msg);
 			isLoadedComplete = false;
 			return;
 		}
@@ -179,11 +179,11 @@ bool Material::InspectorView()
 		ReflectSingleValue(data.materialData.Roughness, *this, "Roughness Strength");
 		ImGui::Separator();
 		ImGui::Spacing();
-		for (const auto &[index, pair] : data.textures | std::ranges::views::enumerate)
+		for (const auto& [index, pair] : data.textures | std::ranges::views::enumerate)
 		{
-			if (auto &[path, texture] = pair; texture)
+			if (auto& [path, texture] = pair; texture)
 			{
-				ImGui::TextCentered(std::string(magic_enum::enum_name(eTextureType(index))));
+				ImGui::TextCentered(std::string(magic_enum::enum_name(static_cast<eTextureType>(index))));
 				ImGui::Separator();
 				ImGui::Columns(2);
 				ImGui::SetColumnWidth(0, 128);
@@ -193,12 +193,12 @@ bool Material::InspectorView()
 
 				ImGui::Text(texture->AssetPath.filename().string().c_str());
 
-				Vector2ui res;
-				uint32_t mip;
-				DXGI_FORMAT format{};
+				Vector2ui                res;
+				uint32_t                 mip;
+				DXGI_FORMAT              format{};
 				D3D12_RESOURCE_DIMENSION dim{};
-				D3D12_RESOURCE_FLAGS flags{};
-				if (const auto &raw = texture->GetRawTexture())
+				D3D12_RESOURCE_FLAGS     flags{};
+				if (const auto& raw = texture->GetRawTexture())
 				{
 					res = raw->GetResolution();
 					format = raw->m_Format;
@@ -225,11 +225,11 @@ bool Material::InspectorView()
 std::shared_ptr<TextureHolder> Material::GetEditorIcon()
 {
 	auto imageTexture =
-		EngineResources.LoadAsset<TextureHolder>(std::format("INTERNAL_IMAGE_UI_{}", AssetPath.filename().string()));
+		ENGINE_RESOURCES.LoadAsset<TextureHolder>(std::format("INTERNAL_IMAGE_UI_{}", AssetPath.filename().string()));
 	if (!imageTexture || !imageTexture->isLoadedComplete)
 	{
-		const std::shared_ptr<Mesh> mesh = EngineResources.LoadAsset<Mesh>("Materials/MaterialPreviewMesh.fbx");
-		const std::shared_ptr<Material> materialPreview = EngineResources.LoadAsset<Material>(AssetPath, true);
+		const std::shared_ptr<Mesh>     mesh = ENGINE_RESOURCES.LoadAsset<Mesh>("Materials/MaterialPreviewMesh.fbx");
+		const std::shared_ptr<Material> materialPreview = ENGINE_RESOURCES.LoadAsset<Material>(AssetPath, true);
 
 		const bool meshReady = mesh->isLoadedComplete && !mesh->isBeingLoaded;
 		const bool materialReady = materialPreview->isLoadedComplete && !materialPreview->isBeingLoaded;
@@ -237,17 +237,17 @@ std::shared_ptr<TextureHolder> Material::GetEditorIcon()
 		if (!imageTexture->isBeingLoaded && meshReady && materialReady)
 		{
 			GraphicsEngineUtilities::GenerateSceneForIcon(mesh, imageTexture, materialPreview);
-			Logger.Log("Material Preview Queued up");
+			LOGGER.Log("Material Preview Queued up");
 		}
 		else
 		{
-			imageTexture = EngineResources.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+			imageTexture = ENGINE_RESOURCES.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
 		}
 	}
 	return imageTexture;
 }
 
-MaterialBuffer &Material::GetMaterialData()
+MaterialBuffer& Material::GetMaterialData()
 {
 	return data.materialData;
 }
@@ -270,20 +270,20 @@ std::shared_ptr<TextureHolder> Material::GetTexture(eTextureType type)
 	return nullptr;
 }
 
-void Material::SetColor(const Color & aColor)
+void Material::SetColor(const Color& aColor)
 {
 	data.m_color = aColor;
 	data.materialData.albedoColor = data.m_color.GetRGBA();
 }
-void Material::SetColor(const Vector4f &aColor)
-{
 
+void Material::SetColor(const Vector4f& aColor)
+{
 	data.m_color = aColor;
-	data.materialData.albedoColor = data.m_color.GetRGBA(); 
+	data.materialData.albedoColor = data.m_color.GetRGBA();
 }
 
-void Material::SetShader(const std::shared_ptr<ShipyardShader> &aVertexShader,
-                         const std::shared_ptr<ShipyardShader> &aPixelShader)
+void Material::SetShader(const std::shared_ptr<ShipyardShader>& aVertexShader,
+                         const std::shared_ptr<ShipyardShader>& aPixelShader)
 {
 	data.vertexShader = aVertexShader;
 	data.pixelShader = aPixelShader;

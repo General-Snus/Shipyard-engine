@@ -1,35 +1,35 @@
 #include "AssetManager.pch.h"
 
-#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h" 
+#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
+#include <unordered_set>
+#include <Engine/GraphicsEngine/GraphicsEngineUtilities.h>
 #include "Engine/AssetManager/ComponentSystem/Components/Animator.h"
 #include "Engine/AssetManager/Objects/BaseAssets/Animations.h"
 #include "Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h"
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
-#include "Tools/ImGui/ImGuiHelpers.hpp"
 #include "Tools/ImGui/imgui.h"
-#include <Engine/GraphicsEngine/GraphicsEngineUtilities.h>
-#include <unordered_set>
+#include "Tools/ImGui/ImGuiHelpers.hpp"
 
 #include "Editor/Editor/Core/Editor.h"
 #include "Editor/Editor/Windows/EditorWindows/CustomFuncWindow.h"
 
 // Must define function EditorIcon for asset
 
-MeshRenderer::MeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager) : Component(anOwnerId, aManager)
+MeshRenderer::MeshRenderer(const SY::UUID anOwnerId, GameObjectManager* aManager) : Component(anOwnerId, aManager)
 {
-	m_Mesh = EngineResources.LoadAsset<Mesh>("default.fbx");
+	m_Mesh = ENGINE_RESOURCES.LoadAsset<Mesh>("default.fbx");
 }
 
-inline MeshRenderer::MeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager,
-								  const std::filesystem::path &aFilePath, bool useExact)
+inline MeshRenderer::MeshRenderer(const SY::UUID               anOwnerId, GameObjectManager* aManager,
+                                  const std::filesystem::path& aFilePath, bool               useExact)
 	: Component(anOwnerId, aManager)
 {
-	m_Mesh = EngineResources.LoadAsset<Mesh>(aFilePath, useExact);
+	m_Mesh = ENGINE_RESOURCES.LoadAsset<Mesh>(aFilePath, useExact);
 }
 
-void MeshRenderer::SetNewMesh(const std::filesystem::path &aFilePath)
+void MeshRenderer::SetNewMesh(const std::filesystem::path& aFilePath)
 {
-	m_Mesh = EngineResources.LoadAsset<Mesh>(aFilePath);
+	m_Mesh = ENGINE_RESOURCES.LoadAsset<Mesh>(aFilePath);
 }
 
 void MeshRenderer::SetNewMesh(std::shared_ptr<Mesh> aMesh)
@@ -37,14 +37,14 @@ void MeshRenderer::SetNewMesh(std::shared_ptr<Mesh> aMesh)
 	m_Mesh = aMesh;
 }
 
-void MeshRenderer::SetMaterialPath(const std::filesystem::path &aFilePath)
+void MeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath)
 {
-	SetMaterial(EngineResources.LoadAsset<Material>(aFilePath), 0);
+	SetMaterial(ENGINE_RESOURCES.LoadAsset<Material>(aFilePath), 0);
 }
 
-void MeshRenderer::SetMaterialPath(const std::filesystem::path &aFilePath, int elementIndex)
+void MeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath, int elementIndex)
 {
-	SetMaterial(EngineResources.LoadAsset<Material>(aFilePath), elementIndex);
+	SetMaterial(ENGINE_RESOURCES.LoadAsset<Material>(aFilePath), elementIndex);
 }
 
 void MeshRenderer::SetMaterial(const std::shared_ptr<Material> aMaterial)
@@ -70,7 +70,7 @@ std::shared_ptr<Material> MeshRenderer::GetMaterial(int materialIndex) const
 		if (const auto mat = m_OverrideMaterial[materialIndex])
 		{
 			return mat;
-		};
+		}
 	}
 
 	if (m_Mesh->materials.contains(materialIndex))
@@ -78,7 +78,7 @@ std::shared_ptr<Material> MeshRenderer::GetMaterial(int materialIndex) const
 		if (const auto mat = m_Mesh->materials[materialIndex])
 		{
 			return mat;
-		};
+		}
 	}
 
 	return nullptr;
@@ -93,18 +93,15 @@ bool MeshRenderer::IsDefaultMesh() const
 	return false;
 }
 
-std::vector<Element> &MeshRenderer::GetElements() const
+std::vector<Element>& MeshRenderer::GetElements() const
 {
 	OPTICK_EVENT();
 	if (m_Mesh->isLoadedComplete)
 	{
 		return m_Mesh->Elements;
 	}
-	else
-	{
-		static std::vector<Element> empty;
-		return empty;
-	}
+	static std::vector<Element> empty;
+	return empty;
 }
 
 std::shared_ptr<Mesh> MeshRenderer::GetRawMesh() const
@@ -156,14 +153,14 @@ bool MeshRenderer::InspectorView()
 
 	if (ImGui::TreeNodeEx("Materials", ImGuiTreeNodeFlags_DefaultOpen)) // Replace with element name
 	{
-		int index = 0;
+		int                          index = 0;
 		std::unordered_set<uint32_t> materialIndexes;
-		for (const auto &element : m_Mesh->Elements)
+		for (const auto& element : m_Mesh->Elements)
 		{
 			materialIndexes.emplace(element.MaterialIndex);
 		}
 
-		for (const auto &matIndex : materialIndexes)
+		for (const auto& matIndex : materialIndexes)
 		{
 			const auto textIndex = std::format("Material {}:", index);
 			ImGui::BeginTable(textIndex.c_str(), 2);
@@ -209,7 +206,7 @@ std::shared_ptr<TextureHolder> MeshRenderer::GetTexture(eTextureType type, unsig
 			}
 		}
 
-		for (const auto &material : m_OverrideMaterial)
+		for (const auto& material : m_OverrideMaterial)
 		{
 			if (!material)
 			{
@@ -231,10 +228,10 @@ std::shared_ptr<TextureHolder> MeshRenderer::GetTexture(eTextureType type, unsig
 			{
 				return tex;
 			}
-		};
+		}
 	}
 
-	for (const auto &[value, material] : m_Mesh->materials)
+	for (const auto& [value, material] : m_Mesh->materials)
 	{
 		if (!material)
 		{
@@ -250,24 +247,24 @@ std::shared_ptr<TextureHolder> MeshRenderer::GetTexture(eTextureType type, unsig
 	return nullptr;
 }
 
-cSkeletalMeshRenderer::cSkeletalMeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager)
+cSkeletalMeshRenderer::cSkeletalMeshRenderer(const SY::UUID anOwnerId, GameObjectManager* aManager)
 	: MeshRenderer(anOwnerId, aManager)
 {
 	// MeshRenderer creates default mesh
 }
 
-cSkeletalMeshRenderer::cSkeletalMeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager,
-											 const std::filesystem::path &aFilePath)
+cSkeletalMeshRenderer::cSkeletalMeshRenderer(const SY::UUID               anOwnerId, GameObjectManager* aManager,
+                                             const std::filesystem::path& aFilePath)
 	: MeshRenderer(anOwnerId, aManager, aFilePath)
 {
-	mySkeleton = EngineResources.LoadAsset<Skeleton>(aFilePath);
+	mySkeleton = ENGINE_RESOURCES.LoadAsset<Skeleton>(aFilePath);
 	assert(mySkeleton);
 }
 
-void cSkeletalMeshRenderer::SetNewMesh(const std::filesystem::path &aFilePath)
+void cSkeletalMeshRenderer::SetNewMesh(const std::filesystem::path& aFilePath)
 {
-	m_Mesh = EngineResources.LoadAsset<Mesh>(aFilePath);
-	mySkeleton = EngineResources.LoadAsset<Skeleton>(aFilePath);
+	m_Mesh = ENGINE_RESOURCES.LoadAsset<Mesh>(aFilePath);
+	mySkeleton = ENGINE_RESOURCES.LoadAsset<Skeleton>(aFilePath);
 }
 
 bool cSkeletalMeshRenderer::InspectorView()

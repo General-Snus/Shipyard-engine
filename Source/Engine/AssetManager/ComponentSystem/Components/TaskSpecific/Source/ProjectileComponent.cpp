@@ -17,7 +17,7 @@ void ProjectileComponent::Update()
 	lifetime -= TimerInstance.getDeltaTime();
 	if (lifetime <= 0)
 	{
-		Scene::ActiveManager().DeleteGameObject(myOwnerID);
+		Scene::activeManager().DeleteGameObject(myOwnerID);
 	}
 }
 
@@ -31,15 +31,15 @@ void ProjectileComponent::OnColliderEnter(const SY::UUID aGameObjectID)
 {
 	if (aGameObjectID != Creator.GetID())
 	{
-		if (auto* arg = Scene::ActiveManager().TryGetComponent<CombatComponent>(aGameObjectID))
+		if (auto* arg = Scene::activeManager().TryGetComponent<CombatComponent>(aGameObjectID))
 		{
 			arg->myHealth -= 10;
 		}
 		// doing this because have no nice tag system :(((
-		if (auto* arg = Scene::ActiveManager().TryGetComponent<ProjectileComponent>(aGameObjectID))
+		if (auto* arg = Scene::activeManager().TryGetComponent<ProjectileComponent>(aGameObjectID))
 		{
 			return;
 		}
-		Scene::ActiveManager().DeleteGameObject(myOwnerID);
+		Scene::activeManager().DeleteGameObject(myOwnerID);
 	}
 }

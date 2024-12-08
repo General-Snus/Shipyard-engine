@@ -19,7 +19,7 @@ void StateMachineBase::ChangeState(int aStateID)
 	assert(mySavedStates.contains(aStateID)&& "State does not exist");
 	myCurrentState = aStateID;
 	mySavedStates.at(myCurrentState)->Enter();
-	Logger.Log(std::format("Entered {} state", magic_enum::enum_name(static_cast<eStates>(myCurrentState))));
+	LOGGER.Log(std::format("Entered {} state", magic_enum::enum_name(static_cast<eStates>(myCurrentState))));
 }
 
 void StateMachineBase::AddState(int aStateID, std::shared_ptr<StateBase> arg)

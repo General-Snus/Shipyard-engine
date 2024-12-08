@@ -174,7 +174,7 @@ void SetupImGuiStyle(Theme theme)
 	colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
 	colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
 
-	auto path = EngineResources.Directory() / "Theme.json";
+	auto path = ENGINE_RESOURCES.Directory() / "Theme.json";
 	if (theme != builtIn && exists(path))
 	{
 		std::ifstream file(path);
@@ -264,7 +264,7 @@ void SetupImGuiStyle(Theme theme)
 		catch (const nlohmann::json::exception& e)
 		{
 			std::string msg = std::format("Unsuccessfull loading of theme file at path: Theme.json {} ", e.what());
-			Logger.Warn(msg);
+			LOGGER.Warn(msg);
 		}
 	}
 }
@@ -274,7 +274,7 @@ void LoadFont()
 	bool     haveLoadedFont = false;
 	ImGuiIO& io = ImGui::GetIO();
 
-	auto path = EngineResources.Directory() / "Theme.json";
+	auto path = ENGINE_RESOURCES.Directory() / "Theme.json";
 	if (exists(path))
 	{
 		std::ifstream file(path);
@@ -288,9 +288,10 @@ void LoadFont()
 			float                 fontSize = json["FontSize"];
 			std::filesystem::path FontPath = json["FontPath"];
 
-			const std::string backupFont = EngineResources.Directory().string() + "/Fonts/roboto/Roboto-Light.ttf";
-			const std::string awsomeFont = EngineResources.Directory().string() + "/Fonts/FontAwesome/fa-solid-900.ttf";
-			const std::string font_path = EngineResources.Directory().string() + (FontPath).string();
+			const std::string backupFont = ENGINE_RESOURCES.Directory().string() + "/Fonts/roboto/Roboto-Light.ttf";
+			const std::string awsomeFont = ENGINE_RESOURCES.Directory().string() +
+				"/Fonts/FontAwesome/fa-solid-900.ttf";
+			const std::string font_path = ENGINE_RESOURCES.Directory().string() + (FontPath).string();
 
 			if (!io.Fonts->AddFontFromFileTTF(font_path.c_str(), fontSize))
 			{
@@ -309,27 +310,27 @@ void LoadFont()
 
 			if (!io.Fonts->Build())
 			{
-				Logger.Err("fucked up font load");
+				LOGGER.Err("fucked up font load");
 			}
 			haveLoadedFont = true;
 		}
 		catch (const nlohmann::json::exception& e)
 		{
 			std::string msg = std::format("Unsuccessfull loading of theme file at path: Theme.json {} ", e.what());
-			Logger.Warn(msg);
+			LOGGER.Warn(msg);
 		}
 	}
 
 	if (!haveLoadedFont)
 	{
 		ImFontConfig      font_config{};
-		const std::string backupFont = EngineResources.Directory().string() + "/Fonts/roboto/Roboto-Light.ttf";
+		const std::string backupFont = ENGINE_RESOURCES.Directory().string() + "/Fonts/roboto/Roboto-Light.ttf";
 		io.Fonts->AddFontFromFileTTF(backupFont.c_str(), 16.0f, &font_config);
 		font_config.MergeMode = true;
 
 		if (!io.Fonts->Build())
 		{
-			Logger.Err("fucked up font load");
+			LOGGER.Err("fucked up font load");
 		}
 	}
 	io.Fonts->AddFontDefault();
@@ -358,8 +359,8 @@ bool Editor::Initialize(HWND aHandle)
 	threadPool.Init();
 
 	ServiceLocator::Instance().ProvideService<LoggerService>();
-	Logger.Create();
-	Logger.SetPrintToVSOutput(true);
+	LOGGER.Create();
+	LOGGER.SetPrintToVSOutput(true);
 
 	GetWindowRect(WindowInstance.windowHandler, &ViewportRect);
 
@@ -388,7 +389,7 @@ bool Editor::Initialize(HWND aHandle)
 		!ImGui_ImplDX12_Init(GPUInstance.m_Device.Get(), GPUInstance.m_FrameCount, DXGI_FORMAT_R8G8B8A8_UNORM,
 		                     heap->Heap(), heap->GetCpuHandle(2000), heap->GetGpuHandle(2000)))
 	{
-		Logger.Err("Failed to init IMGUI Dx12");
+		LOGGER.Err("Failed to init IMGUI Dx12");
 	}
 
 	LoadFont();
@@ -408,15 +409,15 @@ bool Editor::Initialize(HWND aHandle)
 
 	m_ActiveScene = std::make_shared<Scene>("Editor Scene");
 
-	Scene::ActiveManager().SetUpdatePriority<Transform>(ComponentManagerBase::UpdatePriority::Transform);
-	Scene::ActiveManager().SetUpdatePriority<cPhysics_Kinematic>(ComponentManagerBase::UpdatePriority::Physics);
-	Scene::ActiveManager().SetUpdatePriority<cPhysXDynamicBody>(ComponentManagerBase::UpdatePriority::Physics);
+	Scene::activeManager().SetUpdatePriority<Transform>(ComponentManagerBase::UpdatePriority::Transform);
+	Scene::activeManager().SetUpdatePriority<cPhysics_Kinematic>(ComponentManagerBase::UpdatePriority::Physics);
+	Scene::activeManager().SetUpdatePriority<cPhysXDynamicBody>(ComponentManagerBase::UpdatePriority::Physics);
 	// Force no write to thread after this?
 	WorldGraph::InitializeWorld();
 
 	m_Callbacks[EditorCallback::ObjectSelected] = Event();
 	m_Callbacks[EditorCallback::SceneChange] = Event();
-	m_Callbacks[EditorCallback::SceneChange].AddListener([]() { EditorInstance.GetSelectedGameObjects().clear(); });
+	m_Callbacks[EditorCallback::SceneChange].AddListener([]() { EDITOR_INSTANCE.GetSelectedGameObjects().clear(); });
 
 	m_Callbacks[EditorCallback::WM_DropFile] = Event();
 
@@ -438,7 +439,7 @@ void Editor::DoWinProc(const MSG& aMessage)
 		{
 			const auto hDrop = reinterpret_cast<HDROP>(aMessage.wParam);
 			const UINT numFiles = DragQueryFileW(hDrop, 0xFFFFFFFF, nullptr,
-			                               0); // Get the number of dropped files
+			                                     0); // Get the number of dropped files
 			WM_DroppedPath.clear();
 			for (UINT i = 0; i < numFiles; i++)
 			{
@@ -525,11 +526,11 @@ void Editor::UpdateImGui()
 	{
 		if (Input.IsKeyHeld(Keys::SHIFT))
 		{
-			CommandBuffer::MainEditorCommandBuffer().Redo();
+			CommandBuffer::mainEditorCommandBuffer().redo();
 		}
 		else
 		{
-			CommandBuffer::MainEditorCommandBuffer().Undo();
+			CommandBuffer::mainEditorCommandBuffer().undo();
 		}
 	}
 }
@@ -550,7 +551,7 @@ void Editor::CheckSelectedForRemoved()
 
 void Editor::Copy()
 {
-	Logger.Success(std::format("Copied %i objects", GetSelectedGameObjects().size()), true);
+	LOGGER.Success(std::format("Copied %i objects", GetSelectedGameObjects().size()), true);
 }
 
 void Editor::Paste()
@@ -569,10 +570,10 @@ void Editor::Paste()
 		packet.emplace_back(std::make_shared<GameobjectAdded>(newObject));
 	}
 
-	CommandBuffer::MainEditorCommandBuffer().AddCommand(packet);
-	if (const auto ptr = CommandBuffer::MainEditorCommandBuffer().GetLastCommand())
+	CommandBuffer::mainEditorCommandBuffer().addCommand(packet);
+	if (const auto ptr = CommandBuffer::mainEditorCommandBuffer().getLastCommand())
 	{
-		ptr->SetMergeBlocker(true);
+		ptr->setMergeBlocker(true);
 	}
 }
 
@@ -652,7 +653,7 @@ void Editor::Update()
 	const float delta = TimerInstance.getDeltaTime();
 
 	Shipyard_PhysXInstance.StartRead();
-	Scene::ActiveManager().Update();
+	Scene::activeManager().Update();
 	SystemCollection::UpdateSystems(delta);
 
 	// Editor key checks
@@ -672,7 +673,7 @@ void Editor::Update()
 
 	if (Input.IsKeyPressed(Keys::F10))
 	{
-		EngineResources.ClearUnused();
+		ENGINE_RESOURCES.ClearUnused();
 	}
 
 	// End

@@ -8,7 +8,7 @@
 
 void Library::ClearUnused()
 {
-	for (auto &i : content)
+	for (auto& i : content)
 	{
 		if (i.second && i.second->isLoadedComplete && !i.second->isBeingLoaded && i.second.use_count() == 1)
 		{
@@ -21,7 +21,7 @@ void ResourceLoaderBase::RecursiveNameSave()
 {
 	OPTICK_EVENT();
 	nameToPathMap.clear();
-	for (const auto &file : std::filesystem::recursive_directory_iterator(workingDirectory))
+	for (const auto& file : std::filesystem::recursive_directory_iterator(workingDirectory))
 	{
 		if (file.path().has_extension())
 		{
@@ -32,7 +32,7 @@ void ResourceLoaderBase::RecursiveNameSave()
 	}
 }
 
-bool ResourceLoaderBase::AdaptPath(std::filesystem::path &path)
+bool ResourceLoaderBase::AdaptPath(std::filesystem::path& path)
 {
 	OPTICK_EVENT();
 	if (nameToPathMap.contains(path))
@@ -45,7 +45,7 @@ bool ResourceLoaderBase::AdaptPath(std::filesystem::path &path)
 
 void ResourceLoaderBase::ClearUnused()
 {
-	for (const auto &i : myLibraries)
+	for (const auto& i : myLibraries)
 	{
 		i.second->ClearUnused();
 	}
@@ -65,7 +65,7 @@ void ResourceLoaderBase::ThreadedLoading()
 
 			if (!working)
 			{
-				Logger.Err("Something shit itself when loading asset: Asset was empty!");
+				LOGGER.Err("Something shit itself when loading asset: Asset was empty!");
 				return;
 			}
 
@@ -83,35 +83,34 @@ void ResourceLoaderBase::ThreadedLoading()
 
 			working->isBeingLoaded = false;
 			const std::string str = "Failed to load " + working->GetAssetPath().string();
-			Logger.Warn(str);
+			LOGGER.Warn(str);
 		}
 	}
 }
 
-std::string ResourceLoaderBase::AssetType(const std::filesystem::path &path)
+std::string ResourceLoaderBase::AssetType(const std::filesystem::path& path)
 {
 	auto extension = path.extension().string();
-	std::ranges::for_each(extension, [](char &c) { c = (char)std::tolower((int)c); });
+	std::ranges::for_each(extension, [](char& c) { c = static_cast<char>(std::tolower(c)); });
 
 	if (extension == "") // Either Invalid Or directory, either case ignore
 	{
 		return "";
 	}
-	else if (extension == ".fbx")
+	if (extension == ".fbx")
 	{
 		// Is Animation Test return "Animation"
 		return refl::reflect<Mesh>().name.str();
 	}
-	else if (extension == ".json")
+	if (extension == ".json")
 	{
 		return refl::reflect<Material>().name.str();
-		;
 	}
-	else if (extension == ".cso" || extension == ".hlsl")
+	if (extension == ".cso" || extension == ".hlsl")
 	{
 		return refl::reflect<ShipyardShader>().name.str();
 	}
-	else if (extension == ".png" || extension == ".dds" || extension == ".hdr" || extension == ".jpg")
+	if (extension == ".png" || extension == ".dds" || extension == ".hdr" || extension == ".jpg")
 	{
 		return refl::reflect<TextureHolder>().name.str();
 	}

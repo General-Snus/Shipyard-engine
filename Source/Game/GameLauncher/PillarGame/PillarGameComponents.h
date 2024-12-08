@@ -3,26 +3,33 @@
 
 class PlayerComponent : public Component
 {
-  public:
+public:
 	using Component::Component;
 	ReflectableTypeRegistration();
+	defaultInspector();
 
-	int playerId = 0;
+	int        playerId = 0;
 	GameObject currentHook;
 	GameObject wantToHook;
-	bool isDragging = false;
+	bool       isDragging = false;
+	float      timeSinceHook = 0.0f;
+	float      hookCooldown = 10.2f;
 };
-REFL_AUTO(type(PlayerComponent), field(playerId), field(currentHook), field(wantToHook), field(isDragging))
+
+REFL_AUTO(type(PlayerComponent), field(playerId), field(currentHook), field(wantToHook), field(isDragging),
+          field(timeSinceHook), field(hookCooldown))
 
 class HookComponent : public Component
 {
-  public:
+public:
 	using Component::Component;
 	ReflectableTypeRegistration();
+	defaultInspector();
 
-	bool hasConnection;
+	bool       hasConnection = false;
 	GameObject connection;
 };
+
 REFL_AUTO(type(HookComponent), field(hasConnection), field(connection))
 
 void SpawnGround(Vector3f base);

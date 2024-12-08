@@ -11,15 +11,14 @@ public:
 	Server();
 	~Server();
 
-	void Setup();
-	void Update();
-	void Close();
+	void setup();
+	void update();
+	void close();
 
 private:
 	SOCKET mySocket;
 
-	std::unordered_map<unsigned char, std::string> myUsersnames;
-	std::unordered_map<unsigned char, sockaddr_in> myUsersIPs;
-	unsigned char myLatestId{1};
+	std::unordered_map<unsigned char, std::string> usersNames;
+	std::unordered_map<unsigned char, sockaddr_in> usersIPs;
+	unsigned char                                  latestId{1};
 };
-

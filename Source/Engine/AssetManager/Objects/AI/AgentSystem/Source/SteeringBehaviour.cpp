@@ -54,7 +54,7 @@ void SteeringBehaviour::Cohesion(cPhysics_Kinematic*             kinematic, Vect
                                  MultipleTargets_PollingStation* pollingStation, float radius, float strength)
 {
 	OPTICK_EVENT();
-	int      count = 0;
+	int            count = 0;
 	const Vector3f CoM = pollingStation->GetCoMWithinCircle(position, radius, count);
 	if (count)
 	{
@@ -118,11 +118,11 @@ void SteeringBehaviour::Separation(const std::vector<MultipleTargets_PollingStat
 			continue;
 		}
 
-		Vector3f direction = (i.positionData - position);
-		const float    distance = direction.Length();
+		Vector3f    direction = (i.positionData - position);
+		const float distance = direction.Length();
 
 		// Try closest AABB point
-		if (auto collider = Scene::ActiveManager().TryGetComponent<Collider>(i.sourceObject))
+		if (auto collider = Scene::activeManager().TryGetComponent<Collider>(i.sourceObject))
 		{
 		}
 
@@ -140,8 +140,8 @@ void SteeringBehaviour::Separation(const Vector3f  positionToSeparateFrom, cPhys
                                    const Vector3f& position, SeparationSettings                settings)
 {
 	OPTICK_EVENT();
-	Vector3f direction = (positionToSeparateFrom - position);
-	const float    distance = direction.Length();
+	Vector3f    direction = (positionToSeparateFrom - position);
+	const float distance = direction.Length();
 
 	if (distance < settings.threshold)
 	{

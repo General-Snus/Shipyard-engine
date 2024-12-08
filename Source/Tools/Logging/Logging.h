@@ -6,48 +6,50 @@
 #include <string>
 #include <vector>
 
-#include "Tools/Utilities/LinearAlgebra/Vector3.hpp"
 #include <Tools/Utilities/Color.h>
 #include <Tools/Utilities/TemplateHelpers.h>
+#include "Tools/Utilities/LinearAlgebra/Vector3.hpp"
 
-#define Logger ServiceLocator::Instance().GetService<LoggerService>()
+#define LOGGER ServiceLocator::Instance().GetService<LoggerService>()
+
 class LoggerService : public Singleton
 {
-  public:
+public:
 	LoggerService() = default;
+
 	enum class LogType : int32_t
 	{
-		none = 0,
-		message = 1 << 0,
-		warning = 1 << 1,
-		error = 1 << 2,
+		none     = 0,
+		message  = 1 << 0,
+		warning  = 1 << 1,
+		error    = 1 << 2,
 		critical = 1 << 3,
-		success = 1 << 4,
-		All = INT32_MAX
+		success  = 1 << 4,
+		All      = INT32_MAX
 	};
 
 	struct LogMsg
 	{
-		LogType messageType;
-		std::string message;
+		LogType         messageType;
+		std::string     message;
 		std::stacktrace trace;
 	};
 
-  private:
+private:
 	struct logBuffer
 	{
 		std::vector<LogMsg> LoggedMessages;
-		unsigned messagesCount{};
-		unsigned warnCount{};
-		unsigned errCount{};
-		unsigned criticalCount{};
-		unsigned successCount{};
+		unsigned            messagesCount{};
+		unsigned            warnCount{};
+		unsigned            errCount{};
+		unsigned            criticalCount{};
+		unsigned            successCount{};
 
 		void Add(const LogMsg& msg)
 		{
 			switch (msg.messageType)
 			{
-				using enum LoggerService::LogType;
+				using enum LogType;
 			case message:
 				messagesCount++;
 				break;
@@ -70,54 +72,55 @@ class LoggerService : public Singleton
 		}
 	};
 
-  public:
+public:
 	logBuffer m_Buffer;
-	bool Create();
-	void SetConsoleHandle(void *aHandle);
-	void SetPrintToVSOutput(bool bNewValue);
-	void Log(const char *aString, bool withNotice = false,
-			 const std::source_location &location = std::source_location::current());
+	bool      Create();
+	void      SetConsoleHandle(void* aHandle);
+	void      SetPrintToVSOutput(bool bNewValue);
+	void      Log(const char*            aString, bool withNotice = false,
+	         const std::source_location& location = std::source_location::current());
 	static Color GetColor(LogType type);
 
 	template <typename T>
-	void Log(const T &aString, bool withNotice = false,
-			 const std::source_location &location = std::source_location::current())
+	void Log(const T&                    aString, bool withNotice = false,
+	         const std::source_location& location = std::source_location::current())
 	{
 		Log(std::to_string(aString), withNotice, location);
 	}
 
-	void Log(const std::string &aString, bool withNotice = false,
-			 const std::source_location &location = std::source_location::current());
+	void Log(const std::string&          aString, bool withNotice = false,
+	         const std::source_location& location = std::source_location::current());
 
-	void Warn(const std::string &aString, bool withNotice = false,
-			  const std::source_location &location = std::source_location::current());
+	void Warn(const std::string&          aString, bool withNotice = false,
+	          const std::source_location& location = std::source_location::current());
 
 
-	void Err(const std::string &aString, bool withNotice = false,
-			 const std::source_location &location = std::source_location::current());
+	void Err(const std::string&          aString, bool withNotice = false,
+	         const std::source_location& location = std::source_location::current());
 
-	void ErrTrace(const std::string &aString, bool withNotice = false,
-				  const std::stacktrace &trace = std::stacktrace::current(),
-				  const std::source_location &location = std::source_location::current());
+	void ErrTrace(const std::string&          aString, bool withNotice = false,
+	              const std::stacktrace&      trace = std::stacktrace::current(),
+	              const std::source_location& location = std::source_location::current());
 
-	void Success(const std::string &aString, bool withNotice = false,
-			  const std::source_location &location = std::source_location::current());
+	void Success(const std::string&          aString, bool withNotice = false,
+	             const std::source_location& location = std::source_location::current());
 
-	void Critical(const std::exception &anException, unsigned aLevel = 0, bool withNotice = false,
-				  const std::source_location &location = std::source_location::current());
+	void Critical(const std::exception&       anException, unsigned aLevel = 0, bool withNotice = false,
+	              const std::source_location& location = std::source_location::current());
 
-	void Critical(const std::string &anExceptionText, unsigned aLevel = 0, bool withNotice = false,
-				  const std::source_location &location = std::source_location::current());
+	void Critical(const std::string&          anExceptionText, unsigned aLevel = 0, bool withNotice = false,
+	              const std::source_location& location = std::source_location::current());
 
 	static void NewLine();
-	void Clear();
-	void *GetHandle() const
+	void        Clear();
+
+	void* GetHandle() const
 	{
 		return myHandle;
 	}
 
-  private:
-	void *                           myHandle = nullptr;
+private:
+	void*                            myHandle = nullptr;
 	bool                             shouldPrintToOutput = false;
 	bool                             isInitialized = false;
 	std::string                      myNamespace;

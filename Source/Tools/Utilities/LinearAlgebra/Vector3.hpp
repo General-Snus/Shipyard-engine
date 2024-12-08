@@ -27,6 +27,14 @@ public:
 	// Destructor (compiler generated)
 	~Vector3<T>() = default;
 
+
+	static constexpr std::size_t size() { return {3}; };
+
+	T* begin() { return &x; };
+	T* end() { return &x + size(); };
+	T* begin() const { return &x; };
+	T* end() const { return &x + size(); };
+
 	// Implicit cast operator to any datatype, return initializer list of x, y, z
 	template <class U>
 	constexpr operator U() const;

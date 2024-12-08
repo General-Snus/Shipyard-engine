@@ -2,26 +2,25 @@
 
 #include <Tools/Optick/include/optick.h>
 
-#include "imgui.h"
 #include <ranges>
+#include "imgui.h"
 
 void Console::RenderImGUi()
 {
 	OPTICK_EVENT();
 	ImGui::Begin("Console", &m_KeepWindow, ImGuiWindowFlags_NoResize);
-	{ // TODO clipper
+	{
+		// TODO clipper
 		using enum LoggerService::LogType;
-		const auto &style = ImGui::GetStyle();
-		const auto &buffer = Logger.m_Buffer;
-		auto getButtonColor = [&](LoggerService::LogType val, LoggerService::LogType buttonType) {
+		const auto& style = ImGui::GetStyle();
+		const auto& buffer = LOGGER.m_Buffer;
+		auto        getButtonColor = [&](LoggerService::LogType val, LoggerService::LogType buttonType)
+		{
 			if ((val & buttonType) == none)
 			{
-				return style.Colors[ImGuiCol_::ImGuiCol_Button];
+				return style.Colors[ImGuiCol_Button];
 			}
-			else
-			{
-				return style.Colors[ImGuiCol_::ImGuiCol_ButtonActive];
-			}
+			return style.Colors[ImGuiCol_ButtonActive];
 		};
 
 		if (ImGui::ColorButton("All", getButtonColor(filter, All)))
@@ -66,25 +65,25 @@ void Console::RenderImGUi()
 
 		if (ImGui::Button("Clear"))
 		{
-			Logger.Clear();
+			LOGGER.Clear();
 			pickedMessage = LoggerService::LogMsg();
 		}
 
 		const Vector2f spaceAvail = {ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.75f};
-		if (ImGui::BeginChild("ScrollingRegion", (ImVec2)spaceAvail))
+		if (ImGui::BeginChild("ScrollingRegion", static_cast<ImVec2>(spaceAvail)))
 		{
-			for (const auto &[index, logEntity] : buffer.LoggedMessages | std::ranges::views::enumerate)
+			for (const auto& [index, logEntity] : buffer.LoggedMessages | std::ranges::views::enumerate)
 			{
-				const auto &[type, message, trace] = logEntity;
+				const auto& [type, message, trace] = logEntity;
 
 				if (message.empty() || (filter & type) == none)
 				{
 					continue;
 				}
 
-				Color logColor = Logger.GetColor(type);
-				const auto color = logColor.GetRGBA();
-				const ImVec4 &textColor = color;
+				Color         logColor = LOGGER.GetColor(type);
+				const auto    color = logColor.GetRGBA();
+				const ImVec4& textColor = color;
 				ImGui::PushStyleColor(ImGuiCol_Text, textColor);
 				Vector2f space = {ImGui::GetContentRegionAvail().x, ImGui::GetTextLineHeight()};
 
@@ -110,7 +109,7 @@ void Console::RenderImGUi()
 			if (size != buffer.LoggedMessages.size())
 			{
 				ImGui::SetScrollHereY(1.0f);
-				size = (int)buffer.LoggedMessages.size();
+				size = static_cast<int>(buffer.LoggedMessages.size());
 			}
 		}
 		ImGui::EndChild();
@@ -119,7 +118,7 @@ void Console::RenderImGUi()
 		{
 			ImGui::TextWrapped(pickedMessage.message.c_str());
 			ImGui::Spacing();
-			for (auto &traceElement : pickedMessage.trace)
+			for (auto& traceElement : pickedMessage.trace)
 			{
 				ImGui::TextWrapped(traceElement.description().c_str());
 			}

@@ -1,11 +1,11 @@
 #include "DirectXHeader.pch.h"
 
 #include "../CommandQueue.h"
+#include <CrashHandler/NsightAftermathGpuCrashTracker.h>
 #include "../GPU.h"
 #include "Graphics/ResourceStateTracker.h"
-#include <CrashHandler/NsightAftermathGpuCrashTracker.h>
 
-bool GPUCommandQueue::Create(const DeviceType &device, D3D12_COMMAND_LIST_TYPE type)
+bool GPUCommandQueue::Create(const DeviceType& device, D3D12_COMMAND_LIST_TYPE type)
 {
 	m_Device = device;
 	m_CommandListType = type;
@@ -58,17 +58,17 @@ void GPUCommandQueue::WaitForFenceValue(uint64_t fenceValue)
 {
 	if (!IsFenceComplete(fenceValue))
 	{
-		const auto event = ::CreateEvent(NULL, FALSE, FALSE, NULL);
+		const auto event = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
 		assert(event && "Failed to create fence event handle.");
 
 		m_Fence->SetEventOnCompletion(fenceValue, event);
-		::WaitForSingleObject(event, DWORD_MAX);
+		WaitForSingleObject(event, DWORD_MAX);
 
-		::CloseHandle(event);
+		CloseHandle(event);
 	}
 }
 
-std::shared_ptr<CommandList> GPUCommandQueue::GetCommandList(const std::wstring &name)
+std::shared_ptr<CommandList> GPUCommandQueue::GetCommandList(const std::wstring& name)
 {
 	OPTICK_EVENT();
 	std::shared_ptr<CommandList> commandList;
@@ -101,7 +101,7 @@ uint64_t GPUCommandQueue::ExecuteCommandList(std::shared_ptr<CommandList> comman
 	return ExecuteCommandList(std::vector<std::shared_ptr<CommandList>>({commandList}));
 }
 
-uint64_t GPUCommandQueue::ExecuteCommandList(const std::vector<std::shared_ptr<CommandList>> &commandLists)
+uint64_t GPUCommandQueue::ExecuteCommandList(const std::vector<std::shared_ptr<CommandList>>& commandLists)
 {
 	OPTICK_GPU_EVENT("ExecuteCommandList");
 	ResourceStateTracker::Lock();
@@ -114,12 +114,12 @@ uint64_t GPUCommandQueue::ExecuteCommandList(const std::vector<std::shared_ptr<C
 	// static std::vector<std::shared_ptr<CommandList>> generateMipsCommandLists;
 	// generateMipsCommandLists.clear();
 
-	static std::vector<ID3D12CommandList *> d3d12CommandLists;
+	static std::vector<ID3D12CommandList*> d3d12CommandLists;
 	d3d12CommandLists.clear();
 
 	for (auto commandList : commandLists)
 	{
-		auto pendingCommandList = GetCommandList();
+		auto       pendingCommandList = GetCommandList();
 		const bool hasPendingBarriers = commandList->Close(*pendingCommandList);
 		pendingCommandList->Close();
 		// If there are no pending barriers on the pending command list, there is no reason to
@@ -206,7 +206,7 @@ void GPUCommandQueue::Flush()
 	WaitForFenceValue(m_FenceValue);
 }
 
-void GPUCommandQueue::Wait(const GPUCommandQueue &other) const
+void GPUCommandQueue::Wait(const GPUCommandQueue& other) const
 {
 	m_CommandQueue->Wait(other.m_Fence.Get(), other.m_FenceValue);
 }

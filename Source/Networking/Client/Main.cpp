@@ -12,6 +12,4 @@ int main()
 	client.Update();
 
 	client.Close();
-
-	system("PAUSE");
 }

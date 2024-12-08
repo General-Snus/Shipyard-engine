@@ -23,7 +23,9 @@ FrameStatistics::FrameStatistics() : EditorWindow()
 {
 #ifdef _WIN32
 	SYSTEM_INFO sysInfo;
-	FILETIME    ftime, fsys, fuser;
+	FILETIME    ftime;
+	FILETIME    fsys;
+	FILETIME    fuser;
 
 	GetSystemInfo(&sysInfo);
 	numProcessors = sysInfo.dwNumberOfProcessors;

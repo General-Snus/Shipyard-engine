@@ -10,7 +10,7 @@ cAnimator::cAnimator(const SY::UUID anOwnerId, GameObjectManager* aManager)
 	mySkeleton = (this->TryGetComponent<cSkeletalMeshRenderer>())->GetRawSkeleton();
 	if (!mySkeleton)
 	{
-		Logger.Err("cSkeletalMeshRenderer component does not have a skeleton");
+		LOGGER.Err("cSkeletalMeshRenderer component does not have a skeleton");
 	}
 }
 
@@ -21,9 +21,9 @@ cAnimator::cAnimator(const SY::UUID anOwnerId, GameObjectManager* aManager, cons
 	mySkeleton = (this->TryGetComponent<cSkeletalMeshRenderer>())->GetRawSkeleton();
 	if (!mySkeleton)
 	{
-		Logger.Err("cSkeletalMeshRenderer component does not have a skeleton");
+		LOGGER.Err("cSkeletalMeshRenderer component does not have a skeleton");
 	}
-	myAnimations.push_back(EngineResources.LoadAsset<Animation>(aFilePath));
+	myAnimations.push_back(ENGINE_RESOURCES.LoadAsset<Animation>(aFilePath));
 }
 
 void cAnimator::Update()
@@ -69,7 +69,7 @@ void cAnimator::AddAnimation(std::shared_ptr<Animation> aAnimation)
 
 void cAnimator::AddAnimation(const std::filesystem::path& aFilePath)
 {
-	myAnimations.push_back(EngineResources.LoadAsset<Animation>(aFilePath));
+	myAnimations.push_back(ENGINE_RESOURCES.LoadAsset<Animation>(aFilePath));
 }
 
 void cAnimator::SetHierarchy(unsigned int aBoneID, const Matrix& aParentMatrix)
@@ -100,7 +100,7 @@ void cAnimator::SetPlayingAnimation(unsigned int aAnimationIndex)
 {
 	if (aAnimationIndex >= myAnimations.size())
 	{
-		Logger.Warn("Animation index out of range");
+		LOGGER.Warn("Animation index out of range");
 		return;
 	}
 	myCurrentAnimation = aAnimationIndex;

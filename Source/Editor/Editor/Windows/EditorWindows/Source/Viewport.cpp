@@ -1,27 +1,27 @@
 #include "../Viewport.h"
-#include "Editor/Editor/Core/Editor.h"
-#include "Editor/Editor/Windows/Window.h"
-#include "Engine/AssetManager/ComponentSystem/Components/CameraComponent.h"
-#include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
-#include "Engine/AssetManager/ComponentSystem/GameObject.h"
-#include "Engine/AssetManager/ComponentSystem/GameObjectManager.h"
 #include "ImGuiHelpers.hpp"
 #include "imgui_internal.h"
+#include "Editor/Editor/Core/Editor.h"
+#include "Editor/Editor/Windows/Window.h"
+#include "Engine/AssetManager/ComponentSystem/GameObject.h"
+#include "Engine/AssetManager/ComponentSystem/GameObjectManager.h"
+#include "Engine/AssetManager/ComponentSystem/Components/CameraComponent.h"
+#include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
 
 #include <Tools/ImGui/ImGuizmo.h>
 
-#include "Engine/PersistentSystems/Scene.h"
-#include "Tools/Logging/Logging.h"
-#include "Tools/Utilities/Input/Input.hpp"
 #include <Engine/AssetManager/AssetManager.h>
 #include <Engine/PersistentSystems/SceneUtilities.h>
 #include <Font/IconsFontAwesome5.h>
+#include "Engine/PersistentSystems/Scene.h"
+#include "Tools/Logging/Logging.h"
+#include "Tools/Utilities/Input/Input.hpp"
 
 ImGuizmo::OPERATION m_CurrentGizmoOperation = ImGuizmo::OPERATION::UNIVERSAL;
-ImGuizmo::MODE m_CurrentGizmoMode = ImGuizmo::MODE::WORLD;
+ImGuizmo::MODE      m_CurrentGizmoMode = ImGuizmo::MODE::WORLD;
 
 Viewport::Viewport(bool IsMainViewPort, Vector2f ViewportResolution, std::shared_ptr<Scene> aScene,
-				   std::shared_ptr<TextureHolder> RenderTexture)
+                   std::shared_ptr<TextureHolder> RenderTexture)
 	: m_RenderTarget(RenderTexture), ViewportResolution(ViewportResolution), sceneToRender(aScene),
 	  IsMainViewPort(IsMainViewPort), editorCamera(0, nullptr)
 {
@@ -33,7 +33,7 @@ Viewport::Viewport(bool IsMainViewPort, Vector2f ViewportResolution, std::shared
 	}
 
 	if (!m_RenderTarget->GetRawTexture() || m_RenderTarget->GetRawTexture()->GetWidth() != resolution.x &&
-												m_RenderTarget->GetRawTexture()->GetHeight() != resolution.y)
+		m_RenderTarget->GetRawTexture()->GetHeight() != resolution.y)
 	{
 		auto clearColor = Vector4f(0, 0, 1, 1);
 		if (!ColorManagerInstance.GetColor("ClearColor", clearColor))
@@ -50,10 +50,10 @@ Viewport::~Viewport()
 
 std::shared_ptr<Scene> Viewport::GetAttachedScene()
 {
-	return sceneToRender ? sceneToRender : EditorInstance.GetActiveScene();
+	return sceneToRender ? sceneToRender : EDITOR_INSTANCE.GetActiveScene();
 }
 
-Texture *Viewport::GetTarget() const
+Texture* Viewport::GetTarget() const
 {
 	return m_RenderTarget->GetRawTexture().get();
 }
@@ -91,9 +91,9 @@ void Viewport::Update()
 	OPTICK_EVENT();
 	if (IsMainViewPort)
 	{
-		if (auto *camera = GetAttachedScene()->GetGOM().GetCamera().TryGetComponent<Camera>())
+		if (auto* camera = GetAttachedScene()->GetGOM().GetCamera().TryGetComponent<Camera>())
 		{
-			camera->IsInControl(EditorInstance.gameState.LauncherIsPlaying());
+			camera->IsInControl(EDITOR_INSTANCE.gameState.LauncherIsPlaying());
 			camera->SetResolution(ViewportResolution);
 		}
 	}
@@ -115,26 +115,20 @@ Vector2f Viewport::getCursorInWindowPostion()
 	return cursorPositionInViewPort;
 }
 
-Camera &Viewport::GetCamera()
+Camera& Viewport::GetCamera()
 {
 	if (IsMainViewPort)
 	{
-		if (auto *camera = GetAttachedScene()->GetGOM().GetCamera().TryGetComponent<Camera>())
+		if (auto* camera = GetAttachedScene()->GetGOM().GetCamera().TryGetComponent<Camera>())
 		{
 			return *camera;
 		}
-		else
-		{
-			return editorCamera;
-		}
-	}
-	else
-	{
 		return editorCamera;
 	}
+	return editorCamera;
 }
 
-Transform &Viewport::GetCameraTransform()
+Transform& Viewport::GetCameraTransform()
 {
 	return GetCamera().LocalTransform();
 }
@@ -144,7 +138,7 @@ Matrix Viewport::Projection()
 {
 	const auto ViewportCamera = GetCamera();
 	const auto dxMatrix = XMMatrixPerspectiveFovLH(ViewportCamera.FowInRad(), ViewportCamera.APRatio(),
-												   ViewportCamera.nearField, ViewportCamera.farfield);
+	                                               ViewportCamera.nearField, ViewportCamera.farfield);
 	return Matrix(&dxMatrix);
 }
 
@@ -153,7 +147,7 @@ Matrix Viewport::ViewInverse()
 	return GetCamera().LocalTransform().GetMutableTransform().GetInverse();
 }
 
-Matrix &Viewport::View()
+Matrix& Viewport::View()
 {
 	return GetCamera().LocalTransform().GetMutableTransform();
 }
@@ -161,12 +155,12 @@ Matrix &Viewport::View()
 void Viewport::RenderImGUi()
 {
 	OPTICK_EVENT();
-	const ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_MenuBar;
+	constexpr ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_MenuBar;
 	// const auto aspecRatio = (res.x / res.y);
 	// ImGui::SetNextWindowSizeConstraints(ImVec2(0,0),ImVec2(FLT_MAX,FLT_MAX),CustomConstraints::AspectRatio,(void*)&aspecRatio);
 	// // Aspect ratio
 
-	std::vector<GameObject> const &selectedObjects = EditorInstance.GetSelectedGameObjects();
+	const std::vector<GameObject>& selectedObjects = EDITOR_INSTANCE.GetSelectedGameObjects();
 
 	TakeInput();
 
@@ -199,14 +193,14 @@ void Viewport::RenderImGUi()
 
 		if (ImGui::BeginDragDropTarget())
 		{
-			if (const ImGuiPayload *test = ImGui::AcceptDragDropPayload("ContentAsset_Mesh"))
+			if (const ImGuiPayload* test = ImGui::AcceptDragDropPayload("ContentAsset_Mesh"))
 			{
-				const std::filesystem::path data = std::string((char *)test->Data, test->DataSize);
-				const std::string type = EngineResources.AssetType(data);
+				const std::filesystem::path data = std::string(static_cast<char*>(test->Data), test->DataSize);
+				const std::string           type = ENGINE_RESOURCES.AssetType(data);
 
 				SceneUtils::AddAssetToScene(data, sceneToRender);
 
-				Logger.Log(type);
+				LOGGER.Log(type);
 			}
 			ImGui::EndDragDropTarget();
 		}
@@ -224,13 +218,13 @@ void Viewport::RenderImGUi()
 				GetCamera().IsInControl(false);
 			}
 
-			for (auto &gameObject : selectedObjects)
+			for (auto& gameObject : selectedObjects)
 			{
-				auto &transform = gameObject.transform();
+				auto&  transform = gameObject.transform();
 				Matrix mat = transform.WorldMatrix();
 
-				const bool transformed = ImGuizmo::Manipulate(&cameraView, &cameraProjection, m_CurrentGizmoOperation,
-														m_CurrentGizmoMode, &mat);
+				const bool transformed = Manipulate(&cameraView, &cameraProjection, m_CurrentGizmoOperation,
+				                                    m_CurrentGizmoMode, &mat);
 
 				if (transformed)
 				{
@@ -242,8 +236,9 @@ void Viewport::RenderImGUi()
 					if (transform.HasParent())
 					{
 						mat = mat * transform.GetParent()
-										.WorldMatrix()
-										.GetInverse(); // TODO This doesnt support scaled objects, fix asap im eepy now
+						                     .WorldMatrix()
+						                     .GetInverse();
+						// TODO This doesnt support scaled objects, fix asap im eepy now
 					}
 
 					ImGuizmo::DecomposeMatrixToComponents(mat.GetMatrixPtr(), &loc.x, &rot.x, &scale.x);
@@ -276,19 +271,19 @@ void Viewport::RenderImGUi()
 
 void Viewport::RenderToolbar()
 {
-	auto const &style = ImGui::GetStyle();
+	const auto& style = ImGui::GetStyle();
 	const float textHeight = ImGui::CalcTextSize("A").y;
 	// style.FramePadding can also be used here
-	const ImVec2 toolbarItemSize = ImVec2{textHeight * 4.0f, textHeight * 4.0f};
+	const auto   toolbarItemSize = ImVec2{textHeight * 4.0f, textHeight * 4.0f};
 	const ImVec2 toolbarPos = ImGui::GetWindowPos() +
-						ImVec2(2.0f * style.WindowPadding.x, 8.0f * (style.WindowPadding.y + style.FramePadding.y));
+		ImVec2(2.0f * style.WindowPadding.x, 8.0f * (style.WindowPadding.y + style.FramePadding.y));
 	ImGui::SetNextWindowPos(toolbarPos);
 
 	// ImGuiWindowFlags toolbarFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
 	//                                 ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoSavedSettings |
 	//                                 ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_MenuBar;
 
-	const ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_NoPadWithHalfSpacing;
+	constexpr ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_NoPadWithHalfSpacing;
 	/*
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {0.0f, 0.0f});
 	if (ImGui::BeginChild("##ViewportToolbar_Vertical", ImVec2(toolbarItemSize.x, 0), 0, toolbarFlags))
@@ -343,25 +338,25 @@ void Viewport::RenderToolbar()
 		ImGui::ToggleButton("Test", &arg);
 
 		if (ImGui::Selectable(ICON_FA_LOCATION_ARROW, m_CurrentGizmoOperation == ImGuizmo::OPERATION::UNIVERSAL,
-							  selectableFlags, toolbarItemSize))
+		                      selectableFlags, toolbarItemSize))
 		{
 			m_CurrentGizmoOperation = ImGuizmo::OPERATION::UNIVERSAL;
 		}
 		// Move
 		if (ImGui::Selectable(ICON_FA_ARROWS_ALT, m_CurrentGizmoOperation == ImGuizmo::OPERATION::TRANSLATE,
-							  selectableFlags, toolbarItemSize))
+		                      selectableFlags, toolbarItemSize))
 		{
 			m_CurrentGizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
 		}
 		// Rotate
 		if (ImGui::Selectable(ICON_FA_SYNC_ALT, m_CurrentGizmoOperation == ImGuizmo::OPERATION::ROTATE, selectableFlags,
-							  toolbarItemSize))
+		                      toolbarItemSize))
 		{
 			m_CurrentGizmoOperation = ImGuizmo::OPERATION::ROTATE;
 		}
 		ImGui::Separator();
 		if (ImGui::Selectable(ICON_FA_EXPAND, m_CurrentGizmoOperation == ImGuizmo::OPERATION::SCALE, selectableFlags,
-							  toolbarItemSize))
+		                      toolbarItemSize))
 		{
 			m_CurrentGizmoOperation = ImGuizmo::OPERATION::SCALE;
 		}
@@ -372,19 +367,19 @@ void Viewport::RenderToolbar()
 
 		// posSnapping
 		if (ImGui::Selectable(ICON_FA_BORDER_ALL, m_CurrentGizmoOperation == ImGuizmo::OPERATION::SCALE,
-							  selectableFlags, toolbarItemSize))
+		                      selectableFlags, toolbarItemSize))
 		{
 			m_CurrentGizmoOperation = ImGuizmo::OPERATION::SCALE;
 		}
 		// rotSnapping
 		if (ImGui::Selectable(std::format("{}{}", ICON_FA_UNDO_ALT, "*").c_str(),
-							  m_CurrentGizmoOperation == ImGuizmo::OPERATION::SCALE, selectableFlags, toolbarItemSize))
+		                      m_CurrentGizmoOperation == ImGuizmo::OPERATION::SCALE, selectableFlags, toolbarItemSize))
 		{
 			m_CurrentGizmoOperation = ImGuizmo::OPERATION::SCALE;
 		}
 		// ScaleSnapping
 		if (ImGui::Selectable(ICON_FA_EXPAND_ALT, m_CurrentGizmoOperation == ImGuizmo::OPERATION::SCALE,
-							  selectableFlags, toolbarItemSize))
+		                      selectableFlags, toolbarItemSize))
 		{
 			m_CurrentGizmoOperation = ImGuizmo::OPERATION::SCALE;
 		}

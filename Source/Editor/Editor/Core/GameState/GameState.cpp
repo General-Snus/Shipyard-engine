@@ -19,15 +19,15 @@ bool GameState::AttemptDllLoad()
 	dllHandle = LoadLibrary(L"GameLauncher.dll");
 	if (!dllHandle)
 	{
-		Logger.Err("Failed to load DLL!");
+		LOGGER.Err("Failed to load DLL!");
 		return false;
 	}
 
-	dllFunction = reinterpret_cast<EntryPoint>(GetProcAddress(static_cast<HMODULE>(dllHandle), "EntrypointMain"));
-	dllFunctionExit = reinterpret_cast<ExitPoint>(GetProcAddress(static_cast<HMODULE>(dllHandle), "ExitPoint"));
+	dllFunction = reinterpret_cast<EntryPoint>(GetProcAddress(static_cast<HMODULE>(dllHandle), "entrypointMain"));
+	dllFunctionExit = reinterpret_cast<ExitPoint>(GetProcAddress(static_cast<HMODULE>(dllHandle), "exitPoint"));
 	if (!(dllFunction && dllFunctionExit))
 	{
-		Logger.Err("Failed to get DLL function !");
+		LOGGER.Err("Failed to get DLL function !");
 		FreeLibrary(static_cast<HMODULE>(dllHandle));
 		return false;
 	}
@@ -47,9 +47,9 @@ void GameState::StartPlaySession()
 
 	m_GameScene = std::make_shared<Scene>("GameScene");
 
-	m_EditorBackupScene = EditorInstance.GetActiveScene();
-	m_GameScene->Merge(*m_EditorBackupScene);
-	EditorInstance.SetActiveScene(m_GameScene);
+	m_EditorBackupScene = EDITOR_INSTANCE.GetActiveScene();
+	m_GameScene->merge(*m_EditorBackupScene);
+	EDITOR_INSTANCE.SetActiveScene(m_GameScene);
 
 	// If you start here, all the copied gameobjects now point to the wrong scene and causes issue
 	IsLoading = true;
@@ -59,18 +59,18 @@ void GameState::StartPlaySession()
 
 void GameState::EndPlaySession()
 {
-	EditorInstance.SetActiveScene(m_EditorBackupScene);
+	EDITOR_INSTANCE.SetActiveScene(m_EditorBackupScene);
 	if (dllFunction)
 	{
 		m_GameScene = std::make_shared<Scene>("GameScene");
 		try
 		{
-			Logger.Err("Failed to get DLL function !");
+			LOGGER.Err("Failed to get DLL function !");
 			dllFunction = nullptr;
 		}
 		catch (const std::exception& e)
 		{
-			Logger.Critical(e, 0);
+			LOGGER.Critical(e, 0);
 		}
 	}
 
@@ -102,7 +102,7 @@ void GameState::Init()
 	{
 		IsLoading = false;
 		IsPlaying = false;
-		Logger.Err(e.what());
+		LOGGER.Err(e.what());
 	}
 }
 
@@ -119,7 +119,7 @@ void GameState::Start()
 	{
 		IsLoading = false;
 		IsPlaying = false;
-		Logger.Err(e.what());
+		LOGGER.Err(e.what());
 	}
 }
 
@@ -143,6 +143,6 @@ void GameState::Update(float delta)
 	{
 		IsLoading = false;
 		IsPlaying = false;
-		Logger.Err(e.what());
+		LOGGER.Err(e.what());
 	}
 }

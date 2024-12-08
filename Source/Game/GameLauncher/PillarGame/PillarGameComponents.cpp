@@ -54,6 +54,7 @@ void SpawnHooks(int amount, float radius, Vector3f base)
 		position.y = static_cast<float>(i);
 
 		attachment.transform().LookAt(directionOffset * 10.f);
+		attachment.transform().SetRotation(0, attachment.transform().GetRotation().y, 0);
 		attachment.transform().SetPosition(position);
 	}
 }
@@ -62,7 +63,7 @@ void SpawnPlayer(int id, float radius, Vector3f base)
 {
 	id;
 	GameObject player = GameObject::Create("Player");
-	Scene::ActiveManager().SetLastGOAsPlayer();
+	Scene::activeManager().SetLastGOAsPlayer();
 
 	const auto directionOffset =
 		Vector3f(RandomEngine::randomInRange(-1.0f, 1.0f), 0, RandomEngine::randomInRange(-1.0f, 1.0f)).GetNormalized();
@@ -79,7 +80,7 @@ void SpawnPlayer(int id, float radius, Vector3f base)
 
 	GameObject camera = GameObject::Create("Player Camera");
 	camera.AddComponent<Camera>();
-	Scene::ActiveManager().SetLastGOAsCamera();
+	Scene::activeManager().SetLastGOAsCamera();
 	camera.AddComponent<MeshRenderer>("Models/Camera/Camera.fbx");
 
 	camera.transform().SetParent(player.transform());

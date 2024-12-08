@@ -1,11 +1,12 @@
 #include "AssetManager.pch.h"
 
-#include <Tools/Utilities/Math.hpp>
 #include "../ParticleEmitter.h"
-#include <Tools/ImGui/imgui.h> 
-#include "Engine/GraphicsEngine/GraphicsEngine.h"
+#include <Tools/ImGui/imgui.h>
+#include <Tools/Utilities/Math.hpp>
 #include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
+#include "Engine/GraphicsEngine/GraphicsEngine.h"
 
+#include "Tools/Utilities/LinearAlgebra/Easing.h"
 
 
 void ParticleEmitter::InitParticle(Particlevertex& vertex) const
@@ -17,9 +18,10 @@ void ParticleEmitter::InitParticle(Particlevertex& vertex) const
 	vertex.Velocity = settings.StartVelocity;
 }
 
-ParticleEmitter::ParticleEmitter(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)
+ParticleEmitter::ParticleEmitter(const std::filesystem::path& aFilePath) : AssetBase(aFilePath), stride(0), offset(0),
+                                                                           primitiveTopology(0)
 {
-	Logger.Err("NotImplementedException");
+	LOGGER.Err("NotImplementedException");
 	assert(false);
 }
 
@@ -31,14 +33,15 @@ ParticleEmitter::ParticleEmitter(const ParticleEmitterTemplate& aTemplate) : Ass
 	}
 	else
 	{
-		texture = EngineResources.LoadAsset<TextureHolder>(aTemplate.EmmiterSettings.ParticleTexture);
+		texture = ENGINE_RESOURCES.LoadAsset<TextureHolder>(aTemplate.EmmiterSettings.ParticleTexture);
 	}
 
 	settings = aTemplate.EmmiterSettings;
 	primitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
-	if (settings.MaxParticles == 0 || (int)std::ceil(settings.SpawnRate * settings.LifeTime) < settings.MaxParticles)
+	if (settings.MaxParticles == 0 || static_cast<int>(std::ceil(settings.SpawnRate * settings.LifeTime)) < settings.
+		MaxParticles)
 	{
-		settings.MaxParticles = (int)std::ceil(settings.SpawnRate * settings.LifeTime);
+		settings.MaxParticles = static_cast<int>(std::ceil(settings.SpawnRate * settings.LifeTime));
 	}
 
 	particles.resize(settings.MaxParticles);
@@ -51,7 +54,7 @@ ParticleEmitter::ParticleEmitter(const ParticleEmitterTemplate& aTemplate) : Ass
 
 	//if (!RHI::CreateDynamicVertexBuffer(vertexBuffer,particles.size(),sizeof(Particlevertex)))
 	{
-		Logger.Err("Failed to create vertex buffer");
+		LOGGER.Err("Failed to create vertex buffer");
 		return;
 	}
 	//stride = sizeof(Particlevertex);
@@ -59,7 +62,6 @@ ParticleEmitter::ParticleEmitter(const ParticleEmitterTemplate& aTemplate) : Ass
 
 void ParticleEmitter::Init()
 {
-	return;
 }
 
 void ParticleEmitter::Update(float aDeltaTime)
@@ -67,7 +69,7 @@ void ParticleEmitter::Update(float aDeltaTime)
 	aDeltaTime = aDeltaTime * settings.SimulationSpeed;
 
 	secondCounter += settings.SpawnRate * aDeltaTime;
-	spawnedThisFrame = std::floor(secondCounter) + 0.1f;//point exactness
+	spawnedThisFrame = std::floor(secondCounter) + 0.1f; //point exactness
 	secondCounter -= spawnedThisFrame;
 
 	for (auto& aParticle : particles)
@@ -85,9 +87,9 @@ void ParticleEmitter::Update(float aDeltaTime)
 		aParticle.Position.y += aParticle.Velocity.y * aDeltaTime;
 		aParticle.Position.z += aParticle.Velocity.z * aDeltaTime;
 
-		aParticle.Color = Lerp(settings.StartColor,settings.EndColor,aParticle.Lifetime / settings.LifeTime);
-		float scaleAllAxis = Lerp(settings.StartSize,settings.EndSize,aParticle.Lifetime / settings.LifeTime);
-		aParticle.Scale = { scaleAllAxis,scaleAllAxis,scaleAllAxis };
+		aParticle.Color = lerp(settings.StartColor, settings.EndColor, aParticle.Lifetime / settings.LifeTime);
+		float scaleAllAxis = lerp(settings.StartSize, settings.EndSize, aParticle.Lifetime / settings.LifeTime);
+		aParticle.Scale = {scaleAllAxis, scaleAllAxis, scaleAllAxis};
 	}
 }
 

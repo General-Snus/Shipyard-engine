@@ -32,7 +32,7 @@ void Window::Init(const WinInitSettings& init)
 	const HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 	if (FAILED(hr))
 	{
-		Logger.Err("Failed to initialize COM");
+		LOGGER.Err("Failed to initialize COM");
 		return;
 	}
 
@@ -59,7 +59,7 @@ void Window::Init(const WinInitSettings& init)
 
 	if (windowHandler == nullptr)
 	{
-		Logger.Err("Failed to create window");
+		LOGGER.Err("Failed to create window");
 	}
 	DragAcceptFiles(windowHandler, TRUE);
 }
@@ -125,9 +125,9 @@ void Window::Destroy()
 
 void Window::MoveConsoleToOtherMonitor()
 {
-	const HWND           consoleWindow = GetConsoleWindow();
+	const HWND     consoleWindow = GetConsoleWindow();
 	const Vector2i consoleSize = {1280, 720};
-	const int            monitorCount = GetSystemMetrics(SM_CMONITORS);
+	const int      monitorCount = GetSystemMetrics(SM_CMONITORS);
 	if (monitorCount > 1)
 	{
 		RECT virtualSize;

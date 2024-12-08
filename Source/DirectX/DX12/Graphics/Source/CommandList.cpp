@@ -1,15 +1,15 @@
 #include "DirectXHeader.pch.h"
 
 #include "Graphics/CommandList.h"
+#include <ResourceUploadBatch.h>
+#include <Graphics/RootSignature.h>
 #include "Graphics/GPU.h"
 #include "Graphics/GpuResource.h"
-#include "Graphics/MIPS/GenerateMipsPSO.h"
 #include "Graphics/ResourceStateTracker.h"
 #include "Graphics/Texture.h"
-#include <Graphics/RootSignature.h>
-#include <ResourceUploadBatch.h>
+#include "Graphics/MIPS/GenerateMipsPSO.h"
 
-CommandList::CommandList(const DeviceType &device, D3D12_COMMAND_LIST_TYPE type, const std::wstring &name)
+CommandList::CommandList(const DeviceType& device, D3D12_COMMAND_LIST_TYPE type, const std::wstring& name)
 	: m_Type(type), m_Device(device)
 {
 	Helpers::ThrowIfFailed(m_Device->CreateCommandAllocator(type, IID_PPV_ARGS(&m_CommandAllocator)));
@@ -21,8 +21,8 @@ CommandList::CommandList(const DeviceType &device, D3D12_COMMAND_LIST_TYPE type,
 	m_ResourceStateTracker = std::make_unique<ResourceStateTracker>();
 }
 
-void CommandList::CopyBuffer(GpuResource &buffer, size_t numElements, size_t elementSize, const void *bufferData,
-							 D3D12_RESOURCE_FLAGS flags)
+void CommandList::CopyBuffer(GpuResource& buffer, size_t numElements, size_t elementSize, const void* bufferData,
+                             D3D12_RESOURCE_FLAGS flags)
 {
 	OPTICK_GPU_EVENT("CopyBuffer");
 	const size_t bufferSize = numElements * elementSize;
@@ -34,8 +34,8 @@ void CommandList::CopyBuffer(GpuResource &buffer, size_t numElements, size_t ele
 			const auto var1 = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 			const auto var2 = CD3DX12_RESOURCE_DESC::Buffer(bufferSize, flags);
 			Helpers::ThrowIfFailed(m_Device->CreateCommittedResource(&var1, D3D12_HEAP_FLAG_NONE, &var2,
-																	 D3D12_RESOURCE_STATE_COMMON, nullptr,
-																	 IID_PPV_ARGS(&d3d12Resource)));
+			                                                         D3D12_RESOURCE_STATE_COMMON, nullptr,
+			                                                         IID_PPV_ARGS(&d3d12Resource)));
 		}
 
 		ResourceStateTracker::AddGlobalResourceState(d3d12Resource.Get(), D3D12_RESOURCE_STATE_COMMON);
@@ -43,11 +43,11 @@ void CommandList::CopyBuffer(GpuResource &buffer, size_t numElements, size_t ele
 		if (bufferData != nullptr)
 		{
 			ComPtr<ID3D12Resource> uploadResource;
-			const auto var1 = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-			const auto var2 = CD3DX12_RESOURCE_DESC::Buffer(bufferSize);
+			const auto             var1 = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+			const auto             var2 = CD3DX12_RESOURCE_DESC::Buffer(bufferSize);
 			Helpers::ThrowIfFailed(m_Device->CreateCommittedResource(&var1, D3D12_HEAP_FLAG_NONE, &var2,
-																	 D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
-																	 IID_PPV_ARGS(&uploadResource)));
+			                                                         D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
+			                                                         IID_PPV_ARGS(&uploadResource)));
 
 			D3D12_SUBRESOURCE_DATA subresourceData = {};
 			subresourceData.pData = bufferData;
@@ -58,7 +58,7 @@ void CommandList::CopyBuffer(GpuResource &buffer, size_t numElements, size_t ele
 			FlushResourceBarriers();
 
 			if (UpdateSubresources(m_CommandList.Get(), d3d12Resource.Get(), uploadResource.Get(), 0, 0, 1,
-								   &subresourceData) == 0)
+			                       &subresourceData) == 0)
 			{
 				throw std::exception("UpdateSubresources failed");
 			}
@@ -71,14 +71,15 @@ void CommandList::CopyBuffer(GpuResource &buffer, size_t numElements, size_t ele
 	buffer.CreateView(numElements, elementSize);
 }
 
-template <typename T> void CommandList::SetConstantBuffer(unsigned slot, const T &constantBuffer)
+template <typename T>
+void CommandList::SetConstantBuffer(unsigned slot, const T& constantBuffer)
 {
 	OPTICK_GPU_EVENT("SetConstantBuffer");
-	const auto &alloc = GPUInstance.m_GraphicsMemory->AllocateConstant<T>(constantBuffer);
+	const auto& alloc = GPUInstance.m_GraphicsMemory->AllocateConstant<T>(constantBuffer);
 	m_CommandList->SetGraphicsRootConstantBufferView(slot, alloc.GpuAddress());
 }
 
-void CommandList::CopyResource(const ComPtr<ID3D12Resource> &destination, const ComPtr<ID3D12Resource> &source)
+void CommandList::CopyResource(const ComPtr<ID3D12Resource>& destination, const ComPtr<ID3D12Resource>& source)
 {
 	OPTICK_GPU_EVENT("CopyResource");
 	TransitionBarrier(destination, D3D12_RESOURCE_STATE_COPY_DEST);
@@ -329,8 +330,8 @@ void CommandList::CopyResource(const ComPtr<ID3D12Resource> &destination, const 
 //	}
 // }
 
-void CommandList::TransitionBarrier(const ComPtr<ID3D12Resource> &resource, D3D12_RESOURCE_STATES stateAfter,
-									unsigned subresource, bool flushBarriers)
+void CommandList::TransitionBarrier(const ComPtr<ID3D12Resource>& resource, D3D12_RESOURCE_STATES stateAfter,
+                                    unsigned                      subresource, bool               flushBarriers)
 {
 	OPTICK_GPU_EVENT("TransitionBarrier");
 	if (resource)
@@ -341,7 +342,7 @@ void CommandList::TransitionBarrier(const ComPtr<ID3D12Resource> &resource, D3D1
 	}
 	else
 	{
-		Logger.Err("Could not transition resource");
+		LOGGER.Err("Could not transition resource");
 	}
 
 	if (flushBarriers)
@@ -350,22 +351,22 @@ void CommandList::TransitionBarrier(const ComPtr<ID3D12Resource> &resource, D3D1
 	}
 }
 
-void CommandList::TransitionBarrier(GpuResource &resource, D3D12_RESOURCE_STATES stateAfter, unsigned subresource,
-									bool flushBarriers)
+void CommandList::TransitionBarrier(GpuResource& resource, D3D12_RESOURCE_STATES stateAfter, unsigned subresource,
+                                    bool         flushBarriers)
 {
 	OPTICK_EVENT();
 	TransitionBarrier(resource.GetResource(), stateAfter, subresource, flushBarriers);
 	resource.m_TransitioningState = stateAfter;
 }
 
-void CommandList::SetDescriptorTable(unsigned slot, Texture *texture)
+void CommandList::SetDescriptorTable(unsigned slot, Texture* texture)
 {
 	OPTICK_EVENT();
 	const size_t offset = texture->GetHandle(ViewType::SRV).heapOffset;
 
 	if (offset == -1)
 	{
-		Logger.Warn("Texture has no heap offset: " + texture->GetName());
+		LOGGER.Warn("Texture has no heap offset: " + texture->GetName());
 		return;
 	}
 
@@ -378,9 +379,8 @@ void CommandList::SetDescriptorTable(unsigned slot, Texture *texture)
 	TrackResource(texture->GetResource());
 }
 
-void CommandList::SetRenderTargets(unsigned numberOfTargets, Texture *renderTargets, Texture *depthBuffer)
+void CommandList::SetRenderTargets(unsigned numberOfTargets, Texture* renderTargets, Texture* depthBuffer)
 {
-
 	OPTICK_GPU_EVENT("SetRenderTargets");
 	assert(numberOfTargets <= D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
 	D3D12_CPU_DESCRIPTOR_HANDLE RTVs[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT] = {};
@@ -404,47 +404,46 @@ void CommandList::SetRenderTargets(unsigned numberOfTargets, Texture *renderTarg
 	}
 }
 
-void CommandList::ClearRenderTargets(unsigned numberOfTargets, Texture *rtv)
+void CommandList::ClearRenderTargets(unsigned numberOfTargets, Texture* rtv)
 {
 	OPTICK_EVENT();
 	for (unsigned i = 0; i < numberOfTargets; ++i)
 	{
 		m_CommandList->ClearRenderTargetView(rtv[i].GetHandle(ViewType::RTV).cpuPtr, &rtv->m_ClearColor.x, 0,
-												   nullptr);
+		                                     nullptr);
 	}
 }
 
 void CommandList::ClearRenderTarget(Texture rtv)
 {
-	OPTICK_EVENT(); 
+	OPTICK_EVENT();
 	m_CommandList->ClearRenderTargetView(rtv.GetHandle(ViewType::RTV).cpuPtr, &rtv.m_ClearColor.x, 0, nullptr);
 }
 
-void CommandList::SetPipelineState(const PSO &pso)
+void CommandList::SetPipelineState(const PSO& pso)
 {
-	const auto &pipelineState = pso.GetPipelineState().Get();
+	const auto& pipelineState = pso.GetPipelineState().Get();
 	m_CommandList->SetPipelineState(pipelineState);
 	TrackResource(pipelineState);
-
 }
 
-void CommandList::SetViewports(const D3D12_VIEWPORT &viewPort,unsigned num)
+void CommandList::SetViewports(const D3D12_VIEWPORT& viewPort, unsigned num)
 {
 	m_CommandList->RSSetViewports(num, &viewPort);
 }
 
-void CommandList::SetSissorRect(const D3D12_RECT &sissorRect, unsigned num)
+void CommandList::SetSissorRect(const D3D12_RECT& sissorRect, unsigned num)
 {
 	m_CommandList->RSSetScissorRects(num, &sissorRect);
 }
 
-void CommandList::TrackResource(Microsoft::WRL::ComPtr<ID3D12Object> object)
+void CommandList::TrackResource(ComPtr<ID3D12Object> object)
 {
 	OPTICK_EVENT();
 	m_TrackedObjects.push_back(object);
 }
 
-void CommandList::TrackResource(const GpuResource &res)
+void CommandList::TrackResource(const GpuResource& res)
 {
 	OPTICK_EVENT();
 	TrackResource(res.GetResource());
@@ -461,7 +460,7 @@ void CommandList::FlushResourceBarriers()
 	m_ResourceStateTracker->FlushResourceBarriers(*this);
 }
 
-bool CommandList::Close(CommandList &pendingCommandList)
+bool CommandList::Close(CommandList& pendingCommandList)
 {
 	OPTICK_EVENT();
 	FlushResourceBarriers();

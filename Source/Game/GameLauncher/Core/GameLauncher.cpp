@@ -7,15 +7,18 @@
 #include "Engine/PersistentSystems/Physics/Raycast.h"
 #include "PillarGame/PillarGameComponents.h"
 
+#include "Tools/ImGui/crude_json.h"
+#include "Tools/Utilities/LinearAlgebra/Easing.h"
+
 extern "C" {
-inline GAME_API GameLauncher* EntrypointMain()
+inline GAME_API GameLauncher* entrypointMain()
 {
 	return new YourGameLauncher();
 }
 }
 
 extern "C" {
-inline GAME_API void ExitPoint(HMODULE handle)
+inline GAME_API void exitPoint(HMODULE handle)
 {
 	FreeLibraryAndExitThread(handle, 0);
 }
@@ -35,7 +38,7 @@ void YourGameLauncher::Init()
 
 		{
 			GameObject worldRoot = GameObject::Create();
-			Scene::ActiveManager().SetLastGOAsWorld();
+			Scene::activeManager().SetLastGOAsWorld();
 
 			worldRoot.SetName("SkyLight");
 			worldRoot.transform().SetRotation(45, 45, 0);
@@ -58,16 +61,38 @@ void YourGameLauncher::Init()
 void YourGameLauncher::Start()
 {
 	OPTICK_EVENT();
-	Logger.Log("GameLauncher start");
+	LOGGER.Log("GameLauncher start");
 }
 
 void YourGameLauncher::Update(float delta)
 {
 	OPTICK_EVENT();
 	UNREFERENCED_PARAMETER(delta);
-	auto& manager = Scene::ActiveManager();
+	auto& manager = Scene::activeManager();
+
+
+	static Vector3f lerpPos;
+	static Vector3f lerpRot;
 	for (auto& element : manager.GetAllComponents<PlayerComponent>())
 	{
+		if (element.currentHook)
+		{
+			element.timeSinceHook += delta;
+			auto percentage = element.timeSinceHook / element.hookCooldown;
+
+			if (percentage < 1.0f)
+			{
+				auto position = element.transform().GetPosition();
+				position.y = lerp(lerpPos.y, element.currentHook.transform().GetPosition().y, percentage);
+				element.transform().SetPosition(position);
+
+				auto rotation = element.transform().GetRotation();
+				rotation.y = lerp(lerpRot.y, element.currentHook.transform().GetRotation().y, percentage);
+				element.transform().SetRotation(rotation);
+			}
+		}
+
+
 		if (Input.IsKeyHeld(Keys::RIGHT))
 		{
 			element.transform().Rotate(0, -50.0f * delta, 0);
@@ -84,11 +109,28 @@ void YourGameLauncher::Update(float delta)
 			const auto&         cameraTransform = manager.GetCamera().transform();
 			const auto&         camera = manager.GetCamera().GetComponent<Camera>();
 
-			const auto coord = EditorInstance.GetMainViewport()->getCursorInWindowPostion();
+			const auto coord = EDITOR_INSTANCE.GetMainViewport()->getCursorInWindowPostion();
 			if (Raycast(cameraTransform.GetPosition(), camera.GetPointerDirection(coord),
 			            hit))
 			{
-				Logger.Log("You hit something " + hit.objectHit.GetName(), true);
+				LOGGER.Log("You hit something " + hit.objectHit.GetName(), true);
+
+				if (auto* hook = hit.objectHit.TryGetComponent<HookComponent>(); !hook->hasConnection)
+				{
+					if (element.currentHook)
+					{
+						auto& currentHook = element.currentHook.GetComponent<HookComponent>();
+						currentHook.hasConnection = false;
+						currentHook.connection = GameObject();
+					}
+					element.timeSinceHook = 0;
+					element.currentHook = hit.objectHit;
+					hook->connection = element.GetGameObject();
+					hook->hasConnection = true;
+
+					lerpPos = element.transform().GetPosition();
+					lerpRot = element.transform().GetRotation();
+				}
 			}
 		}
 	}

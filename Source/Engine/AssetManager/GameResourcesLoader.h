@@ -1,23 +1,28 @@
 #pragma once
-#include "Loader/LoaderBase.h" 
-#include <Editor/Editor/Defines.h> 
+#include <Editor/Editor/Defines.h>
 #include <Tools/Utilities/System/ServiceLocator.h>
+#include "Loader/LoaderBase.h"
 #define Resources ServiceLocator::Instance().GetService<GameResourcesLoader>()
 
 class GameResourcesLoader : public ResourceLoaderBase
 {
-  public:
-	template <class T> bool Find(const std::filesystem::path &aFilePath) const;
-	template <class T> std::shared_ptr<T> Load(const std::filesystem::path &aFilePath);
-	std::shared_ptr<AssetBase> TryLoad(const std::filesystem::path &path);
-	template <class T> std::shared_ptr<T> ForceLoad(const std::filesystem::path &aFilePath);
-	template <class T> std::shared_ptr<T> Create(const std::filesystem::path &aFilePath);
+public:
+	template <class T>
+	bool Find(const std::filesystem::path& aFilePath) const;
+	template <class T>
+	std::shared_ptr<T>         Load(const std::filesystem::path& aFilePath);
+	std::shared_ptr<AssetBase> TryLoad(const std::filesystem::path& path);
+	template <class T>
+	std::shared_ptr<T> ForceLoad(const std::filesystem::path& aFilePath);
+	template <class T>
+	std::shared_ptr<T> Create(const std::filesystem::path& aFilePath);
 };
 
-template <class T> bool GameResourcesLoader::Find(const std::filesystem::path &aFilePath) const
+template <class T>
+bool GameResourcesLoader::Find(const std::filesystem::path& aFilePath) const
 {
 	OPTICK_EVENT();
-	const std::type_info *typeInfo = &typeid(T);
+	const std::type_info*          typeInfo = &typeid(T);
 	const std::shared_ptr<Library> library = GetLibraryOfType<T>();
 
 	if (!library)
@@ -26,15 +31,16 @@ template <class T> bool GameResourcesLoader::Find(const std::filesystem::path &a
 	}
 
 	const std::filesystem::path Identifier = aFilePath;
-	std::filesystem::path loadObjectFrom = workingDirectory / aFilePath;
+	std::filesystem::path       loadObjectFrom = workingDirectory / aFilePath;
 
 	return library->Has(Identifier);
 }
 
-template <class T> std::shared_ptr<T> GameResourcesLoader::Load(const std::filesystem::path &aFilePath)
+template <class T>
+std::shared_ptr<T> GameResourcesLoader::Load(const std::filesystem::path& aFilePath)
 {
 	OPTICK_EVENT();
-	const std::type_info *typeInfo = &typeid(T);
+	const std::type_info*    typeInfo = &typeid(T);
 	std::shared_ptr<Library> library = GetLibraryOfType<T>();
 
 	if (!library)
@@ -53,7 +59,7 @@ template <class T> std::shared_ptr<T> GameResourcesLoader::Load(const std::files
 		ptr = library->Add(newObject);
 		myAssetQueue.EnqueueUnique(newObject.second);
 		newObject.second->isBeingLoaded = true;
-#if ThreadedAssetLoading
+#if THREADED_ASSET_LOADING
 		ThreadPoolInstance.SubmitWork(std::bind(&ResourceLoaderBase::ThreadedLoading, this));
 #else
 		ThreadedLoading();
@@ -62,10 +68,11 @@ template <class T> std::shared_ptr<T> GameResourcesLoader::Load(const std::files
 	return ptr;
 }
 
-template <class T> std::shared_ptr<T> GameResourcesLoader::ForceLoad(const std::filesystem::path &aFilePath)
+template <class T>
+std::shared_ptr<T> GameResourcesLoader::ForceLoad(const std::filesystem::path& aFilePath)
 {
 	OPTICK_EVENT();
-	const std::type_info *typeInfo = &typeid(T);
+	const std::type_info*    typeInfo = &typeid(T);
 	std::shared_ptr<Library> library = GetLibraryOfType<T>();
 
 	if (!library)
@@ -96,10 +103,10 @@ template <class T> std::shared_ptr<T> GameResourcesLoader::ForceLoad(const std::
 }
 
 template <class T>
-std::shared_ptr<T> GameResourcesLoader::Create(const std::filesystem::path &aFilePath)
+std::shared_ptr<T> GameResourcesLoader::Create(const std::filesystem::path& aFilePath)
 {
 	OPTICK_EVENT();
-	const std::type_info *typeInfo = &typeid(T);
+	const std::type_info*    typeInfo = &typeid(T);
 	std::shared_ptr<Library> library = GetLibraryOfType<T>();
 
 	if (!library)
@@ -120,5 +127,5 @@ std::shared_ptr<T> GameResourcesLoader::Create(const std::filesystem::path &aFil
 		newObject.second->Init();
 	}
 
-	return ptr; 
+	return ptr;
 }
