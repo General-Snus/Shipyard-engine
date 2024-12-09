@@ -1,11 +1,12 @@
 #pragma once
+#include <DirectX/DX12/Graphics/Enums.h>
+#include "DebugDrawer/DebugDrawer.h"
 #include "Engine/AssetManager/Enums.h"
 #include "Tools/Utilities/System/SingletonTemplate.h"
-#include <DirectX/DX12/Graphics/Enums.h>
 
 struct GraphicsSettings
 {
-	int Tonemaptype = 0;
+	int  Tonemaptype = 0;
 	bool DebugRenderer_Active = false;
 };
 
@@ -60,30 +61,32 @@ class GraphicsEngine : public Singleton
 {
 	friend class GraphicsEngineUtilities;
 
-  public:
+public:
 	enum class eDepthStencilStates : unsigned int
 	{
 		DSS_ReadWrite,
 		DSS_ReadOnly,
 		DSS_COUNT,
 	};
-	const PSOCache &GetPSOCache() const;
+
+	const PSOCache& GetPSOCache() const;
 
 	bool ResizeBuffers(Vector2ui resolution);
 
 	std::shared_ptr<PSOCache> m_Cache;
-  private:
+	DebugDrawer               debugDrawer;
 
-	uint32_t *BufferForPicking;
-	bool WantPickingData = false;
+private:
+	uint32_t* BufferForPicking;
+	bool      WantPickingData = false;
 
-	Camera *myCamera;
+	Camera* myCamera;
 
-	std::shared_ptr<Texture> SceneBuffer;
+	std::shared_ptr<Texture>        SceneBuffer;
 	std::shared_ptr<ShipyardShader> defaultVS;
 	std::shared_ptr<ShipyardShader> defaultPS;
 
-	std::shared_ptr<Texture> BRDLookUpTable;
+	std::shared_ptr<Texture>       BRDLookUpTable;
 	std::shared_ptr<TextureHolder> NoiseTable;
 	std::shared_ptr<TextureHolder> defaultTexture;
 	std::shared_ptr<TextureHolder> defaultNormalTexture;
@@ -91,19 +94,18 @@ class GraphicsEngine : public Singleton
 	std::shared_ptr<TextureHolder> defaultEffectTexture;
 	std::shared_ptr<TextureHolder> defaultParticleTexture;
 	std::shared_ptr<TextureHolder> defaultCubeMap;
-	std::shared_ptr<Mesh> defaultMesh;
-	std::shared_ptr<Material> defaultMaterial;
+	std::shared_ptr<Mesh>          defaultMesh;
+	std::shared_ptr<Material>      defaultMaterial;
 
 	GraphicsSettings myGraphicSettings;
-	uint32_t ReadPickingData(Vector2ui position);
+	uint32_t         ReadPickingData(Vector2ui position);
 
-	std::shared_ptr<Scene> newScene;
+	std::shared_ptr<Scene>                 newScene;
 	std::vector<std::shared_ptr<Viewport>> m_CustomSceneRenderPasses; // lifetime 1 frame
 
-	void AddRenderJob(std::shared_ptr<Viewport> aViewport);
+	void     AddRenderJob(std::shared_ptr<Viewport> aViewport);
 	uint32_t GetAmountOfRenderJob();
 
-  private:
 	bool SetupDebugDrawline();
 	void SetupDefaultVariables();
 	void SetupBlendStates();
@@ -112,19 +114,20 @@ class GraphicsEngine : public Singleton
 	void SetupSpace3();
 	void SetupPostProcessing();
 
-	void BeginFrame();
-	uint64_t RenderFrame(Viewport &renderViewPort, GameObjectManager &scene);
-	void EndFrame();
+	void     BeginFrame();
+	uint64_t RenderFrame(Viewport& renderViewPort, GameObjectManager& scene);
+	void     EndFrame();
 
-	void PrepareBuffers(std::shared_ptr<CommandList> commandList, Viewport &renderViewPort, GameObjectManager &scene);
- 	void EnvironmentLightPass(std::shared_ptr<CommandList> commandList);
-	void ToneMapperPass(std::shared_ptr<CommandList> commandList, Texture *target);
+	void PrepareBuffers(std::shared_ptr<CommandList> commandList, Viewport& renderViewPort, GameObjectManager& scene);
+	void EnvironmentLightPass(std::shared_ptr<CommandList> commandList);
+	void ToneMapperPass(std::shared_ptr<CommandList> commandList, Texture* target);
 	void ImGuiPass();
 
-  public:
+public:
 	bool Initialize(HWND windowHandle, bool enableDeviceDebug);
 	void InitializeCustomRenderScene();
 	void Render(std::vector<std::shared_ptr<Viewport>> renderViewPorts);
+	void Update(float delta);
 
 	void SetDepthState(eDepthStencilStates state)
 	{
@@ -136,13 +139,15 @@ class GraphicsEngine : public Singleton
 	{
 		return defaultVS;
 	}
+
 	__forceinline std::shared_ptr<ShipyardShader> GetDefaultPSShader() const
 	{
 		return defaultPS;
 	}
+
 	std::shared_ptr<Texture> GetTargetTextures(eRenderTargets type) const;
 
-	__forceinline GraphicsSettings &GetSettings()
+	__forceinline GraphicsSettings& GetSettings()
 	{
 		return myGraphicSettings;
 	}

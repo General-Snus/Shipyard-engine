@@ -679,7 +679,7 @@ void Editor::Update()
 	// End
 
 	gameState.Update(delta);
-	DebugDrawer::Get().Update(delta);
+	GraphicsEngineInstance.Update(delta);
 	Shipyard_PhysXInstance.EndRead(delta);
 }
 

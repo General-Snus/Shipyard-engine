@@ -22,7 +22,7 @@ CommandList::CommandList(const DeviceType& device, D3D12_COMMAND_LIST_TYPE type,
 }
 
 void CommandList::CopyBuffer(GpuResource& buffer, size_t numElements, size_t elementSize, const void* bufferData,
-                             D3D12_RESOURCE_FLAGS flags)
+                             D3D12_RESOURCE_FLAGS flags, CD3DX12_HEAP_PROPERTIES HeapProperties)
 {
 	OPTICK_GPU_EVENT("CopyBuffer");
 	const size_t bufferSize = numElements * elementSize;
@@ -31,9 +31,8 @@ void CommandList::CopyBuffer(GpuResource& buffer, size_t numElements, size_t ele
 	if (bufferSize != 0)
 	{
 		{
-			const auto var1 = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 			const auto var2 = CD3DX12_RESOURCE_DESC::Buffer(bufferSize, flags);
-			Helpers::ThrowIfFailed(m_Device->CreateCommittedResource(&var1, D3D12_HEAP_FLAG_NONE, &var2,
+			Helpers::ThrowIfFailed(m_Device->CreateCommittedResource(&HeapProperties, D3D12_HEAP_FLAG_NONE, &var2,
 			                                                         D3D12_RESOURCE_STATE_COMMON, nullptr,
 			                                                         IID_PPV_ARGS(&d3d12Resource)));
 		}
@@ -435,6 +434,29 @@ void CommandList::SetViewports(const D3D12_VIEWPORT& viewPort, unsigned num)
 void CommandList::SetSissorRect(const D3D12_RECT& sissorRect, unsigned num)
 {
 	m_CommandList->RSSetScissorRects(num, &sissorRect);
+}
+
+void CommandList::ConfigureInputAssembler(D3D_PRIMITIVE_TOPOLOGY topology, IndexResource& indexResource)
+{
+	OPTICK_GPU_EVENT("ConfigureInputAssembler");
+	m_CommandList->IASetPrimitiveTopology(topology);
+	TransitionBarrier(indexResource, D3D12_RESOURCE_STATE_INDEX_BUFFER);
+	const auto& indexView = indexResource.GetIndexBufferView();
+	m_CommandList->IASetIndexBuffer(&indexView);
+	TrackResource(indexResource);
+}
+
+void CommandList::ConfigureInputAssembler(D3D_PRIMITIVE_TOPOLOGY topology, VertexResource& VertexResource,
+                                          IndexResource&         indexResource)
+{
+	OPTICK_GPU_EVENT("ConfigureInputAssembler");
+	m_CommandList->IASetPrimitiveTopology(topology);
+	TransitionBarrier(indexResource, D3D12_RESOURCE_STATE_INDEX_BUFFER);
+	const auto& indexView = indexResource.GetIndexBufferView();
+	const auto& vertexView = VertexResource.GetVertexBufferView();
+	m_CommandList->IASetIndexBuffer(&indexView);
+	m_CommandList->IASetVertexBuffers(0, 1, &vertexView);
+	TrackResource(indexResource);
 }
 
 void CommandList::TrackResource(ComPtr<ID3D12Object> object)

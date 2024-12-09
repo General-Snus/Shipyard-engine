@@ -113,8 +113,8 @@ uint32_t GraphicsEngine::ReadPickingData(Vector2ui position)
 
 bool GraphicsEngine::SetupDebugDrawline()
 {
-	DebugDrawer::Get().Initialize();
-	DebugDrawer::Get().AddDebugGrid({0.f, 0.0f, 0.f}, 1000, 10, {1.0f, 1.0f, 1.0f});
+	debugDrawer.Initialize();
+	debugDrawer.AddDebugGrid({0.f, 0.0f, 0.f}, 1000, 10, {1.0f, 1.0f, 1.0f});
 	return true;
 }
 
@@ -354,6 +354,7 @@ void GraphicsEngine::Render(std::vector<std::shared_ptr<Viewport>> renderViewPor
 		viewport->Update();
 	}
 
+
 	BeginFrame();
 
 	for (auto& viewport : renderViewPorts)
@@ -368,6 +369,11 @@ void GraphicsEngine::Render(std::vector<std::shared_ptr<Viewport>> renderViewPor
 		viewport->m_RenderTarget->isLoadedComplete = true;
 	}
 	m_CustomSceneRenderPasses.clear();
+}
+
+void GraphicsEngine::Update(float delta)
+{
+	debugDrawer.Update(delta);
 }
 
 void GraphicsEngine::BeginFrame()
@@ -402,6 +408,10 @@ uint64_t GraphicsEngine::RenderFrame(Viewport& renderViewPort, GameObjectManager
 
 		EnvironmentLightPass(commandList);
 		ToneMapperPass(commandList, renderViewPort.GetTarget());
+
+
+		debugDrawer.Render(commandList);
+
 		return commandQueue->ExecuteCommandList(commandList);
 	}
 	const auto commandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);

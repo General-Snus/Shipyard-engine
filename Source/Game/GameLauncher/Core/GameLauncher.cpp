@@ -62,6 +62,7 @@ void YourGameLauncher::Start()
 {
 	OPTICK_EVENT();
 	LOGGER.Log("GameLauncher start");
+	GraphicsEngineInstance.debugDrawer.AddDebugBox({-1, -1, -1}, {1, 1, 1});
 }
 
 void YourGameLauncher::Update(float delta)

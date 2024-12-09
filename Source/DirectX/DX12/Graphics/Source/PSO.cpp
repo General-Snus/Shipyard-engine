@@ -47,6 +47,14 @@ void PSOCache::InitAllStates()
 		                                     DXGI_FORMAT_UNKNOWN, CD3DX12_BLEND_DESC(CD3DX12_DEFAULT()), L"ToneMap");
 		pso_map[ePipelineStateID::ToneMap] = std::move(pso);
 	}
+	{
+		constexpr std::array rtvFormats = {DXGI_FORMAT_R8G8B8A8_UNORM};
+
+		auto pso = CreatePSO("Shaders/LineDrawer_VS.cso", "Shaders/LineDrawer_PS.cso", rtvFormats,
+		                     DXGI_FORMAT_UNKNOWN, CD3DX12_BLEND_DESC(CD3DX12_DEFAULT()), L"LineDrawer",
+		                     D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE);
+		pso_map[ePipelineStateID::DebugDraw] = std::move(pso);
+	}
 }
 
 std::unique_ptr<PSO>& PSOCache::GetState(ePipelineStateID id)
@@ -199,7 +207,7 @@ std::unique_ptr<PSO> PSOCache::CreatePSO(const std::filesystem::path& vertexShad
                                          const std::filesystem::path& pixelShader,
                                          const std::span<const DXGI_FORMAT> renderTargetFormat,
                                          DXGI_FORMAT depthStencilFormat, const CD3DX12_BLEND_DESC& desc,
-                                         std::wstring_view name)
+                                         std::wstring_view name, D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive)
 {
 	auto pso = std::make_unique<PSO>();
 	pso->m_Device = GPUInstance.m_Device;
@@ -230,7 +238,7 @@ std::unique_ptr<PSO> PSOCache::CreatePSO(const std::filesystem::path& vertexShad
 	}
 
 	stream.pRootSignature = m_RootSignature->GetRootSignature().Get();
-	stream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	stream.PrimitiveTopologyType = primitive;
 
 	if (ENGINE_RESOURCES.ForceLoadAsset<ShipyardShader>(vertexShader.string(), pso->m_vs))
 	{

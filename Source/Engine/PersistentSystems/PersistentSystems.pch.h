@@ -13,10 +13,11 @@
 #include <string>
 #include <vector>
 
-#include "ArtificialInteligence/AICommands/AICommands.h"
-#include "Physics/PhysXInterpeter.h"
-#include "Physics/Raycast.h"
-#include "Scene.h"
 #include <Tools/Logging/Logging.h>
 #include <Tools/Reflection/refl.hpp>
+#include "Scene.h"
+#include "ArtificialInteligence/AICommands/AICommands.h"
+#include "Engine/GraphicsEngine/GraphicsEngine.h"
+#include "Physics/PhysXInterpeter.h"
+#include "Physics/Raycast.h"
 #endif // PERSISTENT_PCH_H

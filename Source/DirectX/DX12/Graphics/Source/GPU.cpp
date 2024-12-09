@@ -321,12 +321,14 @@ HeapHandle GPU::GetHeapHandle(DescriptorPile& pile)
 	return HeapHandle(descriptorHandleCPU, descriptorHandleGPU, heapOffset);
 }
 
-bool GPU::CreateIndexBuffer(const std::shared_ptr<CommandList>& commandList, IndexResource& outIndexResource,
-                            const std::vector<uint32_t>&        aIndexList)
+bool GPU::CreateIndexBuffer(const std::shared_ptr<CommandList>& commandList, IndexResource&         outIndexResource,
+                            const std::vector<uint32_t>&        aIndexList, CD3DX12_HEAP_PROPERTIES aHeapProperties)
 {
 	constexpr DXGI_FORMAT indexFormat = (sizeof(uint32_t) == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
 	constexpr size_t      indexSizeInBytes = indexFormat == DXGI_FORMAT_R16_UINT ? 2 : 4;
-	commandList->CopyBuffer(outIndexResource, aIndexList.size(), indexSizeInBytes, aIndexList.data());
+	commandList->CopyBuffer(outIndexResource, aIndexList.size(), indexSizeInBytes, aIndexList.data(),
+	                        D3D12_RESOURCE_FLAG_NONE,
+	                        aHeapProperties);
 	return true;
 }
 

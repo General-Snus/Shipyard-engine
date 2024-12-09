@@ -16,7 +16,7 @@ cPhysics_Kinematic::~cPhysics_Kinematic()
 {
 	for (DebugDrawer::PrimitiveHandle& handle : myHandles)
 	{
-		DebugDrawer::Get().RemoveDebugPrimitive(handle);
+		GraphicsEngineInstance.debugDrawer.RemoveDebugPrimitive(handle);
 	}
 
 	myHandles.clear();
@@ -36,22 +36,23 @@ void cPhysics_Kinematic::InitPrimitive()
 {
 	for (DebugDrawer::PrimitiveHandle& handle : myHandles)
 	{
-		DebugDrawer::Get().RemoveDebugPrimitive(handle);
+		GraphicsEngineInstance.debugDrawer.RemoveDebugPrimitive(handle);
 	}
 
 	const Vector3f position = GetComponent<Transform>().GetPosition();
 	// Velocity
-	DebugDrawer::Get().AddDebugLine(position, position + ph_velocity, Vector3f(1.0f, 0.0f, 0.0f), .01f);
+	GraphicsEngineInstance.debugDrawer.AddDebugLine(position, position + ph_velocity, Vector3f(1.0f, 0.0f, 0.0f), .01f);
 
 	// Acceleration
-	DebugDrawer::Get().AddDebugLine(position, position + ph_acceleration, Vector3f(0.0f, 0.0f, 1.0f), .01f);
+	GraphicsEngineInstance.debugDrawer.AddDebugLine(position, position + ph_acceleration, Vector3f(0.0f, 0.0f, 1.0f),
+	                                                .01f);
 }
 
 void cPhysics_Kinematic::Update()
 {
 	OPTICK_EVENT();
 	const float delta = TimerInstance.getDeltaTime();
-	auto& transform = GetComponent<Transform>();
+	auto&       transform = GetComponent<Transform>();
 	ph_velocity += ph_acceleration * delta;
 	ph_Angular_velocity += ph_Angular_acceleration * delta;
 

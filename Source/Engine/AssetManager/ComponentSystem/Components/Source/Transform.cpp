@@ -101,7 +101,7 @@ void Transform::MakeClean()
 	}
 
 #ifdef _DEBUGDRAW
-    DebugDrawer::Get().SetDebugPrimitiveTransform(primitive, myTransform);
+    GraphicsEngineInstance.debugDrawer.SetDebugPrimitiveTransform(primitive, myTransform);
 #endif // _DEBUGDRAW
 }
 
@@ -343,12 +343,12 @@ void Transform::SetGizmo(bool enabled)
 	IsDebugGizmoEnabled = enabled;
 	if (enabled)
 	{
-		primitive = DebugDrawer::Get().AddDebugGizmo(Vector3f(), 1.0f);
-		DebugDrawer::Get().SetDebugPrimitiveTransform(primitive, myTransform);
+		primitive = GraphicsEngineInstance.debugDrawer.AddDebugGizmo(Vector3f(), 1.0f);
+		GraphicsEngineInstance.debugDrawer.SetDebugPrimitiveTransform(primitive, myTransform);
 	}
 	else
 	{
-		DebugDrawer::Get().RemoveDebugPrimitive(primitive);
+		GraphicsEngineInstance.debugDrawer.RemoveDebugPrimitive(primitive);
 	}
 }
 
