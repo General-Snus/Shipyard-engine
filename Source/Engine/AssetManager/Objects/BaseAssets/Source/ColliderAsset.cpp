@@ -48,7 +48,8 @@ void ColliderAssetAABB::RenderDebugLines(Transform& data)
 
 	myHandles.clear();
 	// Velocity
-	const DebugDrawer::PrimitiveHandle handle = GraphicsEngineInstance.debugDrawer.AddDebugBox(myAABB.GetMin(), myAABB.GetMax());
+	const DebugDrawer::PrimitiveHandle handle = GraphicsEngineInstance.debugDrawer.AddDebugBox(
+		myAABB.GetMin(), myAABB.GetMax());
 	GraphicsEngineInstance.debugDrawer.SetDebugPrimitiveTransform(handle, data.GetTransform());
 	myHandles.push_back(handle);
 }
@@ -86,8 +87,9 @@ void ColliderAssetSphere::RenderDebugLines(Transform& data)
 
 	// Velocity
 	const DebugDrawer::PrimitiveHandle handle =
-		GraphicsEngineInstance.debugDrawer.AddDebugBox(mySphere.GetCenter() + data.GetPosition() + min * mySphere.GetRadius(),
-		                               mySphere.GetCenter() + data.GetPosition() + max * mySphere.GetRadius());
+		GraphicsEngineInstance.debugDrawer.AddDebugBox(
+			mySphere.GetCenter() + data.GetPosition() + min * mySphere.GetRadius(),
+			mySphere.GetCenter() + data.GetPosition() + max * mySphere.GetRadius());
 	GraphicsEngineInstance.debugDrawer.SetDebugPrimitiveTransform(handle, data.GetTransform());
 	myHandles.push_back(handle);
 }

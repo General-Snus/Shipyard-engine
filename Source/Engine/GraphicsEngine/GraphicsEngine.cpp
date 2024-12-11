@@ -114,7 +114,7 @@ uint32_t GraphicsEngine::ReadPickingData(Vector2ui position)
 bool GraphicsEngine::SetupDebugDrawline()
 {
 	debugDrawer.Initialize();
-	debugDrawer.AddDebugGrid({0.f, 0.0f, 0.f}, 1000, 10, {1.0f, 1.0f, 1.0f});
+	//debugDrawer.AddDebugGrid({0.f, 0.0f, 0.f}, 1000, 10, {1.0f, 1.0f, 1.0f});
 	return true;
 }
 

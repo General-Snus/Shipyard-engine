@@ -132,8 +132,6 @@ void DebugDrawer::Render(std::shared_ptr<CommandList> commandList)
 			for (size_t v = 0; v < currentPrimitive.Vertices.size(); ++v)
 			{
 				vxPtr[v] = currentPrimitive.Vertices[v];
-				//Vector3f position = Matrix::ReadPosition(currentPrimitive.Transform);
-				//vxPtr[v].Position = Vector4f(currentPrimitive.Vertices[v].Position + Vector4f(position.x,position.y,position.z,1.0f));
 				vxPtr[v].Position = Vector4f(currentPrimitive.Vertices[v].Position * currentPrimitive.Transform);
 				vxPtr[v].Position.w = 1.0f;
 			}
@@ -171,7 +169,7 @@ void DebugDrawer::Render(std::shared_ptr<CommandList> commandList)
 		commandList->ConfigureInputAssembler(D3D_PRIMITIVE_TOPOLOGY_LINELIST, indexBuffer);
 		const auto& pso = GraphicsEngineInstance.GetPSOCache().GetState(PSOCache::ePipelineStateID::DebugDraw);
 		commandList->SetPipelineState(*pso);
-		commandList->GetGraphicsCommandList()->DrawInstanced(static_cast<UINT>(myNumLineIndices), 1, 0, 0);
+		commandList->GetGraphicsCommandList()->DrawIndexedInstanced(static_cast<UINT>(myNumLineIndices), 1, 0, 0, 0);
 	}
 }
 
@@ -219,7 +217,80 @@ DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugBox(const Vector3f& aMin, cons
 
 	const Vector3f min = aMin;
 	const Vector3f max = aMax;
-	Vector3f       vertex = min;
+
+	//primitive.Vertices.reserve(8);
+
+	////Bottom left
+	//primitive.Vertices.push_back(DebugVertex({min.x, min.y, min.z}, Vector4f(aColor, 1.0f)));
+	////Top left
+	//primitive.Vertices.push_back(DebugVertex({min.x, max.y, min.z}, Vector4f(aColor, 1.0f)));
+	////Top Right
+	//primitive.Vertices.push_back(DebugVertex({max.x, max.y, min.z}, Vector4f(aColor, 1.0f)));
+	////Bottom Right
+	//primitive.Vertices.push_back(DebugVertex({max.x, min.y, min.z}, Vector4f(aColor, 1.0f)));
+
+
+	////Second layer
+	////Bottom left
+	//primitive.Vertices.push_back(DebugVertex({min.x, min.y, max.z}, Vector4f(aColor, 1.0f)));
+	////Top left
+	//primitive.Vertices.push_back(DebugVertex({min.x, max.y, max.z}, Vector4f(aColor, 1.0f)));
+	////Top Right
+	//primitive.Vertices.push_back(DebugVertex({max.x, max.y, max.z}, Vector4f(aColor, 1.0f)));
+	////Bottom Right
+	//primitive.Vertices.push_back(DebugVertex({max.x, min.y, max.z}, Vector4f(aColor, 1.0f)));
+
+
+	//primitive.Indices.reserve(36);
+	//primitive.Indices.push_back(0);
+	//primitive.Indices.push_back(1);
+	//primitive.Indices.push_back(2);
+
+	//primitive.Indices.push_back(0);
+	//primitive.Indices.push_back(2);
+	//primitive.Indices.push_back(3);
+
+	//primitive.Indices.push_back(4);
+	//primitive.Indices.push_back(0);
+	//primitive.Indices.push_back(3);
+
+	//primitive.Indices.push_back(4);
+	//primitive.Indices.push_back(3);
+	//primitive.Indices.push_back(7);
+
+	//primitive.Indices.push_back(4);
+	//primitive.Indices.push_back(5);
+	//primitive.Indices.push_back(1);
+
+	//primitive.Indices.push_back(4);
+	//primitive.Indices.push_back(1);
+	//primitive.Indices.push_back(0);
+
+	//primitive.Indices.push_back(3);
+	//primitive.Indices.push_back(2);
+	//primitive.Indices.push_back(6);
+
+	//primitive.Indices.push_back(3);
+	//primitive.Indices.push_back(6);
+	//primitive.Indices.push_back(7);
+
+	//primitive.Indices.push_back(1);
+	//primitive.Indices.push_back(5);
+	//primitive.Indices.push_back(6);
+
+	//primitive.Indices.push_back(1);
+	//primitive.Indices.push_back(6);
+	//primitive.Indices.push_back(2);
+
+	//primitive.Indices.push_back(7);
+	//primitive.Indices.push_back(5);
+	//primitive.Indices.push_back(6);
+
+	//primitive.Indices.push_back(7);
+	//primitive.Indices.push_back(5);
+	//primitive.Indices.push_back(4);
+
+	Vector3f vertex = min;
 
 	primitive.Vertices.reserve(8);
 	primitive.Vertices.push_back(DebugVertex(vertex, Vector4f(aColor, 1.0f)));
