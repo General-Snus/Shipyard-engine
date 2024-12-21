@@ -118,7 +118,7 @@ void YourGameLauncher::Update(float delta)
 			{
 
 				LOGGER.Log("You hit something " + hit.objectHit.GetName(), true);
-				if (auto* hook = hit.objectHit.TryGetComponent<HookComponent>(); !hook->hasConnection)
+				if (auto* hook = hit.objectHit.TryGetComponent<HookComponent>(); hook && !hook->hasConnection)
 				{
 					if (element.currentHook)
 					{

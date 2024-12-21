@@ -17,3 +17,7 @@ void Scene::merge(const Scene& scene)
 	m_WorldBounds.ExpandSphere(scene.m_WorldBounds);
 	m_GameObjectManager.Merge(scene.m_GameObjectManager);
 }
+
+void Scene::unload() {
+	m_GameObjectManager.unload();
+}

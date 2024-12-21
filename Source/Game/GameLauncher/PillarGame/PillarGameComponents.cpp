@@ -20,7 +20,6 @@ void SpawnGround(Vector3f base)
 {
 	GameObject ground = GameObject::Create("ground");
 	auto&      renderer = ground.AddComponent<MeshRenderer>("Models/Cube.fbx");
-	ground.AddComponent<cPhysXStaticBody>();
 	ground.transform().SetPosition(base);
 	ground.transform().SetScale(100, 0.1f, 100.f);
 
@@ -29,6 +28,7 @@ void SpawnGround(Vector3f base)
 		mat->SetColor(ColorManagerInstance.GetColor("Olive"));
 		renderer.SetMaterial(mat);
 	}
+	ground.AddComponent<cPhysXStaticBody>();
 }
 
 void SpawnHooks(int amount, float radius, Vector3f base)
@@ -71,7 +71,6 @@ void SpawnPlayer(int id, float radius, Vector3f base)
 		Vector3f(RandomEngine::randomInRange(-1.0f, 1.0f), 0, RandomEngine::randomInRange(-1.0f, 1.0f)).GetNormalized();
 	player.transform().LookAt(directionOffset * 10.0f);
 	player.transform().SetPosition(base);
-	player.AddComponent<PlayerComponent>();
 	player.AddComponent<cPhysXStaticBody>();
 
 	GameObject playerModel = GameObject::Create("PlayerModel");
@@ -88,4 +87,5 @@ void SpawnPlayer(int id, float radius, Vector3f base)
 
 	camera.transform().SetParent(player.transform());
 	camera.transform().SetPosition(0, 0, -2);
+	player.AddComponent<PlayerComponent>();
 }

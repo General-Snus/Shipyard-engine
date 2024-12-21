@@ -150,7 +150,7 @@ const Matrix& Transform::GetRawTransform() const
 	return myTransform;
 }
 
-const Quaternionf& Transform::GetQuatF()
+const Quaternionf& Transform::GetQuatF() const
 {
 	return myQuaternion;
 }

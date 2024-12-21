@@ -112,6 +112,10 @@ template <class T> class ComponentManager : public ComponentManagerBase
 
 template <class T> inline void ComponentManager<T>::Destroy()
 {
+	for(auto& ref : myComponents) {
+		ref.Destroy();
+	}
+
 	myGameObjectIDtoVectorIndex.clear();
 	myVectorIndexToGameObjectID.clear();
 	myComponents.clear();

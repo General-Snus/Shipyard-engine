@@ -17,6 +17,7 @@ public:
 
 	// this <- other
 	void merge(const Scene& other);
+	void unload();
 
 	bool        IsLoaded();
 	std::string Name();

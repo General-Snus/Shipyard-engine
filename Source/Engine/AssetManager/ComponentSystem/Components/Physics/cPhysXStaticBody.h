@@ -11,6 +11,8 @@ class cPhysXStaticBody : public Component
 
     void Init() override;
     void UpdateFromCollider();
+    void makeShape(const Collider* collider,Transform& transform);
+    void updateShape(const Collider* collider,Transform& transform);
     void Update() override; 
     void Destroy() override;
     void OnSiblingChanged(const std::type_info *SourceClass) override;

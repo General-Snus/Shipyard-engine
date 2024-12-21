@@ -5,6 +5,7 @@
 #include <Editor/Editor/Core/Editor.h>
 #include <Engine/PersistentSystems/Scene.h>
 #include <Tools/Logging/Logging.h>
+#include <Engine/PersistentSystems/Physics/PhysXInterpeter.h>
 
 GameState::GameState() = default;
 
@@ -53,6 +54,11 @@ void GameState::StartPlaySession() {
 
 void GameState::EndPlaySession() {
 	EDITOR_INSTANCE.SetActiveScene(m_EditorBackupScene);
+
+	if(m_GameScene) {
+		m_GameScene->unload(); 
+	}
+
 	if(dllFunction) {
 		m_GameScene = std::make_shared<Scene>("GameScene");
 		try {
@@ -63,6 +69,8 @@ void GameState::EndPlaySession() {
 		}
 	}
 
+
+	Shipyard_PhysXInstance.resetScene();
 	if(!IsPlaying) {
 		return;
 	}
@@ -82,8 +90,8 @@ void GameState::Init() {
 			m_GameLauncher->Init();
 		}
 	} catch(const std::exception& e) {
-		IsLoading = false;
-		IsPlaying = false;
+		//IsLoading = false;
+		//IsPlaying = false;
 		LOGGER.Err(e.what());
 	}
 }
@@ -94,8 +102,8 @@ void GameState::Start() {
 			m_GameLauncher->Start();
 		}
 	} catch(const std::exception& e) {
-		IsLoading = false;
-		IsPlaying = false;
+		//IsLoading = false;
+		//IsPlaying = false;
 		LOGGER.Err(e.what());
 	}
 }
@@ -112,8 +120,8 @@ void GameState::Update(float delta) {
 			m_GameLauncher->Update(delta);
 		}
 	} catch(const std::exception& e) {
-		IsLoading = false;
-		IsPlaying = false;
+		//IsLoading = false;
+		//IsPlaying = false;
 		LOGGER.Err(e.what());
 	}
 }

@@ -42,6 +42,7 @@ public:
 	void EndRead(float deltaTime);
 	void Render();
 	void ShutdownPhysx();
+	void resetScene();
 
 	// template<typename T>
 	// static T* CookMesh(std::shared_ptr<Mesh> myToBeCookedMesh);

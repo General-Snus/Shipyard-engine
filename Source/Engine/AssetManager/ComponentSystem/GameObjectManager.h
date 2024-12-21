@@ -29,8 +29,8 @@ class GameObjectManager
 	friend class GameobjectAdded;
 	friend class GameobjectDeleted;
 	GameObjectManager(Scene &ref) : m_OwnerScene(ref) {};
-
 	~GameObjectManager();
+	void unload();
 	GameObject CreateGameObject();
 	GameObject CreateGameObject(const SY::UUID aGameObjectID);
 

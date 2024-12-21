@@ -6,7 +6,9 @@
 #include "Editor/Editor/Core/Editor.h"
 #include "Engine/AssetManager/ComponentSystem/ComponentManager.h"
 
-GameObjectManager::~GameObjectManager()
+GameObjectManager::~GameObjectManager() = default;
+
+void GameObjectManager::unload()
 {
 	for (auto& [key, cm] : myComponentManagers)
 	{

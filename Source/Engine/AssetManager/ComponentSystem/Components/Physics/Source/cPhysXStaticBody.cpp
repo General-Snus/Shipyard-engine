@@ -21,7 +21,7 @@ cPhysXStaticBody::cPhysXStaticBody(const SY::UUID anOwnerId,GameObjectManager* a
 
 using namespace physx;
 void cPhysXStaticBody::Init() {
-	auto& transform = GetComponent<Transform>();
+	auto const& transform = GetComponent<Transform>();
 	auto& quat = transform.GetQuatF();
 	auto* world = Shipyard_PhysXInstance.GetPhysicsWorld();
 	data = world->createRigidStatic(PxTransform(transform.GetPosition(),PxQuat(quat.x,quat.y,quat.z,quat.w)));
@@ -40,107 +40,12 @@ void cPhysXStaticBody::UpdateFromCollider() {
 		return;
 	}
 
-	auto& transform = GetComponent<Transform>();
+	auto& objectTransform = transform();
 	if(const auto* collider = TryGetAddComponent<Collider>()) {
 		if(!shape) {
-			makeShape(collider,transform);
+			makeShape(collider,objectTransform);
 		} else {
-			switch(collider->GetColliderType()) {
-			case eColliderType::AABB:
-			{
-				const auto aabb = collider->GetColliderAssetOfType<ColliderAssetAABB>();
-				aabb->UpdateWithTransform(transform.LocalMatrix());
-				const auto& aabbData = aabb->GetAABB();
-				auto geometry = PxBoxGeometry(aabbData.GetXSize() / 2,aabbData.GetYSize() / 2,aabbData.GetZSize() / 2);
-				shape = Shipyard_PhysXInstance.CreateShape(data,&geometry);
-				break;
-			}
-			// case eColliderType::SPHERE:
-			//{
-			//	auto* sphere = collider->TryGetAddComponent<ColliderAssetSphere>();
-			//	const auto& sphereData = sphere->GetSphere();
-			//	PxRigidActorExt::createExclusiveShape(*data,PxSphereGeometry(sphereData.GetRadius()),*mMaterial);
-			//	break;
-			// }
-			// case eColliderType::CIRCLE:
-			//{
-			//	auto* circle = collider->TryGetAddComponent<ColliderAssetCircle>();
-			//	const auto& circleData = circle->GetCircle();
-			//	PxRigidActorExt::createExclusiveShape(*data,PxSphereGeometry(circleData.GetRadius()),*mMaterial);
-			//	break;
-			// }
-			// case eColliderType::PLANE:
-			//{
-			//	auto* plane = collider->TryGetAddComponent<ColliderAssetPlane>();
-			//	const auto& planeData = plane->GetPlane();
-			//	PxRigidActorExt::createExclusiveShape(*data,PxPlaneGeometry(),*mMaterial);
-			//	break;
-			// }
-			// case eColliderType::CONE:
-			//{
-			//	auto* cone = collider->TryGetAddComponent<ColliderAssetCone>();
-			//	const auto& coneData = cone->GetCone();
-			//	PxRigidActorExt::createExclusiveShape(*data,PxCapsuleGeometry(coneData.GetRadius(),coneData.GetHeight()),*mMaterial);
-			//	break;
-			// }
-			// case eColliderType::FRUSTRUM:
-			//{
-			//	auto* frustrum = collider->TryGetAddComponent<ColliderAssetFrustrum>();
-			//	const auto& frustrumData = frustrum->GetFrustrum();
-			//	PxRigidActorExt::createExclusiveShape(*data,PxBoxGeometry(frustrumData.GetWidth(),frustrumData.GetHeight(),frustrumData.GetDepth()),*mMaterial);
-			//	break;
-			// }
-			// case eColliderType::TRIANGLE:
-			//{
-			//	auto* triangle = collider->TryGetAddComponent<ColliderAssetTriangle>();
-			//	const auto& triangleData = triangle->GetTriangle();
-			//	PxRigidActorExt::createExclusiveShape(*data,PxTriangleMeshGeometry(triangleData.GetMesh()),*mMaterial);
-			//	break;
-			// }
-			// case eColliderType::RAY:
-			//{
-			//	auto* ray = collider->TryGetAddComponent<ColliderAssetRay>();
-			//	const auto& rayData = ray->GetRay();
-			//	PxRigidActorExt::createExclusiveShape(*data,PxBoxGeometry(rayData.GetWidth(),rayData.GetHeight(),rayData.GetDepth()),*mMaterial);
-			//	break;
-			// }
-			case eColliderType::CONVEX:
-			{
-				const auto convex = collider->GetColliderAssetOfType<ColliderAssetConvex>();
-				const auto convexData = convex->GetColliderMesh();
-				// PxRigidActorExt::createExclusiveShape(*data,PxConvexMeshGeometry(Shipyard_PhysX::CookMesh(convexData)),*Shipyard_PhysXInstance.GetDefaultMaterial());
-				break;
-			}
-			case eColliderType::PLANAR:
-			{
-				// TODO: reenable planar mesh gen
-				// const auto convex = collider->GetColliderAssetOfType<ColliderAssetPlanar>();
-				// const auto convexData = convex->GetColliderMesh();
-				// const Vector3f scaleV = transform.GetScale();
-				// PxVec3 scale = { scaleV.x,scaleV.y,scaleV.z };
-				// PxRigidActorExt::createExclusiveShape(*data,
-				//	PxTriangleMeshGeometry(Shipyard_PhysX::CookMesh<physx::PxTriangleMesh>(convexData),scale),
-				//	*Shipyard_PhysXInstance.GetDefaultMaterial());
-				// break;
-			}
-			default:
-				auto geometry = PxBoxGeometry(1,1,1);
-				shape = Shipyard_PhysXInstance.CreateShape(data,&geometry);
-				break;
-			}
-
-			shape->setFlag(PxShapeFlag::eSCENE_QUERY_SHAPE,true);
-
-			if(collider->isTrigger) {
-				shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE,false);
-				shape->setFlag(PxShapeFlag::eTRIGGER_SHAPE,true);
-				shape->setFlag(PxShapeFlag::eSCENE_QUERY_SHAPE,false);
-			}
-
-			PxFilterData filterData;
-			filterData.word0 = static_cast<unsigned>(gameObject().GetLayer());
-			shape->setQueryFilterData(filterData);
-
+			updateShape(collider,objectTransform);
 		}
 
 	} else {
@@ -153,7 +58,7 @@ void cPhysXStaticBody::makeShape(const Collider* collider,Transform& transform) 
 	case eColliderType::AABB:
 	{
 		const auto aabb = collider->GetColliderAssetOfType<ColliderAssetAABB>();
-		aabb->UpdateWithTransform(transform.LocalMatrix());
+		aabb->UpdateWithTransform(transform.WorldMatrix());
 		const auto& aabbData = aabb->GetAABB();
 		auto geometry = PxBoxGeometry(aabbData.GetXSize() / 2,aabbData.GetYSize() / 2,aabbData.GetZSize() / 2);
 		shape = Shipyard_PhysXInstance.CreateShape(data,&geometry);
@@ -244,6 +149,103 @@ void cPhysXStaticBody::makeShape(const Collider* collider,Transform& transform) 
 	PxFilterData filterData;
 	filterData.word0 = static_cast<unsigned>(gameObject().GetLayer());
 	shape->setQueryFilterData(filterData);
+
+	updateShape(collider,transform);
+}
+
+void cPhysXStaticBody::updateShape(const Collider* collider,Transform& transform) {
+	switch(collider->GetColliderType()) {
+	case eColliderType::AABB:
+	{
+		const auto aabb = collider->GetColliderAssetOfType<ColliderAssetAABB>();
+		aabb->UpdateWithTransform(transform.WorldMatrix());
+		const auto& aabbData = aabb->GetAABB();
+		auto geometry = PxBoxGeometry(aabbData.GetXSize() / 2,aabbData.GetYSize() / 2,aabbData.GetZSize() / 2);
+		shape->setGeometry(geometry);
+		break;
+	}
+	// case eColliderType::SPHERE:
+	//{
+	//	auto* sphere = collider->TryGetAddComponent<ColliderAssetSphere>();
+	//	const auto& sphereData = sphere->GetSphere();
+	//	PxRigidActorExt::createExclusiveShape(*data,PxSphereGeometry(sphereData.GetRadius()),*mMaterial);
+	//	break;
+	// }
+	// case eColliderType::CIRCLE:
+	//{
+	//	auto* circle = collider->TryGetAddComponent<ColliderAssetCircle>();
+	//	const auto& circleData = circle->GetCircle();
+	//	PxRigidActorExt::createExclusiveShape(*data,PxSphereGeometry(circleData.GetRadius()),*mMaterial);
+	//	break;
+	// }
+	// case eColliderType::PLANE:
+	//{
+	//	auto* plane = collider->TryGetAddComponent<ColliderAssetPlane>();
+	//	const auto& planeData = plane->GetPlane();
+	//	PxRigidActorExt::createExclusiveShape(*data,PxPlaneGeometry(),*mMaterial);
+	//	break;
+	// }
+	// case eColliderType::CONE:
+	//{
+	//	auto* cone = collider->TryGetAddComponent<ColliderAssetCone>();
+	//	const auto& coneData = cone->GetCone();
+	//	PxRigidActorExt::createExclusiveShape(*data,PxCapsuleGeometry(coneData.GetRadius(),coneData.GetHeight()),*mMaterial);
+	//	break;
+	// }
+	// case eColliderType::FRUSTRUM:
+	//{
+	//	auto* frustrum = collider->TryGetAddComponent<ColliderAssetFrustrum>();
+	//	const auto& frustrumData = frustrum->GetFrustrum();
+	//	PxRigidActorExt::createExclusiveShape(*data,PxBoxGeometry(frustrumData.GetWidth(),frustrumData.GetHeight(),frustrumData.GetDepth()),*mMaterial);
+	//	break;
+	// }
+	// case eColliderType::TRIANGLE:
+	//{
+	//	auto* triangle = collider->TryGetAddComponent<ColliderAssetTriangle>();
+	//	const auto& triangleData = triangle->GetTriangle();
+	//	PxRigidActorExt::createExclusiveShape(*data,PxTriangleMeshGeometry(triangleData.GetMesh()),*mMaterial);
+	//	break;
+	// }
+	// case eColliderType::RAY:
+	//{
+	//	auto* ray = collider->TryGetAddComponent<ColliderAssetRay>();
+	//	const auto& rayData = ray->GetRay();
+	//	PxRigidActorExt::createExclusiveShape(*data,PxBoxGeometry(rayData.GetWidth(),rayData.GetHeight(),rayData.GetDepth()),*mMaterial);
+	//	break;
+	// }
+	case eColliderType::CONVEX:
+	{
+		const auto convex = collider->GetColliderAssetOfType<ColliderAssetConvex>();
+		const auto convexData = convex->GetColliderMesh();
+		// PxRigidActorExt::createExclusiveShape(*data,PxConvexMeshGeometry(Shipyard_PhysX::CookMesh(convexData)),*Shipyard_PhysXInstance.GetDefaultMaterial());
+		break;
+	}
+	case eColliderType::PLANAR:
+	{
+		// TODO: reenable planar mesh gen
+		// const auto convex = collider->GetColliderAssetOfType<ColliderAssetPlanar>();
+		// const auto convexData = convex->GetColliderMesh();
+		// const Vector3f scaleV = transform.GetScale();
+		// PxVec3 scale = { scaleV.x,scaleV.y,scaleV.z };
+		// PxRigidActorExt::createExclusiveShape(*data,
+		//	PxTriangleMeshGeometry(Shipyard_PhysX::CookMesh<physx::PxTriangleMesh>(convexData),scale),
+		//	*Shipyard_PhysXInstance.GetDefaultMaterial());
+		// break;
+	}
+	default:
+		auto geometry = PxBoxGeometry(1,1,1);
+		shape->setGeometry(geometry);
+		break;
+	}
+
+	auto pxTransform = [](const Transform& aTransform) {
+		const Vector3f pos = aTransform.GetPosition();
+		const Quaternionf quat = aTransform.GetQuatF();
+		return PxTransform(PxVec3(pos.x,pos.y,pos.z),
+			PxQuat(quat.x,quat.y,quat.z,quat.w));
+		};
+
+	data->setGlobalPose(pxTransform(transform));
 }
 
 void cPhysXStaticBody::Update() {

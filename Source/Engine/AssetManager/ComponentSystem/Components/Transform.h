@@ -12,7 +12,7 @@ enum eSpace
 };
 
 #define DoDirtyChecks                                                                                                  \
-    false //  allows or disallows isDirty, to get tasks done, TODO create a event manager for dirty events checks.
+    true //  allows or disallows isDirty, to get tasks done, TODO create a event manager for dirty events checks.
 
 // LEFTHANDED X RIGHT Y UP Z FORWARD AS GOD INTENDED
 class Transform : public Component
@@ -33,7 +33,7 @@ public:
 
 	// not dirty checked
 	const Matrix&      GetRawTransform() const;
-	const Quaternionf& GetQuatF();
+	const Quaternionf& GetQuatF() const ;
 	void               SetQuatF(const Quaternionf&);
 
 	// TODO

@@ -102,6 +102,20 @@ void Shipyard_PhysX::ShutdownPhysx() {
 	PX_RELEASE(gFoundation);
 }
 
+void Shipyard_PhysX::resetScene() {
+	gScene->fetchResults(true);
+	PX_RELEASE(gScene);
+
+	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
+	sceneDesc.gravity = PxVec3(0.0f,-9.82f,0.0f);
+	sceneDesc.cpuDispatcher = gDispatcher;
+	sceneDesc.filterShader = PxDefaultSimulationFilterShader;
+
+	gScene = gPhysics->createScene(sceneDesc);
+	gScene->setVisualizationParameter(PxVisualizationParameter::eSCALE,1.0f);
+	gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES,true);
+}
+
 PxPhysics* Shipyard_PhysX::GetPhysicsWorld() {
 	return gPhysics;
 }

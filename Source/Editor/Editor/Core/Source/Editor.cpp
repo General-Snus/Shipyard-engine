@@ -574,7 +574,6 @@ void Editor::SetActiveScene(const std::shared_ptr<Scene> scene) {
 		LOGGER.Critical("Failed to set active scene: Scene was null or invalid");
 		return;
 	}
-
 	m_Callbacks[EditorCallback::SceneChange].Invoke();
 	m_ActiveScene = scene;
 }
