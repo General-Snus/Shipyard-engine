@@ -9,17 +9,10 @@
 #define NOMINMAX
 
 // add headers that you want to pre-compile here
-
-// #include "GraphicsEngine.h"
+ 
 //
-// #include "Shaders/Registers.h"
-#include "wrl/client.h"
-//
-// #include "Tools/Logging/Logging.h"
-// #include <Tools/ImGui/imgui.h>
-// #include <Tools/Optick/include/optick.h>
-// #include <Tools/Utilities/Game/Timer.h>
-// #include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
+ #include "Shaders/Registers.h"
+#include "wrl/client.h" 
 
 #include <Windows.h>
 #include <filesystem>
@@ -28,5 +21,7 @@
 #include <mutex>
 #include <queue>
 #include <stdexcept>
+#include <vector>
 #include <string>
+#include <unordered_map>
 #endif // GRAPHICSENGINE_PCH

@@ -16,52 +16,46 @@
 
 using namespace physx;
 
-static PxDefaultAllocator      gAllocator;
-static PxDefaultErrorCallback  gErrorCallback;
-static PxFoundation*           gFoundation = nullptr;
-static PxPhysics*              gPhysics = nullptr;
-static PxDefaultCpuDispatcher* gDispatcher = nullptr;
-static PxScene*                gScene = nullptr;
-static PxMaterial*             gMaterial = nullptr;
-static PxPvd*                  gPvd = nullptr;
+
 #pragma region hide this shit
-void threeaxisrot(float r11, float r12, float r21, float r31, float r32, float res[])
-{
-	res[0] = atan2(r31, r32);
+void threeaxisrot(float r11,float r12,float r21,float r31,float r32,float res[]) {
+	res[0] = atan2(r31,r32);
 	res[1] = asin(r21);
-	res[2] = atan2(r11, r12);
+	res[2] = atan2(r11,r12);
 }
 
-void quaternion2Euler(const PxQuat& q, float res[])
-{
-	threeaxisrot(-2 * (q.y * q.z - q.w * q.x), q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
-	             2 * (q.x * q.z + q.w * q.y), -2 * (q.x * q.y - q.w * q.z),
-	             q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z, res);
+void quaternion2Euler(const PxQuat& q,float res[]) {
+	threeaxisrot(-2 * (q.y * q.z - q.w * q.x),q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
+		2 * (q.x * q.z + q.w * q.y),-2 * (q.x * q.y - q.w * q.z),
+		q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z,res);
 }
 #pragma endregion
 
-int Shipyard_PhysX::InitializePhysx()
-{
+int Shipyard_PhysX::InitializePhysx() {
 	OPTICK_EVENT();
-	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
+
+	gAllocator = new PxDefaultAllocator();
+	gErrorCallback = new PxDefaultErrorCallback();
+
+	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION,*gAllocator,*gErrorCallback);
 
 	gPvd = PxCreatePvd(*gFoundation);
-	PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 100);
-	gPvd->connect(*transport, PxPvdInstrumentationFlag::eALL);
+	PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate("127.0.0.1",5425,100);
+	gPvd->connect(*transport,PxPvdInstrumentationFlag::eALL);
 
-	gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, PxTolerancesScale(), true, gPvd);
+	gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION,*gFoundation,PxTolerancesScale(),true,gPvd);
 	gDispatcher = PxDefaultCpuDispatcherCreate(2);
 
 	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
-	sceneDesc.gravity = PxVec3(0.0f, -9.82f, 0.0f);
+	sceneDesc.gravity = PxVec3(0.0f,-9.82f,0.0f);
 	sceneDesc.cpuDispatcher = gDispatcher;
 	sceneDesc.filterShader = PxDefaultSimulationFilterShader;
 
 	gScene = gPhysics->createScene(sceneDesc);
-	gScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
-	gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES, true);
+	gScene->setVisualizationParameter(PxVisualizationParameter::eSCALE,1.0f);
+	gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES,true);
 
-	gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
+	gMaterial = gPhysics->createMaterial(0.5f,0.5f,0.6f);
 
 	gScene->simulate(.1f);
 
@@ -69,16 +63,14 @@ int Shipyard_PhysX::InitializePhysx()
 	return 0;
 }
 
-void Shipyard_PhysX::StartRead() const
-{
+void Shipyard_PhysX::StartRead() const {
 #if PHYSX
 	OPTICK_EVENT();
 	gScene->fetchResults(true);
 #endif
 }
 
-void Shipyard_PhysX::EndRead(float deltaTime)
-{
+void Shipyard_PhysX::EndRead(float deltaTime) {
 	deltaTime;
 #if PHYSX
 	OPTICK_EVENT();
@@ -86,26 +78,22 @@ void Shipyard_PhysX::EndRead(float deltaTime)
 #endif
 }
 
-void Shipyard_PhysX::Render()
-{
+void Shipyard_PhysX::Render() {
 	const PxRenderBuffer& rb = gScene->getRenderBuffer();
-	for (PxU32 i = 0; i < rb.getNbLines(); i++)
-	{
+	for(PxU32 i = 0; i < rb.getNbLines(); i++) {
 		const PxDebugLine& line = rb.getLines()[i];
 		const Vector3f     Vpos1 = {line.pos0.x, line.pos0.y, line.pos0.z};
 		const Vector3f     Vpos2 = {line.pos1.x, line.pos1.y, line.pos1.z};
 
-		GraphicsEngineInstance.debugDrawer.AddDebugLine(Vpos1, Vpos2, Vector3f(0, 1, 0), TimerInstance.getDeltaTime());
+		GraphicsEngineInstance.debugDrawer.AddDebugLine(Vpos1,Vpos2,Vector3f(0,1,0),TimerInstance.getDeltaTime());
 	}
 }
 
-void Shipyard_PhysX::ShutdownPhysx()
-{
+void Shipyard_PhysX::ShutdownPhysx() {
 	PX_RELEASE(gScene);
 	PX_RELEASE(gDispatcher);
 	PX_RELEASE(gPhysics);
-	if (gPvd)
-	{
+	if(gPvd) {
 		PxPvdTransport* transport = gPvd->getTransport();
 		gPvd->release();
 		gPvd = nullptr;
@@ -114,13 +102,11 @@ void Shipyard_PhysX::ShutdownPhysx()
 	PX_RELEASE(gFoundation);
 }
 
-PxPhysics* Shipyard_PhysX::GetPhysicsWorld()
-{
+PxPhysics* Shipyard_PhysX::GetPhysicsWorld() {
 	return gPhysics;
 }
 
-PxScene* Shipyard_PhysX::GetScene()
-{
+PxScene* Shipyard_PhysX::GetScene() {
 	return gScene;
 }
 
@@ -185,7 +171,19 @@ PxScene* Shipyard_PhysX::GetScene()
 // std::endl;
 //	// error processing implementation
 // }
-PxMaterial* Shipyard_PhysX::GetDefaultMaterial()
-{
+PxMaterial* Shipyard_PhysX::GetDefaultMaterial() {
 	return gMaterial;
+}
+
+physx::PxShape* Shipyard_PhysX::CreateShape(PxRigidActor* actor,const PxGeometry* geometry,const PxMaterial* material,uint8_t shapeFlags) {
+
+	PxShapeFlags pxShapeFlags = (PxShapeFlags)shapeFlags;
+	PxShape* shape = gPhysics->createShape(*geometry,material != nullptr ? *material : *gMaterial,false,pxShapeFlags);
+	actor->attachShape(*shape);
+	shape->release();
+	return shape;
+
+	//return PxRigidActorExt::createExclusiveShape(
+	//	*data,PxBoxGeometry(aabbData.GetXSize() / 2,aabbData.GetYSize() / 2,aabbData.GetZSize() / 2),
+	//	*Shipyard_PhysXInstance.GetDefaultMaterial());
 }

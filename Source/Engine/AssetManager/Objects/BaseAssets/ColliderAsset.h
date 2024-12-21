@@ -73,8 +73,8 @@ class ColliderAssetAABB : public ColliderAsset
     bool InspectorView() override
     {
         ColliderAsset::InspectorView();
-        auto min = myAABB.GetMin();
-        auto max = myAABB.GetMax();
+        auto& min = myOriginalAABB.GetMin();
+        auto& max = myOriginalAABB.GetMax();
         ImGui::DragFloat3("AABB Min", &min.x);
         ImGui::DragFloat3("AABB Max", &max.x);
         return false;

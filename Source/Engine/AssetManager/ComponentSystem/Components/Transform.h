@@ -27,7 +27,7 @@ public:
 	// Be ware, the matrix is built by the transform, changes wont carry but you can use this to avoid making copies of
 	// the orignal matrix
 	Matrix&       GetMutableTransform();
-	const Matrix& GetTransform();
+	const Matrix& LocalMatrix();
 	const Matrix& WorldMatrix() const;
 	const Matrix& WorldMatrix();
 

@@ -58,6 +58,7 @@ class Camera : public Component
 	};
 	FrameBuffer GetFrameBuffer();
 	Transform &LocalTransform();
+	const Transform &LocalTransform() const;
 
 	float fow = 90.0f;
 	float farfield = 1000000.0f;

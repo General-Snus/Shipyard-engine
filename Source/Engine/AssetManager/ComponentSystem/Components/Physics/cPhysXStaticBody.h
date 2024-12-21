@@ -6,6 +6,7 @@ class cPhysXStaticBody : public Component
 {
   public:
     ReflectableTypeRegistration();
+    defaultInspector();
     cPhysXStaticBody(const SY::UUID anOwnerId, GameObjectManager *aManager);
 
     void Init() override;
@@ -15,7 +16,8 @@ class cPhysXStaticBody : public Component
     void OnSiblingChanged(const std::type_info *SourceClass) override;
 
   private:
-    physx::PxRigidStatic *data;
+    physx::PxRigidStatic *data; 
+    physx::PxShape* shape = {}; //TODO: FIX THIS
 };
 
 REFL_AUTO(type(cPhysXStaticBody))

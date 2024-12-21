@@ -21,7 +21,7 @@ void CombatComponent::Init()
 	myVisionRange = 20.f;
 	respawnTime = 10.f;
 	myDeathTimer = 0.f;
-	spawnPoint = GetGameObject().GetComponent<Transform>().GetPosition();
+	spawnPoint = gameObject().GetComponent<Transform>().GetPosition();
 }
 
 void CombatComponent::Update()
@@ -43,7 +43,7 @@ void CombatComponent::Update()
 
 void CombatComponent::Respawn()
 {
-	auto& physicsComponent = GetGameObject().GetComponent<cPhysics_Kinematic>();
+	auto& physicsComponent = gameObject().GetComponent<cPhysics_Kinematic>();
 	physicsComponent.ph_Angular_velocity = {0, 0, 0};
 
 	myHealth = 100;
@@ -62,7 +62,7 @@ void CombatComponent::FireProjectile()
 		auto&      mesh = projectile.AddComponent<MeshRenderer>();
 		const auto&      collider = projectile.AddComponent<Collider>();
 		auto&      projComponent = projectile.AddComponent<ProjectileComponent>();
-		projComponent.InitWithValues(20.f, GetGameObject());
+		projComponent.InitWithValues(20.f, gameObject());
 
 		auto& projectileT = projectile.transform();
 		auto& actorT = transform();

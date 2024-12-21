@@ -42,10 +42,29 @@ void Collider::Destroy()
 void Collider::Update()
 {
 	OPTICK_EVENT();
-	if (drawDebugLines && myCollider)
-	{
-		myCollider->RenderDebugLines(transform());
+
+	if(myCollider) {
+		if (drawDebugLines)
+		{
+			myCollider->RenderDebugLines(transform());
+		}
+		 
+		const auto colliderType = myCollider->GetColliderType();
+		switch(colliderType) {
+		case eColliderType::AABB:
+			GetColliderAssetOfType<ColliderAssetAABB>()->UpdateWithTransform(transform().WorldMatrix());
+			break;
+		case eColliderType::SPHERE:
+			break;
+		case eColliderType::CONVEX:
+			break;
+		case eColliderType::PLANAR:
+			break;
+		default:
+			break;
+		}
 	}
+
 }
 
 Vector3f Collider::GetClosestPosition(Vector3f position) const
@@ -73,26 +92,27 @@ Vector3f Collider::GetNormalToward(Vector3f position) const
 void Collider::OnSiblingChanged(const std::type_info* SourceClass)
 {
 	OPTICK_EVENT();
-	if (SourceClass == &typeid(Transform)) // Transform dirty
-	{
-		Transform& transform = GetComponent<Transform>();
-		const auto colliderType = myCollider->GetColliderType();
-		switch (colliderType)
-		{
-		case eColliderType::AABB:
-			GetColliderAssetOfType<ColliderAssetAABB>()->UpdateWithTransform(transform.GetTransform());
-			break;
-		case eColliderType::SPHERE:
-			break;
-		case eColliderType::CONVEX:
-			break;
-		case eColliderType::PLANAR:
-			break;
-		default:
-			break;
-		}
-		GetGameObject().OnSiblingChanged(&typeid(Collider));
-	}
+	SourceClass;
+	//if (SourceClass == &typeid(Transform)) // Transform dirty
+	//{
+	//	Transform& transform = GetComponent<Transform>();
+	//	const auto colliderType = myCollider->GetColliderType();
+	//	switch (colliderType)
+	//	{
+	//	case eColliderType::AABB:
+	//		GetColliderAssetOfType<ColliderAssetAABB>()->UpdateWithTransform(transform.LocalMatrix());
+	//		break;
+	//	case eColliderType::SPHERE:
+	//		break;
+	//	case eColliderType::CONVEX:
+	//		break;
+	//	case eColliderType::PLANAR:
+	//		break;
+	//	default:
+	//		break;
+	//	}
+	//	gameObject().OnSiblingChanged(&typeid(Collider));
+	//}
 }
 
 bool Collider::InspectorView()

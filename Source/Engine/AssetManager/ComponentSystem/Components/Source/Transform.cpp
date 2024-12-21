@@ -50,7 +50,7 @@ void Transform::Update()
     if (GetIsDirty())
     {
         MakeClean();
-        const auto obj = GetGameObject();
+        const auto obj = gameObject();
         if (obj.IsValid())
         {
             obj.OnSiblingChanged(&typeid(Transform));
@@ -59,7 +59,7 @@ void Transform::Update()
 #else
 	MakeClean();
 
-	const auto obj = GetGameObject();
+	const auto obj = gameObject();
 	if (obj.IsValid())
 	{
 		obj.OnSiblingChanged(&typeid(Transform));
@@ -88,7 +88,7 @@ void Transform::MakeClean()
 
 	if (HasParent())
 	{
-		myWorldSpaceTransform = GetTransform() * m_Parent.transform().WorldMatrix();
+		myWorldSpaceTransform = LocalMatrix() * m_Parent.transform().WorldMatrix();
 	}
 	else
 	{
@@ -105,13 +105,13 @@ void Transform::MakeClean()
 #endif // _DEBUGDRAW
 }
 
-const Matrix& Transform::GetTransform()
+const Matrix& Transform::LocalMatrix()
 {
 	if (GetIsDirty())
 	{
 		MakeClean();
 		// TODO FIX ALL YOUR SHIT
-		// this->GetGameObject().OnSiblingChanged(&typeid(Transform));
+		// this->gameObject().OnSiblingChanged(&typeid(Transform));
 	}
 	return myTransform;
 }
@@ -129,12 +129,12 @@ const Matrix& Transform::WorldMatrix()
 {
 	if (!HasParent())
 	{
-		return GetTransform();
+		return LocalMatrix();
 	}
-	const auto transform = m_Parent.transform();
+	const auto& transform = m_Parent.transform();
 	if (transform.GetIsDirty() || GetIsDirty())
 	{
-		myWorldSpaceTransform = m_Parent.transform().WorldMatrix() * GetTransform();
+		myWorldSpaceTransform = LocalMatrix() * m_Parent.transform().WorldMatrix();
 	}
 
 	return myWorldSpaceTransform;
@@ -334,8 +334,9 @@ bool Transform::GetIsDirty() const
 {
 #if DoDirtyChecks
     return IsDirty;
-#endif
+#else
 	return false;
+#endif
 }
 
 void Transform::SetGizmo(bool enabled)
@@ -573,7 +574,7 @@ bool Transform::SetParent(Transform& parent, bool worldPositionStays)
 {
 	UNREFERENCED_PARAMETER(worldPositionStays);
 	// TODO make sure position stays after parenting
-	const auto obj = parent.GetGameObject();
+	const auto obj = parent.gameObject();
 	if (obj.IsValid() && obj.GetID() != myOwnerID)
 	{
 		Detach();
@@ -606,7 +607,7 @@ Transform& Transform::GetParent() const
 	{
 		return m_Parent.GetComponent<Transform>();
 	}
-	LOGGER.Critical("Error: No parent on " + GetGameObject().GetName());
+	LOGGER.Critical("Error: No parent on " + gameObject().GetName());
 	throw;
 }
 
@@ -650,7 +651,7 @@ Transform& Transform::GetChild(int index) const
 	{
 		return m_Children[index].GetComponent<Transform>();
 	}
-	LOGGER.Critical("Error: No Child found on " + GetGameObject().GetName() + " at index " + std::to_string(index));
+	LOGGER.Critical("Error: No Child found on " + gameObject().GetName() + " at index " + std::to_string(index));
 	throw;
 }
 
@@ -713,13 +714,13 @@ std::vector<std::reference_wrapper<Transform>> Transform::GetAllDirectChildren()
 
 bool Transform::AddChild(Transform& child)
 {
-	const auto id = child.GetGameObject().GetID();
+	const auto id = child.gameObject().GetID();
 
 	if (id.IsValid())
 	{
 		child.Detach();
-		child.m_Parent = GetGameObject();
-		m_Children.emplace_back(child.GetGameObject());
+		child.m_Parent = gameObject();
+		m_Children.emplace_back(child.gameObject());
 		child.myWorldSpaceTransform = child.WorldMatrix();
 		return true;
 	}

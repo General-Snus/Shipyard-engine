@@ -31,7 +31,7 @@ class Viewport : public EditorWindow
     bool IsMainViewport() const;
     void Update();
     void ResolutionUpdate();
-    Vector2f getCursorInWindowPostion();
+    Vector2f getCursorInWindowPostion() const;
 
     std::shared_ptr<Scene> GetAttachedScene();
     Texture *GetTarget() const;
@@ -55,7 +55,7 @@ class Viewport : public EditorWindow
     Vector2f cursorPositionInViewPort;
     bool IsMainViewPort = false;
     bool IsVisible = true;
-    bool IsUsed = false;
+    bool isWindowFocused = false;
     bool IsMouseHoverering = false;
     Camera editorCamera;
 };

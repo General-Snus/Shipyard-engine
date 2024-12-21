@@ -38,7 +38,7 @@ void CollisionChecks::CheckColliders()
 	for (const auto& collider : listOfColliders)
 	{
 		const auto firstOwner = collider.GetOwner();
-		if (!collider.IsActive() || !collider.GetGameObject().GetActive())
+		if (!collider.IsActive() || !collider.gameObject().GetActive())
 		{
 			index++;
 			continue;
@@ -48,7 +48,7 @@ void CollisionChecks::CheckColliders()
 		for (size_t i = index; i < listOfColliders.size(); i++)
 		{
 			const auto secondOwner = listOfColliders[i].GetOwner();
-			if (!listOfColliders[i].IsActive() || !listOfColliders[i].GetGameObject().GetActive())
+			if (!listOfColliders[i].IsActive() || !listOfColliders[i].gameObject().GetActive())
 			{
 				continue;
 			}

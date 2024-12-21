@@ -23,13 +23,13 @@ Camera::Camera(const SY::UUID anOwnerId, GameObjectManager* aManager)
 	}
 
 #ifdef Flashlight
-	GetGameObject().AddComponent<Light>(eLightType::Spot);
+	gameObject().AddComponent<Light>(eLightType::Spot);
 	std::weak_ptr<SpotLight> pLight = GetComponent<Light>().GetData<SpotLight>();
 	pLight.lock()->Position = Vector3f(0, 0, 0);
 	pLight.lock()->Color = Vector3f(1, 1, 1);
 	pLight.lock()->Power = 2000.0f * Kilo;
 	pLight.lock()->Range = 1000;
-	pLight.lock()->Direction = {0, -1, 0};
+	pLight.lock()->Direction = { 0, -1, 0 };
 	pLight.lock()->InnerConeAngle = 10 * DEG_TO_RAD;
 	pLight.lock()->OuterConeAngle = 45 * DEG_TO_RAD;
 #endif
@@ -39,7 +39,6 @@ void Camera::Update()
 {
 	OPTICK_EVENT();
 	localTransform.Update();
-	fow = std::clamp(fow, 0.1f, 360.f);
 
 	if (IsInControll)
 	{
@@ -58,7 +57,7 @@ void Camera::EditorCameraControlls()
 	Transform& aTransform = localTransform;
 	if (HasComponent<Transform>())
 	{
-		aTransform = this->GetGameObject().GetComponent<Transform>();
+		aTransform = this->gameObject().GetComponent<Transform>();
 	}
 
 	const float           aTimeDelta = TimerInstance.getDeltaTime();
@@ -172,10 +171,10 @@ std::array<Vector4f, 4> Camera::GetFrustrumCorners() const
 	const float             halfHeight = farplane * tanf(0.25f * FowInRad());
 	const float             halfWidth = APRatio() * halfHeight;
 	std::array<Vector4f, 4> corners;
-	corners[0] = {-halfWidth, -halfHeight, farplane, 0.0f};
-	corners[1] = {-halfWidth, halfHeight, farplane, 0.0f};
-	corners[2] = {halfWidth, +halfHeight, farplane, 0.0f};
-	corners[3] = {+halfWidth, -halfHeight, farplane, 0.0f};
+	corners[0] = { -halfWidth, -halfHeight, farplane, 0.0f };
+	corners[1] = { -halfWidth, halfHeight, farplane, 0.0f };
+	corners[2] = { halfWidth, +halfHeight, farplane, 0.0f };
+	corners[3] = { +halfWidth, -halfHeight, farplane, 0.0f };
 
 	for (auto& i : corners)
 	{
@@ -188,22 +187,15 @@ std::array<Vector4f, 4> Camera::GetFrustrumCorners() const
 Vector3f Camera::GetPointerDirection(const Vector2f position) const
 {
 	Vector4f viewPosition;
-
 	viewPosition.x = position.x;
-
-	//viewPosition.x = ((2.0f * position.x / resolution.x) - 1);
-	viewPosition /= m_Projection(1, 1);
-
-	//viewPosition.y = ((-2.0f * position.y / resolution.y) - 1);
 	viewPosition.y = position.y;
-	viewPosition /= m_Projection(2, 2);
+	viewPosition.z = 1.0f;
+	viewPosition.w = 1.0f;
 
-	viewPosition.z = 1;
-	viewPosition.w = 0;
+	const Matrix   mvp = (m_Projection * LocalTransform().WorldMatrix()).GetInverse();
+	Vector4f out = viewPosition * mvp;
 
-	const Matrix   myTransform = GetGameObject().GetComponent<Transform>().WorldMatrix();
-	const Vector4f out = viewPosition * Matrix::GetFastInverse(myTransform);
-	return Vector3f(out.x, out.y, out.z).GetNormalized();
+	return Vector3f(out.x, out.y, out.z);
 }
 
 Vector3f Camera::GetPointerDirectionNDC(const Vector2f position) const
@@ -215,10 +207,9 @@ Vector3f Camera::GetPointerDirectionNDC(const Vector2f position) const
 FrameBuffer Camera::GetFrameBuffer()
 {
 	OPTICK_EVENT();
-	auto&       transform = LocalTransform();
+	auto& transform = LocalTransform();
 	FrameBuffer buffer;
-	auto        dxMatrix = XMMatrixPerspectiveFovLH(FowInRad(), APRatio(), farfield, nearField);
-	buffer.ProjectionMatrix = Matrix(&dxMatrix);
+ 	buffer.ProjectionMatrix = m_Projection;
 	buffer.ViewMatrix = Matrix::GetFastInverse(transform.WorldMatrix());
 	buffer.Time = TimerInstance.getDeltaTime();
 	buffer.FB_RenderMode = static_cast<int>(filter);
@@ -237,15 +228,21 @@ Transform& Camera::LocalTransform()
 	return localTransform;
 }
 
+const Transform& Camera::LocalTransform() const {
+	if(HasComponent<Transform>()) {
+		return GetComponent<Transform>();
+	}
+	return localTransform;
+}
 Vector4f Camera::WoldSpaceToPostProjectionSpace(Vector3f aEntity)
 {
-	Transform& myTransform = this->GetGameObject().GetComponent<Transform>();
+	Transform& myTransform = this->gameObject().GetComponent<Transform>();
 
 	// Get actuall world space coordinate
-	Vector4f outPosition = {aEntity.x, aEntity.y, aEntity.z, 1};
+	Vector4f outPosition = { aEntity.x, aEntity.y, aEntity.z, 1 };
 
 	// Punkt -> CameraSpace
-	outPosition = outPosition * Matrix::GetFastInverse(myTransform.GetTransform());
+	outPosition = outPosition * Matrix::GetFastInverse(myTransform.LocalMatrix());
 
 	// Camera space -> ClipSpace
 	outPosition = outPosition * m_Projection;
@@ -263,7 +260,35 @@ bool Camera::InspectorView()
 	{
 		return false;
 	}
-	Reflect<Camera>();
+	bool changed = Reflect<Camera>();
 
-	return true;
+	static std::array<float, 2> arr;
+	if (isOrtho)
+	{
+		changed |= ImGui::DragFloat2("OrthoCamera Height and width", arr.data());
+	}
+
+	if (changed)
+	{
+		fow = std::clamp(fow, 0.1f, 360.f);
+		farfield = std::clamp(farfield, nearField, std::numeric_limits<float>::max());
+		nearField = std::clamp(nearField, 0.000001f, farfield);
+		if (!isOrtho)
+		{
+			const auto dxMatrix = XMMatrixPerspectiveFovLH(FowInRad(), APRatio(), farfield, nearField);
+			m_Projection = Matrix(&dxMatrix);
+		}
+		else
+		{
+			for (auto& fl : arr)
+			{
+				fl = std::clamp(fl, 0.0001f, std::numeric_limits<float>::max());
+			}
+
+			const auto dxMatrix = XMMatrixOrthographicLH(arr[0], arr[1], farfield, nearField);
+			m_Projection = Matrix(&dxMatrix);
+		}
+	}
+
+	return changed;
 }

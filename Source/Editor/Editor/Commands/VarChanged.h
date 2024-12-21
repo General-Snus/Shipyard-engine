@@ -169,7 +169,7 @@ bool VarChanged<ComponentType, var>::merge(std::shared_ptr<BaseCommand>& ptr)
 template <typename ComponentType, typename var>
 VarChanged<ComponentType, var>::VarChanged(ComponentType* object, const var*           value, const var oldVal,
                                            const var      newValue, const std::string& varName)
-	: m_VariableName(varName), m_object(object->GetGameObject())
+	: m_VariableName(varName), m_object(object->gameObject())
 {
 	if (!object)
 	{

@@ -14,7 +14,7 @@
 class InputManager : public Singleton
 {
 public:
-	InputManager() = default;
+	InputManager();
 
 	bool                  IsKeyHeld(int aKeyCode) const;
 	bool                  IsKeyHeld(Keys aKeyCode) const;
@@ -35,14 +35,20 @@ public:
 	float        g_MouseWheelDeadZone = 10;
 
 private:
+	HWND hwnd;
 	std::bitset<256> currentFrameUpdate;
 	std::bitset<256> liveKeyUpdate;
 	std::bitset<256> lastFrameUpdate;
-	unsigned int     lastPressedKey;
-	float            myMouseWheelDelta;
+	unsigned int     lastPressedKey{};
+	float            myMouseWheelDelta{};
 	Vector2<float>   myMousePosition;
 	Vector2<float>   myLastMousePosition;
 };
+
+inline InputManager::InputManager()
+{
+	hwnd = WindowInstance.windowHandler;
+}
 
 inline bool InputManager::IsKeyHeld(const int aKeyCode) const
 {
@@ -76,16 +82,16 @@ inline bool InputManager::IsKeyReleased(const Keys aKeyCode) const
 
 inline Vector2<float> InputManager::GetMousePositionNDC() const
 {
-	const Vector2ui res = {WindowInstance.Width(), WindowInstance.Height()};
+	const Vector2ui res = { WindowInstance.Width(), WindowInstance.Height() };
 	return Vector2f(std::clamp(2.f * (myMousePosition.x / static_cast<float>(res.x)) - 1.0f, -1.0f, 1.0f),
-	                std::clamp(1.0f - 2.f * (myMousePosition.y / static_cast<float>(res.y)), -1.0f, 1.0f));
+		std::clamp(1.0f - 2.f * (myMousePosition.y / static_cast<float>(res.y)), -1.0f, 1.0f));
 }
 
 inline Vector2<float> InputManager::GetMousePositionNDC(const Vector2<float>& mp)
 {
-	const Vector2ui res = {WindowInstance.Width(), WindowInstance.Height()};
+	const Vector2ui res = { WindowInstance.Width(), WindowInstance.Height() };
 	return Vector2f(std::clamp(2.f * (mp.x / static_cast<float>(res.x)) - 1.0f, -1.0f, 1.0f),
-	                std::clamp(1.0f - 2.f * (mp.y / static_cast<float>(res.y)), -1.0f, 1.0f));
+		std::clamp(1.0f - 2.f * (mp.y / static_cast<float>(res.y)), -1.0f, 1.0f));
 }
 
 inline Vector2<float> InputManager::GetMousePosition() const
@@ -106,11 +112,6 @@ inline float InputManager::GetMouseWheelDelta() const
 inline bool InputManager::UpdateMouseInput()
 {
 	myLastMousePosition = myMousePosition;
-	POINT pt = {0, 0};
-	GetCursorPos(&pt);
-
-	myMousePosition.x = static_cast<float>(pt.x);
-	myMousePosition.y = static_cast<float>(pt.y);
 
 	return true;
 }
@@ -162,7 +163,18 @@ inline bool InputManager::UpdateEvents(UINT message, WPARAM wParam, LPARAM lPara
 		return true;
 
 	case WM_MOUSEMOVE:
+	{
+		POINT pt = { 0, 0 };
+		if (GetCursorPos(&pt)) {
+			//if (ScreenToClient(hwnd, &pt))
+			{
+				myMousePosition.x = static_cast<float>(pt.x);
+				myMousePosition.y = static_cast<float>(pt.y); 
+			}
+		}
+
 		return true;
+	}
 
 	default:
 		return false;

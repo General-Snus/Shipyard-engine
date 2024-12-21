@@ -20,6 +20,7 @@ void SpawnGround(Vector3f base)
 {
 	GameObject ground = GameObject::Create("ground");
 	auto&      renderer = ground.AddComponent<MeshRenderer>("Models/Cube.fbx");
+	ground.AddComponent<cPhysXStaticBody>();
 	ground.transform().SetPosition(base);
 	ground.transform().SetScale(100, 0.1f, 100.f);
 
@@ -46,6 +47,7 @@ void SpawnHooks(int amount, float radius, Vector3f base)
 		}
 
 		attachment.AddComponent<Collider>();
+		attachment.AddComponent<cPhysXStaticBody>();
 		auto directionOffset =
 			Vector3f(RandomEngine::randomInRange(-1.0f, 1.0f), 0, RandomEngine::randomInRange(-1.0f, 1.0f))
 			.GetNormalized();
@@ -70,6 +72,7 @@ void SpawnPlayer(int id, float radius, Vector3f base)
 	player.transform().LookAt(directionOffset * 10.0f);
 	player.transform().SetPosition(base);
 	player.AddComponent<PlayerComponent>();
+	player.AddComponent<cPhysXStaticBody>();
 
 	GameObject playerModel = GameObject::Create("PlayerModel");
 	playerModel.AddComponent<MeshRenderer>("Models/PillarClimb/Player.fbx");

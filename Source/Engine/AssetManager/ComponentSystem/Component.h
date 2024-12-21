@@ -50,7 +50,7 @@ class Component : public Reflectable
     {
         return myOwnerID;
     }
-    GameObject GetGameObject() const
+    GameObject gameObject() const
     {
       return myManager ? myManager->GetGameObject(myOwnerID) : GameObject();
     }
@@ -91,6 +91,7 @@ class Component : public Reflectable
     }
     void Abandon();
     Transform &transform();
+    const Transform& transform() const;
 
     SY::UUID myOwnerID;
     GameObjectManager *myManager = nullptr;
@@ -108,7 +109,7 @@ class Component : public Reflectable
     }
 
   private:
-    Component() = default;
+    Component() = delete;
 
     template <class T> friend class ComponentManager;
     void SetOwnerID(const SY::UUID anOwnerID)

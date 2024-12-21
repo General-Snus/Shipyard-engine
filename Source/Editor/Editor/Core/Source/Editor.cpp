@@ -60,15 +60,13 @@
 #include <shellapi.h>
 #include <misc/cpp/WMDropManager.h>
 
-enum Theme
-{
+enum Theme {
 	light,
 	dark,
 	builtIn
 };
 
-void SetupImGuiStyle(Theme theme)
-{
+void SetupImGuiStyle(Theme theme) {
 	OPTICK_EVENT();
 	ImGuizmo::AllowAxisFlip(false);
 	auto& guizmoStyle = ImGuizmo::GetStyle();
@@ -86,22 +84,22 @@ void SetupImGuiStyle(Theme theme)
 
 	style.Alpha = 1.0f;
 	style.DisabledAlpha = 0.6000000238418579f;
-	style.WindowPadding = ImVec2(10.0f, 10.0f);
+	style.WindowPadding = ImVec2(10.0f,10.0f);
 	style.WindowRounding = 2.0f;
 	style.WindowBorderSize = 1.0f;
-	style.WindowMinSize = ImVec2(32.0f, 32.0f);
-	style.WindowTitleAlign = ImVec2(0.0f, 0.5f);
+	style.WindowMinSize = ImVec2(32.0f,32.0f);
+	style.WindowTitleAlign = ImVec2(0.0f,0.5f);
 	style.WindowMenuButtonPosition = ImGuiDir_None;
 	style.ChildRounding = 2.0f;
 	style.ChildBorderSize = 1.0f;
 	style.PopupRounding = 2.0f;
 	style.PopupBorderSize = 1.0f;
-	style.FramePadding = ImVec2(4.0f, 3.0f);
+	style.FramePadding = ImVec2(4.0f,3.0f);
 	style.FrameRounding = 2.0f;
 	style.FrameBorderSize = 0.0f;
-	style.ItemSpacing = ImVec2(8.0f, 4.0f);
-	style.ItemInnerSpacing = ImVec2(4.0f, 4.0f);
-	style.CellPadding = ImVec2(4.0f, 2.0f);
+	style.ItemSpacing = ImVec2(8.0f,4.0f);
+	style.ItemInnerSpacing = ImVec2(4.0f,4.0f);
+	style.CellPadding = ImVec2(4.0f,2.0f);
 	style.IndentSpacing = 21.0f;
 	style.ColumnsMinSpacing = 6.0f;
 	style.ScrollbarSize = 20.0f;
@@ -112,71 +110,70 @@ void SetupImGuiStyle(Theme theme)
 	style.TabBorderSize = 0.0f;
 	style.TabMinWidthForCloseButton = 0.0f;
 	style.ColorButtonPosition = ImGuiDir_Right;
-	style.ButtonTextAlign = ImVec2(0.5f, 0.5f);
-	style.SelectableTextAlign = ImVec2(0.0f, 0.0f);
+	style.ButtonTextAlign = ImVec2(0.5f,0.5f);
+	style.SelectableTextAlign = ImVec2(0.0f,0.0f);
 
 	ImVec4* colors = ImGui::GetStyle().Colors;
-	colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-	colors[ImGuiCol_TextDisabled] = ImVec4(0.59f, 0.59f, 0.59f, 1.00f);
-	colors[ImGuiCol_WindowBg] = ImVec4(0.13f, 0.13f, 0.13f, 1.00f);
-	colors[ImGuiCol_ChildBg] = ImVec4(0.13f, 0.13f, 0.13f, 1.00f);
-	colors[ImGuiCol_PopupBg] = ImVec4(0.24f, 0.24f, 0.24f, 1.00f);
-	colors[ImGuiCol_Border] = ImVec4(0.24f, 0.25f, 0.27f, 1.00f);
-	colors[ImGuiCol_BorderShadow] = ImVec4(0.31f, 0.31f, 0.31f, 1.00f);
-	colors[ImGuiCol_FrameBg] = ImVec4(0.35f, 0.35f, 0.35f, 1.00f);
-	colors[ImGuiCol_FrameBgHovered] = ImVec4(1.00f, 1.00f, 1.00f, 0.16f);
-	colors[ImGuiCol_FrameBgActive] = ImVec4(1.00f, 1.00f, 1.00f, 0.63f);
-	colors[ImGuiCol_TitleBg] = ImVec4(0.13f, 0.13f, 0.13f, 1.00f);
-	colors[ImGuiCol_TitleBgActive] = ImVec4(0.13f, 0.13f, 0.13f, 1.00f);
-	colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.13f, 0.13f, 0.13f, 1.00f);
-	colors[ImGuiCol_MenuBarBg] = ImVec4(0.24f, 0.24f, 0.24f, 1.00f);
-	colors[ImGuiCol_ScrollbarBg] = ImVec4(0.24f, 0.25f, 0.27f, 0.00f);
-	colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.21f, 0.21f, 0.21f, 1.00f);
-	colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.33f, 0.33f, 0.33f, 1.00f);
-	colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.35f, 0.35f, 0.35f, 1.00f);
-	colors[ImGuiCol_CheckMark] = ImVec4(0.82f, 0.56f, 0.33f, 1.00f);
-	colors[ImGuiCol_SliderGrab] = ImVec4(0.82f, 0.56f, 0.33f, 1.00f);
-	colors[ImGuiCol_SliderGrabActive] = ImVec4(0.73f, 0.51f, 0.30f, 0.84f);
-	colors[ImGuiCol_Button] = ImVec4(0.24f, 0.25f, 0.27f, 0.00f);
-	colors[ImGuiCol_ButtonHovered] = ImVec4(1.00f, 1.00f, 1.00f, 0.16f);
-	colors[ImGuiCol_ButtonActive] = ImVec4(1.00f, 1.00f, 1.00f, 0.63f);
-	colors[ImGuiCol_Header] = ImVec4(0.29f, 0.29f, 0.29f, 1.00f);
-	colors[ImGuiCol_HeaderHovered] = ImVec4(1.00f, 1.00f, 1.00f, 0.18f);
-	colors[ImGuiCol_HeaderActive] = ImVec4(1.00f, 1.00f, 1.00f, 0.63f);
-	colors[ImGuiCol_Separator] = ImVec4(0.24f, 0.25f, 0.27f, 1.00f);
-	colors[ImGuiCol_SeparatorHovered] = ImVec4(1.00f, 1.00f, 1.00f, 0.16f);
-	colors[ImGuiCol_SeparatorActive] = ImVec4(1.00f, 1.00f, 1.00f, 0.63f);
-	colors[ImGuiCol_ResizeGrip] = ImVec4(0.82f, 0.56f, 0.33f, 1.00f);
-	colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.90f, 0.62f, 0.37f, 1.10f);
-	colors[ImGuiCol_ResizeGripActive] = ImVec4(0.73f, 0.51f, 0.30f, 0.90f);
-	colors[ImGuiCol_TabHovered] = ImVec4(0.90f, 0.62f, 0.37f, 1.10f);
-	colors[ImGuiCol_Tab] = ImVec4(0.13f, 0.13f, 0.13f, 1.00f);
-	colors[ImGuiCol_TabSelected] = ImVec4(0.90f, 0.62f, 0.37f, 1.00f);
-	colors[ImGuiCol_TabSelectedOverline] = ImVec4(0.95f, 0.51f, 0.00f, 0.00f);
-	colors[ImGuiCol_TabDimmed] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
-	colors[ImGuiCol_TabDimmedSelected] = ImVec4(0.13f, 0.13f, 0.13f, 1.00f);
-	colors[ImGuiCol_TabDimmedSelectedOverline] = ImVec4(0.82f, 0.56f, 0.33f, 0.00f);
-	colors[ImGuiCol_DockingPreview] = ImVec4(0.82f, 0.56f, 0.33f, 1.00f);
-	colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
-	colors[ImGuiCol_PlotLines] = ImVec4(0.82f, 0.56f, 0.33f, 1.00f);
-	colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.90f, 0.62f, 0.37f, 1.10f);
-	colors[ImGuiCol_PlotHistogram] = ImVec4(0.82f, 0.56f, 0.33f, 1.00f);
-	colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.90f, 0.62f, 0.37f, 1.10f);
-	colors[ImGuiCol_TableHeaderBg] = ImVec4(0.19f, 0.19f, 0.20f, 1.00f);
-	colors[ImGuiCol_TableBorderStrong] = ImVec4(0.31f, 0.31f, 0.35f, 1.00f);
-	colors[ImGuiCol_TableBorderLight] = ImVec4(0.23f, 0.23f, 0.25f, 1.00f);
-	colors[ImGuiCol_TableRowBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-	colors[ImGuiCol_TableRowBgAlt] = ImVec4(1.00f, 1.00f, 1.00f, 0.06f);
-	colors[ImGuiCol_TextSelectedBg] = ImVec4(0.82f, 0.56f, 0.33f, 1.00f);
-	colors[ImGuiCol_DragDropTarget] = ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
-	colors[ImGuiCol_NavHighlight] = ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
-	colors[ImGuiCol_NavWindowingHighlight] = ImVec4(0.83f, 0.41f, 0.41f, 0.70f);
-	colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
-	colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
+	colors[ImGuiCol_Text] = ImVec4(1.00f,1.00f,1.00f,1.00f);
+	colors[ImGuiCol_TextDisabled] = ImVec4(0.59f,0.59f,0.59f,1.00f);
+	colors[ImGuiCol_WindowBg] = ImVec4(0.13f,0.13f,0.13f,1.00f);
+	colors[ImGuiCol_ChildBg] = ImVec4(0.13f,0.13f,0.13f,1.00f);
+	colors[ImGuiCol_PopupBg] = ImVec4(0.24f,0.24f,0.24f,1.00f);
+	colors[ImGuiCol_Border] = ImVec4(0.24f,0.25f,0.27f,1.00f);
+	colors[ImGuiCol_BorderShadow] = ImVec4(0.31f,0.31f,0.31f,1.00f);
+	colors[ImGuiCol_FrameBg] = ImVec4(0.35f,0.35f,0.35f,1.00f);
+	colors[ImGuiCol_FrameBgHovered] = ImVec4(1.00f,1.00f,1.00f,0.16f);
+	colors[ImGuiCol_FrameBgActive] = ImVec4(1.00f,1.00f,1.00f,0.63f);
+	colors[ImGuiCol_TitleBg] = ImVec4(0.13f,0.13f,0.13f,1.00f);
+	colors[ImGuiCol_TitleBgActive] = ImVec4(0.13f,0.13f,0.13f,1.00f);
+	colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.13f,0.13f,0.13f,1.00f);
+	colors[ImGuiCol_MenuBarBg] = ImVec4(0.24f,0.24f,0.24f,1.00f);
+	colors[ImGuiCol_ScrollbarBg] = ImVec4(0.24f,0.25f,0.27f,0.00f);
+	colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.21f,0.21f,0.21f,1.00f);
+	colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.33f,0.33f,0.33f,1.00f);
+	colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.35f,0.35f,0.35f,1.00f);
+	colors[ImGuiCol_CheckMark] = ImVec4(0.82f,0.56f,0.33f,1.00f);
+	colors[ImGuiCol_SliderGrab] = ImVec4(0.82f,0.56f,0.33f,1.00f);
+	colors[ImGuiCol_SliderGrabActive] = ImVec4(0.73f,0.51f,0.30f,0.84f);
+	colors[ImGuiCol_Button] = ImVec4(0.24f,0.25f,0.27f,0.00f);
+	colors[ImGuiCol_ButtonHovered] = ImVec4(1.00f,1.00f,1.00f,0.16f);
+	colors[ImGuiCol_ButtonActive] = ImVec4(1.00f,1.00f,1.00f,0.63f);
+	colors[ImGuiCol_Header] = ImVec4(0.29f,0.29f,0.29f,1.00f);
+	colors[ImGuiCol_HeaderHovered] = ImVec4(1.00f,1.00f,1.00f,0.18f);
+	colors[ImGuiCol_HeaderActive] = ImVec4(1.00f,1.00f,1.00f,0.63f);
+	colors[ImGuiCol_Separator] = ImVec4(0.24f,0.25f,0.27f,1.00f);
+	colors[ImGuiCol_SeparatorHovered] = ImVec4(1.00f,1.00f,1.00f,0.16f);
+	colors[ImGuiCol_SeparatorActive] = ImVec4(1.00f,1.00f,1.00f,0.63f);
+	colors[ImGuiCol_ResizeGrip] = ImVec4(0.82f,0.56f,0.33f,1.00f);
+	colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.90f,0.62f,0.37f,1.10f);
+	colors[ImGuiCol_ResizeGripActive] = ImVec4(0.73f,0.51f,0.30f,0.90f);
+	colors[ImGuiCol_TabHovered] = ImVec4(0.90f,0.62f,0.37f,1.10f);
+	colors[ImGuiCol_Tab] = ImVec4(0.13f,0.13f,0.13f,1.00f);
+	colors[ImGuiCol_TabSelected] = ImVec4(0.90f,0.62f,0.37f,1.00f);
+	colors[ImGuiCol_TabSelectedOverline] = ImVec4(0.95f,0.51f,0.00f,0.00f);
+	colors[ImGuiCol_TabDimmed] = ImVec4(0.14f,0.14f,0.14f,1.00f);
+	colors[ImGuiCol_TabDimmedSelected] = ImVec4(0.13f,0.13f,0.13f,1.00f);
+	colors[ImGuiCol_TabDimmedSelectedOverline] = ImVec4(0.82f,0.56f,0.33f,0.00f);
+	colors[ImGuiCol_DockingPreview] = ImVec4(0.82f,0.56f,0.33f,1.00f);
+	colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.20f,0.20f,0.20f,1.00f);
+	colors[ImGuiCol_PlotLines] = ImVec4(0.82f,0.56f,0.33f,1.00f);
+	colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.90f,0.62f,0.37f,1.10f);
+	colors[ImGuiCol_PlotHistogram] = ImVec4(0.82f,0.56f,0.33f,1.00f);
+	colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.90f,0.62f,0.37f,1.10f);
+	colors[ImGuiCol_TableHeaderBg] = ImVec4(0.19f,0.19f,0.20f,1.00f);
+	colors[ImGuiCol_TableBorderStrong] = ImVec4(0.31f,0.31f,0.35f,1.00f);
+	colors[ImGuiCol_TableBorderLight] = ImVec4(0.23f,0.23f,0.25f,1.00f);
+	colors[ImGuiCol_TableRowBg] = ImVec4(0.00f,0.00f,0.00f,0.00f);
+	colors[ImGuiCol_TableRowBgAlt] = ImVec4(1.00f,1.00f,1.00f,0.06f);
+	colors[ImGuiCol_TextSelectedBg] = ImVec4(0.82f,0.56f,0.33f,1.00f);
+	colors[ImGuiCol_DragDropTarget] = ImVec4(0.15f,0.15f,0.15f,1.00f);
+	colors[ImGuiCol_NavHighlight] = ImVec4(0.15f,0.15f,0.15f,1.00f);
+	colors[ImGuiCol_NavWindowingHighlight] = ImVec4(0.83f,0.41f,0.41f,0.70f);
+	colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f,0.80f,0.80f,0.20f);
+	colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.15f,0.15f,0.15f,1.00f);
 
 	auto path = ENGINE_RESOURCES.Directory() / "Theme.json";
-	if (theme != builtIn && exists(path))
-	{
+	if(theme != builtIn && exists(path)) {
 		std::ifstream file(path);
 		assert(file.is_open());
 
@@ -184,17 +181,13 @@ void SetupImGuiStyle(Theme theme)
 		file.close();
 
 		nlohmann::json js;
-		if (theme == light)
-		{
+		if(theme == light) {
 			js = json["Light"];
-		}
-		else
-		{
+		} else {
 			js = json["Dark"];
 		}
 
-		try
-		{
+		try {
 			auto primary = Color(js["PrimaryColor"]);
 			auto secondary = Color(js["SecondaryColor"]);
 			auto Detail = Color(js["DetailColor"]);
@@ -260,31 +253,26 @@ void SetupImGuiStyle(Theme theme)
 			style.Colors[ImGuiCol_PlotLinesHovered] = Detail.GetRGBA() * onHover;
 			style.Colors[ImGuiCol_PlotHistogram] = Detail.GetRGBA();
 			style.Colors[ImGuiCol_PlotHistogramHovered] = Detail.GetRGBA() * onHover;
-		}
-		catch (const nlohmann::json::exception& e)
-		{
-			std::string msg = std::format("Unsuccessfull loading of theme file at path: Theme.json {} ", e.what());
+		} catch(const nlohmann::json::exception& e) {
+			std::string msg = std::format("Unsuccessfull loading of theme file at path: Theme.json {} ",e.what());
 			LOGGER.Warn(msg);
 		}
 	}
 }
 
-void LoadFont()
-{
+void LoadFont() {
 	bool     haveLoadedFont = false;
 	ImGuiIO& io = ImGui::GetIO();
 
 	auto path = ENGINE_RESOURCES.Directory() / "Theme.json";
-	if (exists(path))
-	{
+	if(exists(path)) {
 		std::ifstream file(path);
 		assert(file.is_open());
 
 		nlohmann::json json = nlohmann::json::parse(file);
 		file.close();
 
-		try
-		{
+		try {
 			float                 fontSize = json["FontSize"];
 			std::filesystem::path FontPath = json["FontPath"];
 
@@ -293,9 +281,8 @@ void LoadFont()
 				"/Fonts/FontAwesome/fa-solid-900.ttf";
 			const std::string font_path = ENGINE_RESOURCES.Directory().string() + (FontPath).string();
 
-			if (!io.Fonts->AddFontFromFileTTF(font_path.c_str(), fontSize))
-			{
-				io.Fonts->AddFontFromFileTTF(backupFont.c_str(), 16.0f);
+			if(!io.Fonts->AddFontFromFileTTF(font_path.c_str(),fontSize)) {
+				io.Fonts->AddFontFromFileTTF(backupFont.c_str(),16.0f);
 			}
 
 			static constexpr ImWchar icons_ranges[] = {ICON_MIN_FA, ICON_MAX_16_FA, 0};
@@ -303,43 +290,35 @@ void LoadFont()
 			icons_config.MergeMode = true;
 			icons_config.PixelSnapH = true;
 			icons_config.GlyphMinAdvanceX = fontSize * (2.f / 3.f);
-			if (!io.Fonts->AddFontFromFileTTF(awsomeFont.c_str(), fontSize, &icons_config, icons_ranges))
-			{
-				io.Fonts->AddFontFromFileTTF(backupFont.c_str(), 16.0f);
+			if(!io.Fonts->AddFontFromFileTTF(awsomeFont.c_str(),fontSize,&icons_config,icons_ranges)) {
+				io.Fonts->AddFontFromFileTTF(backupFont.c_str(),16.0f);
 			}
 
-			if (!io.Fonts->Build())
-			{
+			if(!io.Fonts->Build()) {
 				LOGGER.Err("fucked up font load");
 			}
 			haveLoadedFont = true;
-		}
-		catch (const nlohmann::json::exception& e)
-		{
-			std::string msg = std::format("Unsuccessfull loading of theme file at path: Theme.json {} ", e.what());
+		} catch(const nlohmann::json::exception& e) {
+			std::string msg = std::format("Unsuccessfull loading of theme file at path: Theme.json {} ",e.what());
 			LOGGER.Warn(msg);
 		}
 	}
 
-	if (!haveLoadedFont)
-	{
+	if(!haveLoadedFont) {
 		ImFontConfig      font_config{};
 		const std::string backupFont = ENGINE_RESOURCES.Directory().string() + "/Fonts/roboto/Roboto-Light.ttf";
-		io.Fonts->AddFontFromFileTTF(backupFont.c_str(), 16.0f, &font_config);
+		io.Fonts->AddFontFromFileTTF(backupFont.c_str(),16.0f,&font_config);
 		font_config.MergeMode = true;
 
-		if (!io.Fonts->Build())
-		{
+		if(!io.Fonts->Build()) {
 			LOGGER.Err("fucked up font load");
 		}
 	}
 	io.Fonts->AddFontDefault();
 }
 
-bool Editor::Initialize(HWND aHandle)
-{
-	if (constexpr bool profileStartup = false)
-	{
+bool Editor::Initialize(HWND aHandle) {
+	if(constexpr bool profileStartup = false) {
 		OPTICK_START_CAPTURE();
 	}
 	OPTICK_EVENT();
@@ -362,15 +341,15 @@ bool Editor::Initialize(HWND aHandle)
 	LOGGER.Create();
 	LOGGER.SetPrintToVSOutput(true);
 
-	GetWindowRect(WindowInstance.windowHandler, &ViewportRect);
+	GetWindowRect(WindowInstance.windowHandler,&ViewportRect);
 
 	engineResources.RecursiveNameSave();
 	colorManager.InitializeDefaultColors();
 	colorManager.LoadColorsFromFile("Settings/ColorManagerData.ShipyardText");
 #ifdef _DEBUG
-	graphicsEngine.Initialize(aHandle, true);
+	graphicsEngine.Initialize(true);
 #else
-	graphicsEngine.Initialize(aHandle, false);
+	graphicsEngine.Initialize(true); // todo Disable
 #endif // Release
 
 	// Setup Dear ImGui context
@@ -385,10 +364,9 @@ bool Editor::Initialize(HWND aHandle)
 	io.ConfigDockingWithShift = true;
 
 	ImGui_ImplWin32_Init(aHandle);
-	if (const auto& heap = GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)];
-		!ImGui_ImplDX12_Init(GPUInstance.m_Device.Get(), GPUInstance.m_FrameCount, DXGI_FORMAT_R8G8B8A8_UNORM,
-		                     heap->Heap(), heap->GetCpuHandle(2000), heap->GetGpuHandle(2000)))
-	{
+	if(const auto& heap = GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)];
+		!ImGui_ImplDX12_Init(GPUInstance.m_Device.Get(),GPUInstance.m_FrameCount,DXGI_FORMAT_R8G8B8A8_UNORM,
+			heap->Heap(),heap->GetCpuHandle(2000),heap->GetGpuHandle(2000))) {
 		LOGGER.Err("Failed to init IMGUI Dx12");
 	}
 
@@ -400,8 +378,7 @@ bool Editor::Initialize(HWND aHandle)
 	// loaded. You can acuire the data from the service locator
 	auto& var = ServiceLocator::Instance().ProvideService<ImGui::ImGuiContextHolder>();
 	var.ctx = ImGui::GetCurrentContext();
-	ImGui::GetAllocatorFunctions(&var.v1, &var.v2, &var.v3);
-	// End
+	ImGui::GetAllocatorFunctions(&var.v1,&var.v2,&var.v3);
 
 #if PHYSX
 	physicsSystem.InitializePhysx();
@@ -418,8 +395,8 @@ bool Editor::Initialize(HWND aHandle)
 	m_Callbacks[EditorCallback::ObjectSelected] = Event();
 	m_Callbacks[EditorCallback::SceneChange] = Event();
 	m_Callbacks[EditorCallback::SceneChange].AddListener([]() { EDITOR_INSTANCE.GetSelectedGameObjects().clear(); });
-
 	m_Callbacks[EditorCallback::WM_DropFile] = Event();
+	gameState.Intialize("");
 
 	AddViewPort();
 	g_EditorWindows.reserve(100); // TODO Bruh
@@ -431,46 +408,41 @@ bool Editor::Initialize(HWND aHandle)
 	return true;
 }
 
-void Editor::DoWinProc(const MSG& aMessage)
-{
-	switch (aMessage.message)
-	{
+void Editor::DoWinProc(const MSG& aMessage) {
+	switch(aMessage.message) {
 	case WM_DROPFILES:
-		{
-			const auto hDrop = reinterpret_cast<HDROP>(aMessage.wParam);
-			const UINT numFiles = DragQueryFileW(hDrop, 0xFFFFFFFF, nullptr,
-			                                     0); // Get the number of dropped files
-			WM_DroppedPath.clear();
-			for (UINT i = 0; i < numFiles; i++)
-			{
-				const UINT filePathLength = DragQueryFile(hDrop, i, nullptr, 0); // Get the length of the file path
+	{
+		const auto hDrop = reinterpret_cast<HDROP>(aMessage.wParam);
+		const UINT numFiles = DragQueryFileW(hDrop,0xFFFFFFFF,nullptr,
+			0); // Get the number of dropped files
+		WM_DroppedPath.clear();
+		for(UINT i = 0; i < numFiles; i++) {
+			const UINT filePathLength = DragQueryFile(hDrop,i,nullptr,0); // Get the length of the file path
 
-				std::wstring filePath;
-				filePath.resize(filePathLength + 1); // Create a buffer to hold the file path
-				DragQueryFile(hDrop, i, filePath.data(),
-				              filePathLength + 1); // Get the file path
-				WM_DroppedPath.emplace_back(filePath);
-			}
-
-			DragFinish(hDrop); // Release the dropped files handle
-			if (!WM_DroppedPath.empty())
-			{
-				m_Callbacks[EditorCallback::WM_DropFile].Invoke();
-			}
-			break;
+			std::wstring filePath;
+			filePath.resize(filePathLength + 1); // Create a buffer to hold the file path
+			DragQueryFile(hDrop,i,filePath.data(),
+				filePathLength + 1); // Get the file path
+			WM_DroppedPath.emplace_back(filePath);
 		}
+
+		DragFinish(hDrop); // Release the dropped files handle
+		if(!WM_DroppedPath.empty()) {
+			m_Callbacks[EditorCallback::WM_DropFile].Invoke();
+		}
+		break;
+	}
 	case WM_SIZE:
-		{
-			auto&      graphicsEngine = ServiceLocator::Instance().GetService<GraphicsEngine>();
-			const auto res = Vector2ui(LOWORD(aMessage.lParam), HIWORD(aMessage.lParam));
-			graphicsEngine.ResizeBuffers(res);
+	{
+		auto& graphicsEngine = ServiceLocator::Instance().GetService<GraphicsEngine>();
+		const auto res = Vector2ui(LOWORD(aMessage.lParam),HIWORD(aMessage.lParam));
+		graphicsEngine.ResizeBuffers(res);
 
-			for (const auto& viewport : m_Viewports)
-			{
-				viewport->ResolutionUpdate();
-			}
-			break;
+		for(const auto& viewport : m_Viewports) {
+			viewport->ResolutionUpdate();
 		}
+		break;
+	}
 
 	case WM_CLOSE:
 		ColorManagerInstance.DumpToFile("Settings/ColorManagerData.ShipyardText");
@@ -485,25 +457,20 @@ void Editor::DoWinProc(const MSG& aMessage)
 		break;
 	}
 
-	Input.UpdateEvents(aMessage.message, aMessage.wParam, aMessage.lParam);
+	Input.UpdateEvents(aMessage.message,aMessage.wParam,aMessage.lParam);
 
-	extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-	if (ImGui_ImplWin32_WndProcHandler(aMessage.hwnd, aMessage.message, aMessage.wParam, aMessage.lParam))
-	{
+	extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);
+	if(ImGui_ImplWin32_WndProcHandler(aMessage.hwnd,aMessage.message,aMessage.wParam,aMessage.lParam)) {
 	}
 }
 
-int Editor::Run()
-{
+int Editor::Run() {
 	OPTICK_FRAME("MainThread");
-	if (IsGUIActive)
-	{
+	if(IsGUIActive) {
 		UpdateImGui();
 		Update();
 		Render();
-	}
-	else
-	{
+	} else {
 		Update();
 		Render();
 	}
@@ -511,8 +478,7 @@ int Editor::Run()
 	return 0;
 }
 
-void Editor::UpdateImGui()
-{
+void Editor::UpdateImGui() {
 	OPTICK_EVENT();
 	ImGui_ImplDX12_NewFrame();
 	ImGui_ImplWin32_NewFrame();
@@ -522,26 +488,19 @@ void Editor::UpdateImGui()
 	ImGui::DockSpaceOverViewport();
 	TopBar();
 
-	if (Input.IsKeyHeld(Keys::CONTROL) && Input.IsKeyPressed(Keys::Z))
-	{
-		if (Input.IsKeyHeld(Keys::SHIFT))
-		{
+	if(Input.IsKeyHeld(Keys::CONTROL) && Input.IsKeyPressed(Keys::Z)) {
+		if(Input.IsKeyHeld(Keys::SHIFT)) {
 			CommandBuffer::mainEditorCommandBuffer().redo();
-		}
-		else
-		{
+		} else {
 			CommandBuffer::mainEditorCommandBuffer().undo();
 		}
 	}
 }
 
-void Editor::CheckSelectedForRemoved()
-{
+void Editor::CheckSelectedForRemoved() {
 	OPTICK_EVENT();
-	for (auto& selected : m_SelectedGameObjects)
-	{
-		if (!selected.scene().GetGOM().HasGameObject(selected.GetID()))
-		{
+	for(auto& selected : m_SelectedGameObjects) {
+		if(!selected.scene().GetGOM().HasGameObject(selected.GetID())) {
 			// TODO do other than just clear, clear only the value that is removed
 			m_SelectedGameObjects.clear();
 			break;
@@ -549,21 +508,17 @@ void Editor::CheckSelectedForRemoved()
 	}
 }
 
-void Editor::Copy()
-{
-	LOGGER.Success(std::format("Copied %i objects", GetSelectedGameObjects().size()), true);
+void Editor::Copy() {
+	LOGGER.Success(std::format("Copied %i objects",GetSelectedGameObjects().size()),true);
 }
 
-void Editor::Paste()
-{
+void Editor::Paste() {
 	auto          selected = GetSelectedGameObjects();
 	CommandPacket packet;
-	for (auto& object : copiedObjects)
-	{
+	for(auto& object : copiedObjects) {
 		auto components = object.CopyAllComponents();
 		auto newObject = GameObject::Create(object.GetName() + "_1");
-		for (const auto& i : components)
-		{
+		for(const auto& i : components) {
 			newObject.AddBaseComponent(i);
 		}
 
@@ -571,32 +526,26 @@ void Editor::Paste()
 	}
 
 	CommandBuffer::mainEditorCommandBuffer().addCommand(packet);
-	if (const auto ptr = CommandBuffer::mainEditorCommandBuffer().getLastCommand())
-	{
+	if(const auto ptr = CommandBuffer::mainEditorCommandBuffer().getLastCommand()) {
 		ptr->setMergeBlocker(true);
 	}
 }
 
-void Editor::FocusObject(const GameObject& focus, bool focusWithOffset) const
-{
-	for (auto& viewport : m_Viewports)
-	{
-		if (!viewport->IsMainViewport())
-		{
+void Editor::FocusObject(const GameObject& focus,bool focusWithOffset) const {
+	for(auto& viewport : m_Viewports) {
+		if(!viewport->IsMainViewport()) {
 			float radiusOffset = 0;
-			if (const auto renderer = focus.TryGetComponent<MeshRenderer>())
-			{
+			if(const auto renderer = focus.TryGetComponent<MeshRenderer>()) {
 				radiusOffset = renderer->GetBoundingBox().GetRadius();
 			}
 
 			const Vector3f position = focus.transform().GetPosition(WORLD);
 
-			Transform&     ref = viewport->GetCameraTransform();
+			Transform& ref = viewport->GetCameraTransform();
 			const Vector3f cameraPosition = ref.GetPosition(WORLD);
 			const Vector3f direction = (position - cameraPosition).GetNormalized();
 
-			if (!focusWithOffset)
-			{
+			if(!focusWithOffset) {
 				radiusOffset = 0;
 			}
 			const Vector3f offset = -direction * radiusOffset;
@@ -607,13 +556,10 @@ void Editor::FocusObject(const GameObject& focus, bool focusWithOffset) const
 	}
 }
 
-void Editor::AlignObject(const GameObject& focus) const
-{
-	for (auto& viewport : m_Viewports)
-	{
-		if (!viewport->IsMainViewport())
-		{
-			Transform&     ref = viewport->GetCameraTransform();
+void Editor::AlignObject(const GameObject& focus) const {
+	for(auto& viewport : m_Viewports) {
+		if(!viewport->IsMainViewport()) {
+			Transform& ref = viewport->GetCameraTransform();
 			const Vector3f position = ref.GetPosition(WORLD);
 			const Vector3f rotation = ref.GetRotation();
 
@@ -623,31 +569,30 @@ void Editor::AlignObject(const GameObject& focus) const
 	}
 }
 
-void Editor::SetActiveScene(const std::shared_ptr<Scene> scene)
-{
+void Editor::SetActiveScene(const std::shared_ptr<Scene> scene) {
+	if(!scene) {
+		LOGGER.Critical("Failed to set active scene: Scene was null or invalid");
+		return;
+	}
+
 	m_Callbacks[EditorCallback::SceneChange].Invoke();
 	m_ActiveScene = scene;
 }
 
-std::shared_ptr<Scene> Editor::GetActiveScene()
-{
+std::shared_ptr<Scene> Editor::GetActiveScene() {
 	return m_ActiveScene;
 }
 
-std::shared_ptr<Viewport> Editor::GetMainViewport()
-{
-	for (auto& view : m_Viewports)
-	{
-		if (view->IsMainViewport())
-		{
+std::shared_ptr<Viewport> Editor::GetMainViewport() {
+	for(auto& view : m_Viewports) {
+		if(view->IsMainViewport()) {
 			return view;
 		}
 	}
 	return nullptr;
 }
 
-void Editor::Update()
-{
+void Editor::Update() {
 	OPTICK_EVENT();
 	TimerInstance.update();
 	const float delta = TimerInstance.getDeltaTime();
@@ -657,22 +602,18 @@ void Editor::Update()
 	SystemCollection::UpdateSystems(delta);
 
 	// Editor key checks
-	if (Input.IsKeyPressed(Keys::F) && m_SelectedGameObjects.size() > 0)
-	{
+	if(Input.IsKeyPressed(Keys::F) && m_SelectedGameObjects.size() > 0) {
 		FocusObject(m_SelectedGameObjects[0]);
 	}
 
-	if (Input.IsKeyHeld(Keys::CONTROL) && Input.IsKeyPressed(Keys::C))
-	{
+	if(Input.IsKeyHeld(Keys::CONTROL) && Input.IsKeyPressed(Keys::C)) {
 		Copy();
 	}
-	if (Input.IsKeyHeld(Keys::CONTROL) && Input.IsKeyPressed(Keys::V))
-	{
+	if(Input.IsKeyHeld(Keys::CONTROL) && Input.IsKeyPressed(Keys::V)) {
 		Paste();
 	}
 
-	if (Input.IsKeyPressed(Keys::F10))
-	{
+	if(Input.IsKeyPressed(Keys::F10)) {
 		ENGINE_RESOURCES.ClearUnused();
 	}
 
@@ -683,18 +624,15 @@ void Editor::Update()
 	Shipyard_PhysXInstance.EndRead(delta);
 }
 
-void Editor::Render()
-{
+void Editor::Render() {
 	OPTICK_EVENT();
-	for (const auto& viewport : m_Viewports)
-	{
+	for(const auto& viewport : m_Viewports) {
 		viewport->Update();
 	}
 	GraphicsEngineInstance.Render(m_Viewports);
 }
 
-void Editor::AddViewPort()
-{
+void Editor::AddViewPort() {
 	OPTICK_EVENT();
 	static int ViewportIndex = 0;
 	auto       viewport = std::make_shared<Viewport>(!static_cast<bool>(ViewportIndex));
@@ -704,102 +642,80 @@ void Editor::AddViewPort()
 	g_EditorWindows.emplace_back(viewport);
 }
 
-void Editor::TopBar()
-{
+void Editor::TopBar() {
 	OPTICK_EVENT();
-	if (ImGui::BeginMainMenuBar())
-	{
-		if (ImGui::BeginMenu("File"))
-		{
-			if (ImGui::Selectable("Open Scene"))
-			{
+	if(ImGui::BeginMainMenuBar()) {
+		if(ImGui::BeginMenu("File")) {
+			if(ImGui::Selectable("Open Scene")) {
 				// Here we can open the binary scene file
 			}
-			if (ImGui::Selectable("New Scene"))
-			{
+			if(ImGui::Selectable("New Scene")) {
 				// Here we can open the binary scene file
 			}
-			if (ImGui::Selectable("Save Scene"))
-			{
+			if(ImGui::Selectable("Save Scene")) {
 				// Here we can open the binary scene file
 			}
 
 			ImGui::EndMenu();
 		}
-		if (ImGui::BeginMenu("Edit"))
-		{
-			if (ImGui::Selectable("ImGuiDemoWindow"))
-			{
-				auto window = std::make_shared<CustomFuncWindow>(&ImGui::ShowDemoWindow, static_cast<bool*>(nullptr));
+		if(ImGui::BeginMenu("Edit")) {
+			if(ImGui::Selectable("ImGuiDemoWindow")) {
+				auto window = std::make_shared<CustomFuncWindow>(&ImGui::ShowDemoWindow,static_cast<bool*>(nullptr));
 				window->SetWindowName("ImGui demo holder");
 				g_EditorWindows.emplace_back(window);
 			}
 
-			if (ImGui::Selectable("Light Theme"))
-			{
+			if(ImGui::Selectable("Light Theme")) {
 				SetupImGuiStyle(light);
 			}
 
-			if (ImGui::Selectable("Dark Theme"))
-			{
+			if(ImGui::Selectable("Dark Theme")) {
 				SetupImGuiStyle(dark);
 			}
 
 			ImGui::EndMenu();
 		}
-		if (ImGui::BeginMenu("Window"))
-		{
-			if (ImGui::Selectable("Viewport"))
-			{
+		if(ImGui::BeginMenu("Window")) {
+			if(ImGui::Selectable("Viewport")) {
 				AddViewPort();
 			}
 
-			if (ImGui::Selectable("Inspector"))
-			{
+			if(ImGui::Selectable("Inspector")) {
 				g_EditorWindows.emplace_back(std::make_shared<Inspector>());
 			}
 
-			if (ImGui::Selectable("Hierarchy"))
-			{
+			if(ImGui::Selectable("Hierarchy")) {
 				g_EditorWindows.emplace_back(std::make_shared<Hierarchy>());
 			}
 
-			if (ImGui::Selectable("Content Browser"))
-			{
+			if(ImGui::Selectable("Content Browser")) {
 				g_EditorWindows.emplace_back(std::make_shared<ContentDirectory>());
 			}
 
-			if (ImGui::Selectable("Console"))
-			{
+			if(ImGui::Selectable("Console")) {
 				g_EditorWindows.emplace_back(std::make_shared<Console>());
 			}
 
-			if (ImGui::Selectable("History"))
-			{
+			if(ImGui::Selectable("History")) {
 				g_EditorWindows.emplace_back(std::make_shared<History>());
 			}
 
-			if (ImGui::Selectable("Color Presets"))
-			{
+			if(ImGui::Selectable("Color Presets")) {
 				g_EditorWindows.emplace_back(std::make_shared<ColorPresets>());
 			}
 
-			if (ImGui::Selectable("Chat"))
-			{
+			if(ImGui::Selectable("Chat")) {
 				g_EditorWindows.emplace_back(std::make_shared<ChatWindow>());
 			}
 
 			ImGui::EndMenu();
 		}
-		if (ImGui::BeginMenu("Tools"))
-		{
-			if (ImGui::Selectable("Graphics debugger"))
-			{
+		if(ImGui::BeginMenu("Tools")) {
+			if(ImGui::Selectable("Graphics debugger")) {
 				g_EditorWindows.emplace_back(std::make_shared<GraphicsDebugger>());
 			}
 
-			if (ImGui::Selectable("Frame statistics"))
-			{
+			if(ImGui::Selectable("Frame statistics")) {
 				g_EditorWindows.emplace_back(std::make_shared<FrameStatistics>());
 			}
 
@@ -808,54 +724,43 @@ void Editor::TopBar()
 		ImGui::EndMainMenuBar();
 	}
 
-	if (ImGui::BeginMainMenuBar(1))
-	{
-		if (gameState.IsPlaying && !gameState.IsPaused || gameState.IsLoading)
-		{
-			if (ImGui::Button(ICON_FA_PAUSE))
-			{
+	if(ImGui::BeginMainMenuBar(1)) {
+		if(gameState.IsPlaying && !gameState.IsPaused || gameState.IsLoading) {
+			if(ImGui::Button(ICON_FA_PAUSE)) {
 				gameState.PausePlaySession();
 			}
-		}
-		else
-		{
-			if (ImGui::Button(ICON_FA_PLAY))
-			{
+		} else {
+			if(ImGui::Button(ICON_FA_PLAY)) {
 				gameState.StartPlaySession();
 			}
 		}
 
-		if (ImGui::Button(ICON_FA_STOP))
-		{
+		if(ImGui::Button(ICON_FA_STOP)) {
 			gameState.EndPlaySession();
 		}
 
 		ImGui::EndMainMenuBar();
 	}
-	for (const auto& windows : g_EditorWindows)
-	{
-		if (windows && windows->m_KeepWindow)
-		{
+	for(const auto& windows : g_EditorWindows) {
+		if(windows && windows->m_KeepWindow) {
 			ImGui::PushID(windows.get());
 			windows->RenderImGUi();
 			ImGui::PopID();
 		}
 	}
 
-	const auto [first, last] =
-		std::ranges::remove_if(g_EditorWindows.begin(), g_EditorWindows.end(),
-		                       [](const std::shared_ptr<EditorWindow>& window) { return !window->m_KeepWindow; });
+	const auto [first,last] =
+		std::ranges::remove_if(g_EditorWindows.begin(),g_EditorWindows.end(),
+			[](const std::shared_ptr<EditorWindow>& window) { return !window->m_KeepWindow; });
 
-	g_EditorWindows.erase(first, last);
+	g_EditorWindows.erase(first,last);
 }
 
-RECT Editor::GetViewportRECT()
-{
+RECT Editor::GetViewportRECT() {
 	return ViewportRect;
 }
 
-Vector2<unsigned int> Editor::GetViewportResolution()
-{
+Vector2<unsigned int> Editor::GetViewportResolution() {
 	const RECT rect = GetViewportRECT();
-	return Vector2<unsigned int>(rect.right - rect.left, rect.bottom - rect.top);
+	return Vector2<unsigned int>(rect.right - rect.left,rect.bottom - rect.top);
 }

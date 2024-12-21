@@ -74,11 +74,11 @@ namespace Reflection
 			bool       changed = false;
 			static int selected_item1 = -1;
 			changed |= ComboAutoSelect("Blend value 1", selected_item1, keys, item_getter1, autoselect_search_vector,
-			                           ImGuiComboFlags_HeightSmall);
+									   ImGuiComboFlags_HeightSmall);
 
 			static int selected_item2 = -1;
 			changed |= ComboAutoSelect("Blend value 2", selected_item2, keys, item_getter1, autoselect_search_vector,
-			                           ImGuiComboFlags_HeightSmall);
+									   ImGuiComboFlags_HeightSmall);
 			static float blendFactor = 0.5f;
 			changed |= ImGui::SliderFloat("Blend", &blendFactor, 0.0f, 1.0f);
 			ImGui::SameLine();
@@ -100,15 +100,15 @@ namespace Reflection
 		else
 		{
 			const int preSelected = static_cast<int>(std::distance(ColorManagerInstance.m_NamedColor.begin(),
-			                                                       ColorManagerInstance.m_NamedColor.find(
-				                                                       ref.m_ColorName)));
+																   ColorManagerInstance.m_NamedColor.find(
+																	   ref.m_ColorName)));
 
 			static int selected_item1 = -1;
 
 			selected_item1 = preSelected != ColorManagerInstance.m_NamedColor.size() ? preSelected : -1;
 
 			if (ComboAutoSelect("Preset", selected_item1, keys, item_getter1, autoselect_search_vector,
-			                    ImGuiComboFlags_HeightSmall) &&
+								ImGuiComboFlags_HeightSmall) &&
 				selected_item1 != -1)
 			{
 				returnArg = true;
@@ -149,9 +149,9 @@ namespace Reflection
 	concept pointerSyntax = requires(T a) { a->GetTypeInfo(); };
 
 	template <typename T>
-	concept IsComponent = requires(T a) { a.GetGameObject(); };
+	concept IsComponent = requires(T a) { a.gameObject(); };
 	template <typename T>
-	concept IsComponentPtr = requires(T a) { a->GetGameObject(); };
+	concept IsComponentPtr = requires(T a) { a->gameObject(); };
 
 	template <typename T>
 	concept InspectorSyntax = requires(T a) { a.InspectorView(); };
@@ -265,20 +265,20 @@ public:
 	};
 
 	template <typename T0 = Component>
-	void Reflect(this auto& aReflectedObject);
+	bool Reflect(this auto& aReflectedObject);
 	template <typename T0 = Component>
-	void Reflect(T0& aReflectedObject);
+	bool Reflect(T0& aReflectedObject);
 	template <typename T0, typename C>
-	static void UpdateValue(T0& member, C& aReflectedObject, const std::string& arg);
+	static bool UpdateValue(T0& member, C& aReflectedObject, const std::string& arg);
 	template <typename T0, typename C>
 	static bool ReflectSingleValue(T0& member, C& aReflectedObject, const std::string& arg);
 };
 
 #define ReflectableTypeRegistration( )                                                                               \
-    virtual const TypeInfo &GetTypeInfo() const override                                                            \
-    {                                                                                                               \
-        return TypeInfo::Get<::refl::trait::remove_qualifiers_t<decltype(*this)>>();                                \
-    }
+	virtual const TypeInfo &GetTypeInfo() const override                                                            \
+	{                                                                                                               \
+		return TypeInfo::Get<::refl::trait::remove_qualifiers_t<decltype(*this)>>();                                \
+	}
 
 #define defaultInspector( )																						\
 bool InspectorView() override  																					\
@@ -296,11 +296,12 @@ bool InspectorView() override  																					\
 
 // Reflect public reflected members
 template <typename T0> // Make sure only reflected objects can get here
-void Reflectable::Reflect(this auto& aReflectedObject)
+bool Reflectable::Reflect(this auto& aReflectedObject)
 {
+	bool ret{};
 	if constexpr (!isReflectableClass<T0>())
 	{
-		return;
+		return false;
 	}
 
 	auto imp = [&]<typename T1 = int>(T1 member)
@@ -308,12 +309,12 @@ void Reflectable::Reflect(this auto& aReflectedObject)
 		using declType = decltype(member(aReflectedObject));
 		if constexpr (Reflection::InspectorSyntaxPtr<declType>)
 		{
-			member(aReflectedObject)->InspectorView();
+			ret |= member(aReflectedObject)->InspectorView();
 			return;
 		}
 		if constexpr (Reflection::InspectorSyntax<declType>)
 		{
-			member(aReflectedObject).InspectorView();
+			ret |= member(aReflectedObject).InspectorView();
 			return;
 		}
 
@@ -324,18 +325,20 @@ void Reflectable::Reflect(this auto& aReflectedObject)
 		ImGui::SetColumnWidth(0, 200);
 		ImGui::Text(arg.data());
 		ImGui::NextColumn();
-		UpdateValue(member, aReflectedObject, arg);
+		ret |= UpdateValue(member, aReflectedObject, arg);
 
 		ImGui::Columns(1);
 		ImGui::PopID();
 	};
 	refl::util::for_each(refl::reflect(aReflectedObject).members, imp);
 	ImGui::Separator();
+	return ret;
 }
 
 template <typename T0, typename C>
-void Reflectable::UpdateValue(T0& member, C& aReflectedObject, const std::string& arg)
+bool Reflectable::UpdateValue(T0& member, C& aReflectedObject, const std::string& arg)
 {
+	bool changed{};
 	using MemberType = std::remove_reference_t<decltype(unwrapPointer(member(aReflectedObject)))>;
 	using componentType = std::remove_reference_t<decltype(unwrapPointer(aReflectedObject))>;
 	using declType = decltype(member(aReflectedObject));
@@ -344,7 +347,7 @@ void Reflectable::UpdateValue(T0& member, C& aReflectedObject, const std::string
 	using cmpType = std::add_pointer_t<T0>;
 
 	const auto oldValue = member(aReflectedObject);
-	const bool changed = Reflection::ImGuiReflect(member(aReflectedObject), arg);
+	changed = Reflection::ImGuiReflect(member(aReflectedObject), arg);
 
 	constexpr bool isConvertible = std::is_convertible_v<cmpType, Component*>;
 	constexpr bool isBase = std::is_base_of_v<Component, T0>;
@@ -424,6 +427,8 @@ void Reflectable::UpdateValue(T0& member, C& aReflectedObject, const std::string
 			}
 		}
 	}
+
+	return changed;
 }
 
 //Todo document the shit out of this, i have no clue what i have written when looking back
@@ -532,11 +537,12 @@ bool Reflectable::ReflectSingleValue(T0& member, C& aReflectedObject, const std:
 };
 
 template <typename T0>
-__forceinline void Reflectable::Reflect(T0& aReflectedObject)
+__forceinline bool Reflectable::Reflect(T0& aReflectedObject)
 {
+	bool ret{};
 	if constexpr (!isReflectableClass<T0>())
 	{
-		return;
+		return false;
 	}
 
 	auto imp = [&]<typename T1 = float>(const T1 member)
@@ -546,12 +552,12 @@ __forceinline void Reflectable::Reflect(T0& aReflectedObject)
 
 		if constexpr (Reflection::InspectorSyntaxPtr<declType>)
 		{
-			member(aReflectedObject)->InspectorView();
+			ret |= member(aReflectedObject)->InspectorView();
 			return;
 		}
 		if constexpr (Reflection::InspectorSyntax<declType>)
 		{
-			member(aReflectedObject).InspectorView();
+			ret |= member(aReflectedObject).InspectorView();
 			return;
 		}
 
@@ -563,11 +569,12 @@ __forceinline void Reflectable::Reflect(T0& aReflectedObject)
 		ImGui::Text(arg.data());
 		ImGui::NextColumn();
 
-		UpdateValue(member, aReflectedObject, arg);
+		ret |= UpdateValue(member, aReflectedObject, arg);
 		ImGui::Columns(1);
 		ImGui::PopID();
 	};
 	refl::util::for_each(refl::reflect(aReflectedObject).members, imp);
 	ImGui::Separator();
+	return ret;
 }
 #pragma warning(pop)

@@ -18,7 +18,7 @@ void cActor::Update()
     {
         if (controller)
         {
-            controller->Update(GetGameObject()); // Im giving the controller all the rights over the object here
+            controller->Update(gameObject()); // Im giving the controller all the rights over the object here
         }
     }
 }
@@ -50,5 +50,5 @@ bool cActor::InspectorView()
 void cActor::SetController(Controller *aController)
 {
     controller = aController;
-    controller->ComponentRequirement(GetGameObject());
+    controller->ComponentRequirement(gameObject());
 }

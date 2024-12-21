@@ -27,7 +27,7 @@ void cPhysics_Kinematic::Init()
 	// Check for required components
 	if (!TryGetComponent<Transform>())
 	{
-		this->GetGameObject().AddComponent<Transform>();
+		this->gameObject().AddComponent<Transform>();
 		InitPrimitive();
 	}
 }
@@ -78,7 +78,7 @@ void cPhysics_Kinematic::Update()
 	{
 		transform.Rotate(ph_Angular_velocity * delta);
 		const auto     globalVelocity = Vector4f(ph_velocity, 0);
-		const Vector4f localVel = globalVelocity * transform.GetTransform();
+		const Vector4f localVel = globalVelocity * transform.LocalMatrix();
 		transform.Move(Vector3f(localVel.x, localVel.y, localVel.z) * delta);
 		return;
 	}

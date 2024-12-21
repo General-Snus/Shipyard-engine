@@ -37,6 +37,7 @@ public:
 	std::shared_ptr<T> GetColliderAssetOfType() const;
 
 	bool drawDebugLines = false;
+	bool isTrigger = false;
 
 private:
 	//std::unordered_set<SY::UUID> currentlyCollidingObjects;
@@ -44,7 +45,7 @@ private:
 	// std::vector<std::weak_ptr<Component>> myNotify;
 };
 
-REFL_AUTO(type(Collider), field(drawDebugLines))
+REFL_AUTO(type(Collider), field(drawDebugLines),field(isTrigger))
 
 template <typename T, typename... Args>
 void Collider::SetColliderType(Args... someParameters)

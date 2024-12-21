@@ -36,3 +36,8 @@ Transform &Component::transform()
 {
 	return GetComponent<Transform>();
 }
+
+const Transform& Component::transform() const
+{
+	return GetComponent<Transform>();
+}

@@ -11,17 +11,17 @@
 #include "Tools/Utilities/LinearAlgebra/Easing.h"
 
 extern "C" {
-inline GAME_API GameLauncher* entrypointMain()
-{
-	return new YourGameLauncher();
-}
+	inline GAME_API GameLauncher* entrypointMain()
+	{
+		return new YourGameLauncher();
+	}
 }
 
 extern "C" {
-inline GAME_API void exitPoint(HMODULE handle)
-{
-	FreeLibraryAndExitThread(handle, 0);
-}
+	inline GAME_API void exitPoint(HMODULE handle)
+	{
+		FreeLibraryAndExitThread(handle, 0);
+	}
 }
 
 void YourGameLauncher::Init()
@@ -30,7 +30,7 @@ void YourGameLauncher::Init()
 	{
 		{
 			GameObject SkySphere = GameObject::Create("SkySphere");
-			auto&      mesh = SkySphere.AddComponent<MeshRenderer>("Materials/MaterialPreviewMesh.fbx");
+			auto& mesh = SkySphere.AddComponent<MeshRenderer>("Materials/MaterialPreviewMesh.fbx");
 			mesh.SetMaterialPath("Materials/SkySphere.json");
 
 			SkySphere.transform().SetScale(-100000, -100000, -100000);
@@ -45,7 +45,7 @@ void YourGameLauncher::Init()
 			auto& light = worldRoot.AddComponent<Light>(eLightType::Directional);
 			light.SetIsShadowCaster(true);
 			light.SetColor("White");
-			light.SetPower(2.0f);
+			light.SetPower(4.0f);
 			light.BindDirectionToTransform(true);
 		}
 
@@ -54,7 +54,7 @@ void YourGameLauncher::Init()
 		SpawnGround(groundPos);
 		SpawnPillar(groundPos);
 		SpawnHooks(50, pillarRadius, groundPos);
-		SpawnPlayer(0, pillarRadius, {groundPos.x, -0.35f, groundPos.z});
+		SpawnPlayer(0, pillarRadius, { groundPos.x, -0.35f, groundPos.z });
 	}
 }
 
@@ -62,7 +62,7 @@ void YourGameLauncher::Start()
 {
 	OPTICK_EVENT();
 	LOGGER.Log("GameLauncher start");
-	GraphicsEngineInstance.debugDrawer.AddDebugBox({-1, -1, -1}, {1, 1, 1});
+	GraphicsEngineInstance.debugDrawer.AddDebugBox({ -1, -1, -1 }, { 1, 1, 1 });
 }
 
 void YourGameLauncher::Update(float delta)
@@ -70,7 +70,6 @@ void YourGameLauncher::Update(float delta)
 	OPTICK_EVENT();
 	UNREFERENCED_PARAMETER(delta);
 	auto& manager = Scene::activeManager();
-
 
 	static Vector3f lerpPos;
 	static Vector3f lerpRot;
@@ -107,15 +106,18 @@ void YourGameLauncher::Update(float delta)
 		if (Input.IsKeyPressed(Keys::SPACE))
 		{
 			Physics::RaycastHit hit;
-			const auto&         cameraTransform = manager.GetCamera().transform();
-			const auto&         camera = manager.GetCamera().GetComponent<Camera>();
+			const auto& cameraTransform = manager.GetCamera().transform();
+			const auto& camera = manager.GetCamera().GetComponent<Camera>();
 
 			const auto coord = EDITOR_INSTANCE.GetMainViewport()->getCursorInWindowPostion();
-			if (Raycast(cameraTransform.GetPosition(), camera.GetPointerDirection(coord),
-			            hit))
-			{
-				LOGGER.Log("You hit something " + hit.objectHit.GetName(), true);
+			const auto position = cameraTransform.GetPosition(WORLD);
+			const auto direction = camera.GetPointerDirection(coord); 
 
+			GraphicsEngineInstance.debugDrawer.AddDebugLine(position, direction, { 1.0f,0,0 }, 1.0f);
+			if (Raycast(position, direction, hit))
+			{
+
+				LOGGER.Log("You hit something " + hit.objectHit.GetName(), true);
 				if (auto* hook = hit.objectHit.TryGetComponent<HookComponent>(); !hook->hasConnection)
 				{
 					if (element.currentHook)
@@ -126,7 +128,7 @@ void YourGameLauncher::Update(float delta)
 					}
 					element.timeSinceHook = 0;
 					element.currentHook = hit.objectHit;
-					hook->connection = element.GetGameObject();
+					hook->connection = element.gameObject();
 					hook->hasConnection = true;
 
 					lerpPos = element.transform().GetPosition();
@@ -144,8 +146,8 @@ void YourGameLauncher::SyncServices(ServiceLocator& serviceLocator)
 };
 
 extern "C" BOOL WINAPI DllMain(const HINSTANCE instance, // handle to DLL module
-                               const DWORD     reason,   // reason for calling function
-                               const LPVOID    reserved) // reserved
+	const DWORD     reason,   // reason for calling function
+	const LPVOID    reserved) // reserved
 {
 	instance;
 	reserved;

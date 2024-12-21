@@ -77,7 +77,7 @@ void Hierarchy::PopupMenu(SY::UUID id)
 			//  for (auto const &i : obj.transform().GetAllChildren())
 			//{
 			//      const auto ptr =
-			//      std::make_shared<GameobjectDeleted>(i.get().GetGameObject());
+			//      std::make_shared<GameobjectDeleted>(i.get().gameObject());
 			//      Scene::ActiveManager().DeleteGameObject(i.get().GetOwner(),
 			//      true); packet.emplace_back(ptr);
 			//  }
@@ -149,7 +149,7 @@ void Hierarchy::RenderNode(Transform& transform)
 	const auto& style = ImGui::GetStyle();
 	auto        color = style.Colors[ImGuiCol_Text];
 
-	const auto& data = transform.GetGameObject();
+	const auto& data = transform.gameObject();
 	const auto  id = data.GetID();
 	bool        isSelected = false;
 	const auto& selectedObjects = EDITOR_INSTANCE.GetSelectedGameObjects();
@@ -250,7 +250,7 @@ inline void Hierarchy::DragDrop(Transform& transform)
 	}
 	if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
 	{
-		auto       obj = transform.GetGameObject();
+		auto       obj = transform.gameObject();
 		const auto objCopy = GameObject(obj);
 		ImGui::SetDragDropPayload("HIERARCHY_NODE", &objCopy, sizeof(GameObject));
 

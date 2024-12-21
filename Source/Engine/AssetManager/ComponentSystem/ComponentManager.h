@@ -361,7 +361,7 @@ inline void ComponentManager<T>::OnSiblingChanged(const SY::UUID aGameObjectID, 
 
 	if (myGameObjectIDtoVectorIndex.find(aGameObjectID) != myGameObjectIDtoVectorIndex.end())
 	{
-		myComponents[myGameObjectIDtoVectorIndex[aGameObjectID]].OnSiblingChanged(SourceClass);
+	//	myComponents[myGameObjectIDtoVectorIndex[aGameObjectID]].OnSiblingChanged(SourceClass);
 	}
 }
 
