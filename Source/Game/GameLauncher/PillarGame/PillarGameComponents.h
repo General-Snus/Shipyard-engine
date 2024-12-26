@@ -13,7 +13,7 @@ public:
 	GameObject wantToHook;
 	bool       isDragging = false;
 	float      timeSinceHook = 0.0f;
-	float      hookCooldown = 10.2f;
+	float      hookCooldown = 1.5f;
 };
 
 REFL_AUTO(type(PlayerComponent), field(playerId), field(currentHook), field(wantToHook), field(isDragging),

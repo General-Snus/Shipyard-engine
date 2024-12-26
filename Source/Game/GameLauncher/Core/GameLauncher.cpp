@@ -93,7 +93,7 @@ void YourGameLauncher::Update(float delta) {
 			element.transform().Rotate(0,50.0f * delta,0);
 		}
 
-		if(Input.IsKeyHeld(Keys::SPACE)) {
+		if(Input.IsKeyPressed(Keys::SPACE)) {
 			Physics::RaycastHit hit;
 			const auto& cameraTransform = manager.GetCamera().transform();
 			auto& camera = manager.GetCamera().GetComponent<Camera>();
@@ -106,7 +106,6 @@ void YourGameLauncher::Update(float delta) {
 			if(Raycast(position,direction,hit)) {
 
 				GraphicsEngineInstance.debugDrawer.AddDebugLine(position,hit.point,{0.0f,1.0f,0},1.0f);
-				LOGGER.Log("You hit something " + hit.objectHit.GetName(),true);
 				if(auto* hook = hit.objectHit.TryGetComponent<HookComponent>(); hook && !hook->hasConnection) {
 					if(element.currentHook) {
 						auto& currentHook = element.currentHook.GetComponent<HookComponent>();

@@ -159,21 +159,22 @@ Vector3f Camera::GetPointerDirection(const Vector2f position) {
 	viewPosition.y = position.y;
 	viewPosition.w = 1.0f;
 
-	const Matrix   mvp = (GetProjection() * ViewMatrix()).GetFastInverse();
+	const Matrix   mvp = Matrix::Invert(ViewMatrix() * GetProjection());
 
 	viewPosition.z = 0.0f;
 	Vector4f outStart = viewPosition * mvp; 
 	viewPosition.z = 1.0f;
-	Vector4f outEnd = mvp * viewPosition;
+	Vector4f outEnd = viewPosition * mvp;
 
-	if(outEnd.w == 0) {
+	if(outEnd.w == 0 || outStart.w == 0) {
 		return {0,0,0};
 	}
 
 	outEnd /= outEnd.w;
 	outStart /= outStart.w;
 
-	return outEnd.GetNormalized().xyz();
+	//This looks weird, reasoning is that i have inverted nearfar planes so its the opposite direction
+	return (outStart - outEnd).xyz();
 }
 
 Vector3f Camera::GetPointerDirectionNDC(const Vector2f position) const {
