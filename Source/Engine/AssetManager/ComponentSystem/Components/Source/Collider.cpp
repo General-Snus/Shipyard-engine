@@ -6,49 +6,41 @@
 #include <Tools/Utilities/LinearAlgebra/Intersection.hpp>
 #include "Editor/Editor/Core/ApplicationState.h"
 
-Collider::Collider(const SY::UUID anOwnerId, GameObjectManager* aManager) : Component(anOwnerId, aManager)
-{
-	if (const auto renderer = TryGetComponent<MeshRenderer>())
-	{
+Collider::Collider(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager) {
+	if(const auto renderer = TryGetComponent<MeshRenderer>()) {
 		myCollider = std::make_shared<ColliderAssetAABB>(renderer->GetBoundingBox());
-	}
-	else
-	{
+	} else {
 		myCollider = std::make_shared<ColliderAssetAABB>();
 	}
 }
 
-Collider::Collider(const SY::UUID anOwnerId, GameObjectManager* aManager, const std::filesystem::path& aPath)
-	: Component(anOwnerId, aManager)
-{
+Collider::Collider(const SY::UUID anOwnerId,GameObjectManager* aManager,const std::filesystem::path& aPath)
+	: Component(anOwnerId,aManager) {
 	aPath;
 
-	if (const auto renderer = TryGetComponent<MeshRenderer>())
-	{
+	if(const auto renderer = TryGetComponent<MeshRenderer>()) {
 		myCollider = std::make_shared<ColliderAssetAABB>(renderer->GetBoundingBox());
-	}
-	else
-	{
+	} else {
 		myCollider = std::make_shared<ColliderAssetAABB>();
 	}
 }
 
-void Collider::Destroy()
-{
+void Collider::Destroy() {
 	OPTICK_EVENT();
 	SystemCollection::GetSystem<CollisionChecks>()->RemoveCollisions(GetOwner());
+	if(myCollider) {
+		myCollider->RemoveDebugLines();
+	}
 }
 
-void Collider::Update()
-{
+void Collider::Update() {
 	OPTICK_EVENT();
 
 	if(myCollider) {
-		if (drawDebugLines)
-		{
+		if(drawDebugLines) {
 			myCollider->RenderDebugLines(transform());
 		}
-		 
+
 		const auto colliderType = myCollider->GetColliderType();
 		switch(colliderType) {
 		case eColliderType::AABB:
@@ -67,13 +59,11 @@ void Collider::Update()
 
 }
 
-Vector3f Collider::GetClosestPosition(Vector3f position) const
-{
+Vector3f Collider::GetClosestPosition(Vector3f position) const {
 	return GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB().ClosestPoint(position);
 }
 
-Vector3f roundToBasis(Vector3f input)
-{
+Vector3f roundToBasis(Vector3f input) {
 	Vector3f output;
 	output.x = round(input.x);
 	output.y = round(input.y);
@@ -81,16 +71,14 @@ Vector3f roundToBasis(Vector3f input)
 	return output;
 }
 
-Vector3f Collider::GetNormalToward(Vector3f position) const
-{
+Vector3f Collider::GetNormalToward(Vector3f position) const {
 	const Transform& otherObj = GetComponent<Transform>();
 	const auto       collider = GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB();
 	const Vector3f   norm = roundToBasis((collider.ClosestPoint(position) - otherObj.GetPosition()).GetNormalized());
 	return norm;
 }
 
-void Collider::OnSiblingChanged(const std::type_info* SourceClass)
-{
+void Collider::OnSiblingChanged(const std::type_info* SourceClass) {
 	OPTICK_EVENT();
 	SourceClass;
 	//if (SourceClass == &typeid(Transform)) // Transform dirty
@@ -115,18 +103,15 @@ void Collider::OnSiblingChanged(const std::type_info* SourceClass)
 	//}
 }
 
-bool Collider::InspectorView()
-{
-	if (!Component::InspectorView())
-	{
+bool Collider::InspectorView() {
+	if(!Component::InspectorView()) {
 		return false;
 	}
 	Reflect<Collider>();
-	if (myCollider)
-	{
+	if(myCollider) {
 		myCollider->InspectorView();
 
-		if (!drawDebugLines) { myCollider->RenderDebugLines(transform()); }
+		if(!drawDebugLines) { myCollider->RenderDebugLines(transform()); }
 	}
 	return true;
 }

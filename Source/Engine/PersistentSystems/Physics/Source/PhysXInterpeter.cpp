@@ -55,6 +55,15 @@ int Shipyard_PhysX::InitializePhysx() {
 	gScene->setVisualizationParameter(PxVisualizationParameter::eSCALE,1.0f);
 	gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES,true);
 
+	physx::PxPvdSceneClient* pvdClient = gScene->getScenePvdClient();
+	if(pvdClient) {
+		pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS,true);
+		pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_CONTACTS,true);
+		pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES,true);
+	}
+
+
+
 	gMaterial = gPhysics->createMaterial(0.5f,0.5f,0.6f);
 
 	gScene->simulate(.1f);

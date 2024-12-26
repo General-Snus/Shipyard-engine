@@ -118,7 +118,7 @@ Matrix Viewport::Projection() {
 }
 
 Matrix Viewport::ViewInverse() {
-	return GetCamera().LocalTransform().GetMutableTransform().GetInverse();
+	return GetCamera().LocalTransform().GetMutableTransform().GetFastInverse();
 }
 
 Matrix& Viewport::View() {
@@ -196,7 +196,7 @@ void Viewport::RenderImGUi() {
 					if(transform.HasParent()) {
 						mat = mat * transform.GetParent()
 							.WorldMatrix()
-							.GetInverse();
+							.GetFastInverse();
 						// TODO This doesnt support scaled objects, fix asap im eepy now
 					}
 

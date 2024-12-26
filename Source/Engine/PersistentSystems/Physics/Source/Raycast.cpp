@@ -41,7 +41,7 @@ namespace Physics {
 
 		if(pxhitinfo.hasAnyHits()) {
 			outHitInfo.point = Vector3f(pxhitinfo.block.position.x,pxhitinfo.block.position.y,pxhitinfo.block.position.z);
- 			outHitInfo.normal = Vector3f(pxhitinfo.block.normal.x,pxhitinfo.block.normal.y,pxhitinfo.block.normal.z);
+  			outHitInfo.normal = Vector3f(pxhitinfo.block.normal.x,pxhitinfo.block.normal.y,pxhitinfo.block.normal.z);
 			outHitInfo.distance = pxhitinfo.block.distance;
 
 			const SY::UUID* uuid = static_cast<SY::UUID*>(pxhitinfo.block.actor->userData);

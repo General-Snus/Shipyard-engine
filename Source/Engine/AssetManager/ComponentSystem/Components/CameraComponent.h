@@ -43,7 +43,7 @@ class Camera : public Component
 	bool InspectorView() override;
 
 	std::array<Vector4f, 4> GetFrustrumCorners() const;
-	Vector3f GetPointerDirection(const Vector2f position) const;
+	Vector3f GetPointerDirection(const Vector2f position);
 	Vector3f GetPointerDirectionNDC(const Vector2f position) const;
 	Vector4f WoldSpaceToPostProjectionSpace(Vector3f aEntity);
 
@@ -56,6 +56,8 @@ class Camera : public Component
 	{
 		return m_Projection;
 	};
+	const Matrix &ViewMatrix();
+
 	FrameBuffer GetFrameBuffer();
 	Transform &LocalTransform();
 	const Transform &LocalTransform() const;
@@ -86,6 +88,7 @@ class Camera : public Component
 	Vector2f resolution = {(float)(WindowInstance.Width()), (float)(WindowInstance.Height())};
 	bool IsInControll = false;
 	Matrix m_Projection;
+	Matrix m_CachedViewMatrix;
 	float cameraSpeed = 25;
 };
 

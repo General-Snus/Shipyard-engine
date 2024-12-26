@@ -11,21 +11,18 @@
 #include "Tools/Utilities/LinearAlgebra/Easing.h"
 
 extern "C" {
-	inline GAME_API GameLauncher* entrypointMain()
-	{
+	inline GAME_API GameLauncher* entrypointMain() {
 		return new YourGameLauncher();
 	}
 }
 
 extern "C" {
-	inline GAME_API void exitPoint(HMODULE handle)
-	{
-		FreeLibraryAndExitThread(handle, 0);
+	inline GAME_API void exitPoint(HMODULE handle) {
+		FreeLibraryAndExitThread(handle,0);
 	}
 }
 
-void YourGameLauncher::Init()
-{
+void YourGameLauncher::Init() {
 	OPTICK_EVENT();
 	{
 		{
@@ -33,7 +30,7 @@ void YourGameLauncher::Init()
 			auto& mesh = SkySphere.AddComponent<MeshRenderer>("Materials/MaterialPreviewMesh.fbx");
 			mesh.SetMaterialPath("Materials/SkySphere.json");
 
-			SkySphere.transform().SetScale(-100000, -100000, -100000);
+			SkySphere.transform().SetScale(-100000,-100000,-100000);
 		}
 
 		{
@@ -41,7 +38,7 @@ void YourGameLauncher::Init()
 			Scene::activeManager().SetLastGOAsWorld();
 
 			worldRoot.SetName("SkyLight");
-			worldRoot.transform().SetRotation(45, 45, 0);
+			worldRoot.transform().SetRotation(45,45,0);
 			auto& light = worldRoot.AddComponent<Light>(eLightType::Directional);
 			light.SetIsShadowCaster(true);
 			light.SetColor("White");
@@ -50,78 +47,68 @@ void YourGameLauncher::Init()
 		}
 
 		constexpr float pillarRadius = 1.0f;
-		auto            groundPos = Vector3f(0, -.5f, 0);
+		auto            groundPos = Vector3f(0,-.5f,0);
 		SpawnGround(groundPos);
 		SpawnPillar(groundPos);
-		SpawnHooks(50, pillarRadius, groundPos);
-		SpawnPlayer(0, pillarRadius, { groundPos.x, -0.35f, groundPos.z });
+		SpawnHooks(50,pillarRadius,groundPos);
+		SpawnPlayer(0,pillarRadius,{groundPos.x, -0.35f, groundPos.z});
 	}
 }
 
-void YourGameLauncher::Start()
-{
+void YourGameLauncher::Start() {
 	OPTICK_EVENT();
 	LOGGER.Log("GameLauncher start");
-	GraphicsEngineInstance.debugDrawer.AddDebugBox({ -1, -1, -1 }, { 1, 1, 1 });
+	GraphicsEngineInstance.debugDrawer.AddDebugBox({-1, -1, -1},{1, 1, 1});
 }
 
-void YourGameLauncher::Update(float delta)
-{
+void YourGameLauncher::Update(float delta) {
 	OPTICK_EVENT();
 	UNREFERENCED_PARAMETER(delta);
 	auto& manager = Scene::activeManager();
 
 	static Vector3f lerpPos;
 	static Vector3f lerpRot;
-	for (auto& element : manager.GetAllComponents<PlayerComponent>())
-	{
-		if (element.currentHook)
-		{
+	for(auto& element : manager.GetAllComponents<PlayerComponent>()) {
+		if(element.currentHook) {
 			element.timeSinceHook += delta;
 			auto percentage = element.timeSinceHook / element.hookCooldown;
 
-			if (percentage < 1.0f)
-			{
+			if(percentage < 1.0f) {
 				auto position = element.transform().GetPosition();
-				position.y = lerp(lerpPos.y, element.currentHook.transform().GetPosition().y, percentage);
+				position.y = lerp(lerpPos.y,element.currentHook.transform().GetPosition().y,percentage);
 				element.transform().SetPosition(position);
 
 				auto rotation = element.transform().GetRotation();
-				rotation.y = lerp(lerpRot.y, element.currentHook.transform().GetRotation().y, percentage);
+				rotation.y = lerp(lerpRot.y,element.currentHook.transform().GetRotation().y,percentage);
 				element.transform().SetRotation(rotation);
 			}
 		}
 
 
-		if (Input.IsKeyHeld(Keys::RIGHT))
-		{
-			element.transform().Rotate(0, -50.0f * delta, 0);
+		if(Input.IsKeyHeld(Keys::RIGHT)) {
+			element.transform().Rotate(0,-50.0f * delta,0);
 		}
 
-		if (Input.IsKeyHeld(Keys::LEFT))
-		{
-			element.transform().Rotate(0, 50.0f * delta, 0);
+		if(Input.IsKeyHeld(Keys::LEFT)) {
+			element.transform().Rotate(0,50.0f * delta,0);
 		}
 
-		if (Input.IsKeyPressed(Keys::SPACE))
-		{
+		if(Input.IsKeyHeld(Keys::SPACE)) {
 			Physics::RaycastHit hit;
 			const auto& cameraTransform = manager.GetCamera().transform();
-			const auto& camera = manager.GetCamera().GetComponent<Camera>();
+			auto& camera = manager.GetCamera().GetComponent<Camera>();
 
 			const auto coord = EDITOR_INSTANCE.GetMainViewport()->getCursorInWindowPostion();
 			const auto position = cameraTransform.GetPosition(WORLD);
-			const auto direction = camera.GetPointerDirection(coord); 
+			const auto direction = camera.GetPointerDirection(coord);
 
-			GraphicsEngineInstance.debugDrawer.AddDebugLine(position, direction, { 1.0f,0,0 }, 1.0f);
-			if (Raycast(position, direction, hit))
-			{
+			GraphicsEngineInstance.debugDrawer.AddDebugLine(position,direction + position,{1.0f,0,0},1.0f);
+			if(Raycast(position,direction,hit)) {
 
-				LOGGER.Log("You hit something " + hit.objectHit.GetName(), true);
-				if (auto* hook = hit.objectHit.TryGetComponent<HookComponent>(); hook && !hook->hasConnection)
-				{
-					if (element.currentHook)
-					{
+				GraphicsEngineInstance.debugDrawer.AddDebugLine(position,hit.point,{0.0f,1.0f,0},1.0f);
+				LOGGER.Log("You hit something " + hit.objectHit.GetName(),true);
+				if(auto* hook = hit.objectHit.TryGetComponent<HookComponent>(); hook && !hook->hasConnection) {
+					if(element.currentHook) {
 						auto& currentHook = element.currentHook.GetComponent<HookComponent>();
 						currentHook.hasConnection = false;
 						currentHook.connection = GameObject();
@@ -139,8 +126,7 @@ void YourGameLauncher::Update(float delta)
 	}
 }
 
-void YourGameLauncher::SyncServices(ServiceLocator& serviceLocator)
-{
+void YourGameLauncher::SyncServices(ServiceLocator& serviceLocator) {
 	ServiceLocator::SyncInstances(serviceLocator);
 	InitializeOnNewContext(serviceLocator.GetService<ImGui::ImGuiContextHolder>());
 };
@@ -152,8 +138,7 @@ extern "C" BOOL WINAPI DllMain(const HINSTANCE instance, // handle to DLL module
 	instance;
 	reserved;
 	// Perform actions based on the reason for calling.
-	switch (reason)
-	{
+	switch(reason) {
 	case DLL_PROCESS_ATTACH:
 		// Initialize once for each new process.
 		// Return FALSE to fail DLL load.

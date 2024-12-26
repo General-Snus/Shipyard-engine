@@ -71,6 +71,8 @@ public:
 	void Normalize();
 	// Returns the dot product of this and aVector
 	T Dot(const Vector4<T>& aVector) const;
+
+	Vector3<T> xyz();
 };
 
 template <class T>
@@ -193,6 +195,9 @@ T Vector4<T>::Length() const
 template <class T>
 Vector4<T> Vector4<T>::GetNormalized() const
 {
+	if(x == T(0) && y == T(0) && z == T(0) && w == T(0)) {
+		return Vector4<T>(T(0),T(0),T(0),T(0));
+	}
 	const T len = 1 / Length();
 	return Vector4<T>(x * len, y * len, z * len, w * len);
 }
@@ -212,6 +217,11 @@ template <class T>
 T Vector4<T>::Dot(const Vector4<T>& aVector) const
 {
 	return x * aVector.x + y * aVector.y + z * aVector.z + w * aVector.w;
+}
+
+template<class T>
+inline Vector3<T> Vector4<T>::xyz() {
+	return Vector3<T>(x,y,z);
 }
 
 template <class T>

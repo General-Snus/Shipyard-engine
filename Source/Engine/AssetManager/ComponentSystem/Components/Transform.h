@@ -28,7 +28,8 @@ public:
 	// the orignal matrix
 	Matrix&       GetMutableTransform();
 	const Matrix& LocalMatrix();
-	const Matrix& WorldMatrix() const;
+	const Matrix& unmodified_WorldMatrix() const;
+	const Matrix& unmodified_LocalMatrix() const;
 	const Matrix& WorldMatrix();
 
 	// not dirty checked
@@ -137,8 +138,8 @@ private:
 	Vector3<float> myScale = Vector3f(1, 1, 1);
 	;
 
-	Matrix4x4<float>             myTransform{};
-	Matrix4x4<float>             myWorldSpaceTransform{};
+	Matrix4x4<float>             localMatrix{};
+	Matrix4x4<float>             worldMatrix{};
 	DebugDrawer::PrimitiveHandle primitive{};
 };
 

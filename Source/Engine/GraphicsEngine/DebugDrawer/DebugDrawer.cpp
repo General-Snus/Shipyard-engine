@@ -94,7 +94,7 @@ void DebugDrawer::Render(std::shared_ptr<CommandList> commandList) {
 
 			for(size_t v = 0; v < currentPrimitive.Vertices.size(); ++v) {
 				vxPtr[v] = currentPrimitive.Vertices[v];
-				vxPtr[v].Position = Vector4f(currentPrimitive.Vertices[v].Position * currentPrimitive.Transform.GetInverse());
+				vxPtr[v].Position = Vector4f(currentPrimitive.Vertices[v].Position * currentPrimitive.Transform.GetFastInverse());
 				vxPtr[v].Position.w = 1.0f;
 			}
 

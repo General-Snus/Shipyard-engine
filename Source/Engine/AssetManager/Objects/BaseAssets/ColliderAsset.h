@@ -40,7 +40,7 @@ class ColliderAsset : public AssetBase
         return type;
     };
     virtual void RenderDebugLines(Transform &data) = 0;
-
+    void RemoveDebugLines();
     bool InspectorView() override
     {
         auto fl = float(boundingBox.GetRadius());

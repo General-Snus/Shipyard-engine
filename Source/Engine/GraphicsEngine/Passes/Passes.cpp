@@ -43,7 +43,7 @@ namespace Passes {
 						continue;
 					}
 					const auto& transform = object.GetComponent<Transform>();
-					list->AllocateBuffer<ObjectBuffer>(eRootBindings::objectBuffer,{transform.WorldMatrix()});
+					list->AllocateBuffer<ObjectBuffer>(eRootBindings::objectBuffer,{transform.unmodified_WorldMatrix()});
 					for(auto& element : object.GetElements()) {
 						OPTICK_GPU_EVENT(debugName.data());
 						GPUInstance.ConfigureInputAssembler(*list,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
@@ -249,7 +249,7 @@ void GBuffer::Render(const GraphicsEngine& instance,std::shared_ptr<CommandList>
 		const auto& transform = meshRenderer.GetComponent<Transform>();
 
 		ObjectBuffer objectBuffer;
-		objectBuffer.myTransform = transform.WorldMatrix();
+		objectBuffer.myTransform = transform.unmodified_WorldMatrix();
 		objectBuffer.MaxExtents = meshRenderer.GetRawMesh()->Bounds.GetMax();
 		objectBuffer.MinExtents = meshRenderer.GetRawMesh()->Bounds.GetMin();
 		objectBuffer.hasBone = false;
