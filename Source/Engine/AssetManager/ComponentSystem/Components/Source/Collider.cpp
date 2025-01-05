@@ -8,9 +8,9 @@
 
 Collider::Collider(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager) {
 	if(const auto renderer = TryGetComponent<MeshRenderer>()) {
-		myCollider = std::make_shared<ColliderAssetAABB>(renderer->GetBoundingBox());
+		myCollider = std::make_shared<ColliderAssetBox>(renderer->GetBoundingBox());
 	} else {
-		myCollider = std::make_shared<ColliderAssetAABB>();
+		myCollider = std::make_shared<ColliderAssetBox>();
 	}
 }
 
@@ -19,9 +19,9 @@ Collider::Collider(const SY::UUID anOwnerId,GameObjectManager* aManager,const st
 	aPath;
 
 	if(const auto renderer = TryGetComponent<MeshRenderer>()) {
-		myCollider = std::make_shared<ColliderAssetAABB>(renderer->GetBoundingBox());
+		myCollider = std::make_shared<ColliderAssetBox>(renderer->GetBoundingBox());
 	} else {
-		myCollider = std::make_shared<ColliderAssetAABB>();
+		myCollider = std::make_shared<ColliderAssetBox>();
 	}
 }
 
@@ -39,6 +39,8 @@ void Collider::Update() {
 	if(myCollider) {
 		if(drawDebugLines) {
 			myCollider->RenderDebugLines(transform());
+		} else {
+			myCollider->RemoveDebugLines();
 		}
 
 		const auto colliderType = myCollider->GetColliderType();
@@ -60,7 +62,7 @@ void Collider::Update() {
 }
 
 Vector3f Collider::GetClosestPosition(Vector3f position) const {
-	return GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB().ClosestPoint(position);
+	return GetColliderAssetOfType<ColliderAssetAABB>()->ScaledAABB().ClosestPoint(position);
 }
 
 Vector3f roundToBasis(Vector3f input) {
@@ -73,7 +75,7 @@ Vector3f roundToBasis(Vector3f input) {
 
 Vector3f Collider::GetNormalToward(Vector3f position) const {
 	const Transform& otherObj = GetComponent<Transform>();
-	const auto       collider = GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB();
+	const auto       collider = GetColliderAssetOfType<ColliderAssetAABB>()->ScaledAABB();
 	const Vector3f   norm = roundToBasis((collider.ClosestPoint(position) - otherObj.GetPosition()).GetNormalized());
 	return norm;
 }
@@ -111,7 +113,7 @@ bool Collider::InspectorView() {
 	if(myCollider) {
 		myCollider->InspectorView();
 
-		if(!drawDebugLines) { myCollider->RenderDebugLines(transform()); }
+		myCollider->RenderDebugLines(transform());
 	}
 	return true;
 }

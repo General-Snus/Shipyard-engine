@@ -85,7 +85,7 @@ namespace Physics {
 				continue;
 			}
 
-			const auto& collider = i.GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB();
+			const auto& collider = i.GetColliderAssetOfType<ColliderAssetAABB>()->ScaledAABB();
 
 			Ray ray;
 			ray.InitWithOriginAndDirection(origin,direction);
@@ -120,7 +120,7 @@ namespace Physics {
 		float    distance = std::powf(maxDistance,2);
 		Vector3f hitPoint;
 		for(auto& i : Scene::activeManager().GetAllComponents<Collider>()) {
-			auto& collider = i.GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB();
+			auto& collider = i.GetColliderAssetOfType<ColliderAssetAABB>()->ScaledAABB();
 
 			Ray ray;
 			ray.InitWithOriginAndDirection(origin,direction);
@@ -154,7 +154,7 @@ namespace Physics {
 		const Vector3f hitPoint;
 		// Observe crabLiftingBar.jpeg
 		for(auto& i : Scene::activeManager().GetAllComponents<Collider>()) {
-			auto collider = i.GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB();
+			auto collider = i.GetColliderAssetOfType<ColliderAssetAABB>()->ScaledAABB();
 
 			Ray ray;
 			ray.InitWithOriginAndDirection(origin,direction);

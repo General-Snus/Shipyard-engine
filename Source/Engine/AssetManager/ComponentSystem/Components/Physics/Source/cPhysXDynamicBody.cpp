@@ -31,10 +31,17 @@ void cPhysXDynamicBody::Init()
 	{
 		switch (collider->GetColliderType())
 		{
+		case eColliderType::BOX:
+		{
+			const auto aabb = collider->GetColliderAssetOfType<ColliderAssetBox>();
+			const auto& aabbData = aabb->box();
+			PxRigidActorExt::createExclusiveShape(*data,PxBoxGeometry(aabbData.GetXSize() / 2,aabbData.GetYSize() / 2,aabbData.GetZSize() / 2),*mMaterial);
+			break;
+		}
 		case eColliderType::AABB:
 		{
 			const auto aabb = collider->GetColliderAssetOfType<ColliderAssetAABB>();
-			const auto& aabbData = aabb->GetAABB();
+			const auto& aabbData = aabb->ScaledAABB();
 			PxRigidActorExt::createExclusiveShape(*data,PxBoxGeometry(aabbData.GetXSize() / 2,aabbData.GetYSize() / 2,aabbData.GetZSize() / 2),*mMaterial);
 			break;
 		}

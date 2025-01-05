@@ -44,7 +44,7 @@ void CollisionChecks::CheckColliders()
 			continue;
 		}
 
-		const AABB3D<float>& firstCollider = collider.GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB();
+		const AABB3D<float>& firstCollider = collider.GetColliderAssetOfType<ColliderAssetAABB>()->ScaledAABB();
 		for (size_t i = index; i < listOfColliders.size(); i++)
 		{
 			const auto secondOwner = listOfColliders[i].GetOwner();
@@ -53,7 +53,7 @@ void CollisionChecks::CheckColliders()
 				continue;
 			}
 
-			const auto& secondCollider = listOfColliders[i].GetColliderAssetOfType<ColliderAssetAABB>()->GetAABB();
+			const auto& secondCollider = listOfColliders[i].GetColliderAssetOfType<ColliderAssetAABB>()->ScaledAABB();
 
 			if (IntersectionAABB<float>(firstCollider, secondCollider))
 			{

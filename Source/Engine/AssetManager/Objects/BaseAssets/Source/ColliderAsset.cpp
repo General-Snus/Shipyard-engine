@@ -38,20 +38,22 @@ void ColliderAssetAABB::RenderDebugLines(Transform& data) {
 	for(DebugDrawer::PrimitiveHandle& handle : myHandles) {
 		GraphicsEngineInstance.debugDrawer.RemoveDebugPrimitive(handle);
 	}
-
 	myHandles.clear();
 	const auto handle =
-		GraphicsEngineInstance.debugDrawer.AddDebugBox(myAABB.GetMin(),myAABB.GetMax());
-	GraphicsEngineInstance.debugDrawer.SetDebugPrimitiveTransform(handle,data.WorldMatrix());
+		GraphicsEngineInstance.debugDrawer.AddDebugBox(myOriginalAABB.GetMin(),myOriginalAABB.GetMax());
 	myHandles.push_back(handle);
+
+	for(auto const& aHandle : myHandles) {
+		GraphicsEngineInstance.debugDrawer.SetDebugPrimitiveTransform(aHandle,data.WorldMatrix());
+	}
 }
 
 void ColliderAssetAABB::UpdateWithTransform(const Matrix& matrix) {
-	const Vector4f minPoint = Vector4f(myOriginalAABB.GetMin() * .5f,1) * matrix;
-	const Vector4f maxPoint = Vector4f(myOriginalAABB.GetMax() * .5f,1) * matrix;
+	const Vector4f minPoint = Vector4f(myOriginalAABB.GetMin(),1) * matrix;
+	const Vector4f maxPoint = Vector4f(myOriginalAABB.GetMax(),1) * matrix;
 
-	const auto minV3 = Vector3f(minPoint.x,minPoint.y,minPoint.z);
-	const auto maxV3 = Vector3f(maxPoint.x,maxPoint.y,maxPoint.z);
+	const auto minV3 = minPoint.xyz();
+	const auto maxV3 = maxPoint.xyz();
 
 	myAABB = AABB3D(MinVector(minV3,maxV3),MaxVector(minV3,maxV3));
 }
@@ -106,10 +108,28 @@ ColliderAssetPlanar::ColliderAssetPlanar(const std::shared_ptr<Mesh>& rf) : Coll
 ColliderAssetPlanar::ColliderAssetPlanar(const std::filesystem::path& path) : ColliderAsset(eColliderType::PLANAR) {
 	path;
 	ENGINE_RESOURCES.ForceLoadAsset<Mesh>(path,aColliderMesh);
-	// assert(false && "Not implemented");
 }
 
 void ColliderAssetPlanar::RenderDebugLines(Transform& data) {
 	data;
 	assert(false && "Not implemented");
 }
+
+ColliderAssetBox::ColliderAssetBox() : ColliderAsset(eColliderType::BOX) {};
+
+ColliderAssetBox::ColliderAssetBox(const AABB3D<float>& rf) : ColliderAsset(eColliderType::BOX),myBox(rf) {}
+
+void ColliderAssetBox::RenderDebugLines(Transform& data) {
+	for(DebugDrawer::PrimitiveHandle& handle : myHandles) {
+		GraphicsEngineInstance.debugDrawer.RemoveDebugPrimitive(handle);
+	}
+	myHandles.clear();
+	const auto handle =
+		GraphicsEngineInstance.debugDrawer.AddDebugBox(myBox.GetMin(),myBox.GetMax());
+	myHandles.push_back(handle);
+
+	for(auto const& aHandle : myHandles) {
+		GraphicsEngineInstance.debugDrawer.SetDebugPrimitiveTransform(aHandle,data.WorldMatrix());
+	}
+}
+

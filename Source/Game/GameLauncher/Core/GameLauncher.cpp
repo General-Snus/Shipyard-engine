@@ -81,6 +81,7 @@ void YourGameLauncher::Update(float delta) {
 				auto rotation = element.transform().GetRotation();
 				rotation.y = lerp(lerpRot.y,element.currentHook.transform().GetRotation().y,percentage);
 				element.transform().SetRotation(rotation);
+				return;
 			}
 		}
 
@@ -107,6 +108,7 @@ void YourGameLauncher::Update(float delta) {
 
 				GraphicsEngineInstance.debugDrawer.AddDebugLine(position,hit.point,{0.0f,1.0f,0},1.0f);
 				if(auto* hook = hit.objectHit.TryGetComponent<HookComponent>(); hook && !hook->hasConnection) {
+					LOGGER.Log(hit.objectHit.GetName());
 					if(element.currentHook) {
 						auto& currentHook = element.currentHook.GetComponent<HookComponent>();
 						currentHook.hasConnection = false;

@@ -9,6 +9,8 @@
 
 #include "PxPhysics.h"
 #include "PxPhysicsAPI.h"
+#include "omnipvd/PxOmniPvd.h"
+#include "omnipvd/PxOmniPvd.h"
 #include "cooking/PxCooking.h"
 #include "Engine/AssetManager/AssetManager.h"
 #include "Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h"
@@ -39,13 +41,24 @@ int Shipyard_PhysX::InitializePhysx() {
 
 	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION,*gAllocator,*gErrorCallback);
 
+#if usingLegacyDebugger 
 	gPvd = PxCreatePvd(*gFoundation);
 	PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate("127.0.0.1",5425,100);
 	gPvd->connect(*transport,PxPvdInstrumentationFlag::eALL);
+#endif
 
-	gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION,*gFoundation,PxTolerancesScale(),true,gPvd);
+	gOmniPvd = PxCreateOmniPvd(*gFoundation);
+	if(gOmniPvd) {
+		//Todo
+	}
+
+#if usingLegacyDebugger
+	gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION,*gFoundation,PxTolerancesScale(),true,gPvd,gOmniPvd);
+#else
+	gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION,*gFoundation,PxTolerancesScale(),true,0,gOmniPvd);
+#endif
+
 	gDispatcher = PxDefaultCpuDispatcherCreate(2);
-
 	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
 	sceneDesc.gravity = PxVec3(0.0f,-9.82f,0.0f);
 	sceneDesc.cpuDispatcher = gDispatcher;
@@ -88,13 +101,25 @@ void Shipyard_PhysX::EndRead(float deltaTime) {
 }
 
 void Shipyard_PhysX::Render() {
-	const PxRenderBuffer& rb = gScene->getRenderBuffer();
-	for(PxU32 i = 0; i < rb.getNbLines(); i++) {
-		const PxDebugLine& line = rb.getLines()[i];
-		const Vector3f     Vpos1 = {line.pos0.x, line.pos0.y, line.pos0.z};
-		const Vector3f     Vpos2 = {line.pos1.x, line.pos1.y, line.pos1.z};
 
-		GraphicsEngineInstance.debugDrawer.AddDebugLine(Vpos1,Vpos2,Vector3f(0,1,0),TimerInstance.getDeltaTime());
+	if(!showLines) {
+		if(!handles.empty()) {
+			for(auto& i : handles) {
+				GraphicsEngineInstance.debugDrawer.RemoveDebugPrimitive(i);
+			}
+			handles.clear();
+		}
+		return;
+	}
+	if(handles.empty()) {
+		const PxRenderBuffer& rb = gScene->getRenderBuffer();
+		for(PxU32 i = 0; i < rb.getNbLines(); i++) {
+			const PxDebugLine& line = rb.getLines()[i];
+			const Vector3f     Vpos1 = {line.pos0.x, line.pos0.y, line.pos0.z};
+			const Vector3f     Vpos2 = {line.pos1.x, line.pos1.y, line.pos1.z};
+
+			handles.emplace_back(GraphicsEngineInstance.debugDrawer.AddDebugLine(Vpos1,Vpos2,Vector3f(0,1,0)));
+		}
 	}
 }
 
@@ -124,6 +149,8 @@ void Shipyard_PhysX::resetScene() {
 	gScene->setVisualizationParameter(PxVisualizationParameter::eSCALE,1.0f);
 	gScene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES,true);
 }
+
+void Shipyard_PhysX::ShowDrawLines(bool arg) { showLines = arg; }
 
 PxPhysics* Shipyard_PhysX::GetPhysicsWorld() {
 	return gPhysics;

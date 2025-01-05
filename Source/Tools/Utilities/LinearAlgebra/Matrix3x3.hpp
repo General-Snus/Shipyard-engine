@@ -28,6 +28,10 @@ public:
 	// Static function for creating a transpose of a matrix.
 	static Matrix3x3<T> Transpose(const Matrix3x3<T>& aMatrixToTranspose);
 
+
+	void Transpose();
+	Matrix3x3<T> GetTranspose();
+
 private:
 	T arr[dim3x3][dim3x3];
 };
@@ -273,4 +277,12 @@ Matrix3x3<T> Matrix3x3<T>::Transpose(const Matrix3x3<T>& aMatrixToTranspose)
 	}
 
 	return output;
+}
+
+template<class T>
+inline void Matrix3x3<T>::Transpose() { *this =Transpose(*this); }
+
+template<class T>
+inline Matrix3x3<T> Matrix3x3<T>::GetTranspose() {
+	return Transpose(*this);
 }

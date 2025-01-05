@@ -615,6 +615,11 @@ void Editor::Update() {
 	if(Input.IsKeyPressed(Keys::F10)) {
 		ENGINE_RESOURCES.ClearUnused();
 	}
+	if(Input.IsKeyPressed(Keys::F6)) {
+		static bool enabled = false;
+		enabled = !enabled;
+		Shipyard_PhysXInstance.ShowDrawLines(enabled);
+	}
 
 	// End
 
@@ -627,7 +632,8 @@ void Editor::Render() {
 	OPTICK_EVENT();
 	for(const auto& viewport : m_Viewports) {
 		viewport->Update();
-	}
+	} 
+	Shipyard_PhysXInstance.Render();
 	GraphicsEngineInstance.Render(m_Viewports);
 }
 

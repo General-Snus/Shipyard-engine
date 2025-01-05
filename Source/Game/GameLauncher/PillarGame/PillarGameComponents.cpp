@@ -8,6 +8,11 @@ void SpawnPillar(Vector3f base)
 	GameObject pillar = GameObject::Create("Pillar");
 	auto&      renderer = pillar.AddComponent<MeshRenderer>("Models/PillarClimb/Pillar.fbx");
 	pillar.transform().SetPosition(base);
+	auto& collider = pillar.AddComponent<Collider>();
+
+	collider.GetColliderAssetOfType<ColliderAssetBox>()->box().GetExtent().y = 25.0f;
+	collider.GetColliderAssetOfType<ColliderAssetBox>()->box().GetCenter().y = 25.0f;
+	pillar.AddComponent<cPhysXStaticBody>();
 
 	if (const auto mat = Resources.ForceLoad<Material>("TreeMaterial"))
 	{
@@ -46,7 +51,9 @@ void SpawnHooks(int amount, float radius, Vector3f base)
 			renderer.SetMaterial(mat);
 		}
 
-		attachment.AddComponent<Collider>();
+		auto& ref = attachment.AddComponent<Collider>();
+		ref;
+		//ref.GetColliderAssetOfType<ColliderAssetBox>()->box() *= 1.5f;
 		attachment.AddComponent<cPhysXStaticBody>();
 		auto directionOffset =
 			Vector3f(RandomEngine::randomInRange(-1.0f, 1.0f), 0, RandomEngine::randomInRange(-1.0f, 1.0f))
@@ -71,13 +78,19 @@ void SpawnPlayer(int id, float radius, Vector3f base)
 		Vector3f(RandomEngine::randomInRange(-1.0f, 1.0f), 0, RandomEngine::randomInRange(-1.0f, 1.0f)).GetNormalized();
 	player.transform().LookAt(directionOffset * 10.0f);
 	player.transform().SetPosition(base);
-	player.AddComponent<cPhysXStaticBody>();
+	//player.AddComponent<cPhysXStaticBody>();
 
 	GameObject playerModel = GameObject::Create("PlayerModel");
 	playerModel.AddComponent<MeshRenderer>("Models/PillarClimb/Player.fbx");
 	playerModel.transform().SetParent(player.transform());
 	playerModel.transform().SetPosition(0, 0, -radius * 1.25f);
 	playerModel.transform().SetScale(.1f);
+
+	GameObject test = GameObject::Create("PlayerBackCOllider"); 
+	test.transform().SetParent(player.transform());
+	test.transform().SetPosition(0,0,-radius * 2.25f);
+	test.AddComponent<Collider>();
+	test.AddComponent<cPhysXStaticBody>();
 
 
 	GameObject camera = GameObject::Create("Player Camera");

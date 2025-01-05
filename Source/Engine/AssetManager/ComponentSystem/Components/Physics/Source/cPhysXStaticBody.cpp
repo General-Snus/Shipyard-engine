@@ -47,19 +47,27 @@ void cPhysXStaticBody::UpdateFromCollider() {
 		} else {
 			updateShape(collider,objectTransform);
 		}
-
 	} else {
 		assert(false && "failed to add collider for some reason, sim will not be as it should plz fix");
 	}
 }
 
-void cPhysXStaticBody::makeShape(const Collider* collider,Transform& transform) {
+void cPhysXStaticBody::makeShape(const Collider* collider,const Transform& transform) {
 	switch(collider->GetColliderType()) {
+	case eColliderType::BOX:
+	{
+		const auto aabb = collider->GetColliderAssetOfType<ColliderAssetBox>();
+		//aabb->UpdateWithTransform(transform.unmodified_WorldMatrix());
+		const auto& aabbData = aabb->box();
+		auto geometry = PxBoxGeometry(aabbData.GetXSize() / 2,aabbData.GetYSize() / 2,aabbData.GetZSize() / 2);
+		shape = Shipyard_PhysXInstance.CreateShape(data,&geometry);
+		break;
+	}
 	case eColliderType::AABB:
 	{
 		const auto aabb = collider->GetColliderAssetOfType<ColliderAssetAABB>();
-		aabb->UpdateWithTransform(transform.WorldMatrix());
-		const auto& aabbData = aabb->GetAABB();
+		//aabb->UpdateWithTransform(transform.unmodified_WorldMatrix());
+		const auto& aabbData = aabb->ScaledAABB();
 		auto geometry = PxBoxGeometry(aabbData.GetXSize() / 2,aabbData.GetYSize() / 2,aabbData.GetZSize() / 2);
 		shape = Shipyard_PhysXInstance.CreateShape(data,&geometry);
 		break;
@@ -153,15 +161,37 @@ void cPhysXStaticBody::makeShape(const Collider* collider,Transform& transform) 
 	updateShape(collider,transform);
 }
 
-void cPhysXStaticBody::updateShape(const Collider* collider,Transform& transform) {
+void cPhysXStaticBody::updateShape(const Collider* collider,const Transform& transform) {
 	switch(collider->GetColliderType()) {
 	case eColliderType::AABB:
 	{
 		const auto aabb = collider->GetColliderAssetOfType<ColliderAssetAABB>();
-		aabb->UpdateWithTransform(transform.WorldMatrix());
-		const auto& aabbData = aabb->GetAABB();
-		auto geometry = PxBoxGeometry(aabbData.GetXSize() / 2,aabbData.GetYSize() / 2,aabbData.GetZSize() / 2);
+		aabb->UpdateWithTransform(transform.unmodified_WorldMatrix());
+		const auto& aabbData = aabb->ScaledAABB();
+
+		const auto xScale = 1.0f;//transform.unmodified_WorldMatrix().magnitudeOfRow(0);
+		const auto yScale = 1.0f;//transform.unmodified_WorldMatrix().magnitudeOfRow(1);
+		const auto zScale = 1.0f;//transform.unmodified_WorldMatrix().magnitudeOfRow(2); 
+
+		auto geometry = PxBoxGeometry(xScale * aabbData.GetXSize() / 2,yScale * aabbData.GetYSize() / 2,zScale * aabbData.GetZSize() / 2);
+		//const auto pxMatrix = PxMat44T<float>(*&transform.unmodified_WorldMatrix());
+		//shape->setLocalPose(PxTransform(pxMatrix));
 		shape->setGeometry(geometry);
+
+		break;
+	}
+	case eColliderType::BOX:
+	{
+		const auto colliderAsset = collider->GetColliderAssetOfType<ColliderAssetBox>();
+		colliderAsset->UpdateWithTransform(transform.unmodified_WorldMatrix());
+		const auto& aabbData = colliderAsset->box();
+
+		const auto scale = transform.unmodified_WorldMatrix().scale();
+		const auto resizedBox = aabbData.GetExtent() * scale;
+		const auto geometry = PxBoxGeometry(resizedBox);
+		shape->setLocalPose(PxTransform(aabbData.GetCenter()));
+		shape->setGeometry(geometry);
+
 		break;
 	}
 	// case eColliderType::SPHERE:
@@ -239,13 +269,15 @@ void cPhysXStaticBody::updateShape(const Collider* collider,Transform& transform
 	}
 
 	auto pxTransform = [](const Transform& aTransform) {
-		const Vector3f pos = aTransform.GetPosition();
+		const Vector3f pos = aTransform.GetPosition(WORLD);
 		const Quaternionf quat = aTransform.GetQuatF();
 		return PxTransform(PxVec3(pos.x,pos.y,pos.z),
 			PxQuat(quat.x,quat.y,quat.z,quat.w));
 		};
-
-	data->setGlobalPose(pxTransform(transform));
+	
+	const auto quat = Quaternion(transform.unmodified_WorldMatrix().rotationMatrix()); // shits fucked here around
+	//const PxMat44T<float> pxMatrix = PxMat44T<float>(&mat3x3.Transpose(),transform.unmodified_WorldMatrix().position());
+	data->setGlobalPose(PxTransform(transform.unmodified_WorldMatrix().position(),quat));
 }
 
 void cPhysXStaticBody::Update() {

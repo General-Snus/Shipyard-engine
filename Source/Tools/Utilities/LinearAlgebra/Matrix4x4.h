@@ -1,7 +1,9 @@
 #pragma once
-#define DIM4_X4 4
 #include <cmath>
-#include "Vectors.hpp" 
+#include <array>
+#include "Vectors.hpp"  
+
+#define DIM4_X4 4
 namespace DirectX {
 	struct XMMATRIX;
 }
@@ -25,11 +27,11 @@ public:
 	const T& operator()(int aRow,int aColumn) const;
 
 	T* operator&() {
-		return arr;
+		return arr.data();
 	}
 
 	const T* operator&() const {
-		return arr;
+		return arr.data();
 	}
 
 	// Static functions for creating rotation matrices.
@@ -39,34 +41,40 @@ public:
 	static Matrix4x4<T> CreateRotationMatrix(const Vector3<T>& aAnglesInRadians);
 	static Matrix4x4<T> CreateScaleMatrix(const Vector3<T>& aScale);
 	static Matrix4x4<T> CreateTranslationMatrix(Vector3<T> aPosition);
-
-	// Static function for creating a transpose of a matrix.
 	static Matrix4x4<T> Transpose(const Matrix4x4<T>& aMatrixToTranspose);
 	static Matrix4x4<T> GetFastInverse(const Matrix4x4<T>& aTransform);
 	static Matrix4x4<T> GetFastInverse(const Matrix4x4<T>& aTransform,const Vector3<T>& scaling);
 	static T GetDeterminant(const Matrix4x4<T>& aTransform);
 	static Matrix4x4<T> GetAdjugate(const Matrix4x4<T>& aTransform);
 	static Matrix4x4<T> Invert(const Matrix4x4<T>& aTransform);
-	static Vector3<T>   ReadPosition(const Matrix4x4<T>& aMatrix);
+	static T magnitudeOfRow(const Matrix4x4<T>& aMatrix,const int row);
+	static Matrix4x4<T> rotationMatrix(const Matrix4x4<T>& aMatrix);
+
+	static Vector3<T> scale(const Matrix4x4<T>& aMatrix);
+	static Vector3<T> position(const Matrix4x4<T>& aMatrix);
 
 	static Matrix4x4<T> LookAt(const Vector3<T>& aFrom,const Vector3<T>& aTarget,const Vector3<T>& anUp);
 	static Matrix4x4<T> CreateOrthographicProjection(float aLeftPlane,float aRightPlane,float aBottomPlane,
 		float aTopPlane,float  aNearPlane,float  aFarPlane);
-	void SetFromRaw(const T arr[16]);
 
+
+	void SetFromRaw(const T arr[16]);
 	void         Transpose();
 	void         FastInverse();
-
 	T GetDeterminant() const;
 	Matrix4x4<T> GetAdjugate() const;
 	Matrix4x4<T> GetTranspose() const;
 	Matrix4x4<T> GetFastInverse() const;
+	Vector3<T> scale() const;
+	Vector3<T> position() const;
+	Matrix4x4<T> rotationMatrix() const ;
+	T magnitudeOfRow(const int row) const;
 
 	// STRANGER DANGER
 	T* GetMatrixPtr();
 
 private:
-	T arr[16];
+	std::array<T,16> arr;
 };
 
 template <class T>
@@ -125,8 +133,8 @@ Matrix4x4<T>::Matrix4x4() {
 }
 
 template <class T>
-Matrix4x4<T>::Matrix4x4(const Matrix4x4<T>& aMatrix) {
-	memcpy(arr,aMatrix.arr,sizeof(arr));
+Matrix4x4<T>::Matrix4x4(const Matrix4x4<T>& aMatrix) : arr(aMatrix.arr) {
+
 }
 #pragma region Operators
 template <class T>
@@ -275,6 +283,8 @@ bool operator!=(const Matrix4x4<T>& aMat1,const Matrix4x4<T>& aMat2) {
 	return !(aMat1 == aMat2);
 }
 #pragma endregion
+
+
 template <class T>
 Matrix4x4<T> Matrix4x4<T>::CreateRotationAroundX(const T aAngleInRadians) {
 	Matrix4x4<T> output;
@@ -437,14 +447,44 @@ inline Matrix4x4<T> Matrix4x4<T>::Invert(const Matrix4x4<T>& m) {
 	return (1 / det) * GetAdjugate(m);
 }
 
-template <class T>
-Vector3<T> Matrix4x4<T>::ReadPosition(const Matrix4x4<T>& aMatrix) {
-	return Vector3<T>(aMatrix.arr[3][0],aMatrix.arr[3][1],aMatrix.arr[3][2]);
+
+template<class T>
+inline T Matrix4x4<T>::magnitudeOfRow(const Matrix4x4<T>& aMatrix,const int row) {
+	return Vector4<T>(aMatrix(row + 1,1),aMatrix(row + 1,2),aMatrix(row + 1,3),aMatrix(row + 1,4)).Length();
+}
+
+template<class T>
+inline Matrix4x4<T> Matrix4x4<T>::rotationMatrix(const Matrix4x4<T>& aMatrix) {
+	const Vector3<T> scaling = aMatrix.scale();
+	Matrix4x4<T> rotationMatrix = aMatrix;
+
+	for(int i = 1; i < 4; i++) {
+		rotationMatrix(i,1) /= scaling.x;
+		rotationMatrix(i,2) /= scaling.y;
+		rotationMatrix(i,3) /= scaling.z;  
+	}
+
+	rotationMatrix(4,1) = T(0);
+	rotationMatrix(4,2) = T(0);
+	rotationMatrix(4,3) = T(0);
+	rotationMatrix(4,4) = T(1);
+
+	return rotationMatrix;
+}
+
+template<class T>
+inline Vector3<T> Matrix4x4<T>::scale(const Matrix4x4<T>& aMatrix) {
+	return Vector3<T>(aMatrix.magnitudeOfRow(0),aMatrix.magnitudeOfRow(1),aMatrix.magnitudeOfRow(2));
+}
+
+template<class T>
+inline Vector3<T> Matrix4x4<T>::position(const Matrix4x4<T>& aMatrix) {
+	return Vector3<T>(aMatrix(4,1),aMatrix(4,2),aMatrix(4,3));
 }
 
 template <class T>
 T* Matrix4x4<T>::GetMatrixPtr() {
-	return arr;
+	return arr.data();
 }
 
 template <class T>
@@ -475,6 +515,26 @@ inline Matrix4x4<T> Matrix4x4<T>::GetAdjugate() const {
 template <class T>
 Matrix4x4<T> Matrix4x4<T>::GetFastInverse() const {
 	return Matrix4x4<T>::GetFastInverse(*this);
+}
+
+template<class T>
+inline Vector3<T> Matrix4x4<T>::scale() const {
+	return scale(*this);
+}
+
+template<class T>
+inline Vector3<T> Matrix4x4<T>::position() const {
+	return position(*this);
+}
+
+template<class T>
+inline Matrix4x4<T> Matrix4x4<T>::rotationMatrix() const {
+	return rotationMatrix(*this);
+}
+
+template<class T>
+inline T Matrix4x4<T>::magnitudeOfRow(const int row) const {
+	return magnitudeOfRow(*this,row);
 }
 
 template <class T>

@@ -8,7 +8,7 @@
 enum class eColliderType
 {
     AABB,
-    RECTANGLE,
+    BOX,
     SPHERE,
     CIRCLE,
     PLANE,
@@ -48,8 +48,10 @@ class ColliderAsset : public AssetBase
         ImGui::DragFloat("Bounding Box Radius", &fl);
         return false;
     }
+    virtual void UpdateWithTransform(const Matrix& matrix) { matrix; };
 
   protected:
+      bool shouldRemoveLines = false;
     eColliderType type;
     Sphere<float> boundingBox;
     std::vector<DebugDrawer::PrimitiveHandle> myHandles;
@@ -64,19 +66,23 @@ class ColliderAssetAABB : public ColliderAsset
     explicit ColliderAssetAABB();
     explicit ColliderAssetAABB(const AABB3D<float> &rf);
     void RenderDebugLines(Transform &data) override;
-    void UpdateWithTransform(const Matrix &matrix);
-    inline const AABB3D<float> &GetAABB() const
+    void UpdateWithTransform(const Matrix &matrix) override;
+    inline const AABB3D<float> &ScaledAABB() const
     {
         return myAABB;
+    }
+
+    inline AABB3D<float>& BaseAABB() {
+        return myOriginalAABB;
     }
 
     bool InspectorView() override
     {
         ColliderAsset::InspectorView();
-        auto& min = myOriginalAABB.GetMin();
-        auto& max = myOriginalAABB.GetMax();
-        ImGui::DragFloat3("AABB Min", &min.x);
-        ImGui::DragFloat3("AABB Max", &max.x);
+        auto& center = myOriginalAABB.GetCenter();
+        auto& extent = myOriginalAABB.GetExtent();
+        ImGui::DragFloat3("center",&center.x);
+        ImGui::DragFloat3("box extent",&extent.x);
         return false;
     }
 
@@ -85,6 +91,28 @@ class ColliderAssetAABB : public ColliderAsset
     AABB3D<float> myOriginalAABB;
 };
 REFL_AUTO(type(ColliderAssetAABB))
+
+class ColliderAssetBox : public ColliderAsset {
+public:
+    ReflectableTypeRegistration();
+    explicit ColliderAssetBox();
+    explicit ColliderAssetBox(const AABB3D<float>& rf);
+    void RenderDebugLines(Transform& data) override; 
+
+    AABB3D<float>& box() { return myBox; };
+
+    bool InspectorView() override {
+        ColliderAsset::InspectorView();
+        auto& center = myBox.GetCenter();
+        auto& extent = myBox.GetExtent();
+        ImGui::DragFloat3("center",&center.x);
+        ImGui::DragFloat3("box extent",&extent.x);
+        return false;
+    }
+private:
+    AABB3D<float> myBox;
+};
+REFL_AUTO(type(ColliderAssetBox))
 
 class ColliderAssetSphere : public ColliderAsset
 {

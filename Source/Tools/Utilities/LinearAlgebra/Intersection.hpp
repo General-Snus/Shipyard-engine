@@ -254,9 +254,9 @@ template <class T = float>
 bool IntersectionAABB(const AABB3D<T> aAABB, const AABB3D<T> aAABB2)
 {
 	const Vector3<T> c1 = aAABB.GetCenter();
-	const Vector3<T> r1 = aAABB.GetWidth();
+	const Vector3<T> r1 = aAABB.GetExtent();
 	const Vector3<T> c2 = aAABB2.GetCenter();
-	const Vector3<T> r2 = aAABB2.GetWidth();
+	const Vector3<T> r2 = aAABB2.GetExtent();
 
 	const bool x = std::abs(c1[0] - c2[0]) <= (r1[0] + r2[0]);
 	const bool y = std::abs(c1[1] - c2[1]) <= (r1[1] + r2[1]);

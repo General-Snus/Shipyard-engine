@@ -8,6 +8,7 @@ namespace physx {
 	class PxDefaultAllocator;
 	class PxFoundation;
 	class PxPvd;
+	class PxOmniPvd;
 	class PxScene;
 	class PxActor;
 	class PxRigidDynamic;
@@ -24,7 +25,11 @@ namespace physx {
 class Mesh;
 
 #include <Tools/Utilities/System/ServiceLocator.h>
+#include <Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h>
 #define Shipyard_PhysXInstance ServiceLocator::Instance().GetService<Shipyard_PhysX>()
+
+
+#define usingLegacyDebugger true
 class Shipyard_PhysX : public Singleton {
 private:
 	physx::PxDefaultAllocator* gAllocator;
@@ -35,15 +40,17 @@ private:
 	physx::PxScene* gScene{};
 	physx::PxMaterial* gMaterial{};
 	physx::PxPvd* gPvd{};
-
+	physx::PxOmniPvd* gOmniPvd{};
+	bool showLines = false;
+	std::vector<DebugDrawer::PrimitiveHandle> handles;
 public:
 	int InitializePhysx();
 	void StartRead() const;
 	void EndRead(float deltaTime);
 	void Render();
 	void ShutdownPhysx();
-	void resetScene();
-
+	void resetScene(); 
+	void ShowDrawLines(bool arg);
 	// template<typename T>
 	// static T* CookMesh(std::shared_ptr<Mesh> myToBeCookedMesh);
 
@@ -52,7 +59,6 @@ public:
 	physx::PxMaterial* GetDefaultMaterial();
 	physx::PxShape* CreateShape(physx::PxRigidActor* actor,const physx::PxGeometry* geometry,const physx::PxMaterial* material = nullptr,
 		uint8_t shapeFlags = 1 << 3 | 1 << 1 | 1 << 0);
-
 
 };
 

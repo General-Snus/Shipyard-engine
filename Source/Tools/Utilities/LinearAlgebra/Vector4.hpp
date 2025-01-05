@@ -72,7 +72,7 @@ public:
 	// Returns the dot product of this and aVector
 	T Dot(const Vector4<T>& aVector) const;
 
-	Vector3<T> xyz();
+	Vector3<T> xyz() const;
 };
 
 template <class T>
@@ -220,7 +220,7 @@ T Vector4<T>::Dot(const Vector4<T>& aVector) const
 }
 
 template<class T>
-inline Vector3<T> Vector4<T>::xyz() {
+inline Vector3<T> Vector4<T>::xyz() const {
 	return Vector3<T>(x,y,z);
 }
 

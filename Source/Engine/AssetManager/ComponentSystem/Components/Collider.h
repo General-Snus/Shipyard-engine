@@ -36,7 +36,7 @@ public:
 	template <typename T> // add inheritance check here when not lazy stupid
 	std::shared_ptr<T> GetColliderAssetOfType() const;
 
-	bool drawDebugLines = false;
+	bool drawDebugLines = true;
 	bool isTrigger = false;
 
 private:
