@@ -40,7 +40,7 @@ void cPhysXStaticBody::UpdateFromCollider() {
 		return;
 	}
 
-	auto& objectTransform = transform();
+	const auto& objectTransform = transform();
 	if(const auto* collider = TryGetAddComponent<Collider>()) {
 		if(!shape) {
 			makeShape(collider,objectTransform);

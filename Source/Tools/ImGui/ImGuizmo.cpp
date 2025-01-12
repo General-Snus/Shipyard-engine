@@ -1037,8 +1037,8 @@ namespace IMGUIZMO_NAMESPACE
 	static void ComputeContext(const float* view,const float* projection,float* matrix,MODE mode)
 	{
 		gContext.mMode = mode;
-		gContext.mViewMat = *(matrix_t*)view;
-		gContext.mProjectionMat = *(matrix_t*)projection;
+		gContext.mViewMat = *(matrix_t*)view;  
+		gContext.mProjectionMat = *(matrix_t*)projection; 
 		gContext.mbMouseOver = IsHoveringWindow();
 
 		gContext.mModelLocal = *(matrix_t*)matrix;

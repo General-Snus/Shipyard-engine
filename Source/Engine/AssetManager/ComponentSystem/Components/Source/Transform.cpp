@@ -78,7 +78,9 @@ void Transform::MakeClean() {
 	SetDirty(false);
 
 	if(HasParent()) {
-		worldMatrix = localMatrix * m_Parent.transform().WorldMatrix();
+		//Constness matter
+		auto& parentT = m_Parent.transform();
+		worldMatrix = localMatrix* parentT.WorldMatrix();
 	} else {
 		worldMatrix = localMatrix;
 	}
@@ -110,7 +112,7 @@ const Matrix& Transform::WorldMatrix() {
 
 	auto& parentT = m_Parent.transform();
 	if(parentT.GetIsDirty() || GetIsDirty()) {
-		worldMatrix = LocalMatrix() * parentT.WorldMatrix();
+		MakeClean();
 	}
 
 	return worldMatrix;
@@ -209,10 +211,9 @@ Vector3f Transform::GetPosition(eSpace space) const {
 
 	if(space == WORLD) {
 		if(m_Parent.IsValid()) {
-			auto position = Vector4f(myPosition.x,myPosition.y,myPosition.z,1);
-			const auto& matrix = m_Parent.transform().WorldMatrix();
-			position = position * matrix;
-			return Vector3f(position.x,position.y,position.z);
+			const auto& localPosition = Vector4f(myPosition.x,myPosition.y,myPosition.z,1); 
+			const auto& worldPosition = localPosition * m_Parent.transform().WorldMatrix();
+			return worldPosition.xyz();
 		}
 	}
 

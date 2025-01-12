@@ -2,6 +2,7 @@
 #include <cmath>
 #include <array>
 #include "Vectors.hpp"  
+#include <ranges>
 
 #define DIM4_X4 4
 namespace DirectX {
@@ -20,6 +21,8 @@ public:
 	// Copy Constructor.
 	Matrix4x4<T>(const Matrix4x4<T>& aMatrix);
 	Matrix4x4<T>(Vector4<Vector4<T>> aVector);
+	Matrix4x4(const T* aMatrix);
+	Matrix4x4(const std::initializer_list<T>& list);
 	explicit Matrix4x4(const DirectX::XMMATRIX* aMatrix);
 	explicit Matrix4x4(const aiMatrix4x4* aMatrix);
 
@@ -67,7 +70,7 @@ public:
 	Matrix4x4<T> GetFastInverse() const;
 	Vector3<T> scale() const;
 	Vector3<T> position() const;
-	Matrix4x4<T> rotationMatrix() const ;
+	Matrix4x4<T> rotationMatrix() const;
 	T magnitudeOfRow(const int row) const;
 
 	// STRANGER DANGER
@@ -90,6 +93,23 @@ Matrix4x4<T>::Matrix4x4(const Vector4<Vector4<T>> aVector) {
 		}
 	}
 }
+
+template <class T>
+Matrix4x4<T>::Matrix4x4(const T* aMatrix) {
+	for(short i = 1; i <= DIM4_X4; i++) {
+		for(short j = 1; j <= DIM4_X4; j++) {
+			this->operator()(i,j) = aMatrix[(i - 1) * DIM4_X4 + (j - 1)];
+		}
+	}
+}
+
+template <class T>
+Matrix4x4<T>::Matrix4x4(const std::initializer_list<T>& list) : Matrix4x4<T>() {
+	for(const auto& [numerator,listItem] : list | std::ranges::views::enumerate) {
+		this->operator()((numerator / DIM4_X4) + 1,(numerator % DIM4_X4) + 1) = listItem;
+	}
+}
+
 
 template <class T>
 Matrix4x4<T> Matrix4x4<T>::CreateRotationMatrix(const Vector3<T>& aAnglesInRadians) {
@@ -458,10 +478,10 @@ inline Matrix4x4<T> Matrix4x4<T>::rotationMatrix(const Matrix4x4<T>& aMatrix) {
 	const Vector3<T> scaling = aMatrix.scale();
 	Matrix4x4<T> rotationMatrix = aMatrix;
 
-	for(int i = 1; i < 4; i++) {
+	for(int i = 1; i < 3; i++) {
 		rotationMatrix(i,1) /= scaling.x;
 		rotationMatrix(i,2) /= scaling.y;
-		rotationMatrix(i,3) /= scaling.z;  
+		rotationMatrix(i,3) /= scaling.z;
 	}
 
 	rotationMatrix(4,1) = T(0);

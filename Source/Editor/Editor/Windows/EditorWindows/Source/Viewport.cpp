@@ -40,9 +40,9 @@ Viewport::Viewport(bool IsMainViewPort,Vector2f ViewportResolution,std::shared_p
 	}
 }
 
-Viewport::~Viewport() {}
+Viewport::~Viewport() = default;
 
-std::shared_ptr<Scene> Viewport::GetAttachedScene() {
+std::shared_ptr<Scene> Viewport::GetAttachedScene() const {
 	return sceneToRender ? sceneToRender : EDITOR_INSTANCE.GetActiveScene();
 }
 
@@ -58,7 +58,7 @@ bool Viewport::IsHovered() const {
 	return IsMouseHoverering;
 }
 
-bool Viewport::IsRenderReady() {
+bool Viewport::IsRenderReady() const {
 	// if you are main and there is a active camera
 	if(IsMainViewPort) {
 		const auto camera = GetAttachedScene()->GetGOM().GetCamera().TryGetComponent<Camera>();
@@ -95,6 +95,16 @@ Vector2f Viewport::getCursorInWindowPostion() const {
 	return cursorPositionInViewPort;
 }
 
+const Camera& Viewport::GetCamera() const {
+	if(IsMainViewPort) {
+		if(auto const* camera = GetAttachedScene()->GetGOM().GetCamera().TryGetComponent<Camera>()) {
+			return *camera;
+		}
+		return editorCamera;
+	}
+	return editorCamera;
+}
+
 Camera& Viewport::GetCamera() {
 	if(IsMainViewPort) {
 		if(auto* camera = GetAttachedScene()->GetGOM().GetCamera().TryGetComponent<Camera>()) {
@@ -109,20 +119,25 @@ Transform& Viewport::GetCameraTransform() {
 	return GetCamera().LocalTransform();
 }
 
+
+const Transform& Viewport::GetCameraTransform() const {
+	return GetCamera().LocalTransform();
+}
+
 // ImGui did not like reverse projection so i put it back to 0-1 depth only for imgui
-Matrix Viewport::Projection() {
-	const auto ViewportCamera = GetCamera();
-	const auto dxMatrix = XMMatrixPerspectiveFovLH(ViewportCamera.FowInRad(),ViewportCamera.APRatio(),
+Matrix Viewport::Projection() const {
+	const auto& ViewportCamera = GetCamera();
+	const auto dxMatrix = XMMatrixPerspectiveFovLH(ViewportCamera.FowInRad(),ViewportResolution.x/ ViewportResolution.y,
 		ViewportCamera.nearField,ViewportCamera.farfield);
 	return Matrix(&dxMatrix);
 }
 
-Matrix Viewport::ViewInverse() {
-	return GetCamera().LocalTransform().GetMutableTransform().GetFastInverse();
+Matrix Viewport::ViewInverse() const {
+	return Matrix::Invert(GetCamera().LocalTransform().unmodified_WorldMatrix());
 }
 
-Matrix& Viewport::View() {
-	return GetCamera().LocalTransform().GetMutableTransform();
+const Matrix& Viewport::View() const {
+	return GetCamera().LocalTransform().unmodified_WorldMatrix();
 }
 
 void Viewport::RenderImGUi() {
@@ -136,7 +151,7 @@ void Viewport::RenderImGUi() {
 
 	TakeInput();
 
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding,{0.f, 0.f});
+	//ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding,{0.f, 0.f});
 	std::string title = "Scene ";
 	if(IsMainViewport()) {
 		title = "Game";
@@ -147,9 +162,13 @@ void Viewport::RenderImGUi() {
 	if(ImGui::Begin(title.c_str(),&m_KeepWindow,windowFlags)) {
 		isWindowFocused = ImGui::IsWindowFocused();
 		IsVisible = ImGui::IsItemVisible();
+		ViewportResolution = {ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y};
 
-		float windowWidth = ImGui::GetContentRegionAvail().x;
-		float windowHeight = ImGui::GetContentRegionAvail().y;
+
+		auto& ViewportCamera = GetCamera();
+		ViewportCamera.SetResolution(ViewportResolution);
+
+		const auto cursorPosition = ImGui::GetCursorScreenPos();
 		ImGui::Image(m_RenderTarget,ImGui::GetContentRegionAvail());
 		IsMouseHoverering = isWindowFocused;
 
@@ -169,10 +188,9 @@ void Viewport::RenderImGUi() {
 			ImGui::EndDragDropTarget();
 		}
 
-		ViewportResolution = {windowWidth, windowHeight};
 		if(!IsMainViewport()) {
 			ImGuizmo::SetDrawlist();
-			ImGuizmo::SetRect(ImGui::GetWindowPos().x,ImGui::GetWindowPos().y,windowWidth,windowHeight);
+			ImGuizmo::SetRect(cursorPosition.x,cursorPosition.y,ViewportResolution.x,ViewportResolution.y);
 			auto cameraView = ViewInverse();
 			auto cameraProjection = Projection();
 
@@ -182,30 +200,27 @@ void Viewport::RenderImGUi() {
 
 			for(auto& gameObject : selectedObjects) {
 				auto& transform = gameObject.transform();
-				Matrix mat = transform.WorldMatrix();
-
+				Matrix worldMatrix = transform.WorldMatrix();
+				float snapping = 0.0f;
 				const bool transformed = Manipulate(&cameraView,&cameraProjection,m_CurrentGizmoOperation,
-					m_CurrentGizmoMode,&mat);
+					m_CurrentGizmoMode,&worldMatrix,nullptr,&snapping);
 
 				if(transformed) {
 					GetCamera().IsInControl(false);
 					Vector3f loc;
 					Vector3f rot;
 					Vector3f scale;
-
-					if(transform.HasParent()) {
-						mat = mat * transform.GetParent()
-							.WorldMatrix()
-							.GetFastInverse();
+					Matrix localMatrix = worldMatrix;
+					if(transform.HasParent()) { 
+						localMatrix = worldMatrix * Matrix::Invert(transform.GetParent().WorldMatrix());
 						// TODO This doesnt support scaled objects, fix asap im eepy now
 					}
 
-					ImGuizmo::DecomposeMatrixToComponents(mat.GetMatrixPtr(),&loc.x,&rot.x,&scale.x);
+					ImGuizmo::DecomposeMatrixToComponents(localMatrix.GetMatrixPtr(),&loc.x,&rot.x,&scale.x);
 
 					transform.SetPosition(loc);
 					transform.SetRotation(rot);
-					transform.SetScale(scale);
-					transform.Update();
+					transform.SetScale(scale); 
 				} else {
 					if(isWindowFocused) {
 						GetCamera().IsInControl(true);
@@ -220,7 +235,7 @@ void Viewport::RenderImGUi() {
 		IsVisible = false;
 	}
 	ImGui::End();
-	ImGui::PopStyleVar();
+	//ImGui::PopStyleVar();
 }
 
 void Viewport::RenderToolbar() {

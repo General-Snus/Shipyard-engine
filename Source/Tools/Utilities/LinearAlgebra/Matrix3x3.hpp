@@ -2,6 +2,7 @@
 #define dim3x3 3
 #include "Matrix4x4.h"
 #include "Vector3.hpp"
+#include <ranges>
 
 template <class T>
 class Matrix3x3
@@ -9,6 +10,10 @@ class Matrix3x3
 public:
 	// Creates the identity matrix.
 	Matrix3x3<T>();
+	Matrix3x3(const T* aMatrix);
+	Matrix3x3(const std::initializer_list<T>& list);
+	Matrix3x3(const T arr[3][3]);
+
 	// Copy Constructor.
 	Matrix3x3<T>(const Matrix3x3<T>& aMatrix);
 	// Copies the top left 3x3 part of the Matrix4x4.
@@ -56,6 +61,22 @@ Matrix3x3<T>::Matrix3x3()
 }
 
 template <class T>
+Matrix3x3<T>::Matrix3x3(const T* aMatrix) {
+	for(short i = 1; i <= dim3x3; i++) {
+		for(short j = 1; j <= dim3x3; j++) { 
+			arr[i - 1][j - 1] = aMatrix[(i - 1) * dim3x3 + (j - 1)];
+		}
+	}
+}
+
+template <class T>
+Matrix3x3<T>::Matrix3x3(const std::initializer_list<T>& list) : Matrix3x3() {
+	for(const auto& [numerator, listItem ]: list | std::ranges::views::enumerate) {
+		arr[numerator / dim3x3][numerator % dim3x3] = listItem;
+	}
+}
+
+template <class T>
 Matrix3x3<T>::Matrix3x3(const Matrix3x3<T>& aMatrix)
 {
 	for (short i = 1; i <= dim3x3; i++)
@@ -78,6 +99,7 @@ Matrix3x3<T>::Matrix3x3(const Matrix4x4<T>& aMatrix)
 		}
 	}
 }
+
 #pragma region Operators
 template <class T>
 T& Matrix3x3<T>::operator()(const int aRow, const int aColumn)

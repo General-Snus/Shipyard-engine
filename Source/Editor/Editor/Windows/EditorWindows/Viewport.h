@@ -10,52 +10,54 @@
 
 class Transform;
 
-class Viewport : public EditorWindow
-{
-    // New rule! Always give reason for friending in comment
-    // Reason: ImGui Only knows the bounding and status of the viewport when rendering so all configuration here will be
-    // one frame delayed
-    friend class Editor;
+class Viewport : public EditorWindow {
+	// New rule! Always give reason for friending in comment
+	// Reason: ImGui Only knows the bounding and status of the viewport when rendering so all configuration here will be
+	// one frame delayed
+	friend class Editor;
 
-  public:
-    // MainViewport is will render from the MainCamera and if no such camera exist it will be black
-    explicit Viewport(bool IsMainViewPort,
-                      Vector2f ViewportResolution = {(float)WindowInstance.Width(), (float)WindowInstance.Height()},
-                      std::shared_ptr<Scene> sceneToRender = nullptr,
-                      std::shared_ptr<TextureHolder> RenderTexture = nullptr);
+public:
+	// MainViewport is will render from the MainCamera and if no such camera exist it will be black
+	explicit Viewport(bool IsMainViewPort,
+		Vector2f ViewportResolution = {(float)WindowInstance.Width(), (float)WindowInstance.Height()},
+		std::shared_ptr<Scene> sceneToRender = nullptr,
+		std::shared_ptr<TextureHolder> RenderTexture = nullptr);
 
-    ~Viewport() override;
-    bool IsSelected() const;
-    bool IsHovered() const;
-    bool IsRenderReady();
-    bool IsMainViewport() const;
-    void Update();
-    void ResolutionUpdate();
-    Vector2f getCursorInWindowPostion() const;
+	~Viewport() override;
+	bool IsSelected() const;
+	bool IsHovered() const;
+	bool IsRenderReady() const;
+	bool IsMainViewport() const;
+	void Update();
+	void ResolutionUpdate();
+	Vector2f getCursorInWindowPostion() const;
 
-    std::shared_ptr<Scene> GetAttachedScene();
-    Texture *GetTarget() const;
-    Camera &GetCamera();
-    Transform &GetCameraTransform();
+	std::shared_ptr<Scene> GetAttachedScene() const;
+	Texture* GetTarget() const;
+	Camera& GetCamera()  ;
+	const Camera& GetCamera() const;
+	Transform& GetCameraTransform();
+	const Transform& GetCameraTransform() const;
+	
 
-    Matrix Projection();
-    Matrix ViewInverse();
-    Matrix &View();
-    void RenderImGUi() override;
+	Matrix Projection() const;
+	Matrix ViewInverse() const;
+	const Matrix& View() const;
+	void RenderImGUi() override;
 
-    std::shared_ptr<TextureHolder> m_RenderTarget;
-    Vector2f ViewportResolution;
-    int ViewportIndex = 0;
+	std::shared_ptr<TextureHolder> m_RenderTarget;
+	Vector2f ViewportResolution;
+	int ViewportIndex = 0;
 
-  private:
-    std::shared_ptr<Scene> sceneToRender;
-    void TakeInput();
-    void RenderToolbar();
+private:
+	std::shared_ptr<Scene> sceneToRender;
+	void TakeInput();
+	void RenderToolbar();
 
-    Vector2f cursorPositionInViewPort;
-    bool IsMainViewPort = false;
-    bool IsVisible = true;
-    bool isWindowFocused = false;
-    bool IsMouseHoverering = false;
-    Camera editorCamera;
+	Vector2f cursorPositionInViewPort;
+	bool IsMainViewPort = false;
+	bool IsVisible = true;
+	bool isWindowFocused = false;
+	bool IsMouseHoverering = false;
+	Camera editorCamera;
 };

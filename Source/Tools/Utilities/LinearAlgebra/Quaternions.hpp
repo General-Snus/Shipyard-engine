@@ -1,5 +1,7 @@
 #pragma once
 #include <iostream>
+#include <cmath>
+#include <utility>
 #include "Matrix3x3.hpp"
 #include "Matrix4x4.h"
 #include "Vectors.hpp"
@@ -31,6 +33,8 @@ public:
 	T             GetNormalizedSquared();
 	void          Normalize();
 	Quaternion<T> GetNormalized();
+
+	bool IsClose(const Quaternion<T>& other,T epsilon = 1e-5) const;
 
 	// Usability functions
 	void RotateAroundX(T aAngle);
@@ -87,13 +91,26 @@ Quaternion<T>::Quaternion(const Matrix4x4<T>& rotMatrix) : Quaternion<T>(Matrix3
 
 template <typename T>
 Quaternion<T>::Quaternion(const Matrix3x3<T>& aRotationMatrix) {
-	Vector3f right = Vector3f(aRotationMatrix(1,1),aRotationMatrix(1,2),aRotationMatrix(1,3)).GetNormalized();
-	Vector3f up = Vector3f(aRotationMatrix(2,1),aRotationMatrix(2,2),aRotationMatrix(2,3)).GetNormalized();
-	Vector3f forward = Vector3f(aRotationMatrix(3,1),aRotationMatrix(3,2),aRotationMatrix(3,3)).GetNormalized();
-	right = up.Cross(forward);
-	up = forward.Cross(right);
 
-	*this = LookAt(forward,up);
+	const auto m00 = aRotationMatrix(1,1);
+	const auto m11 = aRotationMatrix(2,2);
+	const auto m22 = aRotationMatrix(3,3);
+	const auto m21 = aRotationMatrix(3,2);
+	const auto m12 = aRotationMatrix(2,3);
+	const auto m02 = aRotationMatrix(1,3);
+	const auto m20 = aRotationMatrix(3,1);
+	const auto m10 = aRotationMatrix(2,1);
+	const auto m01 = aRotationMatrix(1,2);
+
+	w = std::sqrt(std::max(T(0),1 + m00 + m11 + m22)) / 2;
+	x = std::sqrt(std::max(T(0),1 + m00 - m11 - m22)) / 2;
+	y = std::sqrt(std::max(T(0),1 - m00 + m11 - m22)) / 2;
+	z = std::sqrt(std::max(T(0),1 - m00 - m11 + m22)) / 2;
+	x = std::copysign(x,m21 - m12);
+	y = std::copysign(y,m02 - m20);
+	z = std::copysign(z,m10 - m01);
+
+	Normalize();
 }
 
 template <typename T>
@@ -202,17 +219,17 @@ Matrix3x3<T> Quaternion<T>::GetRotationAs3x3() const {
 	const T y2 = y * y;
 	const T z2 = z * z;
 
-	mat(1,1) = 1 - 2 * (y2 + z2);
-	mat(1,2) = 2 * (xy + wz);
-	mat(1,3) = 2 * (xz - wy);
+	mat(1,1) = 1 - (2 * y2 - 2 * z2);
+	mat(1,2) = (2 * xy - 2 * wz);
+	mat(1,3) = (2 * xz + 2 * wy);
 
-	mat(2,1) = 2 * (xy - wz);
-	mat(2,2) = 1 - 2 * (x2 + z2);
-	mat(2,3) = 2 * (yz + wx);
+	mat(2,1) = (2 * xy + 2 * wz);
+	mat(2,2) = 1 - (2 * x2 - 2 * z2);
+	mat(2,3) = (2 * yz - 2 * wx);
 
-	mat(3,1) = 2 * (xz + wy);
-	mat(3,2) = 2 * (yz - wx);
-	mat(3,3) = 1 - 2 * (5 + 2);
+	mat(3,1) = (2 * xz - 2 * wy);
+	mat(3,2) = (2 * yz + 2 * wx);
+	mat(3,3) = 1 - (2 * x2 + 2 * y2);
 
 	return mat;
 }
@@ -220,7 +237,7 @@ Matrix3x3<T> Quaternion<T>::GetRotationAs3x3() const {
 template <typename T>
 Matrix4x4<T> Quaternion<T>::GetRotationAs4x4() const {
 	Matrix4x4<T> mat;
-	Matrix3x3<T> mat3x3;
+	Matrix3x3<T> mat3x3 = GetRotationAs3x3();
 
 	mat(1,1) = mat3x3(1,1);
 	mat(1,2) = mat3x3(1,2);
@@ -325,22 +342,26 @@ Quaternion<T> Quaternion<T>::RotationFromTo(const Vector3f& aFrom,const Vector3f
 }
 
 template <typename T>
-Quaternion<T> Quaternion<T>::LookAt(const Vector3<T>& source,const Vector3<T>& point,const Vector3f& front,
+Quaternion<T> Quaternion<T>::LookAt(const Vector3<T>& source,const Vector3<T>& destinationPoint,const Vector3f& front,
 	const Vector3f& up) {
-	Vector3f toVector = (source - point).GetNormalized();
+	Vector3f toVector = (destinationPoint - source).GetNormalized();
+	float dot = front.Dot(toVector);
 
-	// compute rotation axis
-	Vector3f rotAxis = front.Cross(toVector).GetNormalized();
-	if(rotAxis.LengthSqr() == 0) {
-		rotAxis = up;
+
+	if(std::abs(dot + 1.0f) < 0.000001f) {
+		return CreateFromAxisAngle(up,PI);
+	}
+	if(std::abs(dot - 1.0f) < 0.000001f) {
+		return Quaternion();
 	}
 
-	// find the angle around rotation axis
-	const float dot = Vector3<T>::forward().Dot(toVector);
-	float ang = std::acosf(dot);
 
+	float rotAngle = std::acosf(dot);
+	//Vector3 rotAxis = front.Cross(toVector);
+	Vector3 rotAxis = toVector.Cross(front);
+	rotAxis.Normalize();
 	// convert axis angle to quaternion
-	return CreateFromAxisAngle(rotAxis,ang);
+	return CreateFromAxisAngle(rotAxis,rotAngle);
 }
 
 template <typename T>
@@ -349,6 +370,13 @@ Quaternion<T> Quaternion<T>::LookAt(const Vector3<T>& aDirection,const Vector3f&
 	Vector3f up = aUp.GetNormalized();
 	const Vector3f right = up.Cross(forward);
 	up = forward.Cross(right);
+
+	if(forward.IsNearlyEqual({0, 0, 1})) {
+		return Quaternion<float>(); // Identity quaternion
+	}
+	if(up.IsNearlyEqual(forward)) {
+		return Quaternion<float>(); // Identity quaternion
+	}
 
 	//from world forward to Object forward
 	const Quaternion f2d = RotationFromTo({0,0,1},forward);
@@ -365,7 +393,7 @@ Quaternion<T> Quaternion<T>::LookAt(const Vector3<T>& aDirection,const Vector3f&
 template <typename T>
 Quaternion<T> Quaternion<T>::CreateFromAxisAngle(Vector3<T> axis,T angle) {
 	const float halfAngle = angle * .5f;
-	float s = std::sin(halfAngle);
+	const float s = std::sin(halfAngle);
 	axis.Normalize();
 	return Quaternion<T>(axis.x * s,axis.y * s,axis.z * s,std::cos(halfAngle));
 }
@@ -410,6 +438,19 @@ Quaternion<T> Quaternion<T>::GetNormalized() {
 	return Quaternion<T>(*this * (T(1) / sqrtf(n)));
 }
 
+template <typename T>
+bool Quaternion<T>::IsClose(const Quaternion<T>& other,T epsilon) const {
+	return
+		std::abs(x - other.x) < epsilon &&
+		std::abs(y - other.y) < epsilon &&
+		std::abs(z - other.z) < epsilon &&
+		std::abs(w - other.w) < epsilon ||
+		std::abs(x + other.x) < epsilon &&
+		std::abs(y + other.y) < epsilon &&
+		std::abs(z + other.z) < epsilon &&
+		std::abs(w + other.w) < epsilon;
+}
+
 #pragma region Operators
 template <typename T>
 Quaternion<T> operator*(const Quaternion<T>& quat,const T value) {
@@ -422,6 +463,17 @@ Quaternion<T> operator*(const Quaternion<T>& x,T1 y) {
 }
 
 template <typename T>
+Quaternion<T> operator*(const Quaternion<T>& lhf,const Quaternion<T>& rhf) {
+	return
+	{
+		lhf.w * rhf.x + lhf.x * rhf.w + lhf.y * rhf.z - lhf.z * rhf.y,
+		lhf.w * rhf.y + lhf.y * rhf.w + lhf.z * rhf.x - lhf.x * rhf.z,
+		lhf.w * rhf.z + lhf.z * rhf.w + lhf.x * rhf.y - lhf.y * rhf.x,
+		lhf.w * rhf.w - lhf.x * rhf.x - lhf.y * rhf.y - lhf.z * rhf.z
+	};
+}
+
+template <typename T>
 Vector3<T> operator*(const Quaternion<T>& aQuat,const Vector3<T>& v) {
 
 	const Vector3<T> r = (aQuat.x,aQuat.y,aQuat.z);
@@ -429,22 +481,10 @@ Vector3<T> operator*(const Quaternion<T>& aQuat,const Vector3<T>& v) {
 
 
 	return
-		2.0f * r.Dot(v) * r 
+		2.0f * r.Dot(v) * r
 		+ (s * s - r.Dot(r)) * v
 		+ 2.0f * s * r.Cross(v);
 }
-
-template <typename T>
-Quaternion<T> Quaternion<T>::operator*=(const Quaternion<T>& quat) {
-	x = x * quat.x - y * quat.y - z * quat.z - w * quat.w;
-	y = x * quat.y + y * quat.x + z * quat.w - w * quat.z;
-	z = x * quat.z - y * quat.w + z * quat.x + w * quat.y;
-	w = x * quat.x + y * quat.z - z * quat.y + w * quat.x;
-
-	return *this;
-}
-
-
 
 #pragma endregion
 

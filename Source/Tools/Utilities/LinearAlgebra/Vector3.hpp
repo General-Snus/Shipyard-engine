@@ -18,6 +18,8 @@ public:
 	constexpr Vector3<T>(const T& aValue);
 	Vector3<T>(const VectorX<T, 3>& aVector);
 
+	bool IsNearlyEqual(const Vector3<T>& cmp,float epsilon = 1e-5) const;
+
 	// Copy constructor (compiler generated)
 	constexpr Vector3<T>(const Vector3<T>& aVector) = default;
 	// Assignment operator (compiler generated)
@@ -63,9 +65,9 @@ public:
 	// Returns the cross product of this and aVector
 	constexpr Vector3<T> Cross(const Vector3<T>& aVector) const;
 
-	static constexpr Vector3<float> right();
-	static constexpr Vector3<float> up();
-	static constexpr Vector3<float> forward();
+	static constexpr Vector3<T> right();
+	static constexpr Vector3<T> up();
+	static constexpr Vector3<T> forward();
 
 	// Swizzles start at 1
 	template <int... Indices>
@@ -279,21 +281,21 @@ constexpr Vector3<T> Vector3<T>::Cross(const Vector3<T>& aVector) const
 }
 
 template <class T>
-constexpr Vector3<float> Vector3<T>::right()
+constexpr Vector3<T> Vector3<T>::right()
 {
-	return Vector3<float>(1, 0, 0);
+	return Vector3<T>(1, 0, 0);
 }
 
 template <class T>
-constexpr Vector3<float> Vector3<T>::up()
+constexpr Vector3<T> Vector3<T>::up()
 {
-	return Vector3<float>(0, 1, 0);
+	return Vector3<T>(0, 1, 0);
 }
 
 template <class T>
-constexpr Vector3<float> Vector3<T>::forward()
+constexpr Vector3<T> Vector3<T>::forward()
 {
-	return Vector3<float>(0, 0, 1);
+	return Vector3<T>(0, 0, 1);
 }
 
 template <class T>
@@ -323,6 +325,16 @@ constexpr Vector3<T>::Vector3(const T& aValue)
 template <class T>
 Vector3<T>::Vector3(const VectorX<T, 3>& aVector) : x(aVector[0]), y(aVector[1]), z(aVector[2])
 {
+}
+
+template <class T>
+bool Vector3<T>::IsNearlyEqual(const Vector3<T>& cmp,float epsilon) const	{
+	 
+	 return 
+		 std::abs(x - cmp.x) > epsilon &&
+		 std::abs(y - cmp.y) > epsilon &&
+		 std::abs(z - cmp.z) > epsilon;
+		 
 }
 
 template <class T>

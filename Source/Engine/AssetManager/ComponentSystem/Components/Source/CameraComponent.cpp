@@ -34,7 +34,7 @@ Camera::Camera(const SY::UUID anOwnerId,GameObjectManager* aManager)
 void Camera::Update() {
 	OPTICK_EVENT();
 	localTransform.Update();
-
+	UpdateProjection();
 	if(IsInControll) {
 		EditorCameraControlls();
 #ifdef Flashlight
@@ -213,6 +213,10 @@ const Transform& Camera::LocalTransform() const {
 		return GetComponent<Transform>();
 	}
 	return localTransform;
+}
+void Camera::UpdateProjection() { 
+	const auto dxMatrix = XMMatrixPerspectiveFovLH(FowInRad(),APRatio(),farfield,nearField);
+	m_Projection = Matrix(&dxMatrix);
 }
 Vector4f Camera::WoldSpaceToPostProjectionSpace(Vector3f aEntity) {
 	Transform& myTransform = this->gameObject().GetComponent<Transform>();
