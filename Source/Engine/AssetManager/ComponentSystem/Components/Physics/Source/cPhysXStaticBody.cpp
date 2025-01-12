@@ -275,8 +275,9 @@ void cPhysXStaticBody::updateShape(const Collider* collider,const Transform& tra
 			PxQuat(quat.x,quat.y,quat.z,quat.w));
 		};
 	
-	const auto quat = Quaternion(transform.unmodified_WorldMatrix().rotationMatrix()); // shits fucked here around
+	auto quat = Quaternion(transform.unmodified_WorldMatrix().rotationMatrix()); // shits fucked here around
 	//const PxMat44T<float> pxMatrix = PxMat44T<float>(&mat3x3.Transpose(),transform.unmodified_WorldMatrix().position());
+	quat.Normalize();
 	data->setGlobalPose(PxTransform(transform.unmodified_WorldMatrix().position(),quat));
 }
 

@@ -144,6 +144,18 @@ DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugLine(const Vector3f& aStart,co
 	return CreatePrimitiveHandle(primitive,lifetime);
 }
 
+DebugDrawer::PrimitiveHandle DebugDrawer::DebugRay(const Vector3f& aStart,const Vector3f& aDirection,float length,
+	const Vector3f& aColor,const float     lifetime) {
+	assert(length > 0.0f && "Length must be greater than 0");
+
+	Primitive primitive{};
+	primitive.Vertices.emplace_back(aStart,Vector4f(aColor,1.0f));
+	primitive.Vertices.emplace_back(aDirection.GetNormalized() * length,Vector4f(aColor,1.0f));
+	primitive.Indices.emplace_back(0);
+	primitive.Indices.emplace_back(1);
+
+	return CreatePrimitiveHandle(primitive,lifetime);
+}
 DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugGizmo(const Vector3f& aCenter,const float aLength,
 	const float     lifetime) {
 	Primitive primitive{};

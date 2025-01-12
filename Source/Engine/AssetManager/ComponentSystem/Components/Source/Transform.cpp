@@ -66,21 +66,48 @@ void Transform::SetDirty(bool arg) {
 
 #endif
 }
+  
+bool isOrthogonal(const Matrix& mat,float tolerance = 1e-6) {
+	// Check if mat * mat^T = I (Identity matrix)
+	Matrix transpose = Matrix::Transpose(mat);
+	Matrix result = mat * transpose;
+
+	Matrix identity; 
+
+	// Compare the result with the identity matrix
+	for(int i = 0; i < 16; ++i) {
+		if(std::abs((&result)[i] - (&identity)[i]) > tolerance) {
+			return false;
+		}
+	}
+	return true;
+} 
 
 void Transform::MakeClean() {
 	OPTICK_EVENT();
 	IsRecentlyUpdated = true;
 	MakeSaneRotation();
-	localMatrix = Matrix::CreateScaleMatrix(myScale) * Matrix::CreateRotationAroundX(myRotation.x * DEG_TO_RAD) *
-		Matrix::CreateRotationAroundY(myRotation.y * DEG_TO_RAD) *
-		Matrix::CreateRotationAroundZ(myRotation.z * DEG_TO_RAD) *
-		Matrix::CreateTranslationMatrix(myPosition);
+	//localMatrix = Matrix::CreateScaleMatrix(myScale) * Matrix::CreateRotationAroundX(myRotation.x * DEG_TO_RAD) *
+	//	Matrix::CreateRotationAroundY(myRotation.y * DEG_TO_RAD) *
+	//	Matrix::CreateRotationAroundZ(myRotation.z * DEG_TO_RAD) *
+	//	Matrix::CreateTranslationMatrix(myPosition);
+
+	const auto scaleMatrix = Matrix::CreateScaleMatrix(myScale);
+	myQuaternion.Normalize();
+	const auto rotationMatrix = myQuaternion.GetRotationAs4x4();
+	const auto det = rotationMatrix.GetDeterminant();
+	assert(std::abs(1- det) < 1e-5f);
+	assert(isOrthogonal(rotationMatrix));
+
+
+	const auto translationMatrix = Matrix::CreateTranslationMatrix(myPosition);
+	localMatrix = scaleMatrix * rotationMatrix * translationMatrix;
 	SetDirty(false);
 
 	if(HasParent()) {
 		//Constness matter
 		auto& parentT = m_Parent.transform();
-		worldMatrix = localMatrix* parentT.WorldMatrix();
+		worldMatrix = localMatrix * parentT.WorldMatrix();
 	} else {
 		worldMatrix = localMatrix;
 	}
@@ -133,7 +160,7 @@ const Quaternionf& Transform::GetQuatF() const {
 
 void Transform::SetQuatF(const Quaternionf& a_Rotator) {
 	myQuaternion = a_Rotator;
-	myRotation = myQuaternion.GetEulerAngles() * RAD_TO_DEG;
+	//myRotation = myQuaternion.GetEulerAngles() * RAD_TO_DEG;
 	SetDirty(true);
 }
 
@@ -211,7 +238,7 @@ Vector3f Transform::GetPosition(eSpace space) const {
 
 	if(space == WORLD) {
 		if(m_Parent.IsValid()) {
-			const auto& localPosition = Vector4f(myPosition.x,myPosition.y,myPosition.z,1); 
+			const auto& localPosition = Vector4f(myPosition.x,myPosition.y,myPosition.z,1);
 			const auto& worldPosition = localPosition * m_Parent.transform().WorldMatrix();
 			return worldPosition.xyz();
 		}
@@ -225,21 +252,25 @@ Vector3f& Transform::localPosition() {
 };
 
 void Transform::MakeSaneRotation() {
-	for(int i = 0; i < 3; i++) {
-		if(std::abs(myRotation[i]) > 360) {
-			myRotation[i] = std::fmodf(myRotation[i],360);
-		}
-	}
+	//for(int i = 0; i < 3; i++) {
+	//	if(std::abs(myRotation[i]) > 360) {
+	//		myRotation[i] = std::fmodf(myRotation[i],360);
+	//	}
+	//}
 }
 
 void Transform::Rotate(float X,float Y,float Z) {
-	myRotation += {X,Y,Z};
+	//myRotation += {X,Y,Z};
+	myQuaternion *= Quaternionf(Vector3f(X,Y,Z));
+	myQuaternion.Normalize();
 	SetDirty(true);
 }
 
 void Transform::Rotate(Vector2f angularRotation) {
-	myRotation.x += angularRotation.x;
-	myRotation.y += angularRotation.y;
+	//myRotation.x += angularRotation.x;
+	//myRotation.y += angularRotation.y;
+	myQuaternion *= Quaternionf(Vector3f(angularRotation.x,angularRotation.y,0));
+	myQuaternion.Normalize();
 	SetDirty(true);
 	// if(worldSpace)
 	//{
@@ -254,7 +285,9 @@ void Transform::Rotate(Vector2f angularRotation) {
 }
 
 void Transform::Rotate(Vector3f angularRotation) {
-	myRotation += angularRotation;
+	//myRotation += angularRotation;
+	myQuaternion *= Quaternionf(angularRotation); 
+	myQuaternion.Normalize();
 	SetDirty(true);
 }
 
@@ -386,10 +419,13 @@ bool Transform::InspectorView() {
 	}
 
 	justReleased = false;
-	oldValue = myRotation;
-	if(DrawVec3Control("Euler angles",myRotation,0,100,&justReleased)) {
+	oldValue = myQuaternion.GetEulerAngles();
+	auto rotation = myQuaternion.GetEulerAngles();
+
+	if(DrawVec3Control("Euler angles",rotation,0,100,&justReleased)) {
 		CommandBuffer::mainEditorCommandBuffer().addCommand<VarChanged<Transform,Vector3f>>(
-			this,&myRotation,oldValue,myRotation,"Rotation");
+			this,&rotation,oldValue,rotation,"Rotation");
+		myQuaternion *= Quaternion(oldValue-rotation);
 
 		if(justReleased) {
 			CommandBuffer::mainEditorCommandBuffer().getLastCommand()->setMergeBlocker(true);
@@ -421,14 +457,16 @@ void Transform::SetRotation(float X,float Y,float Z) {
 }
 
 void Transform::SetRotation(Vector2f angularRotation) {
-	myRotation.x = angularRotation.x;
-	myRotation.y = angularRotation.y;
+	angularRotation;
+	//myRotation.x = angularRotation.x;
+	//myRotation.y = angularRotation.y;
 	myQuaternion.SetEulerAngles(myRotation);
 	SetDirty(true);
 }
 
 void Transform::SetRotation(Vector3f angularRotation) {
-	myRotation = angularRotation;
+	angularRotation;
+	//myRotation = angularRotation;
 	myQuaternion.SetEulerAngles(myRotation);
 	SetDirty(true);
 }
@@ -441,7 +479,7 @@ Vector3f& Transform::localRotation() {
 void Transform::LookAt(Vector3f target,Vector3f Up) {
 	Up;
 	myQuaternion = Quaternionf::LookAt(myPosition,target,GetForward(WORLD),GetUp(WORLD));
-	myRotation = myQuaternion.GetEulerAngles() * RAD_TO_DEG;
+	//myRotation = myQuaternion.GetEulerAngles() * RAD_TO_DEG;
 	SetDirty(true);
 }
 

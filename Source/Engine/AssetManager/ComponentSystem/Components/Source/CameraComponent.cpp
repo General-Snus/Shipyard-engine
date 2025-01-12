@@ -25,7 +25,7 @@ Camera::Camera(const SY::UUID anOwnerId,GameObjectManager* aManager)
 	pLight.lock()->Color = Vector3f(1,1,1);
 	pLight.lock()->Power = 2000.0f * Kilo;
 	pLight.lock()->Range = 1000;
-	pLight.lock()->Direction = {0, -1, 0};
+	pLight.lock()->Direction = { 0, -1, 0 };
 	pLight.lock()->InnerConeAngle = 10 * DEG_TO_RAD;
 	pLight.lock()->OuterConeAngle = 45 * DEG_TO_RAD;
 #endif
@@ -222,7 +222,7 @@ Vector4f Camera::WoldSpaceToPostProjectionSpace(Vector3f aEntity) {
 	Transform& myTransform = this->gameObject().GetComponent<Transform>();
 
 	// Get actuall world space coordinate
-	Vector4f outPosition = {aEntity.x, aEntity.y, aEntity.z, 1};
+	Vector4f outPosition = { aEntity.x, aEntity.y, aEntity.z, 1 };
 
 	// Punkt -> CameraSpace
 	outPosition = outPosition * Matrix::GetFastInverse(myTransform.LocalMatrix());

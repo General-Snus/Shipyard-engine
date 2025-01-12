@@ -51,9 +51,8 @@ void SpawnHooks(int amount, float radius, Vector3f base)
 			renderer.SetMaterial(mat);
 		}
 
-		auto& ref = attachment.AddComponent<Collider>();
-		ref;
-		//ref.GetColliderAssetOfType<ColliderAssetBox>()->box() *= 1.5f;
+		auto& ref = attachment.AddComponent<Collider>(); 
+		ref.GetColliderAssetOfType<ColliderAssetBox>()->box().GetExtent().z = 0.2f;
 		attachment.AddComponent<cPhysXStaticBody>();
 		auto directionOffset =
 			Vector3f(RandomEngine::randomInRange(-1.0f, 1.0f), 0, RandomEngine::randomInRange(-1.0f, 1.0f))
@@ -86,11 +85,11 @@ void SpawnPlayer(int id, float radius, Vector3f base)
 	playerModel.transform().SetPosition(0, 0, -radius * 1.25f);
 	playerModel.transform().SetScale(.1f);
 
-	GameObject test = GameObject::Create("PlayerBackCOllider"); 
+	/*GameObject test = GameObject::Create("PlayerBackCOllider"); 
 	test.transform().SetParent(player.transform());
 	test.transform().SetPosition(0,0,-radius * 2.25f);
 	test.AddComponent<Collider>();
-	test.AddComponent<cPhysXStaticBody>();
+	test.AddComponent<cPhysXStaticBody>();*/
 
 
 	GameObject camera = GameObject::Create("Player Camera");

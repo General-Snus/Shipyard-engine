@@ -5,6 +5,7 @@
 #include "../Tools/Utilities/LinearAlgebra/Vector4.hpp"
 #include "../Tools/Utilities/LinearAlgebra/Matrix4x4.h"
 #include "../Tools/Utilities/LinearAlgebra/Quaternions.hpp"
+#include "../Tools/Utilities/Math.hpp"
 #include "../Tools/Utilities/LinearAlgebra/VectorX.hpp"
 
 TEST(TestCaseName,TestName) {
@@ -344,7 +345,7 @@ TEST(QuaternionTest,RotationFromTo_NonUnitVectors) {
 
 	Quaternion<float> result = Quaternion<float>::RotationFromTo(from,to);
 	Vector3f axis(0,0,1); // Rotation around Z-axis
-	Quaternion<float> expected = Quaternion<float>::CreateFromAxisAngle(axis,DEG_TO_RAD *  90.0f);
+	Quaternion<float> expected = Quaternion<float>::CreateFromAxisAngle(axis,DEG_TO_RAD * 90.0f);
 
 	EXPECT_TRUE(result.IsClose(expected));
 }
@@ -359,4 +360,98 @@ TEST(QuaternionTest,RotationFromTo_OppositeVectors) {
 	Quaternion<float> expected2(0,1,0,0);
 	Quaternion<float> expected3(0,0,1,0);
 	EXPECT_TRUE(result.IsClose(expected1) || result.IsClose(expected2) || result.IsClose(expected3)); // Handles numerical precision issues
+}
+
+// Test Quaternion multiplication
+TEST(QuaternionTest,Multiplication) {
+	Quaternion<float> q1(1,0,0,0);
+	Quaternion<float> q2(0,1,0,0);
+	Quaternion<float> expected(0,0,1,0);
+
+	Quaternion<float> result = q1 * q2;
+
+	EXPECT_TRUE(result.IsClose(expected));
+}
+
+// Test Quaternion multiplication
+TEST(QuaternionTest,MultiplicationAssignment) {
+	Quaternion<float> q1(1,0,0,0);
+	Quaternion<float> q2(0,1,0,0);
+	Quaternion<float> expected(0,0,1,0);
+
+	Quaternion<float> result = q1;
+	result *= q2;
+
+	EXPECT_TRUE(result.IsClose(expected));
+}
+
+// Test Quaternion normalization
+TEST(QuaternionTest,Normalization) {
+	Quaternion<float> q(1,2,3,4);
+	q.Normalize();
+	float length = std::sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
+
+	EXPECT_NEAR(length,1.0f,1e-5);
+}
+
+// Test Quaternion conjugate
+TEST(QuaternionTest,Conjugate) {
+	Quaternion<float> q(1,2,3,4);
+	Quaternion<float> expected(-1,-2,-3,4);
+
+	Quaternion<float> result = q.GetConjugate();
+
+	EXPECT_TRUE(result.IsClose(expected));
+}
+
+// Test Quaternion inverse
+TEST(QuaternionTest,Inverse) {
+	Quaternion<float> q(1,2,3,4);
+	q.Normalize();
+	Quaternion<float> expected = q.GetConjugate();
+	float lengthSquared = q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w;
+	expected = expected * (1.0f / lengthSquared);
+
+	Quaternion<float> result = q.GetInverse();
+
+	EXPECT_TRUE(result.IsClose(expected));
+}
+
+// Test Quaternion dot product
+TEST(QuaternionTest,DotProduct) {
+	Quaternion<float> q1(1,2,3,4);
+	Quaternion<float> q2(5,6,7,8);
+	float expected = 1 * 5 + 2 * 6 + 3 * 7 + 4 * 8;
+
+	float result = q1.Dot(q2);
+
+	EXPECT_NEAR(result,expected,1e-5);
+}
+
+// Test Quaternion slerp
+TEST(QuaternionTest,Slerp) {
+	Quaternion<float> q1(0,0,0,1);
+	Quaternion<float> q2(0,1,0,0);
+	float t = 0.5f;
+	Quaternion<float> expected = Quaternion<float>::Slerp(q1,q2,t);
+
+	Quaternion<float> result = Quaternion<float>::Slerp(q1,q2,t);
+
+	EXPECT_TRUE(result.IsClose(expected));
+}
+
+
+// Test Quaternion slerp
+TEST(QuaternionTest,EulerAngleCheck) {
+
+	for(size_t i = 0; i < 100; i++) {
+		float x = RandomEngine::randomInRange(0.f,360.f);
+		float y = RandomEngine::randomInRange(0.f,360.f);
+		float z = RandomEngine::randomInRange(0.f,360.f);
+		auto euler = Vector3f(x,y,z);
+		Quaternion<float> q1;
+		q1.SetEulerAngles(euler);
+
+		EXPECT_TRUE(euler.IsNearlyEqual(q1.GetEulerAngles()));
+	}
 }

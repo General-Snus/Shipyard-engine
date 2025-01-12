@@ -17,7 +17,7 @@
 #include "Tools/Logging/Logging.h"
 #include "Tools/Utilities/Input/Input.hpp"
 
-ImGuizmo::OPERATION m_CurrentGizmoOperation = ImGuizmo::OPERATION::UNIVERSAL;
+ImGuizmo::OPERATION m_CurrentGizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
 ImGuizmo::MODE      m_CurrentGizmoMode = ImGuizmo::MODE::WORLD;
 
 Viewport::Viewport(bool IsMainViewPort,Vector2f ViewportResolution,std::shared_ptr<Scene> aScene,
@@ -173,7 +173,7 @@ void Viewport::RenderImGUi() {
 		IsMouseHoverering = isWindowFocused;
 
 		if(IsMouseHoverering) {
-			cursorPositionInViewPort = ImGui::CursorPositionInWindow();
+			cursorPositionInViewPort = ImGui::CursorPositionInWindow(); 
 		}
 
 		if(ImGui::BeginDragDropTarget()) {

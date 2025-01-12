@@ -40,6 +40,8 @@ constexpr int  MegaByte = 1048576;
 constexpr int  GigaByte = 1073741824;
 constexpr auto TeraByte = 1099511627776;
 
+constexpr auto Epsilon = 1e-6;
+
 // Bytes
 constexpr auto GlobalRight = Vector3f(1.0, 0.0, 0.0);
 constexpr auto GlobalUp = Vector3f(0.0, 1.0, 0.0);

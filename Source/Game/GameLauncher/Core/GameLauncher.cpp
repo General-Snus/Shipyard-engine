@@ -103,11 +103,10 @@ void YourGameLauncher::Update(float delta) {
 			const auto position = cameraTransform.GetPosition(WORLD);
 			const auto direction = camera.GetPointerDirection(coord);
 
-			GraphicsEngineInstance.debugDrawer.AddDebugLine(position,direction + position,{1.0f,0,0},1.0f);
 			if(Raycast(position,direction,hit)) {
 
-				GraphicsEngineInstance.debugDrawer.AddDebugLine(position,hit.point,{0.0f,1.0f,0},1.0f);
 				if(auto* hook = hit.objectHit.TryGetComponent<HookComponent>(); hook && !hook->hasConnection) {
+					GraphicsEngineInstance.debugDrawer.AddDebugLine(position,hit.point,{0.0f,1.0f,0},1.0f);
 					LOGGER.Log(hit.objectHit.GetName());
 					if(element.currentHook) {
 						auto& currentHook = element.currentHook.GetComponent<HookComponent>();
@@ -121,7 +120,11 @@ void YourGameLauncher::Update(float delta) {
 
 					lerpPos = element.transform().GetPosition();
 					lerpRot = element.transform().GetRotation();
+					return;
 				}
+				GraphicsEngineInstance.debugDrawer.AddDebugLine(position,direction + position,{1.0f,0,0},1.0f);
+			} else {
+				GraphicsEngineInstance.debugDrawer.AddDebugLine(position,direction + position,{1.0f,0,0},1.0f);
 			}
 		}
 	}

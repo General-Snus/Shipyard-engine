@@ -4,8 +4,8 @@
 #include <utility>
 #include "Matrix3x3.hpp"
 #include "Matrix4x4.h"
-#include "Vectors.hpp"
-#include "../Math.hpp"
+#include "Vectors.hpp" 
+#include "../Math.hpp" 
 
 template <typename T = float>
 class Quaternion {
@@ -29,11 +29,6 @@ public:
 
 	// Base functions
 	Quaternion<T> operator-();
-	Quaternion<T> Conjugate();
-	T             GetNormalizedSquared();
-	void          Normalize();
-	Quaternion<T> GetNormalized();
-
 	bool IsClose(const Quaternion<T>& other,T epsilon = 1e-5) const;
 
 	// Usability functions
@@ -45,20 +40,47 @@ public:
 	Vector3f GetEulerAngles() const;
 	void     SetEulerAngles(const Vector3<T>& aRotation);
 
-	Matrix3x3<T> GetRotationAs3x3() const;
-	Matrix4x4<T> GetRotationAs4x4() const;
+	Matrix3x3<T> GetRotationAs3x3();
+	Matrix4x4<T> GetRotationAs4x4();
 
 	void                 SetRotation(const Matrix3x3<T>& aRotation);
 	void                 SetRotation(const Matrix4x4<T>& aRotation);
-	static Quaternion    RotationFromTo(const Vector3f& aFrom,const Vector3f& aTo);
 
+	//Statics
+	static Quaternion    RotationFromTo(const Vector3f& aFrom,const Vector3f& aTo);
 	static Quaternion<T> LookAt(const Vector3<T>& source,const Vector3<T>& point,const Vector3f& front,
 		const Vector3f& up);
 	static Quaternion<T> LookAt(const Vector3<T>& direction,const Vector3f& up);
-
 	static Quaternion<T> CreateFromAxisAngle(Vector3<T> axis,T angle);
+	static T Dot(const Quaternion<T>& q1,const Quaternion<T>& q2);
+	static Quaternion<T> GetInverse(const Quaternion<T>& q1);
+	static T GetMagnitudeSquared(const Quaternion<T>& q1);
+	static Quaternion<T> GetNormalized(const Quaternion<T>& q1);
+	static Quaternion<T> Pow(const Quaternion<T>& q1,T t);
+	static Quaternion<T> Slerp(const Quaternion<T>& q1,const Quaternion<T>& q2,float decimal);
+	static Quaternion<T> Conjugate(const Quaternion<T>& q1);
+	constexpr static Quaternion<T> Identity();
 
-	Quaternion<T> operator*=(const Quaternion<T>& quat);
+	//Instance
+	T Dot(const Quaternion<T>& q1);
+	Quaternion<T> GetInverse();
+	void Inverse();
+	T GetMagnitudeSquared();
+	void Normalize();
+	Quaternion<T> GetNormalized();
+	Quaternion<T> Pow(T t);
+	Quaternion<T> Slerp(const Quaternion<T>& q1,float decimal);
+	Quaternion<T> GetConjugate();
+
+
+
+
+
+
+
+
+
+
 	Vector3<T>    GetForward();
 	Vector3<T>    GetUp();
 	Vector3<T>    GetRight();
@@ -68,11 +90,25 @@ public:
 	Quaternion<T> GetNormalized();
 	void Normalize();
 	*/
+#pragma warning( push )
+#pragma warning( disable : 4201)  
+	union {
+		struct {
+			T x;
+			T y;
+			T z;
+			T w;
+		};
+		struct {
+			Vector3<T> xyz;
+			T          w;
+		};
 
-	T x;
-	T y;
-	T z;
-	T w;
+		struct {
+			Vector4<T> xyzw;
+		};
+	};
+#pragma warning( pop ) 
 };
 
 template <typename T>
@@ -109,17 +145,13 @@ Quaternion<T>::Quaternion(const Matrix3x3<T>& aRotationMatrix) {
 	x = std::copysign(x,m21 - m12);
 	y = std::copysign(y,m02 - m20);
 	z = std::copysign(z,m10 - m01);
-
-	Normalize();
 }
 
 template <typename T>
-Quaternion<T>::Quaternion(const T x,const T y,const T z,const T w) : x(x),y(y),z(z),w(w) {
-	Normalize();
-}
+Quaternion<T>::Quaternion(const T x,const T y,const T z,const T w) : x(x),y(y),z(z),w(w) {}
 
 template <typename T>
-Quaternion<T>::~Quaternion() {}
+Quaternion<T>::~Quaternion() = default;
 
 template <typename T>
 Quaternion<T>::Quaternion(const Quaternion<T>& Q) {
@@ -142,35 +174,67 @@ T* Quaternion<T>::operator&() {
 
 template <typename T>
 Vector3f Quaternion<T>::GetEulerAngles() const {
-	const float sqw = w * w;
-	const float sqx = x * x;
-	const float sqy = y * y;
-	const float sqz = z * z;
-	const float test = 2.0f * (y * w - x * z);
-	Vector3f    euler;
-	if(test > .9999f) {
-		// heading = rotation about z-axis
-		euler.z = (-2.0f * std::atan2f(x,w));
-		// bank = rotation about x-axis
-		euler.x = 0;
-		// attitude = rotation about y-axis
-		euler.y = PIHALF;
-	} else if(test == -1.0) {
-		// heading = rotation about z-axis
-		euler.z = (2.0f * std::atan2f(x,w));
-		// bank = rotation about x-axis
-		euler.x = 0;
-		// attitude = rotation about y-axis
-		euler.y = -PIHALF;
+	//const float sqw = w * w;
+	//const float sqx = x * x;
+	//const float sqy = y * y;
+	//const float sqz = z * z;
+	//const float test = 2.0f * (y * w - x * z);
+	//Vector3f    euler;
+	//if(test > .9999f) {
+	//	// heading = rotation about z-axis
+	//	euler.z = (-2.0f * std::atan2f(x,w));
+	//	// bank = rotation about x-axis
+	//	euler.x = 0;
+	//	// attitude = rotation about y-axis
+	//	euler.y = PIHALF;
+	//} else if(test == -1.0) {
+	//	// heading = rotation about z-axis
+	//	euler.z = (2.0f * std::atan2f(x,w));
+	//	// bank = rotation about x-axis
+	//	euler.x = 0;
+	//	// attitude = rotation about y-axis
+	//	euler.y = -PIHALF;
+	//} else {
+	//	// heading = rotation about z-axis
+	//	euler.z = std::atan2f(2.0f * (x * y + z * w),(sqx - sqy - sqz + sqw));
+	//	// bank = rotation about x-axis
+	//	euler.x = std::atan2f(2.0f * (y * z + x * w),(-sqx - sqy + sqz + sqw));
+	//	// attitude = rotation about y-axis
+	//	euler.y = std::asinf(std::clamp<float>(test,-1.0f,1.0f));
+	//}
+	//return RAD_TO_DEG*euler;
+
+
+
+
+	 
+
+	// Output Euler angles (radians)
+	float h,p,b;
+
+	// Extract sin(pitch)
+	float sp = -2.0f * (y * z - w * x);
+
+	// Check for Gimbal lock, giving slight tolerance
+	// for numerical imprecision
+	if(fabs(sp) > 0.9999f) {
+
+		// Looking straight up or down
+		p = 1.570796f * sp; // pi/2
+
+		// Compute heading, slam bank to zero
+		h = atan2(-x * z + w * y,0.5f - y * y - z * z);
+		b = 0.0f;
+
 	} else {
-		// heading = rotation about z-axis
-		euler.z = std::atan2f(2.0f * (x * y + z * w),(sqx - sqy - sqz + sqw));
-		// bank = rotation about x-axis
-		euler.x = std::atan2f(2.0f * (y * z + x * w),(-sqx - sqy + sqz + sqw));
-		// attitude = rotation about y-axis
-		euler.y = std::asinf(std::clamp<float>(test,-1.0f,1.0f));
+
+		// Compute angles
+		p = asin(sp);
+		h = atan2(x * z + w * y,0.5f - x * x - y * y);
+		b = atan2(x * y + w * z,0.5f - x * x - z * z);
 	}
-	return euler;
+
+	return  RAD_TO_DEG * Vector3f(h,p,b);
 }
 
 template <typename T>
@@ -204,7 +268,9 @@ Quaternion<T>& Quaternion<T>::operator=(const Quaternion<T>& Q) {
 }
 
 template <typename T>
-Matrix3x3<T> Quaternion<T>::GetRotationAs3x3() const {
+Matrix3x3<T> Quaternion<T>::GetRotationAs3x3() {
+	Normalize();
+
 	Matrix3x3<T> mat;
 	const T      xy = x * y;
 	const T      xz = x * z;
@@ -235,7 +301,7 @@ Matrix3x3<T> Quaternion<T>::GetRotationAs3x3() const {
 }
 
 template <typename T>
-Matrix4x4<T> Quaternion<T>::GetRotationAs4x4() const {
+Matrix4x4<T> Quaternion<T>::GetRotationAs4x4()   {
 	Matrix4x4<T> mat;
 	Matrix3x3<T> mat3x3 = GetRotationAs3x3();
 
@@ -309,6 +375,9 @@ void Quaternion<T>::SetRotation(const Matrix3x3<T>& m) {
 		break;
 	}
 }
+
+template<typename T>
+inline void Quaternion<T>::SetRotation(const Matrix4x4<T>& aRotation) {}
 
 template <typename T>
 Quaternion<T> Quaternion<T>::RotationFromTo(const Vector3f& aFrom,const Vector3f& aTo) {
@@ -398,9 +467,122 @@ Quaternion<T> Quaternion<T>::CreateFromAxisAngle(Vector3<T> axis,T angle) {
 	return Quaternion<T>(axis.x * s,axis.y * s,axis.z * s,std::cos(halfAngle));
 }
 
+template<typename T>
+inline T Quaternion<T>::Dot(const Quaternion<T>& q1,const Quaternion<T>& q2) {
+	return q1.xyzw.Dot(q2.xyzw);
+}
+template<typename T>
+inline Quaternion<T> Quaternion<T>::GetInverse(const Quaternion<T>& q1) {
+
+	const auto sqr = GetMagnitudeSquared(q1);
+
+	if(sqr == 0) {
+		return Quaternion<T>();
+	}
+
+	return Conjugate(q1) * (1 / sqr);
+}
+
+template<typename T>
+T Quaternion<T>::GetMagnitudeSquared(const Quaternion<T>& q1) {
+	return q1.x * q1.x + q1.y * q1.y + q1.z * q1.z + q1.w * q1.w;
+}
+
+template<typename T>
+Quaternion<T> Quaternion<T>::GetNormalized(const Quaternion<T>& q1) {
+	const float n = GetMagnitudeSquared(q1);
+
+	if(std::abs(n-1.0f) < Epsilon) {
+		return  q1;
+	}
+
+	const T invLen = (1.0f / sqrt(n));
+	return Quaternion<T>(q1.x* invLen,q1.y * invLen,q1.z * invLen,q1.w * invLen);
+}
+
+template<typename T>
+Quaternion<T> Quaternion<T>::Pow(const Quaternion<T>& q1,T t) {
+	const Quaternion<T> q = GetNormalized(q1);
+
+	const T angle = std::acos(q.w);
+	const T sinAngle = std::sin(angle);
+
+	if(sinAngle == 0.0) {
+		return q1;
+	}
+
+	const Vector3<T> axis(q.x / sinAngle,q.y / sinAngle,q.z / sinAngle);
+	const T newAngle = angle * t;
+
+	const T newSinAngle = std::sin(newAngle);
+	const Quaternion<T> result(
+		axis.x * newSinAngle,
+		axis.y * newSinAngle,
+		axis.z * newSinAngle,
+		std::cos(newAngle)
+	);
+
+	return result;
+}
+
+template<typename T>
+inline Quaternion<T> Quaternion<T>::Slerp(const Quaternion<T>& q1,const Quaternion<T>& q2,float decimal) {
+	return Pow(q2 * GetInverse(q1),decimal) * q1;
+}
+
+template<typename T>
+constexpr Quaternion<T> Quaternion<T>::Identity() {
+	return Quaternion<T>();
+}
+
+template<typename T>
+inline T Quaternion<T>::Dot(const Quaternion<T>& q1) {
+	return Dot(*this,q1);
+}
+
+template<typename T>
+inline Quaternion<T> Quaternion<T>::GetInverse() {
+	return GetInverse(*this);
+}
+
+template<typename T>
+inline void Quaternion<T>::Inverse() {
+	*this = GetInverse(*this);
+}
+
 template <typename T>
-T Quaternion<T>::GetNormalizedSquared() {
-	return T();
+Quaternion<T> Quaternion<T>::Conjugate(const Quaternion<T>& q1) {
+	return Quaternion<T>(-q1.x,-q1.y,-q1.z,q1.w);
+}
+
+template <typename T>
+T Quaternion<T>::GetMagnitudeSquared() {
+	return GetMagnitudeSquared(*this);
+}
+
+template <typename T>
+void Quaternion<T>::Normalize() {
+	*this = GetNormalized(*this);
+}
+
+template <typename T>
+Quaternion<T> Quaternion<T>::GetNormalized() {
+	return GetNormalized(*this);
+}
+
+template<typename T>
+inline Quaternion<T> Quaternion<T>::Pow(T t) {
+	return Quaternion<T>();
+}
+
+template<typename T>
+inline Quaternion<T> Quaternion<T>::Slerp(const Quaternion<T>& q1,float decimal) {
+	return Quaternion<T>();
+}
+
+template<typename T>
+inline Quaternion<T> Quaternion<T>::GetConjugate() {
+	return Conjugate(*this);
 }
 
 template <typename T>
@@ -416,26 +598,6 @@ Vector3<T> Quaternion<T>::GetUp() {
 template <typename T>
 Vector3<T> Quaternion<T>::GetRight() {
 	return -Vector3<T>(1 - 2 * (y * y + z * z),2 * (x * y + w * z),2 * (x * z - w * y)).GetNormalized();
-}
-
-template <typename T>
-void Quaternion<T>::Normalize() {
-	const float n = x * x + y * y + z * z + w * w;
-
-	if(n == 1) {
-		return;
-	}
-	*this = (*this * (1 / sqrtf(n)));
-}
-
-template <typename T>
-Quaternion<T> Quaternion<T>::GetNormalized() {
-	const float n = x * x + y * y + z * z + w * w;
-
-	if(n == 1) {
-		return *this;
-	}
-	return Quaternion<T>(*this * (T(1) / sqrtf(n)));
 }
 
 template <typename T>
@@ -475,15 +637,20 @@ Quaternion<T> operator*(const Quaternion<T>& lhf,const Quaternion<T>& rhf) {
 
 template <typename T>
 Vector3<T> operator*(const Quaternion<T>& aQuat,const Vector3<T>& v) {
-
 	const Vector3<T> r = (aQuat.x,aQuat.y,aQuat.z);
 	const T s = aQuat.w;
-
 
 	return
 		2.0f * r.Dot(v) * r
 		+ (s * s - r.Dot(r)) * v
 		+ 2.0f * s * r.Cross(v);
+}
+
+template <typename T,typename T1>
+Quaternion<T>& operator*=(Quaternion<T>& lhf,const T1& rhf) {
+	lhf = lhf * rhf;
+	lhf.Normalize();
+	return lhf;
 }
 
 #pragma endregion
