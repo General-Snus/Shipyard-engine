@@ -225,16 +225,16 @@ void SetScrollToComboItemDown(ImGuiWindow* listbox_window, int index)
     if (diff > 0.0f)
         listbox_window->Scroll.y += diff + 1.0f;
 } 
+
 void UpdateInputTextAndCursor(char* buf, int buf_capacity, const char* new_str)
 {
-    strncpy (buf , new_str, buf_capacity);
+    strncpy(buf, new_str, buf_capacity);
 
     ImGuiContext& g = *GImGui;
     ImGuiInputTextState& intxt_state = g.InputTextState;
     const char* buf_end = NULL;
-    intxt_state.CurLenW = ImTextStrFromUtf8(intxt_state.TextW.Data, intxt_state.TextW.Size, buf, NULL, &buf_end);
-    intxt_state.CurLenA = (int)(buf_end - buf);
-    intxt_state.Stb.cursor = intxt_state.Stb.select_end = static_cast<int>(strlen(buf));
+    intxt_state.TextLen = (int)(buf_end - buf); 
+    //intxt_state.Stb->cursor = intxt_state.Stb->select_end = static_cast<int>(strlen(buf));
 }
 
 

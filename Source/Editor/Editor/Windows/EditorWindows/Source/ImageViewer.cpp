@@ -20,8 +20,8 @@ void ImageViewer::RenderImGUi() {
 	if(flipY) flags |= ImGuiTexInspect::InspectorFlags_FlipY;
 
 	auto v2 = ImVec2((float)texture->GetResolution().x,(float)texture->GetResolution().y);
-	const auto id = texture->GetHandle(ViewType::SRV).gpuPtr.ptr; 
-	if(ImGuiTexInspect::BeginInspectorPanel("##ColorFilters",reinterpret_cast<ImTextureID>(id),v2,flags)) {
+	const ImTextureID id = texture->GetHandle(ViewType::SRV).gpuPtr.ptr;
+	if(ImGuiTexInspect::BeginInspectorPanel("##ColorFilters",id,v2,flags)) {
  		ImGuiTexInspect::DrawAnnotations(ImGuiTexInspect::ValueText(ImGuiTexInspect::ValueText::BytesDec));
 	}
 

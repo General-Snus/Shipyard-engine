@@ -250,9 +250,12 @@ void Viewport::RenderToolbar() {
 	const auto& style = ImGui::GetStyle();
 	const float textHeight = ImGui::CalcTextSize("A").y;
 	// style.FramePadding can also be used here
-	const auto   toolbarItemSize = ImVec2{textHeight * 4.0f, textHeight * 4.0f};
-	const ImVec2 toolbarPos = ImGui::GetWindowPos() +
-		ImVec2(2.0f * style.WindowPadding.x,8.0f * (style.WindowPadding.y + style.FramePadding.y));
+	const auto toolbarItemSize = ImVec2{textHeight * 4.0f, textHeight * 4.0f};
+	const auto toolbarPos = ImVec2(
+		2.0f * style.WindowPadding.x + ImGui::GetWindowPos().x,
+		8.0f * (style.WindowPadding.y + style.FramePadding.y) + ImGui::GetWindowPos().y
+	);
+
 	ImGui::SetNextWindowPos(toolbarPos);
 
 	// ImGuiWindowFlags toolbarFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |

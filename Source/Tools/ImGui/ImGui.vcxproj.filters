@@ -90,9 +90,6 @@
     <ClInclude Include="backends\imgui_impl_win32.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="misc\cpp\imgui-combo-filter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="misc\cpp\WMDropManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -112,6 +109,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="backends\tex_inspect_directx12.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="misc\cpp\imgui-combo-filter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -179,9 +179,6 @@
     <ClCompile Include="backends\imgui_impl_win32.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="misc\cpp\imgui-combo-filter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="imgui_tex_inspect.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -189,6 +186,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="backends\tex_inspect_directx12.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="misc\cpp\imgui-combo-filter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

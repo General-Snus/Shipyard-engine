@@ -34,7 +34,7 @@ namespace ImGui {
 
         // Notify of viewport change so GetFrameHeight() can be accurate in case of
         // DPI change
-        SetCurrentViewport(NULL,viewport);
+        //SetCurrentViewport(NULL,viewport);
 
         // For the main menu bar, which cannot be moved, we honor
         // g.Style.DisplaySafeAreaPadding to ensure text can be visible on a TV set.
@@ -120,8 +120,8 @@ namespace ImGui {
         const ImVec2& uv1 = ImVec2(1,1),const ImVec4& tint_col = ImVec4(1,1,1,1),
         const ImVec4& border_col = ImVec4(0,0,0,0)) {
         OPTICK_EVENT();
-        if(const auto id = aTexture.GetHandle(ViewType::SRV).gpuPtr.ptr) {
-            Image(reinterpret_cast<ImTextureID>(id),image_size,uv0,uv1,tint_col,border_col);
+        if(const ImTextureID id = aTexture.GetHandle(ViewType::SRV).gpuPtr.ptr) {
+            Image(id,image_size,uv0,uv1,tint_col,border_col);
         }
     }
 
@@ -129,28 +129,32 @@ namespace ImGui {
         const ImVec2& uv1 = ImVec2(1,1),const ImVec4& tint_col = ImVec4(1,1,1,1),
         const ImVec4& border_col = ImVec4(0,0,0,0)) {
         OPTICK_EVENT();
-        if(const auto id = aTexture->GetRawTexture()->GetHandle(ViewType::SRV).gpuPtr.ptr) {
-            Image(reinterpret_cast<ImTextureID>(id),image_size,uv0,uv1,tint_col,border_col);
+        if(const ImTextureID id = aTexture->GetRawTexture()->GetHandle(ViewType::SRV).gpuPtr.ptr) {
+            Image(id,image_size,uv0,uv1,tint_col,border_col);
         }
     }
+
     inline bool ImageButton(const char* strId,std::shared_ptr<TextureHolder> aTexture,const ImVec2& image_size,
         ImGuiButtonFlags flags = 0,const ImVec2& uv0 = ImVec2(0,0),const ImVec2& uv1 = ImVec2(1,1),
         const ImVec4& bg_col = ImVec4(0,0,0,0),const ImVec4& tint_col = ImVec4(1,1,1,1)) {
+
         OPTICK_EVENT();
         const ImGuiContext& g = *GImGui;
         ImGuiWindow* window = g.CurrentWindow;
-        if(window->SkipItems)
+        if(window->SkipItems) {
             return false;
+        }
 
-        if(const auto id = aTexture->GetRawTexture()->GetHandle(ViewType::SRV).gpuPtr.ptr) {
-            return ImageButtonEx(window->GetID(strId),reinterpret_cast<ImTextureID>(id),image_size,uv0,uv1,bg_col,
+        const auto windowsID = window->GetID(strId);
+        if(const ImTextureID id = aTexture->GetRawTexture()->GetHandle(ViewType::SRV).gpuPtr.ptr) {
+            return ImageButtonEx(windowsID,id,image_size,uv0,uv1,bg_col,
                 tint_col,flags);
         } else {
-            const auto newId = GraphicsEngineInstance.GetDefaultTexture(eTextureType::ColorMap)
+            const ImTextureID newId = GraphicsEngineInstance.GetDefaultTexture(eTextureType::ColorMap)
                 ->GetRawTexture()
                 ->GetHandle(ViewType::SRV)
                 .gpuPtr.ptr;
-            return ImageButtonEx(window->GetID(strId),reinterpret_cast<ImTextureID>(newId),image_size,uv0,uv1,bg_col,
+            return ImageButtonEx(windowsID,newId,image_size,uv0,uv1,bg_col,
                 tint_col,flags);
         }
         return false;
@@ -162,18 +166,20 @@ namespace ImGui {
         OPTICK_EVENT();
         const ImGuiContext& g = *GImGui;
         ImGuiWindow* window = g.CurrentWindow;
-        if(window->SkipItems)
+        if(window->SkipItems) {
             return false;
+        }
 
-        if(const auto id = aTexture.GetHandle(ViewType::SRV).gpuPtr.ptr) {
-            return ImageButtonEx(window->GetID(strId),reinterpret_cast<ImTextureID>(id),image_size,uv0,uv1,bg_col,
+        const auto winddowID = window->GetID(strId);
+        if(const ImTextureID id = aTexture.GetHandle(ViewType::SRV).gpuPtr.ptr) {
+            return ImageButtonEx(winddowID,id,image_size,uv0,uv1,bg_col,
                 tint_col,flags);
         } else {
             const auto newId = GraphicsEngineInstance.GetDefaultTexture(eTextureType::ColorMap)
                 ->GetRawTexture()
                 ->GetHandle(ViewType::SRV)
                 .gpuPtr.ptr;
-            return ImageButtonEx(window->GetID(strId),reinterpret_cast<ImTextureID>(newId),image_size,uv0,uv1,bg_col,
+            return ImageButtonEx(winddowID,newId,image_size,uv0,uv1,bg_col,
                 tint_col,flags);
         }
     }
