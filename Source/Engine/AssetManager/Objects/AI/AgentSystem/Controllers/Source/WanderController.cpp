@@ -24,8 +24,8 @@ bool WanderController::Update(GameObject input)
 
 	const Vector3f position = transform.GetPosition();
 
-	physicsComponent->ph_acceleration += GlobalFwd;
-	physicsComponent->ph_Angular_velocity = {0, std::powf(RandomEngine::randomBinomial(), 5) * 5000, 0};
+	physicsComponent->ph_acceleration += Math::GlobalFwd;
+	physicsComponent->ph_Angular_velocity = {0, std::powf(Math::RandomEngine::randomBinomial(), 5) * 5000, 0};
 
 
 	transform.SetPosition(SteeringBehaviour::SetPositionInBounds(position, 50.0f));

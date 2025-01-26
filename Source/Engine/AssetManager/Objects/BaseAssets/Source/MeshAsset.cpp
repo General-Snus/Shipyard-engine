@@ -297,8 +297,8 @@ bool Mesh::processMesh(aiMesh* mesh, const aiScene* scene, Element& outElement)
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 	{
 		auto position = Vector3f(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-		auto color = Vector4f(RandomEngine::randomInRange<float>(0, 1), RandomEngine::randomInRange<float>(0, 1),
-		                      RandomEngine::randomInRange<float>(0, 1), 1.0f);
+		auto color = Vector4f(Math::RandomEngine::randomInRange<float>(0,1),Math::RandomEngine::randomInRange<float>(0,1),
+			Math::RandomEngine::randomInRange<float>(0, 1), 1.0f);
 
 		auto boneId = Vector4<unsigned int>(0, 0, 0, 0);
 

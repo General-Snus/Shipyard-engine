@@ -29,7 +29,7 @@ namespace GeneralizedAICommands
 
 		const Vector3f direction = (closestTarget - myTransform.GetPosition()).GetNormalized();
 
-		if (direction.Dot(myTransform.GetForward()) > cos(DEG_TO_RAD * myStats.myAttackCone)) // 10 degrees artificial
+		if (direction.Dot(myTransform.GetForward()) > cos(Math::DEG_TO_RAD * myStats.myAttackCone)) // 10 degrees artificial
 		// spread
 		{
 			return true;

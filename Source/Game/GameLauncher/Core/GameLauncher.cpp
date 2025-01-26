@@ -29,7 +29,6 @@ void YourGameLauncher::Init() {
 			GameObject SkySphere = GameObject::Create("SkySphere");
 			auto& mesh = SkySphere.AddComponent<MeshRenderer>("Materials/MaterialPreviewMesh.fbx");
 			mesh.SetMaterialPath("Materials/SkySphere.json");
-
 			SkySphere.transform().SetScale(-100000,-100000,-100000);
 		}
 
@@ -49,9 +48,10 @@ void YourGameLauncher::Init() {
 		constexpr float pillarRadius = 1.0f;
 		auto            groundPos = Vector3f(0,-.5f,0);
 		SpawnGround(groundPos);
-		SpawnPillar(groundPos);
-		SpawnHooks(50,pillarRadius,groundPos);
-		SpawnPlayer(0,pillarRadius,{groundPos.x, -0.35f, groundPos.z});
+
+		auto& pillarTransform = SpawnPillar(groundPos);
+		SpawnHooks(50,pillarRadius,pillarTransform);
+		SpawnPlayer(0,pillarRadius,pillarTransform);
 	}
 }
 
@@ -78,8 +78,8 @@ void YourGameLauncher::Update(float delta) {
 				position.y = lerp(lerpPos.y,element.currentHook.transform().GetPosition().y,percentage);
 				element.transform().SetPosition(position);
 
-				auto rotation = element.transform().GetRotation();
-				rotation.y = lerp(lerpRot.y,element.currentHook.transform().GetRotation().y,percentage);
+				auto rotation = element.transform().euler();
+				rotation.y = lerp(lerpRot.y,element.currentHook.transform().euler().y,percentage);
 				element.transform().SetRotation(rotation);
 				return;
 			}
@@ -119,7 +119,7 @@ void YourGameLauncher::Update(float delta) {
 					hook->hasConnection = true;
 
 					lerpPos = element.transform().GetPosition();
-					lerpRot = element.transform().GetRotation();
+					lerpRot = element.transform().euler();
 					return;
 				}
 				GraphicsEngineInstance.debugDrawer.AddDebugLine(position,direction + position,{1.0f,0,0},1.0f);

@@ -31,8 +31,8 @@ void Inspector::RenderImGUi()
 		ImGui::SetNavWindow(ImGui::GetCurrentWindow());
 		toFront = false;
 	}
-	GameObject gameobject;
 
+	GameObject gameobject;
 	const auto& selectedGameObjects = EDITOR_INSTANCE.GetSelectedGameObjects();
 	if (!selectedGameObjects.empty())
 	{
@@ -70,7 +70,7 @@ void Inspector::RenderImGUi()
 		std::vector<const char*> testArray;
 		for_sequence<enumCount>([&testArray](auto i) constexpr { testArray.emplace_back(layers[i].data()); });
 
-		const int flagLayer = static_cast<int>(gameobject.GetLayer());
+		const auto flagLayer = static_cast<int>(gameobject.GetLayer());
 		int       currentLayer = static_cast<int>(std::log2(flagLayer));
 		if (ImGui::Combo("##Tag", &currentLayer, testArray.data(), enumCount))
 		{
@@ -86,7 +86,7 @@ void Inspector::RenderImGUi()
 		ImGui::NewLine();
 		for (const auto& cmp : gameobject.GetAllComponents())
 		{
-			if (cmp->GetTypeInfo().Name() == refl::reflect<Transform>().name.str())
+			if (cmp->GetTypeInfo().Name() == refl::type_descriptor<Transform>::name.str())
 			{
 				continue;
 			}
@@ -96,13 +96,6 @@ void Inspector::RenderImGUi()
 		}
 
 		ImGui::NewLine();
-
-		// for (const auto &i : )
-		//{
-		//     Logger.Log(i.Name());
-		// }
-
-		// ImGui::Combo();
 	}
 
 	ImGui::End();

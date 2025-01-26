@@ -37,7 +37,7 @@ void Transform::Init() {
 void Transform::Update() {
 	OPTICK_EVENT();
 	IsRecentlyUpdated = false;
-#if DoDirtyChecks
+
 	if(GetIsDirty()) {
 		MakeClean();
 		const auto obj = gameObject();
@@ -45,61 +45,23 @@ void Transform::Update() {
 			obj.OnSiblingChanged(&typeid(Transform));
 		}
 	}
-#else
-	MakeClean();
-
-	const auto obj = gameObject();
-	if(obj.IsValid()) {
-		obj.OnSiblingChanged(&typeid(Transform));
-	}
-#endif //
 }
 
 void Transform::SetDirty(bool arg) {
-	arg;
-#if DoDirtyChecks
 	IsDirty = arg;
 
 	for(auto& child : m_Children) {
 		child.transform().SetDirty(true);
 	}
-
-#endif
 }
-  
-bool isOrthogonal(const Matrix& mat,float tolerance = 1e-6) {
-	// Check if mat * mat^T = I (Identity matrix)
-	Matrix transpose = Matrix::Transpose(mat);
-	Matrix result = mat * transpose;
-
-	Matrix identity; 
-
-	// Compare the result with the identity matrix
-	for(int i = 0; i < 16; ++i) {
-		if(std::abs((&result)[i] - (&identity)[i]) > tolerance) {
-			return false;
-		}
-	}
-	return true;
-} 
 
 void Transform::MakeClean() {
 	OPTICK_EVENT();
 	IsRecentlyUpdated = true;
 	MakeSaneRotation();
-	//localMatrix = Matrix::CreateScaleMatrix(myScale) * Matrix::CreateRotationAroundX(myRotation.x * DEG_TO_RAD) *
-	//	Matrix::CreateRotationAroundY(myRotation.y * DEG_TO_RAD) *
-	//	Matrix::CreateRotationAroundZ(myRotation.z * DEG_TO_RAD) *
-	//	Matrix::CreateTranslationMatrix(myPosition);
 
 	const auto scaleMatrix = Matrix::CreateScaleMatrix(myScale);
-	myQuaternion.Normalize();
 	const auto rotationMatrix = myQuaternion.GetRotationAs4x4();
-	const auto det = rotationMatrix.GetDeterminant();
-	assert(std::abs(1- det) < 1e-5f);
-	assert(isOrthogonal(rotationMatrix));
-
-
 	const auto translationMatrix = Matrix::CreateTranslationMatrix(myPosition);
 	localMatrix = scaleMatrix * rotationMatrix * translationMatrix;
 	SetDirty(false);
@@ -126,6 +88,7 @@ const Matrix& Transform::LocalMatrix() {
 	}
 	return localMatrix;
 }
+
 const Matrix& Transform::unmodified_WorldMatrix()const {
 	return worldMatrix;
 }
@@ -145,22 +108,13 @@ const Matrix& Transform::WorldMatrix() {
 	return worldMatrix;
 }
 
-Matrix& Transform::GetMutableTransform() {
-	SetDirty(true);
-	return localMatrix;
-}
-
-const Matrix& Transform::GetRawTransform() const {
-	return localMatrix;
-}
-
 const Quaternionf& Transform::GetQuatF() const {
 	return myQuaternion;
 }
 
 void Transform::SetQuatF(const Quaternionf& a_Rotator) {
 	myQuaternion = a_Rotator;
-	//myRotation = myQuaternion.GetEulerAngles() * RAD_TO_DEG;
+	myInspectorRotation = myQuaternion.GetEulerAngles();
 	SetDirty(true);
 }
 
@@ -259,49 +213,49 @@ void Transform::MakeSaneRotation() {
 	//}
 }
 
-void Transform::Rotate(float X,float Y,float Z) {
-	//myRotation += {X,Y,Z};
-	myQuaternion *= Quaternionf(Vector3f(X,Y,Z));
-	myQuaternion.Normalize();
+void Transform::Rotate(float X,float Y,float Z,eSpace space) {
+	if(space == LOCAL) {
+		myQuaternion = myQuaternion * Quaternionf(Vector3f(X,Y,Z));
+	} else {
+		myQuaternion = Quaternionf(Vector3f(X,Y,Z)) * myQuaternion;
+	}
+
+	myInspectorRotation = myQuaternion.GetEulerAngles();
 	SetDirty(true);
 }
 
-void Transform::Rotate(Vector2f angularRotation) {
-	//myRotation.x += angularRotation.x;
-	//myRotation.y += angularRotation.y;
-	myQuaternion *= Quaternionf(Vector3f(angularRotation.x,angularRotation.y,0));
-	myQuaternion.Normalize();
-	SetDirty(true);
-	// if(worldSpace)
-	//{
-	//	myTransform = Matrix::CreateRotationAroundX(angularRotation.x * DEG_TO_RAD) *
-	//		Matrix::CreateRotationAroundY(angularRotation.y * DEG_TO_RAD) * myTransform;
-	// }
-	// else
-	//{
-	//	myTransform = Matrix::CreateRotationAroundX(angularRotation.x * DEG_TO_RAD) *
-	//		Matrix::CreateRotationAroundY(angularRotation.y * DEG_TO_RAD) * myTransform;
-	// }
-}
+void Transform::Rotate(Vector2f angularRotation,eSpace space) {
+	myQuaternion = Quaternionf(Vector3f(angularRotation.x,angularRotation.y,0)) * myQuaternion;
 
-void Transform::Rotate(Vector3f angularRotation) {
-	//myRotation += angularRotation;
-	myQuaternion *= Quaternionf(angularRotation); 
-	myQuaternion.Normalize();
+	if(space == LOCAL) {
+		myQuaternion = myQuaternion * Quaternionf(Vector3f(X,Y,Z));
+	} else {
+		myQuaternion = Quaternionf(Vector3f(X,Y,Z)) * myQuaternion;
+	}
+
+	myInspectorRotation = myQuaternion.GetEulerAngles();
 	SetDirty(true);
 }
 
-/*
-void Transform::ApplyTransformation(Matrix transformationMatrix)
-{
-	myTransform = transformationMatrix * myTransform;
+void Transform::Rotate(Vector3f angularRotation,eSpace space) {
+	if(space == LOCAL) {
+		myQuaternion = myQuaternion * Quaternionf(angularRotation);
+	} else {
+		myQuaternion = Quaternionf(angularRotation) * myQuaternion;
+	}
+
+	myInspectorRotation = myQuaternion.GetEulerAngles();
+	SetDirty(true);
 }
-*/
 
 void Transform::SetScale(Vector3f scale) {
 	myScale = scale;
 	SetDirty(true);
-	// ApplyTransformation(Matrix::CreateScaleMatrix(scale));
+}
+
+void Transform::Scale(Vector3f scale) {
+	myScale += scale;
+	SetDirty(true);
 }
 
 Vector3f Transform::GetScale() const {
@@ -313,11 +267,7 @@ bool Transform::GetIsRecentlyUpdated() const {
 }
 
 bool Transform::GetIsDirty() const {
-#if DoDirtyChecks
 	return IsDirty;
-#else
-	return false;
-#endif
 }
 
 void Transform::SetGizmo(bool enabled) {
@@ -397,60 +347,64 @@ bool Transform::InspectorView() {
 		return false;
 	}
 
-	constexpr std::array<const char*,2> localGlobal = {"Relative", "World"};
-	static int                           coordinateSpace1 = 0;
-	ImGui::BeginColumns("##Transform",2,ImGuiOldColumnFlags_NoResize);
-	ImGui::Combo("##Location",&coordinateSpace1,localGlobal.data(),2);
-	static int coordinateSpace2 = 0;
-	ImGui::Combo("##Rotation",&coordinateSpace2,localGlobal.data(),2);
-	static int coordinateSpace3 = 0;
-	ImGui::Combo("##Scale",&coordinateSpace3,localGlobal.data(),2);
-	ImGui::NextColumn();
+	//constexpr std::array<const char*,2> localGlobal = {"Relative", "World"};
+	//static int                           coordinateSpace1 = 0;
+	//ImGui::BeginColumns("##Transform",2,ImGuiOldColumnFlags_NoResize);
+	//ImGui::Combo("##Location",&coordinateSpace1,localGlobal.data(),2);
+	//static int coordinateSpace2 = 0;
+	//ImGui::Combo("##Rotation",&coordinateSpace2,localGlobal.data(),2);
+	//static int coordinateSpace3 = 0;
+	//ImGui::Combo("##Scale",&coordinateSpace3,localGlobal.data(),2);
+	//ImGui::NextColumn();
 
-	bool justReleased = false;
-	auto oldValue = myPosition;
-	if(DrawVec3Control("Position",myPosition,0,100,&justReleased)) {
-		CommandBuffer::mainEditorCommandBuffer().addCommand<VarChanged<Transform,Vector3f>>(
-			this,&myPosition,oldValue,myPosition,"Position");
-		if(justReleased) {
-			CommandBuffer::mainEditorCommandBuffer().getLastCommand()->setMergeBlocker(true);
+	{
+		auto oldPosition = myPosition;
+		bool justReleasedPosition = false;
+		if(DrawVec3Control("Position",myPosition,0,100,&justReleasedPosition)) {
+			CommandBuffer::mainEditorCommandBuffer().addCommand<VarChanged<Transform,Vector3f>>(
+				this,&myPosition,oldPosition,myPosition,"Position");
+
+			if(justReleasedPosition) {
+				CommandBuffer::mainEditorCommandBuffer().getLastCommand()->setMergeBlocker(true);
+			}
+			SetDirty(true);
 		}
-		SetDirty(true);
 	}
 
-	justReleased = false;
-	oldValue = myQuaternion.GetEulerAngles();
-	auto rotation = myQuaternion.GetEulerAngles();
+	{
+		auto oldRotation = myInspectorRotation;
+		bool justReleasedRotation = false;
+		if(DrawVec3Control("Euler angles",myInspectorRotation,0,100,&justReleasedRotation)) {
+			CommandBuffer::mainEditorCommandBuffer().addCommand<VarChanged<Transform,Vector3f>>(
+				this,&myInspectorRotation,oldRotation,myInspectorRotation,"Rotation");
 
-	if(DrawVec3Control("Euler angles",rotation,0,100,&justReleased)) {
-		CommandBuffer::mainEditorCommandBuffer().addCommand<VarChanged<Transform,Vector3f>>(
-			this,&rotation,oldValue,rotation,"Rotation");
-		myQuaternion *= Quaternion(oldValue-rotation);
+			if(justReleasedRotation) {
+				CommandBuffer::mainEditorCommandBuffer().getLastCommand()->setMergeBlocker(true);
+			}
 
-		if(justReleased) {
-			CommandBuffer::mainEditorCommandBuffer().getLastCommand()->setMergeBlocker(true);
+			SetQuatF(Quaternion(myInspectorRotation));
 		}
-
-		SetDirty(true);
 	}
 
-	justReleased = false;
-	oldValue = myScale;
-	if(DrawVec3Control("Scale",myScale,1.0f,100,&justReleased)) {
-		CommandBuffer::mainEditorCommandBuffer().addCommand<VarChanged<Transform,Vector3f>>(
-			this,&myScale,oldValue,myScale,"Scale");
-		if(justReleased) {
-			CommandBuffer::mainEditorCommandBuffer().getLastCommand()->setMergeBlocker(true);
+	{
+		auto oldScale = myScale;
+		bool justReleasedScale = false;
+		if(DrawVec3Control("Scale",myScale,1.0f,100,&justReleasedScale)) {
+			CommandBuffer::mainEditorCommandBuffer().addCommand<VarChanged<Transform,Vector3f>>(
+				this,&myScale,oldScale,myScale,"Scale");
+
+			if(justReleasedScale) {
+				CommandBuffer::mainEditorCommandBuffer().getLastCommand()->setMergeBlocker(true);
+			}
+			SetDirty(true);
 		}
-		SetDirty(true);
 	}
+
 	return true;
 }
 
 void Transform::SetRotation(float X,float Y,float Z) {
-	myRotation = {X, Y, Z};
-
-	myQuaternion.SetEulerAngles(myRotation);
+	myQuaternion.SetEulerAngles(Vector3(X,Y,Z));
 #if DoDirtyChecks
 	IsDirty = true;
 #endif
@@ -460,20 +414,27 @@ void Transform::SetRotation(Vector2f angularRotation) {
 	angularRotation;
 	//myRotation.x = angularRotation.x;
 	//myRotation.y = angularRotation.y;
-	myQuaternion.SetEulerAngles(myRotation);
+	myQuaternion.SetEulerAngles(Vector3(angularRotation.x,angularRotation.x,0.f));
+	SetDirty(true);
+}
+
+void Transform::DecomposeMatrixToTransform(const Matrix& aTransformMatrix) {
+	myScale = aTransformMatrix.scale();
+	myPosition = aTransformMatrix.position();
+	myQuaternion = Quaternionf(aTransformMatrix);
+	myInspectorRotation = myQuaternion.GetEulerAngles();
 	SetDirty(true);
 }
 
 void Transform::SetRotation(Vector3f angularRotation) {
 	angularRotation;
 	//myRotation = angularRotation;
-	myQuaternion.SetEulerAngles(myRotation);
+	myQuaternion.SetEulerAngles(angularRotation);
 	SetDirty(true);
 }
 
-Vector3f& Transform::localRotation() {
-	SetDirty(true);
-	return myRotation;
+Vector3f Transform::euler() const {
+	return myQuaternion.GetEulerAngles();
 }
 
 void Transform::LookAt(Vector3f target,Vector3f Up) {
@@ -481,11 +442,6 @@ void Transform::LookAt(Vector3f target,Vector3f Up) {
 	myQuaternion = Quaternionf::LookAt(myPosition,target,GetForward(WORLD),GetUp(WORLD));
 	//myRotation = myQuaternion.GetEulerAngles() * RAD_TO_DEG;
 	SetDirty(true);
-}
-
-Vector3f Transform::GetRotation() const {
-	return myRotation;
-	// return myQuaternion.GetEulerAngles() * DEG_TO_RAD;
 }
 
 Vector3f Transform::VectorToEulerAngles(Vector3f input) const {

@@ -184,7 +184,7 @@ void ContentDirectory::RenderImGUi()
 		OPTICK_EVENT("sorting");
 		std::ranges::sort(m_CurrentDirectoryPaths, [=](const auto& a, const auto& b)
 		{
-			return Levenshtein::distance(a.name, keyTerm) < Levenshtein::distance(b.name, keyTerm);
+			return Math::Levenshtein::distance(a.name, keyTerm) < Math::Levenshtein::distance(b.name, keyTerm);
 		});
 	}
 

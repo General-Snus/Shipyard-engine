@@ -66,7 +66,7 @@ public:
 	DebugFilter filter = DebugFilter::NoFilter;
 
 	inline float FowInRad() const {
-		return DEG_TO_RAD * fow;
+		return Math::DEG_TO_RAD * fow;
 	};
 
 	inline float APRatio() const {

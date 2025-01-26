@@ -616,32 +616,30 @@ void Light::RedrawDirectionMap()
 void Light::RedrawPointMap()
 {
 	OPTICK_EVENT();
-	constexpr float fow = 90.0f * DEG_TO_RAD;
+	constexpr float fow = 90.0f * Math::DEG_TO_RAD;
 	constexpr float nearField = .01f;
 	const float     farfield = std::max(myPointLightData->Range * 5, nearField + 0.0001f);
 
-	const auto dxMatrix = XMMatrixPerspectiveFovLH(fow, 1, farfield, nearField);
+	const auto dxMatrix = DirectX::XMMatrixPerspectiveFovLH(fow,1,farfield,nearField);
 	myPointLightData->projection = Matrix(&dxMatrix);
 
-	for (int i = 0; i < 6; i++)
-	{
+	for(int i = 0; i < 6; i++) {
 		myPointLightData->lightView[i] = GetLightViewMatrix(i);
 	}
 }
 
-void Light::RedrawSpotMap()
-{
+void Light::RedrawSpotMap() {
 	OPTICK_EVENT();
 	const Vector3f lightPosition = mySpotLightData->Position;
 	mySpotLightData->lightView =
-		Matrix::LookAt(lightPosition, lightPosition + mySpotLightData->Direction.GetNormalized(),
-		               {0, 1, 0}); // REFACTOR, Magic value up
+		Matrix::LookAt(lightPosition,lightPosition + mySpotLightData->Direction.GetNormalized(),
+			{0, 1, 0}); // REFACTOR, Magic value up
 
 	const float     fow = mySpotLightData->OuterConeAngle;
 	const float     farfield = mySpotLightData->Range * 2;
 	constexpr float nearField = 0.01f;
 
-	const auto dxMatrix = XMMatrixPerspectiveFovLH(fow * DEG_TO_RAD, 1, farfield, nearField);
+	const auto dxMatrix = DirectX::XMMatrixPerspectiveFovLH(fow * Math::DEG_TO_RAD, 1, farfield, nearField);
 	mySpotLightData->projection = Matrix(&dxMatrix);
 	mySpotLightData->lightView = Matrix::GetFastInverse(mySpotLightData->lightView);
 }

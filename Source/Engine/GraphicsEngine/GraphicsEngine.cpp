@@ -240,7 +240,7 @@ uint64_t GraphicsEngine::RenderFrame(Viewport& renderViewPort,GameObjectManager&
 	}
 	const auto commandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 	const auto commandList = commandQueue->GetCommandList(L"RenderFrame");
-	GPUInstance.ClearRTV(*commandList,renderViewPort.GetTarget());
+	GPU::ClearRTV(*commandList,renderViewPort.GetTarget());
 	return commandQueue->ExecuteCommandList(commandList);
 }
 

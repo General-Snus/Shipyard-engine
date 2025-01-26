@@ -348,6 +348,7 @@
     <ClInclude Include="Defines.h" />
     <ClInclude Include="Core\Paths.h" />
     <ClInclude Include="Windows\EditorWindows\Hierarchy.h" />
+    <ClInclude Include="Windows\EditorWindows\ImageViewer.h" />
     <ClInclude Include="Windows\EditorWindows\Inspector.h" />
     <ClInclude Include="Windows\EditorWindows\EditorWindow.h" />
     <ClInclude Include="Windows\EditorWindows\Viewport.h" />
@@ -371,6 +372,7 @@
     <ClCompile Include="Core\Source\ApplicationState.cpp" />
     <ClCompile Include="Core\Source\Paths.cpp" />
     <ClCompile Include="Windows\EditorWindows\Source\Hierarchy.cpp" />
+    <ClCompile Include="Windows\EditorWindows\Source\ImageViewer.cpp" />
     <ClCompile Include="Windows\EditorWindows\Source\Inspector.cpp" />
     <ClCompile Include="Windows\EditorWindows\Source\EditorWindow.cpp" />
     <ClCompile Include="Core\Source\Editor.cpp" />

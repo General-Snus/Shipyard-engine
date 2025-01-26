@@ -29,7 +29,6 @@ public:
 	// Destructor (compiler generated)
 	~Vector3<T>() = default;
 
-
 	static constexpr std::size_t size() { return {3}; };
 
 	T* begin() { return &x; };
@@ -77,7 +76,7 @@ public:
 		// static_assert(((Indices < -Z) && ...), "Invalid Value");
 		return VectorX<T, sizeof...(Indices)>(getIndex<Indices>()...);
 	}
-
+	std::string	toString();
 private:
 	template <int index>
 	constexpr T getIndex() const
@@ -296,6 +295,11 @@ template <class T>
 constexpr Vector3<T> Vector3<T>::forward()
 {
 	return Vector3<T>(0, 0, 1);
+}
+
+template<class T>
+inline std::string Vector3<T>::toString() {
+	return std::format("{:3} {:3} {:3}",x,y,z);
 }
 
 template <class T>

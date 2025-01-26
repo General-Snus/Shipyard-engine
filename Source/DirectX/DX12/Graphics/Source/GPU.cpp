@@ -4,11 +4,14 @@
 #include <DDSTextureLoader.h>
 #include <ResourceUploadBatch.h>
 #include <WICTextureLoader.h>
+#include <DescriptorHeap.h>
 #include <DirectX/DX12/Graphics/PSO.h>
 #include "DirectX/DX12/Graphics/CommandQueue.h"
 #include "DirectX/DX12/Graphics/eDescriptors.h"
 #include "DirectX/DX12/Graphics/ResourceStateTracker.h"
 #include "DirectX/DX12/Graphics/Texture.h"
+
+using namespace DirectX;
 
 bool GPU::Initialize(HWND aWindowHandle, bool enableDeviceDebug, uint32_t width, uint32_t height)
 {
@@ -313,7 +316,7 @@ HeapHandle GPU::GetHeapHandle(eHeapTypes type)
 	return HeapHandle(descriptorHandleCPU, descriptorHandleGPU, heapOffset);
 }
 
-HeapHandle GPU::GetHeapHandle(DescriptorPile& pile)
+HeapHandle GPU::GetHeapHandle(DirectX::DescriptorPile& pile)
 {
 	const int  heapOffset = static_cast<int>(pile.Allocate());
 	const auto descriptorHandleCPU = pile.GetCpuHandle(heapOffset);

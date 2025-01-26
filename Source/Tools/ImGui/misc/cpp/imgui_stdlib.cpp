@@ -8,6 +8,7 @@
 //   https://github.com/ocornut/imgui/wiki/Useful-Extensions#cness
 
 #include "imgui.h"
+#ifndef IMGUI_DISABLE
 #include "imgui_stdlib.h"
 
 // Clang warnings with -Weverything
@@ -25,7 +26,7 @@ struct InputTextCallback_UserData
 
 static int InputTextCallback(ImGuiInputTextCallbackData* data)
 {
-    const InputTextCallback_UserData* user_data = (InputTextCallback_UserData*)data->UserData;
+    InputTextCallback_UserData* user_data = (InputTextCallback_UserData*)data->UserData;
     if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
     {
         // Resize string callback
@@ -83,3 +84,5 @@ bool ImGui::InputTextWithHint(const char* label, const char* hint, std::string* 
 #if defined(__clang__)
 #pragma clang diagnostic pop
 #endif
+
+#endif // #ifndef IMGUI_DISABLE

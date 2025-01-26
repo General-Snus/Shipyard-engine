@@ -208,8 +208,8 @@ namespace Helpers
 	inline size_t HashRange(const uint32_t* const Begin, const uint32_t* const End, size_t Hash)
 	{
 #if ENABLE_SSE_CRC32
-		auto       Iter64 = reinterpret_cast<const uint64_t*>(::AlignUp(Begin, 8));
-		const auto End64 = reinterpret_cast<const uint64_t*const>(::AlignDown(End, 8));
+		auto       Iter64 = reinterpret_cast<const uint64_t*>(::Math::AlignUp(Begin, 8));
+		const auto End64 = reinterpret_cast<const uint64_t*const>(::Math::AlignDown(End, 8));
 
 		// If not 64-bit aligned, start with a single u32
 		if ((uint32_t*)Iter64 > Begin)

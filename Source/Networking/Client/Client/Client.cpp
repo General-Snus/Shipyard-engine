@@ -205,7 +205,7 @@ bool Client::SetupConnection()
 
 bool Client::SendOK()
 {
-	const std::string username = "User" + std::to_string(RandomEngine::randomInRange(0, 999));
+	const std::string username = "User" + std::to_string(Math::RandomEngine::randomInRange(0, 999));
 
 	HandshakeMessage message;
 	message.SetMessage(username + "\n");

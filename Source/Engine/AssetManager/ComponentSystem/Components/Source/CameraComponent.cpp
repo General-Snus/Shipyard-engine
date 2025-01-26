@@ -11,10 +11,10 @@ Camera::Camera(const SY::UUID anOwnerId,GameObjectManager* aManager)
 	: Component(anOwnerId,aManager),localTransform(0,nullptr) {
 	localTransform.Init();
 	if(!isOrtho) {
-		const auto dxMatrix = XMMatrixPerspectiveFovLH(FowInRad(),APRatio(),farfield,nearField);
+		const auto dxMatrix = DirectX::XMMatrixPerspectiveFovLH(FowInRad(),APRatio(),farfield,nearField);
 		m_Projection = Matrix(&dxMatrix);
 	} else {
-		const auto dxMatrix = XMMatrixOrthographicLH(fow,fow,farfield,nearField);
+		const auto dxMatrix = DirectX::XMMatrixOrthographicLH(fow,fow,farfield,nearField);
 		m_Projection = Matrix(&dxMatrix);
 	}
 
@@ -25,16 +25,16 @@ Camera::Camera(const SY::UUID anOwnerId,GameObjectManager* aManager)
 	pLight.lock()->Color = Vector3f(1,1,1);
 	pLight.lock()->Power = 2000.0f * Kilo;
 	pLight.lock()->Range = 1000;
-	pLight.lock()->Direction = { 0, -1, 0 };
-	pLight.lock()->InnerConeAngle = 10 * DEG_TO_RAD;
-	pLight.lock()->OuterConeAngle = 45 * DEG_TO_RAD;
+	pLight.lock()->Direction = {0, -1, 0};
+	pLight.lock()->InnerConeAngle = 10 * Math::DEG_TO_RAD;
+	pLight.lock()->OuterConeAngle = 45 * Math::DEG_TO_RAD;
 #endif
 }
 
 void Camera::Update() {
 	OPTICK_EVENT();
 	localTransform.Update();
-	UpdateProjection();
+	UpdateProjection(); ViewMatrix();
 	if(IsInControll) {
 		EditorCameraControlls();
 #ifdef Flashlight
@@ -69,7 +69,7 @@ void Camera::EditorCameraControlls() {
 
 	if(Input.IsKeyHeld(Keys::MBUTTON)) {
 		anyMouseKeyHeld = true;
-		const Vector3f movementUp = GlobalUp * Input.GetMousePositionDelta().y * mousePower;
+		const Vector3f movementUp = Math::GlobalUp * Input.GetMousePositionDelta().y * mousePower;
 		const Vector3f movementRight = aTransform.GetRight() * Input.GetMousePositionDelta().x * mousePower;
 		aTransform.Move((movementUp + movementRight) * aTimeDelta * mdf);
 	}
@@ -78,19 +78,35 @@ void Camera::EditorCameraControlls() {
 		anyMouseKeyHeld = true;
 		const Vector3f mouseDeltaVector = {
 			std::abs(Input.GetMousePositionDelta().y) > 0.001f ? -Input.GetMousePositionDelta().y : 0.f,
-			std::abs(Input.GetMousePositionDelta().x) > 0.001f ? Input.GetMousePositionDelta().x : 0.f, 0.0f
+			std::abs(Input.GetMousePositionDelta().x) > 0.001f ? Input.GetMousePositionDelta().x : 0.f,
+			0.0f
 		};
 
-		aTransform.Rotate(mouseDeltaVector * rotationSpeed * aTimeDelta);
+		const auto rotationVector = mouseDeltaVector * rotationSpeed * aTimeDelta;
+
+		const auto eulerRotation = aTransform.euler();
+		bool clamp = rotationVector.x < 0 && eulerRotation.x < -80.0f || rotationVector.x > 0 && eulerRotation.x > 80.0;
+		
+		if(!clamp) {
+			aTransform.Rotate(rotationVector.x);
+		} else {
+			aTransform.SetRotation(eulerRotation); 
+		}
+
+		aTransform.Rotate(0.0f,rotationVector.y,0.0f,WORLD);
+
+
 	}
 
 	if(Input.IsKeyHeld(Keys::MOUSELBUTTON)) {
 		anyMouseKeyHeld = true;
 		const Vector3f mouseDeltaVector = {
-			0.0f, std::abs(Input.GetMousePositionDelta().x) > 0.001f ? Input.GetMousePositionDelta().x : 0.f, 0.0f
+			0.0f,
+			std::abs(Input.GetMousePositionDelta().x) > 0.001f ? Input.GetMousePositionDelta().x : 0.f,
+			0.0f
 		};
-		// Logger.Log(std::format("mouse delta x {}",mouseDeltaVector.y));
-		aTransform.Rotate(mouseDeltaVector * rotationSpeed * aTimeDelta);
+		const auto rotationVector = mouseDeltaVector * rotationSpeed * aTimeDelta;
+		aTransform.Rotate(0.0f,rotationVector.y,0.0f,WORLD);
 
 		Vector3f newForward = aTransform.GetForward() + aTransform.GetUp();
 		newForward.y = 0;
@@ -127,13 +143,15 @@ void Camera::EditorCameraControlls() {
 		}
 
 		if(Input.IsKeyHeld(Keys::E)) {
-			aTransform.Move(GlobalUp * aTimeDelta * mdf);
+			aTransform.Move(Math::GlobalUp * aTimeDelta * mdf);
 		}
 
 		if(Input.IsKeyHeld(Keys::Q)) {
-			aTransform.Move(-GlobalUp * aTimeDelta * mdf);
+			aTransform.Move(-Math::GlobalUp * aTimeDelta * mdf);
 		}
 	}
+
+	//LOGGER.Log(aTransform.euler().toString());
 }
 
 std::array<Vector4f,4> Camera::GetFrustrumCorners() const {
@@ -162,7 +180,7 @@ Vector3f Camera::GetPointerDirection(const Vector2f position) {
 	const Matrix   mvp = Matrix::Invert(ViewMatrix() * GetProjection());
 
 	viewPosition.z = 0.0f;
-	Vector4f outStart = viewPosition * mvp; 
+	Vector4f outStart = viewPosition * mvp;
 	viewPosition.z = 1.0f;
 	Vector4f outEnd = viewPosition * mvp;
 
@@ -183,7 +201,7 @@ Vector3f Camera::GetPointerDirectionNDC(const Vector2f position) const {
 }
 
 const Matrix& Camera::ViewMatrix() {
-	m_CachedViewMatrix = Matrix::Invert(LocalTransform().WorldMatrix());
+	m_CachedViewMatrix = Matrix::Invert(Matrix::NormalizeScale(LocalTransform().WorldMatrix())); 
 	return m_CachedViewMatrix;
 }
 
@@ -192,7 +210,7 @@ FrameBuffer Camera::GetFrameBuffer() {
 	auto& transform = LocalTransform();
 	FrameBuffer buffer;
 	buffer.ProjectionMatrix = m_Projection;
-	buffer.ViewMatrix = Matrix::GetFastInverse(transform.WorldMatrix());
+	buffer.ViewMatrix = m_CachedViewMatrix;
 	buffer.Time = TimerInstance.getDeltaTime();
 	buffer.FB_RenderMode = static_cast<int>(filter);
 	buffer.FB_CameraPosition = transform.GetPosition();
@@ -214,15 +232,15 @@ const Transform& Camera::LocalTransform() const {
 	}
 	return localTransform;
 }
-void Camera::UpdateProjection() { 
-	const auto dxMatrix = XMMatrixPerspectiveFovLH(FowInRad(),APRatio(),farfield,nearField);
+void Camera::UpdateProjection() {
+	const auto dxMatrix = DirectX::XMMatrixPerspectiveFovLH(FowInRad(),APRatio(),farfield,nearField);
 	m_Projection = Matrix(&dxMatrix);
 }
 Vector4f Camera::WoldSpaceToPostProjectionSpace(Vector3f aEntity) {
 	Transform& myTransform = this->gameObject().GetComponent<Transform>();
 
 	// Get actuall world space coordinate
-	Vector4f outPosition = { aEntity.x, aEntity.y, aEntity.z, 1 };
+	Vector4f outPosition = {aEntity.x, aEntity.y, aEntity.z, 1};
 
 	// Punkt -> CameraSpace
 	outPosition = outPosition * Matrix::GetFastInverse(myTransform.LocalMatrix());
@@ -253,14 +271,14 @@ bool Camera::InspectorView() {
 		farfield = std::clamp(farfield,nearField,std::numeric_limits<float>::max());
 		nearField = std::clamp(nearField,0.000001f,farfield);
 		if(!isOrtho) {
-			const auto dxMatrix = XMMatrixPerspectiveFovLH(FowInRad(),APRatio(),farfield,nearField);
+			const auto dxMatrix = DirectX::XMMatrixPerspectiveFovLH(FowInRad(),APRatio(),farfield,nearField);
 			m_Projection = Matrix(&dxMatrix);
 		} else {
 			for(auto& fl : arr) {
 				fl = std::clamp(fl,0.0001f,std::numeric_limits<float>::max());
 			}
 
-			const auto dxMatrix = XMMatrixOrthographicLH(arr[0],arr[1],farfield,nearField);
+			const auto dxMatrix = DirectX::XMMatrixOrthographicLH(arr[0],arr[1],farfield,nearField);
 			m_Projection = Matrix(&dxMatrix);
 		}
 	}

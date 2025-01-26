@@ -3,6 +3,7 @@
 #include "Graphics/GpuResource.h"
 #include "Graphics/GPU.h"
 
+using namespace DirectX;
 VertexResource::VertexResource(std::filesystem::path name): m_NumVertices(0), m_VertexStride(0)
 {
 	m_ResourceName = name;

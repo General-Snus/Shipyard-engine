@@ -104,12 +104,16 @@ Matrix3x3<T>::Matrix3x3(const Matrix4x4<T>& aMatrix)
 template <class T>
 T& Matrix3x3<T>::operator()(const int aRow, const int aColumn)
 {
+	assert(aRow <= 3);
+	assert(aColumn <= 3); 
 	return arr[aRow - 1][aColumn - 1];
 }
 
 template <class T>
 const T& Matrix3x3<T>::operator()(const int aRow, const int aColumn) const
 {
+	assert(aRow <= 3);
+	assert(aColumn <= 3);
 	return arr[aRow - 1][aColumn - 1];
 }
 

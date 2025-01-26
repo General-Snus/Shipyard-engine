@@ -3,10 +3,9 @@
 #include "PillarGameComponents.h"
 #include <Engine/AssetManager/GameResourcesLoader.h>
 
-void SpawnPillar(Vector3f base)
-{
+Transform& SpawnPillar(Vector3f base) {
 	GameObject pillar = GameObject::Create("Pillar");
-	auto&      renderer = pillar.AddComponent<MeshRenderer>("Models/PillarClimb/Pillar.fbx");
+	auto& renderer = pillar.AddComponent<MeshRenderer>("Models/PillarClimb/Pillar.fbx");
 	pillar.transform().SetPosition(base);
 	auto& collider = pillar.AddComponent<Collider>();
 
@@ -14,78 +13,78 @@ void SpawnPillar(Vector3f base)
 	collider.GetColliderAssetOfType<ColliderAssetBox>()->box().GetCenter().y = 25.0f;
 	pillar.AddComponent<cPhysXStaticBody>();
 
-	if (const auto mat = Resources.ForceLoad<Material>("TreeMaterial"))
-	{
+	if(const auto mat = Resources.ForceLoad<Material>("TreeMaterial")) {
 		mat->SetColor(ColorManagerInstance.GetColor("Brown"));
 		renderer.SetMaterial(mat);
 	}
+	return pillar.transform();
 }
 
-void SpawnGround(Vector3f base)
-{
+void SpawnGround(Vector3f base) {
 	GameObject ground = GameObject::Create("ground");
-	auto&      renderer = ground.AddComponent<MeshRenderer>("Models/Cube.fbx");
+	auto& renderer = ground.AddComponent<MeshRenderer>("Models/Cube.fbx");
 	ground.transform().SetPosition(base);
-	ground.transform().SetScale(100, 0.1f, 100.f);
+	ground.transform().SetScale(100,0.1f,100.f);
 
-	if (const auto mat = Resources.ForceLoad<Material>("GroundMaterial"))
-	{
+	if(const auto mat = Resources.ForceLoad<Material>("GroundMaterial")) {
 		mat->SetColor(ColorManagerInstance.GetColor("Olive"));
 		renderer.SetMaterial(mat);
 	}
 	ground.AddComponent<cPhysXStaticBody>();
 }
 
-void SpawnHooks(int amount, float radius, Vector3f base)
-{
-	for (int i = 0; i < amount; ++i)
-	{
-		GameObject attachment = GameObject::Create(std::format("Hook_{}", i));
+void SpawnHooks(int amount,float radius,Transform& parent) {
+	for(int i = 0; i < amount; ++i) {
+		GameObject attachment = GameObject::Create(std::format("Hook_{}",i));
+		attachment.transform().SetParent(parent);
 		attachment.AddComponent<HookComponent>();
 
 		auto& renderer = attachment.AddComponent<MeshRenderer>("Models/PillarClimb/AttachmentPost.fbx");
 
-		if (const auto mat = Resources.ForceLoad<Material>("AttachmentPostMaterial"))
-		{
+		if(const auto mat = Resources.ForceLoad<Material>("AttachmentPostMaterial")) {
 			mat->SetColor(ColorManagerInstance.GetColor("Green"));
 			renderer.SetMaterial(mat);
 		}
 
-		auto& ref = attachment.AddComponent<Collider>(); 
+		auto& ref = attachment.AddComponent<Collider>();
 		ref.GetColliderAssetOfType<ColliderAssetBox>()->box().GetExtent().z = 0.2f;
 		attachment.AddComponent<cPhysXStaticBody>();
 		auto directionOffset =
-			Vector3f(RandomEngine::randomInRange(-1.0f, 1.0f), 0, RandomEngine::randomInRange(-1.0f, 1.0f))
+			Vector3f(Math::RandomEngine::randomInRange(-1.0f,1.0f),0,Math::RandomEngine::randomInRange(-1.0f,1.0f))
 			.GetNormalized();
 
-		auto position = base + directionOffset * radius * 1.25f;
+		auto position = Math::GlobalUp * .5f + directionOffset * radius * 1.25f;
 		position.y = static_cast<float>(i);
 
 		attachment.transform().LookAt(directionOffset * 10.f);
-		attachment.transform().SetRotation(0, attachment.transform().GetRotation().y, 0);
+		attachment.transform().SetRotation(0,attachment.transform().euler().y,0);
 		attachment.transform().SetPosition(position);
 	}
 }
 
-void SpawnPlayer(int id, float radius, Vector3f base)
-{
+void SpawnPlayer(int id,float radius,Transform& parent) {
 	id;
 	GameObject player = GameObject::Create("Player");
 	Scene::activeManager().SetLastGOAsPlayer();
+	player.transform().SetParent(parent);
 
 	const auto directionOffset =
-		Vector3f(RandomEngine::randomInRange(-1.0f, 1.0f), 0, RandomEngine::randomInRange(-1.0f, 1.0f)).GetNormalized();
+		Vector3f(
+			Math::RandomEngine::randomInRange(-1.0f,1.0f),
+			0,
+			Math::RandomEngine::randomInRange(-1.0f,1.0f)
+		).GetNormalized();
+
 	player.transform().LookAt(directionOffset * 10.0f);
-	player.transform().SetPosition(base);
-	//player.AddComponent<cPhysXStaticBody>();
+	player.transform().SetPosition(0,0.5f,0);
 
 	GameObject playerModel = GameObject::Create("PlayerModel");
 	playerModel.AddComponent<MeshRenderer>("Models/PillarClimb/Player.fbx");
 	playerModel.transform().SetParent(player.transform());
-	playerModel.transform().SetPosition(0, 0, -radius * 1.25f);
+	playerModel.transform().SetPosition(0,0,-radius * 1.25f);
 	playerModel.transform().SetScale(.1f);
 
-	/*GameObject test = GameObject::Create("PlayerBackCOllider"); 
+	/*GameObject test = GameObject::Create("PlayerBackCOllider");
 	test.transform().SetParent(player.transform());
 	test.transform().SetPosition(0,0,-radius * 2.25f);
 	test.AddComponent<Collider>();
@@ -98,6 +97,6 @@ void SpawnPlayer(int id, float radius, Vector3f base)
 	camera.AddComponent<MeshRenderer>("Models/Camera/Camera.fbx");
 
 	camera.transform().SetParent(player.transform());
-	camera.transform().SetPosition(0, 0, -2);
+	camera.transform().SetPosition(0,0,-2);
 	player.AddComponent<PlayerComponent>();
 }

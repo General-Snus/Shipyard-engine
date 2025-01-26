@@ -47,8 +47,8 @@ void CombatComponent::Respawn()
 	physicsComponent.ph_Angular_velocity = {0, 0, 0};
 
 	myHealth = 100;
-	transform().SetPosition(RandomEngine::randomInRange<float>(-20, 20), 0,
-	                        RandomEngine::randomInRange<float>(-20, 20));
+	transform().SetPosition(Math::RandomEngine::randomInRange<float>(-20, 20), 0,
+	                        Math::RandomEngine::randomInRange<float>(-20, 20));
 }
 
 void CombatComponent::FireProjectile()
@@ -68,7 +68,7 @@ void CombatComponent::FireProjectile()
 		auto& actorT = transform();
 
 		projectileT.SetPosition(actorT.GetPosition());
-		projectileT.SetRotation(actorT.GetRotation());
+		projectileT.SetRotation(actorT.euler());
 		projectileT.Rotate(90, 0, 0);
 		kinematic.ph_velocity = actorT.GetForward() * myProjectileSpeed;
 

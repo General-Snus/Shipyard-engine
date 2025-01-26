@@ -119,8 +119,8 @@ void cPhysXDynamicBody::Update()
 
 	Vector3f rotation;
 	const Vector4f quat = { pxTransform.q.x,pxTransform.q.y,pxTransform.q.z,pxTransform.q.w };
-	quaternion2Euler(quat,rotation);
-	rotation *= RAD_TO_DEG;
+	Math::quaternion2Euler(quat,rotation);
+	rotation *= Math::RAD_TO_DEG;
 	auto& transform = GetComponent<Transform>();
 
 	const Vector3f position = { pxTransform.p.x,pxTransform.p.y,pxTransform.p.z };

@@ -59,6 +59,10 @@
 
 #include <shellapi.h>
 #include <misc/cpp/WMDropManager.h>
+#include <Windows/EditorWindows/ImageViewer.h>
+#include <imgui_tex_inspect.h>
+#include <backends/tex_inspect_directx11.h>
+#include <backends/tex_inspect_directx12.h>
 
 enum Theme {
 	light,
@@ -355,6 +359,9 @@ bool Editor::Initialize(HWND aHandle) {
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
+	ImGuiTexInspect::Init();
+	ImGuiTexInspect::CreateContext();
+
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
@@ -370,6 +377,7 @@ bool Editor::Initialize(HWND aHandle) {
 		LOGGER.Err("Failed to init IMGUI Dx12");
 	}
 
+	ImGuiTexInspect::ImplDX12_Init(GPUInstance.m_Device.Get(),GPUInstance.m_FrameCount);
 	LoadFont();
 	SetupImGuiStyle(builtIn);
 
@@ -559,12 +567,9 @@ void Editor::FocusObject(const GameObject& focus,bool focusWithOffset) const {
 void Editor::AlignObject(const GameObject& focus) const {
 	for(auto& viewport : m_Viewports) {
 		if(!viewport->IsMainViewport()) {
-			Transform& ref = viewport->GetCameraTransform();
-			const Vector3f position = ref.GetPosition(WORLD);
-			const Vector3f rotation = ref.GetRotation();
-
-			focus.transform().SetRotation(rotation);
-			focus.transform().SetPosition(position);
+			Transform& ref = viewport->GetCameraTransform(); 
+			focus.transform().SetQuatF(ref.GetQuatF());
+			focus.transform().SetPosition(ref.GetPosition(WORLD));
 		}
 	}
 }
@@ -722,6 +727,10 @@ void Editor::TopBar() {
 
 			if(ImGui::Selectable("Frame statistics")) {
 				g_EditorWindows.emplace_back(std::make_shared<FrameStatistics>());
+			}
+
+			if(ImGui::Selectable("Image Viewer")) {
+				g_EditorWindows.emplace_back(std::make_shared<ImageViewer>(m_Viewports.front()->m_RenderTarget));
 			}
 
 			ImGui::EndMenu();

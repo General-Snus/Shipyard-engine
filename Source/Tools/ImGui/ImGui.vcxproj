@@ -46,6 +46,9 @@
     <ClInclude Include="imgui_node_editor.h" />
     <ClInclude Include="imgui_node_editor_internal.h" />
     <ClInclude Include="imgui_notify.h" />
+    <ClInclude Include="imgui_tex_inspect.h" />
+    <ClInclude Include="imgui_tex_inspect_demo.h" />
+    <ClInclude Include="imgui_tex_inspect_internal.h" />
     <ClInclude Include="implot.h" />
     <ClInclude Include="implot_internal.h" />
     <ClInclude Include="ImSequencer.h" />
@@ -57,6 +60,7 @@
     <ClInclude Include="misc\cpp\imgui_stdlib.h" />
     <ClInclude Include="misc\cpp\WMDropManager.h" />
     <ClInclude Include="misc\single_file\imgui_single_file.h" />
+    <ClInclude Include="backends\tex_inspect_directx12.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="backends\imgui_impl_dx12.cpp" />
@@ -73,6 +77,8 @@
     <ClCompile Include="imgui_node_editor.cpp" />
     <ClCompile Include="imgui_node_editor_api.cpp" />
     <ClCompile Include="imgui_tables.cpp" />
+    <ClCompile Include="imgui_tex_inspect.cpp" />
+    <ClCompile Include="imgui_tex_inspect_demo.cpp" />
     <ClCompile Include="imgui_widgets.cpp" />
     <ClCompile Include="implot.cpp" />
     <ClCompile Include="implot_demo.cpp" />
@@ -81,6 +87,7 @@
     <ClCompile Include="misc\cpp\imgui-combo-filter.cpp" />
     <ClCompile Include="misc\cpp\imgui_stdlib.cpp" />
     <ClCompile Include="misc\fonts\binary_to_compressed_c.cpp" />
+    <ClCompile Include="backends\tex_inspect_directx12.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="imgui_bezier_math.inl" />

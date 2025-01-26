@@ -127,7 +127,7 @@ const Transform& Viewport::GetCameraTransform() const {
 // ImGui did not like reverse projection so i put it back to 0-1 depth only for imgui
 Matrix Viewport::Projection() const {
 	const auto& ViewportCamera = GetCamera();
-	const auto dxMatrix = XMMatrixPerspectiveFovLH(ViewportCamera.FowInRad(),ViewportResolution.x/ ViewportResolution.y,
+	const auto dxMatrix = DirectX::XMMatrixPerspectiveFovLH(ViewportCamera.FowInRad(),ViewportResolution.x / ViewportResolution.y,
 		ViewportCamera.nearField,ViewportCamera.farfield);
 	return Matrix(&dxMatrix);
 }
@@ -173,7 +173,7 @@ void Viewport::RenderImGUi() {
 		IsMouseHoverering = isWindowFocused;
 
 		if(IsMouseHoverering) {
-			cursorPositionInViewPort = ImGui::CursorPositionInWindow(); 
+			cursorPositionInViewPort = ImGui::CursorPositionInWindow();
 		}
 
 		if(ImGui::BeginDragDropTarget()) {
@@ -201,26 +201,34 @@ void Viewport::RenderImGUi() {
 			for(auto& gameObject : selectedObjects) {
 				auto& transform = gameObject.transform();
 				Matrix worldMatrix = transform.WorldMatrix();
+				Matrix deltaChange;
 				float snapping = 0.0f;
-				const bool transformed = Manipulate(&cameraView,&cameraProjection,m_CurrentGizmoOperation,
-					m_CurrentGizmoMode,&worldMatrix,nullptr,&snapping);
+				const bool transformed = ImGuizmo::Manipulate(&cameraView,&cameraProjection,m_CurrentGizmoOperation,
+					m_CurrentGizmoMode,&worldMatrix,&deltaChange,&snapping);
 
 				if(transformed) {
 					GetCamera().IsInControl(false);
-					Vector3f loc;
-					Vector3f rot;
-					Vector3f scale;
 					Matrix localMatrix = worldMatrix;
-					if(transform.HasParent()) { 
+					if(transform.HasParent()) {
 						localMatrix = worldMatrix * Matrix::Invert(transform.GetParent().WorldMatrix());
 						// TODO This doesnt support scaled objects, fix asap im eepy now
 					}
 
-					ImGuizmo::DecomposeMatrixToComponents(localMatrix.GetMatrixPtr(),&loc.x,&rot.x,&scale.x);
+					Vector3f tra;
+					Vector3f rot;
+					Vector3f sca;
+					//ImGuizmo::DecomposeMatrixToComponents(&localMatrix,&tra.x,&rot.x,&sca.x);
+					ImGuizmo::DecomposeMatrixToComponents(&deltaChange,&tra.x,&rot.x,&sca.x);
 
-					transform.SetPosition(loc);
-					transform.SetRotation(rot);
-					transform.SetScale(scale); 
+					transform.Scale(sca);
+					transform.Rotate(rot);
+					transform.Move(tra);
+
+					LOGGER.Log(localMatrix.rotationMatrix().toString());
+
+					transform.DecomposeMatrixToTransform(localMatrix);
+
+
 				} else {
 					if(isWindowFocused) {
 						GetCamera().IsInControl(true);

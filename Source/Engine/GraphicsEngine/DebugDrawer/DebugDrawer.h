@@ -38,7 +38,7 @@ public:
 	void Update(float aDeltaTime);
 	void Render(std::shared_ptr<CommandList> commandList);
 
-	PrimitiveHandle DebugRay(const Vector3f& aStart,const Vector3f& aDirection,float length = Mega,const Vector3f& aColor = {1.f, 0.f, 0.f},const float lifetime = 0.0f);
+	PrimitiveHandle DebugRay(const Vector3f& aStart,const Vector3f& aDirection,float length = Math::Mega,const Vector3f& aColor = {1.f, 0.f, 0.f},const float lifetime = 0.0f);
 	PrimitiveHandle AddDebugLine(const Vector3f& aStart,const Vector3f& aFinish,
 		const Vector3f& aColor = {1.f, 0.f, 0.f},float lifetime = 0.0f);
 	PrimitiveHandle AddDebugGizmo(const Vector3f& aCenter,float aLength,float lifetime = 0.0f);

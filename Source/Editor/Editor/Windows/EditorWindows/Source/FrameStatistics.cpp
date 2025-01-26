@@ -67,10 +67,10 @@ void FrameStatistics::RenderImGUi()
 
 		PROCESS_MEMORY_COUNTERS_EX pmc;
 		GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
-		myAverageVirtualMemoryByApp[myDataIndex] = pmc.PrivateUsage / Mega; // megabyte?
+		myAverageVirtualMemoryByApp[myDataIndex] = pmc.PrivateUsage / Math::Mega; // megabyte?
 
 		const SIZE_T physMemUsedByMe = pmc.WorkingSetSize;
-		myAverageMemoryByApp[myDataIndex] = static_cast<float>(physMemUsedByMe) / Mega;
+		myAverageMemoryByApp[myDataIndex] = static_cast<float>(physMemUsedByMe) / Math::Mega;
 
 		myAverageCPUByApp[myDataIndex] = static_cast<float>(App_CPU_Usage());
 

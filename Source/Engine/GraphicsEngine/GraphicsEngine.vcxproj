@@ -660,6 +660,14 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">6.6</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">6.6</ShaderModel>
     </FxCompile>
+    <FxCompile Include="Shaders\Processing\TextureInspectShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|Win32'">Pixel</ShaderType>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Objects\DataObjects\DefaultParticle_P.dds" />

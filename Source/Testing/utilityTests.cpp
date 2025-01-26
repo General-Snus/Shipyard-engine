@@ -333,7 +333,7 @@ TEST(QuaternionTest,RotationFromTo_ArbitraryVectors) {
 
 	Quaternion<float> result = Quaternion<float>::RotationFromTo(from,to);
 	Vector3f axis(0,0,1); // Rotation around Z-axis
-	Quaternion<float> expected = Quaternion<float>::CreateFromAxisAngle(axis,DEG_TO_RAD * 90.0f);
+	Quaternion<float> expected = Quaternion<float>::CreateFromAxisAngle(axis,Math::DEG_TO_RAD * 90.0f);
 
 	EXPECT_TRUE(result.IsClose(expected));
 }
@@ -345,7 +345,7 @@ TEST(QuaternionTest,RotationFromTo_NonUnitVectors) {
 
 	Quaternion<float> result = Quaternion<float>::RotationFromTo(from,to);
 	Vector3f axis(0,0,1); // Rotation around Z-axis
-	Quaternion<float> expected = Quaternion<float>::CreateFromAxisAngle(axis,DEG_TO_RAD * 90.0f);
+	Quaternion<float> expected = Quaternion<float>::CreateFromAxisAngle(axis,Math::DEG_TO_RAD * 90.0f);
 
 	EXPECT_TRUE(result.IsClose(expected));
 }
@@ -443,11 +443,11 @@ TEST(QuaternionTest,Slerp) {
 
 // Test Quaternion slerp
 TEST(QuaternionTest,EulerAngleCheck) {
-
+	//Invalid test, this is not supposed to work like this.
 	for(size_t i = 0; i < 100; i++) {
-		float x = RandomEngine::randomInRange(0.f,360.f);
-		float y = RandomEngine::randomInRange(0.f,360.f);
-		float z = RandomEngine::randomInRange(0.f,360.f);
+		float x = Math::RandomEngine::randomInRange(-180.f,180.f);
+		float y = Math::RandomEngine::randomInRange(-180.f,180.f);
+		float z = Math::RandomEngine::randomInRange(-180.f,180.f);
 		auto euler = Vector3f(x,y,z);
 		Quaternion<float> q1;
 		q1.SetEulerAngles(euler);

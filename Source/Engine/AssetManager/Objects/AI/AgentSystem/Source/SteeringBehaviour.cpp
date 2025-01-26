@@ -14,7 +14,7 @@ void SteeringBehaviour::LookAt(cPhysics_Kinematic* kinematic, Vector3f TargetDir
 	TargetDirection.Normalize();
 	forward.Normalize();
 
-	auto angles = Quaternionf::RotationFromTo(forward, TargetDirection).GetEulerAngles() * RAD_TO_DEG;
+	auto angles = Quaternionf::RotationFromTo(forward, TargetDirection).GetEulerAngles() * Math::RAD_TO_DEG;
 
 	// Scrub data that can accidentaly enter the system from my bad non quaternion math
 	angles.x = 0;
@@ -26,7 +26,7 @@ void SteeringBehaviour::LookAt(cPhysics_Kinematic* kinematic, Vector3f TargetDir
 Vector3f SteeringBehaviour::SetPositionInBounds(Vector3f position, float mapsize)
 {
 	OPTICK_EVENT();
-	return position = {(Mod<float>((position.x), mapsize)), position.y, (Mod<float>((position.z), mapsize))};
+	return position = {(Math::Mod<float>((position.x), mapsize)), position.y, (Math::Mod<float>((position.z), mapsize))};
 }
 
 void SteeringBehaviour::DampenVelocity(cPhysics_Kinematic* kinematic, float strength)
@@ -66,7 +66,7 @@ void SteeringBehaviour::Wander(cPhysics_Kinematic* kinematic, Vector3f forward, 
 {
 	OPTICK_EVENT();
 	// kinematic->ph_Angular_velocity += {0,std::powf(RandomEngine::RandomBinomial(),5)* strength,0};
-	Vector3f randomness = {RandomEngine::randomBinomial(), 0, RandomEngine::randomBinomial()};
+	Vector3f randomness = {Math::RandomEngine::randomBinomial(), 0, Math::RandomEngine::randomBinomial()};
 	randomness.Normalize();
 
 	kinematic->ph_acceleration += (forward + randomness * strength);

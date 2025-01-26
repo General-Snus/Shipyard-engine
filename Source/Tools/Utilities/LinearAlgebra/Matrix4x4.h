@@ -52,6 +52,7 @@ public:
 	static Matrix4x4<T> Invert(const Matrix4x4<T>& aTransform);
 	static T magnitudeOfRow(const Matrix4x4<T>& aMatrix,const int row);
 	static Matrix4x4<T> rotationMatrix(const Matrix4x4<T>& aMatrix);
+	static Matrix4x4<T> NormalizeScale(const Matrix4x4<T>& aTransform);
 
 	static Vector3<T> scale(const Matrix4x4<T>& aMatrix);
 	static Vector3<T> position(const Matrix4x4<T>& aMatrix);
@@ -76,6 +77,7 @@ public:
 	// STRANGER DANGER
 	T* GetMatrixPtr();
 
+	std::string toString(int precicion = 3);
 private:
 	std::array<T,16> arr;
 };
@@ -389,9 +391,9 @@ Matrix4x4<T> Matrix4x4<T>::GetFastInverse(const Matrix4x4<T>& aTransform,const V
 	Rotation = Rotation.Transpose(Rotation);
 
 	Matrix4x4<T> Scale;
-	Scale(1,1) = std::pow(1 / scaling.x,2);
-	Scale(2,2) = std::pow(1 / scaling.y,2);
-	Scale(3,3) = std::pow(1 / scaling.z,2);
+	Scale(1,1) = std::pow(T(1.0f) / scaling.x,T(2.0f));
+	Scale(2,2) = std::pow(T(1.0f) / scaling.y,T(2.0f));
+	Scale(3,3) = std::pow(T(1.0f) / scaling.z,T(2.0f));
 
 	return Transform * Rotation * Scale; // Version 1 no scaling
 }
@@ -493,6 +495,19 @@ inline Matrix4x4<T> Matrix4x4<T>::rotationMatrix(const Matrix4x4<T>& aMatrix) {
 }
 
 template<class T>
+inline Matrix4x4<T> Matrix4x4<T>::NormalizeScale(const Matrix4x4<T>& aMatrix) {
+	const Vector3<T> scaling = aMatrix.scale();
+	Matrix4x4<T> unScaled = aMatrix;
+	for(int i = 1; i < 3; i++) {
+		unScaled(i,1) /= scaling.x;
+		unScaled(i,2) /= scaling.y;
+		unScaled(i,3) /= scaling.z;
+	}
+
+	return unScaled;
+}
+
+template<class T>
 inline Vector3<T> Matrix4x4<T>::scale(const Matrix4x4<T>& aMatrix) {
 	return Vector3<T>(aMatrix.magnitudeOfRow(0),aMatrix.magnitudeOfRow(1),aMatrix.magnitudeOfRow(2));
 }
@@ -505,6 +520,18 @@ inline Vector3<T> Matrix4x4<T>::position(const Matrix4x4<T>& aMatrix) {
 template <class T>
 T* Matrix4x4<T>::GetMatrixPtr() {
 	return arr.data();
+}
+
+template<class T>
+inline std::string Matrix4x4<T>::toString(int precicion) {
+
+	precicion; 
+	return std::format("\n{:3f} {:3f} {:3f} {:3f}\n{:3f} {:3f} {:3f} {:3f}\n{:3f} {:3f} {:3f} {:3f}\n{:3f} {:3f} {:3f} {:3f}\n",
+		arr[0],arr[1],arr[2],arr[3],
+		arr[4],arr[5],arr[6],arr[7],
+		arr[8],arr[9],arr[10],arr[11],
+		arr[12],arr[13],arr[14],arr[15]
+	);
 }
 
 template <class T>

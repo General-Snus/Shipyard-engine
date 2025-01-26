@@ -37,7 +37,7 @@ public:
 	void RotateAroundZ(T aAngle);
 	void RotateAroundAxis(T aAngle,Vector3<T> aAxis);
 
-	Vector3f GetEulerAngles() const;
+	Vector3<T> GetEulerAngles() const;
 	void     SetEulerAngles(const Vector3<T>& aRotation);
 
 	Matrix3x3<T> GetRotationAs3x3();
@@ -70,16 +70,7 @@ public:
 	Quaternion<T> GetNormalized();
 	Quaternion<T> Pow(T t);
 	Quaternion<T> Slerp(const Quaternion<T>& q1,float decimal);
-	Quaternion<T> GetConjugate();
-
-
-
-
-
-
-
-
-
+	Quaternion<T> GetConjugate(); 
 
 	Vector3<T>    GetForward();
 	Vector3<T>    GetUp();
@@ -123,7 +114,7 @@ template <typename T>
 Quaternion<T>::Quaternion() : x(0),y(0),z(0),w(1) {}
 
 template <typename T>
-Quaternion<T>::Quaternion(const Matrix4x4<T>& rotMatrix) : Quaternion<T>(Matrix3x3<T>(rotMatrix)) {}
+Quaternion<T>::Quaternion(const Matrix4x4<T>& rotMatrix) : Quaternion<T>(Matrix3x3<T>(rotMatrix.rotationMatrix())) {}
 
 template <typename T>
 Quaternion<T>::Quaternion(const Matrix3x3<T>& aRotationMatrix) {
@@ -137,14 +128,59 @@ Quaternion<T>::Quaternion(const Matrix3x3<T>& aRotationMatrix) {
 	const auto m20 = aRotationMatrix(3,1);
 	const auto m10 = aRotationMatrix(2,1);
 	const auto m01 = aRotationMatrix(1,2);
+	 
+	float r22 = m22;
+	if(r22 <= 0.f)  // x^2 + y^2 >= z^2 + w^2
+	{
+		float dif10 = m11 - m00;
+		float omr22 = 1.f - r22;
+		if(dif10 <= 0.f)  // x^2 >= y^2
+		{
+			float fourXSqr = omr22 - dif10;
+			float inv4x = 0.5f / sqrtf(fourXSqr);
+			x = fourXSqr * inv4x;
+			y = (m01 + m10) * inv4x;
+			z = (m02 + m20) * inv4x;
+			w = (m12 - m21) * inv4x;
+		} else  // y^2 >= x^2
+		{
+			float fourYSqr = omr22 + dif10;
+			float inv4y = 0.5f / sqrtf(fourYSqr);
+			x = (m01 + m10) * inv4y;
+			y = fourYSqr * inv4y;
+			z = (m12 + m21) * inv4y;
+			w = (m20 - m02) * inv4y;
+		}
+	} else  // z^2 + w^2 >= x^2 + y^2
+	{
+		float sum10 = m11 + m00;
+		float opr22 = 1.f + r22;
+		if(sum10 <= 0.f)  // z^2 >= w^2
+		{
+			float fourZSqr = opr22 - sum10;
+			float inv4z = 0.5f / sqrtf(fourZSqr);
+			x = (m02 + m20) * inv4z;
+			y = (m12 + m21) * inv4z;
+			z = fourZSqr * inv4z;
+			w = (m01 - m10) * inv4z;
+		} else  // w^2 >= z^2
+		{
+			float fourWSqr = opr22 + sum10;
+			float inv4w = 0.5f / sqrtf(fourWSqr);
+			x = (m12 - m21) * inv4w;
+			y = (m20 - m02) * inv4w;
+			z = (m01 - m10) * inv4w;
+			w = fourWSqr * inv4w;
+		}
+	}
 
-	w = std::sqrt(std::max(T(0),1 + m00 + m11 + m22)) / 2;
-	x = std::sqrt(std::max(T(0),1 + m00 - m11 - m22)) / 2;
-	y = std::sqrt(std::max(T(0),1 - m00 + m11 - m22)) / 2;
-	z = std::sqrt(std::max(T(0),1 - m00 - m11 + m22)) / 2;
-	x = std::copysign(x,m21 - m12);
-	y = std::copysign(y,m02 - m20);
-	z = std::copysign(z,m10 - m01);
+	//w = std::sqrt(std::max(T(0),1 + m00 + m11 + m22)) / 2;
+	//x = std::sqrt(std::max(T(0),1 + m00 - m11 - m22)) / 2;
+	//y = std::sqrt(std::max(T(0),1 - m00 + m11 - m22)) / 2;
+	//z = std::sqrt(std::max(T(0),1 - m00 - m11 + m22)) / 2;
+	//x = std::copysign(x,m21 - m12);
+	//y = std::copysign(y,m02 - m20);
+	//z = std::copysign(z,m10 - m01);
 }
 
 template <typename T>
@@ -172,90 +208,63 @@ T* Quaternion<T>::operator&() {
 	return &x;
 }
 
+//Unoptimized on purpose to return clearer angle types
 template <typename T>
-Vector3f Quaternion<T>::GetEulerAngles() const {
-	//const float sqw = w * w;
-	//const float sqx = x * x;
-	//const float sqy = y * y;
-	//const float sqz = z * z;
-	//const float test = 2.0f * (y * w - x * z);
-	//Vector3f    euler;
-	//if(test > .9999f) {
-	//	// heading = rotation about z-axis
-	//	euler.z = (-2.0f * std::atan2f(x,w));
-	//	// bank = rotation about x-axis
-	//	euler.x = 0;
-	//	// attitude = rotation about y-axis
-	//	euler.y = PIHALF;
-	//} else if(test == -1.0) {
-	//	// heading = rotation about z-axis
-	//	euler.z = (2.0f * std::atan2f(x,w));
-	//	// bank = rotation about x-axis
-	//	euler.x = 0;
-	//	// attitude = rotation about y-axis
-	//	euler.y = -PIHALF;
-	//} else {
-	//	// heading = rotation about z-axis
-	//	euler.z = std::atan2f(2.0f * (x * y + z * w),(sqx - sqy - sqz + sqw));
-	//	// bank = rotation about x-axis
-	//	euler.x = std::atan2f(2.0f * (y * z + x * w),(-sqx - sqy + sqz + sqw));
-	//	// attitude = rotation about y-axis
-	//	euler.y = std::asinf(std::clamp<float>(test,-1.0f,1.0f));
-	//}
-	//return RAD_TO_DEG*euler;
+Vector3<T> Quaternion<T>::GetEulerAngles() const {
 
+	auto eulerToReadable = [](const Vector3<T>& arg) -> Vector3<T> {
+		//Vector3<T> returnValue = arg;
+		//returnValue.x += T(180.0);
+		//returnValue.y += T(180.0);
+		//returnValue.z += T(180.0);
+		return arg;
+		};
 
+	const T xx = x * x;
+	const T yy = y * y;
+	const T zz = z * z;
 
+	const T m31 = 2.f * x * z + 2.f * y * w;
+	const T m32 = 2.f * y * z - 2.f * x * w;
+	const T m33 = 1.f - 2.f * xx - 2.f * yy;
 
-	 
+	const T cy = std::sqrt(m33 * m33 + m31 * m31);
+	const T cx = std::atan2(-m32,cy);
+	if(cy > T(16.f * FLT_EPSILON)) {
+		const float m12 = 2.f * x * y + 2.f * z * w;
+		const float m22 = 1.f - 2.f * xx - 2.f * zz;
 
-	// Output Euler angles (radians)
-	float h,p,b;
-
-	// Extract sin(pitch)
-	float sp = -2.0f * (y * z - w * x);
-
-	// Check for Gimbal lock, giving slight tolerance
-	// for numerical imprecision
-	if(fabs(sp) > 0.9999f) {
-
-		// Looking straight up or down
-		p = 1.570796f * sp; // pi/2
-
-		// Compute heading, slam bank to zero
-		h = atan2(-x * z + w * y,0.5f - y * y - z * z);
-		b = 0.0f;
-
+		return eulerToReadable(Math::RAD_TO_DEG * Vector3<T>(cx,std::atan2(m31,m33),std::atan2(m12,m22)));
 	} else {
+		const T m11 = 1.f - 2.f * yy - 2.f * zz;
+		const T m21 = 2.f * x * y - 2.f * z * w;
 
-		// Compute angles
-		p = asin(sp);
-		h = atan2(x * z + w * y,0.5f - x * x - y * y);
-		b = atan2(x * y + w * z,0.5f - x * x - z * z);
+		return eulerToReadable(Math::RAD_TO_DEG * Vector3<T>(cx,0.f,std::atan2(-m21,m11)));
 	}
-
-	return  RAD_TO_DEG * Vector3f(h,p,b);
 }
 
 template <typename T>
 void Quaternion<T>::SetEulerAngles(const Vector3<T>& aRotationInDegrees) {
-	const Vector3<T> aPitchYawRoll = aRotationInDegrees * DEG_TO_RAD;
-	const T          c0 = std::cos(aPitchYawRoll[0] / 2);
-	const T          s0 = std::sin(aPitchYawRoll[0] / 2);
-	const T          c1 = std::cos(aPitchYawRoll[1] / 2);
-	const T          s1 = std::sin(aPitchYawRoll[1] / 2);
-	const T          c2 = std::cos(aPitchYawRoll[2] / 2);
-	const T          s2 = std::sin(aPitchYawRoll[2] / 2);
+	const Vector3<T> aPitchYawRoll = aRotationInDegrees * Math::DEG_TO_RAD;
+	
 
-	const T c0c1 = c0 * c1;
-	const T s0s1 = s0 * s1;
-	const T s0c1 = s0 * c1;
-	const T c0s1 = c0 * s1;
 
-	w = c0c1 * c2 + s0s1 * s2;
-	x = s0c1 * c2 - c0c1 * s2;
-	y = c0s1 * c2 + s0c1 * s2;
-	z = c0c1 * s2 - s0s1 * c2;
+	const float halfpitch = aPitchYawRoll[0] * 0.5f;
+	float cp = cosf(halfpitch);
+	float sp = sinf(halfpitch);
+
+	const float halfyaw = aPitchYawRoll[1] * 0.5f;
+	float cy = cosf(halfyaw);
+	float sy = sinf(halfyaw);
+
+	const float halfroll = aPitchYawRoll[2] * 0.5f;
+	float cr = cosf(halfroll);
+	float sr = sinf(halfroll);
+
+	x = cr * sp * cy + sr * cp * sy;
+	y = cr * cp * sy - sr * sp * cy;
+	z = sr * cp * cy - cr * sp * sy;
+	w = cr * cp * cy + sr * sp * sy;
 };
 
 template <typename T>
@@ -272,36 +281,32 @@ Matrix3x3<T> Quaternion<T>::GetRotationAs3x3() {
 	Normalize();
 
 	Matrix3x3<T> mat;
-	const T      xy = x * y;
-	const T      xz = x * z;
+	const float qx = x;
+	const float qxx = qx * qx;
 
-	const T wx = w * x;
-	const T wy = w * y;
-	const T wz = w * z;
+	const float qy = y;
+	const float qyy = qy * qy;
 
-	const T yz = y * z;
+	const float qz = z;
+	const float qzz = qz * qz;
 
-	const T x2 = x * x;
-	const T y2 = y * y;
-	const T z2 = z * z;
+	const float qw = w;
 
-	mat(1,1) = 1 - (2 * y2 - 2 * z2);
-	mat(1,2) = (2 * xy - 2 * wz);
-	mat(1,3) = (2 * xz + 2 * wy);
-
-	mat(2,1) = (2 * xy + 2 * wz);
-	mat(2,2) = 1 - (2 * x2 - 2 * z2);
-	mat(2,3) = (2 * yz - 2 * wx);
-
-	mat(3,1) = (2 * xz - 2 * wy);
-	mat(3,2) = (2 * yz + 2 * wx);
-	mat(3,3) = 1 - (2 * x2 + 2 * y2);
+	mat(1,1) = 1.f - 2.f * qyy - 2.f * qzz;
+	mat(1,2) = 2.f * qx * qy + 2.f * qz * qw;
+	mat(1,3) = 2.f * qx * qz - 2.f * qy * qw;
+	mat(2,1) = 2.f * qx * qy - 2.f * qz * qw;
+	mat(2,2) = 1.f - 2.f * qxx - 2.f * qzz;
+	mat(2,3) = 2.f * qy * qz + 2.f * qx * qw;
+	mat(3,1) = 2.f * qx * qz + 2.f * qy * qw;
+	mat(3,2) = 2.f * qy * qz - 2.f * qx * qw;
+	mat(3,3) = 1.f - 2.f * qxx - 2.f * qyy;
 
 	return mat;
 }
 
 template <typename T>
-Matrix4x4<T> Quaternion<T>::GetRotationAs4x4()   {
+Matrix4x4<T> Quaternion<T>::GetRotationAs4x4() {
 	Matrix4x4<T> mat;
 	Matrix3x3<T> mat3x3 = GetRotationAs3x3();
 
@@ -377,7 +382,7 @@ void Quaternion<T>::SetRotation(const Matrix3x3<T>& m) {
 }
 
 template<typename T>
-inline void Quaternion<T>::SetRotation(const Matrix4x4<T>& aRotation) {}
+inline void Quaternion<T>::SetRotation(const Matrix4x4<T>& aRotation) { SetRotation(aRotation.rotationMatrix()); }
 
 template <typename T>
 Quaternion<T> Quaternion<T>::RotationFromTo(const Vector3f& aFrom,const Vector3f& aTo) {
@@ -418,7 +423,7 @@ Quaternion<T> Quaternion<T>::LookAt(const Vector3<T>& source,const Vector3<T>& d
 
 
 	if(std::abs(dot + 1.0f) < 0.000001f) {
-		return CreateFromAxisAngle(up,PI);
+		return CreateFromAxisAngle(up,Math::PI);
 	}
 	if(std::abs(dot - 1.0f) < 0.000001f) {
 		return Quaternion();
@@ -471,12 +476,13 @@ template<typename T>
 inline T Quaternion<T>::Dot(const Quaternion<T>& q1,const Quaternion<T>& q2) {
 	return q1.xyzw.Dot(q2.xyzw);
 }
+
 template<typename T>
 inline Quaternion<T> Quaternion<T>::GetInverse(const Quaternion<T>& q1) {
 
 	const auto sqr = GetMagnitudeSquared(q1);
 
-	if(sqr == 0) {
+	if(sqr < Math::Epsilon) {
 		return Quaternion<T>();
 	}
 
@@ -492,12 +498,12 @@ template<typename T>
 Quaternion<T> Quaternion<T>::GetNormalized(const Quaternion<T>& q1) {
 	const float n = GetMagnitudeSquared(q1);
 
-	if(std::abs(n-1.0f) < Epsilon) {
+	if(std::abs(n - 1.0f) < Math::Epsilon) {
 		return  q1;
 	}
 
 	const T invLen = (1.0f / sqrt(n));
-	return Quaternion<T>(q1.x* invLen,q1.y * invLen,q1.z * invLen,q1.w * invLen);
+	return Quaternion<T>(q1.x * invLen,q1.y * invLen,q1.z * invLen,q1.w * invLen);
 }
 
 template<typename T>
@@ -626,13 +632,34 @@ Quaternion<T> operator*(const Quaternion<T>& x,T1 y) {
 
 template <typename T>
 Quaternion<T> operator*(const Quaternion<T>& lhf,const Quaternion<T>& rhf) {
-	return
-	{
-		lhf.w * rhf.x + lhf.x * rhf.w + lhf.y * rhf.z - lhf.z * rhf.y,
-		lhf.w * rhf.y + lhf.y * rhf.w + lhf.z * rhf.x - lhf.x * rhf.z,
-		lhf.w * rhf.z + lhf.z * rhf.w + lhf.x * rhf.y - lhf.y * rhf.x,
-		lhf.w * rhf.w - lhf.x * rhf.x - lhf.y * rhf.y - lhf.z * rhf.z
-	};
+	
+	const Vector4<T> lwwww= Vector4<T>(lhf.w,lhf.w,lhf.w,lhf.w);
+
+	const Vector4<T> rxyzw= Vector4<T>(rhf.x,rhf.y,rhf.z,rhf.w);
+
+	const Vector4<T> lxyzx = Vector4<T>(lhf.x,lhf.y,lhf.z,lhf.x);
+
+	const Vector4<T> rwwwx = Vector4<T>(rhf.w,rhf.w,rhf.w,rhf.x);
+
+	const Vector4<T> lyzxy= Vector4<T>(lhf.y,lhf.z,lhf.x,lhf.y);
+
+	const Vector4<T> realNegate = Vector4<T>(1.0,1.0,1.0,-1.0);
+
+	const Vector4<T> rzxyy = Vector4<T>(rhf.z,rhf.x,rhf.y,rhf.y);
+
+	const Vector4<T> lzxyz = Vector4<T>(lhf.z,lhf.x,lhf.y,lhf.z);
+
+	const Vector4<T> ryzxz = Vector4<T>(rhf.y,rhf.z,rhf.x,rhf.z);
+	
+	return Quaternion<T>(lwwww * rxyzw + (lxyzx * rwwwx + lyzxy * rzxyy) * realNegate - lzxyz * ryzxz);
+
+	//return
+	//{
+	//	lhf.w * rhf.x + lhf.x * rhf.w + lhf.y * rhf.z - lhf.z * rhf.y,
+	//	lhf.w * rhf.y + lhf.y * rhf.w + lhf.z * rhf.x - lhf.x * rhf.z,
+	//	lhf.w * rhf.z + lhf.z * rhf.w + lhf.x * rhf.y - lhf.y * rhf.x,
+	//	lhf.w * rhf.w - lhf.x * rhf.x - lhf.y * rhf.y - lhf.z * rhf.z
+	//};
 }
 
 template <typename T>

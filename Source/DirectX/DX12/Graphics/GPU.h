@@ -64,7 +64,7 @@ public:
 	                             IndexResource& indexResource);
 
 	HeapHandle GetHeapHandle(eHeapTypes type);
-	HeapHandle GetHeapHandle(DescriptorPile& pile);
+	HeapHandle GetHeapHandle(DirectX::DescriptorPile& pile);
 
 	template <typename vertexType>
 	static bool CreateVertexBuffer(const std::shared_ptr<CommandList>& commandList, VertexResource& outVxBufferView,
@@ -158,9 +158,9 @@ public:
 	D3D12_VIEWPORT                  m_Viewport;
 	D3D12_RECT                      m_ScissorRect;
 	std::shared_ptr<Texture>        m_DepthBuffer;
-	std::shared_ptr<GraphicsMemory> m_GraphicsMemory;
+	std::shared_ptr<DirectX::GraphicsMemory> m_GraphicsMemory;
 
-	std::unique_ptr<DescriptorPile> m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_COUNT)];
+	std::unique_ptr<DirectX::DescriptorPile> m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_COUNT)];
 	std::array<size_t, static_cast<int>(eHeapTypes::HEAP_COUNT)> m_HeapSizes;
 };
 

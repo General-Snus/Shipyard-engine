@@ -7,8 +7,7 @@
 #include "VectorX.hpp"
 
 template <class T>
-class Vector4
-{
+class Vector4 {
 public:
 	T x;
 	T y;
@@ -17,9 +16,9 @@ public:
 	// Creates a null-vector
 	Vector4<T>();
 	// Creates a vector (aX, aY, aZ)
-	Vector4<T>(const T& aX, const T& aY, const T& aZ, const T& aW);
-	Vector4<T>(const Vector3<T>& aVector, const T& aW);
-	Vector4<T>(const VectorX<T, 4>& aVector);
+	Vector4<T>(const T& aX,const T& aY,const T& aZ,const T& aW);
+	Vector4<T>(const Vector3<T>& aVector,const T& aW);
+	Vector4<T>(const VectorX<T,4>& aVector);
 
 	// Copy constructor (compiler generated)
 	Vector4<T>(const Vector4<T>& aVector) = default;
@@ -37,13 +36,11 @@ public:
 	T* begin() const { return &x; };
 	T* end() const { return &x + size(); };
 
-	operator std::initializer_list<T>() const
-	{
+	operator std::initializer_list<T>() const {
 		return {x, y, z, w};
 	}
 
-	operator std::array<T, 4>() const
-	{
+	operator std::array<T,4>() const {
 		return {x, y, z, w};
 	}
 
@@ -55,7 +52,7 @@ public:
 	Vector4<T> operator-() const;
 
 	// Returns the array vector
-	T&       operator[](int value);
+	T& operator[](int value);
 	const T& operator[](int value) const;
 
 	// Returns the squared length of the vector
@@ -76,60 +73,60 @@ public:
 };
 
 template <class T>
-Vector4<T> MinVector(const Vector4<T>& a, const Vector4<T>& b)
-{
-	return Vector4<T>((a < b.x) ? a.x : b.x, (a < b.y) ? a.y : b.y, (a < b.z) ? a.z : b.z, (a < b.w) ? a.w : b.w);
+Vector4<T> MinVector(const Vector4<T>& a,const Vector4<T>& b) {
+	return Vector4<T>((a < b.x) ? a.x : b.x,(a < b.y) ? a.y : b.y,(a < b.z) ? a.z : b.z,(a < b.w) ? a.w : b.w);
 }
 
 template <class T>
-Vector4<T> MaxVector(const Vector4<T>& a, const Vector4<T>& b)
-{
-	return Vector4<T>((a > b.x) ? a.x : b.x, (a > b.y) ? a.y : b.y, (a > b.z) ? a.z : b.z, (a > b.w) ? a.w : b.w);
+Vector4<T> MaxVector(const Vector4<T>& a,const Vector4<T>& b) {
+	return Vector4<T>((a > b.x) ? a.x : b.x,(a > b.y) ? a.y : b.y,(a > b.z) ? a.z : b.z,(a > b.w) ? a.w : b.w);
 }
 
 // Returns the vector sum of aVector0 and aVector1
 template <class T>
-Vector4<T> operator+(const Vector4<T>& aVector0, const Vector4<T>& aVector1)
-{
-	return Vector4<T>(aVector0.x + aVector1.x, aVector0.y + aVector1.y, aVector0.z + aVector1.z,
-	                  aVector0.w + aVector1.w);
+Vector4<T> operator+(const Vector4<T>& aVector0,const Vector4<T>& aVector1) {
+	return Vector4<T>(aVector0.x + aVector1.x,aVector0.y + aVector1.y,aVector0.z + aVector1.z,
+		aVector0.w + aVector1.w);
 }
+
+
+
 
 // Returns the vector difference of aVector0 and aVector1
 template <class T>
-Vector4<T> operator-(const Vector4<T>& aVector0, const Vector4<T>& aVector1)
-{
-	return Vector4<T>(aVector0.x - aVector1.x, aVector0.y - aVector1.y, aVector0.z - aVector1.z,
-	                  aVector0.w - aVector1.w);
+Vector4<T> operator-(const Vector4<T>& aVector0,const Vector4<T>& aVector1) {
+	return Vector4<T>(aVector0.x - aVector1.x,aVector0.y - aVector1.y,aVector0.z - aVector1.z,
+		aVector0.w - aVector1.w);
 }
 
 // Returns the vector aVector multiplied by the scalar aScalar
 template <class T>
-Vector4<T> operator*(const Vector4<T>& aVector, const T& aScalar)
-{
-	return Vector4<T>(aVector.x * aScalar, aVector.y * aScalar, aVector.z * aScalar, aVector.w * aScalar);
+Vector4<T> operator*(const Vector4<T>& aVector,const T& aScalar) {
+	return Vector4<T>(aVector.x * aScalar,aVector.y * aScalar,aVector.z * aScalar,aVector.w * aScalar);
 }
 
 // Returns the vector aVector multiplied by the scalar aScalar
 template <class T>
-Vector4<T> operator*(const T& aScalar, const Vector4<T>& aVector)
-{
-	return Vector4<T>(aVector.x * aScalar, aVector.y * aScalar, aVector.z * aScalar, aVector.w * aScalar);
+Vector4<T> operator*(const T& aScalar,const Vector4<T>& aVector) {
+	return Vector4<T>(aVector.x * aScalar,aVector.y * aScalar,aVector.z * aScalar,aVector.w * aScalar);
+}
+
+template <class T>
+Vector4<T> operator*(const Vector4<T>& lhf,const Vector4<T>& rhf) {
+	return Vector4<T>(lhf.x * rhf.x,lhf.y * rhf.y,lhf.z * rhf.z,lhf.w * rhf.w);
 }
 
 // Returns the vector aVector divided by the scalar aScalar (equivalent to aVector multiplied by 1 / aScalar)
 template <class T>
-Vector4<T> operator/(const Vector4<T>& aVector, const T& aScalar)
-{
+Vector4<T> operator/(const Vector4<T>& aVector,const T& aScalar) {
 	const T mlt = (1 / aScalar);
 
-	return Vector4<T>(aVector.x * mlt, aVector.y * mlt, aVector.z * mlt, aVector.w * mlt);
+	return Vector4<T>(aVector.x * mlt,aVector.y * mlt,aVector.z * mlt,aVector.w * mlt);
 }
 
 // Equivalent to setting aVector0 to (aVector0 + aVector1)
 template <class T>
-void operator+=(Vector4<T>& aVector0, const Vector4<T>& aVector1)
-{
+void operator+=(Vector4<T>& aVector0,const Vector4<T>& aVector1) {
 	aVector0.x = aVector0.x + aVector1.x;
 	aVector0.y = aVector0.y + aVector1.y;
 	aVector0.z = aVector0.z + aVector1.z;
@@ -138,8 +135,7 @@ void operator+=(Vector4<T>& aVector0, const Vector4<T>& aVector1)
 
 // Equivalent to setting aVector0 to (aVector0 - aVector1)
 template <class T>
-void operator-=(Vector4<T>& aVector0, const Vector4<T>& aVector1)
-{
+void operator-=(Vector4<T>& aVector0,const Vector4<T>& aVector1) {
 	aVector0.x = aVector0.x - aVector1.x;
 	aVector0.y = aVector0.y - aVector1.y;
 	aVector0.z = aVector0.z - aVector1.z;
@@ -148,8 +144,7 @@ void operator-=(Vector4<T>& aVector0, const Vector4<T>& aVector1)
 
 // Equivalent to setting aVector to (aVector * aScalar)
 template <class T>
-void operator*=(Vector4<T>& aVector, const T& aScalar)
-{
+void operator*=(Vector4<T>& aVector,const T& aScalar) {
 	aVector.x = aVector.x * aScalar;
 	aVector.y = aVector.y * aScalar;
 	aVector.z = aVector.z * aScalar;
@@ -158,8 +153,7 @@ void operator*=(Vector4<T>& aVector, const T& aScalar)
 
 // Equivalent to setting aVector to (aVector / aScalar)
 template <class T>
-void operator/=(Vector4<T>& aVector, const T& aScalar)
-{
+void operator/=(Vector4<T>& aVector,const T& aScalar) {
 	aVector.x = aVector.x / aScalar;
 	aVector.y = aVector.y / aScalar;
 	aVector.z = aVector.z / aScalar;
@@ -168,43 +162,37 @@ void operator/=(Vector4<T>& aVector, const T& aScalar)
 
 
 template <class T>
-Vector4<T>& Vector4<T>::operator=(const T& aTypeT)
-{
-	x, y, z, w = aTypeT;
+Vector4<T>& Vector4<T>::operator=(const T& aTypeT) {
+	x,y,z,w = aTypeT;
 	return *this;
 }
 
 template <class T>
-Vector4<T> Vector4<T>::operator-() const
-{
-	return Vector4<T>(-x, -y, -z, -w);
+Vector4<T> Vector4<T>::operator-() const {
+	return Vector4<T>(-x,-y,-z,-w);
 }
 
 template <class T>
-T Vector4<T>::LengthSqr() const
-{
+T Vector4<T>::LengthSqr() const {
 	return static_cast<T>(x * x + y * y + z * z + w * w);
 }
 
 template <class T>
-T Vector4<T>::Length() const
-{
+T Vector4<T>::Length() const {
 	return static_cast<T>(sqrt(LengthSqr()));
 }
 
 template <class T>
-Vector4<T> Vector4<T>::GetNormalized() const
-{
+Vector4<T> Vector4<T>::GetNormalized() const {
 	if(x == T(0) && y == T(0) && z == T(0) && w == T(0)) {
 		return Vector4<T>(T(0),T(0),T(0),T(0));
 	}
 	const T len = 1 / Length();
-	return Vector4<T>(x * len, y * len, z * len, w * len);
+	return Vector4<T>(x * len,y * len,z * len,w * len);
 }
 
 template <class T>
-void Vector4<T>::Normalize()
-{
+void Vector4<T>::Normalize() {
 	const T len = 1 / Length();
 
 	x = x * len;
@@ -214,8 +202,7 @@ void Vector4<T>::Normalize()
 }
 
 template <class T>
-T Vector4<T>::Dot(const Vector4<T>& aVector) const
-{
+T Vector4<T>::Dot(const Vector4<T>& aVector) const {
 	return x * aVector.x + y * aVector.y + z * aVector.z + w * aVector.w;
 }
 
@@ -225,8 +212,7 @@ inline Vector3<T> Vector4<T>::xyz() const {
 }
 
 template <class T>
-Vector4<T>::Vector4()
-{
+Vector4<T>::Vector4() {
 	x = 0;
 	y = 0;
 	z = 0;
@@ -234,90 +220,71 @@ Vector4<T>::Vector4()
 }
 
 template <class T>
-Vector4<T>::Vector4(const T& aX, const T& aY, const T& aZ, const T& aW)
-{
-	x = aX;
-	y = aY;
-	z = aZ;
-	w = aW;
-}
+Vector4<T>::Vector4(const T& aX,const T& aY,const T& aZ,const T& aW) : x(aX),y(aY),z(aZ),w(aW) {}
 
 template <class T>
-Vector4<T>::Vector4(const Vector3<T>& aVector, const T& aW)
-{
-	x = aVector.x;
-	y = aVector.y;
-	z = aVector.z;
-	w = aW;
-}
+Vector4<T>::Vector4(const Vector3<T>& aVector,const T& aW) : x(aVector.x),y(aVector.y),z(aVector.z),w(aW) {}
 
 template <class T>
-Vector4<T>::Vector4(const VectorX<T, 4>& aVector) : x(aVector[0]), y(aVector[1]), z(aVector[2]), w(aVector[3])
-{
-}
+Vector4<T>::Vector4(const VectorX<T,4>& aVector) : x(aVector[0]),y(aVector[1]),z(aVector[2]),w(aVector[3]) {}
 
 template <class T>
 template <class U>
-Vector4<T>::operator U() const
-{
+Vector4<T>::operator U() const {
 	return {x, y, z, w};
 }
 
 template <class T>
-T& Vector4<T>::operator[](int value)
-{
+T& Vector4<T>::operator[](int value) {
 	assert(value >= 0 && value <= 4);
-	switch (value)
-	{
+	switch(value) {
 	case 0:
-		{
-			return x;
-		}
+	{
+		return x;
+	}
 	case 1:
-		{
-			return y;
-		}
+	{
+		return y;
+	}
 	case 2:
-		{
-			return z;
-		}
+	{
+		return z;
+	}
 	case 3:
-		{
-			return w;
-		}
+	{
+		return w;
+	}
 	default:
-		{
-			return x;
-		}
+	{
+		return x;
+	}
 	}
 }
 
 template <class T>
-const T& Vector4<T>::operator[](int value) const
-{
+const T& Vector4<T>::operator[](int value) const {
 	assert(value >= 0 && value <= 4);
-	switch (value)
-	{
+	switch(value) {
 	case 0:
-		{
-			return x;
-		}
+	{
+		return x;
+	}
 	case 1:
-		{
-			return y;
-		}
+	{
+		return y;
+	}
 	case 2:
-		{
-			return z;
-		}
+	{
+		return z;
+	}
 	case 3:
-		{
-			return w;
-		}
+	{
+		return w;
+	}
 	default:
-		{
-			return x;
-		}
+	{
+		return x;
+	}
 	}
 }
 
@@ -326,10 +293,8 @@ using Vector4i = Vector4<int>;
 using Vector4ui = Vector4<unsigned int>;
 
 template <>
-struct std::hash<Vector4f>
-{
-	std::size_t operator()(const Vector4f& vector) const noexcept
-	{
+struct std::hash<Vector4f> {
+	std::size_t operator()(const Vector4f& vector) const noexcept {
 		std::size_t                seed = 0;
 		constexpr std::hash<float> hasher;
 

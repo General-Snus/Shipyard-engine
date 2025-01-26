@@ -36,7 +36,7 @@ void PopUpContextForAsset(std::shared_ptr<asset>& replace)
 			}
 
 			const std::string name = path.filename().string();
-			if (!keyTerm.empty() && Levenshtein::distance(name, keyTerm) >= Levenshtein::maxSize(name, keyTerm))
+			if (!keyTerm.empty() && Math::Levenshtein::distance(name, keyTerm) >= Math::Levenshtein::maxSize(name, keyTerm))
 			{
 				continue;
 			}
@@ -48,7 +48,7 @@ void PopUpContextForAsset(std::shared_ptr<asset>& replace)
 		{
 			std::ranges::sort(sortedList, [=](const localPair& a, const localPair& b)
 			{
-				return Levenshtein::distance(a.first, keyTerm) < Levenshtein::distance(b.first, keyTerm);
+				return Math::Levenshtein::distance(a.first, keyTerm) < Math::Levenshtein::distance(b.first, keyTerm);
 			});
 		}
 

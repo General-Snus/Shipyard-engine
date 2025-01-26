@@ -16,9 +16,9 @@ public:
 	{
 		if (!inclusive)
 		{
-			return RandomEngine::randomInRange<T>(from, to);
+			return Math::RandomEngine::randomInRange<T>(from, to);
 		}
-		return RandomEngine::randomInRange<T>(from, to + 1);
+		return Math::RandomEngine::randomInRange<T>(from, to + 1);
 	}
 
 	T lerp(float t) const
