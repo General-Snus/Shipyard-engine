@@ -105,9 +105,6 @@
     <ClInclude Include="imgui_tex_inspect.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="imgui_tex_inspect_demo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="backends\tex_inspect_directx12.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -180,9 +177,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="imgui_tex_inspect.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_tex_inspect_demo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="backends\tex_inspect_directx12.cpp">

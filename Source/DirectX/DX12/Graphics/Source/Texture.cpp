@@ -52,7 +52,7 @@ bool Texture::AllocateTexture(const Vector2ui dimentions,const std::filesystem::
 	const CD3DX12_CLEAR_VALUE clearValue = {Format, &m_ClearColor.x};
 
 	Helpers::ThrowIfFailed(GPUInstance.m_Device->CreateCommittedResource(
-		&heapProps,D3D12_HEAP_FLAG_NONE,&txtDesc,D3D12_RESOURCE_STATE_COPY_DEST,&clearValue,
+		&heapProps,D3D12_HEAP_FLAG_NONE,&txtDesc,D3D12_RESOURCE_STATE_COMMON,&clearValue,
 		IID_PPV_ARGS(m_Resource.ReleaseAndGetAddressOf())));
 	m_Resource->SetName(name.wstring().c_str());
 
@@ -174,4 +174,63 @@ void Texture::SetView(ViewType view) {
 		break;
 	}
 	m_RecentBoundType = view;
+}
+
+size_t Texture::GetMemorySize() {
+	return BitsPerPixel(m_Resource->GetDesc().Format) * 8 * GetWidth() * GetHeight();
+}
+
+bool Texture::CopyDataInto(void* destination) {
+
+	const auto commandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+	const auto commandList = commandQueue->GetCommandList();
+
+
+
+	D3D12_RESOURCE_DESC resourceDesc = m_Resource->GetDesc();
+	resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE; // Make sure no flags that prevent CPU access are set
+	resourceDesc.Alignment = 0;
+	resourceDesc.MipLevels = 1;
+	resourceDesc.SampleDesc.Count = 1;
+	resourceDesc.SampleDesc.Quality = 0;
+
+	D3D12_HEAP_PROPERTIES heapProperties = {};
+	heapProperties.Type = D3D12_HEAP_TYPE_READBACK;
+
+	ComPtr<ID3D12Resource> stagingResource;
+	auto hr = GPUInstance.m_Device->CreateCommittedResource(
+		&heapProperties,
+		D3D12_HEAP_FLAG_NONE,
+		&resourceDesc,
+		D3D12_RESOURCE_STATE_COPY_DEST, // Initial state
+		nullptr, // Clear value
+		IID_PPV_ARGS(&stagingResource)
+	);
+
+	if(FAILED(hr)) {
+		return false;
+	}
+
+	commandList->TransitionBarrier(*this,D3D12_RESOURCE_STATE_COPY_SOURCE,D3D12_RESOURCE_STATE_COPY_DEST);
+
+	commandList->CopyResource(stagingResource.Get(),m_Resource);
+	commandList->TransitionBarrier(*this,D3D12_RESOURCE_STATE_COPY_DEST,D3D12_RESOURCE_STATE_COPY_SOURCE);
+
+	auto fence = commandQueue->ExecuteCommandList(commandList);
+	commandQueue->WaitForFenceValue(fence);
+
+	void* data;
+	hr = stagingResource->Map(0,nullptr,&data);
+	if(SUCCEEDED(hr)) {
+		memcpy(destination,data,GetMemorySize());
+		stagingResource->Unmap(0,nullptr);
+		return true;
+	}
+
+	return false;
+}
+
+bool Texture::CopyDataInto(void* destination,Vector2ui pixel,Vector2ui rect) {
+	destination; pixel; rect;
+	return false;
 }

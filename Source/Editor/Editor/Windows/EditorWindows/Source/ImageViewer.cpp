@@ -19,9 +19,8 @@ void ImageViewer::RenderImGUi() {
 	if(flipX)  flags |= ImGuiTexInspect::InspectorFlags_FlipX;
 	if(flipY) flags |= ImGuiTexInspect::InspectorFlags_FlipY;
 
-	auto v2 = ImVec2((float)texture->GetResolution().x,(float)texture->GetResolution().y);
-	const ImTextureID id = texture->GetHandle(ViewType::SRV).gpuPtr.ptr;
-	if(ImGuiTexInspect::BeginInspectorPanel("##ColorFilters",id,v2,flags)) {
+	auto v2 = ImVec2((float)texture->GetResolution().x,(float)texture->GetResolution().y); 
+	if(ImGuiTexInspect::BeginInspectorPanel("##ColorFilters",texture.get(),v2,flags)) {
  		ImGuiTexInspect::DrawAnnotations(ImGuiTexInspect::ValueText(ImGuiTexInspect::ValueText::BytesDec));
 	}
 
@@ -34,11 +33,6 @@ void ImageViewer::RenderImGUi() {
 	ImGui::BulletText("Use the controls below to change basic color filtering options");
 	ImGui::EndChild();
 
-
-	/* DrawColorChannelSelector & DrawGridEditor are convenience functions that
-	 * draw ImGui controls to manipulate config of the most recently drawn
-	 * texture inspector
-	 **/
 	ImGuiTexInspect::DrawColorChannelSelector();
 	ImGui::SameLine(200);
 	ImGuiTexInspect::DrawGridEditor();

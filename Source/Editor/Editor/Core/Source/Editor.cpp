@@ -370,14 +370,26 @@ bool Editor::Initialize(HWND aHandle) {
 	io.ConfigFlags |= ImGuiConfigFlags_DpiEnableScaleViewports;
 	io.ConfigDockingWithShift = true;
 
-	ImGui_ImplWin32_Init(aHandle);
-	if(const auto& heap = GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)];
-		!ImGui_ImplDX12_Init(GPUInstance.m_Device.Get(),GPUInstance.m_FrameCount,DXGI_FORMAT_R8G8B8A8_UNORM,
-			heap->Heap(),heap->GetCpuHandle(2000),heap->GetGpuHandle(2000))) {
-		LOGGER.Err("Failed to init IMGUI Dx12");
-	}
 
-	ImGuiTexInspect::ImplDX12_Init(GPUInstance.m_Device.Get(),GPUInstance.m_FrameCount);
+
+	ImGui_ImplWin32_Init(aHandle);
+	if(const auto& heap = GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]) {
+		ImGui_ImplDX12_InitInfo initInfo;
+		initInfo.Device = GPUInstance.m_Device.Get();
+		initInfo.CommandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT)->GetCommandQueue().Get();
+		initInfo.NumFramesInFlight = GPUInstance.m_FrameCount;
+		initInfo.RTVFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+		initInfo.DSVFormat = DXGI_FORMAT_R32_TYPELESS;
+		initInfo.SrvDescriptorHeap = heap->Heap();
+		initInfo.LegacySingleSrvCpuDescriptor = heap->GetCpuHandle(2000);
+		initInfo.LegacySingleSrvGpuDescriptor = heap->GetGpuHandle(2000);
+
+		if(!ImGui_ImplDX12_Init(&initInfo)) {
+			LOGGER.Err("Failed to init IMGUI Dx12");
+		}
+	}
+	ImGuiTexInspect::ImplDX12_Init();
+
 	LoadFont();
 	SetupImGuiStyle(builtIn);
 
@@ -567,7 +579,7 @@ void Editor::FocusObject(const GameObject& focus,bool focusWithOffset) const {
 void Editor::AlignObject(const GameObject& focus) const {
 	for(auto& viewport : m_Viewports) {
 		if(!viewport->IsMainViewport()) {
-			Transform& ref = viewport->GetCameraTransform(); 
+			Transform& ref = viewport->GetCameraTransform();
 			focus.transform().SetQuatF(ref.GetQuatF());
 			focus.transform().SetPosition(ref.GetPosition(WORLD));
 		}
@@ -637,7 +649,7 @@ void Editor::Render() {
 	OPTICK_EVENT();
 	for(const auto& viewport : m_Viewports) {
 		viewport->Update();
-	} 
+	}
 	Shipyard_PhysXInstance.Render();
 	GraphicsEngineInstance.Render(m_Viewports);
 }

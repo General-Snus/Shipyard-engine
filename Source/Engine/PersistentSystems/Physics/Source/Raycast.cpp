@@ -64,13 +64,7 @@ namespace Physics {
 		OPTICK_EVENT();
 		layerMask;
 		maxDistance;
-		// REFACTOR, here usually we would use our nice world cached grid for collission
-		// but i am bad at programming and even worse at getting up in the morning so it is not done
-		//  yet 
-
-		if(physxRaycast(origin,direction,outHitInfo,filter,layerMask,maxDistance)) {
-			return true;
-		}
+		return physxRaycast(origin,direction,outHitInfo,filter,layerMask,maxDistance);
 	}
 
 	bool Raycast(Vector3f origin,Vector3f direction,RaycastHit& outHitInfo,GameObject filter,Layer layerMask,

@@ -4,7 +4,9 @@
 #include <d3d12.h>
 #include <Engine/AssetManager/AssetManager.h>
 #include <Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h>
+#include <DirectX/DX12/Graphics/Texture.h>
 #include "imgui_impl_dx12.cpp"
+#include "DirectX/DX12/Graphics/GPU.h"
 
 namespace ImGuiTexInspect {
 
@@ -23,36 +25,23 @@ namespace ImGuiTexInspect {
         float padding[2];
     };
 
-    struct ImGuiTexInspect_ImplDX12_Data {
-        ID3D12Device* pd3dDevice = NULL;
-        ID3D12RootSignature* pRootSignature;
-        ID3D12PipelineState* pPipelineState;
-        DXGI_FORMAT                 RTVFormat;
-    };
+    bool ImplDX12_Init() {
+        const auto& backEndData = ImGui_ImplDX12_GetBackendData();
+        const auto& initData = backEndData->InitInfo;
 
-    static ImGuiTexInspect_ImplDX12_Data GImplData;
-
-
-    bool ImplDX12_Init(ID3D12Device* device,int num_frames_in_flight) {
-        assert(GImplData.pd3dDevice == NULL);
-        GImplData.pd3dDevice = device;
-        GImplData.pd3dDevice->AddRef();
-
-        
 
         D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
         memset(&psoDesc,0,sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
         psoDesc.NodeMask = 1;
         psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-        psoDesc.pRootSignature = GImplData.pRootSignature;
+        psoDesc.pRootSignature = backEndData->pRootSignature;
         psoDesc.SampleMask = UINT_MAX;
         psoDesc.NumRenderTargets = 1;
-        psoDesc.RTVFormats[0] = GImplData.RTVFormat;
+        psoDesc.RTVFormats[0] = backEndData->RTVFormat;
         psoDesc.SampleDesc.Count = 1;
         psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
         ID3DBlob* vertexShaderBlob;
-        ID3DBlob* pixelShaderBlob;
 
         // Create the vertex shader
         {
@@ -101,7 +90,7 @@ namespace ImGuiTexInspect {
         // Create the pixel shader
         {
             std::shared_ptr<ShipyardShader> psShader;
-            ENGINE_RESOURCES.ForceLoadAsset<ShipyardShader>("Shaders/ImGuiTexInspect.cso",psShader);
+            ENGINE_RESOURCES.ForceLoadAsset<ShipyardShader>("Shaders/TextureInspectShader.cso",psShader);
             psoDesc.PS = {psShader->GetBufferPtr(), psShader->GetBlobSize()};
         }
 
@@ -147,21 +136,16 @@ namespace ImGuiTexInspect {
             desc.BackFace = desc.FrontFace;
         }
 
-        HRESULT result_pipeline_state = GImplData.pd3dDevice->CreateGraphicsPipelineState(&psoDesc,IID_PPV_ARGS(&GImplData.pPipelineState));
+        HRESULT result_pipeline_state = backEndData->pd3dDevice->CreateGraphicsPipelineState(&psoDesc,IID_PPV_ARGS(&backEndData->pPipelineState));
         vertexShaderBlob->Release();
-        pixelShaderBlob->Release();
         if(result_pipeline_state != S_OK)
             return false;
 
         return true;
     }
 
-    void ImplDX12_Shutdown() {
-        if(GImplData.pd3dDevice)
-            GImplData.pd3dDevice->Release();  
+    void ImplDX12_Shutdown() {}
 
-        GImplData.pd3dDevice = NULL;
-    }
 
     void GiveNotInitializedWarning() {
         static bool warningGiven = false;
@@ -171,7 +155,7 @@ namespace ImGuiTexInspect {
         }
     }
 
-    struct DX11FormatDesc {
+    struct DX12FormatDesc {
         ImGuiDataType_ type;
         int channelCount;
 
@@ -195,7 +179,7 @@ namespace ImGuiTexInspect {
         }
     };
 
-    bool DecodeDXGIFormat(DXGI_FORMAT format,DX11FormatDesc* desc) {
+    bool DecodeDXGIFormat(DXGI_FORMAT format,DX12FormatDesc* desc) {
         switch(format) {
         case DXGI_FORMAT_R8G8B8A8_UNORM:
         case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
@@ -287,122 +271,53 @@ namespace ImGuiTexInspect {
         //GImplData.pd3dDeviceContext->PSSetConstantBuffers(0,1,&GImplData.pPixelConstantBuffer);
     }
 
-    bool BackEnd_GetData(Inspector* inspector,ImTextureID texture,int /*x*/,int /*y*/,int /*width*/,int /*height*/,BufferDesc* bufferDesc) {
-        if(GImplData.pd3dDevice == NULL) {
+    bool BackEnd_GetData(Inspector* inspector,Texture* texture,int /*x*/,int /*y*/,int /*width*/,int /*height*/,BufferDesc* bufferDesc) {
+        if(ImGui_ImplDX12_GetBackendData()->pd3dDevice == NULL) {
             GiveNotInitializedWarning();
             return false;
         }
-        //ID3D11Texture2D* pTexture = NULL;
 
-        //// Get a pointer to the texture
-        //{
-        //    ID3D11ShaderResourceView* pTextureView = (ID3D11ShaderResourceView*)texture;
-        //    ID3D11Resource* pResource;
-        //    pTextureView->GetResource(&pResource);
 
-        //    if(pResource == NULL)
-        //        return false;
+        DX12FormatDesc formatDesc;
+        if(!DecodeDXGIFormat(texture->GetResource()->GetDesc().Format,&formatDesc)) {
+            return false;
+        }
 
-        //    pResource->QueryInterface<ID3D11Texture2D>(&pTexture);
+        const auto texWidth = texture->GetResolution().x;
+        const auto texHeight = texture->GetResolution().y;
 
-        //    if(pTexture == NULL) {
-        //        pResource->Release();
-        //        return false;
-        //    }
-        //    pResource->Release();
-        //}
+        int componentSize = formatDesc.GetComponentSize();
+        int channelCount = formatDesc.channelCount;
 
-        //int texWidth = (int)inspector->TextureSize.x;
-        //int texHeight = (int)inspector->TextureSize.y;
+        void* copyDst = NULL;
+        if(formatDesc.type == ImGuiDataType_Float) {
+            bufferDesc->Data_float =
+                (float*)ImGuiTexInspect::GetBuffer(inspector,(size_t)texWidth * texHeight * channelCount * componentSize);
+            bufferDesc->Data_uint8_t = NULL;
+            copyDst = bufferDesc->Data_float;
+        } else // ImGuiDataType_U8 is only other supported type at the moment
+        {
+            bufferDesc->Data_uint8_t = ImGuiTexInspect::GetBuffer(inspector,(size_t)texWidth * texHeight * channelCount * componentSize);
+            bufferDesc->Data_float = NULL;
+            copyDst = bufferDesc->Data_uint8_t;
+        }
 
-        //ID3D11Texture2D* pStagingTexture = nullptr;
-        //DX11FormatDesc formatDesc;
+        if(copyDst && texture->CopyDataInto(copyDst)) {
+            int const bytesPerPixel = componentSize * channelCount;
+            bufferDesc->BufferByteSize = (size_t)texWidth * texHeight * bytesPerPixel;
+            bufferDesc->Red = 0;
+            bufferDesc->Green = (ImU8)ImMin(1,channelCount - 1);
+            bufferDesc->Blue = (ImU8)ImMin(2,channelCount - 1);
+            bufferDesc->Alpha = (ImU8)ImMin(3,channelCount - 1);
+            bufferDesc->ChannelCount = (ImU8)channelCount;
 
-        //// Create a CPU accessible texture to copy src texture into
-        //{
-        //    D3D11_TEXTURE2D_DESC texDesc;
-        //    pTexture->GetDesc(&texDesc);
-
-        //    if(!DecodeDXGIFormat(texDesc.Format,&formatDesc)) {
-        //        // Not a supoorted format
-        //        pTexture->Release();
-        //        return false;
-        //    }
-
-        //    // We'll keep all settings as is except for these:
-        //    texDesc.Usage = D3D11_USAGE_STAGING;
-        //    texDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-        //    texDesc.BindFlags = 0;
-        //    texDesc.MiscFlags = 0;
-
-        //    /* Yes we could be keeping this staging texture around rather than creating it
-        //     * every time.  But in profiling it was apparent that the cost of creating the
-        //     * texture is not significant compared to copying the data.  So it's not worth the
-        //     * complexity of tracking and releasing a texture for each Inspector.
-        //     */
-        //    HRESULT hr = GImplData.pd3dDevice->CreateTexture2D(&texDesc,NULL,&pStagingTexture);
-
-        //    if(FAILED(hr)) {
-        //        pTexture->Release();
-        //        return false;
-        //    }
-        //}
-
-        //// Oopy texture data to CPU accessible texture
-        //GImplData.pd3dDeviceContext->CopyResource(pStagingTexture,pTexture);
-
-        //D3D11_MAPPED_SUBRESOURCE resourceDesc = {};
-        //HRESULT hr = GImplData.pd3dDeviceContext->Map(pStagingTexture,0,D3D11_MAP_READ,0,&resourceDesc);
-        //bool success = false;
-        //if(SUCCEEDED(hr)) {
-        //    int componentSize = formatDesc.GetComponentSize();
-        //    int channelCount = formatDesc.channelCount;
-
-        //    void* copyDst = NULL;
-        //    if(formatDesc.type == ImGuiDataType_Float) {
-        //        bufferDesc->Data_float =
-        //            (float*)ImGuiTexInspect::GetBuffer(inspector,(size_t)texWidth * texHeight * channelCount * componentSize);
-        //        bufferDesc->Data_uint8_t = NULL;
-        //        copyDst = bufferDesc->Data_float;
-        //    } else // ImGuiDataType_U8 is only other supported type at the moment
-        //    {
-        //        bufferDesc->Data_uint8_t = ImGuiTexInspect::GetBuffer(inspector,(size_t)texWidth * texHeight * channelCount * componentSize);
-        //        bufferDesc->Data_float = NULL;
-        //        copyDst = bufferDesc->Data_uint8_t;
-        //    }
-
-        //    if(copyDst) {
-        //        int const bytesPerPixel = componentSize * channelCount;
-        //        for(int i = 0; i < texHeight; ++i) {
-        //            /* TODO : An obvious optimization would be to return a pointer
-        //             * directly into the DirectX ResourceDesc data.  We would need
-        //             * another callback to know when to unmap it.
-        //             */
-        //            memcpy((byte*)copyDst + texWidth * bytesPerPixel * i,(byte*)resourceDesc.pData + resourceDesc.RowPitch * i,
-        //                (size_t)texWidth * bytesPerPixel);
-        //        }
-        //        bufferDesc->BufferByteSize = (size_t)texWidth * texHeight * bytesPerPixel;
-        //        bufferDesc->Red = 0;
-        //        bufferDesc->Green = (ImU8)ImMin(1,channelCount - 1);
-        //        bufferDesc->Blue = (ImU8)ImMin(2,channelCount - 1);
-        //        bufferDesc->Alpha = (ImU8)ImMin(3,channelCount - 1);
-        //        bufferDesc->ChannelCount = (ImU8)channelCount;
-
-        //        bufferDesc->LineStride = (int)inspector->TextureSize.x * channelCount;
-        //        bufferDesc->Stride = channelCount;
-        //        bufferDesc->StartX = 0;
-        //        bufferDesc->StartY = 0;
-        //        bufferDesc->Width = texWidth;
-        //        bufferDesc->Height = texHeight;
-
-        //        success = true;
-        //    }
-        //    GImplData.pd3dDeviceContext->Unmap(pStagingTexture,0);
-        //}
-
-        //pTexture->Release();
-
-        //pStagingTexture->Release();
+            bufferDesc->LineStride = (int)inspector->TextureSize.x * channelCount;
+            bufferDesc->Stride = channelCount;
+            bufferDesc->StartX = 0;
+            bufferDesc->StartY = 0;
+            bufferDesc->Width = texWidth;
+            bufferDesc->Height = texHeight; 
+        }
 
         return true;
     }

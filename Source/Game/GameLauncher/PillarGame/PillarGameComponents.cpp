@@ -3,7 +3,7 @@
 #include "PillarGameComponents.h"
 #include <Engine/AssetManager/GameResourcesLoader.h>
 
-Transform& SpawnPillar(Vector3f base) {
+GameObject SpawnPillar(Vector3f base) {
 	GameObject pillar = GameObject::Create("Pillar");
 	auto& renderer = pillar.AddComponent<MeshRenderer>("Models/PillarClimb/Pillar.fbx");
 	pillar.transform().SetPosition(base);
@@ -17,7 +17,7 @@ Transform& SpawnPillar(Vector3f base) {
 		mat->SetColor(ColorManagerInstance.GetColor("Brown"));
 		renderer.SetMaterial(mat);
 	}
-	return pillar.transform();
+	return pillar;
 }
 
 void SpawnGround(Vector3f base) {
@@ -33,10 +33,10 @@ void SpawnGround(Vector3f base) {
 	ground.AddComponent<cPhysXStaticBody>();
 }
 
-void SpawnHooks(int amount,float radius,Transform& parent) {
+void SpawnHooks(int amount,float radius,GameObject parent) {
 	for(int i = 0; i < amount; ++i) {
 		GameObject attachment = GameObject::Create(std::format("Hook_{}",i));
-		attachment.transform().SetParent(parent);
+		attachment.transform().SetParent(parent.transform());
 		attachment.AddComponent<HookComponent>();
 
 		auto& renderer = attachment.AddComponent<MeshRenderer>("Models/PillarClimb/AttachmentPost.fbx");
@@ -62,11 +62,11 @@ void SpawnHooks(int amount,float radius,Transform& parent) {
 	}
 }
 
-void SpawnPlayer(int id,float radius,Transform& parent) {
+void SpawnPlayer(int id,float radius,GameObject parent) {
 	id;
 	GameObject player = GameObject::Create("Player");
 	Scene::activeManager().SetLastGOAsPlayer();
-	player.transform().SetParent(parent);
+	player.transform().SetParent(parent.transform());
 
 	const auto directionOffset =
 		Vector3f(

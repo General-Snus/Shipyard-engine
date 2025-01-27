@@ -5,6 +5,7 @@
 #include "imgui_internal.h"
 #include "imgui_tex_inspect.h"
 
+class Texture;
 namespace ImGuiTexInspect
 {
 //-------------------------------------------------------------------------
@@ -82,7 +83,8 @@ struct Inspector
     bool Initialized = false;
 
     // Texture
-    ImTextureID Texture = ImTextureID{};
+    ImTextureID TextureID = ImTextureID{};
+    Texture* Texture = nullptr;
     ImVec2 TextureSize = {0, 0};        // Size in texels of texture
     float PixelAspectRatio = 1;         // Values other than 1 not supported yet
 
@@ -176,6 +178,7 @@ void PopDisabled();
 // [SECTION] BACKEND FUNCTIONS
 //-------------------------------------------------------------------------
 void BackEnd_SetShader(const ImDrawList *drawList, const ImDrawCmd *cmd, const Inspector *inspector);
-bool BackEnd_GetData(Inspector *inspector, ImTextureID texture, int x, int y, int width, int height, BufferDesc *buffer);
+
+bool BackEnd_GetData(Inspector *inspector,Texture* texture, int x, int y, int width, int height, BufferDesc *buffer);
 
 } // namespace ImGuiTexInspect

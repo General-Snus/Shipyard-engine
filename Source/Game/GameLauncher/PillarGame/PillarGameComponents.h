@@ -33,6 +33,6 @@ public:
 REFL_AUTO(type(HookComponent), field(hasConnection), field(connection))
 
 void SpawnGround(Vector3f base);
-Transform& SpawnPillar(Vector3f base);
-void SpawnHooks(int amount, float radius,Transform& parent);
-void SpawnPlayer(int id, float radius, Transform& parent);
+GameObject SpawnPillar(Vector3f base);
+void SpawnHooks(int amount, float radius,GameObject parent);
+void SpawnPlayer(int id, float radius,GameObject parent);

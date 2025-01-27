@@ -49,7 +49,7 @@ void YourGameLauncher::Init() {
 		auto            groundPos = Vector3f(0,-.5f,0);
 		SpawnGround(groundPos);
 
-		auto& pillarTransform = SpawnPillar(groundPos);
+		auto pillarTransform = SpawnPillar(groundPos);
 		SpawnHooks(50,pillarRadius,pillarTransform);
 		SpawnPlayer(0,pillarRadius,pillarTransform);
 	}

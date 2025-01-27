@@ -11,17 +11,7 @@ struct ID3D12Resource;
 struct ID3D12RootSignature;
 
 namespace ImGuiTexInspect {
-    // DirectX data
-    struct ImGui_ImplDX12_Data {
-        ID3D12Device* pd3dDevice;
-        ID3D12RootSignature* pRootSignature;
-        ID3D12PipelineState* pPipelineState;
-        DXGI_FORMAT                 RTVFormat;
-        ID3D12Resource* pFontTextureResource;
-        ID3D12DescriptorHeap* pd3dSrvDescHeap;
-        unsigned                        numFramesInFlight;
-    };
-
-    bool ImplDX12_Init(ID3D12Device* device,int num_frames_in_flight);
+   
+    bool ImplDX12_Init();
     void ImplDX12_Shutdown();
 } 

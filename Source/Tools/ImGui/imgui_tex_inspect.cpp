@@ -10,6 +10,8 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 
+#include <DirectX/DX12/Graphics/Texture.h>
+
 #if defined(_MSC_VER)
 #pragma warning(disable : 4996) // 'sprintf' considered unsafe
 #endif
@@ -104,7 +106,7 @@ namespace ImGuiTexInspect {
         SetFlag(GContext->NextPanelOptions.ToClear,clearFlags);
     }
 
-    bool BeginInspectorPanel(const char* title,ImTextureID texture,ImVec2 textureSize,InspectorFlags flags,
+    bool BeginInspectorPanel(const char* title,Texture* texture,ImVec2 textureSize,InspectorFlags flags,
         SizeIncludingBorder sizeIncludingBorder) {
         const int borderWidth = 1;
         // Unpack size param.  It's in the SizeIncludingBorder structure just to make sure users know what they're requesting
@@ -123,8 +125,11 @@ namespace ImGuiTexInspect {
         Inspector* inspector = ctx->CurrentInspector;
         justCreated |= !inspector->Initialized;
 
+        const ImTextureID TextureID = texture->GetHandle(ViewType::SRV).gpuPtr.ptr;
+
         // Cache the basics
         inspector->ID = ID;
+        inspector->TextureID = TextureID;
         inspector->Texture = texture;
         inspector->TextureSize = textureSize;
         inspector->Initialized = true;
@@ -240,7 +245,7 @@ namespace ImGuiTexInspect {
 
             UpdateShaderOptions(inspector);
             inspector->CachedShaderOptions = inspector->ActiveShaderOptions;
-            ImGui::Image(texture,viewSize,uv0,uv1);
+            ImGui::Image(TextureID,viewSize,uv0,uv1);
             ImGui::GetWindowDrawList()->AddCallback(ImDrawCallback_ResetRenderState,nullptr);
 
             /* Matrices for going back and forth between texel coordinates in the
@@ -328,11 +333,11 @@ namespace ImGuiTexInspect {
     }
 
 
-    bool BeginInspectorPanel(const char* name,ImTextureID texture,ImVec2 textureSize,InspectorFlags flags) {
+    bool BeginInspectorPanel(const char* name,Texture* texture,ImVec2 textureSize,InspectorFlags flags) {
         return BeginInspectorPanel(name,texture,textureSize,flags,SizeIncludingBorder{{0, 0}});
     }
 
-    bool BeginInspectorPanel(const char* name,ImTextureID texture,ImVec2 textureSize,InspectorFlags flags,SizeExcludingBorder size) {
+    bool BeginInspectorPanel(const char* name,Texture* texture,ImVec2 textureSize,InspectorFlags flags,SizeExcludingBorder size) {
         // Correct the size to include the border, but preserve 0 which has a special meaning
         return BeginInspectorPanel(name,texture,textureSize,flags,
             SizeIncludingBorder{ImVec2{size.size.x == 0 ? 0 : size.size.x + 2,

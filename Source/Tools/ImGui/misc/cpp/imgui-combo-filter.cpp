@@ -229,7 +229,7 @@ void SetScrollToComboItemDown(ImGuiWindow* listbox_window, int index)
 void UpdateInputTextAndCursor(char* buf, int buf_capacity, const char* new_str)
 {
     strncpy(buf, new_str, buf_capacity);
-
+    assert(false && "Assert here if you ever use this combo filter have a closer look at it to see if its actually broken");
     ImGuiContext& g = *GImGui;
     ImGuiInputTextState& intxt_state = g.InputTextState;
     const char* buf_end = NULL;

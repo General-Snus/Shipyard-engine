@@ -47,7 +47,6 @@
     <ClInclude Include="imgui_node_editor_internal.h" />
     <ClInclude Include="imgui_notify.h" />
     <ClInclude Include="imgui_tex_inspect.h" />
-    <ClInclude Include="imgui_tex_inspect_demo.h" />
     <ClInclude Include="imgui_tex_inspect_internal.h" />
     <ClInclude Include="implot.h" />
     <ClInclude Include="implot_internal.h" />
@@ -78,7 +77,6 @@
     <ClCompile Include="imgui_node_editor_api.cpp" />
     <ClCompile Include="imgui_tables.cpp" />
     <ClCompile Include="imgui_tex_inspect.cpp" />
-    <ClCompile Include="imgui_tex_inspect_demo.cpp" />
     <ClCompile Include="imgui_widgets.cpp" />
     <ClCompile Include="implot.cpp" />
     <ClCompile Include="implot_demo.cpp" />

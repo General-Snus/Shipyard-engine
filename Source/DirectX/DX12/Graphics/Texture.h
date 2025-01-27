@@ -40,6 +40,10 @@ class Texture : public GpuResource
     void SetView(D3D12_UNORDERED_ACCESS_VIEW_DESC view);
     void SetView(ViewType view) override;
 
+    size_t GetMemorySize();
+    bool CopyDataInto(void* destination);
+    bool CopyDataInto(void* destination,Vector2ui pixel,Vector2ui rect = Vector2ui(1,1));
+
     uint32_t GetWidth() const
     {
         return static_cast<uint32_t>(m_Viewport.Width);
@@ -69,5 +73,5 @@ class Texture : public GpuResource
     Vector4f m_ClearColor = {0, 0, 0, 1};
 
     D3D12_VIEWPORT m_Viewport;
-    D3D12_RECT m_Rect;
+    D3D12_RECT m_Rect; 
 };
