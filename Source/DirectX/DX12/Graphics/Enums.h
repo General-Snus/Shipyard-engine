@@ -40,6 +40,7 @@ enum class eRootBindings
     objectBuffer,
     materialBuffer,
     lightBuffer,
+    textureInspectionBuffer,
     MeshBuffer,
     Textures,
     GbufferPasses,

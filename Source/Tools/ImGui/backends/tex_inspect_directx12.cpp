@@ -1,12 +1,12 @@
-#include "tex_inspect_directx12.h"
-#include "imgui.h"
+#include "tex_inspect_directx12.h" 
 #include "imgui_tex_inspect_internal.h"
 #include <d3d12.h>
 #include <Engine/AssetManager/AssetManager.h>
 #include <Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h>
 #include <DirectX/DX12/Graphics/Texture.h>
-#include "imgui_impl_dx12.cpp"
+#include "imgui_impl_dx12.h"
 #include "DirectX/DX12/Graphics/GPU.h"
+#include <Engine/GraphicsEngine/Shaders/Registers.h>
 
 namespace ImGuiTexInspect {
 
@@ -25,10 +25,12 @@ namespace ImGuiTexInspect {
         float padding[2];
     };
 
+    static ID3D12PipelineState* pPipelineState;
+    static ID3D12Resource* pResourceConstantBuffer;
     bool ImplDX12_Init() {
+
         const auto& backEndData = ImGui_ImplDX12_GetBackendData();
         const auto& initData = backEndData->InitInfo;
-
 
         D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
         memset(&psoDesc,0,sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
@@ -41,9 +43,9 @@ namespace ImGuiTexInspect {
         psoDesc.SampleDesc.Count = 1;
         psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
-        ID3DBlob* vertexShaderBlob;
 
         // Create the vertex shader
+            IDxcBlob* vertexShaderBlob;
         {
             static const char* vertexShader =
                 "cbuffer vertexBuffer : register(b0) \
@@ -73,8 +75,12 @@ namespace ImGuiTexInspect {
               return output;\
             }";
 
-            if(FAILED(D3DCompile(vertexShader,strlen(vertexShader),nullptr,nullptr,nullptr,"main","vs_5_0",0,0,&vertexShaderBlob,nullptr)))
+            const auto* entry = L"main";
+            const auto* target = L"vs_6_5";
+            if(FAILED(ShipyardShader::CompileShader(vertexShader,entry,target,&vertexShaderBlob))) {
                 return false; // NB: Pass ID3DBlob* pErrorBlob to D3DCompile() to get error showing in (const char*)pErrorBlob->GetBufferPointer(). Make sure to Release() the blob!
+            }
+
             psoDesc.VS = {vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize()};
 
             // Create the input layout
@@ -88,11 +94,61 @@ namespace ImGuiTexInspect {
         }
 
         // Create the pixel shader
+            IDxcBlob* pixelShaderBlob;
         {
-            std::shared_ptr<ShipyardShader> psShader;
-            ENGINE_RESOURCES.ForceLoadAsset<ShipyardShader>("Shaders/TextureInspectShader.cso",psShader);
-            psoDesc.PS = {psShader->GetBufferPtr(), psShader->GetBlobSize()};
+            static const char* pixelShader =
+                "cbuffer pixelBuffer :register(b0)\n\
+            {\n\
+                float4x4 ColorTransform;\n\
+                float4   ColorOffset;\n\
+                float4   Grid;\n\
+                float2   GridWidth;\n\
+                float    PremultiplyAlpha;\n\
+                float    DisableFinalAlpha;\n\
+                float3   BackgroundColor;\n\
+                bool     ForceNearestSampling;\n\
+                float2   TextureSize;\n\
+            };\n\
+            struct PS_INPUT\n\
+            {\n\
+                float4 pos : SV_POSITION;\n\
+                float4 col : COLOR0;\n\
+                float2 uv  : TEXCOORD0;\n\
+            };\n\
+            sampler sampler0;\n\
+            Texture2D texture0;\n\
+            \n\
+            float4 main(PS_INPUT input) : SV_Target\n\
+            {\n\
+                float2 uv;\n\
+                float2 texel = input.uv * TextureSize;\n\
+                if (ForceNearestSampling)\n\
+                    uv = (floor(texel) + float2(0.5, 0.5)) / TextureSize;\n\
+                else\n\
+                    uv = input.uv;\n\
+                float2 texelEdge = step(texel - floor(texel), GridWidth);\n\
+                float isGrid = max(texelEdge.x, texelEdge.y);\n\
+                float4 ct = mul(ColorTransform, texture0.Sample(sampler0, uv)) + ColorOffset;\n\
+                ct.rgb = ct.rgb * lerp(1.0, ct.a, PremultiplyAlpha);\n\
+                ct.rgb += BackgroundColor * (1.0 - ct.a);\n\
+                ct.a = lerp(ct.a, 1.0, DisableFinalAlpha);\n\
+                ct = lerp(ct, float4(Grid.rgb, 1), Grid.a * isGrid);\n\
+                return ct;\n\
+            }";
+
+            const auto* entry = L"main";
+            const auto* target = L"ps_6_5";
+            if(FAILED(ShipyardShader::CompileShader(pixelShader,entry,target,&pixelShaderBlob))) {
+                return false; // NB: Pass ID3DBlob* pErrorBlob to D3DCompile() to get error showing in (const char*)pErrorBlob->GetBufferPointer(). Make sure to Release() the blob!
+            }
+
+            psoDesc.PS = {pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize()};
+
+            //std::shared_ptr<ShipyardShader> psShader;
+            //ENGINE_RESOURCES.ForceLoadAsset<ShipyardShader>("Shaders/TextureInspectShader.cso",psShader);
+            //psoDesc.PS = {psShader->GetBufferPtr(), psShader->GetBlobSize()};
         }
+
 
         // Create the blending setup
         {
@@ -136,15 +192,19 @@ namespace ImGuiTexInspect {
             desc.BackFace = desc.FrontFace;
         }
 
-        HRESULT result_pipeline_state = backEndData->pd3dDevice->CreateGraphicsPipelineState(&psoDesc,IID_PPV_ARGS(&backEndData->pPipelineState));
+        HRESULT result_pipeline_state = backEndData->pd3dDevice->CreateGraphicsPipelineState(&psoDesc,IID_PPV_ARGS(&pPipelineState));
         vertexShaderBlob->Release();
+        pixelShaderBlob->Release();
         if(result_pipeline_state != S_OK)
             return false;
 
         return true;
     }
 
-    void ImplDX12_Shutdown() {}
+    void ImplDX12_Shutdown() {
+        pResourceConstantBuffer->Release();
+        pPipelineState->Release();
+    }
 
 
     void GiveNotInitializedWarning() {
@@ -234,41 +294,67 @@ namespace ImGuiTexInspect {
             GiveNotInitializedWarning();
             return;
         }
-        ImGui_ImplDX12_ViewportData* vd = (ImGui_ImplDX12_ViewportData*)cmdList->OwnerViewport->RendererUserData;
-        cmd->SetPipelineState(bd->pPipelineState);
-        cmdList->SetPipelineState(bd->pPipelineState);
-        cmdList->SetGraphicsRootSignature(bd->pRootSignature);
         */
-
-        //const ShaderOptions* shaderOptions = &inspector->CachedShaderOptions;
-
-        //// Map the pixel shader constant buffer and fill values
-        //{
-        //    D3D11_MAPPED_SUBRESOURCE mapped_resource;
-        //    if(GImplData.pd3dDeviceContext->Map(GImplData.pPixelConstantBuffer,0,D3D11_MAP_WRITE_DISCARD,0,&mapped_resource) != S_OK)
-        //        return;
+        const ShaderOptions* shaderOptions = &inspector->CachedShaderOptions;
 
 
-        //    // Transfer shader options from shaderOptions to our backend specific pixel shader constant buffer
-        //    PIXEL_CONSTANT_BUFFER* constant_buffer = (PIXEL_CONSTANT_BUFFER*)mapped_resource.pData;
+        ImGui_ImplDX12_GetRenderstate()->CommandList->SetPipelineState(pPipelineState);
 
-        //    memcpy(constant_buffer->ColorTransform,shaderOptions->ColorTransform,sizeof(shaderOptions->ColorTransform));
-        //    memcpy(constant_buffer->ColorOffset,shaderOptions->ColorOffset,sizeof(shaderOptions->ColorOffset));
-        //    memcpy(constant_buffer->Grid,&shaderOptions->GridColor,sizeof(shaderOptions->GridColor));
-        //    memcpy(constant_buffer->GridWidth,&shaderOptions->GridWidth,sizeof(shaderOptions->GridWidth));
-        //    memcpy(constant_buffer->BackgroundColor,&shaderOptions->BackgroundColor,sizeof(shaderOptions->BackgroundColor));
-        //    memcpy(constant_buffer->TextureSize,&inspector->TextureSize,sizeof(inspector->TextureSize));
+        if(!pResourceConstantBuffer) {
 
-        //    constant_buffer->PremultiplyAlpha = shaderOptions->PremultiplyAlpha;
-        //    constant_buffer->DisableFinalAlpha = shaderOptions->DisableFinalAlpha;
-        //    constant_buffer->forceNearestSampling = shaderOptions->ForceNearestSampling;
+            const CD3DX12_HEAP_PROPERTIES readBackHeapProperties(D3D12_HEAP_TYPE_READBACK);
 
-        //    GImplData.pd3dDeviceContext->Unmap(GImplData.pPixelConstantBuffer,0);
-        //}
+            D3D12_RESOURCE_DESC resDesc = {};
+            resDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+            resDesc.Alignment = 0;
+            resDesc.Width = sizeof(PIXEL_CONSTANT_BUFFER);
+            resDesc.Height = 1;
+            resDesc.DepthOrArraySize = 1;
+            resDesc.MipLevels = 1;
+            resDesc.Format = DXGI_FORMAT_UNKNOWN;
+            resDesc.SampleDesc.Count = 1;
+            resDesc.SampleDesc.Quality = 0;
+            resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+            resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-        //// Activate shader and buffer
+            ID3D12Resource* constBuf;
+            HRESULT res = ImGui_ImplDX12_GetRenderstate()->Device->CreateCommittedResource(
+                &readBackHeapProperties,
+                D3D12_HEAP_FLAG_NONE,
+                &resDesc,
+                D3D12_RESOURCE_STATE_COPY_DEST, // InitialResourceState
+                nullptr, // pOptimizedClearValue
+                IID_PPV_ARGS(&constBuf));
+        } else {
+
+            void* pMappedMemory = nullptr;
+            D3D12_RANGE readRange = {0, sizeof(PIXEL_CONSTANT_BUFFER)};
+            D3D12_RANGE writeRange = {0, sizeof(PIXEL_CONSTANT_BUFFER)};
+            auto hr = pResourceConstantBuffer->Map(0,&readRange,&pMappedMemory);
+            if(FAILED(hr))
+                return;
+
+
+            // Transfer shader options from shaderOptions to our backend specific pixel shader constant buffer
+            PIXEL_CONSTANT_BUFFER* constant_buffer = (PIXEL_CONSTANT_BUFFER*)pMappedMemory;
+
+            memcpy(constant_buffer->ColorTransform,shaderOptions->ColorTransform,sizeof(shaderOptions->ColorTransform));
+            memcpy(constant_buffer->ColorOffset,shaderOptions->ColorOffset,sizeof(shaderOptions->ColorOffset));
+            memcpy(constant_buffer->Grid,&shaderOptions->GridColor,sizeof(shaderOptions->GridColor));
+            memcpy(constant_buffer->GridWidth,&shaderOptions->GridWidth,sizeof(shaderOptions->GridWidth));
+            memcpy(constant_buffer->BackgroundColor,&shaderOptions->BackgroundColor,sizeof(shaderOptions->BackgroundColor));
+            memcpy(constant_buffer->TextureSize,&inspector->TextureSize,sizeof(inspector->TextureSize));
+
+            constant_buffer->PremultiplyAlpha = shaderOptions->PremultiplyAlpha;
+            constant_buffer->DisableFinalAlpha = shaderOptions->DisableFinalAlpha;
+            constant_buffer->forceNearestSampling = shaderOptions->ForceNearestSampling;
+
+            pResourceConstantBuffer->Unmap(0,&writeRange);
+        }
+        ImGui_ImplDX12_GetRenderstate()->CommandList->SetGraphicsRootConstantBufferView(REG_TextureInspectionBuffer,pResourceConstantBuffer->GetGPUVirtualAddress());
+
         //GImplData.pd3dDeviceContext->PSSetShader(GImplData.pPixelShader,NULL,0);
-        //GImplData.pd3dDeviceContext->PSSetConstantBuffers(0,1,&GImplData.pPixelConstantBuffer);
+       //GImplData.pd3dDeviceContext->PSSetConstantBuffers(0,1,&GImplData.pPixelConstantBuffer);
     }
 
     bool BackEnd_GetData(Inspector* inspector,Texture* texture,int /*x*/,int /*y*/,int /*width*/,int /*height*/,BufferDesc* bufferDesc) {
@@ -316,7 +402,7 @@ namespace ImGuiTexInspect {
             bufferDesc->StartX = 0;
             bufferDesc->StartY = 0;
             bufferDesc->Width = texWidth;
-            bufferDesc->Height = texHeight; 
+            bufferDesc->Height = texHeight;
         }
 
         return true;

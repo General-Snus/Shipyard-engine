@@ -191,9 +191,6 @@
     <ClCompile Include="Src\SkinnedEffect.cpp">
       <Filter>Src</Filter>
     </ClCompile>
-    <ClCompile Include="Src\AlphaTestEffect.cpp">
-      <Filter>Src</Filter>
-    </ClCompile>
     <ClCompile Include="Src\DualTextureEffect.cpp">
       <Filter>Src</Filter>
     </ClCompile>

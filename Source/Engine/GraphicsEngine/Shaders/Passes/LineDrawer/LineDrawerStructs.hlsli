@@ -16,8 +16,3 @@ struct LinePixelOutput
 {
     float4 Color : SV_TARGET;
 };
-
-cbuffer LineBuffer : register(HLSL_REG_LineBuffer)
-{
-    float4x4 LB_Transform;
-}

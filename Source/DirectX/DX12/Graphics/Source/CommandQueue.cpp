@@ -98,7 +98,7 @@ ComPtr<ID3D12CommandQueue> GPUCommandQueue::GetCommandQueue()
 
 uint64_t GPUCommandQueue::ExecuteCommandList(std::shared_ptr<CommandList> commandList)
 {
-	return ExecuteCommandList(std::vector<std::shared_ptr<CommandList>>({commandList}));
+	return ExecuteCommandList(std::vector({commandList}));
 }
 
 uint64_t GPUCommandQueue::ExecuteCommandList(const std::vector<std::shared_ptr<CommandList>>& commandLists)
@@ -117,7 +117,7 @@ uint64_t GPUCommandQueue::ExecuteCommandList(const std::vector<std::shared_ptr<C
 	static std::vector<ID3D12CommandList*> d3d12CommandLists;
 	d3d12CommandLists.clear();
 
-	for (auto commandList : commandLists)
+	for(auto& commandList : commandLists)
 	{
 		auto       pendingCommandList = GetCommandList();
 		const bool hasPendingBarriers = commandList->Close(*pendingCommandList);
@@ -148,7 +148,7 @@ uint64_t GPUCommandQueue::ExecuteCommandList(const std::vector<std::shared_ptr<C
 	ResourceStateTracker::Unlock();
 
 	// Queue command lists for reuse.
-	for (auto commandList : toBeQueued)
+	for(auto& commandList : toBeQueued)
 	{
 		m_InFlightCommandLists.Push({fenceValue, commandList});
 	}
@@ -179,7 +179,7 @@ void GPUCommandQueue::ProccessInFlightCommandLists()
 		while (m_InFlightCommandLists.TryPop(commandListEntry))
 		{
 			const auto fenceValue = std::get<0>(commandListEntry);
-			const auto commandList = std::get<1>(commandListEntry);
+			const auto& commandList = std::get<1>(commandListEntry);
 
 			WaitForFenceValue(fenceValue);
 

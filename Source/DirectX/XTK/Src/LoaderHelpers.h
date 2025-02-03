@@ -14,7 +14,8 @@
 
 #include "DDS.h"
 #include "DDSTextureLoader.h"
-#include "PlatformHelpers.h"
+#include "PlatformHelpers.h"  
+#include <wincodec.h>
 
 
 namespace DirectX

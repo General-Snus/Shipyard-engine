@@ -60,8 +60,7 @@
 #include <shellapi.h>
 #include <misc/cpp/WMDropManager.h>
 #include <Windows/EditorWindows/ImageViewer.h>
-#include <imgui_tex_inspect.h>
-#include <backends/tex_inspect_directx11.h>
+#include <imgui_tex_inspect.h> 
 #include <backends/tex_inspect_directx12.h>
 
 enum Theme {
@@ -386,9 +385,8 @@ bool Editor::Initialize(HWND aHandle) {
 
 		if(!ImGui_ImplDX12_Init(&initInfo)) {
 			LOGGER.Err("Failed to init IMGUI Dx12");
-		}
+		} 
 	}
-	ImGuiTexInspect::ImplDX12_Init();
 
 	LoadFont();
 	SetupImGuiStyle(builtIn);

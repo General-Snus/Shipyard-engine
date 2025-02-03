@@ -83,7 +83,6 @@
     <ClCompile Include="Audio\WaveBank.cpp" />
     <ClCompile Include="Audio\WaveBankReader.cpp" />
     <ClCompile Include="Audio\WAVFileReader.cpp" />
-    <ClCompile Include="Src\AlphaTestEffect.cpp" />
     <ClCompile Include="Src\BasicEffect.cpp" />
     <ClCompile Include="Src\BasicPostProcess.cpp" />
     <ClCompile Include="Src\BufferHelpers.cpp" />

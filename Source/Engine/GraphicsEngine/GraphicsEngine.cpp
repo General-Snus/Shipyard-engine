@@ -253,7 +253,7 @@ void GraphicsEngine::EndFrame() {
 void GraphicsEngine::PrepareBuffers(std::shared_ptr<CommandList> commandList,Viewport& renderViewPort,
 	GameObjectManager& scene) {
 	OPTICK_GPU_EVENT("PrepareBuffers");
-	commandList->TransitionBarrier(GPUInstance.GetCurrentBackBuffer().GetResource(),
+	commandList->TransitionBarrier(GPUInstance.GetCurrentBackBuffer(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	GPU::ClearRTV(*commandList.get(),GPUInstance.GetCurrentRenderTargetView());

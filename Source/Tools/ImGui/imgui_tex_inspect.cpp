@@ -87,7 +87,7 @@ namespace ImGuiTexInspect {
         }
 
         for(ImGuiStoragePair& pair : ctx->Inspectors.Data) {
-            Inspector* inspector = (Inspector*)pair.val_p;
+            auto* inspector = (Inspector*)pair.val_p;
             if(inspector) {
                 IM_DELETE(inspector);
             }
@@ -766,7 +766,7 @@ namespace ImGuiTexInspect {
 
     void InspectorDrawCallback(const ImDrawList* parent_list,const ImDrawCmd* cmd) {
         // Forward call to API-specific backend
-        Inspector* inspector = (Inspector*)cmd->UserCallbackData;
+        auto* inspector = (Inspector*)cmd->UserCallbackData;
         BackEnd_SetShader(parent_list,cmd,inspector);
     }
 
@@ -977,10 +977,10 @@ namespace ImGuiTexInspect {
         } else {
             /* Map [0,1] to [0,255]. Also clamp it since input data wasn't
              * necessarily in [0,1] range. */
-            ImU8 r = (ImU8)Round((ImClamp(value.x,0.0f,1.0f)) * 255);
-            ImU8 g = (ImU8)Round((ImClamp(value.y,0.0f,1.0f)) * 255);
-            ImU8 b = (ImU8)Round((ImClamp(value.z,0.0f,1.0f)) * 255);
-            ImU8 a = (ImU8)Round((ImClamp(value.w,0.0f,1.0f)) * 255);
+            auto r = (ImU8)Round((ImClamp(value.x,0.0f,1.0f)) * 255);
+            auto g = (ImU8)Round((ImClamp(value.y,0.0f,1.0f)) * 255);
+            auto b = (ImU8)Round((ImClamp(value.z,0.0f,1.0f)) * 255);
+            auto a = (ImU8)Round((ImClamp(value.w,0.0f,1.0f)) * 255);
             sprintf(buffer,TextFormatString,r,g,b,a);
         }
 

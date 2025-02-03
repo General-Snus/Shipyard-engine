@@ -71,5 +71,39 @@ struct ImGui_ImplDX12_RenderState
     ID3D12Device*               Device;
     ID3D12GraphicsCommandList*  CommandList;
 };
+static ImGui_ImplDX12_RenderState* ImGui_ImplDX12_GetRenderstate() {
+    return ImGui::GetCurrentContext() ? (ImGui_ImplDX12_RenderState*)ImGui::GetPlatformIO().Renderer_RenderState : nullptr;
+}
 
+// DirectX12 data
+struct ImGui_ImplDX12_RenderBuffers;
+
+struct ImGui_ImplDX12_Texture {
+    ID3D12Resource* pTextureResource;
+    D3D12_CPU_DESCRIPTOR_HANDLE hFontSrvCpuDescHandle;
+    D3D12_GPU_DESCRIPTOR_HANDLE hFontSrvGpuDescHandle;
+
+    ImGui_ImplDX12_Texture() { memset((void*)this,0,sizeof(*this)); }
+};
+
+struct ImGui_ImplDX12_Data {
+    ImGui_ImplDX12_InitInfo     InitInfo;
+    ID3D12Device* pd3dDevice;
+    ID3D12RootSignature* pRootSignature;
+    ID3D12PipelineState* pPipelineState;
+    DXGI_FORMAT                 RTVFormat;
+    DXGI_FORMAT                 DSVFormat;
+    ID3D12DescriptorHeap* pd3dSrvDescHeap;
+    UINT                        numFramesInFlight;
+    ImGui_ImplDX12_Texture      FontTexture;
+    bool                        LegacySingleDescriptorUsed;
+
+    ImGui_ImplDX12_Data() { memset((void*)this,0,sizeof(*this)); }
+};
+
+// Backend data stored in io.BackendRendererUserData to allow support for multiple Dear ImGui contexts
+// It is STRONGLY preferred that you use docking branch with multi-viewports (== single Dear ImGui context + multiple windows) instead of multiple Dear ImGui contexts.
+static ImGui_ImplDX12_Data* ImGui_ImplDX12_GetBackendData() {
+    return ImGui::GetCurrentContext() ? (ImGui_ImplDX12_Data*)ImGui::GetIO().BackendRendererUserData : nullptr;
+}
 #endif // #ifndef IMGUI_DISABLE
