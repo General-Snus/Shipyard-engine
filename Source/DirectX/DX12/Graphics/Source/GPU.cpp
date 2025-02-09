@@ -9,7 +9,8 @@
 #include "DirectX/DX12/Graphics/CommandQueue.h"
 #include "DirectX/DX12/Graphics/eDescriptors.h"
 #include "DirectX/DX12/Graphics/ResourceStateTracker.h"
-#include "DirectX/DX12/Graphics/Texture.h"
+#include "DirectX/DX12/Graphics/Resources/Texture.h" 
+#include <DirectX/DX12/Graphics/Resources/IndexBuffer.h>
 
 using namespace DirectX;
 

@@ -6,7 +6,9 @@
 #include "Graphics/GPU.h"
 #include "Graphics/GpuResource.h"
 #include "Graphics/ResourceStateTracker.h"
-#include "Graphics/Texture.h"
+#include "Graphics/Resources/Texture.h"
+#include "Graphics/Resources/IndexBuffer.h"
+#include "Graphics/Resources/VertexBuffer.h"
 #include "Graphics/MIPS/GenerateMipsPSO.h"
 
 CommandList::CommandList(const DeviceType& device,D3D12_COMMAND_LIST_TYPE type,const std::wstring& name)

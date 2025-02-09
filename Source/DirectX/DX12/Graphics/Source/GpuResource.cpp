@@ -4,27 +4,6 @@
 #include "Graphics/GPU.h"
 
 using namespace DirectX;
-VertexResource::VertexResource(std::filesystem::path name): m_NumVertices(0), m_VertexStride(0)
-{
-	m_ResourceName = name;
-}
-
-void VertexResource::CreateView(size_t numElements, size_t elementSize)
-{
-	OPTICK_EVENT();
-	m_NumVertices = static_cast<uint32_t>(numElements);
-	m_VertexStride = static_cast<uint32_t>(elementSize);
-
-	D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
-	SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-	SRVDesc.Format = DXGI_FORMAT_R32_TYPELESS;
-	SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	SRVDesc.Buffer.NumElements = (m_NumVertices * m_VertexStride) / 4;
-	SRVDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_RAW;
-	HeapHandle handle = GPUInstance.GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
-	GPUInstance.m_Device->CreateShaderResourceView(m_Resource.Get(), &SRVDesc, handle.cpuPtr);
-	m_DescriptorHandles[ViewType::SRV] = handle;
-}
 
 GpuResource::GpuResource()
 	: m_UsageState(D3D12_RESOURCE_STATE_COMMON), m_TransitioningState(static_cast<D3D12_RESOURCE_STATES>(-1)),
@@ -78,6 +57,7 @@ void GpuResource::CreateView(size_t numElements, size_t elementSize)
 	OPTICK_GPU_EVENT("CreateView");
 	UNREFERENCED_PARAMETER(numElements);
 	UNREFERENCED_PARAMETER(elementSize);
+	throw std::exception("Fuck you");
 }
 
 void GpuResource::Reset()
@@ -109,6 +89,11 @@ bool GpuResource::CheckUAVSupport() const
 bool GpuResource::CheckDSVSupport() const
 {
 	return CheckFormatSupport(D3D12_FORMAT_SUPPORT1_DEPTH_STENCIL);
+}
+
+uint64_t GpuResource::GetGpuAddress() const
+{
+	return m_Resource->GetGPUVirtualAddress();
 }
 
 void GpuResource::SetView(ViewType view)
@@ -349,24 +334,7 @@ void GpuResource::CheckFeatureSupport()
 	}
 }
 
-IndexResource::IndexResource() : GpuResource(), m_NumIndices(0), m_IndexFormat(DXGI_FORMAT_UNKNOWN)
+void GpuResource::SetName(const wchar_t* name)
 {
-}
-
-IndexResource::IndexResource(const std::filesystem::path& name)
-	: GpuResource(), m_NumIndices(0), m_IndexFormat(DXGI_FORMAT_UNKNOWN)
-{
-	m_ResourceName = name;
-}
-
-void IndexResource::CreateView(size_t numElements, size_t elementSize)
-{
-	assert(elementSize == 2 || elementSize == 4 && "Indices must be 16, or 32-bit integers.");
-
-	m_NumIndices = static_cast<uint32_t>(numElements);
-	m_IndexFormat = (elementSize == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
-
-	m_IndexBufferView.BufferLocation = m_Resource->GetGPUVirtualAddress();
-	m_IndexBufferView.SizeInBytes = static_cast<UINT>(numElements * elementSize);
-	m_IndexBufferView.Format = m_IndexFormat;
+	m_Resource->SetName(name);
 }

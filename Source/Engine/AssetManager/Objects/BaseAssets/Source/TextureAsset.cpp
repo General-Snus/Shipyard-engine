@@ -3,7 +3,7 @@
 #include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
 #include <Tools/ImGui/ImGuiHelpers.hpp>
 #include "DirectX/DX12/Graphics/GPU.h"
-#include "DirectX/DX12/Graphics/Texture.h"
+#include "DirectX/DX12/Graphics/Resources/Texture.h"
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 
 TextureHolder::TextureHolder(const std::filesystem::path& aFilePath, eTextureType aTextureType)

@@ -22,7 +22,7 @@
 #include "Enums.h"
 #include "Gpu_fwd.h"
 #include "RootSignature.h"
-#include "Texture.h"
+#include <DirectX/DX12/Graphics/Resources/Texture.h>
 
 class GPUSupport
 {

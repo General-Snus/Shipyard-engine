@@ -1,8 +1,6 @@
 #include "DirectXHeader.pch.h"
+#include "../Texture.h"
 
-#include <memory>
-
-#include "Graphics/Texture.h"
 #include "Graphics/CommandQueue.h"
 #include "Graphics/eDescriptors.h"
 #include "Graphics/GPU.h" 

@@ -1,7 +1,7 @@
 #pragma once
 #include <functional>
+#include <filesystem>
 #include <Engine/AssetManager/Enums.h>
-#include "DirectX/DX12/Graphics/GpuResource.h"
 #include "Engine/AssetManager/Reflection/ReflectionTemplate.h"
 #include "Engine/GraphicsEngine/Rendering/Vertex.h"
 #include "Tools/Logging/Logging.h"

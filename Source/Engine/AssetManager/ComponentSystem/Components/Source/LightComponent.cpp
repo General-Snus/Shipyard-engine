@@ -6,7 +6,7 @@
 #include <Tools/Utilities/Math.hpp>
 
 #include "DirectX/DX12/Graphics/GPU.h"
-#include "DirectX/DX12/Graphics/Texture.h"
+#include "DirectX/DX12/Graphics/Resources/Texture.h"
 #include "Engine/AssetManager/Objects/BaseAssets/LightDataBase.h"
 
 Light::Light(const SY::UUID anOwnerId, GameObjectManager* aManager) : Component(anOwnerId, aManager)

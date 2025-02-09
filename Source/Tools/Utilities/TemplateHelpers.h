@@ -36,7 +36,32 @@
     {                                                                                                                  \
         a = a ^ b;                                                                                                     \
         return a;                                                                                                      \
-    };
+    }                                                                                                                  \
+    inline bool operator!(const _ENUM_TYPE & val) {                                                                    \
+        return static_cast<std::underlying_type<_ENUM_TYPE>::type>(val) != 0;                                          \
+    }                                                                                                                  \
+    inline bool operator==(_ENUM_TYPE lhs, _ENUM_TYPE rhs) {                                                           \
+        return static_cast<std::underlying_type_t<_ENUM_TYPE>>(lhs) ==                                                 \
+            static_cast<std::underlying_type_t<_ENUM_TYPE>>(rhs);                                                      \
+    }                                                                                                                  \
+    inline bool operator!=(_ENUM_TYPE lhs, _ENUM_TYPE rhs) {                                                           \
+        return !(lhs == rhs);                                                                                          \
+    }                                                                                                                  \
+    inline bool is_set(_ENUM_TYPE flags, _ENUM_TYPE flag) {                                                            \
+        return bool(flags & flag);                                                                                     \
+    }                                                                                                                  \
+    inline bool to_bool(_ENUM_TYPE val) {                                                                              \
+        return static_cast<std::underlying_type<_ENUM_TYPE>::type>(val) != 0;                                          \
+    }                                                                                                                  \
+    inline std::underlying_type<_ENUM_TYPE>::type to_underlying(_ENUM_TYPE val) {                                      \
+        return static_cast<std::underlying_type<_ENUM_TYPE>::type>(val);                                               \
+    }                                                                                                                  \
+    inline bool operator&&(_ENUM_TYPE lhs, _ENUM_TYPE rhs) {                                                           \
+        return to_bool(lhs & rhs);                                                                           \
+    }                                                                                                                  \
+    inline bool operator||(_ENUM_TYPE lhs, _ENUM_TYPE rhs) {                                                           \
+        return to_bool(lhs | rhs);                                                                           \
+    }
 
 #pragma region SmartPointerChecks
 

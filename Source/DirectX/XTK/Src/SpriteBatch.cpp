@@ -312,13 +312,13 @@ void SpriteBatch::Impl::DeviceResources::CreateIndexBuffer(_In_ ID3D12Device* de
     static_assert((MaxBatchSize * VerticesPerSprite) < USHRT_MAX, "MaxBatchSize too large for 16-bit indices");
 
     const CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_DEFAULT);
-    auto const bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(short) * MaxBatchSize * IndicesPerSprite);
+    auto const BufferDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(short) * MaxBatchSize * IndicesPerSprite);
 
     // Create the constant buffer.
     ThrowIfFailed(device->CreateCommittedResource(
         &heapProps,
         D3D12_HEAP_FLAG_NONE,
-        &bufferDesc,
+        &BufferDesc,
         c_initialCopyTargetState,
         nullptr,
         IID_GRAPHICS_PPV_ARGS(indexBuffer.ReleaseAndGetAddressOf())));
@@ -329,7 +329,7 @@ void SpriteBatch::Impl::DeviceResources::CreateIndexBuffer(_In_ ID3D12Device* de
 
     D3D12_SUBRESOURCE_DATA indexDataDesc = {};
     indexDataDesc.pData = indexValues.data();
-    indexDataDesc.RowPitch = static_cast<LONG_PTR>(bufferDesc.Width);
+    indexDataDesc.RowPitch = static_cast<LONG_PTR>(BufferDesc.Width);
     indexDataDesc.SlicePitch = indexDataDesc.RowPitch;
 
     // Upload the resource
@@ -340,7 +340,7 @@ void SpriteBatch::Impl::DeviceResources::CreateIndexBuffer(_In_ ID3D12Device* de
     // Create the index buffer view
     indexBufferView.BufferLocation = indexBuffer->GetGPUVirtualAddress();
     indexBufferView.Format = DXGI_FORMAT_R16_UINT;
-    indexBufferView.SizeInBytes = static_cast<UINT>(bufferDesc.Width);
+    indexBufferView.SizeInBytes = static_cast<UINT>(BufferDesc.Width);
 }
 
 void SpriteBatch::Impl::DeviceResources::CreateRootSignatures(_In_ ID3D12Device* device)

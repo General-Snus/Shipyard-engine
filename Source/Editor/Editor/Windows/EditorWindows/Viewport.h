@@ -1,5 +1,5 @@
 #pragma once
-#include "DirectX/DX12/Graphics/Texture.h"
+#include "DirectX/DX12/Graphics/Resources/Texture.h"
 #include "Editor/Editor/Core/Editor.h"
 #include "Editor/Editor/Windows/Window.h"
 #include "EditorWindow.h"

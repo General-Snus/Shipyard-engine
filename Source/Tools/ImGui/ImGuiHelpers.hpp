@@ -1,6 +1,6 @@
 #pragma once
 #include "DirectX/DX12/Graphics/GpuResource.h"
-#include "DirectX/DX12/Graphics/Texture.h"
+#include "DirectX/DX12/Graphics/Resources/Texture.h"
 #include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
 #include "Tools/ImGui/imgui.h"
 #include "Tools/Utilities/Input/Input.hpp" 

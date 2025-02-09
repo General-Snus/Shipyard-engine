@@ -7,6 +7,9 @@
 #include <Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h>
 #include <Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h>
 
+#include "DirectX/DX12/Graphics/Resources/IndexBuffer.h"
+#include "DirectX/DX12/Graphics/Resources/VertexBuffer.h"
+
 
 
 bool DebugDrawer::Initialize() {
@@ -30,16 +33,6 @@ bool DebugDrawer::Initialize() {
 		CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK,
 			D3D12_MEMORY_POOL_L0));
 	commandQueue->ExecuteCommandList(commandList);
-	//// Create dynamic vertex and index buffer
-	//if (!(
-	//	RHI::CreateDynamicVertexBuffer(myLineVertexBuffer,65536,sizeof(DebugVertex)) &&
-	//	RHI::CreateDynami
-	//	cIndexBuffer(myLineIndexBuffer,65536)
-	//	))
-	//{
-	//	Logger.Err("Failed to initialize the myLineVertexBuffer!");
-	//	return false;
-	//}
 	return true;
 }
 

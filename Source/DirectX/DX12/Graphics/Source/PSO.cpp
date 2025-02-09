@@ -96,10 +96,7 @@ void PSOCache::InitDefaultSignature()
 	rootParameters[static_cast<int>(eRootBindings::materialBuffer)].InitAsConstantBufferView(
 		REG_DefaultMaterialBuffer, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_ALL);
 	rootParameters[static_cast<int>(eRootBindings::lightBuffer)].InitAsConstantBufferView(
-		REG_LightBuffer, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_ALL);
-
-	rootParameters[static_cast<int>(eRootBindings::textureInspectionBuffer)].InitAsConstantBufferView(
-		REG_TextureInspectionBuffer,0,D3D12_ROOT_DESCRIPTOR_FLAG_NONE,D3D12_SHADER_VISIBILITY_PIXEL);
+		REG_LightBuffer, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_ALL); 
 
 	const auto descriptorRange = CD3DX12_DESCRIPTOR_RANGE1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2048, REG_colorMap, 0,
 	                                                       D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);

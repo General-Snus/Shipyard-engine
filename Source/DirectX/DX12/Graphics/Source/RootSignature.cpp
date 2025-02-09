@@ -129,8 +129,9 @@ void GPURootSignature::SetRootSignatureDesc(const D3D12_ROOT_SIGNATURE_DESC1& ro
 	// Serialize the root signature.
 	ComPtr<ID3DBlob> rootSignatureBlob;
 	ComPtr<ID3DBlob> errorBlob;
-	if (FAILED(D3DX12SerializeVersionedRootSignature(&versionRootSignatureDesc,
-		rootSignatureVersion,&rootSignatureBlob,&errorBlob)))
+	const auto hr = D3DX12SerializeVersionedRootSignature(&versionRootSignatureDesc,
+		rootSignatureVersion, &rootSignatureBlob, &errorBlob);
+	if (FAILED(hr))
 	{
 		const std::string errorString = static_cast<char*>(errorBlob->GetBufferPointer());
 		LOGGER.Err(errorString);

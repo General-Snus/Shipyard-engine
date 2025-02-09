@@ -3,7 +3,7 @@
 #include <span>
 #include <DirectX/DX12/Graphics/Gpu_fwd.h>
 #include <DirectX/DX12/Graphics/Helpers.h>
-#include <DirectX/DX12/Graphics/Texture.h>
+#include <DirectX/DX12/Graphics/Resources/Texture.h>
 #include <Engine/AssetManager/ComponentSystem/GameObjectManager.h>
 #include <Tools/Utilities/Error.hpp>
 #include "Engine/GraphicsEngine/Rendering/Buffers/LightBuffer.h"

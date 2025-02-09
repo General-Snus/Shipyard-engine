@@ -3,7 +3,8 @@
 #include <d3d12.h>
 #include <Engine/AssetManager/AssetManager.h>
 #include <Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h>
-#include <DirectX/DX12/Graphics/Texture.h>
+#include <DirectX/DX12/Graphics/Resources/Texture.h>
+#include <DirectX/DX12/Graphics/Resources/GpuBuffer.h>
 #include "imgui_impl_dx12.h"
 #include "DirectX/DX12/Graphics/GPU.h"
 #include <Engine/GraphicsEngine/Shaders/Registers.h>
@@ -12,7 +13,7 @@ namespace ImGuiTexInspect {
 
     /* Constant buffer used in pixel shader. Size must be multiple of 16 bytes.
      * Layout must match the layout in the pixel shader. */
-    struct PIXEL_CONSTANT_BUFFER {
+     struct alignas(16) PIXEL_CONSTANT_BUFFER  {
         float ColorTransform[16];
         float ColorOffset[4];
         float Grid[4];
@@ -26,7 +27,7 @@ namespace ImGuiTexInspect {
     };
 
     static ID3D12PipelineState* pPipelineState;
-    static ID3D12Resource* pResourceConstantBuffer;
+    static GpuBuffer* pResourceConstantBuffer;
     bool ImplDX12_Init() {
 
         const auto& backEndData = ImGui_ImplDX12_GetBackendData();
@@ -97,7 +98,7 @@ namespace ImGuiTexInspect {
             IDxcBlob* pixelShaderBlob;
         {
             static const char* pixelShader =
-                "cbuffer pixelBuffer :register(b0)\n\
+                "cbuffer pixelBuffer :register(b1)\n\
             {\n\
                 float4x4 ColorTransform;\n\
                 float4   ColorOffset;\n\
@@ -202,7 +203,7 @@ namespace ImGuiTexInspect {
     }
 
     void ImplDX12_Shutdown() {
-        pResourceConstantBuffer->Release();
+        pResourceConstantBuffer->Destroy();
         pPipelineState->Release();
     }
 
@@ -300,64 +301,50 @@ namespace ImGuiTexInspect {
 
         ImGui_ImplDX12_GetRenderstate()->CommandList->SetPipelineState(pPipelineState);
 
-        if(!pResourceConstantBuffer) {
+        if(pResourceConstantBuffer == nullptr) { 
+            BufferDescription resDesc = {};
+            resDesc.size = sizeof(PIXEL_CONSTANT_BUFFER);
+            resDesc.misc_flags = BufferDescription::BufferFlag::ConstantBuffer;
+            resDesc.bind_flags = BufferDescription::BufferBinds::ShaderResource;
+            resDesc.resource_usage = BufferDescription::ResourceUsage::Upload;
+            PIXEL_CONSTANT_BUFFER target;
+            pResourceConstantBuffer = new GpuBuffer(resDesc, &target);
+        }  
 
-            const CD3DX12_HEAP_PROPERTIES readBackHeapProperties(D3D12_HEAP_TYPE_READBACK);
+        void* pMappedMemory = nullptr;
+        D3D12_RANGE readRange = {0, sizeof(PIXEL_CONSTANT_BUFFER)};
+        D3D12_RANGE writeRange = {0, sizeof(PIXEL_CONSTANT_BUFFER)};
+        pMappedMemory = pResourceConstantBuffer->Map();
+        if(!pMappedMemory)
+            return;
 
-            D3D12_RESOURCE_DESC resDesc = {};
-            resDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-            resDesc.Alignment = 0;
-            resDesc.Width = sizeof(PIXEL_CONSTANT_BUFFER);
-            resDesc.Height = 1;
-            resDesc.DepthOrArraySize = 1;
-            resDesc.MipLevels = 1;
-            resDesc.Format = DXGI_FORMAT_UNKNOWN;
-            resDesc.SampleDesc.Count = 1;
-            resDesc.SampleDesc.Quality = 0;
-            resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-            resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+        // Transfer shader options from shaderOptions to our backend specific pixel shader constant buffer
+        PIXEL_CONSTANT_BUFFER* constant_buffer = (PIXEL_CONSTANT_BUFFER*)pMappedMemory;
 
-            ID3D12Resource* constBuf;
-            HRESULT res = ImGui_ImplDX12_GetRenderstate()->Device->CreateCommittedResource(
-                &readBackHeapProperties,
-                D3D12_HEAP_FLAG_NONE,
-                &resDesc,
-                D3D12_RESOURCE_STATE_COPY_DEST, // InitialResourceState
-                nullptr, // pOptimizedClearValue
-                IID_PPV_ARGS(&constBuf));
-        } else {
+        memcpy(constant_buffer->ColorTransform,shaderOptions->ColorTransform,sizeof(shaderOptions->ColorTransform));
+        memcpy(constant_buffer->ColorOffset,shaderOptions->ColorOffset,sizeof(shaderOptions->ColorOffset));
+        memcpy(constant_buffer->Grid,&shaderOptions->GridColor,sizeof(shaderOptions->GridColor));
+        memcpy(constant_buffer->GridWidth,&shaderOptions->GridWidth,sizeof(shaderOptions->GridWidth));
+        memcpy(constant_buffer->BackgroundColor,&shaderOptions->BackgroundColor,sizeof(shaderOptions->BackgroundColor));
+        memcpy(constant_buffer->TextureSize,&inspector->TextureSize,sizeof(inspector->TextureSize));
 
-            void* pMappedMemory = nullptr;
-            D3D12_RANGE readRange = {0, sizeof(PIXEL_CONSTANT_BUFFER)};
-            D3D12_RANGE writeRange = {0, sizeof(PIXEL_CONSTANT_BUFFER)};
-            auto hr = pResourceConstantBuffer->Map(0,&readRange,&pMappedMemory);
-            if(FAILED(hr))
-                return;
+        constant_buffer->PremultiplyAlpha = shaderOptions->PremultiplyAlpha;
+        constant_buffer->DisableFinalAlpha = shaderOptions->DisableFinalAlpha;
+        constant_buffer->forceNearestSampling = shaderOptions->ForceNearestSampling;
 
+        pResourceConstantBuffer->Unmap();
 
-            // Transfer shader options from shaderOptions to our backend specific pixel shader constant buffer
-            PIXEL_CONSTANT_BUFFER* constant_buffer = (PIXEL_CONSTANT_BUFFER*)pMappedMemory;
+        //ImGui_ImplDX12_GetRenderstate()->CommandList->SetGraphicsRootConstantBufferView(REG_TextureInspectionBuffer,pResourceConstantBuffer->GetGpuAddress());
 
-            memcpy(constant_buffer->ColorTransform,shaderOptions->ColorTransform,sizeof(shaderOptions->ColorTransform));
-            memcpy(constant_buffer->ColorOffset,shaderOptions->ColorOffset,sizeof(shaderOptions->ColorOffset));
-            memcpy(constant_buffer->Grid,&shaderOptions->GridColor,sizeof(shaderOptions->GridColor));
-            memcpy(constant_buffer->GridWidth,&shaderOptions->GridWidth,sizeof(shaderOptions->GridWidth));
-            memcpy(constant_buffer->BackgroundColor,&shaderOptions->BackgroundColor,sizeof(shaderOptions->BackgroundColor));
-            memcpy(constant_buffer->TextureSize,&inspector->TextureSize,sizeof(inspector->TextureSize));
-
-            constant_buffer->PremultiplyAlpha = shaderOptions->PremultiplyAlpha;
-            constant_buffer->DisableFinalAlpha = shaderOptions->DisableFinalAlpha;
-            constant_buffer->forceNearestSampling = shaderOptions->ForceNearestSampling;
-
-            pResourceConstantBuffer->Unmap(0,&writeRange);
-        }
-        ImGui_ImplDX12_GetRenderstate()->CommandList->SetGraphicsRootConstantBufferView(REG_TextureInspectionBuffer,pResourceConstantBuffer->GetGPUVirtualAddress());
+        unsigned data_size = sizeof(PIXEL_CONSTANT_BUFFER) / sizeof(uint32_t);
+        //ImGui_ImplDX12_GetRenderstate()->CommandList->SetGraphicsRootSignature(ImGui_ImplDX12_GetBackendData()->pRootSignature);
+        ImGui_ImplDX12_GetRenderstate()->CommandList->SetGraphicsRoot32BitConstants(2, data_size , constant_buffer,0);
 
         //GImplData.pd3dDeviceContext->PSSetShader(GImplData.pPixelShader,NULL,0);
        //GImplData.pd3dDeviceContext->PSSetConstantBuffers(0,1,&GImplData.pPixelConstantBuffer);
     }
 
-    bool BackEnd_GetData(Inspector* inspector,Texture* texture,int /*x*/,int /*y*/,int /*width*/,int /*height*/,BufferDesc* bufferDesc) {
+    bool BackEnd_GetData(Inspector* inspector,Texture* texture,int /*x*/,int /*y*/,int /*width*/,int /*height*/,BufferDesc* BufferDesc) {
         if(ImGui_ImplDX12_GetBackendData()->pd3dDevice == NULL) {
             GiveNotInitializedWarning();
             return false;
@@ -377,32 +364,32 @@ namespace ImGuiTexInspect {
 
         void* copyDst = NULL;
         if(formatDesc.type == ImGuiDataType_Float) {
-            bufferDesc->Data_float =
+            BufferDesc->Data_float =
                 (float*)ImGuiTexInspect::GetBuffer(inspector,(size_t)texWidth * texHeight * channelCount * componentSize);
-            bufferDesc->Data_uint8_t = NULL;
-            copyDst = bufferDesc->Data_float;
+            BufferDesc->Data_uint8_t = NULL;
+            copyDst = BufferDesc->Data_float;
         } else // ImGuiDataType_U8 is only other supported type at the moment
         {
-            bufferDesc->Data_uint8_t = ImGuiTexInspect::GetBuffer(inspector,(size_t)texWidth * texHeight * channelCount * componentSize);
-            bufferDesc->Data_float = NULL;
-            copyDst = bufferDesc->Data_uint8_t;
+            BufferDesc->Data_uint8_t = ImGuiTexInspect::GetBuffer(inspector,(size_t)texWidth * texHeight * channelCount * componentSize);
+            BufferDesc->Data_float = NULL;
+            copyDst = BufferDesc->Data_uint8_t;
         }
 
         if(copyDst && texture->CopyDataInto(copyDst)) {
             int const bytesPerPixel = componentSize * channelCount;
-            bufferDesc->BufferByteSize = (size_t)texWidth * texHeight * bytesPerPixel;
-            bufferDesc->Red = 0;
-            bufferDesc->Green = (ImU8)ImMin(1,channelCount - 1);
-            bufferDesc->Blue = (ImU8)ImMin(2,channelCount - 1);
-            bufferDesc->Alpha = (ImU8)ImMin(3,channelCount - 1);
-            bufferDesc->ChannelCount = (ImU8)channelCount;
+            BufferDesc->BufferByteSize = (size_t)texWidth * texHeight * bytesPerPixel;
+            BufferDesc->Red = 0;
+            BufferDesc->Green = (ImU8)ImMin(1,channelCount - 1);
+            BufferDesc->Blue = (ImU8)ImMin(2,channelCount - 1);
+            BufferDesc->Alpha = (ImU8)ImMin(3,channelCount - 1);
+            BufferDesc->ChannelCount = (ImU8)channelCount;
 
-            bufferDesc->LineStride = (int)inspector->TextureSize.x * channelCount;
-            bufferDesc->Stride = channelCount;
-            bufferDesc->StartX = 0;
-            bufferDesc->StartY = 0;
-            bufferDesc->Width = texWidth;
-            bufferDesc->Height = texHeight;
+            BufferDesc->LineStride = (int)inspector->TextureSize.x * channelCount;
+            BufferDesc->Stride = channelCount;
+            BufferDesc->StartX = 0;
+            BufferDesc->StartY = 0;
+            BufferDesc->Width = texWidth;
+            BufferDesc->Height = texHeight;
         }
 
         return true;

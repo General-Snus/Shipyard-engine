@@ -111,16 +111,16 @@ namespace
         const CD3DX12_HEAP_PROPERTIES readBackHeapProperties(D3D12_HEAP_TYPE_READBACK);
 
         // Readback resources must be buffers
-        D3D12_RESOURCE_DESC bufferDesc = {};
-        bufferDesc.DepthOrArraySize = 1;
-        bufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-        bufferDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-        bufferDesc.Format = DXGI_FORMAT_UNKNOWN;
-        bufferDesc.Height = 1;
-        bufferDesc.Width = srcPitch * desc.Height;
-        bufferDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-        bufferDesc.MipLevels = 1;
-        bufferDesc.SampleDesc.Count = 1;
+        D3D12_RESOURCE_DESC BufferDesc = {};
+        BufferDesc.DepthOrArraySize = 1;
+        BufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+        BufferDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+        BufferDesc.Format = DXGI_FORMAT_UNKNOWN;
+        BufferDesc.Height = 1;
+        BufferDesc.Width = srcPitch * desc.Height;
+        BufferDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+        BufferDesc.MipLevels = 1;
+        BufferDesc.SampleDesc.Count = 1;
 
         ComPtr<ID3D12Resource> copySource(pSource);
         D3D12_RESOURCE_STATES beforeStateSource = beforeState;
@@ -180,7 +180,7 @@ namespace
         hr = device->CreateCommittedResource(
             &readBackHeapProperties,
             D3D12_HEAP_FLAG_NONE,
-            &bufferDesc,
+            &BufferDesc,
             D3D12_RESOURCE_STATE_COPY_DEST,
             nullptr,
             IID_GRAPHICS_PPV_ARGS(pStaging));

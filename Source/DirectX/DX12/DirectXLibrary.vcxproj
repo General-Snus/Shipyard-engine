@@ -43,6 +43,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Graphics\Resources\Source\GpuBuffer.cpp" />
     <ClCompile Include="Graphics\MIPS\GenerateMipsPSO.cpp" />
     <ClCompile Include="Graphics\Source\CommandList.cpp" />
     <ClCompile Include="Graphics\Source\CommandQueue.cpp" />
@@ -52,7 +53,9 @@
     <ClCompile Include="Graphics\Source\ResourceStateTracker.cpp" />
     <ClCompile Include="Graphics\Source\GpuResource.cpp" />
     <ClCompile Include="Graphics\Source\RootSignature.cpp" />
-    <ClCompile Include="Graphics\Source\Texture.cpp" />
+    <ClCompile Include="Graphics\Resources\Source\Texture.cpp" />
+    <ClCompile Include="Graphics\Resources\Source\IndexBuffer.cpp" />
+    <ClCompile Include="Graphics\Resources\Source\VertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CrashHandler\DXSampleHelper.h" />
@@ -68,6 +71,7 @@
     <ClInclude Include="DXC\dxcapi.h" />
     <ClInclude Include="DXC\dxcerrors.h" />
     <ClInclude Include="DXC\dxcisense.h" />
+    <ClInclude Include="Graphics\Resources\GpuBuffer.h" />
     <ClInclude Include="Helpers\d3dx12.h" />
     <ClInclude Include="Helpers\d3dx12_barriers.h" />
     <ClInclude Include="Helpers\d3dx12_check_feature_support.h" />
@@ -91,8 +95,10 @@
     <ClInclude Include="Graphics\PSO.h" />
     <ClInclude Include="Graphics\RootSignature.h" />
     <ClInclude Include="Graphics\Gpu_fwd.h" />
-    <ClInclude Include="Graphics\Texture.h" />
+    <ClInclude Include="Graphics\Resources\Texture.h" />
     <ClInclude Include="Graphics\ThreadSafeQueue.h" />
+    <ClInclude Include="Graphics\Resources\IndexBuffer.h" />
+    <ClInclude Include="Graphics\Resources\VertexBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DirectXTex\DirectXTex_Desktop_2022.vcxproj">

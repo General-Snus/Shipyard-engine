@@ -47,17 +47,6 @@
 #include <dxgidebug.h>
 #endif
 
-#include <cstdarg>
-#include <cstdint>
-#include <cstdio>
-#include <cwctype>
-#include <exception>
-#include <memory>
-#include <string>
-#include <vector>
-
-#include <functional>
-#include <ppltasks.h>
 
 #include <DescriptorHeap.h>
 #include <DirectXHelpers.h>
@@ -94,5 +83,15 @@
 #include <thread>
 #include <unordered_map>
 #include <vector>
+#include <cstdarg>
+#include <cstdint>
+#include <cstdio>
+#include <cwctype>
+#include <exception>
+#include <memory>
+#include <string>
+#include <vector>
+#include <functional>
+#include <ppltasks.h>
 
 #endif // DIRECTXHEADER_PCH_H

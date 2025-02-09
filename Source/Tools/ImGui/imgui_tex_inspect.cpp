@@ -10,7 +10,7 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 
-#include <DirectX/DX12/Graphics/Texture.h>
+#include <DirectX/DX12/Graphics/Resources/Texture.h>
 
 #if defined(_MSC_VER)
 #pragma warning(disable : 4996) // 'sprintf' considered unsafe

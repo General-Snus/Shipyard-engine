@@ -767,7 +767,7 @@ void Editor::TopBar() {
 	}
 	for(const auto& windows : g_EditorWindows) {
 		if(windows && windows->m_KeepWindow) {
-			ImGui::PushID(windows.get());
+			ImGui::PushID(windows->uniqueID);
 			windows->RenderImGUi();
 			ImGui::PopID();
 		}
