@@ -1,10 +1,9 @@
 #pragma once
 #include <vector>
-#include "PriorityQueue.hpp"
-#include "Stack.hpp"
-#include "HashMap.hpp"
-#include "Vectors&Volumes/Vector2.hpp"
-#include "Vectors&Volumes/Vector4.hpp"
+#include <DataStructures/Stack.hpp>
+#include <DataStructures/HashMap.hpp>
+#include <DataStructures/PriorityQueue.hpp>
+#include <LinearAlgebra/Vector2.hpp>
 
 namespace Assignment7Astar { 
 
