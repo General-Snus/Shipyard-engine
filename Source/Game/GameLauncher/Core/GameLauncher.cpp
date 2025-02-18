@@ -6,6 +6,7 @@
 #include "Editor/Editor/Windows/EditorWindows/Viewport.h"
 #include "Engine/PersistentSystems/Physics/Raycast.h"
 #include "PillarGame/PillarGameComponents.h"
+#include <DirectX/XTK/Inc/SimpleMath.h>
 
 #include "Tools/ImGui/crude_json.h"
 #include "Tools/Utilities/LinearAlgebra/Easing.h"
@@ -61,6 +62,8 @@ void YourGameLauncher::Start() {
 	GraphicsEngineInstance.debugDrawer.AddDebugBox({-1, -1, -1},{1, 1, 1});
 }
 
+#pragma optimize( "", off ) 
+
 void YourGameLauncher::Update(float delta) {
 	OPTICK_EVENT();
 	UNREFERENCED_PARAMETER(delta);
@@ -79,8 +82,15 @@ void YourGameLauncher::Update(float delta) {
 				element.transform().SetPosition(position);
 
 				auto rotation = element.transform().euler();
-				rotation.y = lerp(lerpRot.y,element.currentHook.transform().euler().y,percentage);
-				element.transform().SetRotation(rotation);
+				auto hookPosition = element.currentHook.transform().GetPosition();
+
+				const auto towerCenter2d = Vector2(position.swizzle<VectorIndices::x,VectorIndices::z>()); // Player parent origin
+				const auto hook2dPosition = Vector2(hookPosition.swizzle<VectorIndices::x,VectorIndices::z>());
+				const auto hookToCenter = hook2dPosition - towerCenter2d;
+				const auto q = Quaternionf::LookAt(hookToCenter,Vector3f::up());
+
+				rotation.y = lerp(lerpRot.y,q.GetEulerAngles().y,percentage);
+				element.transform().SetRotation(rotation); 
 				return;
 			}
 		}
@@ -102,33 +112,33 @@ void YourGameLauncher::Update(float delta) {
 			const auto coord = EDITOR_INSTANCE.GetMainViewport()->getCursorInWindowPostion();
 			const auto position = cameraTransform.GetPosition(WORLD);
 			const auto direction = camera.GetPointerDirection(coord);
+			const bool raycastHit = Raycast(position,direction,hit); 
+			auto* hook = raycastHit ? hit.objectHit.TryGetComponent<HookComponent>() : nullptr;
 
-			if(Raycast(position,direction,hit)) {
-
-				if(auto* hook = hit.objectHit.TryGetComponent<HookComponent>(); hook && !hook->hasConnection) {
-					GraphicsEngineInstance.debugDrawer.AddDebugLine(position,hit.point,{0.0f,1.0f,0},1.0f);
-					LOGGER.Log(hit.objectHit.GetName());
-					if(element.currentHook) {
-						auto& currentHook = element.currentHook.GetComponent<HookComponent>();
-						currentHook.hasConnection = false;
-						currentHook.connection = GameObject();
-					}
-					element.timeSinceHook = 0;
-					element.currentHook = hit.objectHit;
-					hook->connection = element.gameObject();
-					hook->hasConnection = true;
-
-					lerpPos = element.transform().GetPosition();
-					lerpRot = element.transform().euler();
-					return;
+			if(hook && !hook->hasConnection) {
+				GraphicsEngineInstance.debugDrawer.AddDebugLine(position,hit.point,{0.0f,1.0f,0},1.0f);
+				LOGGER.Log(hit.objectHit.GetName());
+				if(element.currentHook) {
+					auto& currentHook = element.currentHook.GetComponent<HookComponent>();
+					currentHook.hasConnection = false;
+					currentHook.connection = GameObject();
 				}
-				GraphicsEngineInstance.debugDrawer.AddDebugLine(position,direction + position,{1.0f,0,0},1.0f);
+				element.timeSinceHook = 0;
+				element.currentHook = hit.objectHit;
+				hook->connection = element.gameObject();
+				hook->hasConnection = true;
+
+				lerpPos = element.transform().GetPosition();
+				lerpRot = element.transform().euler();
+				return;
 			} else {
 				GraphicsEngineInstance.debugDrawer.AddDebugLine(position,direction + position,{1.0f,0,0},1.0f);
 			}
 		}
 	}
 }
+
+#pragma optimize( "", on )
 
 void YourGameLauncher::SyncServices(ServiceLocator& serviceLocator) {
 	ServiceLocator::SyncInstances(serviceLocator);

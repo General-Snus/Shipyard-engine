@@ -335,9 +335,9 @@ template <class T>
 bool Vector3<T>::IsNearlyEqual(const Vector3<T>& cmp,float epsilon) const	{
 	 
 	 return 
-		 std::abs(x - cmp.x) > epsilon &&
-		 std::abs(y - cmp.y) > epsilon &&
-		 std::abs(z - cmp.z) > epsilon;
+		 std::abs(x - cmp.x) <= epsilon &&
+		 std::abs(y - cmp.y) <= epsilon &&
+		 std::abs(z - cmp.z) <= epsilon;
 		 
 }
 

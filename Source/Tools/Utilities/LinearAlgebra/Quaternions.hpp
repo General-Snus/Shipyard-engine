@@ -50,6 +50,8 @@ public:
 	static Quaternion    RotationFromTo(const Vector3f& aFrom,const Vector3f& aTo);
 	static Quaternion<T> LookAt(const Vector3<T>& source,const Vector3<T>& point,const Vector3f& front,
 		const Vector3f& up);
+
+	static Quaternion<T> LookAt(const Vector2<T>& direction,const Vector3f& up);
 	static Quaternion<T> LookAt(const Vector3<T>& direction,const Vector3f& up);
 	static Quaternion<T> CreateFromAxisAngle(Vector3<T> axis,T angle);
 	static T Dot(const Quaternion<T>& q1,const Quaternion<T>& q2);
@@ -438,9 +440,17 @@ Quaternion<T> Quaternion<T>::LookAt(const Vector3<T>& source,const Vector3<T>& d
 	return CreateFromAxisAngle(rotAxis,rotAngle);
 }
 
+
+template <typename T>
+Quaternion<T> Quaternion<T>::LookAt(const Vector2<T>& aDirection,const Vector3f& aUp) {
+	return Quaternion<T>::LookAt(Vector3<T>(aDirection.x,0,aDirection.y),aUp);
+}
+
 template <typename T>
 Quaternion<T> Quaternion<T>::LookAt(const Vector3<T>& aDirection,const Vector3f& aUp) {
-	const Vector3f forward = aDirection.GetNormalized();
+
+
+	const Vector3f forward = -aDirection.GetNormalized();
 	Vector3f up = aUp.GetNormalized();
 	const Vector3f right = up.Cross(forward);
 	up = forward.Cross(right);

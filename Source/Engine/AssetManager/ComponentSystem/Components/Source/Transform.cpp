@@ -439,7 +439,7 @@ Vector3f Transform::euler() const {
 
 void Transform::LookAt(Vector3f target,Vector3f Up) {
 	Up;
-	myQuaternion = Quaternionf::LookAt(myPosition,target,GetForward(WORLD),GetUp(WORLD));
+	myQuaternion = Quaternionf::LookAt((target - myPosition),GetUp(WORLD));
 	//myRotation = myQuaternion.GetEulerAngles() * RAD_TO_DEG;
 	SetDirty(true);
 }

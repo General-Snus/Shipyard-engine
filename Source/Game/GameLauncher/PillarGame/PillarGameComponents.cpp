@@ -47,13 +47,13 @@ void SpawnHooks(int amount,float radius,GameObject parent) {
 		}
 
 		auto& ref = attachment.AddComponent<Collider>();
-		ref.GetColliderAssetOfType<ColliderAssetBox>()->box().GetExtent().z = 0.2f;
+		ref.GetColliderAssetOfType<ColliderAssetBox>()->box().GetExtent().z = 0.1f;
 		attachment.AddComponent<cPhysXStaticBody>();
 		auto directionOffset =
 			Vector3f(Math::RandomEngine::randomInRange(-1.0f,1.0f),0,Math::RandomEngine::randomInRange(-1.0f,1.0f))
 			.GetNormalized();
 
-		auto position = Math::GlobalUp * .5f + directionOffset * radius * 1.25f;
+		auto position = Math::GlobalUp * .5f + directionOffset * radius * 1.05f;
 		position.y = static_cast<float>(i);
 
 		attachment.transform().LookAt(directionOffset * 10.f);
