@@ -4,12 +4,12 @@
 
 #include <WS2tcpip.h>
 
-#include "Networking/NetShared/NetMessage/NetMessage.h"
+#include "Engine/PersistentSystems/Networking/NetMessage/NetMessage.h"
 #pragma comment(lib, "Ws2_32.lib")
 #undef max
 
 #define DEFAULT_PORT 27015
-#define DEFAULT_IP "127.0.0.1"
+#define LOCALHOST "127.0.0.1"
 
 class Client
 {

@@ -1,22 +1,25 @@
+#include "PersistentSystems.pch.h"
+
 #include "Client.h"
 
 #include <string>
 #include <thread>
 #include <Tools/Logging/Logging.h>
 #include <Tools/Utilities/Math.hpp>
-#include "Networking/NetShared/NetMessage/ChatMessage.h"
-#include "Networking/NetShared/NetMessage/HandshakeMessage.h"
-#include "Networking/NetShared/NetMessage/NetMessage.h"
-#include "Networking/NetShared/NetMessage/PlayerSyncMessage.h"
-#include "Networking/NetShared/NetMessage/QuitMessage.h"
+
+#include "Engine/PersistentSystems/Networking/NetMessage/ChatMessage.h"
+#include "Engine/PersistentSystems/Networking/NetMessage/HandshakeMessage.h"
+#include "Engine/PersistentSystems/Networking/NetMessage/NetMessage.h"
+#include "Engine/PersistentSystems/Networking/NetMessage/PlayerSyncMessage.h"
+#include "Engine/PersistentSystems/Networking/NetMessage/QuitMessage.h"
 
 Client::Client() = default;
 Client::~Client() = default;
 
 void Client::Setup()
 {
-	int attemptLimit = 3;
-	while (!SetupConnection() && attemptLimit > 0)
+	int attemptLimit = 0;
+	while (!SetupConnection() && attemptLimit < 5)
 	{
 		LOGGER.Log("Failed to setup connection try again");
 		attemptLimit++;
@@ -170,7 +173,7 @@ bool Client::SetupConnection()
 	short       port;
 	std::string ip;
 	// InputIpAndPort(ip, port);
-	ip = DEFAULT_IP;
+	ip = LOCALHOST;
 	port = DEFAULT_PORT;
 
 	in_addr address;
@@ -268,7 +271,7 @@ void Client::InputIpAndPort(std::string& outIp, short& outPort)
 
 	if (outIp == "0")
 	{
-		outIp = DEFAULT_IP;
+		outIp = LOCALHOST;
 	}
 
 	std::cin.clear();

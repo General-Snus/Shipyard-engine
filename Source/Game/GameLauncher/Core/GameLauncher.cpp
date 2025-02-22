@@ -61,8 +61,7 @@ void YourGameLauncher::Start() {
 	LOGGER.Log("GameLauncher start");
 	GraphicsEngineInstance.debugDrawer.AddDebugBox({-1, -1, -1},{1, 1, 1});
 }
-
-#pragma optimize( "", off ) 
+ 
 
 void YourGameLauncher::Update(float delta) {
 	OPTICK_EVENT();

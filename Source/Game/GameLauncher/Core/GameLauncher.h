@@ -6,6 +6,7 @@
 #include <Executable/Executable/Export.h>
 #include <Tools/Utilities/System/Event.h>
 #include "Engine/AssetManager/ComponentSystem/GameObject.h"
+#include "Engine/PersistentSystems/Networking/Server.h"
 
 class YourGameLauncher : public GameLauncher
 {
@@ -15,6 +16,7 @@ class YourGameLauncher : public GameLauncher
 	void SyncServices(ServiceLocator& serviceLocator) override;
 
 	GameObject player;
+	NetworkRunner runner;
 };
 
 extern "C" {

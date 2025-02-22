@@ -56,7 +56,11 @@
 #include <typeinfo>
 #include <unordered_map>
 #include <unordered_set>
-#include <vector>
+#include <vector> 
+#include <array>
+#include <concepts> 
+#include <type_traits>
+
 /*
 #include <Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h>
 #include <Engine/GraphicsEngine/GraphicsEngine.h>

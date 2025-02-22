@@ -1,16 +1,17 @@
 #pragma once
 #include "EditorWindow.h"
-#include <Networking/Client/Client/Client.h>
 #include <vector>
-
+#include <string>
+class Client;
 class ChatWindow : public EditorWindow
 {
   public:
     explicit ChatWindow();
+    ~ChatWindow();
     void RenderImGUi() override;
 
   private:
     std::vector<std::string> m_ChatMessages;
-    Client m_Client;
-    char currentMessage[MAX_NETMESSAGE_SIZE];
-};
+    Client* m_Client;
+    char currentMessage[512];
+}; 

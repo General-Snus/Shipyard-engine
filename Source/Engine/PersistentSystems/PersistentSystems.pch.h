@@ -10,7 +10,8 @@
 #define NOMINMAX
 // add headers that you want to pre-compile here
 #include <iostream>
-#include <string>
+#include <string> 
+#include <WS2tcpip.h> 
 #include <vector>
 
 #include <Tools/Logging/Logging.h>

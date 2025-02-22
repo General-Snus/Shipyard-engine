@@ -231,10 +231,11 @@ uint64_t GraphicsEngine::RenderFrame(Viewport& renderViewPort,GameObjectManager&
 		GBuffer::Render(*this,commandList,scene);
 
 		EnvironmentLightPass(commandList);
-		ToneMapperPass(commandList,renderViewPort.GetTarget());
+		ToneMapperPass(commandList,renderViewPort.GetTarget()); 
 
-
-		debugDrawer.Render(commandList);
+		if(!renderViewPort.IsMainViewport()) 			{
+			debugDrawer.Render(commandList);
+		}
 
 		return commandQueue->ExecuteCommandList(commandList);
 	}

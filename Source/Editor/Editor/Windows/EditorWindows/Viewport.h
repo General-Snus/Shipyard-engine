@@ -10,12 +10,8 @@
 
 class Transform;
 
-class Viewport : public EditorWindow {
-	// New rule! Always give reason for friending in comment
-	// Reason: ImGui Only knows the bounding and status of the viewport when rendering so all configuration here will be
-	// one frame delayed
-	friend class Editor;
-
+class Viewport : public EditorWindow { 
+	friend class Editor; 
 public:
 	// MainViewport is will render from the MainCamera and if no such camera exist it will be black
 	explicit Viewport(bool IsMainViewPort,

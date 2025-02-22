@@ -20,13 +20,13 @@ class PlayerSyncMessage : public NetMessage
 
     void SetMessage(const PlayerSyncData &someData)
     {
-        memcpy(&myBuffer, &someData, sizeof(someData));
+        memcpy(&dataBuffer, &someData, sizeof(someData));
     }
 
     PlayerSyncData ReadMessage()
     {
         PlayerSyncData data;
-        memcpy(&data, &myBuffer, sizeof(data));
+        memcpy(&data, &dataBuffer, sizeof(data));
         return data;
     }
 

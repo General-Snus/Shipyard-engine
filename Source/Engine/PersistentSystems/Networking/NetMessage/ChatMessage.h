@@ -1,26 +1,23 @@
 ﻿#pragma once
 #include "NetMessage.h"
 
-class QuitMessage : public NetMessage
+class ChatMessage : public NetMessage
 {
 public:
-	QuitMessage() { myType = eNetMessageType::Quit; }
+	ChatMessage() { myType = eNetMessageType::ChatMessage; }
 
 	void SetMessage(const std::string& aMessage)
 	{
-		memcpy(myBuffer, aMessage.data(), sizeof(char) * aMessage.size());
+		memcpy(dataBuffer.data(),aMessage.data(),sizeof(char) * aMessage.size());
 	}
 
 	std::string ReadMessage()
 	{
-		std::string output = myBuffer;
+		std::string output = dataBuffer.data();
 
 		const size_t position = output.find('\n');
 		output = output.substr(0, position);
 
 		return output;
-	}
-
-private:
-
+	} 
 };

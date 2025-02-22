@@ -1,19 +1,19 @@
 ﻿#pragma once
 #include "NetMessage.h"
 
-class HandshakeMessage : public NetMessage
+class QuitMessage : public NetMessage
 {
 public:
-	HandshakeMessage() { myType = eNetMessageType::Handshake; }
+	QuitMessage() { myType = eNetMessageType::Quit; }
 
 	void SetMessage(const std::string& aMessage)
 	{
-		memcpy(myBuffer, aMessage.data(), sizeof(char) * aMessage.size());
+		memcpy(dataBuffer.data(), aMessage.data(), sizeof(char) * aMessage.size());
 	}
 
 	std::string ReadMessage()
 	{
-		std::string output = myBuffer;
+		std::string output = dataBuffer.data();
 
 		const size_t position = output.find('\n');
 		output = output.substr(0, position);
@@ -22,4 +22,5 @@ public:
 	}
 
 private:
+
 };

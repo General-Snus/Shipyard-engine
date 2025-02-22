@@ -125,8 +125,8 @@ void SetupImGuiStyle(Theme theme) {
 	colors[ImGuiCol_Border] = ImVec4(0.24f,0.25f,0.27f,1.00f);
 	colors[ImGuiCol_BorderShadow] = ImVec4(0.31f,0.31f,0.31f,1.00f);
 	colors[ImGuiCol_FrameBg] = ImVec4(0.35f,0.35f,0.35f,1.00f);
-	colors[ImGuiCol_FrameBgHovered] = ImVec4(1.00f,1.00f,1.00f,0.16f);
-	colors[ImGuiCol_FrameBgActive] = ImVec4(1.00f,1.00f,1.00f,0.63f);
+	colors[ImGuiCol_FrameBgHovered] = ImVec4(1.00f,1.00f,1.00f,1.0f);
+	colors[ImGuiCol_FrameBgActive] = ImVec4(1.00f,1.00f,1.00f,1.0f);
 	colors[ImGuiCol_TitleBg] = ImVec4(0.13f,0.13f,0.13f,1.00f);
 	colors[ImGuiCol_TitleBgActive] = ImVec4(0.13f,0.13f,0.13f,1.00f);
 	colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.13f,0.13f,0.13f,1.00f);
@@ -137,42 +137,42 @@ void SetupImGuiStyle(Theme theme) {
 	colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.35f,0.35f,0.35f,1.00f);
 	colors[ImGuiCol_CheckMark] = ImVec4(0.82f,0.56f,0.33f,1.00f);
 	colors[ImGuiCol_SliderGrab] = ImVec4(0.82f,0.56f,0.33f,1.00f);
-	colors[ImGuiCol_SliderGrabActive] = ImVec4(0.73f,0.51f,0.30f,0.84f);
-	colors[ImGuiCol_Button] = ImVec4(0.24f,0.25f,0.27f,0.00f);
-	colors[ImGuiCol_ButtonHovered] = ImVec4(1.00f,1.00f,1.00f,0.16f);
-	colors[ImGuiCol_ButtonActive] = ImVec4(1.00f,1.00f,1.00f,0.63f);
+	colors[ImGuiCol_SliderGrabActive] = ImVec4(0.73f,0.51f,0.30f,1.0f);
+	colors[ImGuiCol_Button] = ImVec4(0.24f,0.25f,0.27f,1.0f);
+	colors[ImGuiCol_ButtonHovered] = ImVec4(1.00f,1.00f,1.00f,1.0f);
+	colors[ImGuiCol_ButtonActive] = ImVec4(1.00f,1.00f,1.00f,1.0f);
 	colors[ImGuiCol_Header] = ImVec4(0.29f,0.29f,0.29f,1.00f);
-	colors[ImGuiCol_HeaderHovered] = ImVec4(1.00f,1.00f,1.00f,0.18f);
-	colors[ImGuiCol_HeaderActive] = ImVec4(1.00f,1.00f,1.00f,0.63f);
+	colors[ImGuiCol_HeaderHovered] = ImVec4(1.00f,1.00f,1.00f,1.0f);
+	colors[ImGuiCol_HeaderActive] = ImVec4(1.00f,1.00f,1.00f,1.0f);
 	colors[ImGuiCol_Separator] = ImVec4(0.24f,0.25f,0.27f,1.00f);
-	colors[ImGuiCol_SeparatorHovered] = ImVec4(1.00f,1.00f,1.00f,0.16f);
-	colors[ImGuiCol_SeparatorActive] = ImVec4(1.00f,1.00f,1.00f,0.63f);
+	colors[ImGuiCol_SeparatorHovered] = ImVec4(1.00f,1.00f,1.00f,1.0f);
+	colors[ImGuiCol_SeparatorActive] = ImVec4(1.00f,1.00f,1.00f,1.0f);
 	colors[ImGuiCol_ResizeGrip] = ImVec4(0.82f,0.56f,0.33f,1.00f);
-	colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.90f,0.62f,0.37f,1.10f);
-	colors[ImGuiCol_ResizeGripActive] = ImVec4(0.73f,0.51f,0.30f,0.90f);
-	colors[ImGuiCol_TabHovered] = ImVec4(0.90f,0.62f,0.37f,1.10f);
+	colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.90f,0.62f,0.37f,1.0f);
+	colors[ImGuiCol_ResizeGripActive] = ImVec4(0.73f,0.51f,0.30f,1.0f);
+	colors[ImGuiCol_TabHovered] = ImVec4(0.90f,0.62f,0.37f,1.0f);
 	colors[ImGuiCol_Tab] = ImVec4(0.13f,0.13f,0.13f,1.00f);
 	colors[ImGuiCol_TabSelected] = ImVec4(0.90f,0.62f,0.37f,1.00f);
-	colors[ImGuiCol_TabSelectedOverline] = ImVec4(0.95f,0.51f,0.00f,0.00f);
+	colors[ImGuiCol_TabSelectedOverline] = ImVec4(0.95f,0.51f,0.00f,1.0f);
 	colors[ImGuiCol_TabDimmed] = ImVec4(0.14f,0.14f,0.14f,1.00f);
 	colors[ImGuiCol_TabDimmedSelected] = ImVec4(0.13f,0.13f,0.13f,1.00f);
-	colors[ImGuiCol_TabDimmedSelectedOverline] = ImVec4(0.82f,0.56f,0.33f,0.00f);
+	colors[ImGuiCol_TabDimmedSelectedOverline] = ImVec4(0.82f,0.56f,0.33f,1.0f);
 	colors[ImGuiCol_DockingPreview] = ImVec4(0.82f,0.56f,0.33f,1.00f);
 	colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.20f,0.20f,0.20f,1.00f);
 	colors[ImGuiCol_PlotLines] = ImVec4(0.82f,0.56f,0.33f,1.00f);
-	colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.90f,0.62f,0.37f,1.10f);
+	colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.90f,0.62f,0.37f,1.0f);
 	colors[ImGuiCol_PlotHistogram] = ImVec4(0.82f,0.56f,0.33f,1.00f);
 	colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.90f,0.62f,0.37f,1.10f);
 	colors[ImGuiCol_TableHeaderBg] = ImVec4(0.19f,0.19f,0.20f,1.00f);
 	colors[ImGuiCol_TableBorderStrong] = ImVec4(0.31f,0.31f,0.35f,1.00f);
 	colors[ImGuiCol_TableBorderLight] = ImVec4(0.23f,0.23f,0.25f,1.00f);
-	colors[ImGuiCol_TableRowBg] = ImVec4(0.00f,0.00f,0.00f,0.00f);
-	colors[ImGuiCol_TableRowBgAlt] = ImVec4(1.00f,1.00f,1.00f,0.06f);
+	colors[ImGuiCol_TableRowBg] = ImVec4(0.00f,0.00f,0.00f,1.0f);
+	colors[ImGuiCol_TableRowBgAlt] = ImVec4(1.00f,1.00f,1.00f,1.0f);
 	colors[ImGuiCol_TextSelectedBg] = ImVec4(0.82f,0.56f,0.33f,1.00f);
 	colors[ImGuiCol_DragDropTarget] = ImVec4(0.15f,0.15f,0.15f,1.00f);
 	colors[ImGuiCol_NavHighlight] = ImVec4(0.15f,0.15f,0.15f,1.00f);
-	colors[ImGuiCol_NavWindowingHighlight] = ImVec4(0.83f,0.41f,0.41f,0.70f);
-	colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f,0.80f,0.80f,0.20f);
+	colors[ImGuiCol_NavWindowingHighlight] = ImVec4(0.83f,0.41f,0.41f,1.0f);
+	colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f,0.80f,0.80f,1.0f);
 	colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.15f,0.15f,0.15f,1.00f);
 
 	auto path = ENGINE_RESOURCES.Directory() / "Theme.json";
@@ -213,49 +213,50 @@ void SetupImGuiStyle(Theme theme) {
 			style.Colors[ImGuiCol_Border] = secondary.GetRGBA();
 
 			style.Colors[ImGuiCol_Separator] = secondary.GetRGBA();
-			style.Colors[ImGuiCol_SeparatorActive] = secondary.GetRGBA() * onClick;
-			style.Colors[ImGuiCol_SeparatorHovered] = secondary.GetRGBA() * onHover;
+			style.Colors[ImGuiCol_SeparatorActive] = Vector4f(secondary.GetRGB() * onClick,1.0f);
+			style.Colors[ImGuiCol_SeparatorHovered] = Vector4f(secondary.GetRGB() * onHover,1.0f);
 
 			style.Colors[ImGuiCol_ResizeGrip] = Detail.GetRGBA();
-			style.Colors[ImGuiCol_ResizeGripActive] = Detail.GetRGBA() * onClick;
-			style.Colors[ImGuiCol_ResizeGripHovered] = Detail.GetRGBA() * onHover;
+			style.Colors[ImGuiCol_ResizeGripActive] = Vector4f(Detail.GetRGB() * onClick,1.0f);
+			style.Colors[ImGuiCol_ResizeGripHovered] = Vector4f(Detail.GetRGB() * onHover,1.0f); 
 
 			style.Colors[ImGuiCol_Button] = secondary.GetRGBA();
-			style.Colors[ImGuiCol_ButtonActive] = Detail.GetRGBA() * onClick;
-			style.Colors[ImGuiCol_ButtonHovered] = Detail.GetRGBA() * onHover;
+			style.Colors[ImGuiCol_ButtonActive] = Vector4f(Detail.GetRGB() * onClick,1.0f);
+			style.Colors[ImGuiCol_ButtonHovered] = Vector4f(Detail.GetRGB() * onHover,1.0f);  
 
 			style.Colors[ImGuiCol_ScrollbarBg] = secondary.GetRGBA();
 			style.Colors[ImGuiCol_ScrollbarGrab] = Detail.GetRGBA();
-			style.Colors[ImGuiCol_ScrollbarGrabActive] = Detail.GetRGBA() * onClick;
-			style.Colors[ImGuiCol_ScrollbarGrabHovered] = Detail.GetRGBA() * onHover;
+			style.Colors[ImGuiCol_ScrollbarGrabActive] = Vector4f(Detail.GetRGB() * onClick,1.0f);
+			style.Colors[ImGuiCol_ScrollbarGrabHovered] = Vector4f(Detail.GetRGB() * onHover,1.0f); ;
 
 			style.Colors[ImGuiCol_CheckMark] = Detail.GetRGBA();
 			style.Colors[ImGuiCol_SliderGrab] = Detail.GetRGBA();
-			style.Colors[ImGuiCol_SliderGrabActive] = Detail.GetRGBA() * onClick;
+			style.Colors[ImGuiCol_SliderGrabActive] = Vector4f(Detail.GetRGB() * onClick,1.0f);
 
 			style.Colors[ImGuiCol_FrameBg] = secondary.GetRGBA();
-			style.Colors[ImGuiCol_FrameBgActive] = Detail.GetRGBA() * onClick;
-			style.Colors[ImGuiCol_FrameBgHovered] = Detail.GetRGBA() * onHover;
+			style.Colors[ImGuiCol_FrameBgActive] = Vector4f(Detail.GetRGB() * onClick,1.0f);
+			style.Colors[ImGuiCol_FrameBgHovered] = Vector4f(Detail.GetRGB() * onHover,1.0f); 
 
 			style.Colors[ImGuiCol_HeaderActive] = Detail.GetRGBA();
-			style.Colors[ImGuiCol_HeaderHovered] = Detail.GetRGBA() * onHover;
+			style.Colors[ImGuiCol_HeaderHovered] = Vector4f(Detail.GetRGB() * onHover,1.0f); 
 
 			style.Colors[ImGuiCol_DockingPreview] = Detail.GetRGBA();
 
 			style.Colors[ImGuiCol_TabActive] = Detail.GetRGBA();
-			style.Colors[ImGuiCol_TabHovered] = Detail.GetRGBA() * onHover;
+			style.Colors[ImGuiCol_TabHovered] = Vector4f(Detail.GetRGB() * onHover,1.0f); 
 			style.Colors[ImGuiCol_TabUnfocused] = primary.GetRGBA();
 			style.Colors[ImGuiCol_TabUnfocusedActive] = Detail.GetRGBA();
-			style.Colors[ImGuiCol_TabSelected] = Detail.GetRGBA() * onClick;
+			style.Colors[ImGuiCol_TabSelected] = Vector4f(Detail.GetRGB() * onClick,1.0f);
 			style.Colors[ImGuiCol_TabSelectedOverline] = Detail.GetRGBA();
 
 			style.Colors[ImGuiCol_Text] = text.GetRGBA();
 			style.Colors[ImGuiCol_TextSelectedBg] = Detail.GetRGBA();
 
 			style.Colors[ImGuiCol_PlotLines] = Detail.GetRGBA();
-			style.Colors[ImGuiCol_PlotLinesHovered] = Detail.GetRGBA() * onHover;
+			style.Colors[ImGuiCol_PlotLinesHovered] = Vector4f(Detail.GetRGB() * onHover,1.0f); 
 			style.Colors[ImGuiCol_PlotHistogram] = Detail.GetRGBA();
-			style.Colors[ImGuiCol_PlotHistogramHovered] = Detail.GetRGBA() * onHover;
+			style.Colors[ImGuiCol_PlotHistogramHovered] = Vector4f(Detail.GetRGB() * onHover,1.0f);
+
 		} catch(const nlohmann::json::exception& e) {
 			std::string msg = std::format("Unsuccessfull loading of theme file at path: Theme.json {} ",e.what());
 			LOGGER.Warn(msg);
@@ -662,6 +663,8 @@ void Editor::AddViewPort() {
 	g_EditorWindows.emplace_back(viewport);
 }
 
+#pragma optimize( "", off ) 
+
 void Editor::TopBar() {
 	OPTICK_EVENT();
 	if(ImGui::BeginMainMenuBar()) {
@@ -773,12 +776,21 @@ void Editor::TopBar() {
 		}
 	}
 
-	const auto [first,last] =
-		std::ranges::remove_if(g_EditorWindows.begin(),g_EditorWindows.end(),
-			[](const std::shared_ptr<EditorWindow>& window) { return !window->m_KeepWindow; });
+	for(auto& windows : g_EditorWindows) {
+		if(!windows || !windows->m_KeepWindow) {
+			windows = g_EditorWindows.back();
+			g_EditorWindows.pop_back();
+		}
+	}
 
-	g_EditorWindows.erase(first,last);
+	//const auto [first,last] =
+	//	std::ranges::remove_if(g_EditorWindows.begin(),g_EditorWindows.end(),
+	//		[](const std::shared_ptr<EditorWindow>& window) { return !window->m_KeepWindow; });
+	//
+	//g_EditorWindows.erase(first,last);
 }
+
+#pragma optimize( "", on )
 
 RECT Editor::GetViewportRECT() {
 	return ViewportRect;
