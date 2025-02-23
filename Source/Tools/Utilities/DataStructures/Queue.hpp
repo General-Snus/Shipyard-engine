@@ -6,23 +6,51 @@
 template <class T>
 class Queue
 {
-public:
-	//Skapar en tom kö
+public: 
 	Queue();
-	~Queue();
-	//Returnerar antal element i kön
-	int GetSize() const;
-	//Returnerar elementet längst fram i kön. Kraschar med en assert om kön är
-	//tom
-	const T& GetFront() const;
-	//Returnerar elementet längst fram i kön. Kraschar med en assert om kön är tom
-	T& GetFront();
-	//Lägger in ett nytt element längst bak i kön
+	~Queue(); 
+	int GetSize() const; 
+	const T& GetFront() const; 
+	T& GetFront(); 
 	void Enqueue(const T& aValue);
-	void EnqueueUnique(const T& aValue);
-	//Tar bort elementet längst fram i kön och returnerar det. Kraschar med en
-	//assert om kön är tom.
+	void EnqueueUnique(const T& aValue); 
 	T Dequeue();
+
+
+	class Iterator {
+	public:
+		Iterator(T* ptr,int index,int size,int allocated)
+			: ptr(ptr),index(index),size(size),allocated(allocated) {}
+
+		Iterator& operator++() {
+			index = (index + 1) % allocated;
+			--size;
+			return *this;
+		}
+
+		bool operator!=(const Iterator& other) const {
+			return size != other.size;
+		}
+
+		T& operator*() const {
+			return ptr[index];
+		}
+
+	private:
+		T* ptr;
+		int index;
+		int size;
+		int allocated;
+	};
+
+	Iterator begin() const {
+		return Iterator(myContainer,myFront,mySize,myAllocated);
+	}
+
+	Iterator end() const {
+		return Iterator(myContainer,(myFront + mySize) % myAllocated,0,myAllocated);
+	}
+
 
 private:
 	T*  myContainer;

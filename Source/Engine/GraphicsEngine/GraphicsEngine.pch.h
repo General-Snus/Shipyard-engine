@@ -13,8 +13,7 @@
 //
  #include "Shaders/Registers.h"
 #include "wrl/client.h" 
-
-#include <Windows.h>
+ 
 #include <filesystem>
 #include <map>
 #include <memory>

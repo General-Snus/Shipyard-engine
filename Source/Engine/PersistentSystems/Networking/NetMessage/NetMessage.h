@@ -1,5 +1,4 @@
-#pragma once
-#include <Windows.h>
+#pragma once 
 #include <string>
 #include <array> 
 
@@ -49,6 +48,7 @@ class NetMessage
         myId = aId;
     }
     eNetMessageType myType = eNetMessageType::None;
+    constexpr static eNetMessageType type = eNetMessageType::None;
 
   protected:
     unsigned char myId = {};

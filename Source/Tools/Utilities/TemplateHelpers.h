@@ -159,6 +159,10 @@ struct is_derived_from : std::bool_constant<std::is_base_of_v<Base, Derived> &&
 template <typename Base, typename Derived>
 inline constexpr bool is_derived_from_v = is_derived_from<Base, Derived>::value;
 
+
+template<typename Base,typename Derived>
+concept IsDerived = std::is_base_of<Base,Derived>::value;
+
 template <typename T, typename... Ts>
 constexpr bool Contains = (std::is_same<T, Ts>{} || ...);
 template <typename Subset, typename Set>

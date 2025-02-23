@@ -270,12 +270,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ArtificialInteligence\AICommands\AICommands.h" />
-    <ClInclude Include="Networking\Client\Client.h" />
+    <ClInclude Include="Networking\Client.h" />
     <ClInclude Include="Networking\NetMessage\ChatMessage.h" />
     <ClInclude Include="Networking\NetMessage\HandshakeMessage.h" />
     <ClInclude Include="Networking\NetMessage\NetMessage.h" />
     <ClInclude Include="Networking\NetMessage\PlayerSyncMessage.h" />
     <ClInclude Include="Networking\NetMessage\QuitMessage.h" />
+    <ClInclude Include="Networking\NetworkStructs.h" />
     <ClInclude Include="Networking\Server.h" />
     <ClInclude Include="System\Networked\NetworkedUpdate.h" />
     <ClInclude Include="System\Colission\OnCollision.h" />
@@ -289,12 +290,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ArtificialInteligence\AICommands\Source\AICommands.cpp" />
-    <ClCompile Include="Networking\Client\Client.cpp" />
+    <ClCompile Include="Networking\Source\Client.cpp" />
     <ClCompile Include="Networking\NetMessage\ChatMessage.cpp" />
     <ClCompile Include="Networking\NetMessage\HandshakeMessage.cpp" />
     <ClCompile Include="Networking\NetMessage\NetMessage.cpp" />
     <ClCompile Include="Networking\NetMessage\PlayerSyncMessage.cpp" />
     <ClCompile Include="Networking\NetMessage\QuitMessage.cpp" />
+    <ClCompile Include="Networking\Source\NetworkStructs.cpp" />
     <ClCompile Include="Networking\Source\Server.cpp" />
     <ClCompile Include="System\Networked\Source\NetworkedUpdate.cpp" />
     <ClCompile Include="PersistentSystems.pch.cpp">

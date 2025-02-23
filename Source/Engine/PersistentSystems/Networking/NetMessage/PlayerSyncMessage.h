@@ -30,5 +30,6 @@ class PlayerSyncMessage : public NetMessage
         return data;
     }
 
+    constexpr static eNetMessageType type = eNetMessageType::PlayerSync;
   private:
 };

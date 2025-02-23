@@ -63,7 +63,10 @@
     <ClInclude Include="Networking\NetMessage\QuitMessage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Networking\Client\Client.h">
+    <ClInclude Include="Networking\Client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Networking\NetworkStructs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -116,7 +119,10 @@
     <ClCompile Include="Networking\NetMessage\QuitMessage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Networking\Client\Client.cpp">
+    <ClCompile Include="Networking\Source\Client.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Networking\Source\NetworkStructs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

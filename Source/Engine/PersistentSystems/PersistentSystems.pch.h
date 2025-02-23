@@ -13,6 +13,8 @@
 #include <string> 
 #include <WS2tcpip.h> 
 #include <vector>
+#include <string>
+#include <thread>
 
 #include <Tools/Logging/Logging.h>
 #include <Tools/Reflection/refl.hpp>

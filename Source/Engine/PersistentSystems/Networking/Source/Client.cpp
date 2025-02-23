@@ -1,9 +1,7 @@
 #include "PersistentSystems.pch.h"
 
-#include "Client.h"
+#include "../Client.h"
 
-#include <string>
-#include <thread>
 #include <Tools/Logging/Logging.h>
 #include <Tools/Utilities/Math.hpp>
 
@@ -16,37 +14,34 @@
 Client::Client() = default;
 Client::~Client() = default;
 
-void Client::Setup()
-{
+void Client::Setup() {
 	int attemptLimit = 0;
-	while (!SetupConnection() && attemptLimit < 5)
-	{
+	while(!SetupConnection() && attemptLimit < 5) {
 		LOGGER.Log("Failed to setup connection try again");
 		attemptLimit++;
 	}
 }
 
-void Client::Update()
-{
-	unsigned long ul = 1;
-	ioctlsocket(mySocket, FIONBIO, &ul);
+void Client::Update() {
+	//unsigned long ul = 1;
+	//ioctlsocket(connection.socket(),FIONBIO,&ul);
 
-	hasRecievedMessage =
-		recvfrom(mySocket, inbound, MAX_NETMESSAGE_SIZE, 0, (sockaddr*)&myClient, &myLength) != SOCKET_ERROR;
+	hasRecievedMessage = connection.Receive(buffer,&serverAddress);
 
-	// switch (static_cast<NetMessageType>(inbound[0]))
-	//{
-	// case NetMessageType::None:
+
+	//  switch (buffer->myType)
+	// {
+	// case eNetMessageType::None:
 	//     Logger.Log("MessageType was none");
 	//     break;
-	// case NetMessageType::ChatMessage: {
+	// case eNetMessageType::ChatMessage: {
 	//     ChatMessage *message = reinterpret_cast<ChatMessage *>(&inbound);
-	//
+	// 
 	//     /*std::cout << message->ReadMessage() << std::endl;*/
 	//     EditorInstance.myChatMessages.emplace_back(message->ReadMessage());
 	// }
 	// break;
-	// case NetMessageType::Handshake: {
+	// case eNetMessageType::Handshake: {
 	// }
 	// break;
 	//     // case NetMessageType::PlayerSync: {
@@ -119,77 +114,60 @@ void Client::Update()
 	// default:
 	//     Logger.Log("MessageType was undefined");
 	//     break;
-	// }
+	//}
 }
 
-void Client::Close()
-{
-	closesocket(mySocket);
-	WSACleanup();
-
+void Client::Close() {
+	connection.Close();
 	sendThread.join();
 	receiveThread.join();
 }
 
-bool Client::HasRecievedMessage()
-{
+bool Client::HasReceivedMessage() const {
 	return hasRecievedMessage;
 }
 
-eNetMessageType Client::GetType()
-{
-	return static_cast<eNetMessageType>(inbound[0]);
+eNetMessageType Client::GetType() {
+	return buffer->myType;
 }
 
-char* Client::GetLatestMessage()
-{
-	return inbound;
+NetMessage* Client::GetLatestMessage() {
+	return buffer;
 }
 
-bool Client::SetupConnection()
-{
+bool Client::SetupConnection() {
 	WSADATA data;
+	ZeroMemory(&serverAddress,sizeof(serverAddress));
 
-	ZeroMemory(&mySocket, sizeof(mySocket));
-	ZeroMemory(&myClient, sizeof(myClient));
-	ZeroMemory(&myLength, sizeof(myLength));
-
-	if (WSAStartup(MAKEWORD(2, 2), &data) != 0)
-	{
+	if(WSAStartup(MAKEWORD(2,2),&data) != 0) {
 		LOGGER.Log("Wsa startup fail");
 		return false;
 	}
 
-	mySocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP); // SOCK_DGRAM = UDP
+	//mySocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP); // SOCK_DGRAM = UDP
 
-	if (mySocket == INVALID_SOCKET)
-	{
+	if(connection.StartAsClient(AF_INET,SOCK_DGRAM,IPPROTO_UDP) == NetworkConnection::Status::failed) {
 		LOGGER.Log("Could not create socket");
 		return false;
 	}
 
-	myClient.sin_family = AF_INET;
-
 	short       port;
-	std::string ip;
+	std::string connectToIp;
 	// InputIpAndPort(ip, port);
-	ip = LOCALHOST;
+	connectToIp = LOCALHOST;
 	port = DEFAULT_PORT;
 
 	in_addr address;
-	if (inet_pton(AF_INET, ip.c_str(), &address) != 1)
-	{
+	if(inet_pton(AF_INET,connectToIp.c_str(),&address) != 1) {
 		LOGGER.Log("Wrong IP");
 		return false;
 	}
 
-	myClient.sin_addr = address;
-	myClient.sin_port = port;
+	serverAddress.address =
+		address.S_un.S_addr;
+	serverAddress.port = htons(port);
 
-	myLength = sizeof(myClient);
-
-	if (!SendOK())
-	{
+	if(!SendOK()) {
 		LOGGER.Log("Didnt Get response from server");
 		return false;
 	}
@@ -200,77 +178,59 @@ bool Client::SetupConnection()
 	LOGGER.Log(".");
 	LOGGER.Log(".");
 
-	LOGGER.Log(std::format("Connected with ip: {} \t | On Port: {} ", ip, port));
+	LOGGER.Log(std::format("Connected with ip: {} \t | On Port: {} ",connectToIp,port));
 	LOGGER.Log("Init done");
 
 	return true;
 }
 
-bool Client::SendOK()
-{
-	const std::string username = "User" + std::to_string(Math::RandomEngine::randomInRange(0, 999));
+bool Client::SendOK() {
+	const std::string username = "User" + std::to_string(Math::RandomEngine::randomInRange(0,999));
 
 	HandshakeMessage message;
 	message.SetMessage(username + "\n");
+	connection.Send(message,serverAddress);
 
-	char outbound[MAX_NETMESSAGE_SIZE];
-	memcpy(outbound, &message, sizeof(HandshakeMessage));
-
-	if (sendto(mySocket, outbound, 512, 0, reinterpret_cast<sockaddr*>(&myClient), sizeof(myClient)) == SOCKET_ERROR)
-	{
-		LOGGER.Log("Failed to send");
-	}
-
-	unsigned long ul = 1;
-	ioctlsocket(mySocket, FIONBIO, &ul);
-
-	ZeroMemory(&outbound, 64);
+	//unsigned long ul = 1;
+	//ioctlsocket(mySocket,FIONBIO,&ul);
 
 	int  iterations = 0;
 	bool success = false;
 
 	LOGGER.Log("Trying to connect");
-	while (iterations < 100)
-	{
-		if (recvfrom(mySocket, outbound, 512, 0, (sockaddr*)&myClient, &myLength) != SOCKET_ERROR)
-		{
+	while(iterations < 100) {
+		if(connection.Receive(&message,&serverAddress)) {
 			success = true;
 			break;
 		}
 		iterations++;
 	}
 
-	if (success)
-	{
+	if(success) {
 		LOGGER.Log("Success recieving from server");
-	}
-	else
-	{
+	} else {
 		LOGGER.Log("Could not recieve from server");
 	}
-	const auto backMessage = reinterpret_cast<HandshakeMessage*>(&outbound);
 
 	std::string joinMessage = "User: ";
-	joinMessage += backMessage->ReadMessage();
+	joinMessage += message.ReadMessage();
 	joinMessage += " Joined!";
 	std::cout << joinMessage << std::endl;
 
-	myId = backMessage->GetId();
+	myId = message.GetId();
 
-	ul = 0;
-	ioctlsocket(mySocket, FIONBIO, &ul);
+	//ul = 0;
+	//ioctlsocket(mySocket,FIONBIO,&ul);
 
 	return success;
 }
 
-void Client::InputIpAndPort(std::string& outIp, short& outPort)
-{
+void Client::InputIpAndPort(std::string& outIp,short& outPort) {
 	std::cin.clear();
 	LOGGER.Log("Input a Ip Adress (enter 0 for default 127.0.0.1) ");
 	std::cin >> outIp;
 
-	if (outIp == "0")
-	{
+	if(outIp == "0") {
 		outIp = LOCALHOST;
 	}
 
@@ -279,49 +239,26 @@ void Client::InputIpAndPort(std::string& outIp, short& outPort)
 	LOGGER.Log("Input a port (enter 0 for default 27015) ");
 	std::cin >> outPort;
 
-	if (outPort == 0)
-	{
+	if(outPort == 0) {
 		outPort = DEFAULT_PORT;
 	}
 
 	std::cin.clear();
 }
 
-void Client::MessageLoop()
-{
-}
+void Client::MessageLoop() {}
 
-void Client::Send(const std::string& aMessage)
-{
-	if (aMessage == "quit")
-	{
-		myExit = true;
-
+void Client::Send(const std::string& aMessage) {
+	if(aMessage == "quit") { 
 		QuitMessage message;
 		message.SetMessage("");
 		message.SetId(myId);
 
-		char outbound[MAX_NETMESSAGE_SIZE];
-		memcpy(outbound, &message, sizeof(QuitMessage));
-
-		if (sendto(mySocket, outbound, MAX_NETMESSAGE_SIZE, 0, reinterpret_cast<sockaddr*>(&myClient),
-		           sizeof(myClient)) == SOCKET_ERROR)
-		{
-			LOGGER.Log("Failed to send");
-		}
+		connection.Send(message,serverAddress);
 	}
 
 	ChatMessage message;
 	message.SetMessage(aMessage);
 	message.SetId(myId);
-
-	char outbound[MAX_NETMESSAGE_SIZE];
-	memcpy(outbound, &message, sizeof(ChatMessage));
-
-	const auto result =
-		sendto(mySocket, outbound, MAX_NETMESSAGE_SIZE, 0, reinterpret_cast<sockaddr*>(&myClient), sizeof(myClient));
-	if (result == SOCKET_ERROR)
-	{
-		LOGGER.Log("Failed to send");
-	}
+	connection.Send(message,serverAddress);
 }

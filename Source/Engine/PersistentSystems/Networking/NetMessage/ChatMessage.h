@@ -10,7 +10,6 @@ public:
 	{
 		memcpy(dataBuffer.data(),aMessage.data(),sizeof(char) * aMessage.size());
 	}
-
 	std::string ReadMessage()
 	{
 		std::string output = dataBuffer.data();
@@ -20,4 +19,6 @@ public:
 
 		return output;
 	} 
+
+	constexpr static eNetMessageType type = eNetMessageType::ChatMessage;
 };

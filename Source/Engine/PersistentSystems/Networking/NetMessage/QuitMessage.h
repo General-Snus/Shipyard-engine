@@ -21,6 +21,7 @@ public:
 		return output;
 	}
 
+	constexpr static eNetMessageType type = eNetMessageType::Quit;
 private:
 
 };
