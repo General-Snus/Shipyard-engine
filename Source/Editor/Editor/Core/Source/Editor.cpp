@@ -613,6 +613,7 @@ void Editor::Update() {
 	const float delta = TimerInstance.getDeltaTime();
 
 	Shipyard_PhysXInstance.StartRead();
+	Runner.update();
 	Scene::activeManager().Update();
 	SystemCollection::UpdateSystems(delta);
 

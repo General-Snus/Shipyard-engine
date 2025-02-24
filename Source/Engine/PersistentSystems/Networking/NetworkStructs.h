@@ -1,8 +1,7 @@
 #pragma once
 #define DEFAULT_PORT 27015
 #define LOCALHOST "127.0.0.1"
-class NetMessage; 
-struct NetworkMessage;
+class NetMessage;  
 struct NetworkConnection;
 struct NetAddress;
 struct SessionConfiguration;
@@ -12,6 +11,7 @@ struct sockaddr;
 struct NetAddress {
 public:
 	NetAddress();
+	NetAddress(const std::string& Ip,unsigned short port);
 
 	unsigned long address{};
 	unsigned short port{};
@@ -27,19 +27,19 @@ public:
 	};
 
 	//Will attempt to bind to socket and start server
-	Status StartAsServer(int socketType = 2,int socketProtocol = 0,unsigned short bindType = 2); //sock dgram / 0 / af inet, 
+	Status StartAsServer(NetAddress serverAddress,int socketType = 2,int socketProtocol = 0,unsigned short bindType = 2); //sock dgram / 0 / af inet, 
 	//Will attempt to connect to socket, if fail will call startServer
-	Status AutoHostOrClient(int socketType = 2,int socketProtocol = 0,unsigned short bindType = 2); //sock dgram / 0 / af inet, 
+	Status AutoHostOrClient(NetAddress serverAddress, int socketType = 2,int socketProtocol = 0,unsigned short bindType = 2); //sock dgram / 0 / af inet, 
 	//Will attempt to connect to socket
-	Status StartAsClient(int socketType = 2,int socketProtocol = 0,unsigned short bindType = 2); //sock dgram / 0 / af inet, 
+	Status StartAsClient(NetAddress serverAddress,int socketType = 2,int socketProtocol = 0,unsigned short bindType = 2); //sock dgram / 0 / af inet, 
 
-	bool Receive(NetMessage* const message,NetAddress* recivedFrom,const int bufferSize = 512,const float timeout = 0.f) const;
-	bool Send(const NetMessage& message,const NetAddress& sendTo) const;
+	bool Receive(NetMessage* message,NetAddress* recivedFrom,const int bufferSize = 512,const float timeout = 0.f) const;
+	bool Send(const NetMessage& message) const;
 
 	bool Close() const;
 private:
 	Status status;
-	NetAddress homeAddress;
+	NetAddress connectedTo;
 	unsigned long long Socket;
 };
 

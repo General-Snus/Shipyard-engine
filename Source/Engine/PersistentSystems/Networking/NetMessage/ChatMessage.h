@@ -10,7 +10,7 @@ public:
 	{
 		memcpy(dataBuffer.data(),aMessage.data(),sizeof(char) * aMessage.size());
 	}
-	std::string ReadMessage()
+	std::string ReadMessage() const
 	{
 		std::string output = dataBuffer.data();
 

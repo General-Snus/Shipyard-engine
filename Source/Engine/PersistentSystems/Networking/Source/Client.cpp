@@ -146,7 +146,7 @@ bool Client::SetupConnection() {
 
 	//mySocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP); // SOCK_DGRAM = UDP
 
-	if(connection.StartAsClient(AF_INET,SOCK_DGRAM,IPPROTO_UDP) == NetworkConnection::Status::failed) {
+	if(connection.StartAsClient(NetAddress(),AF_INET,SOCK_DGRAM,IPPROTO_UDP) == NetworkConnection::Status::failed) {
 		LOGGER.Log("Could not create socket");
 		return false;
 	}
@@ -189,7 +189,7 @@ bool Client::SendOK() {
 
 	HandshakeMessage message;
 	message.SetMessage(username + "\n");
-	connection.Send(message,serverAddress);
+	connection.Send(message);
 
 	//unsigned long ul = 1;
 	//ioctlsocket(mySocket,FIONBIO,&ul);
@@ -254,11 +254,11 @@ void Client::Send(const std::string& aMessage) {
 		message.SetMessage("");
 		message.SetId(myId);
 
-		connection.Send(message,serverAddress);
+		connection.Send(message);
 	}
 
 	ChatMessage message;
 	message.SetMessage(aMessage);
 	message.SetId(myId);
-	connection.Send(message,serverAddress);
+	connection.Send(message);
 }

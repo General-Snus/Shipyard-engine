@@ -1,7 +1,10 @@
 #pragma once
 #include "EditorWindow.h"
-#include <vector>
+#include <array>
 #include <string>
+#include <vector>
+
+
 class Client;
 class ChatWindow : public EditorWindow
 {
@@ -12,6 +15,5 @@ class ChatWindow : public EditorWindow
 
   private:
     std::vector<std::string> m_ChatMessages;
-    Client* m_Client;
-    char currentMessage[512];
+    std::string currentMessage;
 }; 

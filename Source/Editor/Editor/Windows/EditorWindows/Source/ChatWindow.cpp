@@ -5,13 +5,14 @@
 #include <Engine/PersistentSystems/Networking/NetMessage/ChatMessage.h>
 #include <Engine/PersistentSystems/Networking/Client.h>
 #include <Tools/Reflection/refl.hpp>
-#include <Engine/PersistentSystems/Networking/Server.h>
+#include <Engine/PersistentSystems/Networking/Server.h> 
 
 ChatWindow::ChatWindow()
 {
 	//m_Client = new Client();
 	//m_Client->Setup();
-
+	
+	currentMessage.resize(512);
 	SessionConfiguration config = {
 		SessionConfiguration::GameMode::AutoHostOrClient
 	};
@@ -19,7 +20,7 @@ ChatWindow::ChatWindow()
 	Runner.StartSession(config);
 }
 
-ChatWindow::~ChatWindow() { delete m_Client; }
+ChatWindow::~ChatWindow() = default;
 
 void ChatWindow::RenderImGUi()
 {
@@ -27,7 +28,7 @@ void ChatWindow::RenderImGUi()
 	//m_Client->Update();
 
 	for(auto message : Runner.ReadIncoming<ChatMessage>()) {
-		m_ChatMessages.emplace_back(((ChatMessage*)message)->ReadMessage());
+		m_ChatMessages.emplace_back(((ChatMessage*)&message)->ReadMessage());
 	}
 
 	for (const auto &message : m_ChatMessages)
@@ -35,14 +36,17 @@ void ChatWindow::RenderImGUi()
 		ImGui::Text(message.c_str());
 	}
 
-	ImGui::InputText("Message", currentMessage, MAX_NETMESSAGE_SIZE);
+	ImGui::InputText("Message", currentMessage.data(),MAX_NETMESSAGE_SIZE);
 	ImGui::SameLine();
 
-	if (const std::string message = currentMessage;
+	if (const std::string message = currentMessage.data();
 		ImGui::Button("Send") && !message.empty())
 	{
+		ChatMessage msg;
+		msg.SetMessage(message);
+		Runner.Send(&msg);
+		currentMessage = "";
 		//m_Client->Send(message);
-		//ZeroMemory(currentMessage, 512);
 	}
 	ImGui::End();
 }

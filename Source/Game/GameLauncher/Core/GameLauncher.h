@@ -15,8 +15,7 @@ class YourGameLauncher : public GameLauncher
 	void Update(float delta) override;
 	void SyncServices(ServiceLocator& serviceLocator) override;
 
-	GameObject player;
-	NetworkRunner runner;
+	GameObject player; 
 };
 
 extern "C" {

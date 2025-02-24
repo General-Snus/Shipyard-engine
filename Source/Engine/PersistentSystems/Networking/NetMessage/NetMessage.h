@@ -39,7 +39,7 @@ class NetMessage
     {
         return dataBuffer.data();
     }
-    unsigned char GetId()
+    unsigned char GetId() const
     {
         return  myId;
     } 

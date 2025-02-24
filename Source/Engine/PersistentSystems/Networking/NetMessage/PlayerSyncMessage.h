@@ -23,7 +23,7 @@ class PlayerSyncMessage : public NetMessage
         memcpy(&dataBuffer, &someData, sizeof(someData));
     }
 
-    PlayerSyncData ReadMessage()
+    PlayerSyncData ReadMessage() const
     {
         PlayerSyncData data;
         memcpy(&data, &dataBuffer, sizeof(data));
