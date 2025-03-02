@@ -341,9 +341,16 @@ bool Editor::Initialize(HWND aHandle) {
 	timer.initialize();
 	threadPool.Init();
 
+
 	ServiceLocator::Instance().ProvideService<LoggerService>();
 	LOGGER.Create();
 	LOGGER.SetPrintToVSOutput(true);
+
+	SessionConfiguration config = {
+		SessionConfiguration::GameMode::AutoHostOrClient
+	};
+
+	Runner.StartSession(config);
 
 	GetWindowRect(WindowInstance.windowHandler,&ViewportRect);
 

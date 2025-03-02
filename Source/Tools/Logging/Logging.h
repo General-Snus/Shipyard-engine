@@ -81,12 +81,7 @@ public:
 	         const std::source_location& location = std::source_location::current());
 	static Color GetColor(LogType type);
 
-	template <typename T>
-	void Log(const T&                    aString, bool withNotice = false,
-	         const std::source_location& location = std::source_location::current())
-	{
-		Log(std::to_string(aString), withNotice, location);
-	}
+	
 
 	void Log(const std::string&          aString, bool withNotice = false,
 	         const std::source_location& location = std::source_location::current());
@@ -119,6 +114,26 @@ public:
 		return myHandle;
 	}
 
+	template <typename T>
+	void Log(const T& aString,bool withNotice = false,
+		const std::source_location& location = std::source_location::current()) {
+		Log(std::to_string(aString),withNotice,location);
+	}
+
+	template <typename... Args>
+	void LogC(Args&&... args) {
+		std::ostringstream stream;
+		(stream << ... << std::forward<Args>(args));
+		Log(std::string(stream.str()));
+	}
+
+	template <typename... Args>
+	void ErrC(Args&& ... args) {
+		std::ostringstream stream;
+		(stream << ... << std::forward<Args>(args));
+		Err(stream.str());
+	}
+
 private:
 	void*                            myHandle = nullptr;
 	bool                             shouldPrintToOutput = false;
@@ -129,3 +144,4 @@ private:
 };
 
 ENABLE_ENUM_BITWISE_OPERATORS(LoggerService::LogType)
+

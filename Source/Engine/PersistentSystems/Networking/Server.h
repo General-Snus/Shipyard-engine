@@ -8,19 +8,25 @@
 #include <unordered_map>
 #include <thread>
 #include <mutex>
+#include <span>
+#include <Tools/Utilities/DataStructures/Queue.hpp>
 
 #define Runner ServiceLocator::Instance().GetService<NetworkRunner>()
 class NetworkRunner : public Singleton {
 public:
 	NetworkRunner();
 	~NetworkRunner();
-	NetworkConnection::Status StartSession(SessionConfiguration configuration); 
+	NetworkConnection::Status StartSession(SessionConfiguration configuration);
 	void update();
 	void close();
 
 	template<typename T> requires IsDerived<NetMessage,T>
-	const std::vector<NetMessage>& ReadIncoming();
-	bool Send(const NetMessage* message);
+	const std::vector<NetMessage>& PollMessage();
+
+
+	//If you are the server, message will be broadcasted
+	//If you are the client, it will be sent to server and broadcasted by it
+	bool Send(const NetMessage& message); 
 
 public:
 	bool Initialized{};
@@ -28,27 +34,57 @@ public:
 	bool HasStateAuthority{};
 	bool IsServer{};
 
+	static const int MAX_PLAYERS = 64;
 private:
-	void collectReceivedMessages();
-	void addReceivedMessages(const NetMessage& message);
-	void networkTransformUpdate();
+
+	bool Broadcast(const NetMessage& message); // Send to All
+	bool Unicast(const NetMessage& message,Remote client); // Send to One
+	bool Multicast(const NetMessage& message,std::span<Remote> client); // Send to Set
+
+	void acceptNewClients(std::stop_token stop_token);
+	void collectReceivedMessages(std::stop_token stop_token,NetworkConnection::Protocol protocol);
+	void moveMessageMapToRead();
+	
+	//If you are a server, this connection represents the listening connection and it will create clients to handle the inbetween
+	//If you are a client this will be you connection to the server
 	NetworkConnection connection;
-	std::vector<Client> clients;
+
 	// These function will always have state authority and will not be run if the server does not have it
-	std::unordered_map<eNetMessageType,std::vector<NetMessage>> netMessageTypeHandling;
 
-	//Consume for each tick all after tick
-	//When a client returns anything, add it to queue and server will then  let the messagehandling consume it
+	//MessageStorage
+	using NetworkMessagesMap = std::unordered_map<eNetMessageType,std::vector<NetMessage>>; // vector has to be ordered by timestamp
+	NetworkMessagesMap  messagesMap;
 
+	//Threaded messageStorage
+	NetworkMessagesMap threadedMessageMap;
 	std::mutex addMessageLock;
-	std::jthread receiveThread;
 
+	//
+	std::jthread receiveTCP;
+	std::jthread receiveUDP;
+	std::jthread acceptConnection;
+
+	std::stop_token s_1;
+	std::stop_token acceptConnectionStopToken;
+
+	
+	std::array<Remote,MAX_PLAYERS> clients;
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	//Depricated
 	std::unordered_map<unsigned char,std::string> usersNames;
 	std::unordered_map<unsigned char,NetAddress> usersIPs;
 	unsigned char                                  latestId{1};
 };
 
 template<typename T> requires IsDerived<NetMessage,T>
-inline const std::vector<NetMessage>& NetworkRunner::ReadIncoming() {
-	return netMessageTypeHandling[T::type];
+inline const std::vector<NetMessage>& NetworkRunner::PollMessage() {
+	return messagesMap[T::type];
 }

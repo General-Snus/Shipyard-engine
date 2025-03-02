@@ -4,8 +4,6 @@
 #include <string>
 #include <vector>
 
-
-class Client;
 class ChatWindow : public EditorWindow
 {
   public:

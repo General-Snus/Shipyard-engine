@@ -1,47 +1,76 @@
 #pragma once
+#include <Tools/Utilities/TemplateHelpers.h>
 #define DEFAULT_PORT 27015
 #define LOCALHOST "127.0.0.1"
-class NetMessage;  
+class NetMessage;
 struct NetworkConnection;
 struct NetAddress;
 struct SessionConfiguration;
 struct sockaddr;
+struct sockaddr_in;
 
 //All value in here should be network byte order or whatever that means
 struct NetAddress {
-public:
+	enum class AddressFamily : unsigned short {
+		ipv4 = 2, // AF_INET,
+		ipv6 = 23 // AF_INET6
+	};
+
 	NetAddress();
-	NetAddress(const std::string& Ip,unsigned short port);
+	NetAddress(const std::string& Ip,unsigned short port,AddressFamily family = AddressFamily::ipv4);
+	sockaddr_in as_sockaddr_in() const;
+	sockaddr as_sockaddr() const;
 
 	unsigned long address{};
 	unsigned short port{};
-
-	sockaddr asAddress() const;
+	AddressFamily family = AddressFamily::ipv4;
 };
+using NetworkSocket = unsigned long long;
 
 struct NetworkConnection {
 public:
-	enum class Status {
-		failed = -1,
-		initialized = 1
+	enum class Status : int {
+		failed = 0,
+		initializedAsServer = 1,
+		initializedAsClient = 2,
+		initialized = initializedAsServer | initializedAsClient
+	};
+	enum class Protocol {
+		UDP = 1,TCP = 2
 	};
 
 	//Will attempt to bind to socket and start server
-	Status StartAsServer(NetAddress serverAddress,int socketType = 2,int socketProtocol = 0,unsigned short bindType = 2); //sock dgram / 0 / af inet, 
+	Status StartAsServer(NetAddress serverAddress,SessionConfiguration cfg);
 	//Will attempt to connect to socket, if fail will call startServer
-	Status AutoHostOrClient(NetAddress serverAddress, int socketType = 2,int socketProtocol = 0,unsigned short bindType = 2); //sock dgram / 0 / af inet, 
-	//Will attempt to connect to socket
-	Status StartAsClient(NetAddress serverAddress,int socketType = 2,int socketProtocol = 0,unsigned short bindType = 2); //sock dgram / 0 / af inet, 
+	Status AutoHostOrClient(NetAddress serverAddress,SessionConfiguration cfg);
+	//Will attempt to connect to socket ----- BAD NAMING CLIENT SOCKET IS A DEFINED NAME THIS IS NOT IT TODO MF
+	Status StartAsClient(NetAddress serverAddress,SessionConfiguration cfg);
+	
+	//TcP OnlY EFoRcE HoW todo
+	Status StartAsRemoteConnection(NetAddress serverAddress,NetworkSocket socket);
 
-	bool Receive(NetMessage* message,NetAddress* recivedFrom,const int bufferSize = 512,const float timeout = 0.f) const;
-	bool Send(const NetMessage& message) const;
+	NetworkConnection::Status OpenSockets(SessionConfiguration cfg);
 
+	bool ReceiveUDP(NetMessage* message,NetAddress* recivedFrom,const int bufferSize = 512,bool blocking = true,const float timeout = -1.f) const;
+	bool ReceiveTCP(NetMessage* message,NetAddress* recivedFrom,const int bufferSize = 512,bool blocking = true,const float timeout = -1.f) const;
+	bool Accept(NetworkConnection* returningConnection) const;
+	
+	static bool UDP(NetAddress toAddress, NetworkSocket throughSocket,const NetMessage& message);
+	static bool TCP(NetworkSocket throughSocket,const NetMessage& message);
+ 
+	bool Send(const NetMessage& message,Protocol protocol = Protocol::UDP) const;
+	bool SendUDP(NetAddress toAddress,const NetMessage& message) const;
+
+	NetAddress Address() const;
 	bool Close() const;
 private:
 	Status status;
 	NetAddress connectedTo;
-	unsigned long long Socket;
+	NetworkSocket TCPSocket;
+	NetworkSocket UDPSocket;
 };
+
+ENABLE_ENUM_BITWISE_OPERATORS(NetworkConnection::Status);
 
 struct SessionConfiguration {
 	enum class GameMode {
@@ -52,5 +81,35 @@ struct SessionConfiguration {
 		Client,
 		AutoHostOrClient,
 		count
-	} gameMode;
+	};
+
+	enum class HostType {
+		Local,
+		LAN,
+		WAN,
+		Steam
+	};
+
+	GameMode gameMode;
+	HostType hostType;
 };
+
+namespace NetworkHelpers {
+
+	struct SocketSettings {
+		int receiveBufferSize;
+		int sendBufferSize;
+		bool reuseAddress;
+		bool isBlocking;
+		bool tcpNoDelay;
+		int maxSegmentSize;
+		bool keepAlive;
+		int keepIdle;
+		int keepInterval;
+		int keepCount;
+	};
+
+	//i really cant be bothered to write this shit myself, gpt it is
+	SocketSettings GetSocketSettings(unsigned long long socket);
+}
+

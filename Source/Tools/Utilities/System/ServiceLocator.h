@@ -20,6 +20,7 @@ class ServiceLocator
 
 	static void SyncInstances(ServiceLocator &locator);
 
+
 	template <typename T> T &GetService()
 	{
 		OPTICK_EVENT();
@@ -43,7 +44,7 @@ class ServiceLocator
 
 	static inline ServiceLocator *instance;
 	static constexpr unsigned long sharedMemorySize = 1024 * 1024;
-	static void *OpenOrCreateSharedMemory();
+	static void *OpenOrCreateSharedMemory(); 
 
 	static void *MapSharedMemory(void *hMapFile);
 	static void UnmapSharedMemory(void *pBuf);

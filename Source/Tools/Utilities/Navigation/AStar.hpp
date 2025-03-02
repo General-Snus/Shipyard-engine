@@ -93,26 +93,26 @@ namespace Assignment7Astar {
 
 			for (size_t i = 0; i < neigbours; i++)
 			{
-				int w = current + (int)Directions[i];
+				int adjacent_tile = current + (int)Directions[i];
 
-				if (w < 0 || w >= TileCount)
+				if (adjacent_tile < 0 || adjacent_tile >= TileCount)
 					continue;
 
-				if ((abs(mod(current, MapWidth) - mod(w, MapWidth)) == 1 || abs(current - w) == MapWidth))
+				if ((abs(mod(current, MapWidth) - mod(adjacent_tile, MapWidth)) == 1 || abs(current - adjacent_tile) == MapWidth))
 				{
-					if (aMap[w] != Tile::Impassable)
+					if (aMap[adjacent_tile] != Tile::Impassable)
 					{
 						const int weight = 10;
 						float totalWeightToGetToCurrent = *gscore.Get(current) + weight;
-						if (totalWeightToGetToCurrent < *gscore.Get(w))
+						if (totalWeightToGetToCurrent < *gscore.Get(adjacent_tile))
 						{
-							previous.Insert(w, current);
-							gscore.Insert(w, totalWeightToGetToCurrent);
-							fscore.Insert(w, totalWeightToGetToCurrent + h(w, anEndIndex));
+							previous.Insert(adjacent_tile, current);
+							gscore.Insert(adjacent_tile, totalWeightToGetToCurrent);
+							fscore.Insert(adjacent_tile, totalWeightToGetToCurrent + h(adjacent_tile, anEndIndex));
 
-							if (!priorityQ.Contains(-w))
+							if (!priorityQ.Contains(-adjacent_tile))
 							{
-								priorityQ.Enqueue(-w, -*fscore.Get(w));
+								priorityQ.Enqueue(-adjacent_tile, -*fscore.Get(adjacent_tile));
 							}
 						}
 					}

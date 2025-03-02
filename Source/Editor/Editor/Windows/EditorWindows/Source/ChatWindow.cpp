@@ -13,11 +13,6 @@ ChatWindow::ChatWindow()
 	//m_Client->Setup();
 	
 	currentMessage.resize(512);
-	SessionConfiguration config = {
-		SessionConfiguration::GameMode::AutoHostOrClient
-	};
-
-	Runner.StartSession(config);
 }
 
 ChatWindow::~ChatWindow() = default;
@@ -27,7 +22,7 @@ void ChatWindow::RenderImGUi()
 	ImGui::Begin(std::format("Chat window##{}",uniqueID).c_str(),&m_KeepWindow);
 	//m_Client->Update();
 
-	for(auto message : Runner.ReadIncoming<ChatMessage>()) {
+	for(auto& message : Runner.PollMessage<ChatMessage>()) {
 		m_ChatMessages.emplace_back(((ChatMessage*)&message)->ReadMessage());
 	}
 
@@ -44,7 +39,7 @@ void ChatWindow::RenderImGUi()
 	{
 		ChatMessage msg;
 		msg.SetMessage(message);
-		Runner.Send(&msg);
+		Runner.Send(  msg);
 		currentMessage = "";
 		//m_Client->Send(message);
 	}

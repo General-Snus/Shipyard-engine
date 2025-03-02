@@ -1,3 +1,4 @@
+
 #define NOMINMAX
 #include "PersistentSystems.pch.h"
 
@@ -12,6 +13,7 @@
 #undef GetMessage
 #undef GetMessageW
 
+#pragma optimize( "", off ) 
 bool InitializeWinsock() {
 	WSADATA wsaData;
 	int result = WSAStartup(MAKEWORD(2,2),&wsaData);
@@ -44,56 +46,74 @@ NetworkConnection::Status NetworkRunner::StartSession(SessionConfiguration confi
 		status = NetworkConnection::Status::initialized;
 		HasStateAuthority = true;
 		HasInputAuthority = true;
-		break;
+		return status;
 	case SessionConfiguration::GameMode::Shared:
 		assert("Implement");
 	case SessionConfiguration::GameMode::Server:
 	case SessionConfiguration::GameMode::Host:
-		status = connection.StartAsServer(NetAddress());
-		if(status == NetworkConnection::Status::initialized) {
-			IsServer = true;
-			HasStateAuthority = true;
-			HasInputAuthority = false;
-		}
+		status = connection.StartAsServer(NetAddress(),configuration);
 		break;
 	case SessionConfiguration::GameMode::Client:
-		status = connection.StartAsClient(NetAddress());
-		if(status == NetworkConnection::Status::initialized) {
-			IsServer = true;
-			HasStateAuthority = true;
-			HasInputAuthority = false;
-		}
+		status = connection.StartAsClient(NetAddress(),configuration);
 		break;
 	case SessionConfiguration::GameMode::AutoHostOrClient:
-		status = connection.AutoHostOrClient(NetAddress());
-		if(status == NetworkConnection::Status::initialized) {
-			IsServer = true;
-			HasStateAuthority = true;
-			HasInputAuthority = false;
-		}
+		status = connection.AutoHostOrClient(NetAddress(),configuration);
 		break;
 	default:
 		status = NetworkConnection::Status::failed;
 		break;
 	}
 
-	Initialized = (status == NetworkConnection::Status::initialized);
+	if(status == NetworkConnection::Status::initializedAsServer) {
+		IsServer = true;
+		HasStateAuthority = true;
+		HasInputAuthority = true;
 
-	if(Initialized) { 
-		receiveThread.join();
-		receiveThread = std::jthread(&NetworkRunner::collectReceivedMessages,this); 
+		//Start acceptance thread
+		if(acceptConnection.joinable()) {
+			acceptConnection.request_stop();
+			acceptConnection.join();
+		}
+		acceptConnection = std::jthread([this](std::stop_token s) { this->acceptNewClients(s); });
 	}
+
+	if(status == NetworkConnection::Status::initializedAsClient) {
+		IsServer = false;
+		HasStateAuthority = false;
+		HasInputAuthority = true;
+	}
+
+	Initialized = (status && NetworkConnection::Status::initialized);
+
+	if(Initialized) {
+		if(receiveTCP.joinable()) {
+			receiveTCP.request_stop();
+			receiveTCP.join();
+		}
+		if(receiveUDP.joinable()) {
+			receiveUDP.request_stop();
+			receiveUDP.join();
+		}
+
+		receiveTCP = std::jthread([this](std::stop_token s) { this->collectReceivedMessages(s,NetworkConnection::Protocol::TCP); });
+		receiveUDP = std::jthread([this](std::stop_token s) { this->collectReceivedMessages(s,NetworkConnection::Protocol::UDP); });
+	}
+
 
 	return status;
 }
 
-
-
 void NetworkRunner::update() {
-	if(!Initialized) { return; }
+	if(!Initialized) {
+		SessionConfiguration c;
+		c.gameMode = SessionConfiguration::GameMode::Client;
+		StartSession(c);
+		return;
+	}
 	NetAddress recievedFromAddress;
+	moveMessageMapToRead();
 
-	for(auto& [type,messagesToProcess] : netMessageTypeHandling) {
+	for(const auto& [type,messagesToProcess] : messagesMap) {
 		for(const auto& incomingMessage : messagesToProcess) {
 			switch(type) {
 			case eNetMessageType::None:
@@ -102,18 +122,16 @@ void NetworkRunner::update() {
 			{
 				const auto          message = reinterpret_cast<const ChatMessage*>(&incomingMessage);
 				unsigned char recieveID = message->GetId();
-				std::string   userMessage = "User: " + std::to_string(recieveID) + " With name: " + usersNames[
-					recieveID] +
+				std::string   userMessage = "User: " + std::to_string(recieveID) + " With name: " + usersNames[recieveID] +
 					" Wrote: " + message->ReadMessage();
-					std::cout << userMessage << "\n";
+				std::cout << userMessage << "\n";
 
-					// user dont print their own message and only recieves the server message?
-
-					for(const auto& [id,name] : usersNames) {
-						ChatMessage outMessage;
-						outMessage.SetMessage(usersNames[recieveID] + ":" + message->ReadMessage());
-						//connection.Send(outMessage,usersIPs[id]);
-					}
+				// user dont print their own message and only recieves the server message? 
+				for(const auto& [id,name] : usersNames) {
+					ChatMessage outMessage;
+					outMessage.SetMessage(usersNames[recieveID] + ":" + message->ReadMessage());
+					//connection.Send(outMessage,usersIPs[id]);
+				}
 			}
 			break;
 			case eNetMessageType::Handshake:
@@ -160,9 +178,7 @@ void NetworkRunner::update() {
 			}
 			break;
 			case eNetMessageType::PlayerJoin:
-			{
-			}
-			break;
+				break;
 			case eNetMessageType::PlayerSync:
 			{
 				const auto           message = reinterpret_cast<const PlayerSyncMessage*>(&incomingMessage);
@@ -186,18 +202,7 @@ void NetworkRunner::update() {
 			default:
 				break;
 			}
-
-			// char ip[17];
-			// inet_ntop(AF_INET, &other.sin_addr, ip, 17);
-
-			// std::cout << "Recieved Packet from: " << ip << "\n";
-
-			// if (sendto(mySocket, inbound, 512, 0, reinterpret_cast<sockaddr*>(&other), length) == SOCKET_ERROR)
-			//{
-			//	std::cout << "Failed to respond back" << "\n";
-			// }
 		}
-		messagesToProcess.clear();
 	}
 }
 
@@ -205,33 +210,91 @@ void NetworkRunner::close() {
 	connection.Close();
 }
 
-bool NetworkRunner::Send(const NetMessage* message) {
+bool NetworkRunner::Send(const NetMessage& message) {
 	if(!Initialized) { return false; }
 
 	if(IsServer) {
-		netMessageTypeHandling[message->myType].emplace_back(*message);
+		Broadcast(message);
+		std::scoped_lock lock(addMessageLock);
+		threadedMessageMap[message.myType].emplace_back(message);
 		return true;
 	}
 
-	return connection.Send(*message);
+	//Connection is bound to server
+	return connection.Send(message);
 }
 
-void NetworkRunner::collectReceivedMessages() {
-	if(!Initialized) { return; }
+bool NetworkRunner::Broadcast(const NetMessage& message) {
+	bool allSucceded = true;
+	for(const auto& client : clients) {
+		allSucceded &= connection.SendUDP(client.remoteConnection.Address(),message);
+	}
 
-	NetMessage incomingMessage;
-	NetAddress recievedFromAddress;
-	while(true) {
-		if(!connection.Receive(&incomingMessage,&recievedFromAddress)) {
-			addReceivedMessages(incomingMessage);
+	return allSucceded;
+}
+
+bool NetworkRunner::Unicast(const NetMessage& message,Remote client) {
+	return connection.SendUDP(client.remoteConnection.Address(),message);
+}
+
+bool NetworkRunner::Multicast(const NetMessage& message,std::span<Remote> spanOfClient) {
+	bool allSucceded = true;
+	for(const auto& client : spanOfClient) {
+		allSucceded &= connection.SendUDP(client.remoteConnection.Address(),message);
+	}
+
+	return allSucceded;
+}
+
+void NetworkRunner::acceptNewClients(std::stop_token stop_token) {
+	Remote remote;
+	while(!stop_token.stop_requested()) {
+		if(connection.Accept(&remote.remoteConnection)) {
+			remote.isConnected = true;
+			for(auto& client : clients) {
+				if(client.isConnected != false) {
+					client.Close();
+					client = remote;
+				}
+			}
 		}
 	}
 }
 
-void NetworkRunner::addReceivedMessages(const NetMessage& message) {
+void NetworkRunner::collectReceivedMessages(std::stop_token stop_token,NetworkConnection::Protocol protocol) {
+	if(!Initialized) { return; }
+
+	NetMessage incomingMessage;
+	NetAddress recievedFromAddress;
+	while(!stop_token.stop_requested()) {
+
+		if(protocol == NetworkConnection::Protocol::UDP) {
+			if(connection.ReceiveUDP(&incomingMessage,&recievedFromAddress)) {
+				std::scoped_lock lock(addMessageLock);
+				threadedMessageMap[incomingMessage.myType].emplace_back(incomingMessage);
+			}
+		}
+
+		if(protocol == NetworkConnection::Protocol::TCP) {
+			if(connection.ReceiveTCP(&incomingMessage,&recievedFromAddress)) {
+				std::scoped_lock lock(addMessageLock);
+				threadedMessageMap[incomingMessage.myType].emplace_back(incomingMessage);
+			}
+		}
+
+	}
+}
+
+void NetworkRunner::moveMessageMapToRead() {
 	std::scoped_lock lock(addMessageLock);
-	netMessageTypeHandling[message.myType].emplace_back(message);
+	for(auto& [type,messageVector] : threadedMessageMap) {
+		messagesMap[type].clear();
+		messagesMap[type].resize(messageVector.size());
+
+		messagesMap[type] = messageVector;
+		messageVector.clear();
+	}
 
 }
 
-void NetworkRunner::networkTransformUpdate() {}
+#pragma optimize( "", on )
