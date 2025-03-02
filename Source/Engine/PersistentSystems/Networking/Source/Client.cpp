@@ -261,17 +261,20 @@
 //	message.SetId(myId);
 //	connection.Send(message);
 //}
-
-Remote::Remote() = default;
+ 
 
 void Remote::Close() { // todo
+	this->remoteConnection.Close();
+	this->receiveTCP.request_stop(); 
 }
 
 const std::vector<NetMessage>& Remote::Read() {
+	std::scoped_lock remoteLock(messageMutex);
 	return messages;
 }
 
 void Remote::Consume() {
+	std::scoped_lock remoteLock(messageMutex);
 	messages.clear();
 }
 

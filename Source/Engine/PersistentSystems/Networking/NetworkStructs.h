@@ -59,6 +59,7 @@ public:
 	static bool TCP(NetworkSocket throughSocket,const NetMessage& message);
  
 	bool Send(const NetMessage& message,Protocol protocol = Protocol::UDP) const;
+	bool Send(const NetMessage& message,NetAddress target,Protocol protocol = Protocol::UDP) const;
 	bool SendUDP(NetAddress toAddress,const NetMessage& message) const;
 
 	NetAddress Address() const;

@@ -22,8 +22,8 @@ void ChatWindow::RenderImGUi()
 	ImGui::Begin(std::format("Chat window##{}",uniqueID).c_str(),&m_KeepWindow);
 	//m_Client->Update();
 
-	for(auto& message : Runner.PollMessage<ChatMessage>()) {
-		m_ChatMessages.emplace_back(((ChatMessage*)&message)->ReadMessage());
+	for(auto& [address,message] : Runner.PollMessage<ChatMessage>()) {
+		m_ChatMessages.emplace_back(std::bit_cast<ChatMessage>(message).ReadMessage());
 	}
 
 	for (const auto &message : m_ChatMessages)
@@ -39,7 +39,7 @@ void ChatWindow::RenderImGUi()
 	{
 		ChatMessage msg;
 		msg.SetMessage(message);
-		Runner.Send(  msg);
+		Runner.Send(  msg,NetworkConnection::Protocol::TCP);
 		currentMessage = "";
 		//m_Client->Send(message);
 	}

@@ -9,6 +9,7 @@
 #undef max
 
 struct Remote { 
+	friend class NetworkRunner;
 	NetworkConnection remoteConnection;
 	bool isConnected;
 

@@ -27,7 +27,7 @@ void CleanupWinsock() {
 	WSACleanup();
 }
 
-NetworkRunner::NetworkRunner() = default;
+NetworkRunner::NetworkRunner() {};
 NetworkRunner::~NetworkRunner() { connection.Close(); CleanupWinsock(); };
 
 NetworkConnection::Status NetworkRunner::StartSession(SessionConfiguration configuration) {
@@ -95,10 +95,14 @@ NetworkConnection::Status NetworkRunner::StartSession(SessionConfiguration confi
 			receiveUDP.join();
 		}
 
-		receiveTCP = std::jthread([this](std::stop_token s) { this->collectReceivedMessages(s,NetworkConnection::Protocol::TCP); });
-		receiveUDP = std::jthread([this](std::stop_token s) { this->collectReceivedMessages(s,NetworkConnection::Protocol::UDP); });
-	}
+		receiveTCP = std::jthread([this](std::stop_token s) {
+			this->collectReceivedMessages(s,NetworkConnection::Protocol::TCP);
+			});
 
+		receiveUDP = std::jthread([this](std::stop_token s) {
+			this->collectReceivedMessages(s,NetworkConnection::Protocol::UDP);
+			});
+	}
 
 	return status;
 }
@@ -112,6 +116,8 @@ void NetworkRunner::update() {
 	}
 	NetAddress recievedFromAddress;
 	moveMessageMapToRead();
+	
+
 
 	for(const auto& [type,messagesToProcess] : messagesMap) {
 		for(const auto& incomingMessage : messagesToProcess) {
@@ -210,37 +216,37 @@ void NetworkRunner::close() {
 	connection.Close();
 }
 
-bool NetworkRunner::Send(const NetMessage& message) {
+bool NetworkRunner::Send(const NetMessage& message,NetworkConnection::Protocol protocol) {
 	if(!Initialized) { return false; }
 
 	if(IsServer) {
-		Broadcast(message);
-		std::scoped_lock lock(addMessageLock);
-		threadedMessageMap[message.myType].emplace_back(message);
+		Broadcast(message,protocol);
+		std::scoped_lock lock(addMessageLock); 
+		threadedMessageMap[message.myType].emplace_back(connection.Address(),message);
 		return true;
 	}
 
 	//Connection is bound to server
-	return connection.Send(message);
+	return connection.Send(message,protocol);
 }
 
-bool NetworkRunner::Broadcast(const NetMessage& message) {
+bool NetworkRunner::Broadcast(const NetMessage& message,NetworkConnection::Protocol protocol) {
 	bool allSucceded = true;
-	for(const auto& client : clients) {
-		allSucceded &= connection.SendUDP(client.remoteConnection.Address(),message);
+	for(const auto& client : clients) { 
+		allSucceded &= connection.Send(message,client.remoteConnection.Address(),protocol);
 	}
 
 	return allSucceded;
 }
 
-bool NetworkRunner::Unicast(const NetMessage& message,Remote client) {
-	return connection.SendUDP(client.remoteConnection.Address(),message);
+bool NetworkRunner::Unicast(const NetMessage& message,Remote client,NetworkConnection::Protocol protocol) {
+	return connection.Send(message,client.remoteConnection.Address(),protocol);
 }
 
-bool NetworkRunner::Multicast(const NetMessage& message,std::span<Remote> spanOfClient) {
+bool NetworkRunner::Multicast(const NetMessage& message,std::span<Remote> spanOfClient,NetworkConnection::Protocol protocol) {
 	bool allSucceded = true;
-	for(const auto& client : spanOfClient) {
-		allSucceded &= connection.SendUDP(client.remoteConnection.Address(),message);
+	for(const auto& client : spanOfClient) { 
+		allSucceded &= connection.Send(message,client.remoteConnection.Address(),protocol);
 	}
 
 	return allSucceded;
@@ -250,11 +256,16 @@ void NetworkRunner::acceptNewClients(std::stop_token stop_token) {
 	Remote remote;
 	while(!stop_token.stop_requested()) {
 		if(connection.Accept(&remote.remoteConnection)) {
-			remote.isConnected = true;
 			for(auto& client : clients) {
-				if(client.isConnected != false) {
+				if(client.isConnected == false) {
 					client.Close();
-					client = remote;
+					client.isConnected = true;
+					client.remoteConnection = remote.remoteConnection;
+					client.receiveTCP = std::jthread([&client](std::stop_token s) {
+						client.collectReceivedMessages(s);
+						});
+					remote.remoteConnection = {};
+					break;
 				}
 			}
 		}
@@ -267,21 +278,19 @@ void NetworkRunner::collectReceivedMessages(std::stop_token stop_token,NetworkCo
 	NetMessage incomingMessage;
 	NetAddress recievedFromAddress;
 	while(!stop_token.stop_requested()) {
-
 		if(protocol == NetworkConnection::Protocol::UDP) {
 			if(connection.ReceiveUDP(&incomingMessage,&recievedFromAddress)) {
 				std::scoped_lock lock(addMessageLock);
-				threadedMessageMap[incomingMessage.myType].emplace_back(incomingMessage);
+				threadedMessageMap[incomingMessage.myType].emplace_back(recievedFromAddress,incomingMessage);
 			}
 		}
 
 		if(protocol == NetworkConnection::Protocol::TCP) {
 			if(connection.ReceiveTCP(&incomingMessage,&recievedFromAddress)) {
 				std::scoped_lock lock(addMessageLock);
-				threadedMessageMap[incomingMessage.myType].emplace_back(incomingMessage);
+				threadedMessageMap[incomingMessage.myType].emplace_back(recievedFromAddress,incomingMessage);
 			}
 		}
-
 	}
 }
 
@@ -293,6 +302,15 @@ void NetworkRunner::moveMessageMapToRead() {
 
 		messagesMap[type] = messageVector;
 		messageVector.clear();
+	}
+	
+	for(auto& remote : clients) {
+		if(remote.isConnected && !remote.messages.empty()) {
+			for(const auto& message : remote.Read()) {
+				messagesMap[message.myType].emplace_back(remote.remoteConnection.Address(),message);
+			}
+			remote.Consume();
+		}
 	}
 
 }

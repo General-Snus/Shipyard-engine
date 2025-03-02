@@ -78,17 +78,17 @@ NetworkConnection::Status NetworkConnection::StartAsClient(NetAddress serverAddr
 	message.SetMessage(std::format("{}{}","Lukas : ",(const char*)this));
 	Send(message);
 
-	NetMessage recieveHandshake;
-	if(ReceiveTCP(&recieveHandshake,&connectedTo,512,true,10.0f) &&
-		recieveHandshake.myType == HandshakeMessage::type) {
-		status = Status::initializedAsClient;
-	} else {
-		Close();
-		status = failed;
-		return status;
-	}
+	//NetMessage recieveHandshake;
+	//if(ReceiveTCP(&recieveHandshake,&connectedTo,512,true,10.0f) &&
+	//	recieveHandshake.myType == HandshakeMessage::type) {
+	//	status = Status::initializedAsClient;
+	//} else {
+	//	Close();
+	//	status = failed;
+	//	return status;
+	//}
 
-	return status;
+	return status = Status::initializedAsClient;;
 }
 
 NetworkConnection::Status NetworkConnection::StartAsRemoteConnection(NetAddress remote,NetworkSocket socket) {
@@ -128,6 +128,20 @@ bool NetworkConnection::Send(const NetMessage& message,Protocol protocol) const 
 		std::unreachable();
 		break;
 	} 
+}
+
+bool NetworkConnection::Send(const NetMessage& message,NetAddress target,Protocol protocol) const {
+	switch(protocol) {
+	case NetworkConnection::Protocol::TCP:
+		return NetworkConnection::TCP(TCPSocket,message);
+		break;
+	case NetworkConnection::Protocol::UDP:
+		return NetworkConnection::UDP(target,UDPSocket,message);
+		break;
+	default:
+		std::unreachable();
+		break;
+	}
 }
 
 bool NetworkConnection::SendUDP(NetAddress toAddress,const NetMessage& message) const {
@@ -192,7 +206,7 @@ bool NetworkConnection::ReceiveUDP(NetMessage* message,NetAddress* receivedFrom,
 		}
 	}
 
-	auto receivedLength = recvfrom(UDPSocket,(char*)&message,bufferSize,0,(sockaddr*)&other,&length);
+	auto receivedLength = recvfrom(UDPSocket,(char*)message,bufferSize,0,(sockaddr*)&other,&length);
 	if(receivedLength == SOCKET_ERROR || receivedLength > MAX_NETMESSAGE_SIZE) {
 		//LOGGER.ErrC("Failed to recieve message ",WSAGetLastError());
 		auto socketInfo = NetworkHelpers::GetSocketSettings(TCPSocket);
@@ -238,10 +252,11 @@ bool NetworkConnection::ReceiveTCP(NetMessage* message,NetAddress* receivedFrom,
 		}
 	}
 
-	auto receivedLength = recv(TCPSocket,(char*)&message,bufferSize,0);
+	auto receivedLength = recv(TCPSocket,(char*)message,bufferSize,0);
 	if(receivedLength == SOCKET_ERROR || receivedLength > MAX_NETMESSAGE_SIZE) {
  		return false;
 	} else {
+		*receivedFrom = connectedTo;
 		//receivedFrom->address = other.sin_addr.S_un.S_addr;
 		//receivedFrom->port = other.sin_port;
 		return true;
