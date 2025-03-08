@@ -23,6 +23,7 @@
 #include "../../imgui_internal.h"
 #include <span>
 #include <string>
+#include <Tools/Reflection/magic_enum/magic_enum.hpp>
 
 //----------------------------------------------------------------------------------------------------------------------
 // FORWARD DECLARATIONS
@@ -69,7 +70,7 @@ namespace ImGui
 	void ClearComboData(ImGuiID combo_id);
 
 	void SortFilterResultsDescending(ComboFilterSearchResults& filtered_items);
-	void SortFilterResultsAscending(ComboFilterSearchResults& filtered_items);
+	void SortFilterResultsAscending(ComboFilterSearchResults& filtered_items); 
 
 	// Combo box with text filter
 	// T1 should be a container.
@@ -136,6 +137,36 @@ namespace ImGui
 
 	} // Internal namespace
 } // ImGui namespace
+
+inline  const char* item_getter1(const std::vector<std::string>& items,int index) {
+    if(index >= 0 && index < (int)items.size()) {
+        return items[index].c_str();
+    }
+    return "N/A";
+}
+
+
+
+inline  const char* item_getter2(std::span<const std::string> items,int index) {
+    if(index >= 0 && index < (int)items.size()) {
+        return items[index].c_str();
+    }
+    return "...";
+} 
+
+inline  const char* item_getter4(std::span<const char* const> items,int index) {
+    if(index >= 0 && index < (int)items.size()) {
+        return items[index];
+    }
+    return "";
+}
+
+inline  const char* item_getter5(const std::vector<const char*>& items,int index) {
+    if(index >= 0 && index < (int)items.size()) {
+        return items[index];
+    }
+    return "N/A";
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 // DEFINITIONS
@@ -223,6 +254,17 @@ namespace ImGui
 
 		return ret;
 	}
+    template<typename EnumType>
+    bool ComboAutoSelect(const char* combo_label,int& selected_item,ImGuiComboFlags flags) requires  std::is_enum_v<EnumType>
+    {
+        constexpr auto& enumData = magic_enum::enum_names<EnumType>();
+        constexpr auto  enumCount = magic_enum::enum_count<EnumType>();
+
+        std::vector<const char*> key;
+        for_sequence<enumCount>([&key](auto i) constexpr { key.emplace_back(enumData[i].data()); });
+
+        return ComboAutoSelect(combo_label,selected_item,key,item_getter5,Internal::DefaultComboAutoSelectSearchCallback,flags);
+    }
 
 	template<typename T1, typename T2, typename>
 	bool ComboAutoSelect(const char* combo_label, int& selected_item, const T1& items, ComboItemGetterCallback<T2> item_getter, ImGuiComboFlags flags)
@@ -283,10 +325,10 @@ namespace ImGui
 			constexpr int max_matches = 128;
 			unsigned char matches[max_matches];
 			int best_item = -1;
-			int prevmatch_count;
-			int match_count;
-			int best_score;
-			int score;
+			int prevmatch_count{};
+			int match_count{};
+            int best_score{};
+			int score{};
 			int i = 0;
 
 			for (; i < item_count; ++i) {
@@ -756,42 +798,7 @@ namespace ImGui
 
 	} // Internal namespace
 } // ImGui namespace
-
-
-struct DemoPair
-{
-	const char* str;
-	int num;
-};
-
-inline  const char* item_getter1(const std::vector<std::string>& items, int index) {
-	if (index >= 0 && index < (int)items.size()) {
-		return items[index].c_str();
-	}
-	return "N/A";
-}
-
-inline  const char* item_getter2(std::span<const std::string> items, int index) {
-	if (index >= 0 && index < (int)items.size()) {
-		return items[index].c_str();
-	}
-	return "...";
-}
-
-inline  const char* item_getter3(std::span<const DemoPair> items, int index) {
-	if (index >= 0 && index < (int)items.size()) {
-		return items[index].str;
-	}
-	return "";
-}
-
-inline  const char* item_getter4(std::span<const char* const> items, int index) {
-	if (index >= 0 && index < (int)items.size()) {
-		return items[index];
-	}
-	return "";
-}
-
+ 
 // Fuzzy search algorith by @r-lyeh with some adjustments of my own
 inline static bool fuzzy_score(const char* str1, const char* str2, int& score)
 {

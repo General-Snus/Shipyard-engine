@@ -3,10 +3,13 @@
 #include "DirectX/DX12/Graphics/Resources/Texture.h"
 #include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
 #include "Tools/ImGui/imgui.h"
+#include "Tools/ImGui/imgui_markdown.h" 
 #include "Tools/Utilities/Input/Input.hpp" 
 
 #include <DirectX/DX12/Graphics/Enums.h>
 #include <Engine/GraphicsEngine/GraphicsEngine.h>
+ 
+#include "Shellapi.h"
 
 namespace ImGui {
     class ImGuiContextHolder : public Singleton {
@@ -184,6 +187,18 @@ namespace ImGui {
         }
     }
 
+
+    static bool IsItemJustReleased() {
+        OPTICK_EVENT();
+        return IsItemDeactivated() && !ImGui::IsItemActive();
+    }
+    static bool IsItemJustActivated() {
+        OPTICK_EVENT();
+        return !IsItemDeactivated() && ImGui::IsItemActive();
+    }
+
+
+    //TEXT HELPERS
     inline void TextCentered(std::string text) {
         OPTICK_EVENT();
         const auto windowWidth = ImGui::GetWindowSize().x;
@@ -202,12 +217,63 @@ namespace ImGui {
         ImGui::Text(text);
     }
 
-    static bool IsItemJustReleased() {
-        OPTICK_EVENT();
-        return IsItemDeactivated() && !ImGui::IsItemActive();
+
+    inline void LinkCallback(ImGui::MarkdownLinkCallbackData data_) {
+        std::string url(data_.link,data_.linkLength);
+        if(!data_.isImage) {
+            ShellExecuteA(nullptr,"open",url.c_str(),nullptr,nullptr,SW_SHOWNORMAL);
+        }
     }
-    static bool IsItemJustActivated() {
-        OPTICK_EVENT();
-        return !IsItemDeactivated() && ImGui::IsItemActive();
+
+    inline ImGui::MarkdownImageData ImageCallback(ImGui::MarkdownLinkCallbackData data_) {
+        data_;
+        // In your application you would load an image based on data_ input. Here we just use the imgui font texture.
+        ImTextureID image = ImGui::GetIO().Fonts->TexID;
+        // > C++14 can use ImGui::MarkdownImageData imageData{ true, false, image, ImVec2( 40.0f, 20.0f ) };
+        ImGui::MarkdownImageData imageData;
+        imageData.isValid = true;
+        imageData.useLinkCallback = false;
+        imageData.user_texture_id = image;
+        imageData.size = ImVec2(40.0f,20.0f);
+
+        // For image resize when available size.x > image width, add
+        ImVec2 const contentSize = ImGui::GetContentRegionAvail();
+        if(imageData.size.x > contentSize.x) {
+            float const ratio = imageData.size.y / imageData.size.x;
+            imageData.size.x = contentSize.x;
+            imageData.size.y = contentSize.x * ratio;
+        }
+
+        return imageData;
+    }
+
+    inline void LinkCallback(ImGui::MarkdownLinkCallbackData data_);
+    inline ImGui::MarkdownImageData ImageCallback(ImGui::MarkdownLinkCallbackData data_);
+    inline static MarkdownConfig mdConfig;
+
+    static ImFont* H1 = nullptr;
+    static ImFont* H2 = nullptr;
+    static ImFont* H3 = nullptr;
+
+    inline void LoadMarkdownFonts(ImFont* path,ImFont* boldPath,float fontSize_ = 16.0f) {
+        path; fontSize_;
+        // Bold headings H2 and H3
+        H2 = boldPath;
+        H3 = path; 
+        H1 = boldPath;
+    }
+
+    inline void Markdown(const std::string& markdown_) {
+        // You can make your own Markdown function with your prefered string container and markdown config.
+        // > C++14 can use ImGui::MarkdownConfig mdConfig{ LinkCallback, NULL, ImageCallback, ICON_FA_LINK, { { H1, true }, { H2, true }, { H3, false } }, NULL };
+        mdConfig.linkCallback = LinkCallback;
+        mdConfig.tooltipCallback = NULL;
+        mdConfig.imageCallback = ImageCallback;
+        mdConfig.linkIcon = "\xef\x83\x81"; // ICON_FA_LINK IM LAZY OK
+        mdConfig.headingFormats[0] = {H1, true};
+        mdConfig.headingFormats[1] = {H2, true};
+        mdConfig.headingFormats[2] = {H3, false};
+        mdConfig.userData = NULL; ;
+        ImGui::Markdown(markdown_.c_str(),markdown_.length(),mdConfig);
     }
 } // namespace ImGui

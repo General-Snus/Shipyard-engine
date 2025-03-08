@@ -18,6 +18,7 @@ struct NetAddress {
 
 	NetAddress();
 	NetAddress(const std::string& Ip,unsigned short port,AddressFamily family = AddressFamily::ipv4);
+	std::string IPStr();
 	sockaddr_in as_sockaddr_in() const;
 	sockaddr as_sockaddr() const;
 
@@ -30,10 +31,14 @@ using NetworkSocket = unsigned long long;
 struct NetworkConnection {
 public:
 	enum class Status : int {
-		failed = 0,
-		initializedAsServer = 1,
-		initializedAsClient = 2,
-		initialized = initializedAsServer | initializedAsClient
+		initializedAsServer = 1 << 0,
+		initializedAsClient = 1 << 1,
+		//Failure states
+		incorrectIP = 1 << 2,
+
+		//Summasion states
+		initialized = initializedAsServer | initializedAsClient,
+		failed = incorrectIP,
 	};
 	enum class Protocol {
 		UDP = 1,TCP = 2
@@ -62,8 +67,9 @@ public:
 	bool Send(const NetMessage& message,NetAddress target,Protocol protocol = Protocol::UDP) const;
 	bool SendUDP(NetAddress toAddress,const NetMessage& message) const;
 
+	Status GetStatus() const;
 	NetAddress Address() const;
-	bool Close() const;
+	bool Close();
 private:
 	Status status;
 	NetAddress connectedTo;
@@ -75,13 +81,13 @@ ENABLE_ENUM_BITWISE_OPERATORS(NetworkConnection::Status);
 
 struct SessionConfiguration {
 	enum class GameMode {
-		Single = 1,
+		Single = 0,
 		Shared,
 		Server,
 		Host,
 		Client,
-		AutoHostOrClient,
-		count
+		AutoHostOrClient
+		//count Dont write out count, we have magic_enum for this
 	};
 
 	enum class HostType {
@@ -93,6 +99,7 @@ struct SessionConfiguration {
 
 	GameMode gameMode;
 	HostType hostType;
+	NetAddress address = NetAddress();
 };
 
 namespace NetworkHelpers {

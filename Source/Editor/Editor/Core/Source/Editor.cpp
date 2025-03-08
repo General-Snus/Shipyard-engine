@@ -62,6 +62,7 @@
 #include <Windows/EditorWindows/ImageViewer.h>
 #include <imgui_tex_inspect.h> 
 #include <backends/tex_inspect_directx12.h>
+#include <Windows/EditorWindows/NetworkSettings.h>
 
 enum Theme {
 	light,
@@ -281,6 +282,7 @@ void LoadFont() {
 			std::filesystem::path FontPath = json["FontPath"];
 
 			const std::string backupFont = ENGINE_RESOURCES.Directory().string() + "/Fonts/roboto/Roboto-Light.ttf";
+			const std::string backupBoldFont = ENGINE_RESOURCES.Directory().string() + "/Fonts/roboto/Roboto-Bold.ttf";
 			const std::string awsomeFont = ENGINE_RESOURCES.Directory().string() +
 				"/Fonts/FontAwesome/fa-solid-900.ttf";
 			const std::string font_path = ENGINE_RESOURCES.Directory().string() + (FontPath).string();
@@ -301,6 +303,7 @@ void LoadFont() {
 			if(!io.Fonts->Build()) {
 				LOGGER.Err("fucked up font load");
 			}
+			ImGui::LoadMarkdownFonts(io.Fonts->Fonts[0],io.Fonts->Fonts[0]);
 			haveLoadedFont = true;
 		} catch(const nlohmann::json::exception& e) {
 			std::string msg = std::format("Unsuccessfull loading of theme file at path: Theme.json {} ",e.what());
@@ -737,6 +740,10 @@ void Editor::TopBar() {
 
 			if(ImGui::Selectable("Chat")) {
 				g_EditorWindows.emplace_back(std::make_shared<ChatWindow>());
+			}
+
+			if(ImGui::Selectable("Network Settings")) {
+				g_EditorWindows.emplace_back(std::make_shared<NetworkSettings>());
 			}
 
 			ImGui::EndMenu();

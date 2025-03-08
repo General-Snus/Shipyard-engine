@@ -13,6 +13,7 @@
 
 #define Runner ServiceLocator::Instance().GetService<NetworkRunner>()
 class NetworkRunner : public Singleton {
+	friend class NetworkSettings;
 	using MessageList = std::vector<std::pair<NetAddress,NetMessage>>;
 	using NetworkMessagesMap = std::unordered_map<eNetMessageType,MessageList>; // vector has to be ordered by timestamp todo
 public:

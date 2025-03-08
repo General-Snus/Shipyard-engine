@@ -51,13 +51,13 @@ NetworkConnection::Status NetworkRunner::StartSession(SessionConfiguration confi
 		assert("Implement");
 	case SessionConfiguration::GameMode::Server:
 	case SessionConfiguration::GameMode::Host:
-		status = connection.StartAsServer(NetAddress(),configuration);
+		status = connection.StartAsServer(configuration.address,configuration);
 		break;
 	case SessionConfiguration::GameMode::Client:
-		status = connection.StartAsClient(NetAddress(),configuration);
+		status = connection.StartAsClient(configuration.address,configuration);
 		break;
 	case SessionConfiguration::GameMode::AutoHostOrClient:
-		status = connection.AutoHostOrClient(NetAddress(),configuration);
+		status = connection.AutoHostOrClient(configuration.address,configuration);
 		break;
 	default:
 		status = NetworkConnection::Status::failed;
@@ -213,7 +213,11 @@ void NetworkRunner::update() {
 }
 
 void NetworkRunner::close() {
-	connection.Close();
+	connection.Close();  
+	receiveTCP.request_stop();
+	receiveUDP.request_stop();
+	acceptConnection.request_stop();
+
 }
 
 bool NetworkRunner::Send(const NetMessage& message,NetworkConnection::Protocol protocol) {

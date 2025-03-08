@@ -163,12 +163,19 @@ bool NetworkConnection::UDP(NetAddress toAddress,NetworkSocket throughSocket,con
 	return true;
 }
 
+NetworkConnection::Status NetworkConnection::GetStatus() const {
+	return status;
+}
+
 NetAddress NetworkConnection::Address() const {
 	return connectedTo;
 }
 
-bool NetworkConnection::Close() const {
-	return closesocket(TCPSocket) == 0 && closesocket(UDPSocket) == 0;
+bool NetworkConnection::Close() {
+	bool ret =  closesocket	(TCPSocket) == 0 && closesocket(UDPSocket) == 0;
+	TCPSocket = 0;
+	UDPSocket = 0;
+	return ret;
 }
 
 bool NetworkConnection::ReceiveUDP(NetMessage* message,NetAddress* receivedFrom,const int bufferSize,bool blocking,const float msTimeout) const {
@@ -192,7 +199,7 @@ bool NetworkConnection::ReceiveUDP(NetMessage* message,NetAddress* receivedFrom,
 	u_long iMode = !blocking;
 	auto iResult = ioctlsocket(UDPSocket,FIONBIO,&iMode);
 	if(iResult != NO_ERROR) {
-		throw std::exception("Cant really fail tbh");
+		return false;
 	}
 
 	if(msTimeout > 0) {
@@ -270,7 +277,8 @@ bool NetworkConnection::Accept(NetworkConnection* returningConnection) const {
 	}
 
 	sockaddr addr{};
-	NetworkSocket socket = accept(TCPSocket,0,0);
+	int length = sizeof(sockaddr);
+	NetworkSocket socket = accept(TCPSocket,&addr,&length);
 	if(socket == INVALID_SOCKET) {
 		return false;
 	} else {
@@ -296,7 +304,22 @@ NetAddress::NetAddress(const std::string& Ip,unsigned short port,AddressFamily f
 
 	this->port = htons(port);
 }
+std::string NetAddress::IPStr() {
+	std::string out;
+	switch(family) {
+	case AddressFamily::ipv4:
+		out.resize(INET_ADDRSTRLEN);
+		inet_ntop(AF_INET,&address,out.data(),INET_ADDRSTRLEN);
+		break;
 
+	case AddressFamily::ipv6:
+		out.resize(INET6_ADDRSTRLEN);
+		inet_ntop(AF_INET6,&address,out.data(),INET6_ADDRSTRLEN);
+		break;
+	}
+
+	return out;
+}
 sockaddr_in NetAddress::as_sockaddr_in() const {
 	sockaddr_in intermediate{};
 
