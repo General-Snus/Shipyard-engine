@@ -1,18 +1,11 @@
 #include "PersistentSystems.pch.h" 
-#include "../Client.h"
+#include "../Remote.h"
 
 #include <Tools/Logging/Logging.h>
 #include <Tools/Utilities/Math.hpp>
-
-#include "Engine/PersistentSystems/Networking/NetMessage/ChatMessage.h"
-#include "Engine/PersistentSystems/Networking/NetMessage/HandshakeMessage.h"
 #include "Engine/PersistentSystems/Networking/NetMessage/NetMessage.h"
-#include "Engine/PersistentSystems/Networking/NetMessage/PlayerSyncMessage.h"
-#include "Engine/PersistentSystems/Networking/NetMessage/QuitMessage.h"
-//
-//Client::Client() = default;
-//Client::~Client() = default;
-//
+#include <Networking/NetMessage/StringMessages.h>
+
 //void Client::Setup() {
 //	int attemptLimit = 0;
 //	while(!SetupConnection() && attemptLimit < 5) {
@@ -40,10 +33,10 @@
 //	//     EditorInstance.myChatMessages.emplace_back(message->ReadMessage());
 //	// }
 //	// break;
-//	// case eNetMessageType::Handshake: {
+//	// case eNetMessageType::NewConnection: {
 //	// }
 //	// break;
-//	//     // case NetMessageType::PlayerSync: {
+//	//     // case NetMessageType::TransformSyncMessage: {
 //	//     //     PlayerSyncMessage *message = reinterpret_cast<PlayerSyncMessage *>(&inbound);
 //	//     //     PlayerSyncData data = message->ReadMessage();
 //	//     //
@@ -115,160 +108,15 @@
 //	//     break;
 //	//}
 //}
-//
-//void Client::Close() {
-//	connection.Close();
-//	sendThread.join();
-//	receiveThread.join();
-//}
-//
-//bool Client::HasReceivedMessage() const {
-//	return hasRecievedMessage;
-//}
-//
-//eNetMessageType Client::GetType() {
-//	return buffer->myType;
-//}
-//
-//NetMessage* Client::GetLatestMessage() {
-//	return buffer;
-//}
-//
-//bool Client::SetupConnection() {
-//	WSADATA data;
-//	ZeroMemory(&serverAddress,sizeof(serverAddress));
-//
-//	if(WSAStartup(MAKEWORD(2,2),&data) != 0) {
-//		LOGGER.Log("Wsa startup fail");
-//		return false;
-//	}
-//
-//	//mySocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP); // SOCK_DGRAM = UDP
-//
-//	if(connection.StartAsClient(NetAddress(),AF_INET,SOCK_DGRAM,IPPROTO_UDP) == NetworkConnection::Status::failed) {
-//		LOGGER.Log("Could not create socket");
-//		return false;
-//	}
-//
-//	short       port;
-//	std::string connectToIp;
-//	// InputIpAndPort(ip, port);
-//	connectToIp = LOCALHOST;
-//	port = DEFAULT_PORT;
-//
-//	in_addr address;
-//	if(inet_pton(AF_INET,connectToIp.c_str(),&address) != 1) {
-//		LOGGER.Log("Wrong IP");
-//		return false;
-//	}
-//
-//	serverAddress.address =
-//		address.S_un.S_addr;
-//	serverAddress.port = htons(port);
-//
-//	if(!SendOK()) {
-//		LOGGER.Log("Didnt Get response from server");
-//		return false;
-//	}
-//
-//	LOGGER.Log("Got ok from server");
-//
-//	LOGGER.Log(".");
-//	LOGGER.Log(".");
-//	LOGGER.Log(".");
-//
-//	LOGGER.Log(std::format("Connected with ip: {} \t | On Port: {} ",connectToIp,port));
-//	LOGGER.Log("Init done");
-//
-//	return true;
-//}
-//
-//bool Client::SendOK() {
-//	const std::string username = "User" + std::to_string(Math::RandomEngine::randomInRange(0,999));
-//
-//	HandshakeMessage message;
-//	message.SetMessage(username + "\n");
-//	connection.Send(message);
-//
-//	//unsigned long ul = 1;
-//	//ioctlsocket(mySocket,FIONBIO,&ul);
-//
-//	int  iterations = 0;
-//	bool success = false;
-//
-//	LOGGER.Log("Trying to connect");
-//	while(iterations < 100) {
-//		if(connection.Receive(&message,&serverAddress)) {
-//			success = true;
-//			break;
-//		}
-//		iterations++;
-//	}
-//
-//	if(success) {
-//		LOGGER.Log("Success recieving from server");
-//	} else {
-//		LOGGER.Log("Could not recieve from server");
-//	}
-//
-//	std::string joinMessage = "User: ";
-//	joinMessage += message.ReadMessage();
-//	joinMessage += " Joined!";
-//	std::cout << joinMessage << std::endl;
-//
-//	myId = message.GetId();
-//
-//	//ul = 0;
-//	//ioctlsocket(mySocket,FIONBIO,&ul);
-//
-//	return success;
-//}
-//
-//void Client::InputIpAndPort(std::string& outIp,short& outPort) {
-//	std::cin.clear();
-//	LOGGER.Log("Input a Ip Adress (enter 0 for default 127.0.0.1) ");
-//	std::cin >> outIp;
-//
-//	if(outIp == "0") {
-//		outIp = LOCALHOST;
-//	}
-//
-//	std::cin.clear();
-//
-//	LOGGER.Log("Input a port (enter 0 for default 27015) ");
-//	std::cin >> outPort;
-//
-//	if(outPort == 0) {
-//		outPort = DEFAULT_PORT;
-//	}
-//
-//	std::cin.clear();
-//}
-//
-//void Client::MessageLoop() {}
-//
-//void Client::Send(const std::string& aMessage) {
-//	if(aMessage == "quit") { 
-//		QuitMessage message;
-//		message.SetMessage("");
-//		message.SetId(myId);
-//
-//		connection.Send(message);
-//	}
-//
-//	ChatMessage message;
-//	message.SetMessage(aMessage);
-//	message.SetId(myId);
-//	connection.Send(message);
-//}
- 
 
 void Remote::Close() { // todo
-	this->remoteConnection.Close();
-	this->receiveTCP.request_stop(); 
+	receiveTCP.request_stop(); 
+	remoteConnection.Close();
+	isConnected = false;
+	Consume();
 }
 
-const std::vector<NetMessage>& Remote::Read() {
+const std::vector<Remote::RemoteRecievedMessage>& Remote::Read() {
 	std::scoped_lock remoteLock(messageMutex);
 	return messages;
 }
@@ -284,7 +132,23 @@ void Remote::collectReceivedMessages(std::stop_token stop_token) {
 	while(!stop_token.stop_requested()) {
 		if(remoteConnection.ReceiveTCP(&incomingMessage,&recievedFromAddress)) {
 			std::scoped_lock lock(messageMutex);
-			messages.emplace_back(incomingMessage);
+			//bit discusting but here we go
+
+			if(incomingMessage.myType == eNetMessageType::NewConnection)
+			{
+				HandshakeMessage message = std::bit_cast<HandshakeMessage>(incomingMessage);
+				nickname = message.ReadMessage();
+				id = message.GetId();
+			}
+			
+
+			lastRecievedMessageTime = std::chrono::system_clock::now();
+			RemoteRecievedMessage recv{
+				incomingMessage,
+				recievedFromAddress
+			};
+
+			messages.emplace_back(recv);
 		}
 	}
 }

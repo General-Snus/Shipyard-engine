@@ -45,13 +45,10 @@
     <ClInclude Include="System\SystemBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Networking\Server.h">
+    <ClInclude Include="Networking\NetworkRunner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Networking\NetMessage\ChatMessage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Networking\NetMessage\HandshakeMessage.h">
+    <ClInclude Include="Networking\NetMessage\StringMessages.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Networking\NetMessage\NetMessage.h">
@@ -60,13 +57,13 @@
     <ClInclude Include="Networking\NetMessage\PlayerSyncMessage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Networking\NetMessage\QuitMessage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Networking\Client.h">
+    <ClInclude Include="Networking\Remote.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Networking\NetworkStructs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Networking\ReplicationLayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -101,13 +98,10 @@
     <ClCompile Include="System\SystemBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Networking\Source\Server.cpp">
+    <ClCompile Include="Networking\Source\NetworkRunner.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Networking\NetMessage\ChatMessage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Networking\NetMessage\HandshakeMessage.cpp">
+    <ClCompile Include="Networking\NetMessage\StringMessages.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Networking\NetMessage\NetMessage.cpp">
@@ -116,13 +110,13 @@
     <ClCompile Include="Networking\NetMessage\PlayerSyncMessage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Networking\NetMessage\QuitMessage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Networking\Source\Client.cpp">
+    <ClCompile Include="Networking\Source\Remote.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Networking\Source\NetworkStructs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Networking\Source\ReplicationLayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

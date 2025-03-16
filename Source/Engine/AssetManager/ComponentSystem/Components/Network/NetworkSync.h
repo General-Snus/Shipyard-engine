@@ -5,20 +5,52 @@
 #include <filesystem>
 #include <memory>
 #include <unordered_set>
-class NetworkSync : public Component
+#include "Engine/PersistentSystems/Networking/NetworkStructs.h"
+
+//Existance sync
+class NetworkObject : public Component
 {
   public:
     ReflectableTypeRegistration();
-    NetworkSync() = delete; // Create a generic cube
-    NetworkSync(const SY::UUID anOwnerId, GameObjectManager *aManager);
+    NetworkObject() = delete;
+    NetworkObject(const SY::UUID anOwnerId, GameObjectManager *aManager);
     bool InspectorView() override;
 
-    SY::UUID GetServerID()
+    NetworkedId GetServerID() const
     {
-        return m_ServerID;
+        return uniqueNetId;
     }
 
+    void DisperseNetMessage(const NetMessage& netMessageForIndividualobject);
+
   private:
-    SY::UUID m_ServerID;
+      NetworkedId uniqueNetId;
 };
-REFL_AUTO(type(NetworkSync))
+REFL_AUTO(type(NetworkObject))
+//TODO SHOULD HAVE NETWORK COMPONENT PARENT TO HIDE A BIT SHITTY THINGS
+
+//Transform sync
+class NetworkTransform : public Component
+{
+public:
+    ReflectableTypeRegistration();
+    NetworkTransform() = delete;
+    NetworkTransform(const SY::UUID anOwnerId,GameObjectManager* aManager); 
+
+	std::chrono::time_point<std::chrono::high_resolution_clock> updatePoint;
+	Vector3<float> myPosition{}; // Update from server
+	Quaternionf    myQuaternion{}; // Update from server
+	Vector3<float> myScale = Vector3f(1,1,1); // Update from server
+
+	Vector3<float> translationInterpolation{}; // Update on client whenever new message
+	Quaternionf    myQuaternion{}; // Update on client whenever new message
+
+	NetworkedId GetServerID() const
+	{
+		return uniqueNetId;
+	}
+private:
+	NetworkedId uniqueNetId;
+
+};
+REFL_AUTO(type(NetworkTransform))

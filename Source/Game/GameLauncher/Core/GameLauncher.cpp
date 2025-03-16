@@ -1,12 +1,13 @@
 #include "ShipyardEngine.pch.h"
 
-#include "GameLauncher.h"
+#include "GameLauncher.h"	
 
 #include <UserComponent.h>
 #include "Editor/Editor/Windows/EditorWindows/Viewport.h"
 #include "Engine/PersistentSystems/Physics/Raycast.h"
 #include "PillarGame/PillarGameComponents.h"
-#include <DirectX/XTK/Inc/SimpleMath.h>
+#include "NetworkingGame/BallBouncerGame.h" 
+#include "Tools/Utilities/Math.hpp" 
 
 #include "Tools/ImGui/crude_json.h"
 #include "Tools/Utilities/LinearAlgebra/Easing.h"
@@ -45,7 +46,10 @@ void YourGameLauncher::Init() {
 			light.SetPower(4.0f);
 			light.BindDirectionToTransform(true);
 		}
+		BallEradicationGame::MakeArena(Vector3f(),rect);
 
+
+		#ifdef PillarGame
 		constexpr float pillarRadius = 1.0f;
 		auto            groundPos = Vector3f(0,-.5f,0);
 		SpawnGround(groundPos);
@@ -53,21 +57,88 @@ void YourGameLauncher::Init() {
 		auto pillarTransform = SpawnPillar(groundPos);
 		SpawnHooks(50,pillarRadius,pillarTransform);
 		SpawnPlayer(0,pillarRadius,pillarTransform);
+		#endif
 	}
 }
 
 void YourGameLauncher::Start() {
 	OPTICK_EVENT();
 	LOGGER.Log("GameLauncher start");
-	GraphicsEngineInstance.debugDrawer.AddDebugBox({-1, -1, -1},{1, 1, 1});
+	GraphicsEngineInstance.debugDrawer.AddDebugBox({-1,-1,-1},{1,1,1});
 }
- 
+
 
 void YourGameLauncher::Update(float delta) {
 	OPTICK_EVENT();
 	UNREFERENCED_PARAMETER(delta);
-	auto& manager = Scene::activeManager();
+	if(!Runner.HasStateAuthority)
+	{
+		return;
+	}
 
+	auto& manager = Scene::activeManager();
+	manager;
+
+	for(auto& ball : manager.GetAllComponents<BallTag>())
+	{
+		//Check collisions 
+		const auto& sphere1 = ball.GetComponent<Collider>().GetColliderAssetOfType<ColliderAssetSphere>()->sphere();
+		for(const auto& otherBall : manager.GetAllComponents<BallTag>())
+		{
+			if(ball.gameObject() == otherBall.gameObject())
+			{
+				continue;
+			}
+
+			const auto& sphere2 = otherBall.GetComponent<Collider>().GetColliderAssetOfType<ColliderAssetSphere>()->sphere();
+			if((ball.transform().GetPosition() - otherBall.transform().GetPosition()).Length() < sphere1.GetRadius() + sphere2.GetRadius())
+			{
+				manager.DeleteGameObject(otherBall.gameObject());
+				manager.DeleteGameObject(ball.gameObject());
+				break;
+			}
+		}
+		auto ballPosition = ball.transform().GetPosition();
+		auto& kinematic = ball.GetComponent<cPhysics_Kinematic>();
+
+		float speedup = 1.10f;
+		if(ballPosition.x > rect.x && kinematic.ph_velocity.x > 0)
+		{
+			kinematic.ph_velocity.x = std::copysign(kinematic.ph_velocity.x,-1.0f);
+			kinematic.ph_velocity*=speedup;
+		}
+
+		if(ballPosition.x < -rect.x && kinematic.ph_velocity.x < 0)
+		{
+			kinematic.ph_velocity.x = std::copysign(kinematic.ph_velocity.x,1.0f);
+			kinematic.ph_velocity*=speedup;
+		}
+
+		if(ballPosition.z > rect.z && kinematic.ph_velocity.z > 0)
+		{
+			kinematic.ph_velocity.z = std::copysign(kinematic.ph_velocity.z,-1.0f);
+			kinematic.ph_velocity*=speedup;
+		}
+
+		if(ballPosition.z < -rect.z && kinematic.ph_velocity.z < 0)
+		{
+			kinematic.ph_velocity.z = std::copysign(kinematic.ph_velocity.z,1.0f);
+			kinematic.ph_velocity*=speedup;
+		}
+	}
+
+	auto ballDiff = amountOfBalls - manager.GetAllComponents<BallTag>().size();
+	ballSpawnTimer -= delta;
+	if(ballDiff > 0 && ballSpawnTimer < 0){
+		ballSpawnTimer = ballSpawnCooldown;
+		Vector3f position;
+		position.x = Math::RandomEngine::randomInRange(-rect.x,rect.x);
+		position.z = Math::RandomEngine::randomInRange(-rect.z,rect.z);
+		BallEradicationGame::MakeBall(position);
+	}
+
+
+	#ifdef PillarGame 
 	static Vector3f lerpPos;
 	static Vector3f lerpRot;
 	for(auto& element : manager.GetAllComponents<PlayerComponent>()) {
@@ -89,7 +160,7 @@ void YourGameLauncher::Update(float delta) {
 				const auto q = Quaternionf::LookAt(hookToCenter,Vector3f::up());
 
 				rotation.y = lerp(lerpRot.y,q.GetEulerAngles().y,percentage);
-				element.transform().SetRotation(rotation); 
+				element.transform().SetRotation(rotation);
 				return;
 			}
 		}
@@ -111,7 +182,7 @@ void YourGameLauncher::Update(float delta) {
 			const auto coord = EDITOR_INSTANCE.GetMainViewport()->getCursorInWindowPostion();
 			const auto position = cameraTransform.GetPosition(WORLD);
 			const auto direction = camera.GetPointerDirection(coord);
-			const bool raycastHit = Raycast(position,direction,hit); 
+			const bool raycastHit = Raycast(position,direction,hit);
 			auto* hook = raycastHit ? hit.objectHit.TryGetComponent<HookComponent>() : nullptr;
 
 			if(hook && !hook->hasConnection) {
@@ -135,6 +206,7 @@ void YourGameLauncher::Update(float delta) {
 			}
 		}
 	}
+	#endif
 }
 
 #pragma optimize( "", on )
@@ -153,21 +225,21 @@ extern "C" BOOL WINAPI DllMain(const HINSTANCE instance, // handle to DLL module
 	// Perform actions based on the reason for calling.
 	switch(reason) {
 	case DLL_PROCESS_ATTACH:
-		// Initialize once for each new process.
-		// Return FALSE to fail DLL load.
-		break;
+	// Initialize once for each new process.
+	// Return FALSE to fail DLL load.
+	break;
 
 	case DLL_THREAD_ATTACH:
-		// Do thread-specific initialization.
-		break;
+	// Do thread-specific initialization.
+	break;
 
 	case DLL_THREAD_DETACH:
-		// Do thread-specific cleanup.
-		break;
+	// Do thread-specific cleanup.
+	break;
 
 	case DLL_PROCESS_DETACH:
-		// Perform any necessary cleanup.
-		break;
+	// Perform any necessary cleanup.
+	break;
 	}
 	return TRUE; // Successful DLL_PROCESS_ATTACH.
 }

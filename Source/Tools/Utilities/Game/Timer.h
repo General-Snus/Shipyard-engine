@@ -9,7 +9,7 @@ class Timer : public Singleton
 {
 public:
 	void                 initialize();
-	void                 update();
+	void                 Update();
 	[[nodiscard]] float  getDeltaTime() const;
 	float                getUnscaledDeltaTime();
 	[[nodiscard]] double getTotalTime() const;

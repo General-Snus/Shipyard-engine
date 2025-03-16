@@ -162,6 +162,15 @@
     <ClInclude Include="DataStructures\Iterator.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="uuidv4\uuid_v4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="uuidv4\endianness.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="uuidv4\uuid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game\Camera.cpp">

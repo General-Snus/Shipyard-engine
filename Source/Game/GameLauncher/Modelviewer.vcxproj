@@ -272,12 +272,14 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="NetworkingGame\BallBouncerGame.h" />
     <ClInclude Include="PillarGame\PillarGameComponents.h" />
     <ClInclude Include="ShipyardEngine.pch.h" />
     <ClInclude Include="Core\GameLauncher.h" />
     <ClInclude Include="UserComponent.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="NetworkingGame\BallBouncerGame.cpp" />
     <ClCompile Include="PillarGame\PillarGameComponents.cpp" />
     <ClCompile Include="ShipyardEngine.pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

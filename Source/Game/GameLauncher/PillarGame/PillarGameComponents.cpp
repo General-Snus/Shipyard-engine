@@ -2,7 +2,8 @@
 
 #include "PillarGameComponents.h"
 #include <Engine/AssetManager/GameResourcesLoader.h>
-
+namespace PillarGame
+{
 GameObject SpawnPillar(Vector3f base) {
 	GameObject pillar = GameObject::Create("Pillar");
 	auto& renderer = pillar.AddComponent<MeshRenderer>("Models/PillarClimb/Pillar.fbx");
@@ -99,4 +100,6 @@ void SpawnPlayer(int id,float radius,GameObject parent) {
 	camera.transform().SetParent(player.transform());
 	camera.transform().SetPosition(0,0,-2);
 	player.AddComponent<PlayerComponent>();
+}
+
 }

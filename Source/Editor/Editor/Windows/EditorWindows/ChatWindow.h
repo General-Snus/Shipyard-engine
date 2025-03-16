@@ -12,6 +12,7 @@ class ChatWindow : public EditorWindow
     void RenderImGUi() override;
 
   private:
-    std::vector<std::string> m_ChatMessages;
+    std::vector<std::string> m_ChatMessages; 
     std::string currentMessage;
+    std::string userHandle;
 }; 

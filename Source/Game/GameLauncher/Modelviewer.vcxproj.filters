@@ -30,6 +30,9 @@
     <ClInclude Include="PillarGame\PillarGameComponents.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="NetworkingGame\BallBouncerGame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\GameLauncher.cpp">
@@ -42,6 +45,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PillarGame\PillarGameComponents.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetworkingGame\BallBouncerGame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

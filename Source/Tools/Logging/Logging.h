@@ -92,7 +92,7 @@ public:
 
 	void Err(const std::string&          aString, bool withNotice = false,
 	         const std::source_location& location = std::source_location::current());
-
+ 
 	void ErrTrace(const std::string&          aString, bool withNotice = false,
 	              const std::stacktrace&      trace = std::stacktrace::current(),
 	              const std::source_location& location = std::source_location::current());

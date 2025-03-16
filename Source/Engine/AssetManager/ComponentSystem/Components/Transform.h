@@ -13,6 +13,7 @@ enum eSpace {
 
 // LEFTHANDED X RIGHT Y UP Z FORWARD AS GOD INTENDED
 class Transform : public Component {
+	friend class ReplicationLayer;
 public:
 	ReflectableTypeRegistration();
 	Transform() = delete;

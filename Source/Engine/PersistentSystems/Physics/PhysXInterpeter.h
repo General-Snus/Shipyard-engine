@@ -32,8 +32,8 @@ class Mesh;
 #define usingLegacyDebugger true
 class Shipyard_PhysX : public Singleton {
 private:
-	physx::PxDefaultAllocator* gAllocator;
-	physx::PxDefaultErrorCallback* gErrorCallback;
+	physx::PxDefaultAllocator* gAllocator{};
+	physx::PxDefaultErrorCallback* gErrorCallback{};
 	physx::PxFoundation* gFoundation{};
 	physx::PxPhysics* gPhysics{};
 	physx::PxDefaultCpuDispatcher* gDispatcher{};

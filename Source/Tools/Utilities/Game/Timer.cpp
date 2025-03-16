@@ -10,7 +10,7 @@ void Timer::initialize()
 	myDeltaTime = 0.0f;
 }
 
-void Timer::update()
+void Timer::Update()
 {
 	OPTICK_EVENT();
 	myDeltaTime =

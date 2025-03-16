@@ -6,6 +6,7 @@
 #include <Engine/PersistentSystems/Scene.h>
 #include <Tools/Logging/Logging.h>
 #include <Engine/PersistentSystems/Physics/PhysXInterpeter.h>
+#include "Engine\PersistentSystems\System\SystemBase.h"
 
 GameState::GameState() = default;
 
@@ -117,6 +118,9 @@ void GameState::Update(float delta) {
 		}
 
 		if(m_GameLauncher && !IsPaused && IsPlaying) {
+
+			Scene::activeManager().Update();
+			SystemCollection::UpdateSystems(delta);
 			m_GameLauncher->Update(delta);
 		}
 	} catch(const std::exception& e) {

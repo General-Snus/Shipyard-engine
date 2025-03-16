@@ -270,14 +270,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ArtificialInteligence\AICommands\AICommands.h" />
-    <ClInclude Include="Networking\Client.h" />
-    <ClInclude Include="Networking\NetMessage\ChatMessage.h" />
-    <ClInclude Include="Networking\NetMessage\HandshakeMessage.h" />
+    <ClInclude Include="Networking\Remote.h" />
+    <ClInclude Include="Networking\NetMessage\StringMessages.h" />
     <ClInclude Include="Networking\NetMessage\NetMessage.h" />
     <ClInclude Include="Networking\NetMessage\PlayerSyncMessage.h" />
-    <ClInclude Include="Networking\NetMessage\QuitMessage.h" />
     <ClInclude Include="Networking\NetworkStructs.h" />
-    <ClInclude Include="Networking\Server.h" />
+    <ClInclude Include="Networking\NetworkRunner.h" />
+    <ClInclude Include="Networking\ReplicationLayer.h" />
     <ClInclude Include="System\Networked\NetworkedUpdate.h" />
     <ClInclude Include="System\Colission\OnCollision.h" />
     <ClInclude Include="PersistentSystems.pch.h" />
@@ -290,14 +289,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ArtificialInteligence\AICommands\Source\AICommands.cpp" />
-    <ClCompile Include="Networking\Source\Client.cpp" />
-    <ClCompile Include="Networking\NetMessage\ChatMessage.cpp" />
-    <ClCompile Include="Networking\NetMessage\HandshakeMessage.cpp" />
+    <ClCompile Include="Networking\Source\Remote.cpp" />
+    <ClCompile Include="Networking\NetMessage\StringMessages.cpp" />
     <ClCompile Include="Networking\NetMessage\NetMessage.cpp" />
     <ClCompile Include="Networking\NetMessage\PlayerSyncMessage.cpp" />
-    <ClCompile Include="Networking\NetMessage\QuitMessage.cpp" />
     <ClCompile Include="Networking\Source\NetworkStructs.cpp" />
-    <ClCompile Include="Networking\Source\Server.cpp" />
+    <ClCompile Include="Networking\Source\NetworkRunner.cpp" />
+    <ClCompile Include="Networking\Source\ReplicationLayer.cpp" />
     <ClCompile Include="System\Networked\Source\NetworkedUpdate.cpp" />
     <ClCompile Include="PersistentSystems.pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

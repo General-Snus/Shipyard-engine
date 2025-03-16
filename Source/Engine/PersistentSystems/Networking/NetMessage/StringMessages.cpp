@@ -1,3 +1,3 @@
 ﻿#include "PersistentSystems.pch.h"
 
-#include "QuitMessage.h"
+#include "StringMessages.h"

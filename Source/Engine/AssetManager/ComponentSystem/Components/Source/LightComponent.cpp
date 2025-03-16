@@ -591,7 +591,7 @@ void Light::RedrawShadowMap()
 void Light::RedrawDirectionMap()
 {
 	OPTICK_EVENT();
-	constexpr float radius = 50;
+	constexpr float radius = 100; // todo what the hell where you thinking
 	myDirectionLightData->Direction.Normalize();
 
 	const Vector3f worldCenter = {};

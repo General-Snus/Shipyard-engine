@@ -1,5 +1,6 @@
 #pragma once
 #include <Tools/Utilities/TemplateHelpers.h>
+#include <Tools/Utilities/uuidv4/uuid.h>
 #define DEFAULT_PORT 27015
 #define LOCALHOST "127.0.0.1"
 class NetMessage;
@@ -8,6 +9,32 @@ struct NetAddress;
 struct SessionConfiguration;
 struct sockaddr;
 struct sockaddr_in;
+
+struct NetworkedId {
+	static NetworkedId Generate();
+
+	NetworkedId(); 
+	explicit NetworkedId(uuid::v4::UUID id) : id(id) {};
+	uuid::v4::UUID id;
+
+	//std::strong_ordering operator<=>(const NetworkedId& other) const {
+	//	return id <=> other.id;
+	//}
+	//
+	// Custom equality operator
+	bool operator==(const NetworkedId& other) const { return id == other.id; };
+	
+	// Custom assignment operator
+	NetworkedId& operator=(const uuid::v4::UUID& uuid) {
+		id = uuid;
+		return *this;
+	}
+
+};
+ static_assert(std::is_trivially_copyable<NetworkedId>::value, "NetworkedId must be trivially copyable");
+static_assert(std::is_trivially_copyable<uuid::v4::UUID>::value, "UUIDv4::UUID be trivially copyable");
+ 
+ 
 
 //All value in here should be network byte order or whatever that means
 struct NetAddress {
@@ -18,7 +45,7 @@ struct NetAddress {
 
 	NetAddress();
 	NetAddress(const std::string& Ip,unsigned short port,AddressFamily family = AddressFamily::ipv4);
-	std::string IPStr();
+	std::string IPStr() const;
 	sockaddr_in as_sockaddr_in() const;
 	sockaddr as_sockaddr() const;
 

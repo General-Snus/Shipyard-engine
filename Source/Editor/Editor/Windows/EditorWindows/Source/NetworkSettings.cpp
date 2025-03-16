@@ -3,7 +3,7 @@
 #include "imgui.h"
 #include "ImGuiHelpers.hpp"
 #include <format>
-#include <Engine/PersistentSystems/Networking/Server.h>
+#include <Engine/PersistentSystems/Networking/NetworkRunner.h>
 #include <WinSock2.h>
 
 
@@ -70,14 +70,13 @@ Here you can adjust network settings to your liking or something.
 
 		break;
 	}
-	if(ImGui::Button("Attempt connection")) {
-		Runner.close();
+	if(ImGui::Button("Attempt connection")) { 
 		Runner.StartSession(cfg);
 	}
 
 	ImGui::SameLine();
 	if(ImGui::Button("Close Connection")) {
-		Runner.close();
+		Runner.Close();
 	}
 
 	ImGui::Separator();
@@ -86,16 +85,25 @@ Here you can adjust network settings to your liking or something.
 
 	if(Runner.IsServer) {
 		ImGui::Text("-Remotes\n");
-		for(size_t i = 0; i < Runner.clients.size(); i++) {
-			const auto& client = Runner.clients[i];
+		for(size_t i = 0; i < Runner.remoteConnections.size(); i++) {
+			const auto& client = Runner.remoteConnections[i];
 			if(!client.isConnected) { continue; }
 
+			auto timeSince = std::chrono::duration_cast<std::chrono::seconds>((std::chrono::system_clock::now() - client.lastRecievedMessageTime));
 			ImGui::Text(std::format(
 				R"(
 			Client[{}]:
+				Nickname: {} 
+				UUID: {} 
 				IP: {} 
+				Time since last message: {} sec
 			)"
-				,i,client.remoteConnection.Address().IPStr()).c_str());
+				,i,
+				client.nickname,
+				client.id.id.String(),
+				client.remoteConnection.Address().IPStr(),
+				timeSince.count()
+				).c_str());
 		}
 	}
 

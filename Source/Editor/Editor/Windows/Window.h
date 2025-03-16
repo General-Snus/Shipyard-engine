@@ -30,8 +30,11 @@ class Window : public Singleton
 	unsigned int Height() const;
 	Vector2ui Resolution() const;
 
-    HINSTANCE moduleHandler;
-    HWND windowHandler;
+	bool SetWindowsTitle(const std::string& titleName) const;
+	std::string GetWindowsTitle() const;
+
+    HINSTANCE moduleHandler{};
+	HWND windowHandler{};
     // Cred goes to adira guy on reddit for wonderfull code
     std::function<void(const MSG &msg)> callback = nullptr;
 };

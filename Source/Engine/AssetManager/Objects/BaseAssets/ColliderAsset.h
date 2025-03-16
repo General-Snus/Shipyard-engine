@@ -121,6 +121,8 @@ class ColliderAssetSphere : public ColliderAsset
     explicit ColliderAssetSphere();
     explicit ColliderAssetSphere(const Sphere<float> &rf);
     void RenderDebugLines(Transform &data) override;
+    Sphere<float>& sphere() { return mySphere; };
+
 
   private:
     Sphere<float> mySphere;

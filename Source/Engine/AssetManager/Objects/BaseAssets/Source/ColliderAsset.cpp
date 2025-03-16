@@ -69,13 +69,12 @@ void ColliderAssetSphere::RenderDebugLines(Transform& data) {
 
 	myHandles.clear();
 
-	const Vector3f min = Vector3f(-1.0f,-1.0f,-1.0f).GetNormalized();
-	const Vector3f max = Vector3f(1.0f,1.0f,1.0f).GetNormalized();
-
-	// Velocity
+	const Vector3f min = Vector3f(-1.0f,-1.0f,-1.0f);
+	const Vector3f max = Vector3f(1.0f,1.0f,1.0f);
+	 
 	const DebugDrawer::PrimitiveHandle handle = GraphicsEngineInstance.debugDrawer.AddDebugBox(
-		mySphere.GetCenter() + data.GetPosition() + min * mySphere.GetRadius(),
-		mySphere.GetCenter() + data.GetPosition() + max * mySphere.GetRadius());
+		min * mySphere.GetRadius(),
+		max * mySphere.GetRadius());
 	GraphicsEngineInstance.debugDrawer.SetDebugPrimitiveTransform(handle,data.LocalMatrix());
 	myHandles.push_back(handle);
 }

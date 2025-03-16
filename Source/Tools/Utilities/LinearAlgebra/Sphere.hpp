@@ -4,18 +4,11 @@
 template <class T>
 class Sphere
 {
-public:
-	// Default constructor: there is no sphere, the radius is zero and the position is
-	// the zero vector.
-	Sphere();
-	// Copy constructor.
-	Sphere(const Sphere<T>& aSphere);
-	// Constructor that takes the center position and radius of the sphere.
-	Sphere(const Vector3<T>& aCenter, T aRadius);
-	// Init the sphere with a center and a radius, the same as the constructor above.
-	void InitWithCenterAndRadius(const Vector3<T>& aCenter, T aRadius);
-	// Returns whether a point is inside the sphere: it is inside when the point is on the
-	// sphere surface or inside of the sphere.
+public: 
+	Sphere(); 
+	Sphere(const Sphere<T>& aSphere); 
+	Sphere(const Vector3<T>& aCenter, T aRadius); 
+	void InitWithCenterAndRadius(const Vector3<T>& aCenter, T aRadius); 
 	bool       IsInside(const Vector3<T>& aPosition) const;
 	Vector3<T> GetCenter() const;
 	T          GetRadius() const;
@@ -42,7 +35,7 @@ template <class T>
 Sphere<T>::Sphere()
 {
 	Center = Vector3<T>(0, 0, 0);
-	Radius = 0;
+	Radius = 1;
 }
 
 template <class T>

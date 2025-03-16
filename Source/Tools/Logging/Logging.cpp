@@ -179,6 +179,7 @@ void LoggerService::Err(const std::string &aString, bool withNotice, const std::
 				   << location.function_name() << std::endl;
 	}
 }
+
 void LoggerService::ErrTrace(const std::string &aString, bool withNotice, const std::stacktrace &trace,
 							 const std::source_location &location)
 {

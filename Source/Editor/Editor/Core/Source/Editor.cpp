@@ -619,13 +619,11 @@ std::shared_ptr<Viewport> Editor::GetMainViewport() {
 
 void Editor::Update() {
 	OPTICK_EVENT();
-	TimerInstance.update();
+	TimerInstance.Update();
 	const float delta = TimerInstance.getDeltaTime();
 
 	Shipyard_PhysXInstance.StartRead();
-	Runner.update();
-	Scene::activeManager().Update();
-	SystemCollection::UpdateSystems(delta);
+	Runner.Update();
 
 	// Editor key checks
 	if(Input.IsKeyPressed(Keys::F) && m_SelectedGameObjects.size() > 0) {

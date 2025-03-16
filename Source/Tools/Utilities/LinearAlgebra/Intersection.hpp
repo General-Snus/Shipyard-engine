@@ -281,7 +281,7 @@ bool IntersectionSphereRay(const Sphere<T>& aSphere, const Ray<T>& aRay)
 	}
 	return false;
 }
-
+ 
 template <class T>
 bool IntersectionCircleRay(const Circle<T>& aCircle, const Ray2d<T>& aRay)
 {
