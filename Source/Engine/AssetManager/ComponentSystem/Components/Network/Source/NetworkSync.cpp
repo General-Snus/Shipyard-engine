@@ -28,8 +28,4 @@ void NetworkObject::DisperseNetMessage(const NetMessage& netMessageForIndividual
 
 NetworkTransform::NetworkTransform(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager)
 {}
-
-bool NetworkTransform::InspectorView()
-{
-	return false;
-}
+ 

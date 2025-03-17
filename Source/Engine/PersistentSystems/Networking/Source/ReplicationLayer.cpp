@@ -1,7 +1,8 @@
 #include "PersistentSystems.pch.h"
 #include "../ReplicationLayer.h"
+#include "../NetworkRunner.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
-#include "Networking\NetMessage\PlayerSyncMessage.h"
+#include "Networking/NetMessage/PlayerSyncMessage.h"
 
 void ReplicationLayer::fixedNetworkUpdate(NetworkRunner & runner)
 {
@@ -10,6 +11,7 @@ void ReplicationLayer::fixedNetworkUpdate(NetworkRunner & runner)
 		server_fixedNetworkUpdate(runner);
 	} else
 	{
+		client_ReadIncoming(runner);
 		client_fixedNetworkUpdate(runner);
 	}
 }
@@ -19,10 +21,10 @@ void ReplicationLayer::server_fixedNetworkUpdate(NetworkRunner & runner)
 	auto now = std::chrono::steady_clock::now();
 	for(auto& networkedTransform : Scene::activeManager().GetAllComponents<NetworkTransform>())
 	{
-		auto& transform = networkedTransform.transform(); 
+		auto& transform = networkedTransform.transform();
 		networkedTransform.myPosition = transform.myPosition;
-		networkedTransform.myQuaternion= networkedTransform.myQuaternion;
-		networkedTransform.myScale = networkedTransform.myScale;
+		networkedTransform.myQuaternion= transform.myQuaternion;
+		networkedTransform.myScale = transform.myScale;
 
 		TransformSyncData data{
 			networkedTransform.myPosition,
@@ -33,12 +35,12 @@ void ReplicationLayer::server_fixedNetworkUpdate(NetworkRunner & runner)
 		TransformSyncMessage composedTransformUpdate;
 		composedTransformUpdate.SetMessage(data);
 		runner.Broadcast(composedTransformUpdate,NetworkConnection::Protocol::UDP);
-
 	}
 }
 
-void ReplicationLayer::client_fixedNetworkUpdate(const NetworkRunner & runner)
+void ReplicationLayer::client_fixedNetworkUpdate(const NetworkRunner & runner) const
 {
+	runner;
 	auto now = std::chrono::steady_clock::now(); //switch out to server time
 	for(auto& networkedTransform : Scene::activeManager().GetAllComponents<NetworkTransform>())
 	{
@@ -71,4 +73,28 @@ void ReplicationLayer::client_fixedNetworkUpdate(const NetworkRunner & runner)
 	//{
 	//
 	//}
+}
+
+void ReplicationLayer::client_ReadIncoming(const NetworkRunner & runner)
+{
+	if(!runner.messagesMap.contains(eNetMessageType::TransformSyncMessage))
+	{
+		return;
+	}
+
+	for(auto& i : runner.messagesMap.at(eNetMessageType::TransformSyncMessage))
+	{
+		i;
+	}
+}
+
+void ReplicationLayer::receiveMessage(const NetMessage &)
+{
+
+}
+
+bool ReplicationLayer::registerObject(const NetworkObject & object)
+{
+	object;
+	return false;
 }

@@ -126,9 +126,16 @@ NetworkConnection::Status NetworkRunner::StartSession(SessionConfiguration confi
 								  {
 									  this->collectReceivedMessages(s,NetworkConnection::Protocol::UDP);
 								  });
+
+
 	}
 
 	return status;
+}
+
+void NetworkRunner::Test()
+{
+
 }
 
 void NetworkRunner::Update()
@@ -141,6 +148,8 @@ void NetworkRunner::Update()
 	//}
 
 	moveMessageMapToRead();
+
+	layer.fixedNetworkUpdate(*this);
 
 	if(!IsServer) { return; }
 
@@ -226,8 +235,8 @@ void NetworkRunner::ProcessIncoming(const eNetMessageType& type,NetworkRunner::R
 		break;
 	case eNetMessageType::TransformSyncMessage:
 	{
-		const auto          message = std::bit_cast<PlayerSyncMessage>(incomingMessage.message);
-		PlayerSyncData data = message.ReadMessage();
+		//const auto          message = std::bit_cast<PlayerSyncMessage>(incomingMessage.message);
+		//PlayerSyncData data = message.ReadMessage();
 
 		// std::cout << data.position << '\n' << data.rotation << '\n' << data.scale << '\n';
 

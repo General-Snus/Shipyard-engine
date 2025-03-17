@@ -52,7 +52,7 @@ void ChatWindow::RenderImGUi() {
 
 	if(const std::string message = currentMessage.data();
 		(ImGui::Button("Send") || Input.IsKeyPressed(Keys::RETURN)) && !message.empty()) {
-		ImGui::SetKeyboardFocusHere(-2);
+		ImGui::SetKeyboardFocusHere(-1);
 		ChatMessage msg;
 		msg.SetMessage(message);
 		Runner.Send(msg,NetworkConnection::Protocol::TCP);

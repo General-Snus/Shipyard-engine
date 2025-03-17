@@ -11,6 +11,7 @@ namespace uuid::v4
     // A Version 4 UUID is a universally unique identifier that is generated using random numbers.
     class UUID
     {
+		friend struct std::hash<uuid::v4::UUID>;
     public:
         // Factory method for creating UUID object.
         static UUID New()
@@ -65,4 +66,17 @@ namespace uuid::v4
     };
 };
 
-#endif // #ifndef __UUID__
+namespace std {
+template <>
+struct hash<uuid::v4::UUID> {
+	std::size_t operator()(const uuid::v4::UUID& uuid) const {
+		std::size_t seed = 0;
+		for(const auto& byte : uuid._data) {
+			seed ^= std::hash<unsigned char>{}(byte)+ 0x9e3779b9 + (seed << 6) + (seed >> 2);
+		}
+		return seed;
+	}
+};
+}
+
+#endif

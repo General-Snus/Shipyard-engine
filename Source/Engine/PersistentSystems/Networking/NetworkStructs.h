@@ -28,12 +28,20 @@ struct NetworkedId {
 	NetworkedId& operator=(const uuid::v4::UUID& uuid) {
 		id = uuid;
 		return *this;
-	}
-
+	} 
 };
- static_assert(std::is_trivially_copyable<NetworkedId>::value, "NetworkedId must be trivially copyable");
+
+static_assert(std::is_trivially_copyable<NetworkedId>::value, "NetworkedId must be trivially copyable");
 static_assert(std::is_trivially_copyable<uuid::v4::UUID>::value, "UUIDv4::UUID be trivially copyable");
  
+namespace std {
+template <>
+struct hash<NetworkedId> {
+	std::size_t operator()(const NetworkedId& networkedId) const {
+		return std::hash<uuid::v4::UUID>{}(networkedId.id);
+	}
+};
+}
  
 
 //All value in here should be network byte order or whatever that means

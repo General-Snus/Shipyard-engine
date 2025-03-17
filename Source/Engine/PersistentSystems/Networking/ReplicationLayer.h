@@ -1,24 +1,29 @@
 #pragma once
-#include "Engine\AssetManager\ComponentSystem\Components\Network\NetworkSync.h"
-#include "NetworkRunner.h"
+#include "Engine/AssetManager/ComponentSystem/Components/Network/NetworkSync.h"
+#include <unordered_map>
+#include <utility>
+#include "NetMessage/NetMessage.h"
+#include "NetworkStructs.h"
+
+class NetworkRunner;
 
 class ReplicationLayer
 { 
 	using IdToObject = std::pair<NetworkedId,NetworkObject>;
-
+public:
 
 	//Fixed network update contains the component updates in the server
 	void fixedNetworkUpdate(NetworkRunner& runner);
 	void server_fixedNetworkUpdate(NetworkRunner& runner); 
 	// Transform Example: looks at transform, sets networktransform to same and copies data, ensures that its object exists
-	//It then sends the udp messages of its new information
-
+	//It then sends the udp messages of its new information 
 	
 	// looks at its network transform data and applies interpolation on it
-	void client_fixedNetworkUpdate(const NetworkRunner& runner); 
+	void client_fixedNetworkUpdate(const NetworkRunner& runner) const; 
+	void client_ReadIncoming(const NetworkRunner& runner); 
 
 	//If the id to the object does not exist then we need to create it, in case that we are the server
-	void recieveMessage(const NetMessage&);
+	void receiveMessage(const NetMessage&);
 
 	//Registers a object to the map, made on the server
 	bool registerObject (const NetworkObject& object);

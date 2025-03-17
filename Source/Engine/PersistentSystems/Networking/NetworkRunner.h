@@ -1,15 +1,17 @@
 #pragma once
-#include <string>  
 #include <Tools/Utilities/TemplateHelpers.h>
 #include <Tools/Utilities/System/SingletonTemplate.h>
 #include <Engine/PersistentSystems/Networking/NetMessage/NetMessage.h>
 #include "Engine/PersistentSystems/Networking/Remote.h"
-#include "Engine/PersistentSystems/Networking/NetworkStructs.h"  
+#include "Engine/PersistentSystems/Networking/NetworkStructs.h"
+#include <Tools/Utilities/DataStructures/Queue.hpp>
+#include "ReplicationLayer.h"
+
 #include <unordered_map>
 #include <thread>
+#include <string>
 #include <mutex>
 #include <span>
-#include <Tools/Utilities/DataStructures/Queue.hpp>
 
 #define Runner ServiceLocator::Instance().GetService<NetworkRunner>()
 class NetworkRunner : public Singleton {
@@ -32,6 +34,7 @@ public:
 
 	~NetworkRunner();
 	NetworkConnection::Status StartSession(SessionConfiguration configuration);
+	void Test();
 	void Update();
 	void ProcessIncoming(const eNetMessageType& type,NetworkRunner::RecievedMessage& incomingMessage);
 	void Close();

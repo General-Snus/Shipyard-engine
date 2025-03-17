@@ -38,7 +38,7 @@ NetworkConnection::Status NetworkConnection::StartAsServer(NetAddress serverAddr
 	if(bind(UDPSocket,&server,sizeof(server)) == SOCKET_ERROR)
 	{
 		LOGGER.ErrC("Failed to bind UPD: ",WSAGetLastError());
-		Close();
+		Close(); 
 		status = failed;
 		return status;
 	}

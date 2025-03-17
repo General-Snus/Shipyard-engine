@@ -6,6 +6,7 @@
 #include <memory>
 #include <unordered_set>
 #include "Engine/PersistentSystems/Networking/NetworkStructs.h"
+#include "Tools/Utilities/LinearAlgebra/Quaternions.hpp"
 
 //Existance sync
 class NetworkObject : public Component
@@ -38,12 +39,12 @@ public:
     NetworkTransform(const SY::UUID anOwnerId,GameObjectManager* aManager); 
 
 	std::chrono::time_point<std::chrono::high_resolution_clock> updatePoint;
-	Vector3<float> myPosition{}; // Update from server
-	Quaternionf    myQuaternion{}; // Update from server
-	Vector3<float> myScale = Vector3f(1,1,1); // Update from server
+	Vector3f myPosition; // Update from server
+	Quaternionf    myQuaternion; // Update from server
+	Vector3f myScale = Vector3f(1,1,1); // Update from server
 
-	Vector3<float> translationInterpolation{}; // Update on client whenever new message
-	Quaternionf    myQuaternion{}; // Update on client whenever new message
+	Vector3f translationInterpolation; // Update on client whenever new message
+	Quaternionf    rotationInterpolation; // Update on client whenever new message
 
 	NetworkedId GetServerID() const
 	{
