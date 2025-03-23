@@ -15,6 +15,7 @@
 #include <vector>
 #include <string>
 #include <thread>
+#include <chrono>
 
 #include <Tools/Logging/Logging.h>
 #include <Tools/Reflection/refl.hpp>

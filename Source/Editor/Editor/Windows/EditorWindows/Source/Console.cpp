@@ -18,7 +18,7 @@ void Console::RenderImGUi() {
 				return style.Colors[ImGuiCol_Button];
 			}
 			return style.Colors[ImGuiCol_ButtonActive];
-			};
+		};
 
 		if(ImGui::ColorButton("All",getButtonColor(filter,All))) {
 			if(filter == All) {
@@ -29,7 +29,7 @@ void Console::RenderImGUi() {
 			}
 		}
 		ImGui::SameLine();
-		ImGui::Text(std::format("All: {}",buffer.LoggedMessages.size()).c_str());
+		ImGui::Text(std::format("All: {}",buffer.messagesCount +buffer.warnCount + buffer.errCount + buffer.criticalCount + buffer.successCount).c_str());
 		ImGui::SameLine();
 
 		ImGui::ColorButton("Messages:",getButtonColor(filter,message)) ? filter ^= message : none;
@@ -58,14 +58,18 @@ void Console::RenderImGUi() {
 		ImGui::SameLine();
 
 		if(ImGui::Button("Clear")) {
+			std::scoped_lock lock(LOGGER.mutexLock());
 			LOGGER.Clear();
 			pickedMessage = LoggerService::LogMsg();
 		}
 
-		const Vector2f spaceAvail = {ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.75f};
+		const Vector2f spaceAvail = {ImGui::GetContentRegionAvail().x,ImGui::GetContentRegionAvail().y * 0.75f};
 		if(ImGui::BeginChild("ScrollingRegion",static_cast<ImVec2>(spaceAvail))) {
-			for(const auto& [index,logEntity] : buffer.LoggedMessages | std::ranges::views::enumerate) {
+			int index = 0;
+			std::scoped_lock lock(LOGGER.mutexLock());
+			for(const auto& logEntity : buffer.LoggedMessages) {
 				const auto& [type,message,trace] = logEntity;
+				index ++;
 
 				if(message.empty() || (filter & type) == none) {
 					continue;
@@ -75,7 +79,7 @@ void Console::RenderImGUi() {
 				const auto    color = logColor.GetRGBA();
 				const ImVec4& textColor = color;
 				ImGui::PushStyleColor(ImGuiCol_Text,textColor);
-				Vector2f space = {ImGui::GetContentRegionAvail().x, ImGui::GetTextLineHeight()};
+				Vector2f space = {ImGui::GetContentRegionAvail().x,ImGui::GetTextLineHeight()};
 
 				ImGui::Separator();
 				auto textBeginCursor = ImGui::GetCursorPos();

@@ -47,6 +47,13 @@ void GameState::StartPlaySession() {
 	m_GameScene->merge(*m_EditorBackupScene);
 	EDITOR_INSTANCE.SetActiveScene(m_GameScene);
 
+
+	SessionConfiguration config = {
+		SessionConfiguration::GameMode::AutoHostOrClient
+	};
+
+	Runner.StartSession(config);
+
 	// If you start here, all the copied gameobjects now point to the wrong scene and causes issue
 	IsLoading = true;
 	AttemptDllLoad();
@@ -54,8 +61,9 @@ void GameState::StartPlaySession() {
 }
 
 void GameState::EndPlaySession() {
-	EDITOR_INSTANCE.SetActiveScene(m_EditorBackupScene);
+	Runner.Close();
 
+	EDITOR_INSTANCE.SetActiveScene(m_EditorBackupScene);
 	if(m_GameScene) {
 		m_GameScene->unload(); 
 	}
@@ -117,8 +125,8 @@ void GameState::Update(float delta) {
 			Start();
 		}
 
-		if(m_GameLauncher && !IsPaused && IsPlaying) {
-
+		if(m_GameLauncher && !IsPaused && IsPlaying) { 
+			Runner.Update();
 			Scene::activeManager().Update();
 			SystemCollection::UpdateSystems(delta);
 			m_GameLauncher->Update(delta);

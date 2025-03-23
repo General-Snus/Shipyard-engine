@@ -24,11 +24,14 @@ std::string LoggerService::Timestamp()
 	return result.str();
 }
 
+LoggerService::LoggerService() = default;
+
 bool LoggerService::Create()
 {
 	isInitialized = true;
 	SetConsoleHandle(GetConsoleWindow());
 	Success("Logging started");
+	LOGGER.m_Buffer.LoggedMessages.resize(maxsize+1);
 	return true;
 }
 
@@ -361,7 +364,7 @@ void LoggerService::NewLine()
 }
 
 void LoggerService::Clear()
-{
+{ 
 	m_Buffer.LoggedMessages.clear();
 	m_Buffer.criticalCount = 0;
 	m_Buffer.errCount = 0;

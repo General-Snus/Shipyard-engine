@@ -11,10 +11,6 @@ NetworkSettings::NetworkSettings() {}
 
 void NetworkSettings::RenderImGUi() {
 	ImGui::Begin(std::format("Network settings##{}",uniqueID).c_str(),&m_KeepWindow);
-
-
-
-
 	ImGui::Markdown(R"(
 # Network settings
 Here you can adjust network settings to your liking or something.
@@ -89,20 +85,24 @@ Here you can adjust network settings to your liking or something.
 			const auto& client = Runner.remoteConnections[i];
 			if(!client.isConnected) { continue; }
 
-			auto timeSince = std::chrono::duration_cast<std::chrono::seconds>((std::chrono::system_clock::now() - client.lastRecievedMessageTime));
+			auto timeSince = std::chrono::duration_cast<std::chrono::seconds>((std::chrono::high_resolution_clock::now() - client.lastRecievedMessageTime));
 			ImGui::Text(std::format(
 				R"(
 			Client[{}]:
 				Nickname: {} 
 				UUID: {} 
 				IP: {} 
-				Time since last message: {} sec
+				Port: {} 
+				Ping: {} ms
+				Has established udp connection: {}
 			)"
 				,i,
 				client.nickname,
 				client.id.id.String(),
 				client.remoteConnection.Address().IPStr(),
-				timeSince.count()
+				client.remoteConnection.Address().port,
+				std::chrono::duration_cast<std::chrono::milliseconds>(client.rtt).count(),
+				client.hasConnectedOverUDP
 				).c_str());
 		}
 	}

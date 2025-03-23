@@ -660,7 +660,7 @@ void GPUSwapchain::Create(HWND hwnd, ComPtr<ID3D12CommandQueue>, UINT Width, UIN
 	m_Desc.BufferCount = bufferCount;
 	m_Desc.Scaling = DXGI_SCALING_STRETCH;
 	m_Desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-	m_Desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+	m_Desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH  | DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 	m_Desc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 
 	ComPtr<IDXGISwapChain1> swapChain;

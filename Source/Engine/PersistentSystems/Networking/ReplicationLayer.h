@@ -25,8 +25,12 @@ public:
 	//If the id to the object does not exist then we need to create it, in case that we are the server
 	void receiveMessage(const NetMessage&);
 
-	//Registers a object to the map, made on the server
-	bool registerObject (const NetworkObject& object);
+	//Registers a object to the map, made on the server 
+	bool registerObject(const NetworkRunner & runner,const NetworkObject & object);
+	bool unRegisterObject(const NetworkRunner & runner,const NetworkObject & object);
+
+
+	void Close();
 
 	//Suboptimal solution
 	std::unordered_map<NetworkedId,NetworkObject> idToObjectMap;

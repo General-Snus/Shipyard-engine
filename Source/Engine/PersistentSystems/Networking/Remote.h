@@ -11,22 +11,29 @@
 
 struct Remote { 
 	friend class NetworkRunner;
+	friend class HeartBeatSystem;
 	friend class NetworkSettings;
 	struct RemoteRecievedMessage {
 		NetMessage message;
 		NetAddress from;
 	};;
 	
+	NetAddress udpAddress;
 	NetworkConnection remoteConnection;
 	bool isConnected;
 
 	const std::vector<RemoteRecievedMessage>& Read();
 	void Close();
 	void Consume();
+	void TryUDPConnection(NetAddress serverAddress); 
+	NetAddress AddressByProtocol(NetworkConnection::Protocol protocol);
 private:
+	bool hasConnectedOverUDP = false;
 	NetworkedId id;
 	std::string nickname;
-	std::chrono::time_point<std::chrono::system_clock> lastRecievedMessageTime;
+	TimePoint lastRecievedMessageTime;
+	TimePoint lastHeartbeatTime;
+	Duration rtt;
 	std::vector<RemoteRecievedMessage> messages;
 	std::mutex messageMutex;
 	std::jthread receiveTCP;

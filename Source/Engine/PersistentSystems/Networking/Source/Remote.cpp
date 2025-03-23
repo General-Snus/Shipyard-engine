@@ -126,14 +126,35 @@ void Remote::Consume() {
 	messages.clear();
 }
 
+void Remote::TryUDPConnection(NetAddress serverAddress)
+{ 
+	serverAddress;
+}
+
+NetAddress Remote::AddressByProtocol(NetworkConnection::Protocol protocol)
+{
+	switch(protocol)
+	{
+	case NetworkConnection::Protocol::UDP:
+		return udpAddress;
+		break;
+	case NetworkConnection::Protocol::TCP:
+		return remoteConnection.Address();
+		break;
+	default:
+		std::unreachable();
+		break;
+	}
+}
+
 void Remote::collectReceivedMessages(std::stop_token stop_token) {
 	NetMessage incomingMessage;
 	NetAddress recievedFromAddress;
 	while(!stop_token.stop_requested()) {
-		if(remoteConnection.ReceiveTCP(&incomingMessage,&recievedFromAddress)) {
+		if(auto error = remoteConnection.ReceiveTCP(&incomingMessage,&recievedFromAddress) == ReceiveSuccessful) {
 			std::scoped_lock lock(messageMutex);
-			//bit discusting but here we go
 
+			//bit discusting but here we go
 			if(incomingMessage.myType == eNetMessageType::NewConnection)
 			{
 				HandshakeMessage message = std::bit_cast<HandshakeMessage>(incomingMessage);
@@ -142,13 +163,18 @@ void Remote::collectReceivedMessages(std::stop_token stop_token) {
 			}
 			
 
-			lastRecievedMessageTime = std::chrono::system_clock::now();
+			lastRecievedMessageTime = std::chrono::high_resolution_clock::now();
 			RemoteRecievedMessage recv{
 				incomingMessage,
 				recievedFromAddress
 			};
 
 			messages.emplace_back(recv);
+		} else {
+			isConnected = false;
+			this->Close();
+			LOGGER.Err(std::format("Remote connection encountered errors and will shut down. {}",NetworkHelpers::GetWSAErrorString(error)));
 		}
+
 	}
 }

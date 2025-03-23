@@ -13,8 +13,8 @@ struct sockaddr_in;
 struct NetworkedId {
 	static NetworkedId Generate();
 
-	NetworkedId(); 
-	explicit NetworkedId(uuid::v4::UUID id) : id(id) {};
+	NetworkedId();
+	explicit NetworkedId(uuid::v4::UUID id): id(id) {};
 	uuid::v4::UUID id;
 
 	//std::strong_ordering operator<=>(const NetworkedId& other) const {
@@ -22,18 +22,20 @@ struct NetworkedId {
 	//}
 	//
 	// Custom equality operator
-	bool operator==(const NetworkedId& other) const { return id == other.id; };
-	
+	bool operator==(const NetworkedId& other) const {
+		return id == other.id;
+	};
+
 	// Custom assignment operator
 	NetworkedId& operator=(const uuid::v4::UUID& uuid) {
 		id = uuid;
 		return *this;
-	} 
+	}
 };
 
-static_assert(std::is_trivially_copyable<NetworkedId>::value, "NetworkedId must be trivially copyable");
-static_assert(std::is_trivially_copyable<uuid::v4::UUID>::value, "UUIDv4::UUID be trivially copyable");
- 
+static_assert(std::is_trivially_copyable<NetworkedId>::value,"NetworkedId must be trivially copyable");
+static_assert(std::is_trivially_copyable<uuid::v4::UUID>::value,"UUIDv4::UUID be trivially copyable");
+
 namespace std {
 template <>
 struct hash<NetworkedId> {
@@ -42,11 +44,10 @@ struct hash<NetworkedId> {
 	}
 };
 }
- 
 
 //All value in here should be network byte order or whatever that means
 struct NetAddress {
-	enum class AddressFamily : unsigned short {
+	enum class AddressFamily: unsigned short {
 		ipv4 = 2, // AF_INET,
 		ipv6 = 23 // AF_INET6
 	};
@@ -62,14 +63,16 @@ struct NetAddress {
 	AddressFamily family = AddressFamily::ipv4;
 };
 using NetworkSocket = unsigned long long;
+constexpr static int ReceiveSuccessful = 0;
 
 struct NetworkConnection {
 public:
-	enum class Status : int {
-		initializedAsServer = 1 << 0,
-		initializedAsClient = 1 << 1,
+	enum class Status: int {
+		initializedAsServer = 0b0000'0001,
+		initializedAsClient = 0b0000'0010,
+
 		//Failure states
-		incorrectIP = 1 << 2,
+		incorrectIP = 0b0000'0100,
 
 		//Summasion states
 		initialized = initializedAsServer | initializedAsClient,
@@ -85,29 +88,31 @@ public:
 	Status AutoHostOrClient(NetAddress serverAddress,SessionConfiguration cfg);
 	//Will attempt to connect to socket ----- BAD NAMING CLIENT SOCKET IS A DEFINED NAME THIS IS NOT IT TODO MF
 	Status StartAsClient(NetAddress serverAddress,SessionConfiguration cfg);
-	
+
 	//TcP OnlY EFoRcE HoW todo
 	Status StartAsRemoteConnection(NetAddress serverAddress,NetworkSocket socket);
 
 	NetworkConnection::Status OpenSockets(SessionConfiguration cfg);
 
 	bool ReceiveUDP(NetMessage* message,NetAddress* recivedFrom,const int bufferSize = 512,bool blocking = true,const float timeout = -1.f) const;
-	bool ReceiveTCP(NetMessage* message,NetAddress* recivedFrom,const int bufferSize = 512,bool blocking = true,const float timeout = -1.f) const;
+	//FOR SOME REASON SUCCESS HAVE TO BE ZERO,A TRUE RETURN MEANS ERROR AND THE ERROR CODE IS THE RETURN
+	int ReceiveTCP(NetMessage* message,NetAddress* recivedFrom,const int bufferSize = 512,bool blocking = true,const float timeout = -1.f) const;
+
+
 	bool Accept(NetworkConnection* returningConnection) const;
-	
-	static bool UDP(NetAddress toAddress, NetworkSocket throughSocket,const NetMessage& message);
-	static bool TCP(NetworkSocket throughSocket,const NetMessage& message);
- 
-	bool Send(const NetMessage& message,Protocol protocol = Protocol::UDP) const;
-	bool Send(const NetMessage& message,NetAddress target,Protocol protocol = Protocol::UDP) const;
-	bool SendUDP(NetAddress toAddress,const NetMessage& message) const;
+
+	static bool UDP(NetAddress toAddress,NetworkSocket throughSocket,NetMessage& message);
+	static bool TCP(NetworkSocket throughSocket,NetMessage& message);
+
+	bool SendUDP(NetAddress toAddress,NetMessage& message) const;
+	bool SendTCP(NetMessage& message) const;
 
 	Status GetStatus() const;
 	NetAddress Address() const;
 	bool Close();
 private:
 	Status status;
-	NetAddress connectedTo;
+	NetAddress tcpConnectionAddress;
 	NetworkSocket TCPSocket;
 	NetworkSocket UDPSocket;
 };
@@ -139,20 +144,24 @@ struct SessionConfiguration {
 
 namespace NetworkHelpers {
 
-	struct SocketSettings {
-		int receiveBufferSize;
-		int sendBufferSize;
-		bool reuseAddress;
-		bool isBlocking;
-		bool tcpNoDelay;
-		int maxSegmentSize;
-		bool keepAlive;
-		int keepIdle;
-		int keepInterval;
-		int keepCount;
-	};
+struct SocketSettings {
+	int receiveBufferSize;
+	int sendBufferSize;
+	bool reuseAddress;
+	bool isBlocking;
+	bool tcpNoDelay;
+	int maxSegmentSize;
+	bool keepAlive;
+	int keepIdle;
+	int keepInterval;
+	int keepCount;
+};
 
-	//i really cant be bothered to write this shit myself, gpt it is
-	SocketSettings GetSocketSettings(unsigned long long socket);
+//i really cant be bothered to write this shit myself, gpt it is
+SocketSettings GetSocketSettings(unsigned long long socket);
+
+#define CASE(x) case (x): return #x;
+std::string GetWSAErrorString(int error);
+
 }
 

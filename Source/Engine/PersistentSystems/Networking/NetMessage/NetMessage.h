@@ -1,6 +1,7 @@
 #pragma once 
 #include <string>
 #include <array>
+#include <chrono>
 #include <Engine/PersistentSystems/Networking/NetworkStructs.h>
 
 enum class eNetMessageType : unsigned char {
@@ -11,6 +12,9 @@ enum class eNetMessageType : unsigned char {
 	Quit,
 	PlayerJoin,
 	TransformSyncMessage,
+	CreateObjectMessage,
+	DestroyObjectMessage,
+	HearthBeat,
 	Count
 };
 
@@ -22,7 +26,8 @@ constexpr size_t NETMESSAGE_BUFFERSIZE = (MAX_NETMESSAGE_SIZE - NETMESSAGE_HEADE
 #undef GetMessageW
 
 
-
+using TimePoint = std::chrono::high_resolution_clock::time_point;
+using Duration = std::chrono::high_resolution_clock::duration;
 
 //Recieve directly into NetMessage address please..
 
@@ -40,12 +45,15 @@ public:
 	NetworkedId GetId() const {
 		return  Id;
 	}
+	TimePoint TimeSent() const {
+		return  timePoint;
+	}
 	void SetId(NetworkedId id){
 		Id = id;
 	}
 protected:
 	NetworkedId Id;
-	std::chrono::steady_clock::time_point timePoint;
+	TimePoint timePoint;
 	std::array<char,NETMESSAGE_BUFFERSIZE> dataBuffer{}; 
 public:
 	eNetMessageType myType = eNetMessageType::None;

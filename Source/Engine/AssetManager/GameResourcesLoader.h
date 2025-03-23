@@ -2,6 +2,7 @@
 #include <Editor/Editor/Defines.h>
 #include <Tools/Utilities/System/ServiceLocator.h>
 #include "Loader/LoaderBase.h"
+#include "Tools\Utilities\System\ThreadPool.hpp"
 #define Resources ServiceLocator::Instance().GetService<GameResourcesLoader>()
 
 class GameResourcesLoader : public ResourceLoaderBase

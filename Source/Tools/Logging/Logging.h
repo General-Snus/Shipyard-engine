@@ -3,19 +3,19 @@
 #include <mutex>
 #include <source_location>
 #include <stacktrace>
-#include <string>
-#include <vector>
+#include <string> 
 
 #include <Tools/Utilities/Color.h>
 #include <Tools/Utilities/TemplateHelpers.h>
 #include "Tools/Utilities/LinearAlgebra/Vector3.hpp"
+#include <deque>
 
 #define LOGGER ServiceLocator::Instance().GetService<LoggerService>()
 
 class LoggerService : public Singleton
 {
 public:
-	LoggerService() = default;
+	LoggerService();
 
 	enum class LogType : int32_t
 	{
@@ -36,9 +36,10 @@ public:
 	};
 
 private:
+	static constexpr int maxsize = 10'000;
 	struct logBuffer
 	{
-		std::vector<LogMsg> LoggedMessages;
+		std::deque<LogMsg> LoggedMessages;
 		unsigned            messagesCount{};
 		unsigned            warnCount{};
 		unsigned            errCount{};
@@ -68,6 +69,11 @@ private:
 			default:
 				break;
 			}
+			if(LoggedMessages.size() > maxsize)
+			{
+				LoggedMessages.pop_front();
+			}
+
 			LoggedMessages.emplace_back(msg);
 		}
 	};
@@ -128,12 +134,22 @@ public:
 	}
 
 	template <typename... Args>
+	void WarnC(Args&&... args) {
+		std::ostringstream stream;
+		(stream << ... << std::forward<Args>(args));
+		Warn(std::string(stream.str()));
+	}
+
+	template <typename... Args>
 	void ErrC(Args&& ... args) {
 		std::ostringstream stream;
 		(stream << ... << std::forward<Args>(args));
 		Err(stream.str());
 	}
 
+	std::mutex & mutexLock() {
+		return readyToWrite;
+	}
 private:
 	void*                            myHandle = nullptr;
 	bool                             shouldPrintToOutput = false;

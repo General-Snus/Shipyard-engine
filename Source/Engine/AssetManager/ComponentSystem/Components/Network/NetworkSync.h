@@ -15,6 +15,9 @@ class NetworkObject : public Component
     ReflectableTypeRegistration();
     NetworkObject() = delete;
     NetworkObject(const SY::UUID anOwnerId, GameObjectManager *aManager);
+    NetworkObject(const SY::UUID anOwnerId, GameObjectManager *aManager,NetworkedId id);
+	void Init() override;
+	void Destroy() override;
     bool InspectorView() override;
 
     NetworkedId GetServerID() const
@@ -36,7 +39,9 @@ class NetworkTransform : public Component
 public:
     ReflectableTypeRegistration();
     NetworkTransform() = delete;
-    NetworkTransform(const SY::UUID anOwnerId,GameObjectManager* aManager); 
+    NetworkTransform(const SY::UUID anOwnerId,GameObjectManager* aManager);
+	bool InspectorView() override;
+	void Init() override;
 
 	std::chrono::time_point<std::chrono::high_resolution_clock> updatePoint;
 	Vector3f myPosition; // Update from server
@@ -51,7 +56,6 @@ public:
 		return uniqueNetId;
 	}
 private:
-	NetworkedId uniqueNetId;
-
+	NetworkedId uniqueNetId; 
 };
-REFL_AUTO(type(NetworkTransform))
+REFL_AUTO(type(NetworkTransform),field(myPosition),field(translationInterpolation))

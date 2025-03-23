@@ -1,7 +1,6 @@
 #define NOMINMAX
 
 // TODO Un-yikes the includes
-#include <assert.h>
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -26,24 +25,43 @@
 #include <Tools/Utilities/Input/Input.hpp>
 #include <Tools/Utilities/System/ThreadPool.hpp>
 #include "DirectX/DX12/Graphics/GPU.h"
-#include "Editor/Editor/Windows/SplashWindow.h"
 #include "Editor/Editor/Windows/EditorWindows/Console.h"
 #include "Editor/Editor/Windows/EditorWindows/ContentDirectory.h"
 #include "Editor/Editor/Windows/EditorWindows/Hierarchy.h"
 #include "Editor/Editor/Windows/EditorWindows/Inspector.h"
 #include "Editor/Editor/Windows/EditorWindows/Viewport.h"
 #include "Engine/AssetManager/AssetManager.h"
-#include "Engine/AssetManager/ComponentSystem/Components/LightComponent.h"
 #include "Engine/GraphicsEngine/GraphicsEngine.h"
 #include "Engine/PersistentSystems/Scene.h"
-#include "Engine/PersistentSystems/System/Colission/OnCollision.h"
 #include "Engine/PersistentSystems/System/SceneGraph/WorldGraph.h"
 #if PHYSX
 #include <Engine/PersistentSystems/Physics/PhysXInterpeter.h>
 #endif // PHYSX 0
-#include <CommCtrl.h>
-#include <imgui_notify.h>
-#include <stacktrace>
+#include "Editor\Editor\Defines.h"
+#include "Engine\AssetManager\ComponentSystem\ComponentManager.h"
+#include "Engine\AssetManager\ComponentSystem\GameObjectManager.h"
+#include "Engine\PersistentSystems\Networking\NetworkRunner.h"
+#include "Engine\PersistentSystems\Networking\NetworkStructs.h"
+#include "d3d12.h"
+#include "dxgiformat.h"
+#include "Tools\ImGui\ImGuiHelpers.hpp"
+#include "Tools\Utilities\Input\EnumKeys.h"
+#include "Tools\Utilities\LinearAlgebra\Vector2.hpp"
+#include "Tools\Utilities\LinearAlgebra\Vector3.hpp"
+#include "Tools\Utilities\LinearAlgebra\Vector4.hpp"
+#include "Tools\Utilities\System\Event.h"
+#include "minwindef.h"
+#include "windef.h"
+#include <cassert>
+#include <chrono>
+#include <cmath>
+#include <format>
+#include <iosfwd>
+#include <memory>
+#include <thread>
+#include <utility>
+#include <vector>
+#include "DirectX\DX12\Graphics\Enums.h"
 #include <Editor/Editor/Commands/CommandBuffer.h>
 #include <Editor/Editor/Commands/SceneAction.h>
 #include <Editor/Editor/Windows/EditorWindows/ChatWindow.h>
@@ -58,10 +76,8 @@
 #include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
 
 #include <shellapi.h>
-#include <misc/cpp/WMDropManager.h>
 #include <Windows/EditorWindows/ImageViewer.h>
 #include <imgui_tex_inspect.h> 
-#include <backends/tex_inspect_directx12.h>
 #include <Windows/EditorWindows/NetworkSettings.h>
 
 enum Theme {
@@ -349,11 +365,6 @@ bool Editor::Initialize(HWND aHandle) {
 	LOGGER.Create();
 	LOGGER.SetPrintToVSOutput(true);
 
-	SessionConfiguration config = {
-		SessionConfiguration::GameMode::AutoHostOrClient
-	};
-
-	Runner.StartSession(config);
 
 	GetWindowRect(WindowInstance.windowHandler,&ViewportRect);
 
@@ -620,10 +631,16 @@ std::shared_ptr<Viewport> Editor::GetMainViewport() {
 void Editor::Update() {
 	OPTICK_EVENT();
 	TimerInstance.Update();
+	Shipyard_PhysXInstance.StartRead();
 	const float delta = TimerInstance.getDeltaTime();
 
-	Shipyard_PhysXInstance.StartRead();
-	Runner.Update();
+
+	//constexpr int fpsInMicro = 16000;
+	//const auto deltaInMicro = (int)(delta* std::powf(10,6));
+	//int sleepDuration = std::max(fpsInMicro - deltaInMicro,0);
+	//std::chrono::microseconds duration(sleepDuration/2);
+	//std::this_thread::sleep_for(duration);
+
 
 	// Editor key checks
 	if(Input.IsKeyPressed(Keys::F) && m_SelectedGameObjects.size() > 0) {
@@ -650,7 +667,7 @@ void Editor::Update() {
 
 	gameState.Update(delta);
 	GraphicsEngineInstance.Update(delta);
-	Shipyard_PhysXInstance.EndRead(delta);
+	Shipyard_PhysXInstance.EndRead(delta); 
 }
 
 void Editor::Render() {

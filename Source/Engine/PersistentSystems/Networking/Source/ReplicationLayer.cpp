@@ -3,7 +3,22 @@
 #include "../NetworkRunner.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
 #include "Networking/NetMessage/PlayerSyncMessage.h"
+#include "Networking/NetworkStructs.h"
+#include "Networking/NetMessage/NetMessage.h"
+#include "Engine/AssetManager/ComponentSystem/Components/Network/NetworkSync.h"
 
+#include "Engine/AssetManager/GameResourcesLoader.h"
+#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h" 
+#include "Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h" 
+#include "Engine/AssetManager/ComponentSystem/GameObject.h"
+#include "Engine/AssetManager/ComponentSystem/GameObjectManager.h"
+#include "Engine/PersistentSystems/Scene.h"
+#include "Tools/Logging/Logging.h"
+#include "Tools/Utilities/Color.h"
+#include "Tools\Utilities\Game\Timer.h"
+
+
+#pragma optimize( "", off ) 
 void ReplicationLayer::fixedNetworkUpdate(NetworkRunner & runner)
 {
 	if(runner.IsServer)
@@ -22,11 +37,17 @@ void ReplicationLayer::server_fixedNetworkUpdate(NetworkRunner & runner)
 	for(auto& networkedTransform : Scene::activeManager().GetAllComponents<NetworkTransform>())
 	{
 		auto& transform = networkedTransform.transform();
+
+		//if(!transform.GetIsDirty()) {
+		//	continue;
+		//}
+
 		networkedTransform.myPosition = transform.myPosition;
 		networkedTransform.myQuaternion= transform.myQuaternion;
 		networkedTransform.myScale = transform.myScale;
 
 		TransformSyncData data{
+			networkedTransform.GetServerID(),
 			networkedTransform.myPosition,
 			networkedTransform.myQuaternion,
 			networkedTransform.myScale
@@ -41,27 +62,35 @@ void ReplicationLayer::server_fixedNetworkUpdate(NetworkRunner & runner)
 void ReplicationLayer::client_fixedNetworkUpdate(const NetworkRunner & runner) const
 {
 	runner;
-	auto now = std::chrono::steady_clock::now(); //switch out to server time
-	for(auto& networkedTransform : Scene::activeManager().GetAllComponents<NetworkTransform>())
+	auto now = std::chrono::high_resolution_clock::now(); //switch out to server time
+
+	//Check up to date idToObjectMap
+	for(const auto& networkedTransform : Scene::activeManager().GetAllComponents<NetworkTransform>())
 	{
 		if(!idToObjectMap.contains(networkedTransform.GetServerID()))
 		{
 			Scene::activeManager().DeleteGameObject(networkedTransform.gameObject());
 			continue;
 		}
+	}
 
+	//Interpolationsystem
+	for(auto& networkedTransform : Scene::activeManager().GetAllComponents<NetworkTransform>())
+	{
 		auto& transform = networkedTransform.transform();
 
 		//networkedTransform.translationInterpolation is in unit(meter) per second
-		const auto timeDifference = now - networkedTransform.updatePoint;
-		const auto secondsDifference = std::chrono::duration_cast<std::chrono::duration<float>>(timeDifference).count();
+		const auto timeDifference = now - networkedTransform.updatePoint; // Time 
+		networkedTransform.translationInterpolation = networkedTransform.myPosition - transform.myPosition; // Distance
 
-		auto newPosition = networkedTransform.myPosition + networkedTransform.translationInterpolation * secondsDifference;
+		//Distance/Time = velocity
+		const float delta = TimerInstance.getDeltaTime();
+		auto newPosition = networkedTransform.myPosition + networkedTransform.translationInterpolation * delta;
 		//auto newQuaternion = figure this fucker out sometime * secondsDifference; 
+		transform.SetPosition(newPosition);
+		transform.SetQuatF(networkedTransform.myQuaternion);
+		transform.SetScale(networkedTransform.myScale);
 
-		transform.myPosition = newPosition;
-		transform.myQuaternion= networkedTransform.myQuaternion;
-		transform.myScale = networkedTransform.myScale;
 	}
 
 	//for(auto& i : Scene::activeManager().GetAllComponents<NetworkTransform>())
@@ -77,24 +106,118 @@ void ReplicationLayer::client_fixedNetworkUpdate(const NetworkRunner & runner) c
 
 void ReplicationLayer::client_ReadIncoming(const NetworkRunner & runner)
 {
-	if(!runner.messagesMap.contains(eNetMessageType::TransformSyncMessage))
+
+	if(runner.messagesMap.contains(DestroyObjectMessage::type))
 	{
-		return;
+		for(auto& message : runner.messagesMap.at(DestroyObjectMessage::type))
+		{
+			auto msg =std::bit_cast<DestroyObjectMessage>(message.message);
+			auto id = msg.ReadMessage();
+
+			if(idToObjectMap.contains(id))
+			{
+				Scene::activeManager().DeleteGameObject(idToObjectMap.at(id).gameObject());
+				idToObjectMap.erase(id);
+			}
+		}
 	}
 
-	for(auto& i : runner.messagesMap.at(eNetMessageType::TransformSyncMessage))
+	if(runner.messagesMap.contains(CreateObjectMessage::type))
 	{
-		i;
+		for(auto& message : runner.messagesMap.at(CreateObjectMessage::type))
+		{
+			auto msg =std::bit_cast<CreateObjectMessage>(message.message);
+			auto messageContent = msg.ReadMessage();
+
+			if(!idToObjectMap.contains(messageContent.uniqueComponentId))
+			{
+				GameObject ball = GameObject::Create("Ball");
+				auto& renderer = ball.AddComponent<MeshRenderer>("Models/BallEradicationGame/Sphere.fbx");
+				if(const auto mat = Resources.ForceLoad<Material>("TreeMaterial")) {
+					mat->SetColor(ColorManagerInstance.GetColor("Red"));
+					renderer.SetMaterial(mat);
+				}
+
+				ball.AddComponent<NetworkObject>(messageContent.uniqueComponentId);
+				ball.AddComponent<NetworkTransform>();
+
+				idToObjectMap.emplace(messageContent.uniqueComponentId,ball.GetComponent<NetworkObject>());
+			}
+		}
 	}
+
+	if(runner.messagesMap.contains(TransformSyncMessage::type))
+	{
+		for(auto& transformMessage : runner.messagesMap.at(TransformSyncMessage::type))
+		{
+			auto msg =std::bit_cast<TransformSyncMessage>(transformMessage.message);
+			TransformSyncData messageContent = msg.ReadMessage();
+
+			if(!idToObjectMap.contains(messageContent.uniqueComponentId))
+			{
+				LOGGER.Warn("Received transform for not yet created object");
+				continue;
+			}
+
+			auto& netTransform = idToObjectMap.at(messageContent.uniqueComponentId).GetComponent<NetworkTransform>();
+
+			netTransform.updatePoint = msg.TimeSent();
+			netTransform.myPosition = messageContent.myPosition;
+			netTransform.myQuaternion = messageContent.myQuaternion;
+			netTransform.myScale = messageContent.myScale;
+		}
+	}
+
+
 }
+
+#pragma optimize( "", on )
 
 void ReplicationLayer::receiveMessage(const NetMessage &)
 {
 
 }
 
-bool ReplicationLayer::registerObject(const NetworkObject & object)
+bool ReplicationLayer::registerObject(const NetworkRunner & runner,const NetworkObject & object)
 {
-	object;
+	assert(runner.IsServer);
+
+	if(!idToObjectMap.contains(object.GetServerID()))
+	{
+		//All registered objects have been sent to the clients 
+		GameobjectInformation data;
+
+		data.uniqueComponentId = object.GetServerID();
+		for(const auto& cmp : object.gameObject().GetAllComponents())
+		{
+			data.listOfComponentsNames.emplace_back(cmp->GetTypeInfo().Name());
+		}
+
+		CreateObjectMessage createObjectMessage;
+		createObjectMessage.SetMessage(data);
+		runner.Broadcast(createObjectMessage,NetworkConnection::Protocol::TCP);
+		idToObjectMap.emplace(object.GetServerID(),object);
+		return true;
+	}
+
 	return false;
+}
+
+bool ReplicationLayer::unRegisterObject(const NetworkRunner & runner,const NetworkObject & object)
+{
+	if(idToObjectMap.contains(object.GetServerID()))
+	{
+		//All registered objects have been sent to the clients  
+		DestroyObjectMessage createObjectMessage;
+		createObjectMessage.SetMessage(object.GetServerID());
+		runner.Broadcast(createObjectMessage,NetworkConnection::Protocol::TCP);
+		idToObjectMap.erase(object.GetServerID());
+		return true;
+	}
+	return false;
+}
+
+void ReplicationLayer::Close()
+{
+	idToObjectMap.clear();
 }

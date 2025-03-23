@@ -31,8 +31,9 @@ GameObject BallEradicationGame::MakeBall(Vector3f position)
 	}
 	return ball;
 }
+ 
 
-void BallEradicationGame::MakeArena(Vector3f position,Vector3f rect)
+void BallEradicationGame::MakeArena(Vector3f position,Vector3f extent)
 {
 	GameObject arenaParent = GameObject::Create("Arena");
 	arenaParent.transform().SetPosition(position);
@@ -41,43 +42,43 @@ void BallEradicationGame::MakeArena(Vector3f position,Vector3f rect)
 	arenaFloor.AddComponent<MeshRenderer>("Models/Cube.fbx");
 	Vector3f floorPosition = {position.x,position.y -1,position.z};
 	arenaFloor.transform().SetPosition(floorPosition);
-	arenaFloor.transform().SetScale(2.f*rect);
+	arenaFloor.transform().SetScale(2.f*extent);
 	arenaFloor.transform().SetParent(arenaParent.transform());
 
 
 	{
 		GameObject arenaWall = GameObject::Create("ArenaWall");
 		arenaWall.AddComponent<MeshRenderer>("Models/Cube.fbx");
-		Vector3f arenaWallPosition = {position.x+rect.x,position.y,position.z};
+		Vector3f arenaWallPosition = {position.x+extent.x,position.y,position.z};
 		arenaWall.transform().SetPosition(arenaWallPosition);
-		arenaWall.transform().SetScale(1,rect.y,2*rect.z);
+		arenaWall.transform().SetScale(1,extent.y,2*extent.z);
 		arenaWall.transform().SetParent(arenaParent.transform());
 	}
 
 	{
 		GameObject arenaWall = GameObject::Create("ArenaWall");
 		arenaWall.AddComponent<MeshRenderer>("Models/Cube.fbx");
-		Vector3f arenaWallPosition = {position.x-rect.x,position.y,position.z};
+		Vector3f arenaWallPosition = {position.x-extent.x,position.y,position.z};
 		arenaWall.transform().SetPosition(arenaWallPosition);
-		arenaWall.transform().SetScale(1,rect.y,2*rect.z);
+		arenaWall.transform().SetScale(1,extent.y,2*extent.z);
 		arenaWall.transform().SetParent(arenaParent.transform());
 	}
 
 	{
 		GameObject arenaWall = GameObject::Create("ArenaWall");
 		arenaWall.AddComponent<MeshRenderer>("Models/Cube.fbx");
-		Vector3f arenaWallPosition = {position.x,position.y,position.z+rect.z};
+		Vector3f arenaWallPosition = {position.x,position.y,position.z+extent.z};
 		arenaWall.transform().SetPosition(arenaWallPosition);
-		arenaWall.transform().SetScale(2*rect.x,rect.y,1);
+		arenaWall.transform().SetScale(2*extent.x,extent.y,1);
 		arenaWall.transform().SetParent(arenaParent.transform());
 	}
 
 	{
 		GameObject arenaWall = GameObject::Create("ArenaWall");
 		arenaWall.AddComponent<MeshRenderer>("Models/Cube.fbx");
-		Vector3f arenaWallPosition = {position.x,position.y,position.z-rect.z};
+		Vector3f arenaWallPosition = {position.x,position.y,position.z-extent.z};
 		arenaWall.transform().SetPosition(arenaWallPosition);
-		arenaWall.transform().SetScale(2*rect.x,rect.y,1);
+		arenaWall.transform().SetScale(2*extent.x,extent.y,1);
 		arenaWall.transform().SetParent(arenaParent.transform());
 	}
 }

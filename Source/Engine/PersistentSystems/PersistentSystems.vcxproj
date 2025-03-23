@@ -270,6 +270,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ArtificialInteligence\AICommands\AICommands.h" />
+    <ClInclude Include="Networking\HeartBeatSystem.h" />
+    <ClInclude Include="Networking\NetMessage\HeartBeatMessage.h" />
     <ClInclude Include="Networking\Remote.h" />
     <ClInclude Include="Networking\NetMessage\StringMessages.h" />
     <ClInclude Include="Networking\NetMessage\NetMessage.h" />
@@ -289,6 +291,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ArtificialInteligence\AICommands\Source\AICommands.cpp" />
+    <ClCompile Include="Networking\Source\HeartBeatSystem.cpp" />
+    <ClCompile Include="Networking\NetMessage\HeartBeatMessage.cpp" />
     <ClCompile Include="Networking\Source\Remote.cpp" />
     <ClCompile Include="Networking\NetMessage\StringMessages.cpp" />
     <ClCompile Include="Networking\NetMessage\NetMessage.cpp" />
