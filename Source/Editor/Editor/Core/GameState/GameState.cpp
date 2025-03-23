@@ -16,6 +16,7 @@ void GameState::Intialize(std::filesystem::path aPathToProjectFolder) {
 }
 
 bool GameState::AttemptDllLoad() {
+	OPTICK_EVENT();
 	dllHandle = LoadLibrary(L"GameLauncher.dll");
 	if(!dllHandle) {
 		LOGGER.Err("Failed to load DLL!");
@@ -35,6 +36,7 @@ bool GameState::AttemptDllLoad() {
 }
 
 void GameState::StartPlaySession() {
+	OPTICK_EVENT();
 	if(IsLoading || IsPlaying || IsPaused) {
 		IsPaused = false;
 		IsPlaying = true;
@@ -61,6 +63,7 @@ void GameState::StartPlaySession() {
 }
 
 void GameState::EndPlaySession() {
+	OPTICK_EVENT();
 	Runner.Close();
 
 	EDITOR_INSTANCE.SetActiveScene(m_EditorBackupScene);
@@ -93,6 +96,7 @@ void GameState::PausePlaySession() {
 }
 
 void GameState::Init() {
+	OPTICK_EVENT();
 	try {
 		if(m_GameLauncher) {
 			m_GameLauncher->SyncServices(ServiceLocator::Instance());
@@ -106,6 +110,7 @@ void GameState::Init() {
 }
 
 void GameState::Start() {
+	OPTICK_EVENT();
 	try {
 		if(m_GameLauncher) {
 			m_GameLauncher->Start();
@@ -118,6 +123,7 @@ void GameState::Start() {
 }
 
 void GameState::Update(float delta) {
+	OPTICK_EVENT();
 	try {
 		if(IsLoading) {
 			IsLoading = false;

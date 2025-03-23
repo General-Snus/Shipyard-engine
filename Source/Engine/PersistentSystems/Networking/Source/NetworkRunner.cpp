@@ -35,6 +35,7 @@ NetworkRunner::~NetworkRunner() {
 
 NetworkConnection::Status NetworkRunner::StartSession(SessionConfiguration configuration)
 {
+	OPTICK_EVENT();
 
 	if(!InitializeWinsock())
 	{
@@ -105,7 +106,7 @@ NetworkConnection::Status NetworkRunner::StartSession(SessionConfiguration confi
 		}
 		receiveTCP = std::jthread([this](std::stop_token s)
 		{
-			this->collectReceivedMessages(s,NetworkConnection::Protocol::TCP);
+			this->collectReceivedMessages(s,runnerID,NetworkConnection::Protocol::TCP);
 		});
 
 		HandshakeMessage message(runnerID);
@@ -126,7 +127,7 @@ NetworkConnection::Status NetworkRunner::StartSession(SessionConfiguration confi
 
 		receiveUDP = std::jthread([this](std::stop_token s)
 		{
-			this->collectReceivedMessages(s,NetworkConnection::Protocol::UDP);
+			this->collectReceivedMessages(s,runnerID,NetworkConnection::Protocol::UDP);
 		});
 	}
 
@@ -135,6 +136,8 @@ NetworkConnection::Status NetworkRunner::StartSession(SessionConfiguration confi
 
 void NetworkRunner::Update()
 {
+	OPTICK_EVENT();
+
 	//if(!Initialized) {
 	//	SessionConfiguration c;
 	//	c.gameMode = SessionConfiguration::GameMode::Client;
@@ -164,6 +167,7 @@ void NetworkRunner::Update()
 
 void NetworkRunner::ProcessIncoming(const eNetMessageType& type,NetworkRunner::RecievedMessage& incomingMessage)
 {
+	OPTICK_EVENT();
 	switch(type)
 	{
 	case eNetMessageType::ChatMessage:
@@ -261,8 +265,8 @@ void NetworkRunner::ProcessIncoming(const eNetMessageType& type,NetworkRunner::R
 }
 
 void NetworkRunner::Close()
-{
-
+{ 
+	OPTICK_EVENT();
 	for(auto& remote : remoteConnections)
 	{
 		remote.Close();
@@ -272,10 +276,15 @@ void NetworkRunner::Close()
 	receiveTCP.request_stop();
 	receiveUDP.request_stop();
 	connection.Close();
+
+	IsServer = false;
+	HasStateAuthority = false;
+	HasInputAuthority = false;
 }
 
 bool NetworkRunner::Send(NetMessage& message,NetworkConnection::Protocol protocol)
 {
+	OPTICK_EVENT();
 	if(!Initialized) {
 		return false;
 	}
@@ -313,6 +322,7 @@ bool NetworkRunner::Send(NetMessage& message,NetworkConnection::Protocol protoco
 
 bool NetworkRunner::HasConnection(NetworkedId id)
 {
+	OPTICK_EVENT();
 	if(id == runnerID && connection.GetStatus() == NetworkConnection::Status::initialized)
 	{
 		return true;
@@ -334,6 +344,7 @@ bool NetworkRunner::HasConnection(NetworkedId id)
 
 std::string NetworkRunner::NameOfConnection(NetworkedId id)
 {
+	OPTICK_EVENT();
 	if(id == runnerID && (connection.GetStatus() && NetworkConnection::Status::initialized))
 	{
 		return runnerName;
@@ -350,6 +361,7 @@ std::string NetworkRunner::NameOfConnection(NetworkedId id)
 
 Remote* NetworkRunner::IdToRemote(NetworkedId id)
 {
+	OPTICK_EVENT();
 	if(id == runnerID)
 	{
 		return nullptr;
@@ -370,6 +382,7 @@ Remote* NetworkRunner::IdToRemote(NetworkedId id)
 
 bool NetworkRunner::registerObject(const NetworkObject & object)
 {
+	OPTICK_EVENT();
 	if(!IsServer) {
 		return false;
 	}
@@ -379,6 +392,7 @@ bool NetworkRunner::registerObject(const NetworkObject & object)
 
 bool NetworkRunner::unRegisterObject(const NetworkObject & object)
 {
+	OPTICK_EVENT();
 	if(!IsServer) {
 		return false;
 	}
@@ -388,6 +402,7 @@ bool NetworkRunner::unRegisterObject(const NetworkObject & object)
 
 bool NetworkRunner::Broadcast(NetMessage& message,NetworkConnection::Protocol protocol) const
 {
+	OPTICK_EVENT();
 	assert(IsServer);
 	bool allSucceeded = true;
 	for(const auto& client : remoteConnections)
@@ -418,6 +433,7 @@ bool NetworkRunner::Broadcast(NetMessage& message,NetworkConnection::Protocol pr
 
 bool NetworkRunner::Unicast(NetMessage& message,Remote client,NetworkConnection::Protocol protocol) const
 {
+	OPTICK_EVENT();
 	switch(protocol)
 	{
 	case NetworkConnection::Protocol::UDP:
@@ -437,6 +453,7 @@ bool NetworkRunner::Unicast(NetMessage& message,Remote client,NetworkConnection:
 
 bool NetworkRunner::Multicast(NetMessage& message,std::span<Remote> spanOfClient,NetworkConnection::Protocol protocol) const
 {
+	OPTICK_EVENT();
 	bool allSucceded = true;
 	for(const auto& client : spanOfClient)
 	{
@@ -462,10 +479,11 @@ bool NetworkRunner::Multicast(NetMessage& message,std::span<Remote> spanOfClient
 void NetworkRunner::acceptNewClients(std::stop_token stop_token)
 {
 	NetworkConnection newConnection;
+	OPTICK_THREAD("acceptNewClients");
 	while(!stop_token.stop_requested())
 	{
 		if(connection.Accept(&newConnection))
-		{
+		{ 
 			for(auto& client : remoteConnections)
 			{
 				if(client.isConnected == false)
@@ -486,8 +504,9 @@ void NetworkRunner::acceptNewClients(std::stop_token stop_token)
 	}
 }
 
-void NetworkRunner::collectReceivedMessages(std::stop_token stop_token,NetworkConnection::Protocol protocol)
+void NetworkRunner::collectReceivedMessages(std::stop_token stop_token,NetworkedId recieversOwnId,NetworkConnection::Protocol protocol)
 {
+	OPTICK_THREAD("NetworkRunner::collectReceivedMessages");
 	if(!Initialized) {
 		return;
 	}
@@ -500,6 +519,11 @@ void NetworkRunner::collectReceivedMessages(std::stop_token stop_token,NetworkCo
 		{
 			if(connection.ReceiveUDP(&incomingMessage,&recievedFromAddress))
 			{
+				if(incomingMessage.Id == recieversOwnId)
+				{
+					continue;
+				}
+
 				std::scoped_lock lock(addMessageLock);
 
 				RecievedMessage recv{
@@ -516,6 +540,11 @@ void NetworkRunner::collectReceivedMessages(std::stop_token stop_token,NetworkCo
 		{
 			if(int error = connection.ReceiveTCP(&incomingMessage,&recievedFromAddress) == ReceiveSuccessful)
 			{
+				if(incomingMessage.Id == recieversOwnId)
+				{
+					continue;
+				}
+
 				std::scoped_lock lock(addMessageLock);
 
 				RecievedMessage recv{
@@ -535,6 +564,7 @@ void NetworkRunner::collectReceivedMessages(std::stop_token stop_token,NetworkCo
 
 void NetworkRunner::moveMessageMapToRead()
 {
+	OPTICK_EVENT();
 	std::scoped_lock lock(addMessageLock);
 
 	for(auto& [type,messageVector] : messagesMap)

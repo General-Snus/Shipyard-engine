@@ -7,6 +7,8 @@
 
 void HeartBeatSystem::UpdateClient(NetworkRunner & runner)
 {
+	OPTICK_EVENT();
+
 	const auto now = std::chrono::high_resolution_clock::now();
 	for(const auto& [index,message]: runner.PollMessage<HeartBeatMessage>() | std::ranges::views::enumerate)
 	{
@@ -23,7 +25,7 @@ void HeartBeatSystem::UpdateClient(NetworkRunner & runner)
 	HeartBeatMessage message;
 	HeartBeatData data;
 	data.sentMessagesToConnectionForLast10Seconds = 10; // todo
-	data.lastRoundTripTime =usRoundTripTime;
+	data.lastRoundTripTime = usRoundTripTime;
 	data.timeSentByClient = now;
 	data.serverTime = {};
 	message.SetMessage(data);
@@ -32,6 +34,8 @@ void HeartBeatSystem::UpdateClient(NetworkRunner & runner)
 
 void HeartBeatSystem::UpdateServer(NetworkRunner & runner)
 {
+	OPTICK_EVENT();
+
 	const auto now = std::chrono::high_resolution_clock::now();
 	for(const auto& [index,message]: runner.PollMessage<HeartBeatMessage>() | std::ranges::views::enumerate)
 	{
@@ -51,7 +55,7 @@ void HeartBeatSystem::UpdateServer(NetworkRunner & runner)
 		}
 
 		t->lastHeartbeatTime = now;
-		t->rtt = data.lastRoundTripTime;
+		t->roundTrip = data.lastRoundTripTime;
 
 		HeartBeatMessage sendMessage;
 		data.serverTime = now;
@@ -65,6 +69,8 @@ void HeartBeatSystem::UpdateServer(NetworkRunner & runner)
 
 void HeartBeatSystem::Update(NetworkRunner & runner)
 {
+	OPTICK_EVENT();
+
 	if(runner.IsServer) {
 		UpdateServer(runner);
 	} else{
@@ -74,7 +80,7 @@ void HeartBeatSystem::Update(NetworkRunner & runner)
 #pragma optimize( "", on )
 
 
-Duration  HeartBeatSystem::rtt() const
+float  HeartBeatSystem::rtt() const
 {
-	return usRoundTripTime;
+	return std::chrono::duration_cast<std::chrono::microseconds>(usRoundTripTime).count()/1000.f;
 }

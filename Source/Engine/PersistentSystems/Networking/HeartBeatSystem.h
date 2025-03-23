@@ -6,7 +6,7 @@ class HeartBeatSystem
 public:
 	HeartBeatSystem() = default;
 	void Update(NetworkRunner & runner);
-	Duration rtt() const;
+	float rtt() const;
 private:
 	void UpdateClient(NetworkRunner & runner);
 	void UpdateServer(NetworkRunner & runner);

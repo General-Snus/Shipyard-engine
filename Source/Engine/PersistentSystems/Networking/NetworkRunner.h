@@ -79,7 +79,7 @@ private:
 	bool Multicast(NetMessage& message,std::span<Remote> client,NetworkConnection::Protocol protocol) const; // Send to Set
 
 	void acceptNewClients(std::stop_token stop_token);
-	void collectReceivedMessages(std::stop_token stop_token,NetworkConnection::Protocol protocol);
+	void collectReceivedMessages(std::stop_token stop_token,NetworkedId recieversOwnId,NetworkConnection::Protocol protocol);
 	void moveMessageMapToRead();
 
 	NetworkedId runnerID;

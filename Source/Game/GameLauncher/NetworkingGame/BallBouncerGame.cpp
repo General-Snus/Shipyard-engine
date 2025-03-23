@@ -33,7 +33,7 @@ GameObject BallEradicationGame::MakeBall(Vector3f position)
 }
  
 
-void BallEradicationGame::MakeArena(Vector3f position,Vector3f extent)
+GameObject BallEradicationGame::MakeArena(Vector3f position,Vector3f extent)
 {
 	GameObject arenaParent = GameObject::Create("Arena");
 	arenaParent.transform().SetPosition(position);
@@ -81,4 +81,6 @@ void BallEradicationGame::MakeArena(Vector3f position,Vector3f extent)
 		arenaWall.transform().SetScale(2*extent.x,extent.y,1);
 		arenaWall.transform().SetParent(arenaParent.transform());
 	}
+
+	return arenaParent;
 }

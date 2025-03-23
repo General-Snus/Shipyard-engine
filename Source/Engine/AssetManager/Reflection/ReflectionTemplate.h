@@ -145,6 +145,10 @@ namespace Reflection
 		return ImGui::DragFloat(std::format("##{}", identifier).c_str(), &ref);
 	}
 
+	inline bool ImGuiReflect(int& ref,const std::string& identifier)
+	{
+		return ImGui::DragInt(std::format("##{}",identifier).c_str(),&ref);
+	}
 	template <typename T>
 	concept pointerSyntax = requires(T a) { a->GetTypeInfo(); };
 

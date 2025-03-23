@@ -8,6 +8,7 @@
 #include "Engine/AssetManager/ComponentSystem/GameObject.h"
 #include "Engine/PersistentSystems/Networking/NetworkRunner.h"
 
+
 class YourGameLauncher : public GameLauncher
 {
 	void Init() override;
@@ -16,9 +17,8 @@ class YourGameLauncher : public GameLauncher
 	void SyncServices(ServiceLocator& serviceLocator) override;
 
 	GameObject player; 
-	int amountOfBalls = 10;
-	float ballSpawnTimer = 1.0f;
-	float ballSpawnCooldown = 1.0f;
+	GameObject arena;  
+	float ballSpawnTimer = 1.0f; 
 	Vector3f rect = {50,1,50};
 };
 

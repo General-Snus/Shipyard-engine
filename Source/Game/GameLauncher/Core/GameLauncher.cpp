@@ -46,8 +46,8 @@ void YourGameLauncher::Init() {
 			light.SetPower(4.0f);
 			light.BindDirectionToTransform(true);
 		}
-		BallEradicationGame::MakeArena(Vector3f(),rect);
-
+		this->arena = BallEradicationGame::MakeArena(Vector3f(),rect);
+		arena.AddComponent<BallGameController>();
 
 		#ifdef PillarGame
 		constexpr float pillarRadius = 1.0f;
@@ -64,7 +64,6 @@ void YourGameLauncher::Init() {
 void YourGameLauncher::Start() {
 	OPTICK_EVENT();
 	LOGGER.Log("GameLauncher start");
-	GraphicsEngineInstance.debugDrawer.AddDebugBox({-1,-1,-1},{1,1,1});
 }
 
 
@@ -76,9 +75,8 @@ void YourGameLauncher::Update(float delta) {
 		return;
 	}
 
-	auto& manager = Scene::activeManager();
-	manager;
-
+	auto& manager = Scene::activeManager(); 
+	const auto& controller = arena.GetComponent<BallGameController>();
 	for(auto& ball : manager.GetAllComponents<BallTag>())
 	{
 		//Check collisions 
@@ -101,36 +99,34 @@ void YourGameLauncher::Update(float delta) {
 		auto ballPosition = ball.transform().GetPosition();
 		auto& kinematic = ball.GetComponent<cPhysics_Kinematic>();
 
-		float speedup = 1.10f;
+		float speedup = 1.f+(delta);
 		if(ballPosition.x > rect.x && kinematic.ph_velocity.x > 0)
 		{
 			kinematic.ph_velocity.x = std::copysign(kinematic.ph_velocity.x,-1.0f);
-			kinematic.ph_velocity*=speedup;
 		}
 
 		if(ballPosition.x < -rect.x && kinematic.ph_velocity.x < 0)
 		{
 			kinematic.ph_velocity.x = std::copysign(kinematic.ph_velocity.x,1.0f);
-			kinematic.ph_velocity*=speedup;
 		}
 
 		if(ballPosition.z > rect.z && kinematic.ph_velocity.z > 0)
 		{
 			kinematic.ph_velocity.z = std::copysign(kinematic.ph_velocity.z,-1.0f);
-			kinematic.ph_velocity*=speedup;
 		}
 
 		if(ballPosition.z < -rect.z && kinematic.ph_velocity.z < 0)
 		{
 			kinematic.ph_velocity.z = std::copysign(kinematic.ph_velocity.z,1.0f);
-			kinematic.ph_velocity*=speedup;
 		}
+
+		kinematic.ph_velocity*=speedup;
 	}
 
-	auto ballDiff = amountOfBalls - manager.GetAllComponents<BallTag>().size();
+	auto ballDiff = controller.maxBallsInGame - manager.GetAllComponents<BallTag>().size();
 	ballSpawnTimer -= delta;
 	if(ballDiff > 0 && ballSpawnTimer < 0){
-		ballSpawnTimer = ballSpawnCooldown;
+		ballSpawnTimer = controller.ballSpawnCooldown;
 		Vector3f position;
 		position.x = Math::RandomEngine::randomInRange(-rect.x,rect.x);
 		position.z = Math::RandomEngine::randomInRange(-rect.z,rect.z);
@@ -225,21 +221,21 @@ extern "C" BOOL WINAPI DllMain(const HINSTANCE instance, // handle to DLL module
 	// Perform actions based on the reason for calling.
 	switch(reason) {
 	case DLL_PROCESS_ATTACH:
-	// Initialize once for each new process.
-	// Return FALSE to fail DLL load.
-	break;
+		// Initialize once for each new process.
+		// Return FALSE to fail DLL load.
+		break;
 
 	case DLL_THREAD_ATTACH:
-	// Do thread-specific initialization.
-	break;
+		// Do thread-specific initialization.
+		break;
 
 	case DLL_THREAD_DETACH:
-	// Do thread-specific cleanup.
-	break;
+		// Do thread-specific cleanup.
+		break;
 
 	case DLL_PROCESS_DETACH:
-	// Perform any necessary cleanup.
-	break;
+		// Perform any necessary cleanup.
+		break;
 	}
 	return TRUE; // Successful DLL_PROCESS_ATTACH.
 }

@@ -44,6 +44,7 @@ bool IsSocketBound(NetworkSocket socket) {
 
 NetworkConnection::Status NetworkConnection::StartAsServer(NetAddress serverAddress,SessionConfiguration cfg)
 {
+	OPTICK_EVENT();
 	tcpConnectionAddress = serverAddress;
 
 	Close();
@@ -102,6 +103,7 @@ NetworkConnection::Status NetworkConnection::StartAsServer(NetAddress serverAddr
 
 NetworkConnection::Status NetworkConnection::AutoHostOrClient(NetAddress serverAddress,SessionConfiguration cfg)
 {
+	OPTICK_EVENT();
 	tcpConnectionAddress = serverAddress;
 
 	status = StartAsClient(tcpConnectionAddress,cfg);
@@ -115,6 +117,7 @@ NetworkConnection::Status NetworkConnection::AutoHostOrClient(NetAddress serverA
 
 NetworkConnection::Status NetworkConnection::StartAsClient(NetAddress serverAddress,SessionConfiguration cfg)
 {
+	OPTICK_EVENT();
 	tcpConnectionAddress = serverAddress;
 	Close();
 	if(OpenSockets(cfg) == failed)
@@ -161,6 +164,7 @@ NetworkConnection::Status NetworkConnection::StartAsRemoteConnection(NetAddress 
 NetworkConnection::Status NetworkConnection::OpenSockets(SessionConfiguration cfg)
 {
 	cfg;
+	OPTICK_EVENT();
 
 	int iResult;
 
@@ -189,6 +193,7 @@ NetworkConnection::Status NetworkConnection::OpenSockets(SessionConfiguration cf
 
 bool NetworkConnection::Accept(NetworkConnection* returningConnection) const
 {
+	OPTICK_EVENT();
 	assert(returningConnection);
 	if(!returningConnection)
 	{
@@ -248,6 +253,7 @@ NetworkConnection::Status NetworkConnection::GetStatus() const
 
 bool NetworkConnection::TCP(NetworkSocket throughSocket,  NetMessage& message)
 {
+	OPTICK_EVENT();
 	message.timePoint = std::chrono::high_resolution_clock::now();
 	if(send(throughSocket,(const char*)&message,sizeof(message),0) == SOCKET_ERROR)
 	{
@@ -270,6 +276,7 @@ bool NetworkConnection::SendTCP(  NetMessage & message) const
 
 bool NetworkConnection::UDP(NetAddress toAddress,NetworkSocket throughSocket,  NetMessage& message)
 {
+	OPTICK_EVENT();
 	message.timePoint = std::chrono::high_resolution_clock::now();
 	auto addr = toAddress.as_sockaddr();
 	if(sendto(throughSocket,(const char*)&message,sizeof(message),0,&addr,sizeof(addr)) == SOCKET_ERROR)
@@ -283,6 +290,7 @@ bool NetworkConnection::UDP(NetAddress toAddress,NetworkSocket throughSocket,  N
 
 bool NetworkConnection::ReceiveUDP(NetMessage* message,NetAddress* receivedFrom,const int bufferSize,bool blocking,const float msTimeout) const
 {
+	OPTICK_EVENT();
 	blocking;
 	assert(bufferSize <= 512);
 
@@ -337,6 +345,7 @@ bool NetworkConnection::ReceiveUDP(NetMessage* message,NetAddress* receivedFrom,
 
 int NetworkConnection::ReceiveTCP(NetMessage* message,NetAddress* receivedFrom,const int bufferSize,bool blocking,const float msTimeout) const
 {
+	OPTICK_EVENT();
 	assert(bufferSize <= 512);
 
 	if(status && ~Status::initialized)
@@ -400,21 +409,19 @@ NetAddress::NetAddress(const std::string& Ip,unsigned short hostshortPort,Addres
 }
 std::string NetAddress::IPStr() const
 {
-	std::string out;
+	char arr[INET6_ADDRSTRLEN];
 	switch(family)
 	{
-	case AddressFamily::ipv4:
-		out.resize(INET_ADDRSTRLEN);
-		inet_ntop(AF_INET,&address,out.data(),INET_ADDRSTRLEN);
+	case AddressFamily::ipv4: 
+		inet_ntop(AF_INET,&address,arr,INET_ADDRSTRLEN);
 		break;
 
-	case AddressFamily::ipv6:
-		out.resize(INET6_ADDRSTRLEN);
-		inet_ntop(AF_INET6,&address,out.data(),INET6_ADDRSTRLEN);
+	case AddressFamily::ipv6: 
+		inet_ntop(AF_INET6,&address,arr,INET6_ADDRSTRLEN);
 		break;
 	}
 
-	return out;
+	return std::string(arr);
 }
 sockaddr_in NetAddress::as_sockaddr_in() const
 {

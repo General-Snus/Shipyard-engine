@@ -21,6 +21,8 @@
 #pragma optimize( "", off ) 
 void ReplicationLayer::fixedNetworkUpdate(NetworkRunner & runner)
 {
+	OPTICK_EVENT();
+
 	if(runner.IsServer)
 	{
 		server_fixedNetworkUpdate(runner);
@@ -33,6 +35,8 @@ void ReplicationLayer::fixedNetworkUpdate(NetworkRunner & runner)
 
 void ReplicationLayer::server_fixedNetworkUpdate(NetworkRunner & runner)
 {
+	OPTICK_EVENT();
+
 	auto now = std::chrono::steady_clock::now();
 	for(auto& networkedTransform : Scene::activeManager().GetAllComponents<NetworkTransform>())
 	{
@@ -61,6 +65,8 @@ void ReplicationLayer::server_fixedNetworkUpdate(NetworkRunner & runner)
 
 void ReplicationLayer::client_fixedNetworkUpdate(const NetworkRunner & runner) const
 {
+	OPTICK_EVENT();
+
 	runner;
 	auto now = std::chrono::high_resolution_clock::now(); //switch out to server time
 
@@ -106,6 +112,7 @@ void ReplicationLayer::client_fixedNetworkUpdate(const NetworkRunner & runner) c
 
 void ReplicationLayer::client_ReadIncoming(const NetworkRunner & runner)
 {
+	OPTICK_EVENT();
 
 	if(runner.messagesMap.contains(DestroyObjectMessage::type))
 	{
@@ -180,6 +187,8 @@ void ReplicationLayer::receiveMessage(const NetMessage &)
 
 bool ReplicationLayer::registerObject(const NetworkRunner & runner,const NetworkObject & object)
 {
+	OPTICK_EVENT();
+
 	assert(runner.IsServer);
 
 	if(!idToObjectMap.contains(object.GetServerID()))
@@ -205,6 +214,9 @@ bool ReplicationLayer::registerObject(const NetworkRunner & runner,const Network
 
 bool ReplicationLayer::unRegisterObject(const NetworkRunner & runner,const NetworkObject & object)
 {
+	OPTICK_EVENT();
+	assert(runner.IsServer);
+
 	if(idToObjectMap.contains(object.GetServerID()))
 	{
 		//All registered objects have been sent to the clients  

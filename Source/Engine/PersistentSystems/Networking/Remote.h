@@ -27,13 +27,14 @@ struct Remote {
 	void Consume();
 	void TryUDPConnection(NetAddress serverAddress); 
 	NetAddress AddressByProtocol(NetworkConnection::Protocol protocol);
+	float rtt() const;
 private:
 	bool hasConnectedOverUDP = false;
 	NetworkedId id;
 	std::string nickname;
 	TimePoint lastRecievedMessageTime;
 	TimePoint lastHeartbeatTime;
-	Duration rtt;
+	Duration roundTrip;
 	std::vector<RemoteRecievedMessage> messages;
 	std::mutex messageMutex;
 	std::jthread receiveTCP;

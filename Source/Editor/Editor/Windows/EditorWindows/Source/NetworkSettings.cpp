@@ -9,6 +9,8 @@
 
 NetworkSettings::NetworkSettings() {}
 
+#pragma optimize( "", off ) 
+
 void NetworkSettings::RenderImGUi() {
 	ImGui::Begin(std::format("Network settings##{}",uniqueID).c_str(),&m_KeepWindow);
 	ImGui::Markdown(R"(
@@ -66,7 +68,7 @@ Here you can adjust network settings to your liking or something.
 
 		break;
 	}
-	if(ImGui::Button("Attempt connection")) { 
+	if(ImGui::Button("Attempt connection")) {
 		Runner.StartSession(cfg);
 	}
 
@@ -83,7 +85,9 @@ Here you can adjust network settings to your liking or something.
 		ImGui::Text("-Remotes\n");
 		for(size_t i = 0; i < Runner.remoteConnections.size(); i++) {
 			const auto& client = Runner.remoteConnections[i];
-			if(!client.isConnected) { continue; }
+			if(!client.isConnected) {
+				continue;
+			}
 
 			auto timeSince = std::chrono::duration_cast<std::chrono::seconds>((std::chrono::high_resolution_clock::now() - client.lastRecievedMessageTime));
 			ImGui::Text(std::format(
@@ -99,13 +103,38 @@ Here you can adjust network settings to your liking or something.
 				,i,
 				client.nickname,
 				client.id.id.String(),
-				client.remoteConnection.Address().IPStr(),
+				client.remoteConnection.Address().IPStr().c_str(),
 				client.remoteConnection.Address().port,
-				std::chrono::duration_cast<std::chrono::milliseconds>(client.rtt).count(),
+				client.rtt() ,
 				client.hasConnectedOverUDP
-				).c_str());
+			).c_str());
 		}
+	} else
+	{
+		ImGui::Text(std::format(
+			R"(
+			My Status:
+				Nickname: {} 
+				UUID: {} 
+				IP: {} 
+				TCPPort: {} 
+				Has established udp connection: {}
+				UDPPort: {} 
+				Ping: {} ms
+			)",
+			Runner.runnerName,
+			Runner.runnerID.id.String(),
+			Runner.connection.Address().IPStr(),
+			Runner.connection.Address().port,
+			Runner.udpConnectionInitialized,
+			Runner.serverUdpConnection.port,
+			Runner.heartBeatSystem.rtt()
+		).c_str());
+
+
 	}
 
 	ImGui::End();
 }
+#pragma optimize( "", on )
+
