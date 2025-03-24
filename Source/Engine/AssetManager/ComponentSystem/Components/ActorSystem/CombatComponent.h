@@ -4,13 +4,11 @@
 class CombatComponent : public Component
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     CombatComponent(const SY::UUID anOwnerID, GameObjectManager *aManager);
     ~CombatComponent() override = default;
     void Init() override;
     void Update() override;
-    void Render() override;
-
     void Respawn();
     void FireProjectile();
     void Healing();

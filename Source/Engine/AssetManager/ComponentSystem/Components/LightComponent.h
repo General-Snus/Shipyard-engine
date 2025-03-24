@@ -17,7 +17,7 @@ class SpotLight;
 class PointLight;
 
 class Texture;
-class cLight : public Component
+class Light : public Component
 {
 
     friend class GraphicsEngine;
@@ -25,10 +25,10 @@ class cLight : public Component
     friend class EnvironmentLightPSO;
 
   public:
-    MYLIB_REFLECTABLE();
-    cLight() = delete;                                             // Create a generic cube
-    cLight(const SY::UUID anOwnerId, GameObjectManager *aManager); // Create a generic cube
-    cLight(const SY::UUID anOwnerId, GameObjectManager *aManager, const eLightType type);
+    ReflectableTypeRegistration();
+    Light() = delete;                                             // Create a generic cube
+    Light(const SY::UUID anOwnerId, GameObjectManager *aManager); // Create a generic cube
+    Light(const SY::UUID anOwnerId, GameObjectManager *aManager, const eLightType type);
 
     void Init() override;
 
@@ -75,7 +75,7 @@ class cLight : public Component
     template <class T> std::shared_ptr<T> GetData();
 
     void Update() override;
-    ~cLight() override = default;
+    ~Light() override = default;
 
     bool boundToTransform = true;
     bool isShadowCaster = false;
@@ -98,20 +98,20 @@ class cLight : public Component
     std::shared_ptr<Texture> shadowMap[6];
 };
 
-REFL_AUTO(type(cLight), field(isRendered), field(isShadowCaster), field(boundToTransform), field(m_Color))
+REFL_AUTO(type(Light), field(isRendered), field(isShadowCaster), field(boundToTransform), field(m_Color))
 
-template <> inline std::shared_ptr<DirectionalLight> cLight::GetData<DirectionalLight>()
+template <> inline std::shared_ptr<DirectionalLight> Light::GetData<DirectionalLight>()
 {
     // myDirectionLightData->Color = m_Color.GetRGB();
     return myDirectionLightData;
 }
 
-template <> inline std::shared_ptr<SpotLight> cLight::GetData<SpotLight>()
+template <> inline std::shared_ptr<SpotLight> Light::GetData<SpotLight>()
 {
     return mySpotLightData;
 }
 
-template <> inline std::shared_ptr<PointLight> cLight::GetData<PointLight>()
+template <> inline std::shared_ptr<PointLight> Light::GetData<PointLight>()
 {
     // myPointLightData->Color = m_Color.GetRGB();
     return myPointLightData;

@@ -1,4 +1,4 @@
-#include "Engine/AssetManager/AssetManager.pch.h"
+#include "AssetManager.pch.h"
 
 #include "../EventController.h" 
 #include "Engine/AssetManager/Objects/AI/AgentSystem/AIEventManager.h"
@@ -11,7 +11,7 @@ EventController::EventController()
 
 bool EventController::Update(GameObject input)
 {
-	auto* transform = input.TryGetComponent<Transform>();
+	const auto* transform = input.TryGetComponent<Transform>();
 
 	if (pathToTarget)
 	{

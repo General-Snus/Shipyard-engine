@@ -1,30 +1,31 @@
 #pragma once
-#include <thread> 
 #include "Windows.h"
+#include <thread>
 
-LRESULT CALLBACK SplashWinProc(_In_ HWND hWnd,_In_ UINT uMsg,_In_ WPARAM wParam,_In_ LPARAM lParam);
+LRESULT CALLBACK SplashWinProc(_In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam);
 
 class SplashWindow
 {
-	HWND myHandle,myLayeredHandle;
-	HBITMAP bmp;
-	HINSTANCE myHInstance;
+    HWND myHandle, myLayeredHandle;
+    HBITMAP bmp;
+    HINSTANCE myHInstance;
 
-	std::thread myThread;
+    std::thread myThread;
 
-	bool bIsRunning = true;
+    bool bIsRunning = true;
 
-	void MessagePump();
+    void MessagePump();
 
-	void CreateAndShowWindow();
+    void CreateAndShowWindow();
 
-public:
+  public:
+    HBITMAP GetBitmap() const
+    {
+        return bmp;
+    }
 
-	HBITMAP GetBitmap() const { return bmp; }
+    void Init(HINSTANCE hInstance);
+    void Close();
 
-	void Init(HINSTANCE hInstance);
-	void Close();
-
-	~SplashWindow();
+    ~SplashWindow();
 };
-

@@ -5,18 +5,21 @@
 class cPhysXStaticBody : public Component
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
+    defaultInspector();
     cPhysXStaticBody(const SY::UUID anOwnerId, GameObjectManager *aManager);
 
     void Init() override;
     void UpdateFromCollider();
-    void Update() override;
-    void Render() override;
+    void makeShape(const Collider* collider,const Transform& transform);
+    void updateShape(const Collider* collider,const Transform& transform);
+    void Update() override; 
     void Destroy() override;
     void OnSiblingChanged(const std::type_info *SourceClass) override;
 
   private:
-    physx::PxRigidStatic *data;
+    physx::PxRigidStatic *data; 
+    physx::PxShape* shape = {}; //TODO: FIX THIS
 };
 
 REFL_AUTO(type(cPhysXStaticBody))

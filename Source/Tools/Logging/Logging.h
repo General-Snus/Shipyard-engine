@@ -2,108 +2,162 @@
 #include <format>
 #include <mutex>
 #include <source_location>
-#include <string>
-#include <vector>
+#include <stacktrace>
+#include <string> 
 
-#include "Tools/Utilities/LinearAlgebra/Vector3.hpp"
 #include <Tools/Utilities/Color.h>
 #include <Tools/Utilities/TemplateHelpers.h>
+#include "Tools/Utilities/LinearAlgebra/Vector3.hpp"
+#include <deque>
 
-class Logger
+#define LOGGER ServiceLocator::Instance().GetService<LoggerService>()
+
+class LoggerService : public Singleton
 {
-  public:
-    enum class LogType : int32_t
-    {
-        none = 0,
-        message = 1 << 0,
-        warning = 1 << 1,
-        error = 1 << 2,
-        critical = 1 << 3,
-        success = 1 << 4,
-        All = INT32_MAX
-    };
+public:
+	LoggerService();
 
-  private:
-    struct LogMsg
-    {
-        LogType messageType;
-        std::string message;
-    };
-    struct logBuffer
-    {
-        std::vector<LogMsg> LoggedMessages;
-        unsigned messagesCount{};
-        unsigned warnCount{};
-        unsigned errCount{};
-        unsigned criticalCount{};
-        unsigned successCount{};
+	enum class LogType : int32_t
+	{
+		none     = 0,
+		message  = 1 << 0,
+		warning  = 1 << 1,
+		error    = 1 << 2,
+		critical = 1 << 3,
+		success  = 1 << 4,
+		All      = INT32_MAX
+	};
 
-        void Add(LogMsg msg)
-        {
-            switch (msg.messageType)
-            {
-                using enum Logger::LogType;
-            case message:
-                messagesCount++;
-                break;
-            case warning:
-                warnCount++;
-                break;
-            case error:
-                errCount++;
-                break;
-            case critical:
-                criticalCount++;
-                break;
-            case success:
-                successCount++;
-                break;
-            default:
-                break;
-            }
-            LoggedMessages.emplace_back(msg);
-        }
-    };
+	struct LogMsg
+	{
+		LogType         messageType;
+		std::string     message;
+		std::stacktrace trace;
+	};
 
-  public:
-    static inline logBuffer m_Buffer;
-    static bool Create();
-    static void SetConsoleHandle(void *aHandle);
-    static void SetPrintToVSOutput(bool bNewValue);
-    static void Log(const char *aString, const std::source_location &location = std::source_location::current());
-    static Color GetColor(LogType type);
+private:
+	static constexpr int maxsize = 10'000;
+	struct logBuffer
+	{
+		std::deque<LogMsg> LoggedMessages;
+		unsigned            messagesCount{};
+		unsigned            warnCount{};
+		unsigned            errCount{};
+		unsigned            criticalCount{};
+		unsigned            successCount{};
 
-    template <typename T>
-    static void Log(const T &aString, const std::source_location &location = std::source_location::current())
-    {
-        Log(std::to_string(aString));
-    }
+		void Add(const LogMsg& msg)
+		{
+			switch (msg.messageType)
+			{
+				using enum LogType;
+			case message:
+				messagesCount++;
+				break;
+			case warning:
+				warnCount++;
+				break;
+			case error:
+				errCount++;
+				break;
+			case critical:
+				criticalCount++;
+				break;
+			case success:
+				successCount++;
+				break;
+			default:
+				break;
+			}
+			if(LoggedMessages.size() > maxsize)
+			{
+				LoggedMessages.pop_front();
+			}
 
-    static void Log(const std::string &aString, const std::source_location &location = std::source_location::current());
-    static void Warn(const std::string &aString,
-                     const std::source_location &location = std::source_location::current());
+			LoggedMessages.emplace_back(msg);
+		}
+	};
 
-    static void Err(const std::string &aString, const std::source_location &location = std::source_location::current());
-    static void Succ(const std::string &aString,
-                     const std::source_location &location = std::source_location::current());
-    static void Critical(const std::exception &anException, unsigned aLevel = 0,
-                         const std::source_location &location = std::source_location::current());
-    static void Critical(const std::string &anExceptionText, unsigned aLevel = 0,
-                         const std::source_location &location = std::source_location::current());
-    static void NewLine();
-    void *GetHandle() const
-    {
-        return myHandle;
-    }
+public:
+	logBuffer m_Buffer;
+	bool      Create();
+	void      SetConsoleHandle(void* aHandle);
+	void      SetPrintToVSOutput(bool bNewValue);
+	void      Log(const char*            aString, bool withNotice = false,
+	         const std::source_location& location = std::source_location::current());
+	static Color GetColor(LogType type);
 
-  private:
-    static inline void *myHandle = 0;
-    static inline bool shouldPrintToOutput = false;
-    static inline bool isInitialized = false;
-    static inline std::string myNamespace;
-    static inline std::mutex readyToWrite;
-    static [[nodiscard]] std::string Timestamp();
-    Logger() = default;
+	
+
+	void Log(const std::string&          aString, bool withNotice = false,
+	         const std::source_location& location = std::source_location::current());
+
+	void Warn(const std::string&          aString, bool withNotice = false,
+	          const std::source_location& location = std::source_location::current());
+
+
+	void Err(const std::string&          aString, bool withNotice = false,
+	         const std::source_location& location = std::source_location::current());
+ 
+	void ErrTrace(const std::string&          aString, bool withNotice = false,
+	              const std::stacktrace&      trace = std::stacktrace::current(),
+	              const std::source_location& location = std::source_location::current());
+
+	void Success(const std::string&          aString, bool withNotice = false,
+	             const std::source_location& location = std::source_location::current());
+
+	void Critical(const std::exception&       anException, unsigned aLevel = 0, bool withNotice = false,
+	              const std::source_location& location = std::source_location::current());
+
+	void Critical(const std::string&          anExceptionText, unsigned aLevel = 0, bool withNotice = false,
+	              const std::source_location& location = std::source_location::current());
+
+	static void NewLine();
+	void        Clear();
+
+	void* GetHandle() const
+	{
+		return myHandle;
+	}
+
+	template <typename T>
+	void Log(const T& aString,bool withNotice = false,
+		const std::source_location& location = std::source_location::current()) {
+		Log(std::to_string(aString),withNotice,location);
+	}
+
+	template <typename... Args>
+	void LogC(Args&&... args) {
+		std::ostringstream stream;
+		(stream << ... << std::forward<Args>(args));
+		Log(std::string(stream.str()));
+	}
+
+	template <typename... Args>
+	void WarnC(Args&&... args) {
+		std::ostringstream stream;
+		(stream << ... << std::forward<Args>(args));
+		Warn(std::string(stream.str()));
+	}
+
+	template <typename... Args>
+	void ErrC(Args&& ... args) {
+		std::ostringstream stream;
+		(stream << ... << std::forward<Args>(args));
+		Err(stream.str());
+	}
+
+	std::mutex & mutexLock() {
+		return readyToWrite;
+	}
+private:
+	void*                            myHandle = nullptr;
+	bool                             shouldPrintToOutput = false;
+	bool                             isInitialized = false;
+	std::string                      myNamespace;
+	std::mutex                       readyToWrite;
+	[[nodiscard]] static std::string Timestamp();
 };
 
-ENABLE_ENUM_BITWISE_OPERATORS(Logger::LogType)
+ENABLE_ENUM_BITWISE_OPERATORS(LoggerService::LogType)
+

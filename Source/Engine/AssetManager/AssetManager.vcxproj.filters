@@ -36,9 +36,6 @@
     <ClInclude Include="ComponentSystem\ComponentManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\BackgroundColor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ComponentSystem\Components\Animator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -60,9 +57,6 @@
     <ClInclude Include="Objects\BaseAssets\TextureAsset.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ComponentSystem\Components\Skybox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ComponentSystem\Components\LightComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -70,12 +64,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ComponentSystem\Components\CameraComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\FrameStatistics.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\RenderMode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ComponentSystem\Components\ActorSystem\cActor.h">
@@ -183,10 +171,13 @@
     <ClInclude Include="Objects\AI\AgentSystem\BehaviourTree\BrainTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ComponentSystem\Components\GraphComponent.h">
+    <ClInclude Include="ComponentSystem\Components\Network\NetworkSync.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\BaseAssets\GraphAsset.h">
+    <ClInclude Include="GameResourcesLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Loader\LoaderBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -212,9 +203,6 @@
     <ClCompile Include="ComponentSystem\Source\ComponentManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\BackgroundColor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ComponentSystem\Components\Source\Animator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -236,19 +224,10 @@
     <ClCompile Include="Objects\BaseAssets\Source\TextureAsset.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ComponentSystem\Components\Source\Skybox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ComponentSystem\Components\Source\LightComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ComponentSystem\Components\Source\CameraComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\FrameStatistics.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\RenderMode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\cActor.cpp">
@@ -344,15 +323,18 @@
     <ClCompile Include="Objects\AI\AgentSystem\BehaviourTree\BrainTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\BaseAssets\Source\GraphAsset.cpp">
+    <ClCompile Include="ComponentSystem\Components\Network\Source\NetworkSync.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ComponentSystem\Components\Source\GraphComponent.cpp">
+    <ClCompile Include="GameResourcesLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Loader\LoaderBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="cpp.hint" />
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

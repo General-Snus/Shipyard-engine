@@ -6,7 +6,7 @@
 class cActor : public Component
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     cActor(const SY::UUID anOwnerId, GameObjectManager *aManager);
     ~cActor() override = default;
     void Init() override;

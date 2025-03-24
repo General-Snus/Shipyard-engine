@@ -1,0 +1,43 @@
+#pragma once
+#include "Tools/Utilities/System/ServiceLocator.h"
+#include "d3dx12.h"
+#include <wrl/client.h>
+
+class GPU;
+class IndexResource;
+class VertexResource;
+class GpuResource;
+class Texture;
+class GPUCommandQueue;
+class GPURootSignature;
+class ResourceStateTracker;
+
+#define D3D12_GPU_VIRTUAL_ADDRESS_NULL ((D3D12_GPU_VIRTUAL_ADDRESS)0)
+#define D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN ((D3D12_GPU_VIRTUAL_ADDRESS) - 1)
+#define MY_IID_PPV_ARGS IID_PPV_ARGS
+
+// struct IDXGISwapChain4;
+// struct D3D12_CPU_DESCRIPTOR_HANDLE;
+// struct D3D12_GPU_DESCRIPTOR_HANDLE;
+// struct ID3D10Blob;
+// struct ID3D12RootSignature;
+// struct ID3D12GraphicsCommandList2;
+// struct ID3D12Resource;
+struct IDxcLibrary;
+struct IDxcCompiler;
+struct HeapHandle;
+struct IDxcBlob;
+// struct D3D12_FEATURE_DATA_FORMAT_SUPPORT;
+
+enum class eHeapTypes;
+enum class ViewType;
+enum class ePIPELINE_STAGE;
+enum class eRootBindings;
+
+typedef ID3D10Blob ID3DBlob;
+
+using DxCommandList = Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList3>;
+using DeviceType = Microsoft::WRL::ComPtr<ID3D12Device8>;
+using namespace Microsoft::WRL;
+
+#define GPUInstance ServiceLocator::Instance().GetService<GPU>()

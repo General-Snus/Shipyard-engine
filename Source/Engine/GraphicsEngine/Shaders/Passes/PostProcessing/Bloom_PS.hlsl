@@ -1,6 +1,6 @@
  #include "../../Headers/ShaderStructs.hlsli"
  
-PostProcessPixelOutput main(BRDF_VS_to_PS input)
+PostProcessPixelOutput main(SS_VStoPS input)
 {
     PostProcessPixelOutput output;
     

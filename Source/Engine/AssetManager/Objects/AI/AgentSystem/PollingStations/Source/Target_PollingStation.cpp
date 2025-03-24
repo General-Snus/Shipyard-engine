@@ -1,4 +1,4 @@
-#include "Engine/AssetManager/AssetManager.pch.h"
+#include "AssetManager.pch.h"
 
 #include "Engine/AssetManager/Objects/AI/AgentSystem/PollingStations/Target_PollingStation.h"
 
@@ -44,7 +44,7 @@ std::vector<MultipleTargets_PollingStation::DataTuple> MultipleTargets_PollingSt
     OPTICK_EVENT();
     std::vector<DataTuple> returnVector;
     returnVector.reserve(targets.size());
-    SY::UUID filterID = filter.GetID();
+    const SY::UUID filterID = filter.GetID();
     for (auto &g : targets)
     {
         if (filterID == g.GetID())
@@ -80,7 +80,7 @@ Vector3f MultipleTargets_PollingStation::GetClosestTargetPosition(Vector3f myPos
     OPTICK_EVENT();
     float closestDistance = FLT_MAX;
     Vector3f closestPosition = myPosition;
-    SY::UUID filterID = filter.GetID();
+    const SY::UUID filterID = filter.GetID();
 
     for (auto &g : targets)
     {
@@ -120,7 +120,7 @@ GameObject MultipleTargets_PollingStation::GetClosestAliveTarget(Vector3f myPosi
     static std::vector<GameObject> filterVec;
 
     filterVec.emplace_back(filter);
-    int i = 0;
+    const int i = 0;
     while (i < 1000)
     {
         auto closestObj = GetClosestTarget(myPosition, filterVec);
@@ -182,7 +182,7 @@ GameObject MultipleTargets_PollingStation::GetClosestTarget(Vector3f myPosition,
 {
     float closestDistance = FLT_MAX;
     GameObject closestObj;
-    SY::UUID filterID = filter.GetID();
+    const SY::UUID filterID = filter.GetID();
 
     for (auto &g : targets)
     {
@@ -257,7 +257,7 @@ std::vector<MultipleTargets_PollingStation::DataTuple> MultipleTargets_PollingSt
 Vector3f MultipleTargets_PollingStation::GetCoMWithinCircle(Vector3f position, float radius, int &EntitiesInCircle)
 {
     OPTICK_EVENT();
-    std::vector<DataTuple> returnVector = GetTargetsWithinCircle(position, radius);
+    const std::vector<DataTuple> returnVector = GetTargetsWithinCircle(position, radius);
     EntitiesInCircle = (int)returnVector.size();
 
     if (returnVector.empty())
@@ -298,7 +298,7 @@ Vector3f MultipleTargets_PollingStation::GetClosestPositionOnCollider(Vector3f p
     Vector3f closestPosition = position;
     for (auto &g : targets)
     {
-        const Vector3f coll = g.GetComponent<cCollider>().GetClosestPosition(position);
+        const Vector3f coll = g.GetComponent<Collider>().GetClosestPosition(position);
         const float dist = (coll - position).LengthSqr();
         if (dist < closestDistance)
         {
@@ -315,7 +315,7 @@ Vector3f MultipleTargets_PollingStation::GetClosestPositionOnCollider(Vector3f p
     Vector3f closestPosition = position;
     for (auto &g : targets)
     {
-        const auto &collider = g.GetComponent<cCollider>();
+        const auto &collider = g.GetComponent<Collider>();
         const Vector3f coll = collider.GetClosestPosition(position);
         const float dist = (coll - position).LengthSqr();
         if (dist < closestDistance)

@@ -1,27 +1,30 @@
+#include "../Grid.h"
 #include <algorithm>
-#include "../Grid.h" 
 
 Grid::Grid(
 	float aStartX,
 	float aStartY,
-	float aGridSize) : myGridSize(aGridSize),myRoot(new GridCell(Vector2f(aStartX,aStartY),aGridSize)),count(0)
+	float aGridSize) : grid_size(aGridSize), root(new GridCell(Vector2f(aStartX, aStartY), aGridSize)), count(0)
 {
 }
 
-void Grid::Update()
+void Grid::update()
 {
 }
-void Grid::Render()
+
+void Grid::render()
 {
-	//myRoot->Render(dbd, sharedData, instance, myCenterOffset); 
+	//root->Render(dbd, sharedData, instance, centerOffset); 
 }
+
 Vector2f Grid::GetOffset() const
 {
-	return myCenterOffset;
+	return center_offset;
 }
+
 void Grid::AddObject(GridObject* aObject)
 {
-	if (myRoot->AddObject(aObject))
+	if (root->AddObject(aObject))
 	{
 		count++;
 	}
@@ -29,12 +32,12 @@ void Grid::AddObject(GridObject* aObject)
 
 std::vector<GridObject*> Grid::GetAllWithinRadius(const Border& aBoarder) const
 {
-	if (!myRoot->ContainsPart(aBoarder))
+	if (!root->containsPart(aBoarder))
 	{
 		return {};
 	}
 	std::vector<GridObject*> cells;
-	for (auto& i : myRoot->myObjects)
+	for (auto& i : root->myObjects)
 	{
 		if (aBoarder.ContainsPoint(i->myBorder.myPosition))
 		{
@@ -42,30 +45,31 @@ std::vector<GridObject*> Grid::GetAllWithinRadius(const Border& aBoarder) const
 		}
 	}
 
-	cells = myRoot->GetAllWithinRadius(aBoarder);
+	cells = root->getAllWithinRadius(aBoarder);
 	return cells;
 }
+
 std::vector<GridCell*> Grid::GetCellWithinRadius(const Border& aBoarder) const
 {
-	if (!myRoot->ContainsPart(aBoarder))
+	if (!root->containsPart(aBoarder))
 	{
 		return {};
 	}
 
 	std::vector<GridCell*> cells;
-	cells.push_back(myRoot);
+	cells.push_back(root);
 
-	if (myRoot->myChildren[0] != nullptr)
+	if (root->myChildren[0] != nullptr)
 	{
-		for (const auto& i : myRoot->myChildren)
+		for (const auto& i : root->myChildren)
 		{
-
-			std::vector<GridCell*> newCells = i->GetCellWithinRadius(aBoarder);
-			cells.insert(cells.begin(),newCells.begin(),newCells.end());
+			std::vector<GridCell*> newCells = i->getCellWithinRadius(aBoarder);
+			cells.insert(cells.begin(), newCells.begin(), newCells.end());
 		}
 	}
 	return cells;
 }
+
 std::vector<GridObject*> Grid::GetObjectsInCells(const std::vector<GridCell*>& aCells)
 {
 	std::vector<GridObject*> vector;
@@ -73,7 +77,7 @@ std::vector<GridObject*> Grid::GetObjectsInCells(const std::vector<GridCell*>& a
 	{
 		for (auto obj : cell->myObjects)
 		{
-			if (std::ranges::find(vector,obj) == vector.end())
+			if (std::ranges::find(vector, obj) == vector.end())
 
 			{
 				vector.push_back(obj);
@@ -81,17 +85,17 @@ std::vector<GridObject*> Grid::GetObjectsInCells(const std::vector<GridCell*>& a
 		}
 	}
 
-	return	vector;
+	return vector;
 }
 
-GridCell::GridCell(const Vector2<float> position,const  float  size) : myChildren{}
+GridCell::GridCell(const Vector2<float> position, const float size) : myChildren{}
 {
 	myPosition = position;
 	myHalfWidth = size / 2.0f;
 
 
 	constexpr float modSize = 0.0f;
-	Vector2f start = {
+	Vector2f        start = {
 		position.x + modSize,
 		position.y + modSize
 	};
@@ -121,10 +125,9 @@ GridCell::GridCell(const Vector2<float> position,const  float  size) : myChildre
 	//myQuad.back().color = { 1,0,0,1 };
 }
 
-std::vector<GridObject*> GridCell::GetAllWithinRadius(const Border& aBoarder)
+std::vector<GridObject*> GridCell::getAllWithinRadius(const Border& aBoarder)
 {
-
-	if (ContainsPart(aBoarder))
+	if (containsPart(aBoarder))
 	{
 		return {};
 	}
@@ -142,15 +145,16 @@ std::vector<GridObject*> GridCell::GetAllWithinRadius(const Border& aBoarder)
 	{
 		for (const auto& i : myChildren)
 		{
-			std::vector<GridObject*> newCells = i->GetAllWithinRadius(aBoarder);
-			cells.insert(cells.begin(),newCells.begin(),newCells.end());
+			std::vector<GridObject*> newCells = i->getAllWithinRadius(aBoarder);
+			cells.insert(cells.begin(), newCells.begin(), newCells.end());
 		}
 	}
 	return cells;
 }
-std::vector<GridCell*> GridCell::GetCellWithinRadius(const Border& aBoarder)
+
+std::vector<GridCell*> GridCell::getCellWithinRadius(const Border& aBoarder)
 {
-	if (!ContainsPart(aBoarder))
+	if (!containsPart(aBoarder))
 	{
 		return {};
 	}
@@ -160,15 +164,16 @@ std::vector<GridCell*> GridCell::GetCellWithinRadius(const Border& aBoarder)
 	{
 		for (const auto& i : myChildren)
 		{
-			std::vector<GridCell*> newCells = i->GetCellWithinRadius(aBoarder);
-			cells.insert(cells.begin(),newCells.begin(),newCells.end());
+			std::vector<GridCell*> newCells = i->getCellWithinRadius(aBoarder);
+			cells.insert(cells.begin(), newCells.begin(), newCells.end());
 		}
 	}
 	return cells;
 }
+
 bool GridCell::AddObject(GridObject* aObject)
 {
-	if (!Contains(aObject->myBorder))
+	if (!contains(aObject->myBorder))
 	{
 		return false;
 	}
@@ -181,7 +186,6 @@ bool GridCell::AddObject(GridObject* aObject)
 
 	if (myChildren[0] == nullptr)
 	{
-
 		Subdivide();
 	}
 
@@ -199,14 +203,14 @@ bool GridCell::AddObject(GridObject* aObject)
 
 	//6assert("ERROR: Object not added to any child cell" && false);
 }
+
 void GridCell::Subdivide()
 {
 	//Subdvide the area equally into 4 new cells
-	myChildren[0] = new GridCell(myPosition,myHalfWidth);
-	myChildren[1] = new GridCell(Vector2<float>(myPosition.x + myHalfWidth,myPosition.y),myHalfWidth);
-	myChildren[2] = new GridCell(Vector2<float>(myPosition.x,myPosition.y + myHalfWidth),myHalfWidth);
-	myChildren[3] = new GridCell(Vector2<float>(myPosition.x + myHalfWidth,myPosition.y + myHalfWidth),myHalfWidth);
-
+	myChildren[0] = new GridCell(myPosition, myHalfWidth);
+	myChildren[1] = new GridCell(Vector2<float>(myPosition.x + myHalfWidth, myPosition.y), myHalfWidth);
+	myChildren[2] = new GridCell(Vector2<float>(myPosition.x, myPosition.y + myHalfWidth), myHalfWidth);
+	myChildren[3] = new GridCell(Vector2<float>(myPosition.x + myHalfWidth, myPosition.y + myHalfWidth), myHalfWidth);
 
 
 	//Move objects to the new cells
@@ -218,7 +222,6 @@ void GridCell::Subdivide()
 			if (j->AddObject(i))
 			{
 				succeded = true;
-				continue;
 			}
 		}
 		if (succeded)
@@ -227,9 +230,10 @@ void GridCell::Subdivide()
 		}
 	}
 	//bool lamda = [](GridCell* a) {return a == nullptr}
-	myObjects.erase(std::remove_if(myObjects.begin(),myObjects.end(),[](GridObject* a) { return (a == nullptr); }),myObjects.end());
+	std::erase_if(myObjects, [](GridObject* a) { return (a == nullptr); });
 	//myObjects.clear();
 }
+
 //void GridCell::Render(Tga::LineDrawer& aLineDrawer, Tga::SpriteSharedData& sbs, Tga::Sprite2DInstanceData& aInstance, Vector2<float> aCenterOffset)
 //{
 //	for (int i = 0; i < myObjects.size(); i++)
@@ -261,26 +265,30 @@ void GridCell::Subdivide()
 //
 //}
 
-bool GridCell::Contains(const Border& aObject)
+bool GridCell::contains(const Border& aObject) const
 {
-	const bool insideX = (aObject.myPosition.x - aObject.mySize.x * 0.5f >= myPosition.x) && (aObject.myPosition.x + aObject.mySize.x * 0.5f <= myPosition.x + myHalfWidth * 2.0f);
-	const bool insideY = (aObject.myPosition.y - aObject.mySize.y * 0.5f >= myPosition.y) && (aObject.myPosition.y + aObject.mySize.y * 0.5f <= myPosition.y + myHalfWidth * 2.0f);
+	const bool insideX = (aObject.myPosition.x - aObject.mySize.x * 0.5f >= myPosition.x) && (aObject.myPosition.x +
+		aObject.mySize.x * 0.5f <= myPosition.x + myHalfWidth * 2.0f);
+	const bool insideY = (aObject.myPosition.y - aObject.mySize.y * 0.5f >= myPosition.y) && (aObject.myPosition.y +
+		aObject.mySize.y * 0.5f <= myPosition.y + myHalfWidth * 2.0f);
 
 	return (insideX && insideY);
 }
 
-bool GridCell::ContainsPart(const Border& aObject)
+bool GridCell::containsPart(const Border& aObject) const
 {
-	const bool insideX = (aObject.myPosition.x + aObject.mySize.x * 0.5f >= myPosition.x) && (aObject.myPosition.x - aObject.mySize.x * 0.5f <= myPosition.x + myHalfWidth * 2.0f);
-	const bool insideY = (aObject.myPosition.y + aObject.mySize.y * 0.5f >= myPosition.y) && (aObject.myPosition.y - aObject.mySize.y * 0.5f <= myPosition.y + myHalfWidth * 2.0f);
+	const bool insideX = (aObject.myPosition.x + aObject.mySize.x * 0.5f >= myPosition.x) && (aObject.myPosition.x -
+		aObject.mySize.x * 0.5f <= myPosition.x + myHalfWidth * 2.0f);
+	const bool insideY = (aObject.myPosition.y + aObject.mySize.y * 0.5f >= myPosition.y) && (aObject.myPosition.y -
+		aObject.mySize.y * 0.5f <= myPosition.y + myHalfWidth * 2.0f);
 
 	return (insideX && insideY);
 }
 
 bool Border::ContainsPoint(Vector2<float> aPosition) const
 {
-	const Vector2f MinPoint = { myPosition.x - mySize.x, myPosition.y - mySize.y };
-	const Vector2f MaxPoint = { myPosition.x + mySize.x, myPosition.y + mySize.y };
+	const Vector2f MinPoint = {myPosition.x - mySize.x, myPosition.y - mySize.y};
+	const Vector2f MaxPoint = {myPosition.x + mySize.x, myPosition.y + mySize.y};
 	if (aPosition.x >= MinPoint.x && aPosition.x <= MaxPoint.x)
 	{
 		if (aPosition.y >= MinPoint.y && aPosition.y <= MaxPoint.y)

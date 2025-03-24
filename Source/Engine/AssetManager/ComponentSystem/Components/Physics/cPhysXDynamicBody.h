@@ -6,13 +6,12 @@
 class cPhysXDynamicBody : public Component
 {
 public:
-	MYLIB_REFLECTABLE();
+	ReflectableTypeRegistration();
 	cPhysXDynamicBody(const SY::UUID anOwnerId,GameObjectManager* aManager);
 
 
 	void Init() override;
-	void Update() override;
-	void Render() override;
+	void Update() override; 
 	void Destroy() override;
 	void OnSiblingChanged(const std::type_info* SourceClass) override;
 private:

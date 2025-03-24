@@ -21,7 +21,7 @@ enum class eAnimationState
 class cAnimator : public Component
 {
 public:
-	MYLIB_REFLECTABLE();
+	ReflectableTypeRegistration();
 	cAnimator() = delete; 
 	cAnimator(const SY::UUID anOwnerId,GameObjectManager* aManager); 
 	cAnimator(const SY::UUID anOwnerId,GameObjectManager* aManager,const std::filesystem::path& aFilePath);

@@ -10,13 +10,18 @@
 #define NOMINMAX
 // add headers that you want to pre-compile here
 #include <iostream>
-#include <string>
+#include <string> 
+#include <WS2tcpip.h> 
 #include <vector>
+#include <string>
+#include <thread>
+#include <chrono>
 
-#include "ArtificialInteligence/AICommands/AICommands.h"
-#include "Physics/PhysXInterpeter.h"
-#include "Physics/Raycast.h"
-#include "Scene.h"
 #include <Tools/Logging/Logging.h>
 #include <Tools/Reflection/refl.hpp>
+#include "Scene.h"
+#include "ArtificialInteligence/AICommands/AICommands.h"
+#include "Engine/GraphicsEngine/GraphicsEngine.h"
+#include "Physics/PhysXInterpeter.h"
+#include "Physics/Raycast.h"
 #endif // PERSISTENT_PCH_H

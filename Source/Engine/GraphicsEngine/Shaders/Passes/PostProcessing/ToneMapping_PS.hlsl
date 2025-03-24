@@ -3,14 +3,20 @@
 #include "../../Headers/Common.hlsli"
 #include "../../Headers/PBRFunctions.hlsli"
 
-PostProcessPixelOutput main(BRDF_VS_to_PS input)
+void UnpackData(float4 packedData, out float2 velocity, out uint id, out float depth)
+{
+    velocity = packedData.xy;
+    id = (uint)packedData.zw; 
+}
+PostProcessPixelOutput main(SS_VStoPS input)
 {
     PostProcessPixelOutput result;
-    const float3 color = Target0_Texture.Sample(defaultSampler, input.UV).rgb;
+    const float2 dimention = float2(dim(Target0_Texture));
+    //const float2 uv = input.UV * float2(dimention.x / renderTargetSize.x, dimention.y / renderTargetSize.y);
+    const float2 uv = input.UV;
+    const float3 color = Target0_Texture.Sample(defaultSampler, uv).rgb;
     result.Color.rgb = (Tonemap_UnrealEngine(color));
 
-
-    const float2 uv = input.UV;
     const float4 albedo = colorPass.Sample(defaultSampler, uv);
     const float4 Normal = normalPass.Sample(defaultSampler, uv);
     const float4 Material = materialPass.Sample(defaultSampler, uv);
@@ -20,8 +26,12 @@ PostProcessPixelOutput main(BRDF_VS_to_PS input)
     const float metallic = Material.b;
     const float roughness = Material.g;
     const float occlusion = Material.r;
-    const float depth = DepthPass.Sample(defaultSampler, uv).r;
-    const float4 ssao = SSAOPass.Sample(defaultSampler, uv);
+      float depth;
+      float2 velocity ;
+      uint id  ;
+      UnpackData(DepthPass.Sample(defaultSampler, uv), velocity, id, depth);
+      
+    const float4 ssao = SSAOPass.Sample(defaultSampler, uv); 
     
     
     switch(g_FrameBuffer.FB_RenderMode)
@@ -128,8 +138,24 @@ PostProcessPixelOutput main(BRDF_VS_to_PS input)
                 result.Color.a = 1.0f;
                 break;
             }
+            case 15:
+            {
+                result.Color.rb = normalize(velocity);
+                result.Color.g = 0.0f;
+                result.Color.a = 1.0f;
+                break;
+            }
+            case 16:
+            { 
+		        float word1 = (id) & 0xFF;
+		        float word2 = (id >> 8) & 0xFF; 
+		        float word3 = (id >> 24) & 0xFF;
+                result.Color.rgb  = normalize(float3((float) word1, (float) word2, (float) word3)) ; 
+                result.Color.a = 1.0f;
+                break;
+            }
     
-    }
+    }   
     result.Color.a   = 1.0f;
     return result;
     //switch(g_GraphicsSettings.GSB_ToneMap)

@@ -16,7 +16,7 @@ struct Frame
 class Skeleton : public AssetBase
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     void Init() override;
     Skeleton(const std::filesystem::path &aFilePath);
     std::vector<Bone> myBones;
@@ -36,7 +36,7 @@ REFL_AUTO(type(Skeleton), field(myName))
 class Animation : public AssetBase
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     void Init() override;
     Animation(const std::filesystem::path &aFilePath);
     Animation() = delete; // Create a generic cube

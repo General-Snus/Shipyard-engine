@@ -1,4 +1,4 @@
-#include "Engine/AssetManager/AssetManager.pch.h"
+#include "AssetManager.pch.h"
 #include <Tools/ThirdParty/PhysX/physx/include/PxPhysicsAPI.h> 
 #include "../cPhysXDynamicBody.h"
 
@@ -16,9 +16,9 @@ void cPhysXDynamicBody::Init()
 {
 	const auto& transform = GetComponent<Transform>();
 
-	auto* world = Shipyard_PhysX::Get().GetPhysicsWorld();
+	auto* world = Shipyard_PhysXInstance.GetPhysicsWorld();
 	data = world->createRigidDynamic(PxTransform(transform.GetPosition()));
-	Shipyard_PhysX::Get().GetScene()->addActor(*data);
+	Shipyard_PhysXInstance.GetScene()->addActor(*data);
 
 	PxMaterial* mMaterial;
 	mMaterial = world->createMaterial(0.5f,0.5f,0.1f);
@@ -27,14 +27,21 @@ void cPhysXDynamicBody::Init()
 		assert(false && "Material creation failed!");
 	}
 
-	if (auto* collider = TryGetAddComponent<cCollider>())
+	if (const auto* collider = TryGetAddComponent<Collider>())
 	{
 		switch (collider->GetColliderType())
 		{
+		case eColliderType::BOX:
+		{
+			const auto aabb = collider->GetColliderAssetOfType<ColliderAssetBox>();
+			const auto& aabbData = aabb->box();
+			PxRigidActorExt::createExclusiveShape(*data,PxBoxGeometry(aabbData.GetXSize() / 2,aabbData.GetYSize() / 2,aabbData.GetZSize() / 2),*mMaterial);
+			break;
+		}
 		case eColliderType::AABB:
 		{
-			auto aabb = collider->GetColliderAssetOfType<ColliderAssetAABB>();
-			const auto& aabbData = aabb->GetAABB();
+			const auto aabb = collider->GetColliderAssetOfType<ColliderAssetAABB>();
+			const auto& aabbData = aabb->ScaledAABB();
 			PxRigidActorExt::createExclusiveShape(*data,PxBoxGeometry(aabbData.GetXSize() / 2,aabbData.GetYSize() / 2,aabbData.GetZSize() / 2),*mMaterial);
 			break;
 		}
@@ -112,17 +119,13 @@ void cPhysXDynamicBody::Update()
 
 	Vector3f rotation;
 	const Vector4f quat = { pxTransform.q.x,pxTransform.q.y,pxTransform.q.z,pxTransform.q.w };
-	quaternion2Euler(quat,rotation);
-	rotation *= RAD_TO_DEG;
+	Math::quaternion2Euler(quat,rotation);
+	rotation *= Math::RAD_TO_DEG;
 	auto& transform = GetComponent<Transform>();
 
 	const Vector3f position = { pxTransform.p.x,pxTransform.p.y,pxTransform.p.z };
 	transform.SetPosition(position);
 	transform.SetRotation(rotation);
-}
-
-void cPhysXDynamicBody::Render()
-{
 }
 
 void cPhysXDynamicBody::Destroy()
@@ -136,7 +139,7 @@ void cPhysXDynamicBody::Destroy()
 void cPhysXDynamicBody::OnSiblingChanged(const std::type_info* SourceClass)
 {
 	OPTICK_EVENT();
-	if (SourceClass == &typeid(cCollider))
+	if (SourceClass == &typeid(Collider))
 	{
 		///UpdateFromCollider();
 	}

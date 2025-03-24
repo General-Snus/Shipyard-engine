@@ -15,9 +15,6 @@
     <CLInclude Include="DirectXTex.h">
       <Filter>Header Files</Filter>
     </CLInclude>
-    <CLInclude Include="DirectXTex.inl">
-      <Filter>Header Files</Filter>
-    </CLInclude>
     <ClCompile Include="BC4BC5.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -34,6 +31,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <CLInclude Include="scoped.h">
+      <Filter>Source Files</Filter>
+    </CLInclude>
+    <CLInclude Include="DirectXTex.inl">
       <Filter>Source Files</Filter>
     </CLInclude>
   </ItemGroup>
@@ -111,5 +111,6 @@
     <None Include="Shaders\BC7Encode.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

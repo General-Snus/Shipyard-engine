@@ -45,7 +45,7 @@ struct ParticleEmitterTemplate
 class ParticleEmitter : public AssetBase
 {
 private:
-	MYLIB_REFLECTABLE();
+	ReflectableTypeRegistration();
 	void InitParticle(Particlevertex& vertex) const;
 	EmmiterSettingsData settings;
 	//ComPtr<ID3D11Buffer> vertexBuffer;

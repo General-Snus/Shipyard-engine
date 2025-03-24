@@ -1,23 +1,27 @@
-#pragma once 
-#include <DirectX/Shipyard/Gpu_fwd.h> 
-#include "BaseAsset.h" // fuck you for bad naming
+#pragma once
+#include "BaseAsset.h"
+#include <DirectX/DX12/Graphics/Gpu_fwd.h>
+#include <dxcapi.h>
 
-
-class ShipyardShader : public AssetBase  // <--- 
-{
+class ShipyardShader : public AssetBase {
 public:
-	MYLIB_REFLECTABLE();
+	ReflectableTypeRegistration();
 	ShipyardShader(const std::filesystem::path& aFilePath);
 	void Init() override;
 
-	void SetShader(const ComPtr<ID3DBlob>& aShader); 
-	ID3DBlob* GetBlob() const;
+	void SetShader(const ComPtr<IDxcBlob>& aShader);
+	IDxcBlob* GetBlob() const;
 	LPVOID GetBufferPtr();
-	size_t GetBlobSize() const; 
+	size_t GetBlobSize() const;
+	bool InspectorView() override;
+	std::shared_ptr<TextureHolder> GetEditorIcon() override;
+
+	//static HRESULT CompileShader(const std::filesystem::path& path,LPCWSTR entryPoint,LPCWSTR profile,IDxcBlob** blob);
+	static HRESULT CompileShader(const char* shader,const wchar_t* entryPoint,const wchar_t* target,
+		IDxcBlob** blob);
 private:
 	std::filesystem::path m_ShaderName;
-	ComPtr<ID3DBlob> myBlob = nullptr; 
+	ComPtr<IDxcBlob> m_Blob = nullptr;
 };
-
 
 REFL_AUTO(type(ShipyardShader))

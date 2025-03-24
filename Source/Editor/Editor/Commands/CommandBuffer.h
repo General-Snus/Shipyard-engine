@@ -1,142 +1,159 @@
 #pragma once
-#include <Tools/Logging/Logging.h>
 #include <assert.h>
 #include <cassert>
 #include <vector>
+#include <Tools/Logging/Logging.h>
 
 class BaseCommand
 {
-  public:
-    virtual void Do() = 0;
-    virtual void Undo() = 0;
+public:
+	virtual void commandRedo() = 0;
+	virtual void commandUndo() = 0;
 
-    // Try merge with previous command when added, if true adding is redundant
-    virtual bool Merge(std::shared_ptr<BaseCommand> &ptr)
-    {
-        return ptr && !ptr->m_MergeBlocker;
-    };
-    virtual std::string GetDescription() const
-    {
-        return Description;
-    };
-    // Set this to true when you have identical command chains that you want to separate and avoid merging down
-    void SetMergeBlocker(bool arg = true);
+	// Try merge with previous command when added, if true adding is redundant
+	virtual bool merge(std::shared_ptr<BaseCommand>& ptr)
+	{
+		return ptr && !ptr->mergeBlocker;
+	}
 
-  protected:
-    bool m_MergeBlocker = false;
-    std::string Description = "Unknown command";
+	virtual std::string getDescription() const
+	{
+		return description;
+	}
+
+	// Set this to true when you have identical command chains that you want to separate and avoid merging down
+	virtual void setMergeBlocker(bool arg = true)
+	{
+		mergeBlocker = arg;
+	}
+
+protected:
+	bool        mergeBlocker = false;
+	std::string description = "Unknown command";
 };
 
+
 using CommandPacket = std::vector<std::shared_ptr<BaseCommand>>;
+
 class CommandBuffer
 {
-  public:
-    static CommandBuffer &MainEditorCommandBuffer();
+public:
+	static CommandBuffer& mainEditorCommandBuffer()
+	{
+		static CommandBuffer instance;
+		return instance;
+	}
 
-    template <typename CommandClass, typename... Args> inline void AddCommand(Args... arguments)
-    {
-        auto ptr = std::make_shared<CommandClass>(arguments...);
+	template <typename CommandClass, typename... Args>
+	void addCommand(Args... arguments)
+	{
+		auto ptr = std::make_shared<CommandClass>(arguments...);
 
-        if (commandList.size() > cursor && ptr->Merge(commandList[cursor].back()))
-        {
-            return;
-        }
+		if (commandList.size() > cursor && ptr->merge(commandList[cursor].back()))
+		{
+			return;
+		}
 
-        if (!commandList.empty())
-        {
-            commandList.erase(commandList.begin() + (cursor + 1), commandList.end());
-        }
+		if (!commandList.empty())
+		{
+			commandList.erase(commandList.begin() + (cursor + 1), commandList.end());
+		}
 
-        commandList.push_back({ptr});
-        cursor = static_cast<int>(commandList.size()) - 1;
-    }
+		commandList.push_back({ptr});
+		cursor = static_cast<int>(commandList.size()) - 1;
+	}
 
-    const std::vector<CommandPacket> &GetCommandList();
-    ;
+	const std::vector<CommandPacket>& getCommandList()
+	{
+		return commandList;
+	}
 
-    // assumed complete command
-    inline void AddCommand(const CommandPacket &ptr)
-    {
-        if (ptr.empty() || commandList.size() > cursor && ptr.front()->Merge(commandList[cursor].back()))
-        {
-            return;
-        }
+	// assumed complete command 
+	void addCommand(const CommandPacket& ptr)
+	{
+		if (ptr.empty() || commandList.size() > cursor && ptr.front()->merge(commandList[cursor].back()))
+		{
+			return;
+		}
 
-        if (!commandList.empty())
-        {
-            commandList.erase(commandList.begin() + (cursor + 1), commandList.begin() + commandList.size());
-        }
-        commandList.push_back(ptr);
-        cursor = static_cast<int>(commandList.size()) - 1;
-    }
+		if (!commandList.empty())
+		{
+			commandList.erase(commandList.begin() + (cursor + 1), commandList.begin() + commandList.size());
+		}
+		commandList.push_back(ptr);
+		cursor = static_cast<int>(commandList.size()) - 1;
+	}
 
-    // assumed complete command
-    inline void AddCommand(std::shared_ptr<BaseCommand> ptr)
-    {
-        assert(ptr != nullptr);
+	// assumed complete command
+	void addCommand(std::shared_ptr<BaseCommand> ptr)
+	{
+		assert(ptr != nullptr);
 
-        if (commandList.size() > cursor && ptr->Merge(commandList[cursor].back()))
-        {
-            return;
-        }
+		if (commandList.size() > cursor && ptr->merge(commandList[cursor].back()))
+		{
+			return;
+		}
 
-        if (!commandList.empty())
-        {
-            commandList.erase(commandList.begin() + (cursor + 1), commandList.begin() + commandList.size());
-        }
-        commandList.push_back({ptr});
-        cursor = static_cast<int>(commandList.size()) - 1;
-    };
+		if (!commandList.empty())
+		{
+			commandList.erase(commandList.begin() + (cursor + 1), commandList.begin() + commandList.size());
+		}
+		commandList.push_back({ptr});
+		cursor = static_cast<int>(commandList.size()) - 1;
+	}
 
-    template <typename T> inline T *GetLastCommand()
-    {
-        const auto out = dynamic_cast<T>(commandList.back());
-        assert(out != nullptr);
-        return out;
-    };
+	template <typename T>
+	T* getLastCommand()
+	{
+		const auto out = dynamic_cast<T>(commandList.back());
+		assert(out != nullptr);
+		return out;
+	}
 
-    inline BaseCommand *GetLastCommand()
-    {
-        if (commandList.empty() || commandList.back().empty())
-        {
-            return nullptr;
-        }
-        return commandList.back().back().get();
-    };
 
-    void Undo()
-    {
-        if (!commandList.empty() && cursor >= 0)
-        {
-            Logger::Log(std::format("Undoing command at {}", cursor));
-            for (auto &command : commandList[cursor])
-            {
-                command->Undo();
-            }
-            cursor--;
-        }
-    };
+	BaseCommand* getLastCommand() const
+	{
+		if (commandList.empty() || commandList.back().empty())
+		{
+			return nullptr;
+		}
+		return commandList.back().back().get();
+	}
 
-    void Redo()
-    {
-        if (commandList.size() > cursor + 1)
-        {
-            Logger::Log(std::format("Redoing command at {}", cursor));
-            for (auto &command : commandList[cursor + 1])
-            {
-                command->Do();
-            }
 
-            cursor++;
-        }
-    };
+	void undo()
+	{
+		if (!commandList.empty() && cursor >= 0)
+		{
+			LOGGER.Log(std::format("Undoing command at {}", cursor));
+			for (const auto& command : commandList[cursor])
+			{
+				command->commandUndo();
+			}
+			cursor--;
+		}
+	}
 
-    int GetCursor() const
-    {
-        return cursor;
-    };
+	void redo()
+	{
+		if (commandList.size() > cursor + 1)
+		{
+			LOGGER.Log(std::format("Redoing command at {}", cursor));
+			for (const auto& command : commandList[cursor + 1])
+			{
+				command->commandRedo();
+			}
 
-  private:
-    std::vector<CommandPacket> commandList;
-    int cursor = 0;
+			cursor++;
+		}
+	}
+
+	size_t getCursor() const
+	{
+		return cursor;
+	}
+
+private:
+	std::vector<CommandPacket> commandList;
+	size_t                     cursor = 0;
 };

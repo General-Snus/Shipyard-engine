@@ -27,22 +27,13 @@
     <ClInclude Include="GraphicsEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Rendering\Buffers\ConstantBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Rendering\Vertex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\ForwardRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\Buffers\FrameBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\Buffers\ObjectBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="InterOp\ShaderInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Objects\DataObjects\Default_N.h">
@@ -72,9 +63,6 @@
     <ClInclude Include="Objects\DataObjects\Default_FX.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Rendering\Buffers\G_Buffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Shaders\Include\PointLightShadow_PS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -90,19 +78,13 @@
     <ClInclude Include="Rendering\Buffers\GraphicSettingsBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Rendering\ParticleRenderer\ParticleRenderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Rendering\ParticleRenderer\ParticleVertex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="InterOp\RHI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="InterOp\GPUBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Rendering\Passes.h">
+    <ClInclude Include="Passes\Passes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GraphicsEngineUtilities.h">
@@ -116,37 +98,22 @@
     <ClCompile Include="GraphicsEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Rendering\Buffers\ConstantBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Rendering\Vertex.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Rendering\ForwardRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DebugDrawer\DebugDrawer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Rendering\Buffers\G_Buffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Rendering\InstanceRenderer\InstanceRenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Rendering\ParticleRenderer\ParticleRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\ParticleRenderer\ParticleVertex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="InterOp\Source\RHI.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="InterOp\Source\GPUBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Rendering\Passes.cpp">
+    <ClCompile Include="Passes\Passes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GraphicsEngineUtilities.cpp">
@@ -163,8 +130,9 @@
     <None Include="Shaders\Passes\LineDrawer\LineDrawerStructs.hlsli" />
     <None Include="Shaders\Headers\ParticleStruct.hlsli" />
     <None Include="Shaders\Headers\Tonemaps.hlsli" />
-    <None Include="packages.config" />
     <None Include="Shaders\Headers\SceneGraph.hlsli" />
+    <None Include="Shaders\Headers\DebugLog.hlsli" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\DefaultShaders\Default_VS.hlsl" />
@@ -188,6 +156,7 @@
     <FxCompile Include="Shaders\Passes\PostProcessing\SSAO_PS.hlsl" />
     <FxCompile Include="Shaders\DefaultShaders\Default_PS.hlsl" />
     <FxCompile Include="Shaders\Passes\PostProcessing\EdgeBlur.hlsl" />
+    <FxCompile Include="Shaders\Processing\TextureInspectShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Objects\DataObjects\DefaultParticle_P.dds" />

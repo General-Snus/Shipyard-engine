@@ -1,4 +1,4 @@
-#include "Engine/AssetManager/AssetManager.pch.h"
+#include "AssetManager.pch.h"
 #include "Engine/AssetManager/Objects/AI/AgentSystem/AIEventManager.h"
 
 #include "Engine/AssetManager/Objects/AI/AgentSystem/Controllers/Controller.h"
@@ -46,7 +46,7 @@ bool AIEventManager::CheckForHackingEvent()
 
 void AIEventManager::DispatchEvent(const AIEvent& aEvent)
 {
-	for(auto& i : this->eventListener[aEvent.type])
+	for(const auto& i : this->eventListener[aEvent.type])
 	{
 		i->Recieve(aEvent);
 	}

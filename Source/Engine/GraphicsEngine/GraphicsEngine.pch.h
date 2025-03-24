@@ -6,30 +6,21 @@
 
 #ifndef GRAPHICSENGINE_PCH
 #define GRAPHICSENGINE_PCH
-#define NOMINMAX 
+#define NOMINMAX
 
-// add headers that you want to pre-compile here  
+// add headers that you want to pre-compile here
+ 
+//
+ #include "Shaders/Registers.h"
+#include "wrl/client.h" 
+ 
 #include <filesystem>
 #include <map>
 #include <memory>
-#include <mutex>  
-#include <queue> 
-#include <stdexcept> 
-#include <string> 
-#include <Tools/ImGui/ImGui/imgui.h>
-#include <Tools/Optick/include/optick.h>  
-#include <Tools/Utilities/Game/Timer.h> 
-#include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
-#include <Windows.h>  
-#include "GraphicsEngine.h" 
-#include "Rendering/Buffers/FrameBuffer.h"
-#include "Rendering/Buffers/G_buffer.h"
-#include "Rendering/Buffers/LightBuffer.h"
-#include "Rendering/Buffers/LineBuffer.h"
-#include "Rendering/Buffers/ObjectBuffer.h"
-#include "Rendering/ParticleRenderer/ParticleVertex.h"
-#include "Rendering/Vertex.h" 
-#include "Shaders/Registers.h" 
-#include "Tools/Logging/Logging.h"
-#include "wrl/client.h" 
-#endif //GRAPHICSENGINE_PCH
+#include <mutex>
+#include <queue>
+#include <stdexcept>
+#include <vector>
+#include <string>
+#include <unordered_map>
+#endif // GRAPHICSENGINE_PCH

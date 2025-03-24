@@ -1,8 +1,7 @@
-#include "Engine/AssetManager/AssetManager.pch.h"
+#include "AssetManager.pch.h"
 
-#include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
 #include "../Component.h"
-
+#include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
 
 void Component::Abandon()
 {
@@ -14,10 +13,13 @@ bool Component::InspectorView()
 	OPTICK_EVENT();
 
 	bool isOpened = false;
-	const TypeInfo& typeInfo = this->GetTypeInfo();
-	ImGui::Checkbox(std::format("##{}{}", typeInfo.Name().c_str(), std::to_string(myOwnerID).c_str()).c_str(), &m_IsActive);
+	const TypeInfo &typeInfo = this->GetTypeInfo();
+	ImGui::Checkbox(std::format("##{}{}", typeInfo.Name().c_str(), std::to_string(myOwnerID).c_str()).c_str(),
+					&m_IsActive);
 	ImGui::SameLine(0, 10);
-	isOpened = ImGui::CollapsingHeader(typeInfo.Name().c_str(), ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_OpenOnDoubleClick);
+	isOpened =
+		ImGui::CollapsingHeader(typeInfo.Name().c_str(), ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_DefaultOpen |
+															 ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_OpenOnDoubleClick);
 
 	if (isOpened)
 	{
@@ -27,12 +29,15 @@ bool Component::InspectorView()
 		ImGui::Unindent();
 	}
 
-
 	return isOpened;
 }
 
-Transform& Component::transform()
+Transform &Component::transform()
 {
 	return GetComponent<Transform>();
 }
- 
+
+const Transform& Component::transform() const
+{
+	return GetComponent<Transform>();
+}

@@ -1,6 +1,6 @@
 #pragma once
 #include "BaseAsset.h"
-#include "DirectX/Shipyard/Texture.h"
+#include "DirectX/DX12/Graphics/Resources/Texture.h"
 class Texture;
 
 class TextureHolder : public AssetBase
@@ -8,7 +8,7 @@ class TextureHolder : public AssetBase
     friend class Material;
 
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     void Init() override;
     TextureHolder(const std::filesystem::path &aFilePath);
     TextureHolder(const std::filesystem::path &aFilePath, eTextureType atextureType);

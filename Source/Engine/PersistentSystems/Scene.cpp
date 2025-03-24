@@ -1,13 +1,23 @@
-#include "Engine\PersistentSystems\PersistentSystems.pch.h"
+#include "PersistentSystems.pch.h"
 
 #include "Scene.h"
 #include <Editor/Editor/Core/Editor.h>
 
-Scene::Scene() : m_GameObjectManager(*this)
+Scene::Scene(const std::string& sceneName) : m_GameObjectManager(*this), SceneName(sceneName)
 {
 }
 
-GameObjectManager& Scene::ActiveManager()
+GameObjectManager& Scene::activeManager()
 {
-	return Editor::GetMainScene()->GetGOM();
+	return EDITOR_INSTANCE.GetActiveScene()->GetGOM();
+}
+
+void Scene::merge(const Scene& scene)
+{
+	m_WorldBounds.ExpandSphere(scene.m_WorldBounds);
+	m_GameObjectManager.Merge(scene.m_GameObjectManager);
+}
+
+void Scene::unload() {
+	m_GameObjectManager.unload();
 }

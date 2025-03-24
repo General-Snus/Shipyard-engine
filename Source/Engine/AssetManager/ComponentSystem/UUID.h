@@ -26,8 +26,7 @@ class UUID
     static UUID InvalidID()
     {
         return UINT_MAX;
-    }
-
+    } 
   private:
     uint32_t myUUID;
 };

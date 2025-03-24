@@ -17,8 +17,8 @@ class Event
         m_CallbackFunctions.push_back(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
     }
 
-    void RemoveListener(callback &func);
-    void Invoke();
+    void RemoveListener(const callback &func);
+    void Invoke() const;
 
   private:
     std::vector<callback> m_CallbackFunctions;

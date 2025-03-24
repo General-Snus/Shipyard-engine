@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.props" Condition="Exists('..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.props')" />
+  <Import Project="..\..\packages\Microsoft.Direct3D.D3D12.1.715.1-preview\build\native\Microsoft.Direct3D.D3D12.props" Condition="Exists('..\..\packages\Microsoft.Direct3D.D3D12.1.715.1-preview\build\native\Microsoft.Direct3D.D3D12.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -103,20 +103,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)DirectX\XTK\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include</IncludePath>
-    <LibraryPath>$(Configuration)\;$(LibraryPath);$(SolutionDir)..\Dependencies\$(Configuration)\PhysXLibs;</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
-    <IncludePath>$(SolutionDir);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)DirectX\XTK\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include</IncludePath>
-    <LibraryPath>$(Configuration)\;$(LibraryPath);$(SolutionDir)..\Dependencies\$(Configuration)\PhysXLibs;</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
-    <IncludePath>$(SolutionDir);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)DirectX\XTK\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include</IncludePath>
-    <LibraryPath>$(Configuration)\;$(LibraryPath);$(SolutionDir)..\Dependencies\$(Configuration)\PhysXLibs;</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -178,12 +172,13 @@
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions);PX_PHYSX_STATIC_LIB;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>Engine/AssetManager/AssetManager.pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>AssetManager.pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);$(SolutionDir)Tools\Assimp\include\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -192,24 +187,24 @@
     </Link>
     <Lib>
       <AdditionalDependencies>PhysXCommon_static_64.lib;PhysXCooking_static_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_static_64.lib;PhysXCharacterKinematic_static_64.lib;PhysXPvdSDK_static_64.lib;PhysXVehicle_static_64.lib;PhysXVehicle2_static_64.lib;PVDRuntime_64.lib;SnippetRender_static_64.lib;SnippetUtils_static_64.lib;PhysX_static_64.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)../Dependencies\$(Configuration)\PhysXLibs\</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions);PX_PHYSX_STATIC_LIB;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>Engine/AssetManager/AssetManager.pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>AssetManager.pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);$(SolutionDir)Tools\Assimp\include\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -220,6 +215,7 @@
     </Link>
     <Lib>
       <AdditionalDependencies>PhysXCommon_static_64.lib;PhysXCooking_static_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_static_64.lib;PhysXCharacterKinematic_static_64.lib;PhysXPvdSDK_static_64.lib;PhysXVehicle_static_64.lib;PhysXVehicle2_static_64.lib;PVDRuntime_64.lib;SnippetRender_static_64.lib;SnippetUtils_static_64.lib;PhysX_static_64.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)../Dependencies\$(Configuration)\PhysXLibs\</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">
@@ -231,7 +227,7 @@
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions);PX_PHYSX_STATIC_LIB;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>Engine/AssetManager/AssetManager.pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>AssetManager.pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
@@ -239,6 +235,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <WholeProgramOptimization>false</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);$(SolutionDir)Tools\Assimp\include\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -249,6 +246,7 @@
     </Link>
     <Lib>
       <AdditionalDependencies>PhysXCommon_static_64.lib;PhysXCooking_static_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_static_64.lib;PhysXCharacterKinematic_static_64.lib;PhysXPvdSDK_static_64.lib;PhysXVehicle_static_64.lib;PhysXVehicle2_static_64.lib;PVDRuntime_64.lib;SnippetRender_static_64.lib;SnippetUtils_static_64.lib;PhysX_static_64.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)../Dependencies\$(Configuration)\PhysXLibs\</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -262,8 +260,9 @@
     <ClInclude Include="ComponentSystem\Components\Physics\cPhysXStaticBody.h" />
     <ClInclude Include="ComponentSystem\MasterIncludeComponent.h" />
     <ClInclude Include="Enums.h" />
-    <ClInclude Include="Objects\BaseAssets\GraphAsset.h" />
-    <ClInclude Include="ComponentSystem\Components\GraphComponent.h" />
+    <ClInclude Include="ComponentSystem\Components\Network\NetworkSync.h" />
+    <ClInclude Include="GameResourcesLoader.h" />
+    <ClInclude Include="Loader\LoaderBase.h" />
     <ClInclude Include="Objects\AI\AgentSystem\AIPollingManager.h" />
     <ClInclude Include="AssetManagerUtills.hpp" />
     <ClInclude Include="Objects\AI\AgentSystem\BehaviourTree\BrainTree.h" />
@@ -282,8 +281,6 @@
     <ClInclude Include="Objects\AI\AgentSystem\DecisionTree\DecisionTree.h" />
     <ClInclude Include="Objects\AI\AgentSystem\PollingStations\PollingStation.h" />
     <ClInclude Include="Objects\AI\NavMesh\NavMesh.h" />
-    <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\RenderMode.h" />
-    <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\FrameStatistics.h" />
     <ClInclude Include="ComponentSystem\Components\CameraComponent.h" />
     <ClInclude Include="ComponentSystem\Components\LightComponent.h" />
     <ClInclude Include="Objects\BaseAssets\LightDataBase.h" />
@@ -295,7 +292,6 @@
     <ClInclude Include="ComponentSystem\Components\Animator.h" />
     <ClInclude Include="AssetManager.h" />
     <ClInclude Include="AssetManager.pch.h" />
-    <ClInclude Include="ComponentSystem\Components\DEBUGCOMPONENTS\BackgroundColor.h" />
     <ClInclude Include="ComponentSystem\ComponentManager.h" />
     <ClInclude Include="ComponentSystem\GameObjectManager.h" />
     <ClInclude Include="ComponentSystem\Component.h" />
@@ -308,7 +304,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="Objects\BaseAssets\TextureAsset.h" />
-    <ClInclude Include="ComponentSystem\Components\Skybox.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\WanderController.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\AIController.h" />
     <ClInclude Include="Objects\AI\AgentSystem\Controllers\SeparationController.h" />
@@ -323,16 +318,17 @@
     <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\CombatComponent.cpp" />
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysXDynamicBody.cpp" />
     <ClCompile Include="ComponentSystem\Components\Physics\Source\cPhysXStaticBody.cpp" />
-    <ClCompile Include="ComponentSystem\Components\Source\GraphComponent.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\ParticleSystem.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="ComponentSystem\Components\Network\Source\NetworkSync.cpp" />
+    <ClCompile Include="GameResourcesLoader.cpp" />
+    <ClCompile Include="Loader\LoaderBase.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\BehaviourTree\BrainTree.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Source\AIPollingManager.cpp" />
     <ClCompile Include="AssetManagerUtills.cpp" />
-    <ClCompile Include="Objects\BaseAssets\Source\GraphAsset.cpp" />
     <ClCompile Include="Objects\BaseAssets\Source\ColliderAsset.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\Collider.cpp" />
     <ClCompile Include="ComponentSystem\Components\ActorSystem\Source\cActor.cpp" />
@@ -347,8 +343,6 @@
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\DefaultControllers\Source\PollingController.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\PollingStations\Source\PollingStation.cpp" />
     <ClCompile Include="Objects\AI\NavMesh\Source\NavMesh.cpp" />
-    <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\RenderMode.cpp" />
-    <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\FrameStatistics.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\CameraComponent.cpp" />
     <ClCompile Include="ComponentSystem\Components\Source\LightComponent.cpp" />
     <ClCompile Include="Objects\BaseAssets\Source\MaterialAsset.cpp" />
@@ -365,7 +359,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="ComponentSystem\Components\DEBUGCOMPONENTS\Source\BackgroundColor.cpp" />
     <ClCompile Include="ComponentSystem\Source\ComponentManager.cpp" />
     <ClCompile Include="ComponentSystem\Source\GameObjectManager.cpp" />
     <ClCompile Include="ComponentSystem\Source\Component.cpp" />
@@ -378,7 +371,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Objects\BaseAssets\Source\TextureAsset.cpp" />
-    <ClCompile Include="ComponentSystem\Components\Source\Skybox.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\WanderController.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\AIController.cpp" />
     <ClCompile Include="Objects\AI\AgentSystem\Controllers\Source\SeparationController.cpp" />
@@ -395,13 +387,13 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.targets" Condition="Exists('..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.targets')" />
+    <Import Project="..\..\packages\Microsoft.Direct3D.D3D12.1.715.1-preview\build\native\Microsoft.Direct3D.D3D12.targets" Condition="Exists('..\..\packages\Microsoft.Direct3D.D3D12.1.715.1-preview\build\native\Microsoft.Direct3D.D3D12.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.props'))" />
-    <Error Condition="!Exists('..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Direct3D.D3D12.1.711.3-preview\build\native\Microsoft.Direct3D.D3D12.targets'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.Direct3D.D3D12.1.715.1-preview\build\native\Microsoft.Direct3D.D3D12.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Direct3D.D3D12.1.715.1-preview\build\native\Microsoft.Direct3D.D3D12.props'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.Direct3D.D3D12.1.715.1-preview\build\native\Microsoft.Direct3D.D3D12.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Direct3D.D3D12.1.715.1-preview\build\native\Microsoft.Direct3D.D3D12.targets'))" />
   </Target>
 </Project>

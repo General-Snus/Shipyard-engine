@@ -5,7 +5,7 @@
 class WanderController : public Controller
 {
 public:
-	MYLIB_REFLECTABLE()
+	ReflectableTypeRegistration()
     explicit WanderController(GameObject componentCheck);
     bool Update(GameObject input) override;
     void Recieve(const AIEvent &aEvent) override;

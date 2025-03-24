@@ -1,10 +1,10 @@
-#include "Color.h" 
+#include "Color.h"
 
-#include <fstream> 
-#include "LinearAlgebra/Vectors.hpp"
+#include <fstream>
 #include <string>
-#include <Tools/ThirdParty/nlohmann/json.hpp> 
+#include <Tools/ThirdParty/nlohmann/json.hpp>
 #include "Engine/AssetManager/AssetManager.h"
+#include "LinearAlgebra/Vectors.hpp"
 
 #undef min
 #undef max
@@ -35,10 +35,10 @@ void ColorManager::InitializeDefaultColors()
 
 void ColorManager::LoadColorsFromFile(const std::filesystem::path& path)
 {
-	auto contentPath = AssetManager::AssetPath / path;
-	if (!std::filesystem::exists(contentPath))
+	const auto contentPath = ENGINE_RESOURCES.Directory() / path;
+	if (!exists(contentPath))
 	{
-		Logger::Warn("Color file not found: " + contentPath.string());
+		LOGGER.Warn("Color file not found: " + contentPath.string());
 		return;
 	}
 
@@ -47,7 +47,7 @@ void ColorManager::LoadColorsFromFile(const std::filesystem::path& path)
 
 	if (!file.is_open())
 	{
-		Logger::Warn("Color file could not be read: " + contentPath.string());
+		LOGGER.Warn("Color file could not be read: " + contentPath.string());
 		return;
 	}
 
@@ -58,34 +58,33 @@ void ColorManager::LoadColorsFromFile(const std::filesystem::path& path)
 	{
 		for (const auto& [name, value] : json["NamedColors"].items())
 		{
-			CreateColor(name, { value[0], value[1], value[2], value[3] });
+			CreateColor(name, {value[0], value[1], value[2], value[3]});
 		}
 	}
-
 }
 
 void ColorManager::DumpToFile(const std::filesystem::path& path)
 {
-	auto contentPath = AssetManager::AssetPath / path;
+	const auto contentPath = ENGINE_RESOURCES.Directory() / path;
 
-	if (!std::filesystem::exists(contentPath))
+	if (!exists(contentPath))
 	{
 		std::error_code ec;
-		if (!std::filesystem::create_directories(contentPath.root_directory(), ec))
+		if (!create_directories(contentPath.root_directory(), ec))
 		{
-			Logger::Warn("Failure when dumping color data to memory: " + ec.message());
+			LOGGER.Warn("Failure when dumping color data to memory: " + ec.message());
 		}
 	}
 	nlohmann::json j;
 
-	for (const auto& [name, value] : ColorManager::m_NamedColor)
+	for (const auto& [name, value] : m_NamedColor)
 	{
-		j["NamedColors"][name] = value;
+		auto& vector = j["NamedColors"][name];
+		vector = {value.x, value.y, value.z, value.w};
 	}
 
 	std::ofstream o(contentPath);
 	o << std::setw(4) << j << std::endl;
-
 }
 
 Vector4f& ColorManager::CreateColor(const size_t& color, Vector4f colorValue)
@@ -103,59 +102,84 @@ Vector4f ColorManager::CreateColor(const std::string& identifier, Vector4f color
 	return m_NamedColor[identifier] = colorValue;
 }
 
+bool ColorManager::GetColor(const size_t& color, Vector4f& outColor)
+{
+	if (m_UnNamedColor.contains(color))
+	{
+		outColor = m_UnNamedColor[color];
+		return true;
+	}
+	return false;
+}
+
+bool ColorManager::GetColor(const std::string& identifier, Vector4f& outColor)
+{
+	const bool isLocked = m_Locks.contains(identifier);
+
+	isLocked;
+	// TODO FIX locked colors from change during runtime
+	if (m_NamedColor.contains(identifier))
+	{
+		outColor = m_NamedColor[identifier];
+		return true;
+	}
+	return false;
+}
+
 Vector4f& ColorManager::GetColor(const size_t& color)
 {
 	if (m_UnNamedColor.contains(color))
 	{
 		return m_UnNamedColor[color];
 	}
-	return  m_NamedColor["White"];
+	return m_NamedColor["White"];
 }
 
 Vector4f& ColorManager::GetColor(const std::string& identifier)
 {
-	bool isLocked = m_Locks.contains(identifier);
+	const bool isLocked = m_Locks.contains(identifier);
 
 	isLocked;
-	//TODO FIX locked colors from change during runtime
+	// TODO FIX locked colors from change during runtime
 	if (m_NamedColor.contains(identifier))
 	{
 		return m_NamedColor[identifier];
 	}
-	return  m_NamedColor["White"];
+	return m_NamedColor["White"];
 }
 
-Color::Color() : m_ColorName("White"), m_Context(ColorManager::GetHash({ 1,1,1,1 }))
+Color::Color() : m_ColorName("White"), m_Context(ColorManager::GetHash({1, 1, 1, 1}))
 {
-	ColorManager::CreateColor(m_ColorName, { 1,1,1,1 });
+	ColorManagerInstance.CreateColor(m_ColorName, {1, 1, 1, 1});
 }
 
 Color::Color(const Vector4f& color) : m_Context(ColorManager::GetHash(color))
 {
-	ColorManager::CreateColor(m_Context, color);
+	ColorManagerInstance.CreateColor(m_Context, color);
 }
 
-Color::Color(const Vector3f& color) : m_Context(ColorManager::GetHash({ color.x,color.y,color.z,1.f }))
+Color::Color(const Vector3f& color) : m_Context(ColorManager::GetHash({color.x, color.y, color.z, 1.f}))
 {
-	ColorManager::CreateColor(m_Context, { color.x,color.y,color.z,1.f });
+	ColorManagerInstance.CreateColor(m_Context, {color.x, color.y, color.z, 1.f});
 }
 
-Color::Color(float red, float green, float blue, float alpha) : m_Context(ColorManager::GetHash({ red,green,blue,alpha }))
-{ 
-	ColorManager::CreateColor(m_Context, { red,green,blue,alpha });
+Color::Color(float red, float green, float blue, float alpha)
+	: m_Context(ColorManager::GetHash({red, green, blue, alpha}))
+{
+	ColorManagerInstance.CreateColor(m_Context, {red, green, blue, alpha});
 }
 
 Color::Color(const std::string& hexOrName)
 {
 	if (hexOrName.front() != '#')
 	{
-		if(ColorManager::m_NamedColor.contains(hexOrName))
+		if (ColorManagerInstance.m_NamedColor.contains(hexOrName))
 		{
 			m_ColorName = hexOrName;
-			m_Context = ColorManager::GetHash(ColorManager::m_NamedColor[hexOrName]);
+			m_Context = ColorManager::GetHash(ColorManagerInstance.m_NamedColor[hexOrName]);
 			return;
 		}
-		*this = Color(); 
+		*this = Color();
 	}
 	else
 	{
@@ -165,7 +189,7 @@ Color::Color(const std::string& hexOrName)
 
 Color::Color(const char* hexOrName) : Color(std::string(hexOrName))
 {
-} 
+}
 
 Color& Color::operator=(const std::string& hex)
 {
@@ -174,13 +198,14 @@ Color& Color::operator=(const std::string& hex)
 
 Vector4f Color::operator()() const
 {
-	return !m_ColorName.empty() ? ColorManager::GetColor(m_ColorName) : ColorManager::GetColor(m_Context);
+	return !m_ColorName.empty() ? ColorManagerInstance.GetColor(m_ColorName) : ColorManagerInstance.GetColor(m_Context);
 }
 
 Vector3f Color::GetRGB() const
 {
-	const auto& ref = !m_ColorName.empty() ? ColorManager::GetColor(m_ColorName) : ColorManager::GetColor(m_Context);
-	return { ref.x, ref.y, ref.z };
+	const auto& ref =
+		!m_ColorName.empty() ? ColorManagerInstance.GetColor(m_ColorName) : ColorManagerInstance.GetColor(m_Context);
+	return {ref.x, ref.y, ref.z};
 }
 
 bool Color::operator==(const Color& other) const
@@ -191,19 +216,21 @@ bool Color::operator==(const Color& other) const
 	}
 	return false;
 	/*return IsApproximate(r, other.r) &&
-			IsApproximate(g, other.g) &&
-			IsApproximate(b, other.b) &&
-			IsApproximate(a, other.a);*/
+	        IsApproximate(g, other.g) &&
+	        IsApproximate(b, other.b) &&
+	        IsApproximate(a, other.a);*/
 }
 
 Vector4f Color::GetRGBA() const
 {
-	return !m_ColorName.empty() ? ColorManager::GetColor(m_ColorName) : ColorManager::GetColor(m_Context);
+	return !m_ColorName.empty() ? ColorManagerInstance.GetColor(m_ColorName) : ColorManagerInstance.GetColor(m_Context);
 }
 
 float* Color::GetM_RGBA() const
 {
-	return !m_ColorName.empty() ? &ColorManager::GetColor(m_ColorName).x : &ColorManager::GetColor(m_Context).x;
+	return !m_ColorName.empty()
+		       ? &ColorManagerInstance.GetColor(m_ColorName).x
+		       : &ColorManagerInstance.GetColor(m_Context).x;
 }
 
 Vector4f Color::GetHSV() const
@@ -215,11 +242,11 @@ std::string Color::GetHex() const
 {
 	const auto color = GetRGBA();
 
-	auto ri = static_cast<int>(color.x * 255.0f);
-	auto gi = static_cast<int>(color.y * 255.0f);
-	auto bi = static_cast<int>(color.z * 255.0f);
-	auto ai = static_cast<int>(color.w * 255.0f);
-	char hex[10];
+	const auto ri = static_cast<int>(color.x * 255.0f);
+	const auto gi = static_cast<int>(color.y * 255.0f);
+	const auto bi = static_cast<int>(color.z * 255.0f);
+	const auto ai = static_cast<int>(color.w * 255.0f);
+	char       hex[10];
 	snprintf(hex, sizeof(hex), "#%02x%02x%02x%02x", ri, gi, bi, ai);
 	return std::string(hex);
 }
@@ -228,34 +255,39 @@ void Color::SetColor(Vector4f color)
 {
 	m_ColorName.clear();
 	m_Context = ColorManager::GetHash(color);
-	ColorManager::CreateColor(m_Context, color);
+	ColorManagerInstance.CreateColor(m_Context, color);
 }
 
 Vector4f Color::RGBtoHSV(const Color& colorIn)
 {
-	const auto color = colorIn.GetRGBA();
-	float rgbMin = std::min(std::min(color.x, color.y), color.z);
-	float rgbMax = std::max(std::max(color.x, color.y), color.z);
+	const auto  color = colorIn.GetRGBA();
+	const float rgbMin = std::min(std::min(color.x, color.y), color.z);
+	const float rgbMax = std::max(std::max(color.x, color.y), color.z);
 
 	float h = 0.0f;
 	float s;
 	float v;
 	v = rgbMax;
 
-	float d = rgbMax - rgbMin;
+	const float d = rgbMax - rgbMin;
 	s = rgbMax == 0 ? 0 : d / rgbMax;
 
-	if (rgbMax == rgbMin) {
+	if (rgbMax == rgbMin)
+	{
 		h = 0; // achromatic
 	}
-	else {
-		if (rgbMax == color.x) {
+	else
+	{
+		if (rgbMax == color.x)
+		{
 			h = (color.y - color.z) / d + (color.y < color.z ? 6 : 0);
 		}
-		else if (rgbMax == color.y) {
+		else if (rgbMax == color.y)
+		{
 			h = (color.z - color.x) / d + 2;
 		}
-		else if (rgbMax == color.z) {
+		else if (rgbMax == color.z)
+		{
 			h = (color.x - color.y) / d + 4;
 		}
 		h /= 6;
@@ -265,9 +297,9 @@ Vector4f Color::RGBtoHSV(const Color& colorIn)
 
 Vector4f Color::RGBLerp(const Color& colorIn1, const Color& colorIn2, float blend)
 {
-	Vector4f a = colorIn1.GetRGBA();
-	Vector4f b = colorIn2.GetRGBA();
-	Vector4f c{};
+	const Vector4f a = colorIn1.GetRGBA();
+	const Vector4f b = colorIn2.GetRGBA();
+	Vector4f       c{};
 
 	blend = std::clamp(blend, 0.f, 1.f);
 
@@ -287,36 +319,48 @@ Color Color::HSVtoRGB(const Color& colorIn)
 	float g = 0.0f;
 	float b = 0.0f;
 
-	const int i = static_cast<int>(color.x * 6);
+	const int   i = static_cast<int>(color.x * 6);
 	const float f = color.x * 6 - i;
 	const float p = color.z * (1 - color.y);
 	const float q = color.z * (1 - f * color.y);
 	const float t = color.z * (1 - (1 - f) * color.y);
 
-	switch (i % 6) {
-	case 0: r = color.z, g = t, b = p; break;
-	case 1: r = q, g = color.z, b = p; break;
-	case 2: r = p, g = color.z, b = t; break;
-	case 3: r = p, g = q, b = color.z; break;
-	case 4: r = t, g = p, b = color.z; break;
-	case 5: r = color.z, g = p, b = q; break;
+	switch (i % 6)
+	{
+	case 0:
+		r = color.z, g = t, b = p;
+		break;
+	case 1:
+		r = q, g = color.z, b = p;
+		break;
+	case 2:
+		r = p, g = color.z, b = t;
+		break;
+	case 3:
+		r = p, g = q, b = color.z;
+		break;
+	case 4:
+		r = t, g = p, b = color.z;
+		break;
+	case 5:
+		r = color.z, g = p, b = q;
+		break;
 	}
 
-	return { r, g, b, color.w };
+	return {r, g, b, color.w};
 }
 
 Color Color::FromHex(const std::string& hex)
 {
-
 	if (hex.front() != '#' || (hex.length() != 7 && hex.length() != 9))
 	{
 		throw std::invalid_argument("Invalid hex color format");
 	}
 
-	float r = static_cast<float>(std::stoi(hex.substr(1, 2), nullptr, 16)) / 255.0f;
-	float g = static_cast<float>(std::stoi(hex.substr(3, 2), nullptr, 16)) / 255.0f;
-	float b = static_cast<float>(std::stoi(hex.substr(5, 2), nullptr, 16)) / 255.0f;
-	float a = hex.length() == 9 ? static_cast<float>(std::stoi(hex.substr(7, 2), nullptr, 16)) / 255.0f : 1.0f;
+	const float r = static_cast<float>(std::stoi(hex.substr(1, 2), nullptr, 16)) / 255.0f;
+	const float g = static_cast<float>(std::stoi(hex.substr(3, 2), nullptr, 16)) / 255.0f;
+	const float b = static_cast<float>(std::stoi(hex.substr(5, 2), nullptr, 16)) / 255.0f;
+	const float a = hex.length() == 9 ? static_cast<float>(std::stoi(hex.substr(7, 2), nullptr, 16)) / 255.0f : 1.0f;
 
 	return Color(r, g, b, a);
 }

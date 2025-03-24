@@ -19,7 +19,7 @@ class Blackboard;
 class Node : public Reflectable
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     enum class Status
     {
         Invalid,
@@ -211,7 +211,7 @@ class Blackboard
 class Composite : public Node
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     virtual ~Composite()
     {
     }
@@ -234,7 +234,7 @@ class Composite : public Node
 class Decorator : public Node
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     virtual ~Decorator()
     {
     }
@@ -255,7 +255,7 @@ class Decorator : public Node
 class Leaf : public Node
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     Leaf()
     {
     }
@@ -275,7 +275,7 @@ class Leaf : public Node
 class BehaviorTree : public Node
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     BehaviorTree()
     {
         blackboard = std::make_shared<Blackboard>();
@@ -452,7 +452,7 @@ class Builder
 class Selector : public Composite
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     void initialize() override
     {
         it = children.begin();
@@ -464,7 +464,7 @@ class Selector : public Composite
 
         while (it != children.end())
         {
-            auto status = (*it)->tick();
+            const auto status = (*it)->tick();
 
             if (status != Status::Failure)
             {
@@ -485,7 +485,7 @@ class Selector : public Composite
 class Sequence : public Composite
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     void initialize() override
     {
         it = children.begin();
@@ -497,7 +497,7 @@ class Sequence : public Composite
 
         while (it != children.end())
         {
-            auto status = (*it)->tick();
+            const auto status = (*it)->tick();
 
             if (status != Status::Success)
             {
@@ -518,14 +518,14 @@ class Sequence : public Composite
 class StatefulSelector : public Composite
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     Status update() override
     {
         assert(hasChildren() && "Composite has no children");
 
         while (it != children.end())
         {
-            auto status = (*it)->tick();
+            const auto status = (*it)->tick();
 
             if (status != Status::Failure)
             {
@@ -547,14 +547,14 @@ class StatefulSelector : public Composite
 class StatefulSequence : public Composite
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     Status update() override
     {
         assert(hasChildren() && "Composite has no children");
 
         while (it != children.end())
         {
-            auto status = (*it)->tick();
+            const auto status = (*it)->tick();
 
             if (status != Status::Success)
             {
@@ -572,7 +572,7 @@ class StatefulSequence : public Composite
 class ParallelSequence : public Composite
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     ParallelSequence(bool successOnAll = true, bool failOnAll = true)
         : useSuccessFailPolicy(true), successOnAll(successOnAll), failOnAll(failOnAll)
     {
@@ -612,9 +612,9 @@ class ParallelSequence : public Composite
         int total_success = 0;
         int total_fail = 0;
 
-        for (auto &child : children)
+        for (const auto &child : children)
         {
-            auto status = child->tick();
+            const auto status = child->tick();
             if (status == Status::Success)
             {
                 total_success++;
@@ -649,7 +649,7 @@ class ParallelSequence : public Composite
 class Succeeder : public Decorator
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     Status update() override
     {
         child->tick();
@@ -661,7 +661,7 @@ class Succeeder : public Decorator
 class Failer : public Decorator
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     Status update() override
     {
         child->tick();
@@ -674,10 +674,10 @@ class Failer : public Decorator
 class Inverter : public Decorator
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     Status update() override
     {
-        auto s = child->tick();
+        const auto s = child->tick();
 
         if (s == Status::Success)
         {
@@ -696,7 +696,7 @@ class Inverter : public Decorator
 class Repeater : public Decorator
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     Repeater(int limit = 0) : limit(limit)
     {
     }
@@ -727,12 +727,12 @@ class Repeater : public Decorator
 class UntilSuccess : public Decorator
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     Status update() override
     {
         while (1)
         {
-            auto status = child->tick();
+            const auto status = child->tick();
 
             if (status == Status::Success)
             {
@@ -746,12 +746,12 @@ class UntilSuccess : public Decorator
 class UntilFailure : public Decorator
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     Status update() override
     {
         while (1)
         {
-            auto status = child->tick();
+            const auto status = child->tick();
 
             if (status == Status::Failure)
             {

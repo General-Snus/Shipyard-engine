@@ -2,11 +2,10 @@
 class cPhysics_Newtonian : public Component
 {
 public:
-	MYLIB_REFLECTABLE();
+	ReflectableTypeRegistration();
     cPhysics_Newtonian(const SY::UUID anOwnerId, GameObjectManager *aManager);
     void Init() override;
-    void Update() override;
-    void Render() override;
+    void Update() override; 
     bool InspectorView() override;
     Vector3f ph_force;
     double ph_mass;

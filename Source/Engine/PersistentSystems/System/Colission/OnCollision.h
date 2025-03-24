@@ -1,10 +1,16 @@
 #pragma once
+#include "Engine/AssetManager/ComponentSystem/UUID.h"
+#include "Engine/PersistentSystems/System/SystemBase.h"
+#include <unordered_map>
 #include <unordered_set>
 
-class CollisionChecks
+class CollisionChecks : public SystemBase
 {
   public:
-    static void CheckColliders();
-    static void RemoveCollisions(const SY::UUID &anOwnerID);
-    static inline std::unordered_map<SY::UUID, std::unordered_map<SY::UUID, bool>> activeCollisions;
+    void Update(float delta) override;
+    void RemoveCollisions(const SY::UUID &anOwnerID);
+
+  private:
+    void CheckColliders();
+    std::unordered_map<SY::UUID, std::unordered_map<SY::UUID, bool>> activeCollisions;
 };

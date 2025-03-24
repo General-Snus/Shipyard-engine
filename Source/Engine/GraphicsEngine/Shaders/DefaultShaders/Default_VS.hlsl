@@ -37,14 +37,14 @@ DefaultVertexToPixel main(uint vertexId : SV_VertexID)
     //}
 
     float3x3 worldNormalRotation = (float3x3)g_ObjectBuffer.OB_Transform;
-    result.WorldPosition = mul(g_ObjectBuffer.OB_Transform, result.Position);
+    result.WorldPosition = mul(g_ObjectBuffer.OB_Transform, result.Position); // Local to World
      
     result.Normal = mul(result.Normal, transpose(worldNormalRotation));
     result.BiNormal = mul(result.BiNormal, worldNormalRotation);
     result.Tangent = mul(result.Tangent, worldNormalRotation);
      
-    result.Position = mul(g_FrameBuffer.FB_InvView, result.WorldPosition);
-    result.Position = mul(g_FrameBuffer.FB_Proj, result.Position);
+    result.Position = mul(g_FrameBuffer.FB_InvView, result.WorldPosition); // World to View
+    result.Position = mul(g_FrameBuffer.FB_Proj, result.Position); // View to Proj
     //result.Position.z = 1 - clamp(result.Position.z, 0, 1);
    //
    //result.Position.z = log2(max(1e-6, 1.0 + result.Position.w)) * Fcoef - 1.0;

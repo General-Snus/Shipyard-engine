@@ -1,10 +1,6 @@
+#include "ShipyardEngine.pch.h"
+
 #include "../Decicion1States.h"
-#include <Engine/PersistentSystems/ArtificialInteligence/AICommands/AICommands.h>
-
-#include <Engine/AssetManager/AssetManager.pch.h>
-
-#include "Engine/AssetManager/Objects/AI/AgentSystem/AIPollingManager.h"
-#include "Engine/AssetManager/Objects/AI/AgentSystem/PollingStations/Target_PollingStation.h"
 
 void MovementState::Enter()
 {
@@ -137,7 +133,7 @@ void FleeingState::Update(float deltaTime, GameObject input)
 
     const Vector3f position = input.GetComponent<Transform>().GetPosition();
     Vector3f closestWell =
-        AIPollingManager::Get().GetStation<MultipleTargets_PollingStation>("Healing")->GetClosestTargetPosition(
+        AIPollingManagerInstance.GetStation<MultipleTargets_PollingStation>("Healing")->GetClosestTargetPosition(
             position);
 
     if ((closestWell - position).Length() < 1.0f)

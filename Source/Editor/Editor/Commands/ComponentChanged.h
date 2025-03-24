@@ -2,12 +2,12 @@
 #include <Editor/Editor/Commands/CommandBuffer.h>
 #include <Engine/AssetManager/ComponentSystem/Component.h>
 
-template<typename ComponentType>
+template <typename ComponentType>
 class ComponentChanged : public BaseCommand
 {
 public:
 	//Think imgui, i pass identifier, i will merge if previous have same identifier
-	ComponentChanged(GameObject changedObject,std::string idenfier);
+	ComponentChanged(GameObject changedObject, std::string idenfier);
 	~ComponentChanged() = default;
 
 	bool Merge(BaseCommand* ptr)
@@ -24,7 +24,7 @@ public:
 		m_ChangedObject.GetComponent<ComponentType>() = m_NewValue;
 	}
 
-	void Undo() override
+	void commandUndo() override
 	{
 		m_ChangedObject.GetComponent<ComponentType>() = m_PreviousValue;
 	}
@@ -37,11 +37,9 @@ public:
 
 
 private:
-	GameObject m_ChangedObject;
+	GameObject    m_ChangedObject;
 	ComponentType m_PreviousValue;
 	ComponentType m_NewValue;
-
-
 };
 
 //template<typename ComponentType>
@@ -50,7 +48,7 @@ private:
 //
 //}
 
-template<typename ComponentType>
-inline ComponentChanged<ComponentType>::ComponentChanged(GameObject changedObject, std::string idenfier)
+template <typename ComponentType>
+ComponentChanged<ComponentType>::ComponentChanged(GameObject changedObject, std::string idenfier)
 {
 }

@@ -5,13 +5,12 @@
 class cPhysics_Kinematic : public Component
 {
   public:
-    MYLIB_REFLECTABLE();
+    ReflectableTypeRegistration();
     cPhysics_Kinematic(const SY::UUID anOwnerId, GameObjectManager *aManager);
     ~cPhysics_Kinematic() override;
     void Init() override;
     void UpdatePrimitive();
-    void Update() override;
-    void Render() override;
+    void Update() override; 
     bool InspectorView() override;
 
     Vector3f ph_velocity;

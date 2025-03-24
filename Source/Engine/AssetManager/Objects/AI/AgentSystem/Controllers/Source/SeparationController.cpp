@@ -1,4 +1,4 @@
-#include "Engine/AssetManager/AssetManager.pch.h"
+#include "AssetManager.pch.h"
 #include "../SeparationController.h"
 #include <Tools/Utilities/LinearAlgebra/Quaternions.hpp>
 
@@ -21,11 +21,11 @@ bool SeparationController::Update(GameObject input)
 {
 	// You can use Get directly if you are sure it will exist, its faster and force safe code
 	auto& physicsComponent = input.GetComponent<cPhysics_Kinematic>();
-	auto& transform = input.GetComponent<Transform>(); 
+	auto& transform = input.GetComponent<Transform>();
 
-	auto fwd = transform.GetForward();
-	Vector3f position = transform.GetPosition();
-	auto arg = reinterpret_cast<MultipleTargets_PollingStation*>(pollingStation)->GetTargetPosition();
+	const auto fwd = transform.GetForward();
+	const Vector3f position = transform.GetPosition();
+	const auto arg = reinterpret_cast<MultipleTargets_PollingStation*>(pollingStation)->GetTargetPosition();
 	 
 	SteeringBehaviour::DampenVelocity(&physicsComponent);
 	SteeringBehaviour::Separation(arg,&physicsComponent,position,input.GetID());

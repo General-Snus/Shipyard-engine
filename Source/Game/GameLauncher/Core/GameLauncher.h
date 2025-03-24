@@ -1,21 +1,28 @@
 #pragma once
-#include "Engine/AssetManager/ComponentSystem/GameObject.h"
 
+#include <filesystem>
+#include <wtypes.h>
+#include <Editor/Editor/Core/GameState/GameState.h>
+#include <Executable/Executable/Export.h>
 #include <Tools/Utilities/System/Event.h>
-class GameLauncher
+#include "Engine/AssetManager/ComponentSystem/GameObject.h"
+#include "Engine/PersistentSystems/Networking/NetworkRunner.h"
+
+
+class YourGameLauncher : public GameLauncher
 {
-  public:
-    GameLauncher() = default;
-    void Init();
-    void Start();
-    void Update(float delta);
+	void Init() override;
+	void Start() override;
+	void Update(float delta) override;
+	void SyncServices(ServiceLocator& serviceLocator) override;
 
-    void LocalFunction();
-
-  private:
-    Event m_CustomKeyCallback;
-
-    // Room 1
-    GameObject Object1_Room1;
-    GameObject Object2_Room1; 
+	GameObject player; 
+	GameObject arena;  
+	float ballSpawnTimer = 1.0f; 
+	Vector3f rect = {50,1,50};
 };
+
+extern "C" {
+GAME_API GameLauncher* entrypointMain();
+GAME_API void          exitPoint(HMODULE handle);
+}

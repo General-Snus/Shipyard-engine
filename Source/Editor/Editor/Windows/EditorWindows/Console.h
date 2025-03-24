@@ -10,5 +10,6 @@ class Console : public EditorWindow
     void RenderImGUi() override;
 
   private:
-    Logger::LogType filter = Logger::LogType::message;
+    LoggerService::LogType filter = LoggerService::LogType::message;
+    LoggerService::LogMsg pickedMessage;
 };

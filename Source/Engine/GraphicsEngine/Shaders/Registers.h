@@ -41,8 +41,9 @@
 #define HLSL_REG_LightBuffer b3 
 #define REG_LightBuffer 3 
 
-#define HLSL_REG_LineBuffer b5 
-#define REG_LineBuffer 5
+#define HLSL_REG_TextureInspectionBuffer b1
+#define REG_TextureInspectionBuffer 1 
+
 
 #define HLSL_REG_GraphicSettingsBuffer b13 
 #define REG_GraphicSettingsBuffer 13

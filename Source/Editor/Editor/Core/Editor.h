@@ -1,10 +1,11 @@
 #pragma once
-#include "../Windows/SplashWindow.h"
 #include <Editor/Editor/Defines.h>
 #include <Game/GameLauncher/Core/GameLauncher.h>
 #include <Tools/Utilities/DataStructures/Queue.hpp>
 #include <Tools/Utilities/LinearAlgebra/Sphere.hpp>
+#include <Tools/Utilities/System/ServiceLocator.h>
 #include <Tools/Utilities/System/SingletonTemplate.h>
+#include "../Windows/SplashWindow.h"
 
 class Viewport;
 class CommandBuffer;
@@ -15,73 +16,76 @@ class Scene;
 
 enum class EditorCallback
 {
-    ObjectSelected,
-    WM_DropFile,
+	ObjectSelected,
+	SceneChange,
+	WM_DropFile
 };
 
-class Editor : public Singleton<Editor>
+#define EDITOR_INSTANCE ServiceLocator::Instance().GetService<Editor>()
+
+class Editor : public Singleton
 {
+	friend class LoggerService;
+	friend class ContentDirectory;
 
-    friend class Singleton<Editor>;
-    friend class Logger;
-    friend class ContentDirectory;
-    std::unique_ptr<SplashWindow> mySplashWindow = nullptr;
-    void ShowSplashScreen();
-    void HideSplashScreen() const;
+	void UpdateImGui();
+	void Update();
+	void Render();
 
-    void UpdateImGui();
-    void Update();
-    void Render();
+	void AddViewPort();
+	void TopBar();
 
-    void AddViewPort();
-    void TopBar();
+public:
+	int  Run();
+	bool Initialize(HWND aHandle);
+	void DoWinProc(const MSG& msg);
 
-  public:
-    int Run();
-    bool Initialize(HWND aHandle);
-    void DoWinProc(const MSG &msg);
+	RECT                  GetViewportRECT();
+	Vector2<unsigned int> GetViewportResolution();
 
-    static RECT GetViewportRECT();
-    static Vector2<unsigned int> GetViewportResolution();
+	bool GetIsGUIActive() const
+	{
+		return IsGUIActive;
+	};
 
-    bool GetIsGUIActive() const
-    {
-        return IsGUIActive;
-    };
-    void SetIsGUIActive(bool set)
-    {
-        IsGUIActive = set;
-    };
-    static inline std::vector<std::shared_ptr<EditorWindow>> g_EditorWindows;
+	void SetIsGUIActive(bool set)
+	{
+		IsGUIActive = set;
+	};
+	std::vector<std::shared_ptr<EditorWindow>> g_EditorWindows;
 
-    static std::vector<GameObject> &GetSelectedGameObjects()
-    {
-        return m_SelectedGameObjects;
-    }
-    static void CheckSelectedForRemoved();
-    static void Copy();
-    static void Paste();
+	std::vector<GameObject>& GetSelectedGameObjects()
+	{
+		// Todo ensure saftey from other steps
+		const auto& invalidArray =
+			std::ranges::remove_if(m_SelectedGameObjects, [](GameObject obj) { return !obj.IsValid(); });
+		m_SelectedGameObjects.erase(invalidArray.begin(), invalidArray.end());
 
-    static inline bool IsPlaying = false;
+		return m_SelectedGameObjects;
+	}
 
-    void FocusObject(const GameObject &focus, bool focusWithOffset = true) const;
-    void AlignObject(const GameObject &focus) const;
-    static std::shared_ptr<Scene> GetMainScene()
-    {
-        return m_MainScene;
-    }
+	void CheckSelectedForRemoved();
+	void Copy();
+	void Paste();
 
-    std::unordered_map<EditorCallback, Event> m_Callbacks;
+	void FocusObject(const GameObject& focus, bool focusWithOffset = true) const;
+	void AlignObject(const GameObject& focus) const;
 
-  private:
-    Editor() = default;
-    std::vector<std::filesystem::path> WM_DroppedPath;
+	void                      SetActiveScene(std::shared_ptr<Scene> scene);
+	std::shared_ptr<Scene>    GetActiveScene();
+	std::shared_ptr<Viewport> GetMainViewport();
 
-    inline static RECT ViewportRect;
-    inline static std::vector<GameObject> m_SelectedGameObjects;
-    inline static std::vector<GameObject> copiedObjects;
-    inline static std::shared_ptr<Scene> m_MainScene;
-    std::vector<std::shared_ptr<Viewport>> m_Viewports;
-    GameLauncher myGameLauncher;
-    bool IsGUIActive = true;
+	std::unordered_map<EditorCallback, Event> m_Callbacks;
+	GameState                                 gameState;
+
+private:
+	std::vector<std::filesystem::path> WM_DroppedPath;
+
+	RECT                    ViewportRect;
+	std::vector<GameObject> m_SelectedGameObjects;
+	std::vector<GameObject> copiedObjects;
+	std::shared_ptr<Scene>  m_ActiveScene;
+
+	std::vector<std::shared_ptr<Viewport>> m_Viewports;
+	bool                                   IsGUIActive = true;
 };

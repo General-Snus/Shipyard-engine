@@ -1,25 +1,25 @@
-#include "Engine/AssetManager/AssetManager.pch.h"
+#include "AssetManager.pch.h"
 
 #include "../LightComponent.h"
-//#include <Editor/Editor/Core/Editor.h>
-#include <Tools/Utilities/Math.hpp> 
+// #include <Editor/Editor/Core/Editor.h>
 #include <Tools/Optick/include/optick.h>
+#include <Tools/Utilities/Math.hpp>
 
-#include "DirectX/Shipyard/GPU.h"
-#include "DirectX/Shipyard/Texture.h"
+#include "DirectX/DX12/Graphics/GPU.h"
+#include "DirectX/DX12/Graphics/Resources/Texture.h"
 #include "Engine/AssetManager/Objects/BaseAssets/LightDataBase.h"
 
-
-cLight::cLight(const SY::UUID anOwnerId, GameObjectManager* aManager) : Component(anOwnerId, aManager)
+Light::Light(const SY::UUID anOwnerId, GameObjectManager* aManager) : Component(anOwnerId, aManager)
 {
 	myLightType = eLightType::Directional;
 }
 
-cLight::cLight(const SY::UUID anOwnerId, GameObjectManager* aManager, const eLightType type) : Component(anOwnerId, aManager), myLightType(type)
+Light::Light(const SY::UUID anOwnerId, GameObjectManager* aManager, const eLightType type)
+	: Component(anOwnerId, aManager), myLightType(type)
 {
 }
 
-void cLight::Init()
+void Light::Init()
 {
 	shadowMap[0] = std::make_shared<Texture>();
 	switch (myLightType)
@@ -61,26 +61,28 @@ void cLight::Init()
 		break;
 	case uninitialized:
 	default:
-		Logger::Warn("Light was not initialized correctly, no/invalid type given");
+		LOGGER.Warn("Light was not initialized correctly, no/invalid type given");
 		break;
 	}
 	SetIsShadowCaster(isShadowCaster);
 }
 
-eLightType cLight::GetType() const
+eLightType Light::GetType() const
 {
 	return myLightType;
 }
-void cLight::SetType(const eLightType aType)
+
+void Light::SetType(const eLightType aType)
 {
 	myLightType = aType;
 }
 
-bool cLight::GetIsShadowCaster() const
+bool Light::GetIsShadowCaster() const
 {
 	return isShadowCaster;
 }
-void cLight::SetIsShadowCaster(const bool active)
+
+void Light::SetIsShadowCaster(const bool active)
 {
 	OPTICK_EVENT();
 	isShadowCaster = active;
@@ -89,24 +91,24 @@ void cLight::SetIsShadowCaster(const bool active)
 	{
 		isDirty = true;
 		std::wstring name = L"unNamedMap";
-		Vector2ui resolution = { 512,512 };
-		int mapsToCreate = 0;
+		Vector2ui    resolution = {512, 512};
+		int          mapsToCreate = 0;
 		switch (myLightType)
 		{
 			using enum eLightType;
 		case Directional:
 			name = L"directionalLight";
-			resolution = { 4096,4096 };
+			resolution = {4096, 4096};
 			mapsToCreate = 1;
 			break;
 		case Point:
 			name = L"pointLight";
-			resolution = { 512,512 };
+			resolution = {512, 512};
 			mapsToCreate = 6;
 			break;
 		case Spot:
 			name = L"spotLight";
-			resolution = { 1024,1024 };
+			resolution = {1024, 1024};
 			mapsToCreate = 1;
 			break;
 		case uninitialized:
@@ -117,8 +119,8 @@ void cLight::SetIsShadowCaster(const bool active)
 
 		for (int i = 0; i < mapsToCreate; i++)
 		{
-			if(!(!shadowMap[i] || shadowMap[i]->GetResolution() != resolution))
-			{ 
+			if (!(!shadowMap[i] || shadowMap[i]->GetResolution() != resolution))
+			{
 				continue;
 			}
 
@@ -126,12 +128,8 @@ void cLight::SetIsShadowCaster(const bool active)
 
 			shadowMap[i]->AllocateTexture(
 				resolution,
-				name + std::to_wstring(i) + L"_" +
-				std::to_wstring(resolution.x) + L"|" +
-				std::to_wstring(resolution.y),
-				DXGI_FORMAT_D32_FLOAT,
-				D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL,
-				D3D12_RESOURCE_STATE_DEPTH_WRITE);
+				name + std::to_wstring(i) + L"_" + std::to_wstring(resolution.x) + L"|" + std::to_wstring(resolution.y),
+				{}, DXGI_FORMAT_D32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
 			shadowMap[i]->SetView(ViewType::DSV);
 			shadowMap[i]->SetView(ViewType::SRV);
@@ -188,29 +186,29 @@ void cLight::SetIsShadowCaster(const bool active)
 		{
 			if (tex)
 			{
-				//shadowMap->reset();
-				//TODO Make sure resource deletion is fine to do whenever we want
+				// shadowMap->reset();
+				// TODO Make sure resource deletion is fine to do whenever we want
 			}
 		}
 	}
+}
 
-	
-} 
-
-bool cLight::GetIsRendered() const
+bool Light::GetIsRendered() const
 {
 	return isRendered;
 }
-void cLight::SetIsRendered(const bool shouldRender)
+
+void Light::SetIsRendered(const bool shouldRender)
 {
 	this->isRendered = shouldRender;
 }
 
-bool cLight::GetIsDirty() const
+bool Light::GetIsDirty() const
 {
 	return isDirty;
 }
-void cLight::SetIsDirty(const bool dirty)
+
+void Light::SetIsDirty(const bool dirty)
 {
 	isDirty = dirty;
 	if (isShadowCaster)
@@ -219,7 +217,7 @@ void cLight::SetIsDirty(const bool dirty)
 	}
 }
 
-void cLight::SetPower(const float power)
+void Light::SetPower(const float power)
 {
 	SetIsDirty(true);
 	switch (myLightType)
@@ -240,7 +238,8 @@ void cLight::SetPower(const float power)
 		break;
 	}
 }
-float cLight::GetPower()const
+
+float Light::GetPower() const
 {
 	switch (myLightType)
 	{
@@ -262,7 +261,7 @@ float cLight::GetPower()const
 	return 0;
 }
 
-void cLight::SetColor(const Color& color)
+void Light::SetColor(const Color& color)
 {
 	m_Color = color;
 	SetIsDirty(true);
@@ -284,12 +283,13 @@ void cLight::SetColor(const Color& color)
 		break;
 	}
 }
-Color cLight::GetColor()const
+
+Color Light::GetColor() const
 {
 	return m_Color;
 }
 
-void cLight::SetPosition(const Vector3f position)
+void Light::SetPosition(const Vector3f position)
 {
 	SetIsDirty(true);
 	switch (myLightType)
@@ -309,7 +309,8 @@ void cLight::SetPosition(const Vector3f position)
 		break;
 	}
 }
-Vector3f cLight::GetPosition()const
+
+Vector3f Light::GetPosition() const
 {
 	switch (myLightType)
 	{
@@ -331,7 +332,7 @@ Vector3f cLight::GetPosition()const
 	return Vector3f();
 }
 
-void cLight::SetDirection(const Vector3f direction)
+void Light::SetDirection(const Vector3f direction)
 {
 	SetIsDirty(true);
 	switch (myLightType)
@@ -351,17 +352,15 @@ void cLight::SetDirection(const Vector3f direction)
 		break;
 	}
 }
-Vector3f cLight::GetDirection() const
+
+Vector3f Light::GetDirection() const
 {
 	switch (myLightType)
 	{
 		using enum eLightType;
 	case Directional:
-		return Vector3f(
-			myDirectionLightData->Direction.x,
-			myDirectionLightData->Direction.y,
-			myDirectionLightData->Direction.z
-		);
+		return Vector3f(myDirectionLightData->Direction.x, myDirectionLightData->Direction.y,
+		                myDirectionLightData->Direction.z);
 		break;
 	case Point:
 		return Vector3f();
@@ -377,7 +376,7 @@ Vector3f cLight::GetDirection() const
 	return Vector3f();
 }
 
-void cLight::SetRange(const float range)
+void Light::SetRange(const float range)
 {
 	SetIsDirty(true);
 	switch (myLightType)
@@ -397,7 +396,8 @@ void cLight::SetRange(const float range)
 		break;
 	}
 }
-float cLight::GetRange() const
+
+float Light::GetRange() const
 {
 	switch (myLightType)
 	{
@@ -419,9 +419,8 @@ float cLight::GetRange() const
 	return 0;
 }
 
-void cLight::SetInnerAngle(const float angle)
+void Light::SetInnerAngle(const float angle)
 {
-
 	SetIsDirty(true);
 	switch (myLightType)
 	{
@@ -439,12 +438,13 @@ void cLight::SetInnerAngle(const float angle)
 		break;
 	}
 }
-float cLight::GetInnerAngle()const
+
+float Light::GetInnerAngle() const
 {
 	return 0.0f;
 }
 
-void cLight::SetOuterAngle(const float angle)
+void Light::SetOuterAngle(const float angle)
 {
 	SetIsDirty(true);
 	switch (myLightType)
@@ -463,7 +463,8 @@ void cLight::SetOuterAngle(const float angle)
 		break;
 	}
 }
-float cLight::GetOuterAngle()const
+
+float Light::GetOuterAngle() const
 {
 	switch (myLightType)
 	{
@@ -485,12 +486,12 @@ float cLight::GetOuterAngle()const
 	return 0.0f;
 }
 
-std::shared_ptr<Texture> cLight::GetShadowMap(const int number) const
+std::shared_ptr<Texture> Light::GetShadowMap(const int number) const
 {
 	return shadowMap[number];
 }
 
-void cLight::Update()
+void Light::Update()
 {
 	OPTICK_EVENT();
 	if (boundToTransform)
@@ -498,8 +499,8 @@ void cLight::Update()
 		ConformToTransform();
 	}
 
-	//TODO dealt with dynamic maps and static maps in some way
-	//if (isDirty)
+	// TODO dealt with dynamic maps and static maps in some way
+	// if (isDirty)
 	{
 		Vector3f color = m_Color.GetRGB();
 		switch (myLightType)
@@ -519,8 +520,10 @@ void cLight::Update()
 		case Spot:
 			RedrawSpotMap();
 			mySpotLightData->Color = color;
-			mySpotLightData->InnerConeAngle = std::clamp(mySpotLightData->InnerConeAngle, 0.f, mySpotLightData->OuterConeAngle);
-			mySpotLightData->OuterConeAngle = std::clamp(mySpotLightData->OuterConeAngle, mySpotLightData->InnerConeAngle, 360.f);
+			mySpotLightData->InnerConeAngle =
+				std::clamp(mySpotLightData->InnerConeAngle, 0.f, mySpotLightData->OuterConeAngle);
+			mySpotLightData->OuterConeAngle =
+				std::clamp(mySpotLightData->OuterConeAngle, mySpotLightData->InnerConeAngle, 360.f);
 			mySpotLightData->Power = std::max(0.0f, mySpotLightData->Power);
 			mySpotLightData->Range = std::max(0.0f, mySpotLightData->Range);
 			break;
@@ -531,13 +534,12 @@ void cLight::Update()
 		}
 		SetIsDirty(false);
 	}
-
 }
 
-void cLight::ConformToTransform()
+void Light::ConformToTransform()
 {
 	OPTICK_EVENT();
-	Transform* transform = this->TryGetComponent<Transform>();
+	const Transform* transform = this->TryGetComponent<Transform>();
 	if (transform == nullptr)
 	{
 		std::cout << "Light component has no transform component" << std::endl;
@@ -567,7 +569,7 @@ void cLight::ConformToTransform()
 	}
 }
 
-void cLight::RedrawShadowMap()
+void Light::RedrawShadowMap()
 {
 	switch (myLightType)
 	{
@@ -586,111 +588,112 @@ void cLight::RedrawShadowMap()
 	}
 }
 
-void cLight::RedrawDirectionMap()
+void Light::RedrawDirectionMap()
 {
 	OPTICK_EVENT();
-	constexpr float radius = 50;
+	constexpr float radius = 100; // todo what the hell where you thinking
 	myDirectionLightData->Direction.Normalize();
 
 	const Vector3f worldCenter = {};
-	const Vector3f lightPosition = radius * 5.0f * -Vector3f(myDirectionLightData->Direction.x, myDirectionLightData->Direction.y, myDirectionLightData->Direction.z);
-	myDirectionLightData->lightView = Matrix::LookAt(lightPosition, worldCenter, { 0,1,0 }); // REFACTOR, Magic value up
+	const Vector3f lightPosition = radius * 5.0f *
+		-Vector3f(myDirectionLightData->Direction.x, myDirectionLightData->Direction.y,
+		          myDirectionLightData->Direction.z);
+	myDirectionLightData->lightView = Matrix::LookAt(lightPosition, worldCenter, {0, 1, 0}); // REFACTOR, Magic value up
 
 	const Vector4f cameraCenter = Vector4f(worldCenter, 0.0f) * myDirectionLightData->lightView;
 	myDirectionLightData->lightView = Matrix::GetFastInverse(myDirectionLightData->lightView);
 
-	const float leftPlane = cameraCenter.x - radius * 1;
-	const float rightPlane = cameraCenter.x + radius * 1;
-	const float bottomPlane = cameraCenter.y - radius * 1;
-	const float topPlane = cameraCenter.y + radius * 1;
+	const float     leftPlane = cameraCenter.x - radius * 1;
+	const float     rightPlane = cameraCenter.x + radius * 1;
+	const float     bottomPlane = cameraCenter.y - radius * 1;
+	const float     topPlane = cameraCenter.y + radius * 1;
 	constexpr float nearPlane = 0.1f;
 	constexpr float farPlane = radius * 5.f;
-	myDirectionLightData->projection = Matrix::CreateOrthographicProjection(
-		leftPlane,
-		rightPlane,
-		bottomPlane,
-		topPlane,
-		farPlane,
-		nearPlane
-	);
+	myDirectionLightData->projection =
+		Matrix::CreateOrthographicProjection(leftPlane, rightPlane, bottomPlane, topPlane, farPlane, nearPlane);
 }
 
-void cLight::RedrawPointMap()
+void Light::RedrawPointMap()
 {
 	OPTICK_EVENT();
-	constexpr float fow = 90.0f * DEG_TO_RAD;
+	constexpr float fow = 90.0f * Math::DEG_TO_RAD;
 	constexpr float nearField = .01f;
-	const float farfield = std::max(myPointLightData->Range * 5, nearField + 0.0001f);
+	const float     farfield = std::max(myPointLightData->Range * 5, nearField + 0.0001f);
 
-	const auto dxMatrix = XMMatrixPerspectiveFovLH(fow, 1, farfield, nearField);
+	const auto dxMatrix = DirectX::XMMatrixPerspectiveFovLH(fow,1,farfield,nearField);
 	myPointLightData->projection = Matrix(&dxMatrix);
 
-	for (int i = 0; i < 6; i++)
-	{
+	for(int i = 0; i < 6; i++) {
 		myPointLightData->lightView[i] = GetLightViewMatrix(i);
 	}
-
 }
 
-void cLight::RedrawSpotMap()
-{
+void Light::RedrawSpotMap() {
 	OPTICK_EVENT();
-	Vector3f lightPosition = mySpotLightData->Position;
-	mySpotLightData->lightView = Matrix::LookAt(lightPosition, lightPosition + mySpotLightData->Direction.GetNormalized(), { 0,1,0 }); // REFACTOR, Magic value up
+	const Vector3f lightPosition = mySpotLightData->Position;
+	mySpotLightData->lightView =
+		Matrix::LookAt(lightPosition,lightPosition + mySpotLightData->Direction.GetNormalized(),
+			{0, 1, 0}); // REFACTOR, Magic value up
 
-	const float fow = mySpotLightData->OuterConeAngle;
-	const float farfield = mySpotLightData->Range * 2;
+	const float     fow = mySpotLightData->OuterConeAngle;
+	const float     farfield = mySpotLightData->Range * 2;
 	constexpr float nearField = 0.01f;
 
-
-	const auto dxMatrix = XMMatrixPerspectiveFovLH(fow * DEG_TO_RAD, 1, farfield, nearField);
+	const auto dxMatrix = DirectX::XMMatrixPerspectiveFovLH(fow * Math::DEG_TO_RAD, 1, farfield, nearField);
 	mySpotLightData->projection = Matrix(&dxMatrix);
 	mySpotLightData->lightView = Matrix::GetFastInverse(mySpotLightData->lightView);
 }
 
-void cLight::BindDirectionToTransform(const bool active)
+void Light::BindDirectionToTransform(const bool active)
 {
 	SetIsDirty(true);
 	boundToTransform = active;
 }
 
-Matrix cLight::GetLightViewMatrix(const int number) const
+Matrix Light::GetLightViewMatrix(const int number) const
 {
-	Vector3f lightPos = myPointLightData->Position;
+	const Vector3f lightPos = myPointLightData->Position;
 	assert(number < 6 && "There are only 6 faces to a cubemap");
 	assert(myLightType == eLightType::Point && "Use only for point lights");
 	switch (number)
 	{
 	case 0:
-		return Matrix::GetFastInverse(Matrix::LookAt(lightPos, lightPos + Vector3f(1.0f, 0.0f, 0.0f), Vector3f(0.0f, 1.0f, 0.0f)));
+		return Matrix::GetFastInverse(
+			Matrix::LookAt(lightPos, lightPos + Vector3f(1.0f, 0.0f, 0.0f), Vector3f(0.0f, 1.0f, 0.0f)));
 		break;
 	case 1:
-		return Matrix::GetFastInverse(Matrix::LookAt(lightPos, lightPos + Vector3f(-1.0f, 0.0f, 0.0f), Vector3f(0.0f, 1.0f, 0.0f)));
+		return Matrix::GetFastInverse(
+			Matrix::LookAt(lightPos, lightPos + Vector3f(-1.0f, 0.0f, 0.0f), Vector3f(0.0f, 1.0f, 0.0f)));
 		break;
 	case 2:
-		return Matrix::GetFastInverse(Matrix::LookAt(lightPos, lightPos + Vector3f(0.0f, 1.0f, 0.0f), Vector3f(0.0f, 0.0f, 1.0f)));
+		return Matrix::GetFastInverse(
+			Matrix::LookAt(lightPos, lightPos + Vector3f(0.0f, 1.0f, 0.0f), Vector3f(0.0f, 0.0f, 1.0f)));
 		break;
 	case 3:
-		return Matrix::GetFastInverse(Matrix::LookAt(lightPos, lightPos + Vector3f(0.0f, -1.0f, 0.0f), Vector3f(0.0f, 0.0f, 1.0f)));
+		return Matrix::GetFastInverse(
+			Matrix::LookAt(lightPos, lightPos + Vector3f(0.0f, -1.0f, 0.0f), Vector3f(0.0f, 0.0f, 1.0f)));
 		break;
 	case 4:
-		return Matrix::GetFastInverse(Matrix::LookAt(lightPos, lightPos + Vector3f(0.0f, 0.0f, 1.0f), Vector3f(0.0f, 1.0f, 0.0f)));
+		return Matrix::GetFastInverse(
+			Matrix::LookAt(lightPos, lightPos + Vector3f(0.0f, 0.0f, 1.0f), Vector3f(0.0f, 1.0f, 0.0f)));
 		break;
 	case 5:
-		return Matrix::GetFastInverse(Matrix::LookAt(lightPos, lightPos + Vector3f(0.0f, 0.0f, -1.0f), Vector3f(0.0f, 1.0f, 0.0f)));
+		return Matrix::GetFastInverse(
+			Matrix::LookAt(lightPos, lightPos + Vector3f(0.0f, 0.0f, -1.0f), Vector3f(0.0f, 1.0f, 0.0f)));
 		break;
 	default:
-		return Matrix::GetFastInverse(Matrix::LookAt(lightPos, lightPos + Vector3f(1.0f, 0.0f, 0.0f), Vector3f(0.0f, 1.0f, 0.0f)));
+		return Matrix::GetFastInverse(
+			Matrix::LookAt(lightPos, lightPos + Vector3f(1.0f, 0.0f, 0.0f), Vector3f(0.0f, 1.0f, 0.0f)));
 		break;
 	}
 }
 
-bool cLight::GetIsBound()const
+bool Light::GetIsBound() const
 {
 	return boundToTransform;
 }
 
-FrameBuffer cLight::GetShadowMapFrameBuffer(const int number) const
+FrameBuffer Light::GetShadowMapFrameBuffer(const int number) const
 {
 	FrameBuffer fb;
 
@@ -700,19 +703,19 @@ FrameBuffer cLight::GetShadowMapFrameBuffer(const int number) const
 	case Directional:
 		fb.ProjectionMatrix = myDirectionLightData->projection;
 		fb.ViewMatrix = myDirectionLightData->lightView;
-		fb.FB_ScreenResolution = { shadowMap[0]->GetWidth(),shadowMap[0]->GetHeight() };
+		fb.FB_ScreenResolution = {shadowMap[0]->GetWidth(), shadowMap[0]->GetHeight()};
 		fb.FB_CameraPosition = GetPosition();
 		break;
 	case Point:
 		fb.ProjectionMatrix = myPointLightData->projection;
 		fb.ViewMatrix = GetLightViewMatrix(number);
-		fb.FB_ScreenResolution = { shadowMap[number]->GetWidth(),shadowMap[number]->GetHeight() };
+		fb.FB_ScreenResolution = {shadowMap[number]->GetWidth(), shadowMap[number]->GetHeight()};
 		fb.FB_CameraPosition = GetPosition();
 		break;
 	case Spot:
 		fb.ProjectionMatrix = mySpotLightData->projection;
 		fb.ViewMatrix = mySpotLightData->lightView;
-		fb.FB_ScreenResolution = { shadowMap[0]->GetWidth(),shadowMap[0]->GetHeight() };
+		fb.FB_ScreenResolution = {shadowMap[0]->GetWidth(), shadowMap[0]->GetHeight()};
 		fb.FB_CameraPosition = GetPosition();
 		break;
 	case uninitialized:
@@ -724,7 +727,7 @@ FrameBuffer cLight::GetShadowMapFrameBuffer(const int number) const
 	return fb;
 }
 
-bool cLight::InspectorView()
+bool Light::InspectorView()
 {
 	if (!Component::InspectorView())
 	{
@@ -741,14 +744,13 @@ bool cLight::InspectorView()
 	}
 
 	const bool previousShadowCasterValue = isShadowCaster;
-	Reflect<cLight>();
+	Reflect<Light>();
 
-	//stupid stupid stupid, no textures would be allocated otherwise
+	// stupid stupid stupid, no textures would be allocated otherwise
 	if (isShadowCaster != previousShadowCasterValue)
 	{
 		SetIsShadowCaster(isShadowCaster);
 	}
-
 
 	using enum eLightType;
 	switch (myLightType)
