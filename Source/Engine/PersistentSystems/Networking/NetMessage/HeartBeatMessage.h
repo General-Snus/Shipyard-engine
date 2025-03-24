@@ -7,7 +7,7 @@ struct HeartBeatData
 {
 	TimePoint serverTime;
 	TimePoint timeSentByClient;
-	Duration lastRoundTripTime;
+	float lastRoundTripTime;
 	int sentMessagesToConnectionForLast10Seconds;
 };
 

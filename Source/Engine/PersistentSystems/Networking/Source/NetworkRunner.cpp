@@ -234,27 +234,7 @@ void NetworkRunner::ProcessIncoming(const eNetMessageType& type,NetworkRunner::R
 			remote->Close();
 		}
 	}
-	break;
-	case eNetMessageType::PlayerJoin:
-		break;
-	case eNetMessageType::TransformSyncMessage:
-	{
-		//const auto          message = std::bit_cast<PlayerSyncMessage>(incomingMessage.message);
-		//PlayerSyncData data = message.ReadMessage();
-
-		// std::cout << data.position << '\n' << data.rotation << '\n' << data.scale << '\n';
-
-		//for(const auto& [id,name] : usersNames) {
-		//	if(id == message->GetId()) {
-		//		continue;
-		//	}
-
-		//	PlayerSyncMessage outMessage;
-		//	outMessage.SetMessage(data);
-		//	//newConnection.Send(outMessage,usersIPs[id]);
-		//}
-	}
-	break;
+	break;  
 	case eNetMessageType::Count:
 		break;
 	default:

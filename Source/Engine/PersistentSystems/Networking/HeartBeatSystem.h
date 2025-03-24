@@ -1,5 +1,7 @@
 #pragma once 
 #include "NetMessage\NetMessage.h"
+#include "Tools\Utilities\DataStructures\CircularBuffer.h"
+
 class NetworkRunner;
 class HeartBeatSystem
 {
@@ -12,6 +14,6 @@ private:
 	void UpdateServer(NetworkRunner & runner);
 
 	TimePoint lastRecievedHearthBeatMessage; // if client, also if server for no real reason
-	Duration usRoundTripTime;
+ 	CircularBuffer<float,10> roundTripBuffer;
 };
 

@@ -124,6 +124,9 @@ inline constexpr bool is_array<std::array<T, N>> = true;
 template <typename T, std::size_t N>
 inline constexpr bool is_array<const std::array<T, N>> = true;
 
+template <typename T>
+concept Arithmetic = std::integral<T> || std::floating_point<T>;
+
 template <typename T, T... S, typename F>
 constexpr void for_sequence(std::integer_sequence<T, S...>, F f)
 {

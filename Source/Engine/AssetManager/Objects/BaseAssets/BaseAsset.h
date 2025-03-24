@@ -28,6 +28,7 @@ public:
 
 	virtual bool InjectIntoScene(std::shared_ptr<Scene> SceneToAddAsset)
 	{
+		SceneToAddAsset;
 		LOGGER.Warn(
 			std::format("Asset could not be added to scene\nAsset of type {} is not possible to load into scene",
 			            GetTypeInfo().Name()));

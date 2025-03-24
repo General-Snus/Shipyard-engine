@@ -96,18 +96,7 @@ void ReplicationLayer::client_fixedNetworkUpdate(const NetworkRunner & runner) c
 		transform.SetPosition(newPosition);
 		transform.SetQuatF(networkedTransform.myQuaternion);
 		transform.SetScale(networkedTransform.myScale);
-
 	}
-
-	//for(auto& i : Scene::activeManager().GetAllComponents<NetworkTransform>())
-	//{
-	//
-	//}
-	//
-	//for(auto& i : Scene::activeManager().GetAllComponents<NetworkTransform>())
-	//{
-	//
-	//}
 }
 
 void ReplicationLayer::client_ReadIncoming(const NetworkRunner & runner)

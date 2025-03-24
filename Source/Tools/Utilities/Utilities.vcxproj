@@ -243,6 +243,7 @@
   <ItemGroup>
     <ClInclude Include="Color.h" />
     <ClInclude Include="DataStructures\BSTSet.hpp" />
+    <ClInclude Include="DataStructures\CircularBuffer.h" />
     <ClInclude Include="DataStructures\DoublyLinkedList.hpp" />
     <ClInclude Include="DataStructures\HashMap.hpp" />
     <ClInclude Include="DataStructures\Heap.hpp" />

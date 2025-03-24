@@ -6,6 +6,7 @@
 #include "Engine/PersistentSystems/Networking/NetMessage/NetMessage.h"
 #include "Engine/PersistentSystems/Networking/NetworkStructs.h" 
 #include <Tools/Utilities/uuidv4/uuid_v4.h>
+#include <Tools/Utilities/DataStructures/CircularBuffer.h>
 #pragma comment(lib, "Ws2_32.lib")
 #undef max
 
@@ -35,6 +36,7 @@ private:
 	TimePoint lastRecievedMessageTime;
 	TimePoint lastHeartbeatTime;
 	Duration roundTrip;
+	CircularBuffer<float,15> roundTripBuffer;
 	std::vector<RemoteRecievedMessage> messages;
 	std::mutex messageMutex;
 	std::jthread receiveTCP;

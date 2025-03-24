@@ -18,14 +18,16 @@ void HeartBeatSystem::UpdateClient(NetworkRunner & runner)
 		const auto serverToClientTripTime = (now - pulse.TimeSent()) ;
 		const auto clientToServerTripTime = (data.serverTime - data.timeSentByClient) ;
 		const auto tripTime = serverToClientTripTime+ clientToServerTripTime;
-		usRoundTripTime = ((usRoundTripTime*index) + tripTime)/(index+1); //This is an average in case my iq is lower then it was on 22/03/2025 
-		lastRecievedHearthBeatMessage = now;
+
+		float msRoundTrip = (float)std::chrono::duration_cast<std::chrono::microseconds>(tripTime).count()/1000.f;
+		roundTripBuffer.Add(msRoundTrip); 
+ 		lastRecievedHearthBeatMessage = now;
 	}
 
 	HeartBeatMessage message;
 	HeartBeatData data;
 	data.sentMessagesToConnectionForLast10Seconds = 10; // todo
-	data.lastRoundTripTime = usRoundTripTime;
+	data.lastRoundTripTime = rtt();
 	data.timeSentByClient = now;
 	data.serverTime = {};
 	message.SetMessage(data);
@@ -55,7 +57,7 @@ void HeartBeatSystem::UpdateServer(NetworkRunner & runner)
 		}
 
 		t->lastHeartbeatTime = now;
-		t->roundTrip = data.lastRoundTripTime;
+ 		t->roundTripBuffer.Add(data.lastRoundTripTime);
 
 		HeartBeatMessage sendMessage;
 		data.serverTime = now;
@@ -82,5 +84,5 @@ void HeartBeatSystem::Update(NetworkRunner & runner)
 
 float  HeartBeatSystem::rtt() const
 {
-	return std::chrono::duration_cast<std::chrono::microseconds>(usRoundTripTime).count()/1000.f;
+	return  float(roundTripBuffer.Sum())/roundTripBuffer.Count();;
 }
