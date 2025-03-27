@@ -4,7 +4,7 @@
 #include <Tools/ImGui/ImGuiHelpers.hpp>
 #include "DirectX/DX12/Graphics/GPU.h"
 #include "DirectX/DX12/Graphics/Resources/Texture.h"
-#include "Engine/GraphicsEngine/GraphicsEngine.h"
+#include "Engine/GraphicsEngine/Renderer.h"
 
 TextureHolder::TextureHolder(const std::filesystem::path& aFilePath, eTextureType aTextureType)
 	: AssetBase(aFilePath), textureType(aTextureType)
@@ -61,7 +61,7 @@ std::shared_ptr<TextureHolder> TextureHolder::GetEditorIcon()
 	{
 		return file;
 	}
-	return GraphicsEngineInstance.GetDefaultTexture(eTextureType::ColorMap);
+	return RENDERER.GetDefaultTexture(eTextureType::ColorMap);
 }
 
 void TextureHolder::SetTextureType(eTextureType aTextureType)
@@ -107,9 +107,9 @@ void TextureHolder::Init()
 			{
 				const std::string msg = "Error: Coulnt load texture at " + AssetPath.string();
 				LOGGER.Err(msg);
-				if (GraphicsEngineInstance.GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
+				if (RENDERER.GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
 				{
-					RawTexture = GraphicsEngineInstance.GetDefaultTexture(this->textureType)->GetRawTexture();
+					RawTexture = RENDERER.GetDefaultTexture(this->textureType)->GetRawTexture();
 					isLoadedComplete = true;
 					return;
 				}
@@ -122,9 +122,9 @@ void TextureHolder::Init()
 		{
 			const std::string msg = "Error: Coulnt dds texture at " + AssetPath.string();
 			LOGGER.Err(msg);
-			if (GraphicsEngineInstance.GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
+			if (RENDERER.GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
 			{
-				RawTexture = GraphicsEngineInstance.GetDefaultTexture(this->textureType)->GetRawTexture();
+				RawTexture = RENDERER.GetDefaultTexture(this->textureType)->GetRawTexture();
 				isLoadedComplete = true;
 				RawTexture->SetView(ViewType::SRV);
 				return;
@@ -142,9 +142,9 @@ void TextureHolder::Init()
 		const std::string msg = "Error: Coulnt load generic texture at " + AssetPath.string();
 		LOGGER.Err(msg);
 
-		// if (GraphicsEngineInstance.GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
+		// if (RENDERER.GetDefaultTexture(this->textureType)->GetRawTexture().get() != nullptr)
 		//{
-		//	RawTexture = GraphicsEngineInstance.GetDefaultTexture(this->textureType)->GetRawTexture();
+		//	RawTexture = RENDERER.GetDefaultTexture(this->textureType)->GetRawTexture();
 		//	isLoadedComplete = true;
 		//	RawTexture->SetView(ViewType::SRV);
 		//	return;

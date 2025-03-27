@@ -2,8 +2,7 @@
 #include <functional>
 #include <filesystem>
 #include <Engine/AssetManager/Enums.h>
-#include "Engine/AssetManager/Reflection/ReflectionTemplate.h"
-#include "Engine/GraphicsEngine/Rendering/Vertex.h"
+#include "Engine/AssetManager/Reflection/ReflectionTemplate.h" 
 #include "Tools/Logging/Logging.h"
 #include "Tools/Reflection/refl.hpp"
 

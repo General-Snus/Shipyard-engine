@@ -12,7 +12,7 @@ class GPURootSignature
 
     void Destroy();
 
-    ComPtr<ID3D12RootSignature> GetRootSignature() const
+	Ref<ID3D12RootSignature> GetRootSignature() const
     {
         return m_RootSignature;
     }
@@ -30,7 +30,7 @@ class GPURootSignature
 
   private:
     D3D12_ROOT_SIGNATURE_DESC1 m_RootSignatureDesc;
-    Microsoft::WRL::ComPtr<ID3D12RootSignature> m_RootSignature;
+	Ref<ID3D12RootSignature> m_RootSignature;
     uint32_t m_NumDescriptorsPerTable[32];
     uint32_t m_SamplerTableBitMask;
     uint32_t m_DescriptorTableBitMask;

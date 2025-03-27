@@ -1,7 +1,6 @@
 #pragma once 
-#include "../Component.h" 
-#include <Engine/GraphicsEngine/Rendering/Vertex.h>
-#include <Tools/Utilities/LinearAlgebra/Vector3.hpp>
+#include "../Component.h"  
+#include "Tools/Utilities/LinearAlgebra/Matrix4x4.h"
 #include "MeshRenderer.h"
 
 #define boneLimit 128
@@ -43,7 +42,7 @@ private:
 	int myCurrentAnimation;
 	float myAnimationTimer;
 	unsigned int myCurrentFrame;
-	std::array< Matrix,boneLimit> myBoneTransforms;
+	std::array<Matrix,boneLimit> myBoneTransforms;
 	std::vector < std::shared_ptr<Animation> > myAnimations;
 	std::shared_ptr<Skeleton> mySkeleton;
 };

@@ -3,7 +3,6 @@
 #include "Tools/Utilities/LinearAlgebra/AABB3D.hpp"
 #include "Tools/Utilities/LinearAlgebra/Matrix4x4.h"
 #include <Tools/Utilities/LinearAlgebra/Sphere.hpp>
-
 #include "DirectX/DX12/Graphics/Resources/IndexBuffer.h"
 #include "DirectX/DX12/Graphics/Resources/VertexBuffer.h"
 

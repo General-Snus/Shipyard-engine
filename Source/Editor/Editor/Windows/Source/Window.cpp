@@ -3,12 +3,9 @@
 
 #include <combaseapi.h>
 #include <shellapi.h>
-#include <string>
-#include <Tools/ImGui/misc/cpp/WMDropManager.h>
+#include <string> 
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 #include "Tools/Logging/Logging.h"
-
-#include <DirectX/DX12/Graphics/GPU.h>
 
 void Window::Init(const WinInitSettings& init)
 {

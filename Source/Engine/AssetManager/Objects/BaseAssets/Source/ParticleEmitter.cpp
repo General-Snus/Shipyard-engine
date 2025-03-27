@@ -4,7 +4,7 @@
 #include <Tools/ImGui/imgui.h>
 #include <Tools/Utilities/Math.hpp>
 #include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
-#include "Engine/GraphicsEngine/GraphicsEngine.h"
+#include "Engine/GraphicsEngine/Renderer.h"
 
 #include "Tools/Utilities/LinearAlgebra/Easing.h"
 
@@ -29,7 +29,7 @@ ParticleEmitter::ParticleEmitter(const ParticleEmitterTemplate& aTemplate) : Ass
 {
 	if (aTemplate.EmmiterSettings.ParticleTexture.empty())
 	{
-		texture = GraphicsEngineInstance.GetDefaultTexture(eTextureType::ParticleMap);
+		texture = RENDERER.GetDefaultTexture(eTextureType::ParticleMap);
 	}
 	else
 	{

@@ -1,8 +1,6 @@
-#pragma once 
-#include <DirectX/DX12/Graphics/Gpu_fwd.h>
+#pragma once  
 #include <DirectX/DX12/Graphics/GpuResource.h>
-#include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
-#include <unordered_map>
+#include <Tools/Utilities/LinearAlgebra/Vectors.hpp> 
 
 class Texture : public GpuResource
 {

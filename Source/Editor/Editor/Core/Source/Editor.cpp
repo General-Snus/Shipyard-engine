@@ -1,84 +1,67 @@
-#define NOMINMAX
+﻿#define NOMINMAX
 
 // TODO Un-yikes the includes
-#include <filesystem>
-#include <fstream>
-#include <string>
-#include <Windows.h>
-
-#include <Editor/Editor/Windows/Window.h>
-#include <Engine/AssetManager/ComponentSystem/GameObject.h>
-#include <Engine/AssetManager/ComponentSystem/Components/Transform.h>
-#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h>
-#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXDynamicBody.h>
-
-#include <Tools/ImGui/imgui.h>
-#include <Tools/ImGui/backends/imgui_impl_dx12.h>
-#include <Tools/ImGui/backends/imgui_impl_win32.h>
-#include "ImGuizmo.h"
-
 #include "../Editor.h"
-#include <Tools/Logging/Logging.h>
-#include <Tools/Optick/include/optick.h>
-#include <Tools/Utilities/Color.h>
-#include <Tools/Utilities/Game/Timer.h>
-#include <Tools/Utilities/Input/Input.hpp>
-#include <Tools/Utilities/System/ThreadPool.hpp>
-#include "DirectX/DX12/Graphics/GPU.h"
+#include "Editor/Editor/Defines.h"
+#include "Editor/Editor/Windows/EditorWindows/ColorPresets.h"  
 #include "Editor/Editor/Windows/EditorWindows/Console.h"
 #include "Editor/Editor/Windows/EditorWindows/ContentDirectory.h"
 #include "Editor/Editor/Windows/EditorWindows/Hierarchy.h"
 #include "Editor/Editor/Windows/EditorWindows/Inspector.h"
 #include "Editor/Editor/Windows/EditorWindows/Viewport.h"
 #include "Engine/AssetManager/AssetManager.h"
-#include "Engine/GraphicsEngine/GraphicsEngine.h"
+#include "Engine/AssetManager/ComponentSystem/ComponentManager.h"
+#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
+#include "Engine/AssetManager/ComponentSystem/GameObjectManager.h" 
+#include "Engine/GraphicsEngine/Renderer.h"
 #include "Engine/PersistentSystems/Scene.h"
 #include "Engine/PersistentSystems/System/SceneGraph/WorldGraph.h"
-#if PHYSX
-#include <Engine/PersistentSystems/Physics/PhysXInterpeter.h>
-#endif // PHYSX 0
-#include "Editor\Editor\Defines.h"
-#include "Engine\AssetManager\ComponentSystem\ComponentManager.h"
-#include "Engine\AssetManager\ComponentSystem\GameObjectManager.h"
-#include "Engine\PersistentSystems\Networking\NetworkRunner.h"
-#include "Engine\PersistentSystems\Networking\NetworkStructs.h"
-#include "d3d12.h"
-#include "dxgiformat.h"
-#include "Tools\ImGui\ImGuiHelpers.hpp"
-#include "Tools\Utilities\Input\EnumKeys.h"
-#include "Tools\Utilities\LinearAlgebra\Vector2.hpp"
-#include "Tools\Utilities\LinearAlgebra\Vector3.hpp"
-#include "Tools\Utilities\LinearAlgebra\Vector4.hpp"
-#include "Tools\Utilities\System\Event.h"
+#include "ImGuizmo.h"
+#include "Tools/ImGui/ImGuiHelpers.hpp"
+#include "Tools/Utilities/Input/EnumKeys.h"
+#include "Tools/Utilities/LinearAlgebra/Vectors.hpp" 
+#include "Tools/Utilities/System/Event.h"
+#include "imgui_tex_inspect.h"
 #include "minwindef.h"
 #include "windef.h"
-#include <cassert>
-#include <chrono>
-#include <cmath>
-#include <format>
-#include <iosfwd>
-#include <memory>
-#include <thread>
-#include <utility>
-#include <vector>
-#include "DirectX\DX12\Graphics\Enums.h"
-#include <Editor/Editor/Commands/CommandBuffer.h>
+ #include <Editor/Editor/Commands/CommandBuffer.h>
 #include <Editor/Editor/Commands/SceneAction.h>
 #include <Editor/Editor/Windows/EditorWindows/ChatWindow.h>
 #include <Editor/Editor/Windows/EditorWindows/CustomFuncWindow.h>
 #include <Editor/Editor/Windows/EditorWindows/FrameStatistics.h>
 #include <Editor/Editor/Windows/EditorWindows/GraphicsDebugger.h>
-#include <Editor/Editor/Windows/EditorWindows/History.h>
+#include <Editor/Editor/Windows/EditorWindows/History.h> 
+#include <Editor/Editor/Windows/Window.h>
+#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXDynamicBody.h>
+#include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h> 
+#include <Engine/AssetManager/ComponentSystem/Components/Transform.h> 
+#include <Engine/AssetManager/ComponentSystem/GameObject.h> 
 #include <Tools/ImGui/Font/IconsFontAwesome6.h>
+#include <Tools/ImGui/backends/imgui_impl_dx12.h> 
+#include <Tools/ImGui/backends/imgui_impl_win32.h>  
+#include <Tools/ImGui/imgui.h> 
+#include <Tools/Logging/Logging.h>
+#include <Tools/Optick/include/optick.h>
 #include <Tools/ThirdParty/nlohmann/json.hpp>
+#include <Tools/Utilities/Color.h>
+#include <Tools/Utilities/Game/Timer.h>
+#include <Tools/Utilities/Input/Input.hpp>
 #include <Tools/Utilities/System/ServiceLocator.h>
-#include "Editor/Editor/Windows/EditorWindows/ColorPresets.h"
-#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
-
-#include <shellapi.h>
-#include <Windows/EditorWindows/ImageViewer.h>
-#include <imgui_tex_inspect.h> 
+#include <Tools/Utilities/System/ThreadPool.hpp> 
+#include <Windows.h>
+#include <Windows/EditorWindows/ImageViewer.h> 
 #include <Windows/EditorWindows/NetworkSettings.h>
+#include <cassert> 
+#include <filesystem>
+#include <format> 
+#include <fstream>
+#include <memory> 
+#include <shellapi.h>
+#include <string> 
+#include <vector>
+#if PHYSX
+#include <Engine/PersistentSystems/Physics/PhysXInterpeter.h>
+#endif // PHYSX 0
 
 enum Theme {
 	light,
@@ -354,7 +337,7 @@ bool Editor::Initialize(HWND aHandle) {
 	engineResources.SetWorkingDirectory("../../Content");
 
 	auto& colorManager = ServiceLocator::Instance().ProvideService<ColorManager>();
-	auto& graphicsEngine = ServiceLocator::Instance().ProvideService<GraphicsEngine>();
+	auto& renderer = ServiceLocator::Instance().ProvideService<Renderer>();
 	auto& physicsSystem = ServiceLocator::Instance().ProvideService<Shipyard_PhysX>();
 
 	timer.initialize();
@@ -372,9 +355,9 @@ bool Editor::Initialize(HWND aHandle) {
 	colorManager.InitializeDefaultColors();
 	colorManager.LoadColorsFromFile("Settings/ColorManagerData.ShipyardText");
 #ifdef _DEBUG
-	graphicsEngine.Initialize(true);
+	renderer.Initialize(true);
 #else
-	graphicsEngine.Initialize(true); // todo Disable
+	renderer.Initialize(true); // todo Disable
 #endif // Release
 
 	// Setup Dear ImGui context
@@ -394,21 +377,7 @@ bool Editor::Initialize(HWND aHandle) {
 
 
 	ImGui_ImplWin32_Init(aHandle);
-	if(const auto& heap = GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]) {
-		ImGui_ImplDX12_InitInfo initInfo;
-		initInfo.Device = GPUInstance.m_Device.Get();
-		initInfo.CommandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT)->GetCommandQueue().Get();
-		initInfo.NumFramesInFlight = GPUInstance.m_FrameCount;
-		initInfo.RTVFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
-		initInfo.DSVFormat = DXGI_FORMAT_R32_TYPELESS;
-		initInfo.SrvDescriptorHeap = heap->Heap();
-		initInfo.LegacySingleSrvCpuDescriptor = heap->GetCpuHandle(2000);
-		initInfo.LegacySingleSrvGpuDescriptor = heap->GetGpuHandle(2000);
-
-		if(!ImGui_ImplDX12_Init(&initInfo)) {
-			LOGGER.Err("Failed to init IMGUI Dx12");
-		} 
-	}
+	renderer.InitializeImguiBackends();
 
 	LoadFont();
 	SetupImGuiStyle(builtIn);
@@ -473,10 +442,9 @@ void Editor::DoWinProc(const MSG& aMessage) {
 		break;
 	}
 	case WM_SIZE:
-	{
-		auto& graphicsEngine = ServiceLocator::Instance().GetService<GraphicsEngine>();
+	{ 
 		const auto res = Vector2ui(LOWORD(aMessage.lParam),HIWORD(aMessage.lParam));
-		graphicsEngine.ResizeBuffers(res);
+		RENDERER.ResizeBuffers(res);
 
 		for(const auto& viewport : m_Viewports) {
 			viewport->ResolutionUpdate();
@@ -491,7 +459,7 @@ void Editor::DoWinProc(const MSG& aMessage) {
 		ImGui_ImplDX12_Shutdown();
 		ImGui_ImplWin32_Shutdown();
 		ImGui::DestroyContext();
-		GPUInstance.UnInitialize();
+		RENDERER.Shutdown();
 		return;
 	default:
 		break;
@@ -634,14 +602,7 @@ void Editor::Update() {
 	Shipyard_PhysXInstance.StartRead();
 	const float delta = TimerInstance.getDeltaTime();
 
-
-	//constexpr int fpsInMicro = 16000;
-	//const auto deltaInMicro = (int)(delta* std::powf(10,6));
-	//int sleepDuration = std::max(fpsInMicro - deltaInMicro,0);
-	//std::chrono::microseconds duration(sleepDuration/2);
-	//std::this_thread::sleep_for(duration);
-
-
+	 
 	// Editor key checks
 	if(Input.IsKeyPressed(Keys::F) && m_SelectedGameObjects.size() > 0) {
 		FocusObject(m_SelectedGameObjects[0]);
@@ -666,7 +627,7 @@ void Editor::Update() {
 	// End
 
 	gameState.Update(delta);
-	GraphicsEngineInstance.Update(delta);
+	RENDERER.Update(delta);
 	Shipyard_PhysXInstance.EndRead(delta); 
 }
 
@@ -675,8 +636,8 @@ void Editor::Render() {
 	for(const auto& viewport : m_Viewports) {
 		viewport->Update();
 	}
-	Shipyard_PhysXInstance.Render();
-	GraphicsEngineInstance.Render(m_Viewports);
+	Shipyard_PhysXInstance.Render(); 
+	RENDERER.Render(m_Viewports);
 }
 
 void Editor::AddViewPort() {
@@ -687,9 +648,7 @@ void Editor::AddViewPort() {
 	ViewportIndex++;
 	m_Viewports.emplace_back(viewport);
 	g_EditorWindows.emplace_back(viewport);
-}
-
-#pragma optimize( "", off ) 
+} 
 
 void Editor::TopBar() {
 	OPTICK_EVENT();
@@ -819,8 +778,7 @@ void Editor::TopBar() {
 	//
 	//g_EditorWindows.erase(first,last);
 }
-
-#pragma optimize( "", on )
+ 
 
 RECT Editor::GetViewportRECT() {
 	return ViewportRect;

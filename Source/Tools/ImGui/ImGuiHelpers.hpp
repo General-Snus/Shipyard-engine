@@ -7,12 +7,14 @@
 #include "Tools/Utilities/Input/Input.hpp" 
 
 #include <DirectX/DX12/Graphics/Enums.h>
-#include <Engine/GraphicsEngine/GraphicsEngine.h>
- 
+#include <Engine/GraphicsEngine/Renderer.h>
+
 #include "Shellapi.h"
 
-namespace ImGui {
-    class ImGuiContextHolder : public Singleton {
+namespace ImGui
+{
+    class ImGuiContextHolder : public Singleton
+    {
     public:
         ImGuiContext* ctx;
         ImGuiMemAllocFunc v1;
@@ -20,15 +22,18 @@ namespace ImGui {
         void* v3;
     };
 
-    inline void InitializeOnNewContext(ImGuiContextHolder& context) {
+    inline void InitializeOnNewContext(ImGuiContextHolder& context)
+    {
         OPTICK_EVENT();
         ImGui::SetCurrentContext(context.ctx);
         ImGui::SetAllocatorFunctions(context.v1,context.v2,context.v3);
     }
 
-    inline bool BeginMainMenuBar(int barNumber) {
+    inline bool BeginMainMenuBar(int barNumber)
+    {
         OPTICK_EVENT();
-        if(barNumber == 0) {
+        if(barNumber == 0)
+        {
             return BeginMainMenuBar();
         }
 
@@ -51,7 +56,7 @@ namespace ImGui {
             ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar;
         const float height = GetFrameHeight();
         const bool is_open = BeginViewportSideBar(std::format("##MainMenuBar{}",barNumber).c_str(),viewport,ImGuiDir_Up,
-            height,window_flags);
+                                                  height,window_flags);
         g.NextWindowData.MenuBarOffsetMinVal = ImVec2(0.0f,0.0f);
 
         if(is_open)
@@ -61,7 +66,8 @@ namespace ImGui {
         return is_open;
     };
 
-    inline bool ToggleButton(const char* str_id,bool* v) {
+    inline bool ToggleButton(const char* str_id,bool* v)
+    {
         OPTICK_EVENT();
         bool returnValue = false;
         const ImVec4* colors = ImGui::GetStyle().Colors;
@@ -73,7 +79,8 @@ namespace ImGui {
         const float radius = height * 0.50f;
 
         ImGui::InvisibleButton(str_id,ImVec2(width,height));
-        if(ImGui::IsItemClicked()) {
+        if(ImGui::IsItemClicked())
+        {
             *v = !*v;
             returnValue = true;
         }
@@ -85,23 +92,27 @@ namespace ImGui {
             // float t_anim = ImSaturate(gg.LastActiveIdTimer / ANIM_SPEED);
         }
 
-        if(ImGui::IsItemHovered()) {
+        if(ImGui::IsItemHovered())
+        {
             draw_list->AddRectFilled(
                 p,ImVec2(p.x + width,p.y + height),
                 ImGui::GetColorU32(*v ? colors[ImGuiCol_ButtonActive] : ImVec4(0.78f,0.78f,0.78f,1.0f)),height * 0.5f);
-        } else {
+        }
+        else
+        {
             draw_list->AddRectFilled(p,ImVec2(p.x + width,p.y + height),
-                ImGui::GetColorU32(*v ? colors[ImGuiCol_Button] : ImVec4(0.85f,0.85f,0.85f,1.0f)),
-                height * 0.50f);
+                                     ImGui::GetColorU32(*v ? colors[ImGuiCol_Button] : ImVec4(0.85f,0.85f,0.85f,1.0f)),
+                                     height * 0.50f);
         }
 
         draw_list->AddCircleFilled(ImVec2(p.x + radius + (*v ? 1 : 0) * (width - radius * 2.0f),p.y + radius),
-            radius - 1.5f,IM_COL32(255,255,255,255));
+                                   radius - 1.5f,IM_COL32(255,255,255,255));
 
         return returnValue;
     }
 
-    inline Vector2f CursorPositionInWindow() {
+    inline Vector2f CursorPositionInWindow()
+    {
         const auto mp = Input.GetMousePosition();
         const auto imgui_cursor = ImGui::GetWindowPos();
         const auto screen_size = Vector2f(ImGui::GetWindowSize().x,ImGui::GetWindowSize().y);
@@ -120,86 +131,106 @@ namespace ImGui {
     }
 
     inline void Image(::Texture& aTexture,const ImVec2& image_size,const ImVec2& uv0 = ImVec2(0,0),
-        const ImVec2& uv1 = ImVec2(1,1),const ImVec4& tint_col = ImVec4(1,1,1,1),
-        const ImVec4& border_col = ImVec4(0,0,0,0)) {
+                      const ImVec2& uv1 = ImVec2(1,1),const ImVec4& tint_col = ImVec4(1,1,1,1),
+                      const ImVec4& border_col = ImVec4(0,0,0,0))
+    {
         OPTICK_EVENT();
-        if(const ImTextureID id = aTexture.GetHandle(ViewType::SRV).gpuPtr.ptr) {
+        if(const ImTextureID id = aTexture.GetHandle(ViewType::SRV).gpuPtr.ptr)
+        {
             Image(id,image_size,uv0,uv1,tint_col,border_col);
         }
     }
 
     inline void Image(std::shared_ptr<TextureHolder> aTexture,const ImVec2& image_size,const ImVec2& uv0 = ImVec2(0,0),
-        const ImVec2& uv1 = ImVec2(1,1),const ImVec4& tint_col = ImVec4(1,1,1,1),
-        const ImVec4& border_col = ImVec4(0,0,0,0)) {
+                      const ImVec2& uv1 = ImVec2(1,1),const ImVec4& tint_col = ImVec4(1,1,1,1),
+                      const ImVec4& border_col = ImVec4(0,0,0,0))
+    {
         OPTICK_EVENT();
-        if(const ImTextureID id = aTexture->GetRawTexture()->GetHandle(ViewType::SRV).gpuPtr.ptr) {
+        if(const ImTextureID id = aTexture->GetRawTexture()->GetHandle(ViewType::SRV).gpuPtr.ptr)
+        {
             Image(id,image_size,uv0,uv1,tint_col,border_col);
         }
     }
 
     inline bool ImageButton(const char* strId,std::shared_ptr<TextureHolder> aTexture,const ImVec2& image_size,
-        ImGuiButtonFlags flags = 0,const ImVec2& uv0 = ImVec2(0,0),const ImVec2& uv1 = ImVec2(1,1),
-        const ImVec4& bg_col = ImVec4(0,0,0,0),const ImVec4& tint_col = ImVec4(1,1,1,1)) {
+                            ImGuiButtonFlags flags = 0,const ImVec2& uv0 = ImVec2(0,0),const ImVec2& uv1 = ImVec2(1,1),
+                            const ImVec4& bg_col = ImVec4(0,0,0,0),const ImVec4& tint_col = ImVec4(1,1,1,1))
+    {
 
         OPTICK_EVENT();
         const ImGuiContext& g = *GImGui;
         ImGuiWindow* window = g.CurrentWindow;
-        if(window->SkipItems) {
+        if(window->SkipItems)
+        {
             return false;
         }
 
         const auto windowsID = window->GetID(strId);
-        if(const ImTextureID id = aTexture->GetRawTexture()->GetHandle(ViewType::SRV).gpuPtr.ptr) {
+        if(const ImTextureID id = aTexture->GetRawTexture()->GetHandle(ViewType::SRV).gpuPtr.ptr)
+        {
             return ImageButtonEx(windowsID,id,image_size,uv0,uv1,bg_col,
-                tint_col,flags);
-        } else {
-            const ImTextureID newId = GraphicsEngineInstance.GetDefaultTexture(eTextureType::ColorMap)
+                                 tint_col,flags);
+        }
+        else
+        {
+            const ImTextureID newId = RENDERER.GetDefaultTexture(eTextureType::ColorMap)
                 ->GetRawTexture()
                 ->GetHandle(ViewType::SRV)
                 .gpuPtr.ptr;
             return ImageButtonEx(windowsID,newId,image_size,uv0,uv1,bg_col,
-                tint_col,flags);
+                                 tint_col,flags);
         }
         return false;
     }
 
     inline bool ImageButton(const char* strId,::Texture& aTexture,const ImVec2& image_size,ImGuiButtonFlags flags = 0,
-        const ImVec2& uv0 = ImVec2(0,0),const ImVec2& uv1 = ImVec2(1,1),
-        const ImVec4& bg_col = ImVec4(0,0,0,0),const ImVec4& tint_col = ImVec4(1,1,1,1)) {
+                            const ImVec2& uv0 = ImVec2(0,0),const ImVec2& uv1 = ImVec2(1,1),
+                            const ImVec4& bg_col = ImVec4(0,0,0,0),const ImVec4& tint_col = ImVec4(1,1,1,1))
+    {
         OPTICK_EVENT();
         const ImGuiContext& g = *GImGui;
         ImGuiWindow* window = g.CurrentWindow;
-        if(window->SkipItems) {
+        if(window->SkipItems)
+        {
             return false;
         }
 
         const auto winddowID = window->GetID(strId);
-        if(const ImTextureID id = aTexture.GetHandle(ViewType::SRV).gpuPtr.ptr) {
+        if(const ImTextureID id = aTexture.GetHandle(ViewType::SRV).gpuPtr.ptr)
+        {
             return ImageButtonEx(winddowID,id,image_size,uv0,uv1,bg_col,
-                tint_col,flags);
-        } else {
-            const auto newId = GraphicsEngineInstance.GetDefaultTexture(eTextureType::ColorMap)
+                                 tint_col,flags);
+        }
+        else
+        {
+            const auto newId = RENDERER.GetDefaultTexture(eTextureType::ColorMap)
                 ->GetRawTexture()
                 ->GetHandle(ViewType::SRV)
                 .gpuPtr.ptr;
             return ImageButtonEx(winddowID,newId,image_size,uv0,uv1,bg_col,
-                tint_col,flags);
+                                 tint_col,flags);
         }
     }
 
-
-    static bool IsItemJustReleased() {
+#pragma warning( push )
+#pragma warning( disable : 4505)
+    inline static bool IsItemJustReleased()
+    {
         OPTICK_EVENT();
         return IsItemDeactivated() && !ImGui::IsItemActive();
     }
-    static bool IsItemJustActivated() {
+    inline  static bool IsItemJustActivated()
+    {
         OPTICK_EVENT();
         return !IsItemDeactivated() && ImGui::IsItemActive();
     }
+    // Your function
+#pragma warning( pop ) 
 
 
     //TEXT HELPERS
-    inline void TextCentered(std::string text) {
+    inline void TextCentered(std::string text)
+    {
         OPTICK_EVENT();
         const auto windowWidth = ImGui::GetWindowSize().x;
         const auto textWidth = ImGui::CalcTextSize(text.c_str()).x;
@@ -208,7 +239,8 @@ namespace ImGui {
         ImGui::Text(text.c_str());
     }
 
-    inline void TextCentered(const char* text) {
+    inline void TextCentered(const char* text)
+    {
         OPTICK_EVENT();
         const auto windowWidth = ImGui::GetWindowSize().x;
         const auto textWidth = ImGui::CalcTextSize(text).x;
@@ -218,14 +250,17 @@ namespace ImGui {
     }
 
 
-    inline void LinkCallback(ImGui::MarkdownLinkCallbackData data_) {
+    inline void LinkCallback(ImGui::MarkdownLinkCallbackData data_)
+    {
         std::string url(data_.link,data_.linkLength);
-        if(!data_.isImage) {
+        if(!data_.isImage)
+        {
             ShellExecuteA(nullptr,"open",url.c_str(),nullptr,nullptr,SW_SHOWNORMAL);
         }
     }
 
-    inline ImGui::MarkdownImageData ImageCallback(ImGui::MarkdownLinkCallbackData data_) {
+    inline ImGui::MarkdownImageData ImageCallback(ImGui::MarkdownLinkCallbackData data_)
+    {
         data_;
         // In your application you would load an image based on data_ input. Here we just use the imgui font texture.
         ImTextureID image = ImGui::GetIO().Fonts->TexID;
@@ -238,7 +273,8 @@ namespace ImGui {
 
         // For image resize when available size.x > image width, add
         ImVec2 const contentSize = ImGui::GetContentRegionAvail();
-        if(imageData.size.x > contentSize.x) {
+        if(imageData.size.x > contentSize.x)
+        {
             float const ratio = imageData.size.y / imageData.size.x;
             imageData.size.x = contentSize.x;
             imageData.size.y = contentSize.x * ratio;
@@ -255,15 +291,17 @@ namespace ImGui {
     static ImFont* H2 = nullptr;
     static ImFont* H3 = nullptr;
 
-    inline void LoadMarkdownFonts(ImFont* path,ImFont* boldPath,float fontSize_ = 16.0f) {
+    inline void LoadMarkdownFonts(ImFont* path,ImFont* boldPath,float fontSize_ = 16.0f)
+    {
         path; fontSize_;
         // Bold headings H2 and H3
         H2 = boldPath;
-        H3 = path; 
+        H3 = path;
         H1 = boldPath;
     }
 
-    inline void Markdown(const std::string& markdown_) {
+    inline void Markdown(const std::string& markdown_)
+    {
         // You can make your own Markdown function with your prefered string container and markdown config.
         // > C++14 can use ImGui::MarkdownConfig mdConfig{ LinkCallback, NULL, ImageCallback, ICON_FA_LINK, { { H1, true }, { H2, true }, { H3, false } }, NULL };
         mdConfig.linkCallback = LinkCallback;

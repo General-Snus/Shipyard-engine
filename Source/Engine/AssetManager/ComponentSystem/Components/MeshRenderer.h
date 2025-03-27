@@ -1,12 +1,10 @@
 #pragma once
 #include "Engine/AssetManager/ComponentSystem/Component.h"
-#include "Engine/AssetManager/Enums.h"
-#include "Engine/AssetManager/Objects/BaseAssets/MeshAsset.h"
-#include "Tools/ImGui/ImGuiHelpers.hpp"
-#include <Engine/AssetManager/AssetManager.h>
-#include <Engine/AssetManager/Objects/BaseAssets/BaseAsset.h>
+#include "Engine/AssetManager/Enums.h" 
+#include "Tools/Utilities/LinearAlgebra/AABB3D.hpp"
 #define AsUINT(v) static_cast<unsigned>(v)
 
+struct Element;
 class Mesh;
 class Material;
 class TextureHolder;
@@ -25,7 +23,7 @@ class MeshRenderer : public Component
     // Mesh
     void SetNewMesh(const std::filesystem::path &aFilePath);
     void SetNewMesh(const std::shared_ptr<Mesh> aMesh);
-    std::vector<Element> &GetElements() const;
+    const std::vector<Element>& GetElements() const;
     std::shared_ptr<Mesh> GetRawMesh() const;
     float GetBoundingSphereRadius() const;
     AABB3D<float> GetBoundingBox() const;
@@ -67,10 +65,7 @@ class cSkeletalMeshRenderer : public MeshRenderer
     void SetNewMesh(const std::filesystem::path &aFilePath); 
     bool InspectorView() override;
 
-    FORCEINLINE const std::shared_ptr<Skeleton> GetRawSkeleton() const
-    {
-        return (mySkeleton);
-    }
+	const std::shared_ptr<Skeleton> GetRawSkeleton() const ;
 
     std::shared_ptr<Skeleton> mySkeleton;
 };

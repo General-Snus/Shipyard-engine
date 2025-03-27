@@ -11,6 +11,7 @@
 
 #include "Tools/ImGui/crude_json.h"
 #include "Tools/Utilities/LinearAlgebra/Easing.h"
+#include "Engine\PersistentSystems\Networking\NetworkRunner.h"
 
 extern "C" {
 	inline GAME_API GameLauncher* entrypointMain() {

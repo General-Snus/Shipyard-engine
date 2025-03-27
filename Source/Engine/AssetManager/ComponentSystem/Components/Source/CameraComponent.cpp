@@ -6,6 +6,7 @@
 
 #include "Editor/Editor/Core/ApplicationState.h"
 #include "Tools/Utilities/Input/EnumKeys.h"
+#include "DirectX/XTK/Inc/SimpleMath.h"
 
 Camera::Camera(const SY::UUID anOwnerId,GameObjectManager* aManager)
 	: Component(anOwnerId,aManager),localTransform(0,nullptr) {

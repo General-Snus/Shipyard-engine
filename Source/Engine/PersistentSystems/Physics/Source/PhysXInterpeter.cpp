@@ -105,7 +105,7 @@ void Shipyard_PhysX::Render() {
 	if(!showLines) {
 		if(!handles.empty()) {
 			for(auto& i : handles) {
-				GraphicsEngineInstance.debugDrawer.RemoveDebugPrimitive(i);
+				RENDERER.debugDrawer.RemoveDebugPrimitive(i);
 			}
 			handles.clear();
 		}
@@ -118,7 +118,7 @@ void Shipyard_PhysX::Render() {
 			const Vector3f     Vpos1 = {line.pos0.x, line.pos0.y, line.pos0.z};
 			const Vector3f     Vpos2 = {line.pos1.x, line.pos1.y, line.pos1.z};
 
-			handles.emplace_back(GraphicsEngineInstance.debugDrawer.AddDebugLine(Vpos1,Vpos2,Vector3f(0,1,0)));
+			handles.emplace_back(RENDERER.debugDrawer.AddDebugLine(Vpos1,Vpos2,Vector3f(0,1,0)));
 		}
 	}
 }

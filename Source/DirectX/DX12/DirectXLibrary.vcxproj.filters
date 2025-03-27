@@ -92,51 +92,6 @@
     <ClInclude Include="DirectXHeader.pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DXC\d3d12shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DXC\dxcapi.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DXC\dxcerrors.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DXC\dxcisense.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Helpers\d3dx12.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Helpers\d3dx12_barriers.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Helpers\d3dx12_check_feature_support.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Helpers\d3dx12_core.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Helpers\d3dx12_default.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Helpers\d3dx12_pipeline_state_stream.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Helpers\d3dx12_property_format_table.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Helpers\d3dx12_render_pass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Helpers\d3dx12_resource_helpers.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Helpers\d3dx12_root_signature.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Helpers\d3dx12_state_object.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Graphics\CommandList.h">
       <Filter>Header Files</Filter>
     </ClInclude>

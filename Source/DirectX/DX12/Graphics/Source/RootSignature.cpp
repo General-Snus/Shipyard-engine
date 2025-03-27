@@ -127,10 +127,10 @@ void GPURootSignature::SetRootSignatureDesc(const D3D12_ROOT_SIGNATURE_DESC1& ro
 	versionRootSignatureDesc.Init_1_1(numParameters, pParameters, numStaticSamplers, pStaticSamplers, flags);
 
 	// Serialize the root signature.
-	ComPtr<ID3DBlob> rootSignatureBlob;
-	ComPtr<ID3DBlob> errorBlob;
+	Ref<ID3DBlob> rootSignatureBlob;
+	Ref<ID3DBlob> errorBlob;
 	const auto hr = D3DX12SerializeVersionedRootSignature(&versionRootSignatureDesc,
-		rootSignatureVersion, &rootSignatureBlob, &errorBlob);
+		rootSignatureVersion, rootSignatureBlob.GetAddressOf(), errorBlob.GetAddressOf());
 	if (FAILED(hr))
 	{
 		const std::string errorString = static_cast<char*>(errorBlob->GetBufferPointer());
@@ -141,7 +141,7 @@ void GPURootSignature::SetRootSignatureDesc(const D3D12_ROOT_SIGNATURE_DESC1& ro
 	// Create the root signature.
 	Helpers::ThrowIfFailed(device->CreateRootSignature(0, rootSignatureBlob->GetBufferPointer(),
 	                                                   rootSignatureBlob->GetBufferSize(),
-	                                                   IID_PPV_ARGS(&m_RootSignature)));
+	                                                   IID_PPV_ARGS(m_RootSignature.GetAddressOf())));
 
 	m_RootSignature->SetName(L"Default root signature");
 }

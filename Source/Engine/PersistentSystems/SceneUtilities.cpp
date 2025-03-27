@@ -2,9 +2,13 @@
 
 #include "SceneUtilities.h"
 #include <Engine/AssetManager/AssetManager.h>
+
 #include <Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h>
 #include <Engine/AssetManager/ComponentSystem/Components/Transform.h>
+
 #include <Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h>
+#include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
+#include <Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h>
 
 bool SceneUtils::AddAssetToScene(const std::filesystem::path& aPath, const std::shared_ptr<Scene>& aScene)
 {

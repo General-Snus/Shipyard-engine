@@ -1,10 +1,11 @@
-#pragma once
-#include <functional>
+#pragma once 
 #include <memory>
 #include <Editor/Editor/Core/Editor.h>
 #include <Editor/Editor/Windows/EditorWindows/CustomFuncWindow.h>
 #include <Engine/AssetManager/AssetManager.h>
+#include <Engine/GraphicsEngine/Renderer.h>
 #include <Tools/ImGui/imgui.h>
+#include <Tools/ImGui/ImGuiHelpers.hpp>
 
 #include "Tools/Utilities/Math.hpp"
 
@@ -102,7 +103,7 @@ void SwitchableAsset(std::shared_ptr<assetType>& asset, std::string PayloadType,
 			ENGINE_RESOURCES.LoadAsset<TextureHolder>("Textures\\Widgets\\File.png");
 		if (!texture)
 		{
-			texture = GraphicsEngineInstance.GetDefaultTexture(eTextureType::MaterialMap);
+			texture = RENDERER.GetDefaultTexture(eTextureType::MaterialMap);
 		}
 
 		ImGui::ImageButton((char*)&texture, texture, {100, 100}, ImGuiButtonFlags_PressedOnDoubleClick);

@@ -71,7 +71,7 @@ struct ImGui_ImplDX12_RenderState
     ID3D12Device*               Device;
     ID3D12GraphicsCommandList*  CommandList;
 };
-static ImGui_ImplDX12_RenderState* ImGui_ImplDX12_GetRenderstate() {
+ inline ImGui_ImplDX12_RenderState* ImGui_ImplDX12_GetRenderstate() {
     return ImGui::GetCurrentContext() ? (ImGui_ImplDX12_RenderState*)ImGui::GetPlatformIO().Renderer_RenderState : nullptr;
 }
 
@@ -101,9 +101,13 @@ struct ImGui_ImplDX12_Data {
     ImGui_ImplDX12_Data() { memset((void*)this,0,sizeof(*this)); }
 };
 
+
+#pragma warning( push )
+#pragma warning( disable : 4101) 
 // Backend data stored in io.BackendRendererUserData to allow support for multiple Dear ImGui contexts
 // It is STRONGLY preferred that you use docking branch with multi-viewports (== single Dear ImGui context + multiple windows) instead of multiple Dear ImGui contexts.
-static ImGui_ImplDX12_Data* ImGui_ImplDX12_GetBackendData() {
+inline static ImGui_ImplDX12_Data* ImGui_ImplDX12_GetBackendData() {
     return ImGui::GetCurrentContext() ? (ImGui_ImplDX12_Data*)ImGui::GetIO().BackendRendererUserData : nullptr;
 }
+#pragma warning( pop ) 
 #endif // #ifndef IMGUI_DISABLE

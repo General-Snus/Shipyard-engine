@@ -74,13 +74,13 @@ void PSOCache::InitDefaultSignature()
 	CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
 	rootSignatureDesc.Init(0, nullptr, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
-	ComPtr<ID3DBlob> signature;
-	ComPtr<ID3DBlob> error;
+	Ref<ID3DBlob> signature;
+	Ref<ID3DBlob> error;
 	Helpers::ThrowIfFailed(
-		D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
+		D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, signature.GetAddressOf(), error.GetAddressOf()));
 	Helpers::ThrowIfFailed(
 		GPUInstance.m_Device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(),
-		                                          IID_PPV_ARGS(&m_RootSignature->GetRootSignature())));
+		                                          IID_PPV_ARGS(m_RootSignature->GetRootSignature().GetAddressOf())));
 
 	constexpr D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags =
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
@@ -269,16 +269,15 @@ std::unique_ptr<PSO> PSOCache::CreatePSO(const std::filesystem::path& vertexShad
 	}
 
 	stream.DepthStencilState = depthStencil;
-
+	 
 	const D3D12_PIPELINE_STATE_STREAM_DESC psoDescStreamDesc = {sizeof(PipelineStateStream), &stream};
 	Helpers::ThrowIfFailed(
-		GPUInstance.m_Device->CreatePipelineState(&psoDescStreamDesc, IID_PPV_ARGS(&pso->m_PipelineState)));
-	pso->m_PipelineState->SetName(name.data());
-
+		GPUInstance.m_Device->CreatePipelineState(&psoDescStreamDesc, IID_PPV_ARGS(pso->m_PipelineState.GetAddressOf())));
+	pso->m_PipelineState->SetName(name.data()); 
 	return pso;
 }
 
-const ComPtr<ID3D12PipelineState>& PSO::GetPipelineState() const
+const Ref<ID3D12PipelineState>& PSO::GetPipelineState() const
 {
 	return m_PipelineState;
 }

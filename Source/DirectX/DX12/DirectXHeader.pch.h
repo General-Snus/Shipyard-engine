@@ -36,11 +36,9 @@
 
 #define WIN32_LEAN_AND_MEAN
 
-#include <Windows.h>
-#include <wrl/client.h>
-#include <wrl/event.h>
+#include <Windows.h>  
 
-#include "Helpers/d3dx12.h"
+#include "d3dx12.h"
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #ifdef _DEBUG
@@ -74,23 +72,16 @@
 #include <condition_variable>
 #include <cstdint>
 #include <filesystem>
-#include <map>
-#include <memory>
-#include <mutex>
+#include <vector>
 #include <new>
 #include <stdexcept>
 #include <string>
 #include <thread>
 #include <unordered_map>
-#include <vector>
 #include <cstdarg>
-#include <cstdint>
 #include <cstdio>
 #include <cwctype>
 #include <exception>
-#include <memory>
-#include <string>
-#include <vector>
 #include <functional>
 #include <ppltasks.h>
 

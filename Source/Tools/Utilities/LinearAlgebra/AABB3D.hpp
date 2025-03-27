@@ -1,10 +1,6 @@
-#pragma once
-#define NOMINMAX
-#include <algorithm>
+#pragma once 
 #include "Sphere.hpp"
-#include "Vectors.hpp"
-
-class Transform;
+#include "Vectors.hpp" 
 
 template <class T = float>
 class AABB3D {

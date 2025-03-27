@@ -78,9 +78,6 @@
     <ClInclude Include="Inc\GraphicsMemory.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="Src\d3dx12.h">
-      <Filter>Src</Filter>
-    </ClInclude>
     <ClInclude Include="Inc\Audio.h">
       <Filter>Audio</Filter>
     </ClInclude>

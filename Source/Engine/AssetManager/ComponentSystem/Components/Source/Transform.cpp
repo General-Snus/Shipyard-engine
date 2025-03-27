@@ -273,10 +273,10 @@ bool Transform::GetIsDirty() const {
 void Transform::SetGizmo(bool enabled) {
 	IsDebugGizmoEnabled = enabled;
 	if(enabled) {
-		primitive = GraphicsEngineInstance.debugDrawer.AddDebugGizmo(Vector3f(),1.0f);
-		GraphicsEngineInstance.debugDrawer.SetDebugPrimitiveTransform(primitive,localMatrix);
+		primitive = RENDERER.debugDrawer.AddDebugGizmo(Vector3f(),1.0f);
+		RENDERER.debugDrawer.SetDebugPrimitiveTransform(primitive,localMatrix);
 	} else {
-		GraphicsEngineInstance.debugDrawer.RemoveDebugPrimitive(primitive);
+		RENDERER.debugDrawer.RemoveDebugPrimitive(primitive);
 	}
 }
 

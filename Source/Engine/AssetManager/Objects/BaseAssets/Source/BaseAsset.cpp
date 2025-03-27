@@ -2,7 +2,7 @@
 
 #include "../BaseAsset.h"
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
-#include "Engine/GraphicsEngine/GraphicsEngine.h"
+#include "Engine/GraphicsEngine/Renderer.h"
 #include "Tools/ImGui/ImGuiHelpers.hpp"
 
 AssetBase::AssetBase(const std::filesystem::path& aFilePath) : AssetPath(aFilePath), isLoadedComplete(false)
@@ -30,7 +30,7 @@ inline bool AssetBase::InspectorView()
 	bool            isOpened = false;
 
 	const float size = ImGui::CalcTextSize("A").y;
-	ImGui::Image(GraphicsEngineInstance.GetDefaultTexture(eTextureType::ColorMap), ImVec2(size, size), ImVec2(0, 0),
+	ImGui::Image(RENDERER.GetDefaultTexture(eTextureType::ColorMap), ImVec2(size, size), ImVec2(0, 0),
 	             ImVec2(1, 1), color);
 	ImGui::SameLine();
 	isOpened =
@@ -47,5 +47,5 @@ std::shared_ptr<TextureHolder> AssetBase::GetEditorIcon()
 	{
 		return file;
 	}
-	return GraphicsEngineInstance.GetDefaultTexture(eTextureType::ColorMap);
+	return RENDERER.GetDefaultTexture(eTextureType::ColorMap);
 }

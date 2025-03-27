@@ -8,7 +8,8 @@
 #include "DirectX/DX12/Graphics/GPU.h"
 #include "DirectX/DX12/Graphics/Helpers.h"
 #include "Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h"
-#include "Engine/GraphicsEngine/GraphicsEngine.h"
+#include "Engine/GraphicsEngine/Renderer.h"
+#include "Engine\GraphicsEngine\Rendering\Vertex.h"
 
 Mesh::Mesh(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)
 {
@@ -133,7 +134,7 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 
 		if (!textureLoaded)
 		{
-			materials[key] = GraphicsEngineInstance.GetDefaultMaterial();
+			materials[key] = RENDERER.GetDefaultMaterial();
 			continue;
 		}
 
@@ -155,7 +156,7 @@ std::shared_ptr<TextureHolder> Mesh::GetEditorIcon()
 		if (!imageTexture->isBeingLoaded && meshReady)
 		{
 			GraphicsEngineUtilities::GenerateSceneForIcon(mesh, imageTexture,
-			                                              GraphicsEngineInstance.GetDefaultMaterial());
+			                                              RENDERER.GetDefaultMaterial());
 		}
 		else
 		{
@@ -184,7 +185,7 @@ bool Mesh::InspectorView()
 			if (!imageTexture->isBeingLoaded && meshReady)
 			{
 				GraphicsEngineUtilities::GenerateSceneForIcon(mesh, imageTexture,
-				                                              GraphicsEngineInstance.GetDefaultMaterial());
+				                                              RENDERER.GetDefaultMaterial());
 			}
 			else
 			{

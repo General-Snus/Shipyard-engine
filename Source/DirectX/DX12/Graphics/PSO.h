@@ -80,15 +80,15 @@ public:
 	{
 		return m_numRenderTargets;
 	};
-	const ComPtr<ID3D12PipelineState>& GetPipelineState() const;
+	const Ref<ID3D12PipelineState>& GetPipelineState() const;
 
 private:
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC m_psoDescription = {};
-	ComPtr<ID3D12PipelineState>        m_PipelineState;
+	Ref<ID3D12PipelineState>        m_PipelineState;
 
 	unsigned int                    m_numRenderTargets = 0;
 	std::vector<Texture>            m_renderTargets;
 	std::shared_ptr<ShipyardShader> m_vs;
 	std::shared_ptr<ShipyardShader> m_ps;
-	ComPtr<ID3D12Device2>           m_Device;
+	Ref<ID3D12Device2>           m_Device;
 };

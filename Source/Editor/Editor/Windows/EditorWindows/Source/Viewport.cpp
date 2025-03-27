@@ -7,9 +7,8 @@
 #include "Engine/AssetManager/ComponentSystem/GameObjectManager.h"
 #include "Engine/AssetManager/ComponentSystem/Components/CameraComponent.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
-
-#include <Tools/ImGui/ImGuizmo.h>
-
+#include "DirectX/XTK/Inc/SimpleMath.h" 
+#include <Tools/ImGui/ImGuizmo.h> 
 #include <Engine/AssetManager/AssetManager.h>
 #include <Engine/PersistentSystems/SceneUtilities.h>
 #include <Font/IconsFontAwesome5.h>

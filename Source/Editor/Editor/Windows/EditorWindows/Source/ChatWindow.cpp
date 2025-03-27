@@ -1,17 +1,12 @@
 #include "../ChatWindow.h"
 
-#include "imgui.h"
-#include "imgui_internal.h"
+#include "imgui.h" 
 #include <Engine/PersistentSystems/Networking/NetworkRunner.h>
-#include <Engine/PersistentSystems/Networking/NetMessage/StringMessages.h>
-#include <Tools/Reflection/refl.hpp> 
-#include "Windows\Window.h"
-#include "Tools\Utilities\Input\Input.hpp"
+#include <Engine/PersistentSystems/Networking/NetMessage/StringMessages.h> 
+#include "Windows/Window.h"
+#include "Tools/Utilities/Input/Input.hpp"
 
-ChatWindow::ChatWindow() {
-	//m_Client = new Client();
-	//m_Client->Setup();
-
+ChatWindow::ChatWindow() { 
 	currentMessage.resize(512);
 	userHandle.resize(32);
 	userHandle = WindowInstance.GetWindowsTitle();

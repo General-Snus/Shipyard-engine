@@ -1,8 +1,7 @@
 #pragma once
 #include <algorithm>
 #include <chrono> // For DefaultSeed generation
-#include <cmath>
-#include <DirectXMath.h>
+#include <cmath> 
 #include <intrin.h>
 #include <numbers>
 #include <random>

@@ -56,7 +56,7 @@
 #include <Editor/Editor/Defines.h>
 #include <Engine/AssetManager/AssetManager.h>
 #include <Engine/AssetManager/AssetManagerUtills.hpp>
-#include <Engine/GraphicsEngine/GraphicsEngine.h>
+#include <Engine/GraphicsEngine/Renderer.h>
 
 // AI
 #include "Engine/AssetManager/Objects/AI/AgentSystem/PollingStations/Target_PollingStation.h"

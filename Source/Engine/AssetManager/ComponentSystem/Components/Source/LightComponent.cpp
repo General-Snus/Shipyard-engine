@@ -4,6 +4,7 @@
 // #include <Editor/Editor/Core/Editor.h>
 #include <Tools/Optick/include/optick.h>
 #include <Tools/Utilities/Math.hpp>
+#include "DirectX/XTK/Inc/SimpleMath.h"
 
 #include "DirectX/DX12/Graphics/GPU.h"
 #include "DirectX/DX12/Graphics/Resources/Texture.h"

@@ -58,8 +58,8 @@ void cAnimator::RenderAnimation(const std::shared_ptr<Mesh>& aData, const Matrix
 {
 	aData;
 	aTransform;
-	//GraphicsEngineInstance.ShadowCommands<GfxCmd_RenderSkeletalMeshShadow>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
-	//GraphicsEngineInstance.DeferredCommand<GfxCmd_RenderSkeletalMesh>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
+	//RENDERER.ShadowCommands<GfxCmd_RenderSkeletalMeshShadow>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
+	//RENDERER.DeferredCommand<GfxCmd_RenderSkeletalMesh>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
 }
 
 void cAnimator::AddAnimation(std::shared_ptr<Animation> aAnimation)

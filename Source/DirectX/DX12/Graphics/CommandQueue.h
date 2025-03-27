@@ -12,7 +12,7 @@ class GPUCommandQueue
     bool Create(const DeviceType &device, D3D12_COMMAND_LIST_TYPE type);
     std::shared_ptr<CommandList> GetCommandList(const std::wstring &name = L"NoName");
 
-    ComPtr<ID3D12CommandQueue> GetCommandQueue();
+	Ref<ID3D12CommandQueue> GetCommandQueue();
     uint64_t ExecuteCommandList(std::shared_ptr<CommandList> commandList);
     uint64_t ExecuteCommandList(const std::vector<std::shared_ptr<CommandList>> &commandLists);
 
@@ -31,8 +31,8 @@ class GPUCommandQueue
 
     DeviceType m_Device;
     D3D12_COMMAND_LIST_TYPE m_CommandListType{};
-    ComPtr<ID3D12CommandQueue> m_CommandQueue;
-    ComPtr<ID3D12Fence> m_Fence;
+    Ref<ID3D12CommandQueue> m_CommandQueue;
+    Ref<ID3D12Fence> m_Fence;
     std::atomic_uint64_t m_FenceValue;
 
     ThreadSafeQueue<CommandListEntry> m_InFlightCommandLists;

@@ -7,6 +7,7 @@
 #include <Tools/Logging/Logging.h>
 #include <Engine/PersistentSystems/Physics/PhysXInterpeter.h>
 #include "Engine\PersistentSystems\System\SystemBase.h"
+#include "Engine\PersistentSystems\Networking\NetworkRunner.h"
 
 GameState::GameState() = default;
 

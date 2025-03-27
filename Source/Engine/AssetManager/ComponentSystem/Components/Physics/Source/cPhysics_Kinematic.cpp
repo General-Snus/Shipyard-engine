@@ -16,7 +16,7 @@ cPhysics_Kinematic::~cPhysics_Kinematic()
 {
 	for (DebugDrawer::PrimitiveHandle& handle : myHandles)
 	{
-		GraphicsEngineInstance.debugDrawer.RemoveDebugPrimitive(handle);
+		RENDERER.debugDrawer.RemoveDebugPrimitive(handle);
 	}
 
 	myHandles.clear();
@@ -36,15 +36,15 @@ void cPhysics_Kinematic::InitPrimitive()
 {
 	for (DebugDrawer::PrimitiveHandle& handle : myHandles)
 	{
-		GraphicsEngineInstance.debugDrawer.RemoveDebugPrimitive(handle);
+		RENDERER.debugDrawer.RemoveDebugPrimitive(handle);
 	}
 
 	const Vector3f position = GetComponent<Transform>().GetPosition();
 	// Velocity
-	GraphicsEngineInstance.debugDrawer.AddDebugLine(position, position + ph_velocity, Vector3f(1.0f, 0.0f, 0.0f), .01f);
+	RENDERER.debugDrawer.AddDebugLine(position, position + ph_velocity, Vector3f(1.0f, 0.0f, 0.0f), .01f);
 
 	// Acceleration
-	GraphicsEngineInstance.debugDrawer.AddDebugLine(position, position + ph_acceleration, Vector3f(0.0f, 0.0f, 1.0f),
+	RENDERER.debugDrawer.AddDebugLine(position, position + ph_acceleration, Vector3f(0.0f, 0.0f, 1.0f),
 	                                                .01f);
 }
 

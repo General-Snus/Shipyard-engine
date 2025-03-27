@@ -1,6 +1,7 @@
 #include "AssetManager.pch.h"
 
 #include "../NetworkSync.h"
+#include "Engine/PersistentSystems/Networking/NetworkRunner.h"
 
 NetworkObject::NetworkObject(const SY::UUID anOwnerId,GameObjectManager* aManager): Component(anOwnerId,aManager)
 {}

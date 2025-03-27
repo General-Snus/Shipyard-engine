@@ -5,7 +5,7 @@
 #include <comdef.h>
 #include <exception>
 #include <Tools/Utilities/Error.hpp>
-#include "DirectX/DX12/Helpers/d3dx12.h"
+#include "d3dx12.h"
 #include "Tools/Logging/Logging.h"
 
 namespace Helpers

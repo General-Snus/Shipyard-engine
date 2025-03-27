@@ -21,7 +21,7 @@
 #include <Tools/Reflection/refl.hpp>
 #include "Scene.h"
 #include "ArtificialInteligence/AICommands/AICommands.h"
-#include "Engine/GraphicsEngine/GraphicsEngine.h"
+#include "Engine/GraphicsEngine/Renderer.h"
 #include "Physics/PhysXInterpeter.h"
 #include "Physics/Raycast.h"
 #endif // PERSISTENT_PCH_H

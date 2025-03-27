@@ -18,8 +18,8 @@ bool GPUCommandQueue::Create(const DeviceType& device, D3D12_COMMAND_LIST_TYPE t
 	desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	desc.NodeMask = 0;
 
-	Helpers::ThrowIfFailed(device->CreateCommandQueue(&desc, IID_PPV_ARGS(&m_CommandQueue)));
-	Helpers::ThrowIfFailed(device->CreateFence(m_FenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_Fence)));
+	Helpers::ThrowIfFailed(device->CreateCommandQueue(&desc, IID_PPV_ARGS(m_CommandQueue.GetAddressOf())));
+	Helpers::ThrowIfFailed(device->CreateFence(m_FenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(m_Fence.GetAddressOf())));
 
 	switch (type)
 	{
@@ -91,7 +91,7 @@ std::shared_ptr<CommandList> GPUCommandQueue::GetCommandList(const std::wstring&
 	return commandList;
 }
 
-ComPtr<ID3D12CommandQueue> GPUCommandQueue::GetCommandQueue()
+Ref<ID3D12CommandQueue> GPUCommandQueue::GetCommandQueue()
 {
 	return m_CommandQueue;
 }

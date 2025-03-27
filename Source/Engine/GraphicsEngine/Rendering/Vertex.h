@@ -1,10 +1,5 @@
 #pragma once  
-#include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
-#include <vector>
-#include <wrl.h>
-using namespace Microsoft::WRL;
-// We'll be writing this a lot so easier
-// to just typedef it here. 
+#include <Tools/Utilities/LinearAlgebra/Vectors.hpp> 
 
 struct Vertex
 {

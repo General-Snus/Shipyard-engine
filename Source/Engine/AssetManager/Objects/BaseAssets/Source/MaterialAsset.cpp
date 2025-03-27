@@ -3,7 +3,7 @@
 #include <Engine/GraphicsEngine/Shaders/Registers.h>
 
 #include <Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h>
-#include "Engine/GraphicsEngine/GraphicsEngine.h"
+#include "Engine/GraphicsEngine/Renderer.h"
 
 #include <Engine/GraphicsEngine/GraphicsEngineUtilities.h>
 #include "Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h"
@@ -55,18 +55,18 @@ void Material::Init()
 {
 	data.textures.resize(4);
 	data.textures[static_cast<int>(eTextureType::ColorMap)].second =
-		GraphicsEngineInstance.GetDefaultTexture(eTextureType::ColorMap);
+		RENDERER.GetDefaultTexture(eTextureType::ColorMap);
 	data.textures[static_cast<int>(eTextureType::NormalMap)].second =
-		GraphicsEngineInstance.GetDefaultTexture(eTextureType::NormalMap);
+		RENDERER.GetDefaultTexture(eTextureType::NormalMap);
 	data.textures[static_cast<int>(eTextureType::MaterialMap)].second =
-		GraphicsEngineInstance.GetDefaultTexture(eTextureType::MaterialMap);
+		RENDERER.GetDefaultTexture(eTextureType::MaterialMap);
 	data.textures[static_cast<int>(eTextureType::EffectMap)].second =
-		GraphicsEngineInstance.GetDefaultTexture(eTextureType::EffectMap);
+		RENDERER.GetDefaultTexture(eTextureType::EffectMap);
 
-	if (GraphicsEngineInstance.GetDefaultMaterial())
+	if (RENDERER.GetDefaultMaterial())
 	{
 		data.materialData =
-			GraphicsEngineInstance.GetDefaultMaterial()
+			RENDERER.GetDefaultMaterial()
 				->data.materialData; // yo dawg i put some data in your data so you can data while you data
 	}
 	else
@@ -74,8 +74,8 @@ void Material::Init()
 		data.materialData = MaterialBuffer();
 	}
 
-	data.vertexShader = GraphicsEngineInstance.GetDefaultVSShader();
-	data.pixelShader = GraphicsEngineInstance.GetDefaultPSShader();
+	data.vertexShader = RENDERER.GetDefaultVSShader();
+	data.pixelShader = RENDERER.GetDefaultPSShader();
 
 	if (exists(AssetPath) && AssetPath.extension() == ".json")
 	{

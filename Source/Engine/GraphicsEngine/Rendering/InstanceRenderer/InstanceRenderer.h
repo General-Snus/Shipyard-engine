@@ -13,7 +13,7 @@ struct renderDataHash
 
 class InstanceRenderer
 {
-	friend class GraphicsEngine;
+	friend class Renderer;
 public:
 	void Init();
 	void Execute(bool isShadowPass);

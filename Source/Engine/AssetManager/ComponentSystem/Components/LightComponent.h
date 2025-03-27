@@ -20,7 +20,7 @@ class Texture;
 class Light : public Component
 {
 
-    friend class GraphicsEngine;
+    friend class Renderer;
     friend class ShadowRenderer;
     friend class EnvironmentLightPSO;
 

@@ -1,7 +1,9 @@
 #pragma once
 #include "BaseAsset.h"
-#include <DirectX/DX12/Graphics/Gpu_fwd.h>
+#include "Tools/Utilities/Ref.h"
 #include <dxcapi.h>
+ 
+class TextureHolder;
 
 class ShipyardShader : public AssetBase {
 public:
@@ -9,7 +11,7 @@ public:
 	ShipyardShader(const std::filesystem::path& aFilePath);
 	void Init() override;
 
-	void SetShader(const ComPtr<IDxcBlob>& aShader);
+	void SetShader(const Ref<IDxcBlob>& aShader);
 	IDxcBlob* GetBlob() const;
 	LPVOID GetBufferPtr();
 	size_t GetBlobSize() const;
@@ -21,7 +23,7 @@ public:
 		IDxcBlob** blob);
 private:
 	std::filesystem::path m_ShaderName;
-	ComPtr<IDxcBlob> m_Blob = nullptr;
+	Ref<IDxcBlob> m_Blob{};
 };
 
 REFL_AUTO(type(ShipyardShader))

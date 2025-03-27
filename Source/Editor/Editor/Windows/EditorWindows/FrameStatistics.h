@@ -9,6 +9,7 @@ class FrameStatistics : public EditorWindow
     ~FrameStatistics() = default;
 
   private:
+	void APP_VirtualPhysicalMemory( );
 #define MAX_DATA_COUNT 100
 #define SKIPRATE 1
     int skipFrame = 0;

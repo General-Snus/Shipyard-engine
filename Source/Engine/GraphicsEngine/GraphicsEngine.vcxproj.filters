@@ -24,7 +24,7 @@
     <ClInclude Include="GraphicsEngine.pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicsEngine.h">
+    <ClInclude Include="Renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\Vertex.h">
@@ -95,7 +95,7 @@
     <ClCompile Include="GraphicsEngine.pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GraphicsEngine.cpp">
+    <ClCompile Include="Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\Vertex.cpp">

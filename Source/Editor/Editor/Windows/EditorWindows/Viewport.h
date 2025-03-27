@@ -1,14 +1,12 @@
-#pragma once
-#include "DirectX/DX12/Graphics/Resources/Texture.h"
-#include "Editor/Editor/Core/Editor.h"
+#pragma once  
 #include "Editor/Editor/Windows/Window.h"
 #include "EditorWindow.h"
-#include "Engine/AssetManager/ComponentSystem/Components/CameraComponent.h"
-#include "Engine/AssetManager/ComponentSystem/GameObject.h"
-#include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
+#include "Engine/AssetManager/ComponentSystem/Components/CameraComponent.h"  
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
 
 class Transform;
+class TextureHolder;
+class Texture;
 
 class Viewport : public EditorWindow { 
 	friend class Editor; 

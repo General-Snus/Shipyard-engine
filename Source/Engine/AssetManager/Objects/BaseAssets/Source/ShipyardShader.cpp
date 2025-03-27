@@ -1,9 +1,8 @@
 #include "AssetManager.pch.h"
 
 #include "../ShipyardShader.h" 
-#include <dxcapi.h>
 #include "DirectX/DX12/Graphics/Helpers.h"
-#include <d3d12shader.h>
+#include <d3d12shader.h> 
 
 static inline ComPtr<IDxcCompiler3> pCompiler;
 static inline ComPtr<IDxcUtils> pUtils;
@@ -68,8 +67,8 @@ void ShipyardShader::Init() {
 
 	// Helpers::ThrowIfFailed(D3DReadFileToBlob(AssetPath.wstring().c_str(), &m_Blob));
 
-	ComPtr<IDxcBlobEncoding> pSourceBlob;
-	const HRESULT            hr = pLibrary->CreateBlobFromFile(AssetPath.wstring().c_str(),&codePage,&pSourceBlob);
+	Ref<IDxcBlobEncoding> pSourceBlob;
+	const HRESULT            hr = pLibrary->CreateBlobFromFile(AssetPath.wstring().c_str(),&codePage,pSourceBlob.GetAddressOf());
 	//const HRESULT            hr = pUtils->LoadFile(AssetPath.wstring().c_str(),&codePage,&pSourceBlob);
 	m_Blob = pSourceBlob;
 
@@ -229,7 +228,7 @@ HRESULT ShipyardShader::CompileShader(const char* shader,const wchar_t* entryPoi
 	return 0;
 }
 
-void ShipyardShader::SetShader(const ComPtr<IDxcBlob>& aShader) {
+void ShipyardShader::SetShader(const Ref<IDxcBlob>& aShader) {
 	m_Blob = aShader;
 }
 

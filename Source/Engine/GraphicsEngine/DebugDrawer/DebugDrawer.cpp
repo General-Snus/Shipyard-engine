@@ -1,7 +1,7 @@
 #include "GraphicsEngine.pch.h"
 
 #include "DebugDrawer.h"
-#include "GraphicsEngine.h"
+#include "Renderer.h"
 #include <DirectX/DX12/Graphics/GPU.h>
 #include <DirectX/DX12/Graphics/PSO.h>
 #include <Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h>
@@ -120,7 +120,7 @@ void DebugDrawer::Render(std::shared_ptr<CommandList> commandList) {
 			REG_DefaultMaterialBuffer,alloc.GpuAddress());
 
 		commandList->ConfigureInputAssembler(D3D_PRIMITIVE_TOPOLOGY_LINELIST,*indexBuffer);
-		const auto& pso = GraphicsEngineInstance.GetPSOCache().GetState(PSOCache::ePipelineStateID::DebugDraw);
+		const auto& pso = RENDERER.GetPSOCache().GetState(PSOCache::ePipelineStateID::DebugDraw);
 		commandList->SetPipelineState(*pso);
 		commandList->GetGraphicsCommandList()->DrawIndexedInstanced(static_cast<UINT>(myNumLineIndices),1,0,0,0);
 	}

@@ -284,7 +284,7 @@ int GpuResource::GetHeapOffset() const
 	return m_DescriptorHandles.at(m_RecentBoundType).heapOffset;
 };
 
-void GpuResource::SetResource(const ComPtr<ID3D12Resource>& resource)
+void GpuResource::SetResource(const Ref<ID3D12Resource>& resource)
 {
 	OPTICK_GPU_EVENT("SetResource");
 	m_Resource = resource;
@@ -292,12 +292,12 @@ void GpuResource::SetResource(const ComPtr<ID3D12Resource>& resource)
 	CheckFeatureSupport();
 }
 
-ComPtr<ID3D12Resource> GpuResource::GetResource()
+Ref<ID3D12Resource> GpuResource::GetResource()
 {
 	return m_Resource;
 }
 
-const ComPtr<ID3D12Resource>& GpuResource::GetResource() const
+const Ref<ID3D12Resource>& GpuResource::GetResource() const
 {
 	return m_Resource;
 }

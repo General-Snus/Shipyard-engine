@@ -220,7 +220,7 @@ bool Texture::CopyDataInto(void* destination,Vector2ui pixel,Vector2ui rect) {
 
 	D3D12_RESOURCE_DESC readbackBufferDesc{CD3DX12_RESOURCE_DESC::Buffer(bufferSize)};
 
-	ComPtr<ID3D12Resource> pStaging;
+	Ref<ID3D12Resource> pStaging;
 	hr = GPUInstance.m_Device->CreateCommittedResource(
 		&readBackHeapProperties,
 		D3D12_HEAP_FLAG_NONE,

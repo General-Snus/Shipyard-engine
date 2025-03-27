@@ -14,7 +14,7 @@ ColliderAsset::ColliderAsset(const std::filesystem::path& aFilePath) : AssetBase
 
 ColliderAsset::~ColliderAsset() {
 	for(DebugDrawer::PrimitiveHandle& handle : myHandles) {
-		GraphicsEngineInstance.debugDrawer.RemoveDebugPrimitive(handle);
+		RENDERER.debugDrawer.RemoveDebugPrimitive(handle);
 	}
 
 	myHandles.clear();
@@ -26,7 +26,7 @@ void ColliderAsset::Init() {}
 
 void ColliderAsset::RemoveDebugLines() {
 	for(DebugDrawer::PrimitiveHandle& handle : myHandles) {
-		GraphicsEngineInstance.debugDrawer.RemoveDebugPrimitive(handle);
+		RENDERER.debugDrawer.RemoveDebugPrimitive(handle);
 	}
 }
 
@@ -36,15 +36,15 @@ ColliderAssetAABB::ColliderAssetAABB(const AABB3D<float>& rf) : ColliderAsset(eC
 
 void ColliderAssetAABB::RenderDebugLines(Transform& data) {
 	for(DebugDrawer::PrimitiveHandle& handle : myHandles) {
-		GraphicsEngineInstance.debugDrawer.RemoveDebugPrimitive(handle);
+		RENDERER.debugDrawer.RemoveDebugPrimitive(handle);
 	}
 	myHandles.clear();
 	const auto handle =
-		GraphicsEngineInstance.debugDrawer.AddDebugBox(myOriginalAABB.GetMin(),myOriginalAABB.GetMax());
+		RENDERER.debugDrawer.AddDebugBox(myOriginalAABB.GetMin(),myOriginalAABB.GetMax());
 	myHandles.push_back(handle);
 
 	for(auto const& aHandle : myHandles) {
-		GraphicsEngineInstance.debugDrawer.SetDebugPrimitiveTransform(aHandle,data.WorldMatrix());
+		RENDERER.debugDrawer.SetDebugPrimitiveTransform(aHandle,data.WorldMatrix());
 	}
 }
 
@@ -64,7 +64,7 @@ ColliderAssetSphere::ColliderAssetSphere(const Sphere<float>& rf) : ColliderAsse
 
 void ColliderAssetSphere::RenderDebugLines(Transform& data) {
 	for(DebugDrawer::PrimitiveHandle& handle : myHandles) {
-		GraphicsEngineInstance.debugDrawer.RemoveDebugPrimitive(handle);
+		RENDERER.debugDrawer.RemoveDebugPrimitive(handle);
 	}
 
 	myHandles.clear();
@@ -72,10 +72,10 @@ void ColliderAssetSphere::RenderDebugLines(Transform& data) {
 	const Vector3f min = Vector3f(-1.0f,-1.0f,-1.0f);
 	const Vector3f max = Vector3f(1.0f,1.0f,1.0f);
 	 
-	const DebugDrawer::PrimitiveHandle handle = GraphicsEngineInstance.debugDrawer.AddDebugBox(
+	const DebugDrawer::PrimitiveHandle handle = RENDERER.debugDrawer.AddDebugBox(
 		min * mySphere.GetRadius(),
 		max * mySphere.GetRadius());
-	GraphicsEngineInstance.debugDrawer.SetDebugPrimitiveTransform(handle,data.LocalMatrix());
+	RENDERER.debugDrawer.SetDebugPrimitiveTransform(handle,data.LocalMatrix());
 	myHandles.push_back(handle);
 }
 
@@ -120,15 +120,15 @@ ColliderAssetBox::ColliderAssetBox(const AABB3D<float>& rf) : ColliderAsset(eCol
 
 void ColliderAssetBox::RenderDebugLines(Transform& data) {
 	for(DebugDrawer::PrimitiveHandle& handle : myHandles) {
-		GraphicsEngineInstance.debugDrawer.RemoveDebugPrimitive(handle);
+		RENDERER.debugDrawer.RemoveDebugPrimitive(handle);
 	}
 	myHandles.clear();
 	const auto handle =
-		GraphicsEngineInstance.debugDrawer.AddDebugBox(myBox.GetMin(),myBox.GetMax());
+		RENDERER.debugDrawer.AddDebugBox(myBox.GetMin(),myBox.GetMax());
 	myHandles.push_back(handle);
 
 	for(auto const& aHandle : myHandles) {
-		GraphicsEngineInstance.debugDrawer.SetDebugPrimitiveTransform(aHandle,data.WorldMatrix());
+		RENDERER.debugDrawer.SetDebugPrimitiveTransform(aHandle,data.WorldMatrix());
 	}
 }
 

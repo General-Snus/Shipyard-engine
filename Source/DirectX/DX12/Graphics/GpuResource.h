@@ -1,10 +1,11 @@
 #pragma once
-#include <filesystem>
-#include <string>
+#include <filesystem> 
 #include <unordered_map>
-#include "Enums.h"
-#include "Gpu_fwd.h" 
+#include "Enums.h" 
+#include <Tools/Utilities/Ref.h>
 
+#define D3D12_GPU_VIRTUAL_ADDRESS_NULL ((D3D12_GPU_VIRTUAL_ADDRESS)0)
+#define D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN ((D3D12_GPU_VIRTUAL_ADDRESS) - 1)
 class GpuResource
 {
 	friend class CommandList;
@@ -34,9 +35,9 @@ public:
 	virtual HeapHandle GetHandle() const;
 	virtual int        GetHeapOffset() const;
 
-	void                          SetResource(const ComPtr<ID3D12Resource>& resource);
-	ComPtr<ID3D12Resource>        GetResource();
-	const ComPtr<ID3D12Resource>& GetResource() const;
+	void                          SetResource(const Ref<ID3D12Resource>& resource);
+	Ref<ID3D12Resource>        GetResource();
+	const Ref<ID3D12Resource>& GetResource() const;
 	ID3D12Resource**              GetAddressOf();
 
 	void Reset();
@@ -61,7 +62,7 @@ protected:
 	std::unordered_map<ViewType, HeapHandle> m_DescriptorHandles;
 
 	std::filesystem::path             m_ResourceName;
-	Microsoft::WRL::ComPtr<ID3D12Resource>            m_Resource;
+	Ref<ID3D12Resource>            m_Resource;
 	D3D12_FEATURE_DATA_FORMAT_SUPPORT m_FormatSupport;
 };
 

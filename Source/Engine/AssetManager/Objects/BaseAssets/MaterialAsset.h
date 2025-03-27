@@ -1,10 +1,9 @@
 #pragma once
 #include "BaseAsset.h"
-#include <Engine/AssetManager/Enums.h>
-#include <Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h>
-#include <Tools/Thirdparty/nlohmann/json_fwd.hpp>
+#include <Engine/AssetManager/Enums.h>  
 
 class TextureHolder;
+class ShipyardShader;
 struct MaterialBuffer
 {
     Vector4f albedoColor = {1.f, 1.f, 1.f, 1.f};

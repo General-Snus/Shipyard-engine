@@ -1,27 +1,27 @@
 #include "GraphicsEngine.pch.h"
 
 #include "Passes.h"
-#include <Engine/GraphicsEngine/Rendering/Buffers/LightBuffer.h>
 
 #include "DirectX/DX12/Graphics/CommandList.h"
 #include "DirectX/DX12/Graphics/GPU.h"
-#include "DirectX/DX12/Graphics/PSO.h"
-#include "DirectX/DX12/Graphics/RootSignature.h"
-
-#include "Editor/Editor/Core/Editor.h"
-#include "Editor/Editor/Windows/Window.h"
-#include "Engine/AssetManager/AssetManager.h"
+#include "DirectX/DX12/Graphics/PSO.h" 
 
 #include "Engine/AssetManager/ComponentSystem/GameObjectManager.h"
 #include "Engine/AssetManager/ComponentSystem/Components/LightComponent.h"
 #include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
-#include "Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h"
+
+#include "Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h" 
+#include "Engine/AssetManager/Objects/BaseAssets/MeshAsset.h"
+#include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
+
 #include "Engine/GraphicsEngine/Rendering/Buffers/FrameBuffer.h"
 #include "Engine/GraphicsEngine/Rendering/Buffers/ObjectBuffer.h"
+#include <Engine/GraphicsEngine/Rendering/Buffers/LightBuffer.h>
+#include "Engine/GraphicsEngine/Renderer.h"
 
 namespace Passes {
-	void ShadowPass(const GraphicsEngine& instance,std::shared_ptr<CommandList>& commandList,GameObjectManager& scene) {
+	void ShadowPass(const Renderer& instance,std::shared_ptr<CommandList>& commandList,GameObjectManager& scene) {
 		OPTICK_GPU_EVENT("WriteShadows");
 
 		const auto& meshRendererList = scene.GetAllComponents<MeshRenderer>();
@@ -29,8 +29,8 @@ namespace Passes {
 
 		const auto& shadowMapper = instance.GetPSOCache().GetState(PSOCache::ePipelineStateID::ShadowMapper);
 
-		const auto& pipelineState = shadowMapper->GetPipelineState().Get();
-		graphicCommandList->SetPipelineState(pipelineState);
+		const auto& pipelineState = shadowMapper->GetPipelineState();
+		graphicCommandList->SetPipelineState(pipelineState.Get());
 		commandList->TrackResource(pipelineState);
 
 		auto renderShadows = [](const std::vector<MeshRenderer>& objectsToRender,
@@ -44,10 +44,9 @@ namespace Passes {
 					}
 					const auto& transform = object.GetComponent<Transform>();
 					list->AllocateBuffer<ObjectBuffer>(eRootBindings::objectBuffer,{transform.unmodified_WorldMatrix()});
-					for(auto& element : object.GetElements()) {
+					for(const auto& element : object.GetElements()) {
 						OPTICK_GPU_EVENT(debugName.data());
-						GPUInstance.ConfigureInputAssembler(*list,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
-							element.IndexResource);
+						GPUInstance.ConfigureInputAssembler(*list,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.IndexResource);
 						materialBuffer.vertexBufferIndex = element.VertexBuffer.GetHandle(ViewType::SRV).heapOffset;
 						list->AllocateBuffer<MaterialBuffer>(eRootBindings::materialBuffer,materialBuffer);
 						list->GetGraphicsCommandList()->DrawIndexedInstanced(
@@ -204,17 +203,17 @@ namespace Passes {
 
 void SSAO::Initialize(void) {}
 
-void SSAO::Render(const GraphicsEngine& instance,std::shared_ptr<CommandList>& commandList,const Camera& camera) {
+void SSAO::Render(const Renderer& instance,std::shared_ptr<CommandList>& commandList,const Camera& camera) {
 	instance;
 	commandList;
 	camera;
 }
 
-void GBuffer::Initialize(const GraphicsEngine& instance) {
+void GBuffer::Initialize(const Renderer& instance) {
 	UNREFERENCED_PARAMETER(instance);
 }
 
-void GBuffer::Render(const GraphicsEngine& instance,std::shared_ptr<CommandList>& commandList,
+void GBuffer::Render(const Renderer& instance,std::shared_ptr<CommandList>& commandList,
 	const GameObjectManager& scene) {
 	commandList->SetViewports(GPUInstance.m_Viewport);
 	commandList->SetSissorRect(GPUInstance.m_ScissorRect);
@@ -258,8 +257,7 @@ void GBuffer::Render(const GraphicsEngine& instance,std::shared_ptr<CommandList>
 
 		for(auto& element : meshRenderer.GetElements()) {
 			vertCount += element.VertexBuffer.GetVertexCount();
-			GPUInstance.ConfigureInputAssembler(*commandList,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
-				element.IndexResource);
+			GPUInstance.ConfigureInputAssembler(*commandList,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.IndexResource);
 
 			const unsigned materialIndex = element.MaterialIndex;
 			MaterialBuffer materialBuffer = meshRenderer.GetMaterial(materialIndex)->GetMaterialData();

@@ -15,7 +15,7 @@
 
 extern "C"
 {
-    __declspec(dllexport) extern const UINT D3D12SDKVersion = 715;
+    __declspec(dllexport) extern const UINT D3D12SDKVersion = 615; // This is a hilarously bad approach, but sure microsoft ill bite
 }
 
 extern "C"

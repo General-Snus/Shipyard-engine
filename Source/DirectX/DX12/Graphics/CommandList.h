@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <DirectX/DX12/Graphics/Gpu_fwd.h>
+#include <Tools/Utilities/Ref.h>
 
 #ifndef incCommandList
 #define incCommandList
@@ -16,7 +17,7 @@ public:
 		D3D12_RESOURCE_FLAGS    flags = D3D12_RESOURCE_FLAG_NONE,
 		CD3DX12_HEAP_PROPERTIES HeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT));
 
-	void TransitionBarrier(const ComPtr<ID3D12Resource>& resource,D3D12_RESOURCE_STATES stateBefore,D3D12_RESOURCE_STATES stateAfter,
+	void TransitionBarrier(const Ref<ID3D12Resource>& resource,D3D12_RESOURCE_STATES stateBefore,D3D12_RESOURCE_STATES stateAfter,
 		unsigned subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,bool flushBarriers = false);
 
 	void TransitionBarrier(ID3D12Resource* resource,D3D12_RESOURCE_STATES stateBefore,D3D12_RESOURCE_STATES stateAfter,
@@ -51,8 +52,9 @@ public:
 		return m_CommandList;
 	}
 
-	void TrackResource(ComPtr<ID3D12Object> object);
-	void TrackResource(const GpuResource& res);
+	void TrackResource(const Ref<ID3D12Object> object);
+	void TrackResource(const GpuResource & object);
+
 
 	void ReleaseTrackedObjects();
 	void FlushResourceBarriers();
@@ -65,7 +67,7 @@ public:
 
 	template <typename T>
 	void SetConstantBuffer(unsigned slot,const T& constantBuffer);
-	void CopyResource(const ComPtr<ID3D12Resource>& destination,const ComPtr<ID3D12Resource>& source);
+	void CopyResource(const Ref<ID3D12Resource>& destination,const Ref<ID3D12Resource>& source);
 
 	void GenerateMips(Texture& texture);
 
@@ -77,8 +79,8 @@ private:
 	D3D12_COMMAND_LIST_TYPE           m_Type;
 	DxCommandList                     m_CommandList;
 	DeviceType                        m_Device;
-	ComPtr<ID3D12CommandAllocator>    m_CommandAllocator;
-	std::vector<ComPtr<ID3D12Object>> m_TrackedObjects;
+	Ref<ID3D12CommandAllocator>    m_CommandAllocator;
+	std::vector<Ref<ID3D12Object>> m_TrackedObjects;
 };
 
 #endif // incCommandList

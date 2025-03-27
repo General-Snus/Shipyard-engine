@@ -1,17 +1,11 @@
 #include "AssetManager.pch.h"
 
 #include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
-#include <unordered_set>
-#include <Engine/GraphicsEngine/GraphicsEngineUtilities.h>
 #include "Engine/AssetManager/ComponentSystem/Components/Animator.h"
 #include "Engine/AssetManager/Objects/BaseAssets/Animations.h"
 #include "Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h"
-#include "Engine/GraphicsEngine/GraphicsEngine.h"
-#include "Tools/ImGui/imgui.h"
-#include "Tools/ImGui/ImGuiHelpers.hpp"
-
-#include "Editor/Editor/Core/Editor.h"
-#include "Editor/Editor/Windows/EditorWindows/CustomFuncWindow.h"
+#include "Engine/AssetManager/Objects/BaseAssets/MeshAsset.h" 
+#include "Tools/ImGui/imgui.h" 
 
 // Must define function EditorIcon for asset
 
@@ -93,7 +87,7 @@ bool MeshRenderer::IsDefaultMesh() const
 	return false;
 }
 
-std::vector<Element>& MeshRenderer::GetElements() const
+const std::vector<Element>& MeshRenderer::GetElements() const
 {
 	OPTICK_EVENT();
 	if (m_Mesh->isLoadedComplete)
@@ -120,7 +114,7 @@ float MeshRenderer::GetBoundingSphereRadius() const
 	return m_Mesh->Bounds.GetRadius();
 }
 
-AABB3D<> MeshRenderer::GetBoundingBox() const
+AABB3D<float> MeshRenderer::GetBoundingBox() const
 {
 	if (!m_Mesh)
 	{
@@ -275,4 +269,9 @@ bool cSkeletalMeshRenderer::InspectorView()
 	}
 	Reflect<cSkeletalMeshRenderer>();
 	return true;
+}
+
+const std::shared_ptr<Skeleton> cSkeletalMeshRenderer::GetRawSkeleton() const
+{
+	return mySkeleton;
 }
