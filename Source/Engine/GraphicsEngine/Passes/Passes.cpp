@@ -30,8 +30,8 @@ namespace Passes {
 		const auto& shadowMapper = instance.GetPSOCache().GetState(PSOCache::ePipelineStateID::ShadowMapper);
 
 		const auto& pipelineState = shadowMapper->GetPipelineState();
-		graphicCommandList->SetPipelineState(pipelineState.Get());
-		commandList->TrackResource(pipelineState);
+		graphicCommandList->SetPipelineState(pipelineState);
+		//commandList->TrackResource(pipelineState);
 
 		auto renderShadows = [](const std::vector<MeshRenderer>& objectsToRender,
 			const std::shared_ptr<CommandList>& list,
@@ -46,7 +46,7 @@ namespace Passes {
 					list->AllocateBuffer<ObjectBuffer>(eRootBindings::objectBuffer,{transform.unmodified_WorldMatrix()});
 					for(const auto& element : object.GetElements()) {
 						OPTICK_GPU_EVENT(debugName.data());
-						GPUInstance.ConfigureInputAssembler(*list,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.IndexResource);
+						list->ConfigureInputAssembler(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.IndexResource);
 						materialBuffer.vertexBufferIndex = element.VertexBuffer.GetHandle(ViewType::SRV).heapOffset;
 						list->AllocateBuffer<MaterialBuffer>(eRootBindings::materialBuffer,materialBuffer);
 						list->GetGraphicsCommandList()->DrawIndexedInstanced(
@@ -54,6 +54,7 @@ namespace Passes {
 					}
 				}
 			};
+
 		auto setShadowPrerequisite = [](const Light& light,int map,
 			const std::shared_ptr<CommandList>& list) -> std::shared_ptr<Texture> {
 				OPTICK_GPU_EVENT("setShadowPrerequisite");
@@ -216,7 +217,7 @@ void GBuffer::Initialize(const Renderer& instance) {
 void GBuffer::Render(const Renderer& instance,std::shared_ptr<CommandList>& commandList,
 	const GameObjectManager& scene) {
 	commandList->SetViewports(GPUInstance.m_Viewport);
-	commandList->SetSissorRect(GPUInstance.m_ScissorRect);
+	commandList->SetScissorRect(GPUInstance.m_ScissorRect);
 
 	const auto& gbufferPSO = instance.m_Cache->GetState(PSOCache::ePipelineStateID::GBuffer);
 	const auto& gBufferTextures = gbufferPSO->RenderTargets();
@@ -257,7 +258,7 @@ void GBuffer::Render(const Renderer& instance,std::shared_ptr<CommandList>& comm
 
 		for(auto& element : meshRenderer.GetElements()) {
 			vertCount += element.VertexBuffer.GetVertexCount();
-			GPUInstance.ConfigureInputAssembler(*commandList,D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.IndexResource);
+			commandList->ConfigureInputAssembler(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.IndexResource);
 
 			const unsigned materialIndex = element.MaterialIndex;
 			MaterialBuffer materialBuffer = meshRenderer.GetMaterial(materialIndex)->GetMaterialData();
@@ -267,7 +268,7 @@ void GBuffer::Render(const Renderer& instance,std::shared_ptr<CommandList>& comm
 				if(const auto textureAsset = meshRenderer.GetTexture(static_cast<eTextureType>(i),materialIndex)) {
 					const auto tex = textureAsset->GetRawTexture();
 					tex->SetView(ViewType::SRV);
-					commandList->TrackResource(tex->GetResource());
+					commandList->TrackResource(tex->Resource());
 					const auto heapOffset = tex->GetHeapOffset();
 					switch(static_cast<eTextureType>(i)) {
 					case eTextureType::ColorMap:

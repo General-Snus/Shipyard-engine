@@ -234,7 +234,7 @@ std::unique_ptr<PSO> PSOCache::CreatePSO(const std::filesystem::path& vertexShad
 		                                        std::format("RenderLayer {}", i), Vector4f(), renderTargetFormat[i],
 		                                        D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET |
 		                                        D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS);
-		rtvFormats.RTFormats[i] = pso->m_renderTargets[i].GetResource()->GetDesc().Format;
+		rtvFormats.RTFormats[i] = pso->m_renderTargets[i].Resource()->GetDesc().Format;
 	}
 
 	stream.pRootSignature = m_RootSignature->GetRootSignature().Get();
@@ -272,12 +272,12 @@ std::unique_ptr<PSO> PSOCache::CreatePSO(const std::filesystem::path& vertexShad
 	 
 	const D3D12_PIPELINE_STATE_STREAM_DESC psoDescStreamDesc = {sizeof(PipelineStateStream), &stream};
 	Helpers::ThrowIfFailed(
-		GPUInstance.m_Device->CreatePipelineState(&psoDescStreamDesc, IID_PPV_ARGS(pso->m_PipelineState.GetAddressOf())));
+		GPUInstance.m_Device->CreatePipelineState(&psoDescStreamDesc, IID_PPV_ARGS(pso->m_PipelineState.ReleaseAndGetAddressOf())));
 	pso->m_PipelineState->SetName(name.data()); 
 	return pso;
 }
 
-const Ref<ID3D12PipelineState>& PSO::GetPipelineState() const
+ID3D12PipelineState* PSO::GetPipelineState() const
 {
-	return m_PipelineState;
+	return m_PipelineState.Get();
 }

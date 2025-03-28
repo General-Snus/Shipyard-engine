@@ -29,6 +29,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Utilities", "Tools\Utilities\Utilities.vcxproj", "{B7232C9E-466F-46A5-A0A4-EA832733A352}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Editor", "Editor", "{C0E6B880-DDA1-4CA5-B4FB-90B24100A474}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameLauncher", "Game\GameLauncher\Modelviewer.vcxproj", "{22A9F47B-5CE9-470B-AE62-562504394512}"
 	ProjectSection(ProjectDependencies) = postProject

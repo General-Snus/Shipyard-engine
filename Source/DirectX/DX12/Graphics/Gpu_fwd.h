@@ -23,7 +23,7 @@ enum class eRootBindings;
  
 
 using ID3DBlob = ID3D10Blob;
-using DxCommandList = Ref<ID3D12GraphicsCommandList3>;
-using DeviceType = Ref<ID3D12Device8>;
+using DxCommandList = ID3D12GraphicsCommandList3;
+using DeviceType = ID3D12Device8;
 
 #define GPUInstance ServiceLocator::Instance().GetService<GPU>()

@@ -87,13 +87,13 @@ void ResourceStateTracker::TransitionResource(ID3D12Resource *resource, D3D12_RE
 void ResourceStateTracker::TransitionResource(const GpuResource &resource, D3D12_RESOURCE_STATES stateAfter,
                                               UINT subResource)
 {
-    TransitionResource(resource.GetResource().Get(), stateAfter, subResource);
+    TransitionResource(resource.Resource().Get(), stateAfter, subResource);
 }
 
 void ResourceStateTracker::UAVBarrier(const GpuResource *resource)
 {
     OPTICK_EVENT();
-    ID3D12Resource *pResource = resource != nullptr ? resource->GetResource().Get() : nullptr;
+    ID3D12Resource *pResource = resource != nullptr ? resource->Resource().Get() : nullptr;
 
     ResourceBarrier(CD3DX12_RESOURCE_BARRIER::UAV(pResource));
 }
@@ -101,13 +101,13 @@ void ResourceStateTracker::UAVBarrier(const GpuResource *resource)
 void ResourceStateTracker::AliasBarrier(const GpuResource *resourceBefore, const GpuResource *resourceAfter)
 {
     OPTICK_GPU_EVENT("AliasBarrier");
-    ID3D12Resource *pResourceBefore = resourceBefore != nullptr ? resourceBefore->GetResource().Get() : nullptr;
-    ID3D12Resource *pResourceAfter = resourceAfter != nullptr ? resourceAfter->GetResource().Get() : nullptr;
+    ID3D12Resource *pResourceBefore = resourceBefore != nullptr ? resourceBefore->Resource().Get() : nullptr;
+    ID3D12Resource *pResourceAfter = resourceAfter != nullptr ? resourceAfter->Resource().Get() : nullptr;
 
     ResourceBarrier(CD3DX12_RESOURCE_BARRIER::Aliasing(pResourceBefore, pResourceAfter));
 }
 
-void ResourceStateTracker::FlushResourceBarriers(CommandList &commandList)
+void ResourceStateTracker::FlushResourceBarriers(const CommandList &commandList)
 {
     OPTICK_GPU_EVENT("FlushResourceBarriers");
     const UINT numBarriers = static_cast<UINT>(m_ResourceBarriers.size());
@@ -119,7 +119,7 @@ void ResourceStateTracker::FlushResourceBarriers(CommandList &commandList)
     }
 }
 
-uint32_t ResourceStateTracker::FlushPendingResourceBarriers(CommandList &commandList)
+uint32_t ResourceStateTracker::FlushPendingResourceBarriers(const CommandList &commandList)
 {
     OPTICK_GPU_EVENT("FlushPendingResourceBarriers");
     assert(ms_IsLocked);

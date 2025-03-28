@@ -17,7 +17,7 @@ public:
 		return m_VertexStride;
 	}
 
-	D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView() const
+	D3D12_VERTEX_BUFFER_VIEW VertexView() const
 	{
 		return m_VertexBufferView;
 	}

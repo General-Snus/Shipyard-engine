@@ -352,7 +352,7 @@ namespace ImGuiTexInspect {
 
 
         DX12FormatDesc formatDesc;
-        if(!DecodeDXGIFormat(texture->GetResource()->GetDesc().Format,&formatDesc)) {
+        if(!DecodeDXGIFormat(texture->Resource()->GetDesc().Format,&formatDesc)) {
             return false;
         }
 

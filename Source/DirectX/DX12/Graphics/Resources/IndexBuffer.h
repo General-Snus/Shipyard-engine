@@ -17,7 +17,7 @@ public:
 		return m_IndexFormat;
 	}
 
-	D3D12_INDEX_BUFFER_VIEW GetIndexBufferView() const
+	D3D12_INDEX_BUFFER_VIEW IndexView() const
 	{
 		return m_IndexBufferView;
 	}

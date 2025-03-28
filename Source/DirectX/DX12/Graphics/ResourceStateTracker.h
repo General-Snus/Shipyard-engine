@@ -104,13 +104,13 @@ class ResourceStateTracker
      *
      * @return The number of resource barriers that were flushed to the command list.
      */
-    uint32_t FlushPendingResourceBarriers(CommandList &commandList);
+    uint32_t FlushPendingResourceBarriers(const CommandList &commandList);
 
     /**
      * Flush any (non-pending) resource barriers that have been pushed to the resource state
      * tracker.
      */
-    void FlushResourceBarriers(CommandList &commandList);
+    void FlushResourceBarriers(const CommandList &commandList);
 
     /**
      * Commit final resource states to the global resource state map.

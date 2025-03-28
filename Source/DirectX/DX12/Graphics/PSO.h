@@ -3,15 +3,11 @@
 #include <span>
 #include <DirectX/DX12/Graphics/Gpu_fwd.h>
 #include <DirectX/DX12/Graphics/Helpers.h>
-#include <DirectX/DX12/Graphics/Resources/Texture.h>
-#include <Engine/AssetManager/ComponentSystem/GameObjectManager.h>
-#include <Tools/Utilities/Error.hpp>
-#include "Engine/GraphicsEngine/Rendering/Buffers/LightBuffer.h"
+#include <DirectX/DX12/Graphics/Resources/Texture.h> 
 
 class MeshRenderer;
 class ShipyardShader;
-class PSO;
-using namespace Microsoft::WRL;
+class PSO; 
 
 namespace GenerateMips
 {
@@ -80,15 +76,15 @@ public:
 	{
 		return m_numRenderTargets;
 	};
-	const Ref<ID3D12PipelineState>& GetPipelineState() const;
+	ID3D12PipelineState* GetPipelineState() const;
 
 private:
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC m_psoDescription = {};
+	//D3D12_GRAPHICS_PIPELINE_STATE_DESC m_psoDescription = {};
 	Ref<ID3D12PipelineState>        m_PipelineState;
 
 	unsigned int                    m_numRenderTargets = 0;
 	std::vector<Texture>            m_renderTargets;
 	std::shared_ptr<ShipyardShader> m_vs;
 	std::shared_ptr<ShipyardShader> m_ps;
-	Ref<ID3D12Device2>           m_Device;
+	Ref<DeviceType>           m_Device;
 };

@@ -2,6 +2,7 @@
 #include "DirectX/DX12/Graphics/CommandList.h"
 #include "DirectX/DX12/CrashHandler/GFSDK_Aftermath.h"
 #include "ThreadSafeQueue.h"
+#include "Tools/Utilities/Ref.h"
 
 #ifndef incGPUCommandQueue
 #define incGPUCommandQueue
@@ -9,7 +10,7 @@
 class GPUCommandQueue
 {
   public:
-    bool Create(const DeviceType &device, D3D12_COMMAND_LIST_TYPE type);
+    bool Create(const Ref<DeviceType> &device, D3D12_COMMAND_LIST_TYPE type);
     std::shared_ptr<CommandList> GetCommandList(const std::wstring &name = L"NoName");
 
 	Ref<ID3D12CommandQueue> GetCommandQueue();
@@ -29,7 +30,7 @@ class GPUCommandQueue
   private:
     using CommandListEntry = std::tuple<uint64_t, std::shared_ptr<CommandList>>;
 
-    DeviceType m_Device;
+    Ref<DeviceType> m_Device;
     D3D12_COMMAND_LIST_TYPE m_CommandListType{};
     Ref<ID3D12CommandQueue> m_CommandQueue;
     Ref<ID3D12Fence> m_Fence;

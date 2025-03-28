@@ -29,8 +29,7 @@ bool GPU::Initialize(HWND aWindowHandle,bool enableDeviceDebug,uint32_t width,ui
 	if(enableDeviceDebug)
 	{
 		#if !USE_NSIGHT_AFTERMATH
-		Ref<ID3D12Debug3> debugController;
-		ComPtr<ID3D12Debug3> debugController1;
+		Ref<ID3D12Debug3> debugController; 
 		const auto           result = D3D12GetDebugInterface(IID_PPV_ARGS(debugController.GetAddressOf()));
 		if(SUCCEEDED(result))
 		{
@@ -180,14 +179,14 @@ void GPU::Resize(Vector2ui resolution)
 
 		for(int i = 0; i < m_FrameCount; ++i)
 		{
-			if(auto res = m_renderTargets[i].GetResource())
+			if(auto res = m_renderTargets[i].Resource())
 			{
 				ResourceStateTracker::RemoveGlobalResourceState(res.Get());
 			}
 			m_renderTargets[i].Reset();
 		}
 
-		ResourceStateTracker::RemoveGlobalResourceState(m_DepthBuffer->GetResource().Get());
+		ResourceStateTracker::RemoveGlobalResourceState(m_DepthBuffer->Resource().Get());
 		m_DepthBuffer->Reset();
 
 		m_Width = resolution.x;
@@ -209,8 +208,7 @@ void GPU::Resize(Vector2ui resolution)
 
 void GPU::Present(unsigned aSyncInterval)
 {
-	const auto commandList = m_DirectCommandQueue->GetCommandList();
-
+	const auto commandList = m_DirectCommandQueue->GetCommandList(); 
 	commandList->TransitionBarrier(m_renderTargets[m_FrameIndex],D3D12_RESOURCE_STATE_PRESENT);
 	m_DirectCommandQueue->ExecuteCommandList(commandList);
 
@@ -263,7 +261,7 @@ void GPU::Present(unsigned aSyncInterval)
 
 void GPU::UpdateBufferResource(const CommandList& commandList,ID3D12Resource**    pDestinationResource,
 							   ID3D12Resource**   pIntermediateResource,size_t    numElements,size_t elementSize,
-							   const void*        bufferData,D3D12_RESOURCE_FLAGS flags)
+							   const void*        bufferData,D3D12_RESOURCE_FLAGS flags) const
 {
 	const size_t bufferSize = numElements * elementSize;
 	auto         heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
@@ -293,17 +291,6 @@ void GPU::UpdateBufferResource(const CommandList& commandList,ID3D12Resource**  
 	}
 }
 
-void GPU::ConfigureInputAssembler(CommandList&   commandList,D3D_PRIMITIVE_TOPOLOGY topology,
-								  const IndexResource& indexResource)
-{
-	OPTICK_GPU_EVENT("ConfigureInputAssembler");
-	commandList.GetGraphicsCommandList()->IASetPrimitiveTopology(topology);
-	commandList.TransitionBarrier(indexResource.GetResource(),D3D12_RESOURCE_STATE_COMMON,D3D12_RESOURCE_STATE_INDEX_BUFFER);
-	const auto& indexView = indexResource.GetIndexBufferView();
-	commandList.GetGraphicsCommandList()->IASetIndexBuffer(&indexView);
-	commandList.TrackResource(indexResource.GetResource());
-}
-
 HeapHandle GPU::GetHeapHandle(eHeapTypes type)
 {
 	const auto heapOffset = static_cast<int>(m_ResourceDescriptors[static_cast<int>(type)]->Allocate());
@@ -325,18 +312,7 @@ HeapHandle GPU::GetHeapHandle(DirectX::DescriptorPile& pile)
 	const auto descriptorHandleGPU = pile.GetGpuHandle(heapOffset);
 	return HeapHandle(descriptorHandleCPU,descriptorHandleGPU,heapOffset);
 }
-
-bool GPU::CreateIndexBuffer(const std::shared_ptr<CommandList>& commandList,IndexResource&         outIndexResource,
-							const std::vector<uint32_t>&        aIndexList,CD3DX12_HEAP_PROPERTIES aHeapProperties)
-{
-	constexpr DXGI_FORMAT indexFormat = (sizeof(uint32_t) == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
-	constexpr size_t      indexSizeInBytes = indexFormat == DXGI_FORMAT_R16_UINT ? 2 : 4;
-	commandList->CopyBuffer(outIndexResource,aIndexList.size(),indexSizeInBytes,aIndexList.data(),
-							D3D12_RESOURCE_FLAG_NONE,
-							aHeapProperties);
-	return true;
-}
-
+ 
 void GPU::ResizeDepthBuffer(unsigned width,unsigned height)
 {
 	if(!m_DepthBuffer)
@@ -521,7 +497,7 @@ Texture& GPU::GetCurrentBackBuffer()
 	return m_renderTargets[m_FrameIndex];
 }
 
-Ref<ID3D12DescriptorHeap> GPU::CreateDescriptorHeap(const DeviceType& device,D3D12_DESCRIPTOR_HEAP_TYPE type,
+Ref<ID3D12DescriptorHeap> GPU::CreateDescriptorHeap(const Ref<DeviceType>& device,D3D12_DESCRIPTOR_HEAP_TYPE type,
 													   uint32_t numDescriptors,D3D12_DESCRIPTOR_HEAP_FLAGS flags)
 {
 	OPTICK_EVENT();
@@ -537,7 +513,7 @@ Ref<ID3D12DescriptorHeap> GPU::CreateDescriptorHeap(const DeviceType& device,D3D
 	return descriptorHeap;
 }
 
-std::shared_ptr<GPUCommandQueue> GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE type)
+std::shared_ptr<GPUCommandQueue> GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE type) const
 {
 	OPTICK_EVENT();
 	std::shared_ptr<GPUCommandQueue> commandQueue;
@@ -560,7 +536,7 @@ std::shared_ptr<GPUCommandQueue> GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE ty
 	return commandQueue;
 }
 
-Ref<ID3D12Fence> GPU::CreateFence()
+Ref<ID3D12Fence> GPU::CreateFence() const
 {
 	OPTICK_EVENT();
 	Ref<ID3D12Fence> fence;
@@ -581,13 +557,13 @@ HANDLE GPU::CreateEventHandle()
 	return fenceEvent;
 }
 
-void GPU::UpdateRenderTargetViews(const DeviceType& device,const Ref<IDXGISwapChain4>& swapChain)
+void GPU::UpdateRenderTargetViews(const Ref<DeviceType>& device,const Ref<IDXGISwapChain4>& swapChain)
 {
 	OPTICK_EVENT();
 	device;
 	for(int i = 0; i < m_FrameCount; ++i)
 	{
-		if(auto res = m_renderTargets[i].GetResource())
+		if(auto res = m_renderTargets[i].Resource())
 		{
 			ResourceStateTracker::RemoveGlobalResourceState(res.Get());
 		}
@@ -682,12 +658,12 @@ void GPUSwapchain::Create(HWND hwnd,Ref<ID3D12CommandQueue>,UINT Width,UINT Heig
 	Helpers::ThrowIfFailed(m_SwapChain->SetFullscreenState(FALSE,nullptr)); 
 }
 
-void GPUSwapchain::Present()
+void GPUSwapchain::Present() const
 {
 	Helpers::ThrowIfFailed(GPUInstance.m_Swapchain->m_SwapChain->Present(m_Desc.SwapEffect,m_Desc.Flags));
 }
 
-void GPUSwapchain::Resize(Vector2ui resolution)
+void GPUSwapchain::Resize(Vector2ui resolution) const
 {
 	DXGI_SWAP_CHAIN_DESC desc = {};
 	m_SwapChain->GetDesc(&desc);

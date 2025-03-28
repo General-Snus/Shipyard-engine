@@ -32,8 +32,8 @@ class GPUSwapchain
 {
 public:
 	void                    Create(HWND hwnd,Ref<ID3D12CommandQueue>,UINT Width,UINT Height,UINT bufferCount);
-	void                    Present();
-	void                    Resize(Vector2ui resolution);
+	void                    Present() const;
+	void                    Resize(Vector2ui resolution) const;
 	Ref<IDXGISwapChain4> m_SwapChain{};
 	DXGI_SWAP_CHAIN_DESC1   m_Desc{};
 };
@@ -52,28 +52,17 @@ public:
 
 	void UpdateBufferResource(const CommandList& commandList,ID3D12Resource**    pDestinationResource,
 							  ID3D12Resource**   pIntermediateResource,size_t    numElements,size_t elementSize,
-							  const void*        bufferData,D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
+							  const void*        bufferData,D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE) const;
 
 	void CopyBuffer(const CommandList& aCommandList,GpuResource&       buffer,size_t numElements,size_t elementSize,
 					const void*        bufferData,D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
 
-	void ConfigureInputAssembler(CommandList&   commandList,D3D_PRIMITIVE_TOPOLOGY topology,
-								 const IndexResource& indexResource);
-
 	HeapHandle GetHeapHandle(eHeapTypes type);
 	HeapHandle GetHeapHandle(DirectX::DescriptorPile& pile);
 
-	template <typename vertexType>
-	static bool CreateVertexBuffer(const std::shared_ptr<CommandList>& commandList,VertexResource& outVxBufferView,
-								   const std::vector<vertexType>&      aVertexList,
-								   CD3DX12_HEAP_PROPERTIES             aHeapProperties = CD3DX12_HEAP_PROPERTIES(
-		D3D12_HEAP_TYPE_DEFAULT));
 
-	static bool CreateIndexBuffer(const std::shared_ptr<CommandList>& commandList,IndexResource& outIndexResource,
-								  const std::vector<uint32_t>&        aIndexList,
-								  CD3DX12_HEAP_PROPERTIES             aHeapProperties = CD3DX12_HEAP_PROPERTIES(
-		D3D12_HEAP_TYPE_DEFAULT));
 
+ 
 	void ResizeDepthBuffer(unsigned width,unsigned height);
 
 	bool LoadTexture(Texture* outTexture,const std::filesystem::path& aFileName,bool generateMips = true);
@@ -102,17 +91,18 @@ public:
 	Texture&                    GetCurrentBackBuffer();
 
 	Ref<ID3D12DescriptorHeap> CreateDescriptorHeap(
-		const DeviceType&           device,D3D12_DESCRIPTOR_HEAP_TYPE type,uint32_t numDescriptors,
+		const Ref<DeviceType>&           device,D3D12_DESCRIPTOR_HEAP_TYPE type,uint32_t numDescriptors,
 		D3D12_DESCRIPTOR_HEAP_FLAGS flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE);
 
-	void UpdateRenderTargetViews(const DeviceType& device,const Ref<IDXGISwapChain4>& swapChain);
+	void UpdateRenderTargetViews(const Ref<DeviceType>& device,const Ref<IDXGISwapChain4>& swapChain);
 
-	static Ref<ID3D12CommandAllocator> CreateCommandAllocator(DeviceType device,D3D12_COMMAND_LIST_TYPE type);
-	static CommandList& CreateCommandList(DeviceType device,Ref<ID3D12CommandAllocator> commandAllocator,
+	static Ref<ID3D12CommandAllocator> CreateCommandAllocator(Ref<DeviceType> device,D3D12_COMMAND_LIST_TYPE type);
+
+	static CommandList& CreateCommandList(Ref<DeviceType> device,Ref<ID3D12CommandAllocator> commandAllocator,
 										  D3D12_COMMAND_LIST_TYPE type);
-	std::shared_ptr<GPUCommandQueue> GetCommandQueue(D3D12_COMMAND_LIST_TYPE type);
+	std::shared_ptr<GPUCommandQueue> GetCommandQueue(D3D12_COMMAND_LIST_TYPE type) const;
 
-	Ref<ID3D12Fence> CreateFence();
+	Ref<ID3D12Fence> CreateFence() const;
 
 	static HANDLE CreateEventHandle();
 
@@ -127,20 +117,20 @@ public:
 	static constexpr bool m_useWarpDevice = false;
 	UINT                  m_FrameIndex;
 
-	DeviceType                       m_Device;
-	unsigned                         m_Width;
-	unsigned                         m_Height;
-	std::shared_ptr<GPUCommandQueue> m_DirectCommandQueue;
-	std::shared_ptr<GPUCommandQueue> m_CopyCommandQueue;
-	std::shared_ptr<GPUCommandQueue> m_ComputeCommandQueue;
+	Ref<DeviceType>                       m_Device{};
+	unsigned                         m_Width{};
+	unsigned                         m_Height{};
+	std::shared_ptr<GPUCommandQueue> m_DirectCommandQueue{};
+	std::shared_ptr<GPUCommandQueue> m_CopyCommandQueue{};
+	std::shared_ptr<GPUCommandQueue> m_ComputeCommandQueue{};
 
 	std::unique_ptr<GPUSwapchain>                            m_Swapchain;
 	std::array<Ref<ID3D12CommandAllocator>,m_FrameCount> m_CommandAllocators;
 	std::array<Texture,m_FrameCount> m_renderTargets;
 
-	std::mutex                 lockForTextureLoad;
+	std::mutex                 lockForTextureLoad{};
 	std::array<uint64_t,m_FrameCount> m_FenceValues = {};
-	D3D_ROOT_SIGNATURE_VERSION m_FeatureData;
+	D3D_ROOT_SIGNATURE_VERSION m_FeatureData{};
 
 	#if (USE_NSIGHT_AFTERMATH)
 	UINT64 m_frameCounter;
@@ -150,25 +140,14 @@ public:
 	GpuCrashTracker *m_gpuCrashTracker;
 	#endif
 
-	GPUSupport                      m_DeviceSupport;
-	D3D12_VIEWPORT                  m_Viewport;
-	D3D12_RECT                      m_ScissorRect;
-	std::shared_ptr<Texture>        m_DepthBuffer;
-	std::shared_ptr<DirectX::GraphicsMemory> m_GraphicsMemory;
+	GPUSupport                      m_DeviceSupport{};
+	D3D12_VIEWPORT                  m_Viewport{};
+	D3D12_RECT                      m_ScissorRect{};
+	std::shared_ptr<Texture>        m_DepthBuffer{};
+	std::shared_ptr<DirectX::GraphicsMemory> m_GraphicsMemory{};
 
-	std::array<std::unique_ptr<DirectX::DescriptorPile>,static_cast<int>(eHeapTypes::HEAP_COUNT)> m_ResourceDescriptors;
-	std::array<size_t,static_cast<int>(eHeapTypes::HEAP_COUNT)> m_HeapSizes;
+	std::array<std::unique_ptr<DirectX::DescriptorPile>,static_cast<int>(eHeapTypes::HEAP_COUNT)> m_ResourceDescriptors{};
+	std::array<size_t,static_cast<int>(eHeapTypes::HEAP_COUNT)> m_HeapSizes{};
 };
 
-template <typename vertexType>
-bool GPU::CreateVertexBuffer(const std::shared_ptr<CommandList>& commandList,VertexResource& outVxBufferView,
-							 const std::vector<vertexType>&      aVertexList,
-							 CD3DX12_HEAP_PROPERTIES             aHeapProperties)
-{
-	commandList->CopyBuffer(outVxBufferView,aVertexList.size(),sizeof(vertexType),aVertexList.data(),
-							D3D12_RESOURCE_FLAG_NONE,
-							aHeapProperties);
-
-	return true;
-}
 #endif

@@ -11,7 +11,7 @@
 #include "Graphics/Resources/VertexBuffer.h"
 #include "Graphics/MIPS/GenerateMipsPSO.h"
 
-CommandList::CommandList(const DeviceType& device,D3D12_COMMAND_LIST_TYPE type,const std::wstring& name)
+CommandList::CommandList(const Ref<DeviceType>& device,D3D12_COMMAND_LIST_TYPE type,const std::wstring& name)
 	: m_Type(type),m_Device(device) {
 	Helpers::ThrowIfFailed(m_Device->CreateCommandAllocator(type,IID_PPV_ARGS(m_CommandAllocator.GetAddressOf())));
 	Helpers::ThrowIfFailed(m_Device->CreateCommandList(0,type,m_CommandAllocator.Get(),nullptr,IID_PPV_ARGS(m_CommandList.GetAddressOf())));
@@ -86,6 +86,14 @@ void CommandList::CopyResource(const Ref<ID3D12Resource>& destination,const Ref<
 	TrackResource(source);
 }
 
+bool CommandList::CreateIndexBuffer(IndexResource & outIndexResource,const std::vector<uint32_t>& aIndexList,CD3DX12_HEAP_PROPERTIES aHeapProperties)
+{
+	constexpr DXGI_FORMAT indexFormat = (sizeof(uint32_t) == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
+	constexpr size_t      indexSizeInBytes = indexFormat == DXGI_FORMAT_R16_UINT ? 2 : 4;
+	CopyBuffer(outIndexResource,aIndexList.size(),indexSizeInBytes,aIndexList.data(),D3D12_RESOURCE_FLAG_NONE,aHeapProperties);
+	return true;
+}
+
 void CommandList::TransitionBarrier(const Ref<ID3D12Resource>& resource,D3D12_RESOURCE_STATES stateBefore,D3D12_RESOURCE_STATES stateAfter,
 	unsigned                      subresource,bool               flushBarriers) {
 	TransitionBarrier(resource.Get(),stateBefore,stateAfter,subresource,flushBarriers);
@@ -106,9 +114,9 @@ void CommandList::TransitionBarrier(ID3D12Resource* resource,D3D12_RESOURCE_STAT
 	}
 }
 
-void CommandList::TransitionBarrier(GpuResource& resource,D3D12_RESOURCE_STATES stateAfter,unsigned subresource,bool flushBarriers) {
+void CommandList::TransitionBarrier(const GpuResource& resource,D3D12_RESOURCE_STATES stateAfter,unsigned subresource,bool flushBarriers) {
 	OPTICK_EVENT();
-	TransitionBarrier(resource.GetResource(),resource.m_TransitioningState != -1 ? resource.m_TransitioningState : D3D12_RESOURCE_STATE_COMMON,stateAfter,subresource,flushBarriers);
+	TransitionBarrier(resource.Resource(),resource.m_TransitioningState != -1 ? resource.m_TransitioningState : D3D12_RESOURCE_STATE_COMMON,stateAfter,subresource,flushBarriers);
 	resource.m_TransitioningState = stateAfter;
 }
 
@@ -127,7 +135,7 @@ void CommandList::SetDescriptorTable(unsigned slot,Texture* texture) {
 		slot,
 		GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->GetGpuHandle(offset));
 
-	TrackResource(texture->GetResource());
+	TrackResource(texture->Resource());
 }
 
 void CommandList::SetRenderTargets(unsigned numberOfTargets,Texture* renderTargets,Texture* depthBuffer) {
@@ -163,38 +171,39 @@ void CommandList::ClearRenderTarget(Texture rtv) {
 }
 
 void CommandList::SetPipelineState(const PSO& pso) {
-	const auto& pipelineState = pso.GetPipelineState(); 
-	m_CommandList->SetPipelineState(pipelineState.Get());
-	TrackResource(pipelineState);
+	m_CommandList->SetPipelineState(pso.GetPipelineState());
+	//TrackResource(pipelineState);
 }
 
 void CommandList::SetViewports(const D3D12_VIEWPORT& viewPort,unsigned num) {
 	m_CommandList->RSSetViewports(num,&viewPort);
 }
 
-void CommandList::SetSissorRect(const D3D12_RECT& sissorRect,unsigned num) {
+void CommandList::SetScissorRect(const D3D12_RECT& sissorRect,unsigned num) {
 	m_CommandList->RSSetScissorRects(num,&sissorRect);
 }
 
-void CommandList::ConfigureInputAssembler(D3D_PRIMITIVE_TOPOLOGY topology,IndexResource& indexResource) {
+void CommandList::ConfigureInputAssembler(D3D_PRIMITIVE_TOPOLOGY topology,const IndexResource& indexResource) {
 	OPTICK_GPU_EVENT("ConfigureInputAssembler");
 	m_CommandList->IASetPrimitiveTopology(topology);
 	TransitionBarrier(indexResource,D3D12_RESOURCE_STATE_INDEX_BUFFER);
-	const auto& indexView = indexResource.GetIndexBufferView();
-	m_CommandList->IASetIndexBuffer(&indexView);
-	TrackResource(indexResource.GetResource());
+	const auto & indexLValue = indexResource.IndexView();
+	m_CommandList->IASetIndexBuffer(&indexLValue);
+	TrackResource(indexResource.Resource());
 }
 
-void CommandList::ConfigureInputAssembler(D3D_PRIMITIVE_TOPOLOGY topology,VertexResource& VertexResource,
-	IndexResource& indexResource) {
-	OPTICK_GPU_EVENT("ConfigureInputAssembler");
+void CommandList::ConfigureInputAssembler(D3D_PRIMITIVE_TOPOLOGY topology,const VertexResource& vertexResource,
+	const IndexResource& indexResource) {
+	OPTICK_GPU_EVENT("ConfigureInputAssembler"); 
 	m_CommandList->IASetPrimitiveTopology(topology);
-	TransitionBarrier(indexResource,D3D12_RESOURCE_STATE_INDEX_BUFFER);
-	const auto& indexView = indexResource.GetIndexBufferView();
-	const auto& vertexView = VertexResource.GetVertexBufferView();
-	m_CommandList->IASetIndexBuffer(&indexView);
-	m_CommandList->IASetVertexBuffers(0,1,&vertexView);
-	TrackResource(indexResource.GetResource());
+	TransitionBarrier(indexResource,D3D12_RESOURCE_STATE_INDEX_BUFFER); 
+
+	const auto & indexLValue = indexResource.IndexView();
+	const auto & vertexLValue = vertexResource.VertexView();
+
+	m_CommandList->IASetIndexBuffer(&indexLValue);
+	m_CommandList->IASetVertexBuffers(0,1,&vertexLValue);
+	TrackResource(indexResource.Resource());
 }
 
 void CommandList::TrackResource(const Ref<ID3D12Object> object) {
@@ -203,14 +212,14 @@ void CommandList::TrackResource(const Ref<ID3D12Object> object) {
 }
 void CommandList::TrackResource(const GpuResource& object) {
 	OPTICK_EVENT();
-	m_TrackedObjects.push_back(object.GetResource());
+	m_TrackedObjects.push_back(object.Resource());
 }
 void CommandList::ReleaseTrackedObjects() {
 	OPTICK_EVENT();
 	m_TrackedObjects.clear();
 }
 
-void CommandList::FlushResourceBarriers() {
+void CommandList::FlushResourceBarriers() const {
 	m_ResourceStateTracker->FlushResourceBarriers(*this);
 }
 

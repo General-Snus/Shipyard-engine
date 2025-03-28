@@ -356,14 +356,14 @@ bool Mesh::processMesh(aiMesh* mesh, const aiScene* scene, Element& outElement)
 	OPTICK_GPU_CONTEXT(commandList->GetGraphicsCommandList().Get());
 
 	VertexResource vertexRes(wname);
-	if (!GPUInstance.CreateVertexBuffer<Vertex>(commandList, vertexRes, mdlVertices))
+	if (!commandList->CreateVertexBuffer<Vertex>(vertexRes, mdlVertices))
 	{
 		LOGGER.Err("Failed to create vertex buffer");
 		return false;
 	}
 
 	IndexResource indexRes(wname);
-	if (!GPUInstance.CreateIndexBuffer(commandList, indexRes, mdlIndicies))
+	if (!commandList->CreateIndexBuffer(indexRes, mdlIndicies))
 	{
 		LOGGER.Err("Failed to create index buffer");
 		return false;

@@ -5,7 +5,7 @@
 #include "../GPU.h"
 #include "Graphics/ResourceStateTracker.h"
 
-bool GPUCommandQueue::Create(const DeviceType& device, D3D12_COMMAND_LIST_TYPE type)
+bool GPUCommandQueue::Create(const Ref<DeviceType>& device, D3D12_COMMAND_LIST_TYPE type)
 {
 	m_Device = device;
 	m_CommandListType = type;
@@ -108,11 +108,7 @@ uint64_t GPUCommandQueue::ExecuteCommandList(const std::vector<std::shared_ptr<C
 
 	// Command lists that need to put back on the command list queue.
 	static std::vector<std::shared_ptr<CommandList>> toBeQueued;
-	toBeQueued.clear();
-
-	// Generate mips command lists.
-	// static std::vector<std::shared_ptr<CommandList>> generateMipsCommandLists;
-	// generateMipsCommandLists.clear();
+	toBeQueued.clear(); 
 
 	static std::vector<ID3D12CommandList*> d3d12CommandLists;
 	d3d12CommandLists.clear();
@@ -122,6 +118,7 @@ uint64_t GPUCommandQueue::ExecuteCommandList(const std::vector<std::shared_ptr<C
 		auto       pendingCommandList = GetCommandList();
 		const bool hasPendingBarriers = commandList->Close(*pendingCommandList);
 		pendingCommandList->Close();
+
 		// If there are no pending barriers on the pending command list, there is no reason to
 		// execute an empty command list on the command queue.
 		if (hasPendingBarriers)
@@ -131,20 +128,14 @@ uint64_t GPUCommandQueue::ExecuteCommandList(const std::vector<std::shared_ptr<C
 		d3d12CommandLists.push_back(commandList->GetGraphicsCommandList().Get());
 
 		toBeQueued.push_back(pendingCommandList);
-		toBeQueued.push_back(commandList);
-
-		// auto generateMipsCommandList = commandList->GetGenerateMipsCommandList();
-		// if (generateMipsCommandList)
-		//{
-		//	generateMipsCommandLists.push_back(generateMipsCommandList);
-		// }
+		toBeQueued.push_back(commandList); 
 	}
 
 	const UINT numCommandLists = static_cast<UINT>(d3d12CommandLists.size());
 	OPTICK_GPU_EVENT("ListExecution");
 	m_CommandQueue->ExecuteCommandLists(numCommandLists, d3d12CommandLists.data());
 	uint64_t fenceValue = Signal();
-
+	
 	ResourceStateTracker::Unlock();
 
 	// Queue command lists for reuse.

@@ -187,7 +187,7 @@ void Renderer::Init_brdfLUT() {
 	graphicCommandList->SetGraphicsRootSignature(rootSignature.Get());
 	commandList->TrackResource(rootSignature);
 
-	graphicCommandList->SetPipelineState(brdfPSO->GetPipelineState().Get());
+	graphicCommandList->SetPipelineState(brdfPSO->GetPipelineState() );
 
 	graphicCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	graphicCommandList->IASetVertexBuffers(0,1,nullptr);
@@ -212,7 +212,7 @@ void Renderer::Render(std::vector<std::shared_ptr<Viewport>> renderViewPorts) {
 	for(auto& viewport : m_CustomSceneRenderPasses) {
 		renderViewPorts.emplace_back(viewport);
 		viewport->Update();
-	} 
+	}
 
 	BeginFrame();
 
@@ -281,9 +281,11 @@ uint64_t Renderer::RenderFrame(Viewport& renderViewPort,GameObjectManager& scene
 
 		return commandQueue->ExecuteCommandList(commandList);
 	}
+
 	const auto commandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 	const auto commandList = commandQueue->GetCommandList(L"RenderFrame");
 	GPU::ClearRTV(*commandList,renderViewPort.GetTarget());
+
 	return commandQueue->ExecuteCommandList(commandList);
 }
 
@@ -322,7 +324,7 @@ void Renderer::PrepareBuffers(std::shared_ptr<CommandList> commandList,Viewport&
 
 		const auto cubeMap = defaultCubeMap->GetRawTexture().get();
 		commandList->SetDescriptorTable(static_cast<int>(eRootBindings::PermanentTextures),cubeMap);
-		commandList->TrackResource(cubeMap->GetResource());
+		commandList->TrackResource(cubeMap->Resource());
 
 		commandList->GetGraphicsCommandList()->SetGraphicsRootDescriptorTable(
 			static_cast<int>(eRootBindings::Textures),
@@ -368,8 +370,8 @@ void Renderer::EnvironmentLightPass(std::shared_ptr<CommandList> commandList) {
 			nullptr);
 
 		const auto& pipelineState = environmentLight->GetPipelineState();
-		commandList->GetGraphicsCommandList()->SetPipelineState(pipelineState.Get());
-		commandList->TrackResource(pipelineState);
+		commandList->GetGraphicsCommandList()->SetPipelineState(pipelineState);
+		//commandList->TrackResource(pipelineState);
 
 		for(unsigned i = 0; i < bufferCount; i++) {
 			gBufferTextures[i].SetView(ViewType::SRV);
@@ -429,5 +431,8 @@ void Renderer::ImGuiPass() {
 	commandList->GetGraphicsCommandList()->SetDescriptorHeaps(std::size(heaps),heaps);
 
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(),commandList->GetGraphicsCommandList().Get());
-	commandQueue->ExecuteCommandList(commandList);
+	commandQueue->ExecuteCommandList(commandList) ;
+	commandQueue->Wait(*commandQueue);
+	//Ensure this is done before we move on, this should be blocking because --- todo
+	
 }

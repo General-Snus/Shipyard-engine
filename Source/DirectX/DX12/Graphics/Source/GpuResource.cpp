@@ -292,12 +292,12 @@ void GpuResource::SetResource(const Ref<ID3D12Resource>& resource)
 	CheckFeatureSupport();
 }
 
-Ref<ID3D12Resource> GpuResource::GetResource()
+Ref<ID3D12Resource> GpuResource::Resource()
 {
 	return m_Resource;
 }
 
-const Ref<ID3D12Resource>& GpuResource::GetResource() const
+const Ref<ID3D12Resource>& GpuResource::Resource() const
 {
 	return m_Resource;
 }

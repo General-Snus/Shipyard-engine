@@ -7,7 +7,7 @@
 template<typename T>
 concept releaseable =  requires(T t)
 {
-	t.Release();
+	t.Release();//Make sure its a IUnknown instead or just fulfills its interface
 };
 
 template<releaseable T>
@@ -129,7 +129,7 @@ public:
 		r.ptr_ = tmp;
 	}
 
-	InterfaceType* Get() const noexcept
+	InterfaceType* Get() const
 	{
 		return ptr_;
 	}
