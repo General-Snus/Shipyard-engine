@@ -1,4 +1,4 @@
-﻿#define NOMINMAX
+#define NOMINMAX
 
 // TODO Un-yikes the includes
 #include "../Editor.h"
@@ -41,8 +41,8 @@
 #include <Tools/ImGui/backends/imgui_impl_win32.h>  
 #include <Tools/ImGui/imgui.h> 
 #include <Tools/Logging/Logging.h>
-#include <Tools/Optick/include/optick.h>
-#include <Tools/ThirdParty/nlohmann/json.hpp>
+#include <External/Optick/include/optick.h>
+#include <External/nlohmann/json.hpp>
 #include <Tools/Utilities/Color.h>
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/Input/Input.hpp>

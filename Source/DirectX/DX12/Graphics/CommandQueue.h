@@ -1,6 +1,6 @@
 #pragma once
-#include "DirectX/DX12/Graphics/CommandList.h"
 #include "DirectX/DX12/CrashHandler/GFSDK_Aftermath.h"
+#include "DirectX/DX12/Graphics/Gpu_fwd.h"
 #include "ThreadSafeQueue.h"
 #include "Tools/Utilities/Ref.h"
 

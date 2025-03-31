@@ -59,8 +59,9 @@
 // Other
 #include "Engine/GraphicsEngine/Shaders/Registers.h"
 #include "Graphics/Enums.h"
-#include <Tools/Optick/include/optick.h>
+#include <External/Optick/include/optick.h>
 #include <Tools/Utilities/Error.hpp>
+#include <Tools/Utilities/Ref.h>
 
 // STL Headers
 #include "Graphics/Helpers.h"
@@ -84,5 +85,12 @@
 #include <exception>
 #include <functional>
 #include <ppltasks.h>
+#include <filesystem>
+#include <format>
+#include <iterator>
+#include <memory>
+#include <span>
+#include <string_view>
+#include <utility>
 
 #endif // DIRECTXHEADER_PCH_H

@@ -75,14 +75,12 @@
     <OutDir>$(SolutionDir)../Bin\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <TargetName>Shipyard_$(ProjectName)_$(Configuration)</TargetName>
-    <IncludePath>$(SolutionDir);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)Tools\ThirdParty\;$(SolutionDir)Tools\ThirdParty\dpp\;$(SolutionDir)DirectX\XTK\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)..\Lib\$(Configuration)\;$(SolutionDir)..\Dependencies\$(Configuration)\;$(SolutionDir)..\Dependencies\$(Configuration)\PhysXLibs\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)../Bin\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <TargetName>Shipyard_$(ProjectName)_$(Configuration)</TargetName>
-    <IncludePath>$(SolutionDir);$(SolutionDir)Tools\Assimp\include;$(SolutionDir)Tools\ThirdParty\;$(SolutionDir)Tools\ThirdParty\dpp\;$(SolutionDir)DirectX\XTK\;$(SolutionDir)Tools\ThirdParty\PhysX\physx\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)..\Lib\$(Configuration)\;$(SolutionDir)..\Dependencies\$(Configuration)\;$(SolutionDir)..\Dependencies\$(Configuration)\PhysXLibs\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -123,6 +121,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);$(SolutionDir)External/</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -143,6 +142,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);$(SolutionDir)External/</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

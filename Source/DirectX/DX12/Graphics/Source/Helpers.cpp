@@ -1,7 +1,8 @@
-﻿#include "DirectXHeader.pch.h"
+#include "DirectXHeader.pch.h"
 
 #include "../Helpers.h"
 #include "Graphics/GPU.h"
+#include "comdef.h"
 
 namespace Helpers
 {

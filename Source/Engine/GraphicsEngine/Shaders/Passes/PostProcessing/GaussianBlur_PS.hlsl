@@ -9,7 +9,7 @@ PostProcessPixelOutput main(SS_VStoPS input)
     const float Quality = 4.0f;
     const float Radius = 2.0f;
     
-    const float2 rad = Radius /g_FrameBuffer.FB_ScreenResolution;
+    const float2 rad = Radius /g_FrameBuffer.renderResolution;
 
     float4 color = Target0_Texture.Sample(defaultSampler, input.UV);
     

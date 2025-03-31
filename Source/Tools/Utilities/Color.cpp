@@ -2,7 +2,7 @@
 
 #include <fstream>
 #include <string>
-#include <Tools/ThirdParty/nlohmann/json.hpp>
+#include <External/nlohmann/json.hpp>
 #include "Engine/AssetManager/AssetManager.h"
 #include "LinearAlgebra/Vectors.hpp"
 

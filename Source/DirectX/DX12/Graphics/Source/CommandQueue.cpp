@@ -1,9 +1,9 @@
 #include "DirectXHeader.pch.h"
 
 #include "../CommandQueue.h"
-#include <CrashHandler/NsightAftermathGpuCrashTracker.h>
-#include "../GPU.h"
+#include <CrashHandler/NsightAftermathGpuCrashTracker.h> 
 #include "Graphics/ResourceStateTracker.h"
+#include "Graphics/CommandList.h"
 
 bool GPUCommandQueue::Create(const Ref<DeviceType>& device, D3D12_COMMAND_LIST_TYPE type)
 {

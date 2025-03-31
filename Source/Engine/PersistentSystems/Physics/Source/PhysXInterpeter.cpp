@@ -3,18 +3,18 @@
 #include "../PhysXInterpeter.h"
 #include <Editor/Editor/Defines.h>
 #include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
-#include <pvd/PxPvdTransport.h>
+#include <External/PhysX/pvd/PxPvdTransport.h>
 #include <Tools/Utilities/Math.hpp>
 #include <Tools/Utilities/Game/Timer.h>
 
-#include "PxPhysics.h"
-#include "PxPhysicsAPI.h"
-#include "omnipvd/PxOmniPvd.h"
-#include "omnipvd/PxOmniPvd.h"
-#include "cooking/PxCooking.h"
+#include "External/PhysX/PxPhysics.h"
+#include "External/PhysX/PxPhysicsAPI.h"
+#include "External/PhysX/omnipvd/PxOmniPvd.h"
+#include "External/PhysX/omnipvd/PxOmniPvd.h"
+#include "External/PhysX/cooking/PxCooking.h"
 #include "Engine/AssetManager/AssetManager.h"
 #include "Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h"
-#include "geometry/PxTriangleMeshGeometry.h"
+#include "External/PhysX/geometry/PxTriangleMeshGeometry.h"
 
 using namespace physx;
 

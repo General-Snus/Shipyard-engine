@@ -78,9 +78,6 @@
     <ClInclude Include="Input\EnumKeys.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Game\SolveSudoku.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -179,9 +176,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Game\Camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Game\Timer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

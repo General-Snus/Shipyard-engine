@@ -144,8 +144,7 @@ void Viewport::RenderImGUi() {
 	constexpr ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_MenuBar;
 	// const auto aspecRatio = (res.x / res.y);
 	// ImGui::SetNextWindowSizeConstraints(ImVec2(0,0),ImVec2(FLT_MAX,FLT_MAX),CustomConstraints::AspectRatio,(void*)&aspecRatio);
-	// // Aspect ratio
-
+ 
 	const std::vector<GameObject>& selectedObjects = EDITOR_INSTANCE.GetSelectedGameObjects();
 
 	TakeInput();

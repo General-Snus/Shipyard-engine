@@ -1,7 +1,6 @@
 #pragma once
 #include <DirectX/DX12/Graphics/GpuResource.h>
 
-
 struct BufferDescription { 
 	enum class BufferBinds : unsigned {
 		None = 0,

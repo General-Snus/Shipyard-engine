@@ -1,5 +1,5 @@
 #include "Matrix4x4.h"
-#include "Tools/Assimp/include/assimp/matrix4x4.h"
+#include "External/Assimp/matrix4x4.h"
 #include <DirectXMath.h>
 
 template <> Matrix4x4<float>::Matrix4x4(const DirectX::XMMATRIX *aMatrix)

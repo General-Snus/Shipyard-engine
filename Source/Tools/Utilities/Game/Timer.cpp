@@ -1,7 +1,7 @@
 #include "Timer.h"
 #include <cassert>
 
-#include <Tools/Optick/include/optick.h>
+#include <External/Optick/include/optick.h>
 
 void Timer::initialize()
 {

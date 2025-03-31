@@ -1,8 +1,8 @@
 #include "DirectXHeader.pch.h"
 #include "../Texture.h"
 
-#include "Graphics/CommandQueue.h"
-#include "Graphics/eDescriptors.h"
+#include "Graphics/CommandQueue.h" 
+#include "Graphics/CommandList.h" 
 #include "Graphics/GPU.h" 
 #include <DirectX/XTK/Src/LoaderHelpers.h>
 

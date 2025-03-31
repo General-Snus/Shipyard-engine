@@ -1,7 +1,7 @@
 #include "../History.h"
 #include <imgui.h>
 #include <Editor/Editor/Commands/CommandBuffer.h>
-#include <Tools/Optick/include/optick.h>
+#include <External/Optick/include/optick.h>
 
 void History::RenderImGUi()
 {

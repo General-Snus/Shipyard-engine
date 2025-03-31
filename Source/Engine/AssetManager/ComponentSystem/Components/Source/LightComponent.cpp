@@ -2,7 +2,7 @@
 
 #include "../LightComponent.h"
 // #include <Editor/Editor/Core/Editor.h>
-#include <Tools/Optick/include/optick.h>
+#include <External/Optick/include/optick.h>
 #include <Tools/Utilities/Math.hpp>
 #include "DirectX/XTK/Inc/SimpleMath.h"
 
@@ -702,22 +702,22 @@ FrameBuffer Light::GetShadowMapFrameBuffer(const int number) const
 	{
 		using enum eLightType;
 	case Directional:
-		fb.ProjectionMatrix = myDirectionLightData->projection;
-		fb.ViewMatrix = myDirectionLightData->lightView;
-		fb.FB_ScreenResolution = {shadowMap[0]->GetWidth(), shadowMap[0]->GetHeight()};
-		fb.FB_CameraPosition = GetPosition();
+		fb.projection = myDirectionLightData->projection;
+		fb.view = myDirectionLightData->lightView;
+		fb.render_resolution = {shadowMap[0]->GetWidth(), shadowMap[0]->GetHeight()};
+		fb.camera_position = GetPosition();
 		break;
 	case Point:
-		fb.ProjectionMatrix = myPointLightData->projection;
-		fb.ViewMatrix = GetLightViewMatrix(number);
-		fb.FB_ScreenResolution = {shadowMap[number]->GetWidth(), shadowMap[number]->GetHeight()};
-		fb.FB_CameraPosition = GetPosition();
+		fb.projection = myPointLightData->projection;
+		fb.view = GetLightViewMatrix(number);
+		fb.render_resolution = {shadowMap[number]->GetWidth(), shadowMap[number]->GetHeight()};
+		fb.camera_position = GetPosition();
 		break;
 	case Spot:
-		fb.ProjectionMatrix = mySpotLightData->projection;
-		fb.ViewMatrix = mySpotLightData->lightView;
-		fb.FB_ScreenResolution = {shadowMap[0]->GetWidth(), shadowMap[0]->GetHeight()};
-		fb.FB_CameraPosition = GetPosition();
+		fb.projection = mySpotLightData->projection;
+		fb.view = mySpotLightData->lightView;
+		fb.render_resolution = {shadowMap[0]->GetWidth(), shadowMap[0]->GetHeight()};
+		fb.camera_position = GetPosition();
 		break;
 	case uninitialized:
 		break;

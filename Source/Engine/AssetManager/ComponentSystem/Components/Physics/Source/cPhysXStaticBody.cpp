@@ -1,10 +1,12 @@
 #include "AssetManager.pch.h"
 
 #include "../cPhysXStaticBody.h"
-#include <Tools/ThirdParty/PhysX/physx/include/PxPhysicsAPI.h>
-#include <Tools/ThirdParty/PhysX/physx/include/foundation/PxMat33.h>
-#include <extensions\PxRigidActorExt.h>
+#include "External/PhysX/PxPhysics.h"
+#include "External/PhysX/PxScene.h"
+#include "External/PhysX/PxRigidStatic.h"
+#include <External/PhysX/foundation/PxMat33.h>
 
+#include "Engine/PersistentSystems/Physics/PhysXInterpeter.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Collider.h"
 #include "Engine/AssetManager/Objects/BaseAssets/ColliderAsset.h"
 

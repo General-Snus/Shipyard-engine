@@ -24,7 +24,7 @@ PostProcessPixelOutput main(SS_VStoPS input)
     int numMips = 0;
     Noise_Texture.GetDimensions(0, noiseWidth, noiseHeight, numMips);
     
-    const float2 randomUVScale = g_FrameBuffer.FB_ScreenResolution / float2(noiseWidth, noiseHeight);
+    const float2 randomUVScale = g_FrameBuffer.renderResolution / float2(noiseWidth, noiseHeight);
     const float2 random = GetRandom(input.UV, randomUVScale);
     const float4 pxPos = GetViewPosition(input.UV);
     const float4 pxNorm = GetViewNormal(input.UV);

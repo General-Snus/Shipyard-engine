@@ -2,7 +2,7 @@
 #ifndef GameObjectManagerDef
 #define GameObjectManagerDef
 #include "ComponentManager.h"
-#include "Tools/Optick/include/optick.h"
+#include "External/Optick/include/optick.h"
 #include "UUID.h"
 #include <Engine/AssetManager/Enums.h>
 #include <memory>

@@ -17,9 +17,9 @@
 #include "Engine/AssetManager/Reflection/ReflectionTemplate.h"
 #include "Tools/ImGui/imgui.h"
 #include "Tools/Logging/Logging.h"
-#include <Tools/Optick/include/optick.h>
+#include <External/Optick/include/optick.h>
 #include <Tools/Reflection/refl.hpp>
-#include <Tools/ThirdParty/nlohmann/json.hpp>
+#include <External/nlohmann/json.hpp>
 #include <Tools/Utilities/DataStructures/Ranges.hpp>
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/Input/Input.hpp>

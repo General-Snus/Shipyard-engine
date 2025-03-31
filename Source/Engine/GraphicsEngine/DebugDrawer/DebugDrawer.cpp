@@ -4,6 +4,9 @@
 #include "Renderer.h"
 #include <DirectX/DX12/Graphics/GPU.h>
 #include <DirectX/DX12/Graphics/PSO.h>
+#include <DirectX/DX12/Graphics/CommandQueue.h>
+#include <DirectX/DX12/Graphics/CommandList.h>
+
 #include <Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h>
 #include <Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h>
 

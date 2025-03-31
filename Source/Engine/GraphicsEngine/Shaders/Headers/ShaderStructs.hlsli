@@ -60,18 +60,49 @@ struct BRDF_Result
 {
     float2 color : SV_Target;
 };
-
-
+     
 struct FrameBuffer
 {
-    float4x4 FB_InvView;
-    float4x4 FB_Proj;
-    float FB_Time;
-    float3 FB_CameraPosition;
-    int FB_RenderMode;
-    uint2 FB_ScreenResolution;
-    float1 padding;
-    //float4 FB_FrustrumCorners[4];
+    matrix view;
+    matrix projection;
+    matrix viewProjection;
+    matrix inverseView;
+    matrix inverseProjection;
+    matrix inverseViewProjection;
+    matrix prevView;
+    matrix prevProjection;
+    matrix prevViewProjection;
+    
+    float4 cameraPosition;
+    float4 cameraForward;
+    
+    float2 cameraJitter;
+    float cameraNear;
+    float cameraFar;
+
+    float4 ambientColor; 
+    float4 sunDirection;
+    float4 sunColor;
+    float4 cascadeSplits;
+
+    uint2 displayResolution;
+    uint2 renderResolution;
+
+    float2 mouseNormalizedCoords;
+    float deltaTime;
+    float totalTime;
+
+    uint render_mode;                    
+    int lightsIdx;          
+    int lightCount;
+    int lightsMatricesIdx;
+    
+    int envMapIdx;
+    int meshesIdx;
+    int materialsIdx;
+    int instancesIdx;               
+    
+    //If the adira guy sees this im going to be very embarrassed but also happy, thanks for the inspo
 };
 ConstantBuffer<FrameBuffer> g_FrameBuffer : register(HLSL_REG_FrameBuffer); 
 

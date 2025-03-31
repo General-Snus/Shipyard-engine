@@ -3,13 +3,50 @@
 #include <Tools/Utilities/LinearAlgebra/Vector4.hpp>
 #include <array>
 
-struct FrameBuffer
+#define PAD Uint32 ADRIA_CONCAT(pad, __COUNTER__)
+
+DECLSPEC_ALIGN(16) struct FrameBuffer
 {
-	Matrix ViewMatrix;		 // 64 bytes
-	Matrix ProjectionMatrix; // 64 bytes
-	float Time = 0;			 // 4 bytes
-	Vector3f FB_CameraPosition = {0, 0, 0};
-	int FB_RenderMode = 0;
-	Vector2ui FB_ScreenResolution = {1920, 1080};
-	float padding = 0;
+	Matrix view;
+	Matrix projection;
+	Matrix view_projection;
+	Matrix inverse_view;
+	Matrix inverse_projection;
+	Matrix inverse_view_projection;
+	Matrix prev_view;
+	Matrix prev_projection;
+	Matrix prev_view_projection;
+
+	Vector3f camera_position;
+	float pad1;
+
+	Vector3f camera_forward; 
+	float pad2; 
+
+	Vector2f  camera_jitter;
+	float  camera_near;
+	float  camera_far;
+
+	Vector4f ambient_color; 
+	Vector4f sun_direction;
+	Vector4f sun_color;
+	Vector4f cascade_splits;
+
+	Vector2ui  display_resolution;
+	Vector2ui  render_resolution;
+
+	Vector2f  mouse_normalized_coords;
+	float  delta_time;
+	float  total_time;
+
+	// Should i be using cstint instead of normal?
+	uint32_t render_mode; 
+	int32_t  lights_idx;
+	int32_t  light_count;
+	int32_t  lights_matrices_idx;
+
+	int32_t  env_map_idx;
+	int32_t  meshes_idx;
+	int32_t  materials_idx;
+	int32_t  instances_idx;
 };

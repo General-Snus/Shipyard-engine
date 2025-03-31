@@ -21,9 +21,7 @@ DefaultPixelOutput main(SS_VStoPS input)
 	const float ID = DepthPass.Sample(defaultSampler,uv).g;
 	const float4 ssao = SSAOPass.Sample(defaultSampler,uv);
 
-
-
-	switch (g_FrameBuffer.FB_RenderMode)
+	switch (g_FrameBuffer.render_mode)
 	{
 	default:
 	case 0:

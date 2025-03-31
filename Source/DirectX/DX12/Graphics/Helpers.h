@@ -1,8 +1,6 @@
-﻿#pragma once
+#pragma once
 #include <string>
 #include <Tools/Utilities/Math.hpp>
-
-#include <comdef.h>
 #include <exception>
 #include <Tools/Utilities/Error.hpp>
 #include "d3dx12.h"

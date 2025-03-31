@@ -244,7 +244,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>DirectXHeader.pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);$(SolutionDir)DirectX/XTK/Inc/;$(SolutionDir)DirectX/DirectXTex/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);$(SolutionDir)External/;$(SolutionDir)DirectX\XTK\Inc\;$(SolutionDir)DirectX\DirectXTex\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -269,7 +269,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>DirectXHeader.pch.h</PrecompiledHeaderFile>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);$(SolutionDir)DirectX/XTK/Inc/;$(SolutionDir)DirectX/DirectXTex/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);$(SolutionDir)External/;$(SolutionDir)DirectX\XTK\Inc\;$(SolutionDir)DirectX\DirectXTex\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -299,7 +299,7 @@
       <PrecompiledHeaderFile>DirectXHeader.pch.h</PrecompiledHeaderFile>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);$(SolutionDir)DirectX/XTK/Inc/;$(SolutionDir)DirectX/DirectXTex/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);$(SolutionDir)External/;$(SolutionDir)DirectX\XTK\Inc\;$(SolutionDir)DirectX\DirectXTex\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>

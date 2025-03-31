@@ -34,7 +34,7 @@ PostProcessPixelOutput main(SS_VStoPS input)
     const float4 ssao = SSAOPass.Sample(defaultSampler, uv); 
     
     
-    switch(g_FrameBuffer.FB_RenderMode)
+    switch(g_FrameBuffer.render_mode)
     {
         default:
         case 0:

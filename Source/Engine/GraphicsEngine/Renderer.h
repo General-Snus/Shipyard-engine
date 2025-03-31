@@ -2,43 +2,7 @@
 #include "DebugDrawer/DebugDrawer.h"
 #include "Engine/AssetManager/Enums.h"
 #include "Tools/Utilities/System/SingletonTemplate.h"
-
-struct GraphicsSettings {
-	int  Tonemaptype = 0;
-	bool DebugRenderer_Active = false;
-};
-
-enum class eRenderTargets {
-	BackBuffer,
-	DepthBuffer,
-	SceneBuffer,
-	halfSceneBuffer,
-	quaterSceneBuffer1,
-	quaterSceneBuffer2,
-	IntermediateA,
-	IntermediateB,
-	SSAO,
-	NoiseTexture,
-	count
-};
-
-enum class eShader {
-	defaultVS,
-	defaultPS,
-	particleVS,
-	particleGS,
-	particlePS,
-	screenSpaceQuad,
-	luminancePass,
-	linearGammaPass,
-	copyShader,
-	gaussShader,
-	bloomShader,
-	debugLinePS,
-	debugLineVS,
-	count
-};
-
+ 
 class Camera;
 class Texture;
 class TextureHolder;
@@ -94,7 +58,6 @@ private:
 	std::shared_ptr<Mesh>          defaultMesh;
 	std::shared_ptr<Material>      defaultMaterial;
 
-	GraphicsSettings myGraphicSettings;
 	uint32_t         ReadPickingData(Vector2ui position);
 
 	std::shared_ptr<Scene>                 newScene;
@@ -112,8 +75,8 @@ private:
 	void     EndFrame();
 
 	void PrepareBuffers(std::shared_ptr<CommandList> commandList,Viewport& renderViewPort,GameObjectManager& scene);
-	void EnvironmentLightPass(std::shared_ptr<CommandList> commandList);
-	void ToneMapperPass(std::shared_ptr<CommandList> commandList,Texture* target);
+	void EnvironmentLightPass(std::shared_ptr<CommandList> commandList) const;
+	void ToneMapperPass(std::shared_ptr<CommandList> commandList,Texture* target) const;
 	void ImGuiPass();
 
 public:
@@ -132,11 +95,7 @@ public:
 	__forceinline std::shared_ptr<ShipyardShader> GetDefaultPSShader() const {
 		return defaultPS;
 	}
-
-	__forceinline GraphicsSettings& GetSettings() {
-		return myGraphicSettings;
-	}
-
+	 
 	__forceinline std::shared_ptr<Material> GetDefaultMaterial() const {
 		return defaultMaterial;
 	}

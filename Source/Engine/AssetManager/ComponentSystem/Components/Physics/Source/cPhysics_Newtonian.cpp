@@ -1,5 +1,6 @@
-#include "../cPhysics_Newtonian.h"
 #include "AssetManager.pch.h"
+
+#include "../cPhysics_Newtonian.h"
 
 cPhysics_Newtonian::cPhysics_Newtonian(const SY::UUID anOwnerId, GameObjectManager *aManager)
     : Component(anOwnerId, aManager)

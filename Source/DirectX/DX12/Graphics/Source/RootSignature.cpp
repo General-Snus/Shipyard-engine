@@ -5,18 +5,17 @@
 
 GPURootSignature::GPURootSignature()
 	: m_RootSignatureDesc{}
-	  , m_NumDescriptorsPerTable{0}
-	  , m_SamplerTableBitMask(0)
-	  , m_DescriptorTableBitMask(0)
-{
-}
+	, m_NumDescriptorsPerTable{ 0 }
+	, m_SamplerTableBitMask(0)
+	, m_DescriptorTableBitMask(0)
+{}
 
 GPURootSignature::GPURootSignature(const D3D12_ROOT_SIGNATURE_DESC1& rootSignatureDesc,
-                                   D3D_ROOT_SIGNATURE_VERSION        rootSignatureVersion)
+								   D3D_ROOT_SIGNATURE_VERSION        rootSignatureVersion)
 	: m_RootSignatureDesc{}
-	  , m_NumDescriptorsPerTable{0}
-	  , m_SamplerTableBitMask(0)
-	  , m_DescriptorTableBitMask(0)
+	, m_NumDescriptorsPerTable{ 0 }
+	, m_SamplerTableBitMask(0)
+	, m_DescriptorTableBitMask(0)
 {
 	SetRootSignatureDesc(rootSignatureDesc, rootSignatureVersion);
 }
@@ -52,7 +51,7 @@ void GPURootSignature::Destroy()
 }
 
 void GPURootSignature::SetRootSignatureDesc(const D3D12_ROOT_SIGNATURE_DESC1& rootSignatureDesc,
-                                            D3D_ROOT_SIGNATURE_VERSION        rootSignatureVersion)
+											D3D_ROOT_SIGNATURE_VERSION        rootSignatureVersion)
 {
 	Destroy();
 
@@ -73,11 +72,11 @@ void GPURootSignature::SetRootSignatureDesc(const D3D12_ROOT_SIGNATURE_DESC1& ro
 		{
 			const UINT               numDescriptorRanges = rootParameter.DescriptorTable.NumDescriptorRanges;
 			D3D12_DESCRIPTOR_RANGE1* pDescriptorRanges = numDescriptorRanges > 0
-				                                             ? new D3D12_DESCRIPTOR_RANGE1[numDescriptorRanges]
-				                                             : nullptr;
+				? new D3D12_DESCRIPTOR_RANGE1[numDescriptorRanges]
+				: nullptr;
 
 			memcpy(pDescriptorRanges, rootParameter.DescriptorTable.pDescriptorRanges,
-			       sizeof(D3D12_DESCRIPTOR_RANGE1) * numDescriptorRanges);
+				   sizeof(D3D12_DESCRIPTOR_RANGE1) * numDescriptorRanges);
 
 			pParameters[i].DescriptorTable.NumDescriptorRanges = numDescriptorRanges;
 			pParameters[i].DescriptorTable.pDescriptorRanges = pDescriptorRanges;
@@ -111,13 +110,13 @@ void GPURootSignature::SetRootSignatureDesc(const D3D12_ROOT_SIGNATURE_DESC1& ro
 
 	const UINT                 numStaticSamplers = rootSignatureDesc.NumStaticSamplers;
 	D3D12_STATIC_SAMPLER_DESC* pStaticSamplers = numStaticSamplers > 0
-		                                             ? new D3D12_STATIC_SAMPLER_DESC[numStaticSamplers]
-		                                             : nullptr;
+		? new D3D12_STATIC_SAMPLER_DESC[numStaticSamplers]
+		: nullptr;
 
 	if (pStaticSamplers)
 	{
 		memcpy(pStaticSamplers, rootSignatureDesc.pStaticSamplers,
-		       sizeof(D3D12_STATIC_SAMPLER_DESC) * numStaticSamplers);
+			   sizeof(D3D12_STATIC_SAMPLER_DESC) * numStaticSamplers);
 	}
 
 	m_RootSignatureDesc.NumStaticSamplers = numStaticSamplers;
@@ -139,9 +138,11 @@ void GPURootSignature::SetRootSignatureDesc(const D3D12_ROOT_SIGNATURE_DESC1& ro
 	}
 
 	// Create the root signature.
-	Helpers::ThrowIfFailed(device->CreateRootSignature(0, rootSignatureBlob->GetBufferPointer(),
-	                                                   rootSignatureBlob->GetBufferSize(),
-	                                                   IID_PPV_ARGS(m_RootSignature.GetAddressOf())));
+	Helpers::ThrowIfFailed(device->CreateRootSignature(
+		0,
+		rootSignatureBlob->GetBufferPointer(),
+		rootSignatureBlob->GetBufferSize(),
+		IID_GRAPHICS_PPV_ARGS(m_RootSignature.GetAddressOf())));
 
 	m_RootSignature->SetName(L"Default root signature");
 }

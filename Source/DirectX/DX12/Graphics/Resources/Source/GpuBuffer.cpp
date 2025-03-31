@@ -1,6 +1,20 @@
 #include "DirectXHeader.pch.h"
 #include "../GpuBuffer.h"
 #include <DirectX/DX12/Graphics/GPU.h>
+#include <DirectX/DX12/Graphics/CommandQueue.h>
+#include <DirectX/DX12/Graphics/CommandList.h>
+#include "winerror.h"
+#include "combaseapi.h"
+#include "Windows.h"
+#include <cstdint>
+#include "cstring"
+#include <memory>
+#include "Graphics/Gpu_fwd.h"
+#include "d3d12.h"
+#include "d3dx12_core.h"
+#include "dxgiformat.h"
+#include "Tools/Utilities/Math.hpp"
+#include "Tools/Utilities/Ref.h"
 
 
 GpuBuffer::GpuBuffer(const BufferDescription& desc, void* intialData) : desc(desc)

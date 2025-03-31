@@ -18,7 +18,7 @@ DefaultPixelOutput main(SS_VStoPS input)
     const float roughness = Material.g;
     const float metallic = Material.b;
 
-    const float3 cameraDirection = normalize(g_FrameBuffer.FB_CameraPosition.xyz - worldPosition.xyz);
+    const float3 cameraDirection = normalize(g_FrameBuffer.cameraPosition.xyz - worldPosition.xyz);
     const float3 diffuseColor = lerp((float3) 0.0f, albedo.rgb, 1 - metallic);
     const float3 specularColor = lerp((float3) 0.04f, albedo.rgb, metallic);
 

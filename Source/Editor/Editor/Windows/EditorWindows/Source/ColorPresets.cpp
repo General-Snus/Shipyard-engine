@@ -4,7 +4,7 @@
 #include "Tools/ImGui/misc/cpp/imgui_stdlib.h"
 #include "Tools/Utilities/Color.h"
 #include "imgui.h"
-#include <Tools/Optick/include/optick.h>
+#include <External/Optick/include/optick.h>
 #include <ranges>
 
 void ColorPresets::RenderImGUi()

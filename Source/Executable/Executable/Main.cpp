@@ -1,17 +1,12 @@
-﻿
+
 #include "Editor/Editor/Core/Editor.h"
-#include "Editor/Editor/Windows/Window.h"
-#include "resource.h"
-#include <Tools/ThirdParty/dpp/dpp.h>
+#include "Editor/Editor/Windows/Window.h" 
+#include <External/dpp/dpp.h>
 #include <Windows.h> // Mean and lean is in compiler defines
 
 #include <Strsafe.h>
 #include <Tools/Utilities/System/ServiceLocator.h>
-#include <dbghelp.h>
-#include <shellapi.h>
-#include <shlobj.h>
-#include <stdio.h>
-#include <wchar.h>
+#include <dbghelp.h> 
 
 extern "C"
 {

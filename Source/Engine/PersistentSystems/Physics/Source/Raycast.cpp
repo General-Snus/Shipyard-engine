@@ -3,17 +3,17 @@
 #include "../Raycast.h"
 
 #include <numbers>
-#include <Tools/Optick/include/optick.h>
+#include <External/Optick/include/optick.h>
 #include <Tools/Utilities/LinearAlgebra/Intersection.hpp>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
 
 #include <Engine/AssetManager/ComponentSystem/Components/Collider.h>
 #include <Engine/AssetManager/ComponentSystem/Components/Transform.h>
 #include "Engine/PersistentSystems/Scene.h"
-#include "PxPhysics.h"
-#include "PxScene.h"
-#include "PxActor.h"
-#include "PxRigidActor.h"
+#include "External/PhysX/PxPhysics.h"
+#include "External/PhysX/PxScene.h"
+#include "External/PhysX/PxActor.h"
+#include "External/PhysX/PxRigidActor.h"
 
 namespace Physics {
 	RaycastHit::RaycastHit() = default;

@@ -179,7 +179,7 @@
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);$(SolutionDir)Tools\Assimp\include\;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);$(SolutionDir)External/</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -201,7 +201,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);$(SolutionDir)Tools\Assimp\include\;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);$(SolutionDir)External/</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -229,7 +229,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);$(SolutionDir)Tools\Assimp\include\;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);$(SolutionDir)External/</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -261,7 +261,6 @@
     <ClInclude Include="Files\Images\stb_image.h" />
     <ClInclude Include="Files\Images\stb_image_resize2.h" />
     <ClInclude Include="Files\Images\stb_image_write.h" />
-    <ClInclude Include="Game\Camera.h" />
     <ClInclude Include="Game\SolveSudoku.hpp" />
     <ClInclude Include="Game\Timer.h" />
     <ClInclude Include="Input\EnumKeys.h" />
@@ -299,7 +298,6 @@
     <ClCompile Include="FileHelpers.hpp" />
     <ClCompile Include="System\Source\ServiceLocator.cpp" />
     <ClCompile Include="System\Source\Event.cpp" />
-    <ClCompile Include="Game\Camera.cpp" />
     <ClCompile Include="Game\Timer.cpp" />
     <ClCompile Include="LinearAlgebra\Matrix4x4.cpp" />
     <ClCompile Include="System\Source\Grid.cpp" />

@@ -12,7 +12,6 @@
  
 //
  #include "Shaders/Registers.h"
-#include "wrl/client.h" 
  
 #include <filesystem>
 #include <map>

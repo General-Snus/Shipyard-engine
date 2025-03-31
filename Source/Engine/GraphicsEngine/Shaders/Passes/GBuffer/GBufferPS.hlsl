@@ -32,7 +32,7 @@ GBufferOutput main(DefaultVertexToPixel input)
 		normalize(input.Normal)
 	);
 
-	const float3 cameraDirection = g_FrameBuffer.FB_CameraPosition.xyz - input.WorldPosition.xyz;
+	const float3 cameraDirection = g_FrameBuffer.cameraPosition.xyz - input.WorldPosition.xyz;
 	const float2 uv = input.UV * g_defaultMaterial.UVTiling;
 
 	const float4 textureColor = textureHeap[g_defaultMaterial.AlbedoTextureIndex].Sample(defaultSampler,uv) * g_defaultMaterial.albedoColor;
