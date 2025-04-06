@@ -247,6 +247,7 @@
     <ClInclude Include="DataStructures\HashMap.hpp" />
     <ClInclude Include="DataStructures\Heap.hpp" />
     <ClInclude Include="DataStructures\Iterator.hpp" />
+    <ClInclude Include="DataStructures\MathStructs.h" />
     <ClInclude Include="DataStructures\PriorityQueue.hpp" />
     <ClInclude Include="DataStructures\Queue.hpp" />
     <ClInclude Include="DataStructures\Ranges.hpp" />

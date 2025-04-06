@@ -57,6 +57,13 @@ protected:
 	std::array<char,NETMESSAGE_BUFFERSIZE> dataBuffer{}; 
 public:
 	eNetMessageType myType = eNetMessageType::None;
-	constexpr static eNetMessageType type = eNetMessageType::None;
+	constexpr static eNetMessageType type = eNetMessageType::None; 
+};
 
+
+struct RecievedMessage {
+	NetMessage message;
+	NetAddress from;
+	NetworkedId idFrom;
+	NetworkConnection::Protocol protocol;
 };

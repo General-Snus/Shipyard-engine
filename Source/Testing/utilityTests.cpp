@@ -7,6 +7,7 @@
 #include "../Tools/Utilities/LinearAlgebra/Quaternions.hpp"
 #include "../Tools/Utilities/Math.hpp"
 #include "../Tools/Utilities/LinearAlgebra/VectorX.hpp"
+#include "../Tools/Utilities/DataStructures/MathStructs.h"
 
 TEST(TestCaseName,TestName) {
 	const auto intVec = VectorX<int,3>({1, 2, 3});
@@ -36,6 +37,23 @@ TEST(TestCaseName,TestName) {
 	// EXPECT_NEAR(expandedFloatVec.w, floatVec.y, 0.2f);
 }
 using T = float; // Change this to test with different types (e.g., double)
+
+
+TEST(AverageTester, Average)
+{
+	Avg<float, 10000> avg;
+
+
+	for (size_t i = 0; i < 100'000; i++)
+	{
+		avg.Add(Math::RandomEngine::randomInRange(0.0f,1.0f));
+	}
+	EXPECT_NEAR(avg.Average(),.5f, 0.001f); 
+}
+
+
+
+
 
 // Helper function for matrix comparison
 template <typename T>

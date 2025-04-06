@@ -47,6 +47,20 @@ void YourGameLauncher::Init() {
 			light.SetPower(4.0f);
 			light.BindDirectionToTransform(true);
 		}
+
+		{
+			GameObject SceneCamera = GameObject::Create("SceneCamera");
+			auto& camera = SceneCamera.AddComponent<Camera>();
+			Scene::activeManager().SetLastGOAsCamera();
+
+			camera.isOrtho = true;
+			camera.orthoRect = { 110,100 };
+			camera.UpdateProjection(); //yeezz
+
+			camera.transform().SetPosition({ 0,10,0 });
+			camera.transform().SetRotation({ 90,0,0 });
+		}
+
 		this->arena = BallEradicationGame::MakeArena(Vector3f(),rect);
 		arena.AddComponent<BallGameController>();
 

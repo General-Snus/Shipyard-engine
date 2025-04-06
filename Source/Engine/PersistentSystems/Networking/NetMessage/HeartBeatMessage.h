@@ -8,7 +8,7 @@ struct HeartBeatData
 	TimePoint serverTime;
 	TimePoint timeSentByClient;
 	float lastRoundTripTime;
-	int sentMessagesToConnectionForLast10Seconds;
+	float bytePerSeconds;
 };
 
 class HeartBeatMessage: public NetMessage

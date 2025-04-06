@@ -2,81 +2,89 @@
 #include "../HeartBeatSystem.h"
 #include "Networking/NetMessage/HeartBeatMessage.h"
 #include "Networking/NetworkRunner.h"
+#include "Tools\Utilities\Game\Timer.h"
 
 #pragma optimize( "", off ) 
 
-void HeartBeatSystem::UpdateClient(NetworkRunner & runner)
+bool HeartBeatSystem::RecieveMessage(NetworkRunner& runner, const  RecievedMessage& msg)
 {
-	OPTICK_EVENT();
-
-	const auto now = std::chrono::high_resolution_clock::now();
-	for(const auto& [index,message]: runner.PollMessage<HeartBeatMessage>() | std::ranges::views::enumerate)
+	if (msg.message.myType != eNetMessageType::HearthBeat)
 	{
-		const auto pulse = std::bit_cast<HeartBeatMessage>(message.message);
-		auto data = pulse.ReadMessage();
-
-		const auto serverToClientTripTime = (now - pulse.TimeSent()) ;
-		const auto clientToServerTripTime = (data.serverTime - data.timeSentByClient) ;
-		const auto tripTime = serverToClientTripTime+ clientToServerTripTime;
-
-		float msRoundTrip = (float)std::chrono::duration_cast<std::chrono::microseconds>(tripTime).count()/1000.f;
-		roundTripBuffer.Add(msRoundTrip); 
- 		lastRecievedHearthBeatMessage = now;
+		return false;
 	}
 
+	const auto pulse = std::bit_cast<HeartBeatMessage>(msg.message);
+	const auto now = std::chrono::high_resolution_clock::now();
+	const auto delta = TimerInstance.getDeltaTime();
+	auto data = pulse.ReadMessage();
+
+	this->downlinkPerSecond.Add(data.bytePerSeconds);
+
+	if (runner.IsServer)
+	{
+		Remote* remote = runner.IdToRemote(pulse.GetId());
+
+		if (remote == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		if (!remote->hasConnectedOverUDP)
+		{
+			remote->udpAddress = msg.from;
+			remote->hasConnectedOverUDP = true;
+		}
+
+		remote->lastHeartbeatTime = now;
+		remote->roundTripBuffer.Add(data.lastRoundTripTime);
+
+		HeartBeatMessage sendMessage;
+		data.serverTime = now;
+		data.bytePerSeconds = remote->sentDataPerFrame * delta;
+		sendMessage.SetMessage(data);
+
+		runner.SendTo(*remote, sendMessage, NetworkConnection::Protocol::UDP);
+	}
+	else
+	{
+		const auto serverToClientTripTime = (now - pulse.TimeSent());
+		const auto clientToServerTripTime = (data.serverTime - data.timeSentByClient);
+		const auto tripTime = serverToClientTripTime + clientToServerTripTime;
+
+		float msRoundTrip = (float)std::chrono::duration_cast<std::chrono::microseconds>(tripTime).count() / 1000.f;
+		roundTripBuffer.Add(msRoundTrip);
+		lastRecievedHearthBeatMessage = now;
+	}
+
+	return true;
+}
+
+void HeartBeatSystem::UpdateClient(NetworkRunner& runner) const
+{
+	OPTICK_EVENT();
+	const auto now = std::chrono::high_resolution_clock::now();
 	HeartBeatMessage message;
 	HeartBeatData data;
-	data.sentMessagesToConnectionForLast10Seconds = 10; // todo
+	data.bytePerSeconds = runner.uplinkRate();//Client sets it to sent, server set it to sent to client
 	data.lastRoundTripTime = rtt();
 	data.timeSentByClient = now;
 	data.serverTime = {};
 	message.SetMessage(data);
-	runner.Send(message,NetworkConnection::Protocol::UDP);
+	runner.Send(message, NetworkConnection::Protocol::UDP);
 }
 
-void HeartBeatSystem::UpdateServer(NetworkRunner & runner)
+void HeartBeatSystem::Update(NetworkRunner& runner)
 {
 	OPTICK_EVENT();
 
-	const auto now = std::chrono::high_resolution_clock::now();
-	for(const auto& [index,message]: runner.PollMessage<HeartBeatMessage>() | std::ranges::views::enumerate)
+	if (!runner.IsServer)
 	{
-		const auto pulse = std::bit_cast<HeartBeatMessage>(message.message);
-		auto data = pulse.ReadMessage();
-		Remote* t = runner.IdToRemote(pulse.GetId());
-
-		if(t == nullptr) {
-			assert(false);
-			continue;
-		}
-
-		if(!t->hasConnectedOverUDP)
-		{
-			t->udpAddress = message.from;
-			t->hasConnectedOverUDP = true;
-		}
-
-		t->lastHeartbeatTime = now;
- 		t->roundTripBuffer.Add(data.lastRoundTripTime);
-
-		HeartBeatMessage sendMessage;
-		data.serverTime = now;
-		data.sentMessagesToConnectionForLast10Seconds = 10; // todo
-		sendMessage.SetMessage(data);
-
-		runner.Send(sendMessage,NetworkConnection::Protocol::UDP);
-	}
-
-}
-
-void HeartBeatSystem::Update(NetworkRunner & runner)
-{
-	OPTICK_EVENT();
-
-	if(runner.IsServer) {
-		UpdateServer(runner);
-	} else{
 		UpdateClient(runner);
+	}
+	else
+	{
+		//Do throw away client here if respond time is to long
 	}
 }
 #pragma optimize( "", on )
@@ -84,5 +92,10 @@ void HeartBeatSystem::Update(NetworkRunner & runner)
 
 float  HeartBeatSystem::rtt() const
 {
-	return  float(roundTripBuffer.Sum())/roundTripBuffer.Count();;
+	return  float(roundTripBuffer.Sum()) / roundTripBuffer.Count();;
+}
+
+float HeartBeatSystem::downlinkRate() const
+{
+	return downlinkPerSecond.Average();
 }

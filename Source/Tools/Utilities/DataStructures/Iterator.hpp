@@ -8,7 +8,7 @@ class CustomRange
 public:
 	class Iterator
 	{
-		T* current;
+		T* current;	
 
 	public:
 		Iterator(T* ptr) : current(ptr)

@@ -12,16 +12,8 @@ Camera::Camera(const SY::UUID anOwnerId,GameObjectManager* aManager)
 	: Component(anOwnerId,aManager),localTransform(0,nullptr)
 {
 	localTransform.Init();
-	if(!isOrtho)
-	{
-		const auto dxMatrix = DirectX::XMMatrixPerspectiveFovLH(FowInRad(),APRatio(),farfield,nearField);
-		m_Projection = Matrix(&dxMatrix);
-	}
-	else
-	{
-		const auto dxMatrix = DirectX::XMMatrixOrthographicLH(fow,fow,farfield,nearField);
-		m_Projection = Matrix(&dxMatrix);
-	}
+
+	UpdateProjection();
 
 #ifdef Flashlight
 	gameObject().AddComponent<Light>(eLightType::Spot);
@@ -40,7 +32,7 @@ void Camera::Update()
 {
 	OPTICK_EVENT();
 	localTransform.Update();
-	UpdateProjection(); ViewMatrix();
+	ViewMatrix();
 	if(IsInControll)
 	{
 		EditorCameraControlls();
@@ -63,8 +55,8 @@ void Camera::EditorCameraControlls()
 
 	const float           aTimeDelta = TimerInstance.getDeltaTime();
 	Vector3f        mdf = cameraSpeed;
-	float           rotationSpeed = 20000;
-	constexpr float mousePower = 50.f;
+	float           rotationSpeed = 100000;
+	constexpr float mousePower = 500.f;
 
 	if(Input.IsKeyHeld(Keys::SHIFT))
 	{
@@ -312,8 +304,25 @@ const Transform& Camera::LocalTransform() const
 }
 void Camera::UpdateProjection()
 {
-	const auto dxMatrix = DirectX::XMMatrixPerspectiveFovLH(FowInRad(),APRatio(),farfield,nearField);
-	m_Projection = Matrix(&dxMatrix);
+	fow = std::clamp(fow, 0.1f, 360.f);
+	farfield = std::clamp(farfield, nearField, std::numeric_limits<float>::max());
+	nearField = std::clamp(nearField, 0.000001f, farfield);
+
+	if (!isOrtho)
+	{
+		const auto dxMatrix = DirectX::XMMatrixPerspectiveFovLH(FowInRad(), APRatio(), farfield, nearField);
+		m_Projection = Matrix(&dxMatrix);
+	}
+	else
+	{
+		for (auto& fl : orthoRect)
+		{
+			fl = std::clamp(fl, 0.0001f, std::numeric_limits<float>::max());
+		}
+
+		const auto dxMatrix = DirectX::XMMatrixOrthographicLH(orthoRect.x, orthoRect.y, farfield, nearField);
+		m_Projection = Matrix(&dxMatrix);
+	}
 }
 Vector4f Camera::WoldSpaceToPostProjectionSpace(Vector3f aEntity)
 {
@@ -342,33 +351,15 @@ bool Camera::InspectorView()
 		return false;
 	}
 	bool changed = Reflect<Camera>();
-
-	static std::array<float,2> arr;
+	 
 	if(isOrtho)
 	{
-		changed |= ImGui::DragFloat2("OrthoCamera Height and width",arr.data());
+		changed |= ImGui::DragFloat2("OrthoCamera Height and width", &orthoRect.x);
 	}
 
 	if(changed)
 	{
-		fow = std::clamp(fow,0.1f,360.f);
-		farfield = std::clamp(farfield,nearField,std::numeric_limits<float>::max());
-		nearField = std::clamp(nearField,0.000001f,farfield);
-		if(!isOrtho)
-		{
-			const auto dxMatrix = DirectX::XMMatrixPerspectiveFovLH(FowInRad(),APRatio(),farfield,nearField);
-			m_Projection = Matrix(&dxMatrix);
-		}
-		else
-		{
-			for(auto& fl : arr)
-			{
-				fl = std::clamp(fl,0.0001f,std::numeric_limits<float>::max());
-			}
-
-			const auto dxMatrix = DirectX::XMMatrixOrthographicLH(arr[0],arr[1],farfield,nearField);
-			m_Projection = Matrix(&dxMatrix);
-		}
+		UpdateProjection();
 	}
 
 	return changed;

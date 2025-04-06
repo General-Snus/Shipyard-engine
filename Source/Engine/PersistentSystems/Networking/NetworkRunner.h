@@ -15,21 +15,16 @@
 #include <span>
 #include "Engine\AssetManager\ComponentSystem\Components\Network\NetworkSync.h"
 
+//This entire thing is fucked, you should handle messages directly not per frame update and construct commands for the engine in all cases but thats a lot of time
 #define Runner ServiceLocator::Instance().GetService<NetworkRunner>()
-class NetworkRunner: public Singleton {
+class NetworkRunner : public Singleton {
 	friend class NetworkSettings;
 	friend class ReplicationLayer;
 	friend class NetworkObject;
 
 public:
-	struct RecievedMessage {
-		NetMessage message;
-		NetAddress from;
-		NetworkedId idFrom;
-		NetworkConnection::Protocol protocol;
-	};
 	using MessageList = std::vector<RecievedMessage>;
-	using NetworkMessagesMap = std::unordered_map<eNetMessageType,MessageList>; // vector has to be ordered by timestamp todo
+	using NetworkMessagesMap = std::unordered_map<eNetMessageType, MessageList>; // vector has to be ordered by timestamp todo
 
 	NetworkRunner();
 	NetworkRunner(const NetworkRunner&) = delete;
@@ -39,22 +34,29 @@ public:
 	NetworkConnection::Status StartSession(SessionConfiguration configuration);
 
 	void Update();
-	void ProcessIncoming(const eNetMessageType& type,NetworkRunner::RecievedMessage& incomingMessage);
+	void ProcessIncoming(const eNetMessageType& type, RecievedMessage& incomingMessage);
 	void Close();
 
-	template<typename T> requires IsDerived<NetMessage,T>
+	template<typename T> requires IsDerived<NetMessage, T>
 	const MessageList& PollMessage();
 
-	template<typename T> requires IsDerived<NetMessage,T>
+	template<typename T> requires IsDerived<NetMessage, T>
 	bool ReadMessages(NetworkRunner::MessageList&) const;
 
 	//If you are the server, message will be broadcasted
 	//If you are the client, it will be sent to server and broadcasted by it
 	//Will set the id of the message to the runner to ensure consistency, this layer is aware of id, connection is not
-	bool Send(NetMessage& message,NetworkConnection::Protocol protocol);
+	bool Send(NetMessage& message, NetworkConnection::Protocol protocol);
+	bool SendTo(const Remote& remote, NetMessage& message, NetworkConnection::Protocol protocol) const;
+	bool SendTo(const NetworkedId& remote, NetMessage& message, NetworkConnection::Protocol protocol) const;
+
 	bool HasConnection(NetworkedId id);
 	std::string NameOfConnection(NetworkedId id);
 	Remote* IdToRemote(NetworkedId id);
+	const Remote* IdToRemote(NetworkedId id) const;
+
+	float uplinkRate(); // per second
+	float downlinkRate();// per second
 public:
 	ReplicationLayer layer;
 	HeartBeatSystem heartBeatSystem;
@@ -69,17 +71,17 @@ public:
 
 	static const int MAX_PLAYERS = 64;
 private:
-	bool registerObject(const NetworkObject & object);
-	bool unRegisterObject(const NetworkObject & object);
+	bool registerObject(const NetworkObject& object);
+	bool unRegisterObject(const NetworkObject& object);
 
 
 
-	bool Broadcast(NetMessage& message,NetworkConnection::Protocol protocol) const; // Send to All
-	bool Unicast(NetMessage& message,Remote client,NetworkConnection::Protocol protocol) const; // Send to One
-	bool Multicast(NetMessage& message,std::span<Remote> client,NetworkConnection::Protocol protocol) const; // Send to Set
+	bool Broadcast(NetMessage& message, NetworkConnection::Protocol protocol) const; // Send to All
+	bool Unicast(NetMessage& message, Remote client, NetworkConnection::Protocol protocol)  const; // Send to One
+	bool Multicast(NetMessage& message, std::span<Remote> client, NetworkConnection::Protocol protocol) const; // Send to Set
 
 	void acceptNewClients(std::stop_token stop_token);
-	void collectReceivedMessages(std::stop_token stop_token,NetworkedId recieversOwnId,NetworkConnection::Protocol protocol);
+	void collectReceivedMessages(std::stop_token stop_token, NetworkedId recieversOwnId, NetworkConnection::Protocol protocol);
 	void moveMessageMapToRead();
 
 	NetworkedId runnerID;
@@ -87,9 +89,11 @@ private:
 	//If you are a server, this connection represents the listening connection and it will create clients to handle the inbetween
 	//If you are a client this will be you connection to the server
 	NetworkConnection connection;
+	std::atomic<int> readDataPerFrame;
+	std::atomic<int> sentDataPerFrame;
 
 	//[Server]
-	std::array<Remote,MAX_PLAYERS> remoteConnections;
+	std::array<Remote, MAX_PLAYERS> remoteConnections;
 
 	// These function will always have state authority and will not be run if the server does not have it 
 	//MessageStorage
@@ -105,19 +109,21 @@ private:
 	std::stop_token acceptConnectionStopToken;
 };
 
-template<typename T> requires IsDerived<NetMessage,T>
-inline const NetworkRunner::MessageList& NetworkRunner::PollMessage() {
+template<typename T> requires IsDerived<NetMessage, T>
+inline const NetworkRunner::MessageList& NetworkRunner::PollMessage()
+{
 	return messagesMap[T::type];
 }
 
-template<typename T> requires IsDerived<NetMessage,T>
-inline bool NetworkRunner::ReadMessages(NetworkRunner::MessageList & read) const
+template<typename T> requires IsDerived<NetMessage, T>
+inline bool NetworkRunner::ReadMessages(NetworkRunner::MessageList& read) const
 {
-	if(messagesMap.contains(T::type))
+	if (messagesMap.contains(T::type))
 	{
 		read = messagesMap.at(T::type);
 		return true;
-	} else
+	}
+	else
 	{
 		return false;
 	}

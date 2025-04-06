@@ -5,6 +5,7 @@
 #include <Tools/Utilities/Math.hpp>
 #include "Engine/PersistentSystems/Networking/NetMessage/NetMessage.h"
 #include <Networking/NetMessage/StringMessages.h>
+#include "Networking/NetworkRunner.h"
 
 void Remote::Close() { // todo
 	OPTICK_EVENT();
@@ -53,7 +54,7 @@ NetAddress Remote::AddressByProtocol(NetworkConnection::Protocol protocol)
 
 float Remote::rtt() const
 {
-	return std::chrono::duration_cast<std::chrono::microseconds>(roundTrip).count()/1000.f;
+	return float(roundTripBuffer.Sum()) / (float)roundTripBuffer.Count();
 }
 
 void Remote::collectReceivedMessages(std::stop_token stop_token) {
@@ -64,7 +65,7 @@ void Remote::collectReceivedMessages(std::stop_token stop_token) {
 	while(!stop_token.stop_requested()) {
 		if(auto error = remoteConnection.ReceiveTCP(&incomingMessage,&recievedFromAddress) == ReceiveSuccessful) {
 			std::scoped_lock lock(messageMutex);
-
+			readDataPerFrame += sizeof(incomingMessage);
 			//bit discusting but here we go
 			if(incomingMessage.myType == eNetMessageType::NewConnection)
 			{

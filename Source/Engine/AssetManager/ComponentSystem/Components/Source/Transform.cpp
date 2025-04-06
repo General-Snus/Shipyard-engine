@@ -405,9 +405,7 @@ bool Transform::InspectorView() {
 
 void Transform::SetRotation(float X,float Y,float Z) {
 	myQuaternion.SetEulerAngles(Vector3(X,Y,Z));
-#if DoDirtyChecks
-	IsDirty = true;
-#endif
+	SetDirty(true); 
 }
 
 void Transform::SetRotation(Vector2f angularRotation) {

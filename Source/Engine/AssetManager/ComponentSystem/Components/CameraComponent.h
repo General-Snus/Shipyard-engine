@@ -63,6 +63,7 @@ public:
 	float farfield = 1000000.0f;
 	float nearField = 0.01f;
 	bool isOrtho = false;
+	Vector2f orthoRect{};
 	DebugFilter filter = DebugFilter::NoFilter;
 
 	inline float FowInRad() const {

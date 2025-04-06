@@ -14,6 +14,7 @@ struct Remote {
 	friend class NetworkRunner;
 	friend class HeartBeatSystem;
 	friend class NetworkSettings;
+	friend class NetworkSettings;
 	struct RemoteRecievedMessage {
 		NetMessage message;
 		NetAddress from;
@@ -30,13 +31,18 @@ struct Remote {
 	NetAddress AddressByProtocol(NetworkConnection::Protocol protocol);
 	float rtt() const;
 private:
-	bool hasConnectedOverUDP = false;
 	NetworkedId id;
 	std::string nickname;
+
+	bool hasConnectedOverUDP = false;
 	TimePoint lastRecievedMessageTime;
 	TimePoint lastHeartbeatTime;
 	Duration roundTrip;
 	CircularBuffer<float,15> roundTripBuffer;
+
+	mutable std::atomic<int> readDataPerFrame; // I want it to be sent as const and this is threadsafe anyhow
+	mutable std::atomic<int> sentDataPerFrame; // I want it to be sent as const and this is threadsafe anyhow
+
 	std::vector<RemoteRecievedMessage> messages;
 	std::mutex messageMutex;
 	std::jthread receiveTCP;
