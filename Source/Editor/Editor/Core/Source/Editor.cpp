@@ -357,7 +357,7 @@ bool Editor::Initialize(HWND aHandle) {
 #ifdef _DEBUG
 	renderer.Initialize(true);
 #else
-	renderer.Initialize(true); // todo Disable
+	renderer.Initialize(false); // todo Disable
 #endif // Release
 
 	// Setup Dear ImGui context
