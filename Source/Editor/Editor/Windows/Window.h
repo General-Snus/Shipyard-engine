@@ -29,9 +29,9 @@ class Window : public Singleton
   public:
     void Init(const WinInitSettings &init);
     bool Update();
-    static LRESULT CALLBACK WinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+    LRESULT static CALLBACK WinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-    void SetCallbackFunction(const std::function<void(MSG const &msg)> &aCallback);
+    void SetCallbackFunction(const std::function<void(Window* window,MSG const &msg)> &aCallback);
     void Destroy();
     void MoveConsoleToOtherMonitor();
 
@@ -39,11 +39,16 @@ class Window : public Singleton
 	unsigned int Height() const;
 	Vector2ui Resolution() const;
 
+
+    unsigned int MonitorWidth() const;
+    unsigned int MonitorHeight() const;
+    Vector2ui MonitorResolution() const;
+
 	bool SetWindowsTitle(const std::string& titleName) const;
 	std::string GetWindowsTitle() const;
 
     HINSTANCE moduleHandler{};
 	HWND windowHandler{};
     // Cred goes to adira guy on reddit for wonderfull code
-    std::function<void(const MSG &msg)> callback = nullptr;
+    std::function<void(Window* window,const MSG &msg)> callback = nullptr;
 };

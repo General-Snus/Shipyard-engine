@@ -38,7 +38,10 @@ public:
 	void SetPipelineState(const PSO& pso);
 
 	void SetViewports(const D3D12_VIEWPORT& viewPort,unsigned num = 1);
+	void SetViewports(const Vector2f& widthHeight, unsigned num = 1);
+
 	void SetScissorRect(const D3D12_RECT& sissorRect,unsigned num = 1);
+	void SetScissorRect(const Vector2f& widthHeight, unsigned num = 1); 
 
 	void ConfigureInputAssembler(D3D_PRIMITIVE_TOPOLOGY topology,
 								 const IndexResource& indexResource);

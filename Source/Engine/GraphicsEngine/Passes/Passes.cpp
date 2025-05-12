@@ -216,23 +216,22 @@ void GBuffer::Initialize(const Renderer& instance) {
 
 void GBuffer::Render(const Renderer& instance,std::shared_ptr<CommandList>& commandList,
 	const GameObjectManager& scene) {
-	commandList->SetViewports(GPUInstance.m_Viewport);
-	commandList->SetScissorRect(GPUInstance.m_ScissorRect);
-
 	const auto& gbufferPSO = instance.m_Cache->GetState(PSOCache::ePipelineStateID::GBuffer);
 	const auto& gBufferTextures = gbufferPSO->RenderTargets();
 	const auto  numTargets = gbufferPSO->GetNumberOfTargets();
 
-	commandList->ClearRenderTargets(numTargets,gBufferTextures);
-	commandList->SetRenderTargets(numTargets,gBufferTextures,
-		GPUInstance.m_DepthBuffer.get());
-
-	commandList->SetPipelineState(*gbufferPSO);
 
 	std::vector<MeshRenderer> list;
 	if(!scene.GetReadOnly<MeshRenderer>(list)) {
 		return;
 	}
+
+	commandList->ClearRenderTargets(numTargets, gBufferTextures);
+	commandList->SetRenderTargets(numTargets, gBufferTextures,
+		GPUInstance.m_DepthBuffer.get());
+	commandList->SetPipelineState(*gbufferPSO);
+	commandList->SetViewports(gBufferTextures->GetViewPort());
+	commandList->SetScissorRect(gBufferTextures->GetRect());
 
 	const uint32_t dtAlbedo = instance.GetDefaultTexture(eTextureType::ColorMap)->GetRawTexture()->GetHeapOffset();
 	const uint32_t dtNormal = instance.GetDefaultTexture(eTextureType::NormalMap)->GetRawTexture()->GetHeapOffset();

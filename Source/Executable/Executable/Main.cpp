@@ -30,7 +30,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
     UNREFERENCED_PARAMETER(nCmdShow);
-
     if (IsDebuggerPresent())
     {
         Run(hInstance);
@@ -55,13 +54,13 @@ int Run(HINSTANCE &hInstance)
 
     WinInitSettings settings{};
     settings.hInstance = hInstance;
-    settings.windowSize = {1920, 1080};
+    settings.windowSize = {1920/2, 1080/2};
     settings.windowTitle = L"Shipyard";
     window.Init(settings);
 
     Editor &editor = ServiceLocator::Instance().GetService<Editor>();
     editor.Initialize(window.windowHandler);
-    window.SetCallbackFunction([&editor](MSG const &msg_data) { editor.DoWinProc(msg_data); });
+    window.SetCallbackFunction([&editor](Window* win,MSG const &msg_data) { editor.DoWinProc(win,msg_data); });
 
     ShowWindow(WindowInstance.windowHandler, SW_SHOW);
     SetForegroundWindow(WindowInstance.windowHandler);

@@ -21,7 +21,7 @@
 
 bool Renderer::Initialize(bool enableDeviceDebug)
 {
-	if (!GPUInstance.Initialize(WindowInstance.windowHandler, enableDeviceDebug, WindowInstance.Width(), WindowInstance.Height()))
+	if (!GPUInstance.Initialize(WindowInstance.windowHandler, enableDeviceDebug, WindowInstance.MonitorWidth(), WindowInstance.MonitorHeight()))
 	{
 		LOGGER.Err("Failed to initialize the DX12 GPU!");
 		return false;
@@ -113,7 +113,7 @@ const PSOCache& Renderer::GetPSOCache() const
 
 bool Renderer::ResizeBuffers(Vector2ui resolution)
 {
-	//GPUInstance.Resize(resolution);
+	GPUInstance.Resize(resolution);
 	//m_Cache->InitAllStates();
 	resolution;
 	return true; // TODO Makes sense to check if the resolution is supporded by the monitor
@@ -259,15 +259,6 @@ void Renderer::BeginFrame()
 
 uint64_t Renderer::RenderFrame(Viewport& renderViewPort, GameObjectManager& scene)
 {
-
-	//stop = std::chrono::high_resolution_clock::now();
-	//float time = std::chrono::duration<float,std::milli>(stop - start).count();
-	//if(time < (1000.0f / framerate))
-	//{
-	//	return 1;
-	//}
-	//start = std::chrono::high_resolution_clock::now();
-
 	if (renderViewPort.IsRenderReady())
 	{
 		OPTICK_EVENT();
@@ -283,12 +274,13 @@ uint64_t Renderer::RenderFrame(Viewport& renderViewPort, GameObjectManager& scen
 		OPTICK_GPU_EVENT("DeferredRenderingPass");
 		const auto frameBuffer = renderViewPort.GetCamera().GetFrameBuffer();
 		commandList->AllocateBuffer(eRootBindings::frameBuffer, frameBuffer);
-		GBuffer::Render(*this, commandList, scene);
 
+
+		GBuffer::Render(*this, commandList, scene); 
 		EnvironmentLightPass(commandList);
 		ToneMapperPass(commandList, renderViewPort.GetTarget());
 
-		if (!renderViewPort.IsMainViewport())
+		if (!renderViewPort.IsGameViewport())
 		{
 			debugDrawer.Render(commandList);
 		}
@@ -397,6 +389,7 @@ void Renderer::EnvironmentLightPass(std::shared_ptr<CommandList> commandList) co
 			commandList->TransitionBarrier(gBufferTextures[i], D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 			commandList->TrackResource(gBufferTextures[i]);
 		}
+
 		commandList->FlushResourceBarriers();
 		commandList->SetDescriptorTable(static_cast<int>(eRootBindings::GbufferPasses), gBufferTextures);
 
@@ -419,6 +412,10 @@ void Renderer::ToneMapperPass(std::shared_ptr<CommandList> commandList, Texture*
 	commandList->FlushResourceBarriers();
 
 	commandList->ClearRenderTargets(toneMapper->GetNumberOfTargets(), toneMapper->RenderTargets());
+
+	commandList->SetViewports(target->GetViewPort());
+	commandList->SetScissorRect(target->GetRect());
+
 	commandList->SetRenderTargets(1, target, nullptr);
 	commandList->TrackResource(*target);
 
@@ -437,6 +434,8 @@ void Renderer::ImGuiPass()
 
 	commandList->SetRenderTargets(1, &GPUInstance.GetCurrentBackBuffer(), nullptr);
 
+	commandList->SetViewports(GPUInstance.m_Viewport);
+	commandList->SetScissorRect(GPUInstance.m_ScissorRect);
 	ImGui::RenderNotifications();
 	ImGui::Render();
 	const ImGuiIO& io = ImGui::GetIO();

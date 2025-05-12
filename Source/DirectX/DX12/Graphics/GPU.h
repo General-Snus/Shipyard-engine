@@ -111,13 +111,17 @@ public:
 	static void setAftermathEventMarker(const std::string& markerData, bool appManagedMarker);
 	static std::string createMarkerStringForFrame(const char* markerString);
 #endif
+
+
 	static constexpr UINT m_FrameCount = 2;
 	static constexpr bool m_useWarpDevice = false;
 	UINT                  m_FrameIndex;
 
 	Ref<DeviceType>                       m_Device{};
+
 	unsigned                         m_Width{};
-	unsigned                         m_Height{};
+	unsigned                         m_Height{};  
+
 	std::shared_ptr<GPUCommandQueue> m_DirectCommandQueue{};
 	std::shared_ptr<GPUCommandQueue> m_CopyCommandQueue{};
 	std::shared_ptr<GPUCommandQueue> m_ComputeCommandQueue{};

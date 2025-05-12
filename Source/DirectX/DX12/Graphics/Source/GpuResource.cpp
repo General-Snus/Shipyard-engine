@@ -7,7 +7,7 @@ using namespace DirectX;
 
 GpuResource::GpuResource()
 	: m_UsageState(D3D12_RESOURCE_STATE_COMMON), m_TransitioningState(static_cast<D3D12_RESOURCE_STATES>(-1)),
-	  m_Resource(nullptr), m_FormatSupport()
+	m_Resource(nullptr), m_FormatSupport()
 {
 	CheckFeatureSupport();
 }
@@ -111,56 +111,56 @@ void GpuResource::SetView(ViewType view)
 	switch (view)
 	{
 	case ViewType::UAV:
+	{
+		HeapHandle handle = GPUInstance.GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
+		CreateUnorderedAccessView(GPUInstance.m_Device.Get(), m_Resource.Get(), handle.cpuPtr, desc.MipLevels);
+		m_DescriptorHandles[ViewType::UAV] = handle;
+	}
+	break;
+	case ViewType::SRV:
+	{
+		if (CheckDSVSupport())
+		{
+			D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+			SRVDesc.Format = Helpers::GetDepthFormat(m_Format);
+			SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+			SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+			SRVDesc.Texture2D.MipLevels = 1;
+
+			HeapHandle handle = GPUInstance.GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
+			GPUInstance.m_Device->CreateShaderResourceView(m_Resource.Get(), &SRVDesc, handle.cpuPtr);
+			m_DescriptorHandles[ViewType::SRV] = handle;
+		}
+		else
 		{
 			HeapHandle handle = GPUInstance.GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
-			CreateUnorderedAccessView(GPUInstance.m_Device.Get(), m_Resource.Get(), handle.cpuPtr, desc.MipLevels);
-			m_DescriptorHandles[ViewType::UAV] = handle;
+			CreateShaderResourceView(GPUInstance.m_Device.Get(), m_Resource.Get(), handle.cpuPtr);
+			m_DescriptorHandles[ViewType::SRV] = handle;
 		}
-		break;
-	case ViewType::SRV:
-		{
-			if (CheckDSVSupport())
-			{
-				D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
-				SRVDesc.Format = Helpers::GetDepthFormat(m_Format);
-				SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-				SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-				SRVDesc.Texture2D.MipLevels = 1;
-
-				HeapHandle handle = GPUInstance.GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
-				GPUInstance.m_Device->CreateShaderResourceView(m_Resource.Get(), &SRVDesc, handle.cpuPtr);
-				m_DescriptorHandles[ViewType::SRV] = handle;
-			}
-			else
-			{
-				HeapHandle handle = GPUInstance.GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
-				CreateShaderResourceView(GPUInstance.m_Device.Get(), m_Resource.Get(), handle.cpuPtr);
-				m_DescriptorHandles[ViewType::SRV] = handle;
-			}
-		}
-		break;
+	}
+	break;
 	case ViewType::RTV:
-		{
-			HeapHandle handle = GPUInstance.GetHeapHandle(eHeapTypes::HEAP_TYPE_RTV);
+	{
+		HeapHandle handle = GPUInstance.GetHeapHandle(eHeapTypes::HEAP_TYPE_RTV);
 
-			device->CreateRenderTargetView(m_Resource.Get(), nullptr, handle.cpuPtr);
-			m_DescriptorHandles[ViewType::RTV] = handle;
-		}
-		break;
+		device->CreateRenderTargetView(m_Resource.Get(), nullptr, handle.cpuPtr);
+		m_DescriptorHandles[ViewType::RTV] = handle;
+	}
+	break;
 	case ViewType::DSV:
-		{
-			HeapHandle handle = GPUInstance.GetHeapHandle(eHeapTypes::HEAP_TYPE_DSV);
+	{
+		HeapHandle handle = GPUInstance.GetHeapHandle(eHeapTypes::HEAP_TYPE_DSV);
 
-			D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
-			dsvDesc.Format = m_Format;
-			dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-			dsvDesc.Texture2D.MipSlice = 0;
-			dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+		dsvDesc.Format = m_Format;
+		dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+		dsvDesc.Texture2D.MipSlice = 0;
+		dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
 
-			device->CreateDepthStencilView(m_Resource.Get(), &dsvDesc, handle.cpuPtr);
-			m_DescriptorHandles[ViewType::DSV] = handle;
-		}
-		break;
+		device->CreateDepthStencilView(m_Resource.Get(), &dsvDesc, handle.cpuPtr);
+		m_DescriptorHandles[ViewType::DSV] = handle;
+	}
+	break;
 	default:
 		assert(false && "Out of range view type");
 		break;
@@ -183,49 +183,49 @@ void GpuResource::SetView(ViewType view, HeapHandle handle)
 	switch (view)
 	{
 	case ViewType::UAV:
-		{
-			CreateUnorderedAccessView(GPUInstance.m_Device.Get(), m_Resource.Get(), handle.cpuPtr, desc.MipLevels);
-			m_DescriptorHandles[ViewType::UAV] = handle;
-		}
-		break;
+	{
+		CreateUnorderedAccessView(GPUInstance.m_Device.Get(), m_Resource.Get(), handle.cpuPtr, desc.MipLevels);
+		m_DescriptorHandles[ViewType::UAV] = handle;
+	}
+	break;
 	case ViewType::SRV:
+	{
+		if (CheckDSVSupport())
 		{
-			if (CheckDSVSupport())
-			{
-				D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
-				SRVDesc.Format = Helpers::GetDepthFormat(m_Format);
-				SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-				SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-				SRVDesc.Texture2D.MipLevels = 1;
+			D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+			SRVDesc.Format = Helpers::GetDepthFormat(m_Format);
+			SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+			SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+			SRVDesc.Texture2D.MipLevels = 1;
 
-				GPUInstance.m_Device->CreateShaderResourceView(m_Resource.Get(), &SRVDesc, handle.cpuPtr);
-				m_DescriptorHandles[ViewType::SRV] = handle;
-			}
-			else
-			{
-				CreateShaderResourceView(GPUInstance.m_Device.Get(), m_Resource.Get(), handle.cpuPtr);
-				m_DescriptorHandles[ViewType::SRV] = handle;
-			}
+			GPUInstance.m_Device->CreateShaderResourceView(m_Resource.Get(), &SRVDesc, handle.cpuPtr);
+			m_DescriptorHandles[ViewType::SRV] = handle;
 		}
-		break;
+		else
+		{
+			CreateShaderResourceView(GPUInstance.m_Device.Get(), m_Resource.Get(), handle.cpuPtr);
+			m_DescriptorHandles[ViewType::SRV] = handle;
+		}
+	}
+	break;
 	case ViewType::RTV:
-		{
-			device->CreateRenderTargetView(m_Resource.Get(), nullptr, handle.cpuPtr);
-			m_DescriptorHandles[ViewType::RTV] = handle;
-		}
-		break;
+	{
+		device->CreateRenderTargetView(m_Resource.Get(), nullptr, handle.cpuPtr);
+		m_DescriptorHandles[ViewType::RTV] = handle;
+	}
+	break;
 	case ViewType::DSV:
-		{
-			D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
-			dsvDesc.Format = m_Format;
-			dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-			dsvDesc.Texture2D.MipSlice = 0;
-			dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+	{
+		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+		dsvDesc.Format = m_Format;
+		dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+		dsvDesc.Texture2D.MipSlice = 0;
+		dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
 
-			device->CreateDepthStencilView(m_Resource.Get(), &dsvDesc, handle.cpuPtr);
-			m_DescriptorHandles[ViewType::DSV] = handle;
-		}
-		break;
+		device->CreateDepthStencilView(m_Resource.Get(), &dsvDesc, handle.cpuPtr);
+		m_DescriptorHandles[ViewType::DSV] = handle;
+	}
+	break;
 	default:
 		assert(false && "Out of range view type");
 		break;
@@ -326,7 +326,7 @@ void GpuResource::CheckFeatureSupport()
 
 		m_FormatSupport.Format = desc.Format;
 		Helpers::ThrowIfFailed(GPUInstance.m_Device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &m_FormatSupport,
-		                                                                 sizeof(D3D12_FEATURE_DATA_FORMAT_SUPPORT)));
+			sizeof(D3D12_FEATURE_DATA_FORMAT_SUPPORT)));
 	}
 	else
 	{

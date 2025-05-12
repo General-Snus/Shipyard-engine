@@ -13,6 +13,7 @@ struct ImGuizmoOp;
 class EditorWindow;
 class ScriptGraphEditor;
 class Scene;
+class Window;
 
 enum class EditorCallback
 {
@@ -38,7 +39,7 @@ class Editor : public Singleton
 public:
 	int  Run();
 	bool Initialize(HWND aHandle);
-	void DoWinProc(const MSG& msg);
+	void DoWinProc(Window* window, const MSG& msg);
 
 	RECT                  GetViewportRECT();
 	Vector2<unsigned int> GetViewportResolution();

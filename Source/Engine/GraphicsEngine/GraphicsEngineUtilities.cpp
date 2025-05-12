@@ -21,7 +21,7 @@ bool GraphicsEngineUtilities::GenerateSceneForIcon(std::shared_ptr<Mesh> meshAss
 	}
 
 	renderTarget->isBeingLoaded = true;
-	const auto res = Vector2f(1920, 1080.f);
+	const auto res = Vector2ui(1920, 1080);
 	{
 		auto& camera = RENDERER.newScene->GetGOM().GetCamera().GetComponent<Camera>();
 		camera.SetResolution(res);

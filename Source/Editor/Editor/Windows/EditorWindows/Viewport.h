@@ -13,7 +13,7 @@ class Viewport : public EditorWindow {
 public:
 	// MainViewport is will render from the MainCamera and if no such camera exist it will be black
 	explicit Viewport(bool IsMainViewPort,
-		Vector2f ViewportResolution = {(float)WindowInstance.Width(), (float)WindowInstance.Height()},
+		Vector2ui ViewportResolution = WindowInstance.MonitorResolution(),
 		std::shared_ptr<Scene> sceneToRender = nullptr,
 		std::shared_ptr<TextureHolder> RenderTexture = nullptr);
 
@@ -21,7 +21,7 @@ public:
 	bool IsSelected() const;
 	bool IsHovered() const;
 	bool IsRenderReady() const;
-	bool IsMainViewport() const;
+	bool IsGameViewport() const;
 	void Update();
 	void ResolutionUpdate();
 	Vector2f getCursorInWindowPostion() const;
@@ -49,7 +49,7 @@ private:
 	void RenderToolbar();
 
 	Vector2f cursorPositionInViewPort;
-	bool IsMainViewPort = false;
+	bool isGameViewport = false;
 	bool IsVisible = true;
 	bool isWindowFocused = false;
 	bool IsMouseHoverering = false;

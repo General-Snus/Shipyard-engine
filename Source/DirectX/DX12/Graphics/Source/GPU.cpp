@@ -184,8 +184,7 @@ void GPU::Resize(Vector2ui resolution)
 			m_renderTargets[i].Reset();
 		}
 
-		ResourceStateTracker::RemoveGlobalResourceState(m_DepthBuffer->Resource().Get());
-		m_DepthBuffer->Reset();
+		
 
 		m_Width = resolution.x;
 		m_Height = resolution.y;
@@ -198,9 +197,8 @@ void GPU::Resize(Vector2ui resolution)
 
 		m_Swapchain->Resize(resolution);
 		m_FrameIndex = m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
-
 		UpdateRenderTargetViews(m_Device,m_Swapchain->m_SwapChain);
-		ResizeDepthBuffer(m_Width,m_Height);
+		//ResizeDepthBuffer(m_Width,m_Height);
 	}
 }
 
@@ -317,21 +315,14 @@ void GPU::ResizeDepthBuffer(unsigned width,unsigned height)
 	{
 		m_DepthBuffer = std::make_unique<Texture>();
 	}
+	ResourceStateTracker::RemoveGlobalResourceState(m_DepthBuffer->Resource().Get());
+	m_DepthBuffer->Reset();
 	m_DirectCommandQueue->Flush();
 
 	width = std::max(1u,width);
-	height = std::max(1u,height);
-
-	const auto                heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-	const D3D12_RESOURCE_DESC depthStencilDesc = CD3DX12_RESOURCE_DESC::Tex2D(
-		DXGI_FORMAT_D32_FLOAT,width,height,1,0,1,0,D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
-
-	const CD3DX12_CLEAR_VALUE depthOptimizedClearValue(DXGI_FORMAT_D32_FLOAT,0.0f,0u);
-	Helpers::ThrowIfFailed(m_Device->CreateCommittedResource(
-		&heapProperties,D3D12_HEAP_FLAG_NONE,&depthStencilDesc,D3D12_RESOURCE_STATE_DEPTH_WRITE,
-		&depthOptimizedClearValue,IID_PPV_ARGS(m_DepthBuffer->m_Resource.GetAddressOf())));
-	m_DepthBuffer->m_Resource->SetName(L"DepthBuffer");
-	m_DepthBuffer->m_Format = DXGI_FORMAT_D32_FLOAT;
+	height = std::max(1u,height); 
+	Vector2ui res = { width,height };
+	m_DepthBuffer->AllocateDepthTexture(res, "DepthBuffer", 0.0f, 0u, DXGI_FORMAT_D32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 	m_DepthBuffer->CheckFeatureSupport();
 	m_DepthBuffer->SetView(ViewType::DSV);
 }

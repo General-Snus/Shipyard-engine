@@ -78,6 +78,12 @@ public:
 		resolution = aResolution;
 	};
 
+	inline void SetResolution(Vector2ui aResolution)
+	{
+		resolution.x = (float)aResolution.x;
+		resolution.y = (float)aResolution.y;
+	};
+
 
 private:
 	Transform localTransform;

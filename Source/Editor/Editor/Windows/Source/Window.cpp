@@ -43,6 +43,7 @@ void Window::Init(const WinInitSettings& init)
 	windowClass.lpszClassName = windowClassName;
 	RegisterClass(&windowClass);
 
+	SetProcessDPIAware();
 	// Then we use the class to create our window
 	windowHandler = CreateWindow(windowClassName,                // Classname
 								 init.windowTitle.c_str(),       // Window Title
@@ -60,6 +61,21 @@ void Window::Init(const WinInitSettings& init)
 	ShowWindow(windowHandler,SW_SHOWDEFAULT);
 	UpdateWindow(windowHandler);
 	DragAcceptFiles(windowHandler,TRUE);
+}
+
+unsigned int Window::MonitorWidth() const
+{
+	return MonitorResolution().x;
+}
+
+unsigned int Window::MonitorHeight() const
+{
+	return MonitorResolution().y;
+}
+
+Vector2ui Window::MonitorResolution() const
+{
+	return Vector2ui(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
 }
 
 bool Window::SetWindowsTitle(const std::string& titleName) const {
@@ -99,8 +115,7 @@ LRESULT CALLBACK Window::WinProc(_In_ HWND hWnd,_In_ UINT uMsg,_In_ WPARAM wPara
 		msg.message = uMsg;
 		msg.wParam = wParam;
 		msg.lParam = lParam;
-
-		WindowInstance.callback(msg);
+		WindowInstance.callback(&WindowInstance,msg);
 	}
 
 	switch(uMsg)
@@ -118,7 +133,7 @@ LRESULT CALLBACK Window::WinProc(_In_ HWND hWnd,_In_ UINT uMsg,_In_ WPARAM wPara
 	return DefWindowProc(hWnd,uMsg,wParam,lParam);
 }
 
-void Window::SetCallbackFunction(const std::function<void(const MSG& msg)>& aCallback)
+void Window::SetCallbackFunction(const std::function<void(Window* window,const MSG& msg)>& aCallback)
 {
 	callback = aCallback;
 }
