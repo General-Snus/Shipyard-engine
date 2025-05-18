@@ -127,10 +127,10 @@ void Light::SetIsShadowCaster(const bool active)
 
 			shadowMap[i] = std::make_shared<Texture>();
 
-			shadowMap[i]->AllocateTexture(
+			shadowMap[i]->AllocateDepthTexture(
 				resolution,
 				name + std::to_wstring(i) + L"_" + std::to_wstring(resolution.x) + L"|" + std::to_wstring(resolution.y),
-				{}, DXGI_FORMAT_D32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+				0,0, DXGI_FORMAT_D32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
 			shadowMap[i]->SetView(ViewType::DSV);
 			shadowMap[i]->SetView(ViewType::SRV);

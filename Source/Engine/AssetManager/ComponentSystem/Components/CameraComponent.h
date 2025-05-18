@@ -71,7 +71,10 @@ public:
 	};
 
 	inline float APRatio() const {
-		return resolution.x / resolution.y;
+		auto res = resolution;
+		res.x = std::max(resolution.x, 1.0f);
+		res.y = std::max(resolution.y, 1.0f);
+		return res.x / res.y;
 	};
 
 	inline void SetResolution(Vector2f aResolution) {

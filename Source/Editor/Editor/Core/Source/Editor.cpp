@@ -62,6 +62,7 @@
 #if PHYSX
 #include <Engine/PersistentSystems/Physics/PhysXInterpeter.h>
 #endif // PHYSX 0
+#include "DirectX\DX12\Graphics\GPU.h"
 
 enum Theme {
 	light,
@@ -474,11 +475,12 @@ void Editor::DoWinProc(Window* window, const MSG& aMessage)
 		}
 	case WM_EXITSIZEMOVE:
 	{
-		RENDERER.ResizeBuffers(window->Resolution());
+		//RENDERER.ResizeBuffers(window->Resolution());
 		for (const auto& viewport : m_Viewports)
 		{
 			viewport->ResolutionUpdate();
 		}
+		GPUInstance.ResizeBackbuffer(window->Resolution());
 		break;
 	}
 

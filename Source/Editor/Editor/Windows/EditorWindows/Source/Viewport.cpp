@@ -103,7 +103,7 @@ void Viewport::Update()
 
 void Viewport::ResolutionUpdate()
 {
-	// m_RenderTarget->GetRawTexture()->AllocateTexture(resolution, "Target1");
+	
 }
 
 Vector2f Viewport::getCursorInWindowPostion() const

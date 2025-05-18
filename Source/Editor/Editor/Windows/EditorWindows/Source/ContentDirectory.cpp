@@ -76,7 +76,12 @@ void ContentDirectory::Node(const int index,const float cellWidth)
 		}
 		if(ImGui::Selectable("Delete"))
 		{
-			std::filesystem::remove(absolute((ENGINE_RESOURCES.Directory() / path)));
+			std::error_code _Ec;
+			if(!std::filesystem::remove(absolute((ENGINE_RESOURCES.Directory() / path)), _Ec))
+			{
+				LOGGER.Err(_Ec.message(), true);
+			}
+
 			IsDirty = true;
 		}
 		ImGui::Separator();

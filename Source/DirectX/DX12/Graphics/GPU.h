@@ -43,9 +43,10 @@ class GPU : public Singleton
 public:
 	friend class CommandList;
 	friend class GpuResource;
-	bool Initialize(HWND aWindowHandle, bool enableDeviceDebug, uint32_t width, uint32_t height);
+	bool Initialize(HWND aWindowHandle, bool enableDeviceDebug,Vector2ui backbufferResolution);
 	bool UnInitialize();
-	void Resize(Vector2ui resolution);
+
+	void ResizeBackbuffer(Vector2ui resolution);
 	void Present(unsigned aSyncInterval = 0);
 
 	void UpdateBufferResource(const CommandList& commandList, ID3D12Resource** pDestinationResource,
@@ -57,11 +58,6 @@ public:
 
 	HeapHandle GetHeapHandle(eHeapTypes type);
 	HeapHandle GetHeapHandle(DirectX::DescriptorPile& pile);
-
-
-
-
-	void ResizeDepthBuffer(unsigned width, unsigned height);
 
 	bool LoadTexture(Texture* outTexture, const std::filesystem::path& aFileName, bool generateMips = true);
 
@@ -98,7 +94,7 @@ public:
 
 	static CommandList& CreateCommandList(Ref<DeviceType> device, Ref<ID3D12CommandAllocator> commandAllocator,
 										  D3D12_COMMAND_LIST_TYPE type);
-	std::shared_ptr<GPUCommandQueue> GetCommandQueue(D3D12_COMMAND_LIST_TYPE type) const;
+	std::shared_ptr<GPUCommandQueue> GetCommandQueue(D3D12_COMMAND_LIST_TYPE type = D3D12_COMMAND_LIST_TYPE_DIRECT) const;
 
 	Ref<ID3D12Fence> CreateFence() const;
 
@@ -145,7 +141,6 @@ public:
 	GPUSupport                      m_DeviceSupport{};
 	D3D12_VIEWPORT                  m_Viewport{};
 	D3D12_RECT                      m_ScissorRect{};
-	std::shared_ptr<Texture>        m_DepthBuffer{};
 	std::shared_ptr<DirectX::GraphicsMemory> m_GraphicsMemory{};
 
 	std::array<std::unique_ptr<DirectX::DescriptorPile>, static_cast<int>(eHeapTypes::HEAP_COUNT)> m_ResourceDescriptors{};

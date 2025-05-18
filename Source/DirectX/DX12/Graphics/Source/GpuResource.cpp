@@ -2,6 +2,7 @@
 
 #include "Graphics/GpuResource.h"
 #include "Graphics/GPU.h"
+#include "Graphics/ResourceStateTracker.h"
 
 using namespace DirectX;
 
@@ -66,7 +67,7 @@ void GpuResource::Reset()
 	m_Resource.Reset();
 	m_ResourceName.clear();
 	m_FormatSupport = {};
-	m_DescriptorHandles.clear();
+	m_DescriptorHandles.clear(); 
 }
 
 bool GpuResource::CheckSrvSupport() const

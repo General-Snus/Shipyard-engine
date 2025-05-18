@@ -21,8 +21,10 @@
 #include <Engine/GraphicsEngine/Shaders/Registers.h>
 #include <Graphics/RootSignature.h>
 
-void PSOCache::InitAllStates()
+void PSOCache::InitAllStates(Vector2ui RenderResolution)
 {
+	m_RenderResolution = RenderResolution;
+
 	{
 		// TODO PACK THIS SUCKER UP
 		constexpr std::array rtvFormats = {
@@ -244,7 +246,7 @@ std::unique_ptr<PSO> PSOCache::CreatePSO(const std::filesystem::path& vertexShad
 	rtvFormats.NumRenderTargets = static_cast<unsigned>(renderTargetFormat.size());
 	for (size_t i = 0; i < renderTargetFormat.size(); i++)
 	{
-		pso->m_renderTargets[i].AllocateTexture({ GPUInstance.m_Width, GPUInstance.m_Height },
+		pso->m_renderTargets[i].AllocateTexture({ m_RenderResolution.x, m_RenderResolution.y },
 												std::format("RenderLayer {}", i), Vector4f(), renderTargetFormat[i],
 												D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET |
 												D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS);

@@ -6,7 +6,9 @@
 #include "DirectX/DX12/Graphics/PSO.h"
 #include "DirectX/DX12/Graphics/RootSignature.h" 
 #include "DirectX/DX12/Graphics/CommandQueue.h" 
-#include "DirectX/DX12/Graphics/CommandList.h" 
+#include "DirectX/DX12/Graphics/CommandList.h"
+#include "DirectX/DX12/Graphics/ResourceStateTracker.h"
+
 #include "Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h"
 #include "Engine/PersistentSystems/Scene.h" 
 #include "Passes/Passes.h" 
@@ -21,15 +23,16 @@
 
 bool Renderer::Initialize(bool enableDeviceDebug)
 {
-	if (!GPUInstance.Initialize(WindowInstance.windowHandler, enableDeviceDebug, WindowInstance.MonitorWidth(), WindowInstance.MonitorHeight()))
+	if (!GPUInstance.Initialize(WindowInstance.windowHandler, enableDeviceDebug,WindowInstance.Resolution()))
 	{
 		LOGGER.Err("Failed to initialize the DX12 GPU!");
 		return false;
 	}
+	renderResolution = WindowInstance.MonitorResolution();
 
 	m_Cache = std::make_shared<PSOCache>();
 	m_Cache->InitRootSignature();
-	m_Cache->InitAllStates();
+	m_Cache->InitAllStates(renderResolution);
 
 	SetupDefaultVariables();
 	Init_brdfLUT();
@@ -113,9 +116,19 @@ const PSOCache& Renderer::GetPSOCache() const
 
 bool Renderer::ResizeBuffers(Vector2ui resolution)
 {
-	GPUInstance.Resize(resolution);
-	//m_Cache->InitAllStates();
-	resolution;
+	renderResolution = resolution;
+	m_Cache->InitAllStates(resolution);
+
+	if (!m_DepthBuffer)
+	{
+		m_DepthBuffer = std::make_unique<Texture>();
+	}
+
+	m_DepthBuffer->Reset(); 
+	m_DepthBuffer->AllocateDepthTexture(resolution, "DepthBuffer", 0.0f, 0u, DXGI_FORMAT_D32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+	m_DepthBuffer->CheckFeatureSupport();
+	m_DepthBuffer->SetView(ViewType::DSV);
+
 	return true; // TODO Makes sense to check if the resolution is supporded by the monitor
 }
 
@@ -133,6 +146,18 @@ bool Renderer::SetupDebugDrawline()
 
 void Renderer::SetupDefaultVariables()
 {
+	if (!m_DepthBuffer)
+	{
+		m_DepthBuffer = std::make_unique<Texture>();
+	}
+
+	ResourceStateTracker::RemoveGlobalResourceState(m_DepthBuffer->Resource().Get());
+	m_DepthBuffer->Reset();
+	GPUInstance.GetCommandQueue()->Flush();
+	m_DepthBuffer->AllocateDepthTexture(renderResolution, "DepthBuffer", 0.0f, 0u, DXGI_FORMAT_D32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+	m_DepthBuffer->CheckFeatureSupport();
+	m_DepthBuffer->SetView(ViewType::DSV);
+
 
 	////Particle
 	ENGINE_RESOURCES.ForceLoadAsset<TextureHolder>(L"Textures/Default/DefaultParticle_P.dds", defaultParticleTexture);
@@ -310,7 +335,7 @@ void Renderer::PrepareBuffers(std::shared_ptr<CommandList> commandList, Viewport
 								   D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	GPU::ClearRTV(*commandList.get(), GPUInstance.GetCurrentRenderTargetView());
-	GPU::ClearDepth(*commandList.get(), GPUInstance.m_DepthBuffer->GetHandle(ViewType::DSV).cpuPtr);
+	GPU::ClearDepth(*commandList.get(), m_DepthBuffer->GetHandle(ViewType::DSV).cpuPtr);
 
 	const auto& rootSignature = m_Cache->m_RootSignature->GetRootSignature();
 	commandList->GetGraphicsCommandList()->SetGraphicsRootSignature(rootSignature.Get());

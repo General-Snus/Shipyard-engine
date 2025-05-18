@@ -227,8 +227,7 @@ void GBuffer::Render(const Renderer& instance,std::shared_ptr<CommandList>& comm
 	}
 
 	commandList->ClearRenderTargets(numTargets, gBufferTextures);
-	commandList->SetRenderTargets(numTargets, gBufferTextures,
-		GPUInstance.m_DepthBuffer.get());
+	commandList->SetRenderTargets(numTargets, gBufferTextures,instance.m_DepthBuffer.get());
 	commandList->SetPipelineState(*gbufferPSO);
 	commandList->SetViewports(gBufferTextures->GetViewPort());
 	commandList->SetScissorRect(gBufferTextures->GetRect());

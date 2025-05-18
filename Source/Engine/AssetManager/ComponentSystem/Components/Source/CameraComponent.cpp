@@ -33,6 +33,8 @@ void Camera::Update()
 	OPTICK_EVENT();
 	localTransform.Update();
 	ViewMatrix();
+	UpdateProjection();
+
 	if(IsInControll)
 	{
 		EditorCameraControlls();
@@ -266,7 +268,7 @@ FrameBuffer Camera::GetFrameBuffer()
 	buffer.cascade_splits = {0,0};
 
 	buffer.render_resolution = Vector2ui(resolution);
-	buffer.display_resolution = WindowInstance.Resolution();
+	buffer.display_resolution = WindowInstance.MonitorResolution();
 
 	buffer.mouse_normalized_coords = Input.GetMousePositionNDC();
 	buffer.delta_time = TimerInstance.getDeltaTime();
@@ -302,11 +304,12 @@ const Transform& Camera::LocalTransform() const
 	}
 	return localTransform;
 }
+
 void Camera::UpdateProjection()
 {
 	fow = std::clamp(fow, 0.1f, 360.f);
 	farfield = std::clamp(farfield, nearField, std::numeric_limits<float>::max());
-	nearField = std::clamp(nearField, 0.000001f, farfield);
+	nearField = std::clamp(nearField, 0.000001f, farfield); 
 
 	if (!isOrtho)
 	{
@@ -320,10 +323,11 @@ void Camera::UpdateProjection()
 			fl = std::clamp(fl, 0.0001f, std::numeric_limits<float>::max());
 		}
 
-		const auto dxMatrix = DirectX::XMMatrixOrthographicLH(orthoRect.x, orthoRect.y, farfield, nearField);
+		const auto dxMatrix = DirectX::XMMatrixOrthographicLH(orthoRect.x* APRatio(), orthoRect.y, farfield, nearField);
 		m_Projection = Matrix(&dxMatrix);
 	}
 }
+
 Vector4f Camera::WoldSpaceToPostProjectionSpace(Vector3f aEntity)
 {
 	Transform& myTransform = this->gameObject().GetComponent<Transform>();

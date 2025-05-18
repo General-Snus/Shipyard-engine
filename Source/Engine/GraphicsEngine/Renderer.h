@@ -32,11 +32,13 @@ public:
 	bool ResizeBuffers(Vector2ui resolution);
 
 	std::shared_ptr<PSOCache> m_Cache;
+	std::shared_ptr<Texture>        m_DepthBuffer{};
 	DebugDrawer               debugDrawer;
 
 	float framerate = 60.f;
 private:
 
+	Vector2ui renderResolution;
 	std::chrono::steady_clock::time_point start;
 	std::chrono::steady_clock::time_point stop;
 	uint32_t* BufferForPicking;

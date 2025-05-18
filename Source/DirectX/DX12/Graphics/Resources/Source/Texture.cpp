@@ -114,23 +114,15 @@ bool Texture::AllocateDepthTexture(const Vector2ui dimentions, const std::filesy
 	myName = name.string();
 	m_Format = Format;
 
-	D3D12_RESOURCE_DESC txtDesc = {};
-	txtDesc.MipLevels = txtDesc.DepthOrArraySize = 1;
-	txtDesc.Format = Format;
-	txtDesc.Width = width;
-	txtDesc.Height = height;
-	txtDesc.SampleDesc.Count = 1;
-	txtDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	txtDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-	txtDesc.Flags = flags;
-
 	const auto heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 	const auto clearValue = CD3DX12_CLEAR_VALUE(Format, depth, stencil);
+	const D3D12_RESOURCE_DESC depthStencilDesc = CD3DX12_RESOURCE_DESC::Tex2D(
+	DXGI_FORMAT_D32_FLOAT, width, height, 1, 0, 1, 0, flags);
 
 	Helpers::ThrowIfFailed(GPUInstance.m_Device->CreateCommittedResource(
-		&heapProps, D3D12_HEAP_FLAG_NONE, &txtDesc, targetResourceState, &clearValue,
+		&heapProps, D3D12_HEAP_FLAG_NONE, &depthStencilDesc, targetResourceState, &clearValue,
 		IID_PPV_ARGS(m_Resource.ReleaseAndGetAddressOf())));
-	m_Resource->SetName(name.wstring().c_str());
+	m_Resource->SetName(name.wstring().c_str()); 
 
 	for (int i = 0; i < 4; i++)
 	{

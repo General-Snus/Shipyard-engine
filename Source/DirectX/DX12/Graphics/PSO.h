@@ -7,7 +7,7 @@
 
 class MeshRenderer;
 class ShipyardShader;
-class PSO; 
+class PSO;
 
 namespace GenerateMips
 {
@@ -38,27 +38,28 @@ public:
 		GenerateMips
 	};
 
-	void                              InitRootSignature();
-	void                              InitAllStates();
-	std::unique_ptr<PSO>&             GetState(ePipelineStateID id);
-	const std::unique_ptr<PSO>&       GetState(ePipelineStateID id) const;
-	std::shared_ptr<GPURootSignature> m_RootSignature;
-	std::shared_ptr<GPURootSignature> m_MipRootSignature;
+	void InitRootSignature();
+	void InitAllStates(Vector2ui RenderResolution);
+
+	std::unique_ptr<PSO>& GetState(ePipelineStateID id);
+	const std::unique_ptr<PSO>& GetState(ePipelineStateID id) const;
 
 	std::unique_ptr<PSO> CreatePSO(
 		const std::filesystem::path& vertexShader, const std::filesystem::path& pixelShader,
 		std::span<const DXGI_FORMAT> renderTargetFormat,
 		DXGI_FORMAT                  depthStencilFormat = DXGI_FORMAT_UNKNOWN,
-		const CD3DX12_BLEND_DESC&    desc = CD3DX12_BLEND_DESC(CD3DX12_DEFAULT()),
+		const CD3DX12_BLEND_DESC& desc = CD3DX12_BLEND_DESC(CD3DX12_DEFAULT()),
 		std::wstring_view            name = std::format(
 			L"LowLifetime PSO from {}",
 			Helpers::string_cast<std::wstring>(std::string(std::source_location::current().function_name()))),
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
+	std::shared_ptr<GPURootSignature> m_RootSignature;
+	std::shared_ptr<GPURootSignature> m_MipRootSignature; 
 private:
 	void InitDefaultSignature();
 	void InitMipmapSignature();
-
+	Vector2ui m_RenderResolution = { 1920,1080 };
 	std::unordered_map<ePipelineStateID, std::unique_ptr<PSO>> pso_map;
 };
 
