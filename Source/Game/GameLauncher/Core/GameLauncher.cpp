@@ -220,8 +220,6 @@ void YourGameLauncher::Update(float delta) {
 	#endif
 }
 
-#pragma optimize( "", on )
-
 void YourGameLauncher::SyncServices(ServiceLocator& serviceLocator) {
 	ServiceLocator::SyncInstances(serviceLocator);
 	InitializeOnNewContext(serviceLocator.GetService<ImGui::ImGuiContextHolder>());

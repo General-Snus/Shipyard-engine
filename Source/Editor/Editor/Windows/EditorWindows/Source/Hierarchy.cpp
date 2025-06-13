@@ -20,6 +20,7 @@ bool localActiveMenu = false;
 bool clickedAnyNode = false;
 
 void Hierarchy::PopupMenu(SY::UUID id) {
+	OPTICK_EVENT();
 	const auto popupId = "##Hierarchy" + static_cast<std::string>(id);
 	if(ImGui::BeginPopupContextItem(popupId.c_str())) {
 		localActiveMenu = true;
@@ -124,6 +125,7 @@ void Hierarchy::PopupMenu(SY::UUID id) {
 }
 
 void Hierarchy::RenderNode(Transform& transform) {
+	OPTICK_EVENT();
 	auto flags = ImGuiTreeNodeFlags_DefaultOpen |
 		ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth;
 
@@ -186,6 +188,7 @@ void Hierarchy::RenderNode(Transform& transform) {
 }
 
 inline void Hierarchy::DragDrop(Transform& transform) {
+	OPTICK_EVENT();
 	if(ImGui::BeginDragDropTarget()) {
 		if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("HIERARCHY_NODE")) {
 			// TODO do we want all selected? We can guarantee that the payload is one of them
@@ -255,6 +258,7 @@ void Hierarchy::RenderImGUi() {
 	static std::vector<localPair> sortedList;
 
 	for(const auto& [id,data] : gObjList) {
+		OPTICK_EVENT("ObjectIteration");
 		const auto& transform = Scene::activeManager().GetComponent<Transform>(id);
 		if(transform.HasParent() || !data.IsVisibleInHierarcy) // We let parent handle the iterating over the children
 		{
@@ -265,6 +269,7 @@ void Hierarchy::RenderImGUi() {
 	}
 
 	if(!keyTerm.empty()) {
+		OPTICK_EVENT("Sorting");
 		// sort the list
 		std::ranges::sort(sortedList,[&keyTerm](const localPair& a,const localPair& b) {
 			return Math::Levenshtein::distance(a.first,keyTerm) < Math::Levenshtein::distance(b.first,keyTerm);

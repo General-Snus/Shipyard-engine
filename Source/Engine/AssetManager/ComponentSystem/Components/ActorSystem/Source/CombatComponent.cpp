@@ -82,7 +82,7 @@ void CombatComponent::FireProjectile()
 		collider;
 	}
 }
-#pragma optimize("", on)
+
 
 void CombatComponent::Healing()
 {

@@ -387,13 +387,13 @@ bool Editor::Initialize(HWND aHandle)
 	ImGuiTexInspect::Init();
 	ImGuiTexInspect::CreateContext();
 
-	ImGuiIO& io = ImGui::GetIO(); 
+	ImGuiIO& io = ImGui::GetIO();
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; 
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_DpiEnableScaleViewports;
-	io.ConfigWindowsMoveFromTitleBarOnly =	true;
+	io.ConfigWindowsMoveFromTitleBarOnly = true;
 	io.ConfigDockingWithShift = true;
 	io.ConfigDockingTransparentPayload = true;
 	io.ConfigDockingAlwaysTabBar = true;
@@ -532,6 +532,18 @@ void Editor::UpdateImGui()
 	ImGuizmo::BeginFrame();
 
 	ImGui::DockSpaceOverViewport();
+
+	g_EditorWindows.erase(
+	std::remove_if(
+		g_EditorWindows.begin(),
+		g_EditorWindows.end(),
+		[](const auto& window)
+	{
+		return !window || !window->m_KeepWindow;
+	}),
+	g_EditorWindows.end()
+	);
+
 	TopBar();
 
 	if (Input.IsKeyHeld(Keys::CONTROL) && Input.IsKeyPressed(Keys::Z))
@@ -871,16 +883,6 @@ void Editor::TopBar()
 		}
 	}
 
-	g_EditorWindows.erase(
-	std::remove_if(
-		g_EditorWindows.begin(),
-		g_EditorWindows.end(),
-		[](const auto& window)
-	{
-		return !window || !window->m_KeepWindow;
-	}),
-	g_EditorWindows.end()
-	);
 
 	//const auto [first,last] =
 	//	std::ranges::remove_if(g_EditorWindows.begin(),g_EditorWindows.end(),

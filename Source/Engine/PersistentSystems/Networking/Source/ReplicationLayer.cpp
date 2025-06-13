@@ -17,28 +17,27 @@
 #include "Tools/Utilities/Color.h"
 #include "Tools\Utilities\Game\Timer.h"
 
-
-#pragma optimize( "", off ) 
-void ReplicationLayer::fixedNetworkUpdate(NetworkRunner & runner)
+void ReplicationLayer::fixedNetworkUpdate(NetworkRunner& runner)
 {
 	OPTICK_EVENT();
 
-	if(runner.IsServer)
+	if (runner.IsServer)
 	{
 		server_fixedNetworkUpdate(runner);
-	} else
+	}
+	else
 	{
 		client_ReadIncoming(runner);
 		client_fixedNetworkUpdate(runner);
 	}
 }
 
-void ReplicationLayer::server_fixedNetworkUpdate(NetworkRunner & runner)
+void ReplicationLayer::server_fixedNetworkUpdate(NetworkRunner& runner)
 {
 	OPTICK_EVENT();
 
 	auto now = std::chrono::steady_clock::now();
-	for(auto& networkedTransform : Scene::activeManager().GetAllComponents<NetworkTransform>())
+	for (auto& networkedTransform : Scene::activeManager().GetAllComponents<NetworkTransform>())
 	{
 		auto& transform = networkedTransform.transform();
 
@@ -47,7 +46,7 @@ void ReplicationLayer::server_fixedNetworkUpdate(NetworkRunner & runner)
 		//}
 
 		networkedTransform.myPosition = transform.myPosition;
-		networkedTransform.myQuaternion= transform.myQuaternion;
+		networkedTransform.myQuaternion = transform.myQuaternion;
 		networkedTransform.myScale = transform.myScale;
 
 		TransformSyncData data{
@@ -59,11 +58,11 @@ void ReplicationLayer::server_fixedNetworkUpdate(NetworkRunner & runner)
 
 		TransformSyncMessage composedTransformUpdate;
 		composedTransformUpdate.SetMessage(data);
-		runner.Broadcast(composedTransformUpdate,NetworkConnection::Protocol::UDP);
+		runner.Broadcast(composedTransformUpdate, NetworkConnection::Protocol::UDP);
 	}
 }
 
-void ReplicationLayer::client_fixedNetworkUpdate(const NetworkRunner & runner) const
+void ReplicationLayer::client_fixedNetworkUpdate(const NetworkRunner& runner) const
 {
 	OPTICK_EVENT();
 
@@ -71,9 +70,9 @@ void ReplicationLayer::client_fixedNetworkUpdate(const NetworkRunner & runner) c
 	auto now = std::chrono::high_resolution_clock::now(); //switch out to server time
 
 	//Check up to date idToObjectMap
-	for(const auto& networkedTransform : Scene::activeManager().GetAllComponents<NetworkTransform>())
+	for (const auto& networkedTransform : Scene::activeManager().GetAllComponents<NetworkTransform>())
 	{
-		if(!idToObjectMap.contains(networkedTransform.GetServerID()))
+		if (!idToObjectMap.contains(networkedTransform.GetServerID()))
 		{
 			Scene::activeManager().DeleteGameObject(networkedTransform.gameObject());
 			continue;
@@ -81,7 +80,7 @@ void ReplicationLayer::client_fixedNetworkUpdate(const NetworkRunner & runner) c
 	}
 
 	//Interpolationsystem
-	for(auto& networkedTransform : Scene::activeManager().GetAllComponents<NetworkTransform>())
+	for (auto& networkedTransform : Scene::activeManager().GetAllComponents<NetworkTransform>())
 	{
 		auto& transform = networkedTransform.transform();
 
@@ -99,18 +98,18 @@ void ReplicationLayer::client_fixedNetworkUpdate(const NetworkRunner & runner) c
 	}
 }
 
-void ReplicationLayer::client_ReadIncoming(const NetworkRunner & runner)
+void ReplicationLayer::client_ReadIncoming(const NetworkRunner& runner)
 {
 	OPTICK_EVENT();
 
-	if(runner.messagesMap.contains(DestroyObjectMessage::type))
+	if (runner.messagesMap.contains(DestroyObjectMessage::type))
 	{
-		for(auto& message : runner.messagesMap.at(DestroyObjectMessage::type))
+		for (auto& message : runner.messagesMap.at(DestroyObjectMessage::type))
 		{
-			auto msg =std::bit_cast<DestroyObjectMessage>(message.message);
+			auto msg = std::bit_cast<DestroyObjectMessage>(message.message);
 			auto id = msg.ReadMessage();
 
-			if(idToObjectMap.contains(id))
+			if (idToObjectMap.contains(id))
 			{
 				Scene::activeManager().DeleteGameObject(idToObjectMap.at(id).gameObject());
 				idToObjectMap.erase(id);
@@ -118,18 +117,19 @@ void ReplicationLayer::client_ReadIncoming(const NetworkRunner & runner)
 		}
 	}
 
-	if(runner.messagesMap.contains(CreateObjectMessage::type))
+	if (runner.messagesMap.contains(CreateObjectMessage::type))
 	{
-		for(auto& message : runner.messagesMap.at(CreateObjectMessage::type))
+		for (auto& message : runner.messagesMap.at(CreateObjectMessage::type))
 		{
-			auto msg =std::bit_cast<CreateObjectMessage>(message.message);
+			auto msg = std::bit_cast<CreateObjectMessage>(message.message);
 			auto messageContent = msg.ReadMessage();
 
-			if(!idToObjectMap.contains(messageContent.uniqueComponentId))
+			if (!idToObjectMap.contains(messageContent.uniqueComponentId))
 			{
 				GameObject ball = GameObject::Create("Ball");
 				auto& renderer = ball.AddComponent<MeshRenderer>("Models/BallEradicationGame/Sphere.fbx");
-				if(const auto mat = Resources.ForceLoad<Material>("TreeMaterial")) {
+				if (const auto mat = Resources.ForceLoad<Material>("TreeMaterial"))
+				{
 					mat->SetColor(ColorManagerInstance.GetColor("Red"));
 					renderer.SetMaterial(mat);
 				}
@@ -137,19 +137,19 @@ void ReplicationLayer::client_ReadIncoming(const NetworkRunner & runner)
 				ball.AddComponent<NetworkObject>(messageContent.uniqueComponentId);
 				ball.AddComponent<NetworkTransform>();
 
-				idToObjectMap.emplace(messageContent.uniqueComponentId,ball.GetComponent<NetworkObject>());
+				idToObjectMap.emplace(messageContent.uniqueComponentId, ball.GetComponent<NetworkObject>());
 			}
 		}
 	}
 
-	if(runner.messagesMap.contains(TransformSyncMessage::type))
+	if (runner.messagesMap.contains(TransformSyncMessage::type))
 	{
-		for(auto& transformMessage : runner.messagesMap.at(TransformSyncMessage::type))
+		for (auto& transformMessage : runner.messagesMap.at(TransformSyncMessage::type))
 		{
-			auto msg =std::bit_cast<TransformSyncMessage>(transformMessage.message);
+			auto msg = std::bit_cast<TransformSyncMessage>(transformMessage.message);
 			TransformSyncData messageContent = msg.ReadMessage();
 
-			if(!idToObjectMap.contains(messageContent.uniqueComponentId))
+			if (!idToObjectMap.contains(messageContent.uniqueComponentId))
 			{
 				LOGGER.Warn("Received transform for not yet created object");
 				continue;
@@ -163,55 +163,51 @@ void ReplicationLayer::client_ReadIncoming(const NetworkRunner & runner)
 			netTransform.myScale = messageContent.myScale;
 		}
 	}
-
-
 }
 
-#pragma optimize( "", on )
-
-void ReplicationLayer::receiveMessage(const NetMessage &)
+void ReplicationLayer::receiveMessage(const NetMessage&)
 {
 
 }
 
-bool ReplicationLayer::registerObject(const NetworkRunner & runner,const NetworkObject & object)
+bool ReplicationLayer::registerObject(const NetworkRunner& runner, const NetworkObject& object)
 {
 	OPTICK_EVENT();
 
 	assert(runner.IsServer);
 
-	if(!idToObjectMap.contains(object.GetServerID()))
+	if (!idToObjectMap.contains(object.GetServerID()))
 	{
 		//All registered objects have been sent to the clients 
 		GameobjectInformation data;
 
 		data.uniqueComponentId = object.GetServerID();
-		for(const auto& cmp : object.gameObject().GetAllComponents())
+		for (const auto& cmp : object.gameObject().GetAllComponents())
 		{
 			data.listOfComponentsNames.emplace_back(cmp->GetTypeInfo().Name());
 		}
 
 		CreateObjectMessage createObjectMessage;
 		createObjectMessage.SetMessage(data);
-		runner.Broadcast(createObjectMessage,NetworkConnection::Protocol::TCP);
-		idToObjectMap.emplace(object.GetServerID(),object);
+		runner.Broadcast(createObjectMessage, NetworkConnection::Protocol::TCP);
+		idToObjectMap.emplace(object.GetServerID(), object);
 		return true;
 	}
 
 	return false;
 }
 
-bool ReplicationLayer::unRegisterObject(const NetworkRunner & runner,const NetworkObject & object)
+bool ReplicationLayer::unRegisterObject(const NetworkRunner& runner, const NetworkObject& object)
 {
 	OPTICK_EVENT();
 	assert(runner.IsServer);
 
-	if(idToObjectMap.contains(object.GetServerID()))
+	if (idToObjectMap.contains(object.GetServerID()))
 	{
 		//All registered objects have been sent to the clients  
 		DestroyObjectMessage createObjectMessage;
 		createObjectMessage.SetMessage(object.GetServerID());
-		runner.Broadcast(createObjectMessage,NetworkConnection::Protocol::TCP);
+		runner.Broadcast(createObjectMessage, NetworkConnection::Protocol::TCP);
 		idToObjectMap.erase(object.GetServerID());
 		return true;
 	}

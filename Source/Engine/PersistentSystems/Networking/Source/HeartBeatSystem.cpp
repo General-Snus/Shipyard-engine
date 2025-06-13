@@ -4,8 +4,6 @@
 #include "Networking/NetworkRunner.h"
 #include "Tools\Utilities\Game\Timer.h"
 
-#pragma optimize( "", off ) 
-
 bool HeartBeatSystem::RecieveMessage(NetworkRunner& runner, const  RecievedMessage& msg)
 {
 	if (msg.message.myType != eNetMessageType::HearthBeat)
@@ -87,8 +85,6 @@ void HeartBeatSystem::Update(NetworkRunner& runner)
 		//Do throw away client here if respond time is to long
 	}
 }
-#pragma optimize( "", on )
-
 
 float  HeartBeatSystem::rtt() const
 {

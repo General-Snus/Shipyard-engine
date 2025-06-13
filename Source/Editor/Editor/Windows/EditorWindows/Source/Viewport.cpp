@@ -276,7 +276,7 @@ void Viewport::RenderImGUi()
 				}
 			}
 
-			RenderToolbar();
+			//RenderToolbar();
 		}
 	}
 	else

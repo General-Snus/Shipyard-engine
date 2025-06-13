@@ -57,7 +57,7 @@ void Camera::EditorCameraControlls()
 
 	const float           aTimeDelta = TimerInstance.getDeltaTime();
 	Vector3f        mdf = cameraSpeed;
-	float           rotationSpeed = 100000;
+	float           rotationSpeed = 10000;
 	constexpr float mousePower = 500.f;
 
 	if(Input.IsKeyHeld(Keys::SHIFT))

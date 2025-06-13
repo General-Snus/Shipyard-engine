@@ -12,7 +12,6 @@
 #undef GetMessage
 #undef GetMessageW
 
-#pragma optimize( "", off ) 
 bool InitializeWinsock()
 {
 	WSADATA wsaData;
@@ -685,5 +684,3 @@ void NetworkRunner::moveMessageMapToRead()
 		}
 	}
 }
-
-#pragma optimize( "", on )

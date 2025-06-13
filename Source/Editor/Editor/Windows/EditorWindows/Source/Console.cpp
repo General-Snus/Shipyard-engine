@@ -68,6 +68,7 @@ void Console::RenderImGUi() {
 			int index = 0;
 			std::scoped_lock lock(LOGGER.mutexLock());
 			for(const auto& logEntity : buffer.LoggedMessages) {
+				OPTICK_EVENT("logSingleMessage");
 				const auto& [type,message,trace] = logEntity;
 				index ++;
 

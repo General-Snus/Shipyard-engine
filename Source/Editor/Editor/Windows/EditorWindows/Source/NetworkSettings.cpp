@@ -9,8 +9,6 @@
 
 NetworkSettings::NetworkSettings() {}
 
-#pragma optimize( "", off ) 
-
 void NetworkSettings::RenderImGUi()
 {
 	ImGui::Begin(std::format("Network settings##{}", uniqueID).c_str(), &m_KeepWindow);
@@ -177,5 +175,3 @@ void NetworkSettings::DrawPingPlot(float newPing)
 	rttTime[index] = newPing;
 	ImGui::PlotLines("Ping", &rttTime[0], size, index);
 }
-#pragma optimize( "", on )
-
