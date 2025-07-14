@@ -30,15 +30,19 @@ void ReplicationLayer::fixedNetworkUpdate(NetworkRunner& runner)
 		client_ReadIncoming(runner);
 		client_fixedNetworkUpdate(runner);
 	}
+	spacialFrequencyCulling.Draw(RENDERER.debugDrawer);
 }
 
 void ReplicationLayer::server_fixedNetworkUpdate(NetworkRunner& runner)
 {
 	OPTICK_EVENT();
-
-	auto now = std::chrono::steady_clock::now();
 	for (auto& networkedTransform : Scene::activeManager().GetAllComponents<NetworkTransform>())
 	{
+		if (!networkedTransform.ShouldSync(runner))
+		{
+			continue;
+		}
+
 		auto& transform = networkedTransform.transform();
 
 		//if(!transform.GetIsDirty()) {
@@ -67,7 +71,7 @@ void ReplicationLayer::client_fixedNetworkUpdate(const NetworkRunner& runner) co
 	OPTICK_EVENT();
 
 	runner;
-	auto now = std::chrono::high_resolution_clock::now(); //switch out to server time
+	auto now = runner.serverTime(); //switch out to server time
 
 	//Check up to date idToObjectMap
 	for (const auto& networkedTransform : Scene::activeManager().GetAllComponents<NetworkTransform>())
@@ -85,7 +89,7 @@ void ReplicationLayer::client_fixedNetworkUpdate(const NetworkRunner& runner) co
 		auto& transform = networkedTransform.transform();
 
 		//networkedTransform.translationInterpolation is in unit(meter) per second
-		const auto timeDifference = now - networkedTransform.updatePoint; // Time 
+		const auto timeDifference = now - networkedTransform.GetLastSyncTime(); // Time 
 		networkedTransform.translationInterpolation = networkedTransform.myPosition - transform.myPosition; // Distance
 
 		//Distance/Time = velocity
@@ -157,7 +161,7 @@ void ReplicationLayer::client_ReadIncoming(const NetworkRunner& runner)
 
 			auto& netTransform = idToObjectMap.at(messageContent.uniqueComponentId).GetComponent<NetworkTransform>();
 
-			netTransform.updatePoint = msg.TimeSent();
+			netTransform.Synced(msg.TimeSent());
 			netTransform.myPosition = messageContent.myPosition;
 			netTransform.myQuaternion = messageContent.myQuaternion;
 			netTransform.myScale = messageContent.myScale;
@@ -191,6 +195,18 @@ bool ReplicationLayer::registerObject(const NetworkRunner& runner, const Network
 		createObjectMessage.SetMessage(data);
 		runner.Broadcast(createObjectMessage, NetworkConnection::Protocol::TCP);
 		idToObjectMap.emplace(object.GetServerID(), object);
+
+		auto position = new cullerPosition{
+			 object.GetServerID(),
+			  60.0f,
+			  0.0f
+		};
+		auto gridObject = new GridObject2D<cullerPosition>(position);
+		gridObject->border = Border2D(
+			Vector2f(object.transform().GetPosition().x, object.transform().GetPosition().z),
+			Vector2f(1.0f, 1.0f));
+		gridObject->color = ColorManagerInstance.GetColor("Green");
+		spacialFrequencyCulling.AddObject(gridObject);
 		return true;
 	}
 

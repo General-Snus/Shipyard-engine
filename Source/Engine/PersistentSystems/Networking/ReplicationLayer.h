@@ -1,9 +1,9 @@
 #pragma once
 #include "Engine/AssetManager/ComponentSystem/Components/Network/NetworkSync.h"
-#include <unordered_map>
-#include <utility>
 #include "NetMessage/NetMessage.h"
 #include "NetworkStructs.h"
+#include <Tools/Utilities/System/Grid.h>
+#include <utility>
 
 class NetworkRunner;
 
@@ -11,7 +11,7 @@ class ReplicationLayer
 { 
 	using IdToObject = std::pair<NetworkedId,NetworkObject>;
 public:
-
+	ReplicationLayer() = default;
 	//Fixed network update contains the component updates in the server
 	void fixedNetworkUpdate(NetworkRunner& runner);
 	void server_fixedNetworkUpdate(NetworkRunner& runner); 
@@ -29,8 +29,20 @@ public:
 	bool registerObject(const NetworkRunner & runner,const NetworkObject & object);
 	bool unRegisterObject(const NetworkRunner & runner,const NetworkObject & object);
 
+	void Close(); 
 
-	void Close();
+	struct cullerPosition
+	{
+		NetworkedId id;
+		float frequencyInverse = 60.0f;
+		float timeSinceLastUpdate = 0.0f;
+		inline float GetFrequency() const
+		{
+			return 1.0f / frequencyInverse;
+		}
+	};
+
+	Grid2D<cullerPosition> spacialFrequencyCulling;
 
 	//Suboptimal solution
 	std::unordered_map<NetworkedId,NetworkObject> idToObjectMap;

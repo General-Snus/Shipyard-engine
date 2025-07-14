@@ -412,6 +412,11 @@ const Remote* NetworkRunner::IdToRemote(NetworkedId id) const
 	return nullptr;
 }
 
+ServerTimePoint NetworkRunner::serverTime() const
+{
+	return ServerClock::now();
+} 
+
 //The data uplink as server is the combined send on all remotes and its udp socket
 //The data uplink of a client is just the runners send of tcp and udp socket
 float NetworkRunner::uplinkRate()

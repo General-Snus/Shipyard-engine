@@ -20,10 +20,11 @@
 #include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
 #include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h> 
 #include <Tools/ImGui/imgui_notify.h>
+#include "Editor\Editor\Core\Editor.h"
 
 bool Renderer::Initialize(bool enableDeviceDebug)
 {
-	if (!GPUInstance.Initialize(WindowInstance.windowHandler, enableDeviceDebug,WindowInstance.Resolution()))
+	if (!GPUInstance.Initialize(WindowInstance.windowHandler, enableDeviceDebug, WindowInstance.Resolution()))
 	{
 		LOGGER.Err("Failed to initialize the DX12 GPU!");
 		return false;
@@ -124,7 +125,7 @@ bool Renderer::ResizeBuffers(Vector2ui resolution)
 		m_DepthBuffer = std::make_unique<Texture>();
 	}
 
-	m_DepthBuffer->Reset(); 
+	m_DepthBuffer->Reset();
 	m_DepthBuffer->AllocateDepthTexture(resolution, "DepthBuffer", 0.0f, 0u, DXGI_FORMAT_D32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 	m_DepthBuffer->CheckFeatureSupport();
 	m_DepthBuffer->SetView(ViewType::DSV);
@@ -300,10 +301,18 @@ uint64_t Renderer::RenderFrame(Viewport& renderViewPort, GameObjectManager& scen
 		const auto frameBuffer = renderViewPort.GetCamera().GetFrameBuffer();
 		commandList->AllocateBuffer(eRootBindings::frameBuffer, frameBuffer);
 
-
-		GBuffer::Render(*this, commandList, scene); 
+		GBuffer::Render(*this, commandList, scene);
 		EnvironmentLightPass(commandList);
-		ToneMapperPass(commandList, renderViewPort.GetTarget());
+
+
+		if (EDITOR_INSTANCE.GetIsGUIActive())
+		{
+			ToneMapperPass(commandList, renderViewPort.GetTarget());
+		}
+		else
+		{
+			ToneMapperPass(commandList, &GPUInstance.GetCurrentBackBuffer());
+		}
 
 		if (!renderViewPort.IsGameViewport())
 		{
@@ -451,6 +460,8 @@ void Renderer::ToneMapperPass(std::shared_ptr<CommandList> commandList, Texture*
 
 void Renderer::ImGuiPass()
 {
+	if (!EDITOR_INSTANCE.GetIsGUIActive()) { return; }
+
 	const auto commandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 	const auto commandList = commandQueue->GetCommandList();
 

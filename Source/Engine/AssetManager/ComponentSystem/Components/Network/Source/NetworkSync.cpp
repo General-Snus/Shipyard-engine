@@ -3,10 +3,12 @@
 #include "../NetworkSync.h"
 #include "Engine/PersistentSystems/Networking/NetworkRunner.h"
 
-NetworkObject::NetworkObject(const SY::UUID anOwnerId,GameObjectManager* aManager): Component(anOwnerId,aManager)
-{}
-NetworkObject::NetworkObject(const SY::UUID anOwnerId,GameObjectManager* aManager,NetworkedId id): Component(anOwnerId,aManager),uniqueNetId(id)
-{}
+NetworkObject::NetworkObject(const SY::UUID anOwnerId, GameObjectManager* aManager) : Component(anOwnerId, aManager)
+{
+}
+NetworkObject::NetworkObject(const SY::UUID anOwnerId, GameObjectManager* aManager, NetworkedId id) : Component(anOwnerId, aManager), uniqueNetId(id)
+{
+}
 
 void NetworkObject::Init()
 {
@@ -20,13 +22,25 @@ void NetworkObject::Destroy()
 
 bool NetworkObject::InspectorView()
 {
-	if(!Component::InspectorView())
+	if (!Component::InspectorView())
 	{
 		return false;
 	}
 	Reflect<NetworkObject>();
-	ImGui::InputText("Unique id",uniqueNetId.id.String().data(),uniqueNetId.id.String().size(),ImGuiInputTextFlags_ReadOnly);
+	ImGui::InputText("Unique id", uniqueNetId.id.String().data(), uniqueNetId.id.String().size(), ImGuiInputTextFlags_ReadOnly);
 	return true;
+}
+
+bool NetworkObject::ShouldSync(const NetworkRunner& runner) const
+{
+	auto diff = updatePoint - runner.serverTime();
+	float secondSinceLastUpdate = (float)std::chrono::duration_cast<std::chrono::microseconds>(diff).count()*.001f;
+	return secondSinceLastUpdate > SyncFrequencyInverse();
+}
+
+void NetworkObject::Synced(const ServerTimePoint& time)
+{
+	updatePoint = time;
 }
 
 void NetworkObject::DisperseNetMessage(const NetMessage& netMessageForIndividualobject)
@@ -40,25 +54,27 @@ void NetworkObject::DisperseNetMessage(const NetMessage& netMessageForIndividual
 
 }
 
-NetworkTransform::NetworkTransform(const SY::UUID anOwnerId,GameObjectManager* aManager): Component(anOwnerId,aManager)
-{}
+NetworkTransform::NetworkTransform(const SY::UUID anOwnerId, GameObjectManager* aManager) : NetworkObject(anOwnerId, aManager)
+{
+}
 
 bool NetworkTransform::InspectorView()
 {
-	if(!Component::InspectorView())
+	if (!Component::InspectorView())
 	{
 		return false;
 	}
 	Reflect<NetworkTransform>();
-	ImGui::InputText("Unique id",uniqueNetId.id.String().data(),uniqueNetId.id.String().size(),ImGuiInputTextFlags_ReadOnly);
+	ImGui::InputText("Unique id", uniqueNetId.id.String().data(), uniqueNetId.id.String().size(), ImGuiInputTextFlags_ReadOnly);
 	return true;
 }
 
 void NetworkTransform::Init()
 {
-	if(auto* netObject =TryGetComponent<NetworkObject>())
+	if (auto* netObject = TryGetComponent<NetworkObject>())
 	{
-		//Rather out of place here, need a good place for prerequisite checks
+		//Rather out of place here, need a good place for prerequisite checks 
+		this->syncFrequency = netObject->syncFrequency;
 		this->uniqueNetId = netObject->GetServerID();
 	}
 }

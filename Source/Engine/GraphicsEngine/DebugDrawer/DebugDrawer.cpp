@@ -13,6 +13,7 @@
 #include "DirectX/DX12/Graphics/Resources/IndexBuffer.h"
 #include "DirectX/DX12/Graphics/Resources/VertexBuffer.h"
 
+#include <Tools/Utilities/LinearAlgebra/Plane.hpp>
 
 
 bool DebugDrawer::Initialize()
@@ -254,6 +255,37 @@ DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugBox(const Vector3f& aMin,const
 	primitive.Indices.push_back(7);
 
 	return CreatePrimitiveHandle(primitive,lifetime);
+}
+  //todo this is shit and is 2d only add normal fucker
+DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugQuad(const Vector3f& center, const Vector3f& halfSize,
+													  const Vector3f& aColor, const float   lifetime)
+{
+	Primitive primitive{};
+	primitive.Vertices.reserve(8);
+
+	const Vector3f bottomLeft = center - halfSize;
+	const Vector3f topRight = center + halfSize;
+	Vector3f vertex = bottomLeft; 
+
+	primitive.Vertices.emplace_back(vertex, Vector4f(aColor, 1.0f)); // bottom left
+
+	vertex.x = topRight.x;
+	primitive.Vertices.emplace_back(vertex, Vector4f(aColor, 1.0f)); // bottom right
+
+	vertex.z = topRight.z;
+	primitive.Vertices.emplace_back(vertex, Vector4f(aColor, 1.0f)); // top right
+
+	vertex.x = bottomLeft.x;
+	primitive.Vertices.emplace_back(vertex, Vector4f(aColor, 1.0f)); // top left 
+
+	primitive.Indices.reserve(8);
+	primitive.Indices.push_back(0);
+	primitive.Indices.push_back(1);
+	primitive.Indices.push_back(2);
+	primitive.Indices.push_back(3);
+	primitive.Indices.push_back(0); 
+
+	return CreatePrimitiveHandle(primitive, lifetime);
 }
 
 //DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugCircle(const Vector3f & aCenter, const float aRadius, const Vector3f & aColor)

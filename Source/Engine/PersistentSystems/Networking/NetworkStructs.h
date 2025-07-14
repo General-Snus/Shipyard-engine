@@ -10,6 +10,10 @@ struct SessionConfiguration;
 struct sockaddr;
 struct sockaddr_in;
 
+
+using ServerClock = std::chrono::high_resolution_clock;
+using ServerTimePoint = ServerClock::time_point;
+
 struct NetworkedId {
 	static NetworkedId Generate();
 

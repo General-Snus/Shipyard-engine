@@ -8,25 +8,30 @@
 #include <Engine/PersistentSystems/Physics/PhysXInterpeter.h>
 #include "Engine\PersistentSystems\System\SystemBase.h"
 #include "Engine\PersistentSystems\Networking\NetworkRunner.h"
+#include "Tools\Utilities\Input\Input.hpp"
 
 GameState::GameState() = default;
 
-void GameState::Intialize(std::filesystem::path aPathToProjectFolder) {
+void GameState::Intialize(std::filesystem::path aPathToProjectFolder)
+{
 	pathToProjectFolder = aPathToProjectFolder;
 	m_EditorBackupScene = EDITOR_INSTANCE.GetActiveScene();
 }
 
-bool GameState::AttemptDllLoad() {
+bool GameState::AttemptDllLoad()
+{
 	OPTICK_EVENT();
 	dllHandle = LoadLibrary(L"GameLauncher.dll");
-	if(!dllHandle) {
+	if (!dllHandle)
+	{
 		LOGGER.Err("Failed to load DLL!");
 		return false;
 	}
 
-	dllFunction = reinterpret_cast<EntryPoint>(GetProcAddress(static_cast<HMODULE>(dllHandle),"entrypointMain"));
-	dllFunctionExit = reinterpret_cast<ExitPoint>(GetProcAddress(static_cast<HMODULE>(dllHandle),"exitPoint"));
-	if(!(dllFunction && dllFunctionExit)) {
+	dllFunction = reinterpret_cast<EntryPoint>(GetProcAddress(static_cast<HMODULE>(dllHandle), "entrypointMain"));
+	dllFunctionExit = reinterpret_cast<ExitPoint>(GetProcAddress(static_cast<HMODULE>(dllHandle), "exitPoint"));
+	if (!(dllFunction && dllFunctionExit))
+	{
 		LOGGER.Err("Failed to get DLL function !");
 		FreeLibrary(static_cast<HMODULE>(dllHandle));
 		return false;
@@ -36,9 +41,11 @@ bool GameState::AttemptDllLoad() {
 	return true;
 }
 
-void GameState::StartPlaySession() {
+void GameState::StartPlaySession()
+{
 	OPTICK_EVENT();
-	if(IsLoading || IsPlaying || IsPaused) {
+	if (IsLoading || IsPlaying || IsPaused)
+	{
 		IsPaused = false;
 		IsPlaying = true;
 		return;
@@ -63,28 +70,35 @@ void GameState::StartPlaySession() {
 	IsPlaying = true;
 }
 
-void GameState::EndPlaySession() {
+void GameState::EndPlaySession()
+{
 	OPTICK_EVENT();
 	Runner.Close();
 
 	EDITOR_INSTANCE.SetActiveScene(m_EditorBackupScene);
-	if(m_GameScene) {
-		m_GameScene->unload(); 
+	if (m_GameScene)
+	{
+		m_GameScene->unload();
 	}
 
-	if(dllFunction) {
+	if (dllFunction)
+	{
 		m_GameScene = std::make_shared<Scene>("GameScene");
-		try {
+		try
+		{
 			LOGGER.Err("Failed to get DLL function !");
 			dllFunction = nullptr;
-		} catch(const std::exception& e) {
-			LOGGER.Critical(e,0);
+		}
+		catch (const std::exception& e)
+		{
+			LOGGER.Critical(e, 0);
 		}
 	}
 
 
 	Shipyard_PhysXInstance.resetScene();
-	if(!IsPlaying) {
+	if (!IsPlaying)
+	{
 		return;
 	}
 
@@ -92,53 +106,84 @@ void GameState::EndPlaySession() {
 	IsPaused = false;
 }
 
-void GameState::PausePlaySession() {
+void GameState::PausePlaySession()
+{
 	IsPaused = true;
 }
 
-void GameState::Init() {
+void GameState::Init()
+{
 	OPTICK_EVENT();
-	try {
-		if(m_GameLauncher) {
+	try
+	{
+		if (m_GameLauncher)
+		{
 			m_GameLauncher->SyncServices(ServiceLocator::Instance());
 			m_GameLauncher->Init();
 		}
-	} catch(const std::exception& e) {
+	}
+	catch (const std::exception& e)
+	{
 		//IsLoading = false;
 		//IsPlaying = false;
 		LOGGER.Err(e.what());
 	}
 }
 
-void GameState::Start() {
+void GameState::Start()
+{
 	OPTICK_EVENT();
-	try {
-		if(m_GameLauncher) {
+	try
+	{
+		if (m_GameLauncher)
+		{
 			m_GameLauncher->Start();
 		}
-	} catch(const std::exception& e) {
+	}
+	catch (const std::exception& e)
+	{
 		//IsLoading = false;
 		//IsPlaying = false;
 		LOGGER.Err(e.what());
 	}
 }
 
-void GameState::Update(float delta) {
+void GameState::Update(float delta)
+{
 	OPTICK_EVENT();
-	try {
-		if(IsLoading) {
+
+	if (Input.IsKeyPressed(Keys::F5))
+	{
+		if (IsPlaying)
+		{
+			EndPlaySession();
+		}
+		else
+		{
+			StartPlaySession();
+		}
+		return;
+	}
+
+	try
+	{
+		if (IsLoading)
+		{
 			IsLoading = false;
 			Init();
 			Start();
 		}
 
-		if(m_GameLauncher && !IsPaused && IsPlaying) { 
+		if (m_GameLauncher && !IsPaused && IsPlaying)
+		{
 			Runner.Update();
 			Scene::activeManager().Update();
 			SystemCollection::UpdateSystems(delta);
 			m_GameLauncher->Update(delta);
 		}
-	} catch(const std::exception& e) {
+	}
+	catch (const std::exception& e)
+	{
 		//IsLoading = false;
 		//IsPlaying = false;
 		LOGGER.Err(e.what());

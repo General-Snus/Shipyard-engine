@@ -422,7 +422,7 @@ bool Editor::Initialize(HWND aHandle)
 	Scene::activeManager().SetUpdatePriority<cPhysics_Kinematic>(ComponentManagerBase::UpdatePriority::Physics);
 	Scene::activeManager().SetUpdatePriority<cPhysXDynamicBody>(ComponentManagerBase::UpdatePriority::Physics);
 	// Force no write to thread after this?
-	WorldGraph::InitializeWorld();
+	//WorldGraph::InitializeWorld();
 
 	m_Callbacks[EditorCallback::ObjectSelected] = Event();
 	m_Callbacks[EditorCallback::SceneChange] = Event();
@@ -519,6 +519,12 @@ int Editor::Run()
 		Update();
 		Render();
 	}
+
+	if (Input.IsKeyPressed(Keys::F7))
+	{
+		SetIsGUIActive(!GetIsGUIActive());
+	}
+
 	Input.Update();
 	return 0;
 }
@@ -685,6 +691,8 @@ void Editor::Update()
 	{
 		FocusObject(m_SelectedGameObjects[0]);
 	}
+
+	
 
 	if (Input.IsKeyHeld(Keys::CONTROL) && Input.IsKeyPressed(Keys::C))
 	{

@@ -5,7 +5,7 @@
 
 void WorldGraph::InitializeWorld()
 {
-	WorldGrid = new Grid(0, 0, 100);
+	WorldGrid = new Grid2D<Vector3f>(0, 0, 100);
 }
 
 void WorldGraph::Update()

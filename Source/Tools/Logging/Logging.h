@@ -33,6 +33,7 @@ public:
 		LogType         messageType;
 		std::string     message;
 		std::stacktrace trace;
+		int logNumber;
 	};
 
 private:
@@ -73,8 +74,9 @@ private:
 			{
 				LoggedMessages.pop_front();
 			}
-
+			auto logNr = messagesCount + warnCount + errCount + criticalCount + successCount;
 			LoggedMessages.emplace_back(msg);
+			LoggedMessages.back().logNumber = logNr;
 		}
 	};
 

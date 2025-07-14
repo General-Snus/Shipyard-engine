@@ -31,7 +31,7 @@ bool LoggerService::Create()
 	isInitialized = true;
 	SetConsoleHandle(GetConsoleWindow());
 	Success("Logging started");
-	LOGGER.m_Buffer.LoggedMessages.resize(maxsize+1);
+	//LOGGER.m_Buffer.LoggedMessages.resize(maxsize+1);
 	return true;
 }
 

@@ -39,9 +39,6 @@
     <ClInclude Include="System\Colission\OnCollision.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\Networked\NetworkedUpdate.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="System\SystemBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -96,9 +93,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="System\Colission\Source\OnCollision.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="System\Networked\Source\NetworkedUpdate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="System\SystemBase.cpp">

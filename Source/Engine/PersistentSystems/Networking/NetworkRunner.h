@@ -55,6 +55,8 @@ public:
 	Remote* IdToRemote(NetworkedId id);
 	const Remote* IdToRemote(NetworkedId id) const;
 
+	ServerTimePoint serverTime() const;
+
 	float uplinkRate(); // per second
 	float downlinkRate();// per second
 public:

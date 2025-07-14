@@ -188,7 +188,7 @@ void GPU::ResizeBackbuffer(Vector2ui resolution)
 void GPU::Present(unsigned aSyncInterval)
 {
 	const auto commandList = m_DirectCommandQueue->GetCommandList();
-	commandList->TransitionBarrier(m_renderTargets[m_FrameIndex], D3D12_RESOURCE_STATE_PRESENT);
+	commandList->TransitionBarrier(GetCurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT);
 	m_DirectCommandQueue->ExecuteCommandList(commandList);
 
 #if (USE_NSIGHT_AFTERMATH)

@@ -88,5 +88,5 @@ private:
 	std::shared_ptr<Scene>  m_ActiveScene;
 
 	std::vector<std::shared_ptr<Viewport>> m_Viewports;
-	bool                                   IsGUIActive = true;
+	bool                                   IsGUIActive = false;
 };
