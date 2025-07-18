@@ -262,26 +262,22 @@ DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugQuad(const Vector3f& center, c
 {
 	Primitive primitive{};
 	primitive.Vertices.reserve(8);
+	 
+	primitive.Vertices.emplace_back(center + Vector3f(-halfSize.x, 0, halfSize.z), Vector4f(aColor, 1.0f)); // top left 
 
-	const Vector3f bottomLeft = center - halfSize;
-	const Vector3f topRight = center + halfSize;
-	Vector3f vertex = bottomLeft; 
+	primitive.Vertices.emplace_back(center + Vector3f(halfSize.x, 0, halfSize.z), Vector4f(aColor, 1.0f)); // top right
 
-	primitive.Vertices.emplace_back(vertex, Vector4f(aColor, 1.0f)); // bottom left
+	primitive.Vertices.emplace_back(center + Vector3f(halfSize.x, 0, -halfSize.z), Vector4f(aColor, 1.0f)); // bottom right
 
-	vertex.x = topRight.x;
-	primitive.Vertices.emplace_back(vertex, Vector4f(aColor, 1.0f)); // bottom right
-
-	vertex.z = topRight.z;
-	primitive.Vertices.emplace_back(vertex, Vector4f(aColor, 1.0f)); // top right
-
-	vertex.x = bottomLeft.x;
-	primitive.Vertices.emplace_back(vertex, Vector4f(aColor, 1.0f)); // top left 
+	primitive.Vertices.emplace_back(center + Vector3f(-halfSize.x,0, -halfSize.z), Vector4f(aColor, 1.0f)); // bottom left
 
 	primitive.Indices.reserve(8);
 	primitive.Indices.push_back(0);
 	primitive.Indices.push_back(1);
+	primitive.Indices.push_back(1);
 	primitive.Indices.push_back(2);
+	primitive.Indices.push_back(2);
+	primitive.Indices.push_back(3);
 	primitive.Indices.push_back(3);
 	primitive.Indices.push_back(0); 
 

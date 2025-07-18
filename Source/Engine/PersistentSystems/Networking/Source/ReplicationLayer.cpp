@@ -17,6 +17,10 @@
 #include "Tools/Utilities/Color.h"
 #include "Tools\Utilities\Game\Timer.h"
 
+ReplicationLayer::ReplicationLayer() : spacialFrequencyCulling(0, 0, 100.0f)
+{
+}
+
 void ReplicationLayer::fixedNetworkUpdate(NetworkRunner& runner)
 {
 	OPTICK_EVENT();

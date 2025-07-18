@@ -135,11 +135,11 @@ inline void GridCell2D<GridData>::Draw(DebugDrawer& draw, Vector2<float> aCenter
 	{
 		for (const auto& cell : cells)
 		{
-			cell->Draw(draw, aCenterOffset);
+			cell->Draw(draw, cell->myPosition);
 		}
 	}
 
-	draw.AddDebugQuad(Vector3f(aCenterOffset.x, 0, aCenterOffset.y), Vector3f(halfWidth, 0, halfWidth), Colors::red.GetRGB(),.1f);
+	draw.AddDebugQuad(Vector3f(aCenterOffset.x, 0, aCenterOffset.y), Vector3f(halfWidth, 0, halfWidth), Colors::red.GetRGB(), .1f);
 }
 template <typename GridData>
 inline Vector2<float> Grid2D<GridData>::GetOffset() const
@@ -237,9 +237,9 @@ inline std::vector<GridObject2D<GridData>*> GridCell2D<GridData>::getAllWithinRa
 
 	if (cells[0] != nullptr)
 	{
-		for (const auto& i : cells)
+		for (auto& i : cells)
 		{
-			std::vector<GridObject2D<GridData>*> newCells = i.getAllWithinRadius(aBoarder);
+			std::vector<GridObject2D<GridData>*> newCells = i->getAllWithinRadius(aBoarder);
 			objects.insert(objects.end(), newCells.begin(), newCells.end());
 		}
 	}
@@ -339,10 +339,10 @@ template <typename GridData>
 inline void GridCell2D<GridData>::Subdivide()
 {
 	//Subdvide the area equally into 4 new cells
-	cells[0] = new GridCell2D(myPosition, halfWidth);
-	cells[1] = new GridCell2D(Vector2<float>(myPosition.x + halfWidth, myPosition.y), halfWidth);
-	cells[2] = new GridCell2D(Vector2<float>(myPosition.x, myPosition.y + halfWidth), halfWidth);
-	cells[3] = new GridCell2D(Vector2<float>(myPosition.x + halfWidth, myPosition.y + halfWidth), halfWidth);
+	cells[0] = new GridCell2D(Vector2f(myPosition.x - halfWidth/2.f, myPosition.y - halfWidth/2.f), halfWidth);
+	cells[1] = new GridCell2D(Vector2f(myPosition.x + halfWidth/2.f, myPosition.y - halfWidth/2.f), halfWidth);
+	cells[2] = new GridCell2D(Vector2f(myPosition.x - halfWidth/2.f, myPosition.y + halfWidth/2.f), halfWidth);
+	cells[3] = new GridCell2D(Vector2f(myPosition.x + halfWidth/2.f, myPosition.y + halfWidth/2.f), halfWidth);
 
 	//Move objects to the new cells
 	for (auto& object : myObjects)

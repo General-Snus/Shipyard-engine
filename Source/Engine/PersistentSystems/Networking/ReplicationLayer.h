@@ -11,7 +11,7 @@ class ReplicationLayer
 { 
 	using IdToObject = std::pair<NetworkedId,NetworkObject>;
 public:
-	ReplicationLayer() = default;
+	ReplicationLayer();
 	//Fixed network update contains the component updates in the server
 	void fixedNetworkUpdate(NetworkRunner& runner);
 	void server_fixedNetworkUpdate(NetworkRunner& runner); 
