@@ -237,5 +237,6 @@ enum class Keys : int
 	ZOOM = 0xFB,
 	NONAME = 0xFC,
 	PA1 = 0xFD,
-	OEM_CLEAR = 0xFE
+	OEM_CLEAR = 0xFE,
+	COUNT
 };

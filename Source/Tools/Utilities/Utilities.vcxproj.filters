@@ -132,7 +132,7 @@
     <ClInclude Include="TemplateHelpers.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\Grid.h">
+    <ClInclude Include="DataStructures\QuadTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Error.hpp">
@@ -177,6 +177,18 @@
     <ClInclude Include="DataStructures\MathStructs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Input\Mapper.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DataStructures\VoxelGrid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LinearAlgebra\Frustrum.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Extensions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game\Timer.cpp">
@@ -185,7 +197,7 @@
     <ClCompile Include="LinearAlgebra\Matrix4x4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\Source\Grid.cpp">
+    <ClCompile Include="DataStructures\Source\QuadTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="System\ThreadPool.cpp">
@@ -201,6 +213,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="System\Source\ServiceLocator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Input\Mapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DataStructures\Source\VoxelGrid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

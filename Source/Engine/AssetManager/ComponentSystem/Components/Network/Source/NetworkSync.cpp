@@ -13,6 +13,7 @@ NetworkObject::NetworkObject(const SY::UUID anOwnerId, GameObjectManager* aManag
 void NetworkObject::Init()
 {
 	Runner.registerObject(*this);
+	Synced(Runner.serverTime());
 }
 
 void NetworkObject::Destroy()
@@ -33,9 +34,14 @@ bool NetworkObject::InspectorView()
 
 bool NetworkObject::ShouldSync(const NetworkRunner& runner) const
 {
+	return ShouldSync(runner, SyncFrequencyInverse());
+}
+
+bool NetworkObject::ShouldSync(const NetworkRunner& runner, float CustomSyncFrequency) const
+{
 	auto diff = updatePoint - runner.serverTime();
-	float secondSinceLastUpdate = (float)std::chrono::duration_cast<std::chrono::microseconds>(diff).count()*.001f;
-	return secondSinceLastUpdate > SyncFrequencyInverse();
+	float secondSinceLastUpdate = (float)std::chrono::duration_cast<std::chrono::microseconds>(diff).count() * .001f;
+	return secondSinceLastUpdate < 1 / CustomSyncFrequency;
 }
 
 void NetworkObject::Synced(const ServerTimePoint& time)
@@ -77,4 +83,12 @@ void NetworkTransform::Init()
 		this->syncFrequency = netObject->syncFrequency;
 		this->uniqueNetId = netObject->GetServerID();
 	}
+}
+
+void NetworkInputListener::AddKeyFunc(Keys key, Action action, MapperFunction func)
+{
+	UNREFERENCED_PARAMETER(key);
+	UNREFERENCED_PARAMETER(action);
+	UNREFERENCED_PARAMETER(func);
+
 }

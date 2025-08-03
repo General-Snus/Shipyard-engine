@@ -103,14 +103,17 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
+    <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
+    <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release With hotreload|x64'">
     <OutDir>$(SolutionDir)../Lib\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)../Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
+    <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -200,7 +203,6 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);$(SolutionDir)External/</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -251,6 +253,9 @@
     <ClInclude Include="DataStructures\PriorityQueue.hpp" />
     <ClInclude Include="DataStructures\Queue.hpp" />
     <ClInclude Include="DataStructures\Ranges.hpp" />
+    <ClInclude Include="Extensions.h" />
+    <ClInclude Include="Input\Mapper.hpp" />
+    <ClInclude Include="LinearAlgebra\Frustrum.h" />
     <ClInclude Include="Ref.h" />
     <ClInclude Include="DataStructures\Sort.hpp" />
     <ClInclude Include="DataStructures\Stack.hpp" />
@@ -286,23 +291,26 @@
     <ClInclude Include="Math.hpp" />
     <ClInclude Include="Navigation\AStar.hpp" />
     <ClInclude Include="Navigation\Dijkstra.hpp" />
-    <ClInclude Include="System\Grid.h" />
+    <ClInclude Include="DataStructures\QuadTree.h" />
     <ClInclude Include="System\ServiceLocator.h" />
     <ClInclude Include="System\SingletonTemplate.h" />
     <ClInclude Include="System\ThreadPool.hpp" />
     <ClInclude Include="uuidv4\endianness.h" />
     <ClInclude Include="uuidv4\uuid.h" />
     <ClInclude Include="uuidv4\uuid_v4.h" />
+    <ClInclude Include="DataStructures\VoxelGrid.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="FileHelpers.hpp" />
+    <ClCompile Include="Input\Mapper.cpp" />
     <ClCompile Include="System\Source\ServiceLocator.cpp" />
     <ClCompile Include="System\Source\Event.cpp" />
     <ClCompile Include="Game\Timer.cpp" />
     <ClCompile Include="LinearAlgebra\Matrix4x4.cpp" />
-    <ClCompile Include="System\Source\Grid.cpp" />
+    <ClCompile Include="DataStructures\Source\QuadTree.cpp" />
     <ClCompile Include="System\ThreadPool.cpp" />
+    <ClCompile Include="DataStructures\Source\VoxelGrid.cpp" />
     <ClInclude Include="TemplateHelpers.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

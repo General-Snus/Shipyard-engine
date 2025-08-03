@@ -1,4 +1,5 @@
 #pragma once
+#include "LinearAlgebra/Vectors.hpp"
 #include <algorithm>
 #include <chrono> // For DefaultSeed generation
 #include <cmath> 
@@ -6,7 +7,6 @@
 #include <numbers>
 #include <random>
 #include <string>
-#include "LinearAlgebra/Vectors.hpp"
 
 #undef min
 #undef max

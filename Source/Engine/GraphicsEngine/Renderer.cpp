@@ -247,12 +247,17 @@ void Renderer::Render(std::vector<std::shared_ptr<Viewport>> renderViewPorts)
 
 	BeginFrame();
 
+	Viewport* gameViewport =nullptr;
 	for (auto& viewport : renderViewPorts)
 	{
+		if (viewport->IsGameViewport())
+		{
+			gameViewport = viewport.get();
+		}
 		RenderFrame(*viewport, viewport->GetAttachedScene()->GetGOM());
 	}
 
-	EndFrame();
+	EndFrame(gameViewport);
 
 	for (const auto& viewport : m_CustomSceneRenderPasses)
 	{
@@ -303,16 +308,9 @@ uint64_t Renderer::RenderFrame(Viewport& renderViewPort, GameObjectManager& scen
 
 		GBuffer::Render(*this, commandList, scene);
 		EnvironmentLightPass(commandList);
+		ToneMapperPass(commandList, renderViewPort.GetTarget());
 
 
-		if (EDITOR_INSTANCE.GetIsGUIActive())
-		{
-			ToneMapperPass(commandList, renderViewPort.GetTarget());
-		}
-		else
-		{
-			ToneMapperPass(commandList, &GPUInstance.GetCurrentBackBuffer());
-		}
 
 		if (!renderViewPort.IsGameViewport())
 		{
@@ -329,10 +327,19 @@ uint64_t Renderer::RenderFrame(Viewport& renderViewPort, GameObjectManager& scen
 	return commandQueue->ExecuteCommandList(commandList);
 }
 
-void Renderer::EndFrame()
+void Renderer::EndFrame(Viewport* gamePort)
 {
 	OPTICK_GPU_EVENT("EndFrame");
-	ImGuiPass();
+
+	// imgui pass is not written and we have to manually transfer the viewport to backbuffer
+	if (EDITOR_INSTANCE.GetIsGUIActive())
+	{
+		ImGuiPass();
+	}
+	else
+	{
+		ViewportToBackBuffer(gamePort);
+	}
 	GPUInstance.Present();
 }
 
@@ -431,6 +438,8 @@ void Renderer::EnvironmentLightPass(std::shared_ptr<CommandList> commandList) co
 		commandList->GetGraphicsCommandList()->IASetVertexBuffers(0, 1, nullptr);
 		commandList->GetGraphicsCommandList()->IASetIndexBuffer(nullptr);
 		commandList->GetGraphicsCommandList()->DrawInstanced(6, 1, 0, 0);
+		commandList->GetGraphicsCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
 	}
 }
 
@@ -456,6 +465,57 @@ void Renderer::ToneMapperPass(std::shared_ptr<CommandList> commandList, Texture*
 	commandList->GetGraphicsCommandList()->IASetVertexBuffers(0, 1, nullptr);
 	commandList->GetGraphicsCommandList()->IASetIndexBuffer(nullptr);
 	commandList->GetGraphicsCommandList()->DrawInstanced(6, 1, 0, 0);
+}
+
+void Renderer::ViewportToBackBuffer(Viewport* viewport)
+{
+	if (viewport == nullptr) { return; }
+	//viewport->ViewportResolution = {(float) WindowInstance.Resolution().x,(float) WindowInstance.Resolution().y };
+	viewport->ViewportResolution = (Vector2f)WindowInstance.Resolution();
+	viewport->ResolutionUpdate();
+
+	const auto commandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+	const auto commandList = commandQueue->GetCommandList();
+
+	const auto& copyPSO = m_Cache->GetState(PSOCache::ePipelineStateID::CopyTexture);
+
+	const auto& rootSignature = m_Cache->m_RootSignature->GetRootSignature();
+	commandList->GetGraphicsCommandList()->SetGraphicsRootSignature(rootSignature.Get());
+
+	const std::array<ID3D12DescriptorHeap*, 2> heaps = {
+		GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->Heap(),
+		GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_SAMPLER)]->Heap()
+	};
+
+	commandList->GetGraphicsCommandList()->SetDescriptorHeaps(std::size(heaps), heaps.data());
+
+	commandList->GetGraphicsCommandList()->SetGraphicsRootDescriptorTable(
+		static_cast<int>(eRootBindings::Textures),
+		GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]
+		->GetFirstGpuHandle());
+
+
+	commandList->SetPipelineState(*copyPSO);
+	OPTICK_GPU_CONTEXT(commandList->GetGraphicsCommandList().Get());
+	OPTICK_GPU_EVENT("CopyTexture");
+
+	commandList->SetDescriptorTable(static_cast<int>(eRootBindings::TargetTexture), viewport->GetTarget());
+	commandList->FlushResourceBarriers();
+
+
+	commandList->SetRenderTargets(1, &GPUInstance.GetCurrentBackBuffer(), nullptr);
+
+	commandList->SetViewports(GPUInstance.m_Viewport);
+	commandList->SetScissorRect(GPUInstance.m_ScissorRect);
+
+	commandList->GetGraphicsCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	commandList->GetGraphicsCommandList()->IASetVertexBuffers(0, 1, nullptr);
+	commandList->GetGraphicsCommandList()->IASetIndexBuffer(nullptr);
+	commandList->GetGraphicsCommandList()->DrawInstanced(6, 1, 0, 0);
+
+	commandQueue->ExecuteCommandList(commandList);
+	commandQueue->Wait(*commandQueue); // block then present
+
 }
 
 void Renderer::ImGuiPass()

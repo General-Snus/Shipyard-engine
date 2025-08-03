@@ -1,4 +1,4 @@
-#include "../Grid.h"
+#include "../QuadTree.h"
 #include <algorithm>
 #include <Tools/Utilities/Color.h>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>

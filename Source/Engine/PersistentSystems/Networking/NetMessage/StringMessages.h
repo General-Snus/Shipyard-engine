@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "NetMessage.h"
 
 class StringMessage : public NetMessage

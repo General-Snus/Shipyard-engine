@@ -35,7 +35,8 @@ public:
 		ToneMap,
 		SSAO,
 		DebugDraw,
-		GenerateMips
+		CopyTexture,
+		GenerateMips,
 	};
 
 	void InitRootSignature();

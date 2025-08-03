@@ -93,7 +93,7 @@ void Viewport::Update()
 			camera->SetResolution(ViewportResolution);
 		}
 	}
-	else
+	else 
 	{
 		editorCamera.Update();
 		editorCamera.IsInControl(IsSelected());

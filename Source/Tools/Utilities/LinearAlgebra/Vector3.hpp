@@ -18,7 +18,7 @@ public:
 	constexpr Vector3<T>(const T& aValue);
 	Vector3<T>(const VectorX<T, 3>& aVector);
 
-	bool IsNearlyEqual(const Vector3<T>& cmp,float epsilon = 1e-5) const;
+	bool IsNearlyEqual(const Vector3<T>& cmp, float epsilon = 1e-5) const;
 
 	// Copy constructor (compiler generated)
 	constexpr Vector3<T>(const Vector3<T>& aVector) = default;
@@ -29,7 +29,7 @@ public:
 	// Destructor (compiler generated)
 	~Vector3<T>() = default;
 
-	static constexpr std::size_t size() { return {3}; };
+	static constexpr std::size_t size() { return { 3 }; };
 
 	T* begin() { return &x; };
 	T* end() { return &x + size(); };
@@ -43,7 +43,7 @@ public:
 	// Returns the negated vector
 	constexpr Vector3<T> operator-() const;
 
-	constexpr T&       operator[](int value);
+	constexpr T& operator[](int value);
 	constexpr const T& operator[](int value) const;
 
 	// Returns the squared length of the vector
@@ -216,6 +216,12 @@ constexpr Vector3<T>& Vector3<T>::operator=(const T& aTypeT)
 	return *this;
 }
 
+template <class T>
+constexpr  bool operator==(const Vector3<T>& aVector, const Vector3<T>& toCompare) noexcept
+{
+	return (aVector.x == toCompare.x) && (aVector.y == toCompare.y) && (aVector.z == toCompare.z);
+}
+
 #pragma endregion
 
 template <class T>
@@ -298,8 +304,9 @@ constexpr Vector3<T> Vector3<T>::forward()
 }
 
 template<class T>
-inline std::string Vector3<T>::toString() {
-	return std::format("{:3} {:3} {:3}",x,y,z);
+inline std::string Vector3<T>::toString()
+{
+	return std::format("{:3} {:3} {:3}", x, y, z);
 }
 
 template <class T>
@@ -332,20 +339,21 @@ Vector3<T>::Vector3(const VectorX<T, 3>& aVector) : x(aVector[0]), y(aVector[1])
 }
 
 template <class T>
-bool Vector3<T>::IsNearlyEqual(const Vector3<T>& cmp,float epsilon) const	{
-	 
-	 return 
-		 std::abs(x - cmp.x) <= epsilon &&
-		 std::abs(y - cmp.y) <= epsilon &&
-		 std::abs(z - cmp.z) <= epsilon;
-		 
+bool Vector3<T>::IsNearlyEqual(const Vector3<T>& cmp, float epsilon) const
+{
+
+	return
+		std::abs(x - cmp.x) <= epsilon &&
+		std::abs(y - cmp.y) <= epsilon &&
+		std::abs(z - cmp.z) <= epsilon;
+
 }
 
 template <class T>
 template <class U>
 constexpr Vector3<T>::operator U() const
 {
-	return {x, y, z};
+	return { x, y, z };
 }
 
 template <class T>
@@ -355,21 +363,21 @@ constexpr T& Vector3<T>::operator[](int value)
 	switch (value)
 	{
 	case 0:
-		{
-			return x;
-		}
+	{
+		return x;
+	}
 	case 1:
-		{
-			return y;
-		}
+	{
+		return y;
+	}
 	case 2:
-		{
-			return z;
-		}
+	{
+		return z;
+	}
 	default:
-		{
-			return x;
-		}
+	{
+		return x;
+	}
 	}
 }
 
@@ -387,21 +395,21 @@ constexpr const T& Vector3<T>::operator[](int value) const
 	switch (value)
 	{
 	case 0:
-		{
-			return x;
-		}
+	{
+		return x;
+	}
 	case 1:
-		{
-			return y;
-		}
+	{
+		return y;
+	}
 	case 2:
-		{
-			return z;
-		}
+	{
+		return z;
+	}
 	default:
-		{
-			return x;
-		}
+	{
+		return x;
+	}
 	}
 }
 

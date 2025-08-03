@@ -2,7 +2,7 @@
 #include "Engine/AssetManager/ComponentSystem/Components/Network/NetworkSync.h"
 #include "NetMessage/NetMessage.h"
 #include "NetworkStructs.h"
-#include <Tools/Utilities/System/Grid.h>
+#include <Tools/Utilities/DataStructures/QuadTree.h>
 #include <utility>
 
 class NetworkRunner;
@@ -42,7 +42,7 @@ public:
 		}
 	};
 
-	Grid2D<cullerPosition> spacialFrequencyCulling;
+	QuadTree<cullerPosition> spacialFrequencyCulling;
 
 	//Suboptimal solution
 	std::unordered_map<NetworkedId,NetworkObject> idToObjectMap;

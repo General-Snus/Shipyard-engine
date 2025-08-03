@@ -20,13 +20,7 @@ class ShipyardShader;
 class Renderer: public Singleton {
 	friend class GraphicsEngineUtilities;
 
-public:
-	enum class eDepthStencilStates: unsigned int {
-		DSS_ReadWrite,
-		DSS_ReadOnly,
-		DSS_COUNT,
-	};
-
+public: 
 	const PSOCache& GetPSOCache() const;
 
 	bool ResizeBuffers(Vector2ui resolution);
@@ -74,13 +68,13 @@ private:
 
 	void     BeginFrame();
 	uint64_t RenderFrame(Viewport& renderViewPort,GameObjectManager& scene);
-	void     EndFrame();
+	void EndFrame(Viewport* gamePort);
 
 	void PrepareBuffers(std::shared_ptr<CommandList> commandList,Viewport& renderViewPort,GameObjectManager& scene);
 	void EnvironmentLightPass(std::shared_ptr<CommandList> commandList) const;
 	void ToneMapperPass(std::shared_ptr<CommandList> commandList,Texture* target) const;
 	void ImGuiPass();
-
+	void ViewportToBackBuffer(Viewport* viewport);
 public:
 	bool Initialize(bool enableDeviceDebug);
 	bool InitializeImguiBackends() const;

@@ -1,18 +1,19 @@
 #include "PersistentSystems.pch.h"
 
 #include "WorldGraph.h"
-#include "Tools/Utilities/System/Grid.h"
+#include "Tools/Utilities/DataStructures/QuadTree.h"
 
 void WorldGraph::InitializeWorld()
 {
-	WorldGrid = new Grid2D<Vector3f>(0, 0, 100);
+	//WorldGrid = new QuadTree<Vector3f>(0, 0, 100);
 }
 
 void WorldGraph::Update()
 {
 	if (ShouldUpdateGrid())
 	{
-		WorldGrid->update();
+		WorldGrid.Add<Vector3f>(Vector3f(0, 0, 0), nullptr);
+		//WorldGrid.update();
 	}
 }
 

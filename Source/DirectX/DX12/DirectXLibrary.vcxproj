@@ -268,7 +268,6 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>DirectXHeader.pch.h</PrecompiledHeaderFile>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <AdditionalIncludeDirectories>$(SolutionDir);$(ProjectDir);$(SolutionDir)External/;$(SolutionDir)DirectX\XTK\Inc\;$(SolutionDir)DirectX\DirectXTex\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>

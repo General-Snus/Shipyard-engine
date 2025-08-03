@@ -7,7 +7,8 @@
 #include <unordered_set>
 #include "Engine/PersistentSystems/Networking/NetworkStructs.h" 
 #include "Tools/Utilities/LinearAlgebra/Quaternions.hpp"
- 
+#include "Tools/Utilities/Input/Mapper.hpp"
+
 //Existance sync
 class NetworkRunner;
 class NetworkObject : public Component
@@ -24,7 +25,7 @@ public:
 	NetworkedId GetServerID() const
 	{
 		return uniqueNetId;
-	} 
+	}
 	float SyncFrequencyInverse() const
 	{
 		return 1 / syncFrequency;
@@ -36,11 +37,12 @@ public:
 	}
 
 	bool ShouldSync(const NetworkRunner& runner) const;
+	bool ShouldSync(const NetworkRunner& runner, float customSyncTime) const;
 	void Synced(const ServerTimePoint& time);
-	
+
 	void DisperseNetMessage(const NetMessage& netMessageForIndividualobject);
 
-	float syncFrequency = 60.0f;
+	float syncFrequency = 20.0f;
 protected:
 	ServerTimePoint updatePoint;
 	NetworkedId uniqueNetId;
@@ -66,3 +68,17 @@ public:
 	Quaternionf    rotationInterpolation; // Update on client whenever new message
 };
 REFL_AUTO(type(NetworkTransform), field(myPosition), field(translationInterpolation))
+
+
+class NetworkInputListener : public NetworkObject
+{
+public:
+	ReflectableTypeRegistration();
+	NetworkInputListener() = delete;
+	NetworkInputListener(const SY::UUID anOwnerId, GameObjectManager* aManager);
+	bool InspectorView() override;
+	void Init() override;
+
+	void AddKeyFunc(Keys key, Action action, MapperFunction func);
+};
+REFL_AUTO(type(NetworkInputListener))

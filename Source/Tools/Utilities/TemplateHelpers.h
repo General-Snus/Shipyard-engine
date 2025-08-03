@@ -124,8 +124,29 @@ inline constexpr bool is_array<std::array<T, N>> = true;
 template <typename T, std::size_t N>
 inline constexpr bool is_array<const std::array<T, N>> = true;
 
+
 template <typename T>
-concept Arithmetic = std::integral<T> || std::floating_point<T>;
+concept FloatingPoint = std::floating_point<T>;
+
+template <typename T>
+concept Integer = std::integral<T>;
+
+template <typename T>
+concept Arithmetic = Integer<T> || FloatingPoint<T>;
+
+template<typename T, typename U>
+constexpr T Cast(U&& value)
+{
+    return static_cast<T>(std::forward<U>(value));
+}
+template <auto V>
+concept Positive = (V > 0); 
+
+template <Integer auto V>
+concept PositiveInt = (V > 0);
+
+template <FloatingPoint auto V>
+concept PositiveFloat = (V > 0);
 
 template <typename T, T... S, typename F>
 constexpr void for_sequence(std::integer_sequence<T, S...>, F f)
@@ -154,8 +175,8 @@ struct unique_types<T1, T2>
 };
 
 template <typename Base, typename Derived>
-struct is_derived_from : std::bool_constant<std::is_base_of_v<Base, Derived> &&
-		std::is_convertible_v<const volatile Derived*, const volatile Base*>>
+struct is_derived_from : std::bool_constant<std::is_base_of_v<Base, Derived>&&
+	std::is_convertible_v<const volatile Derived*, const volatile Base*>>
 {
 };
 
@@ -163,8 +184,8 @@ template <typename Base, typename Derived>
 inline constexpr bool is_derived_from_v = is_derived_from<Base, Derived>::value;
 
 
-template<typename Base,typename Derived>
-concept IsDerived = std::is_base_of<Base,Derived>::value;
+template<typename Base, typename Derived>
+concept IsDerived = std::is_base_of<Base, Derived>::value;
 
 template <typename T, typename... Ts>
 constexpr bool Contains = (std::is_same<T, Ts>{} || ...);
@@ -172,3 +193,10 @@ template <typename Subset, typename Set>
 constexpr bool IsSubsetOf = false;
 template <typename... Ts, typename... Us>
 constexpr bool IsSubsetOf<std::tuple<Ts...>, std::tuple<Us...>> = (Contains<Ts, Us...> && ...);
+
+
+template <typename T>
+concept Hashable = requires(T v)
+{
+    { std::hash<T>{}(v) } -> std::convertible_to<std::size_t>;
+};

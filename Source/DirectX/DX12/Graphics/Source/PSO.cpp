@@ -70,6 +70,11 @@ void PSOCache::InitAllStates(Vector2ui RenderResolution)
 							 DXGI_FORMAT_UNKNOWN, CD3DX12_BLEND_DESC(CD3DX12_DEFAULT()), L"LineDrawer",
 							 D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE);
 		pso_map[ePipelineStateID::DebugDraw] = std::move(pso);
+
+
+		pso = CreatePSO("Shaders/ScreenspaceQuad_VS.cso", "Shaders/CopyPixels_PS.cso", rtvFormats,
+							 DXGI_FORMAT_UNKNOWN, CD3DX12_BLEND_DESC(CD3DX12_DEFAULT()), L"Copy");
+		pso_map[ePipelineStateID::CopyTexture] = std::move(pso);
 	}
 }
 

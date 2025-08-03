@@ -75,7 +75,7 @@ void ReplicationLayer::client_fixedNetworkUpdate(const NetworkRunner& runner) co
 	OPTICK_EVENT();
 
 	runner;
-	auto now = runner.serverTime(); //switch out to server time
+	auto now = runner.serverTime();
 
 	//Check up to date idToObjectMap
 	for (const auto& networkedTransform : Scene::activeManager().GetAllComponents<NetworkTransform>())
@@ -205,7 +205,7 @@ bool ReplicationLayer::registerObject(const NetworkRunner& runner, const Network
 			  60.0f,
 			  0.0f
 		};
-		auto gridObject = new GridObject2D<cullerPosition>(position);
+		auto gridObject = new TreeObject<cullerPosition>(position);
 		gridObject->border = Border2D(
 			Vector2f(object.transform().GetPosition().x, object.transform().GetPosition().z),
 			Vector2f(1.0f, 1.0f));
