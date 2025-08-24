@@ -41,7 +41,7 @@ NetAddress Remote::AddressByProtocol(NetworkConnection::Protocol protocol)
 	switch(protocol)
 	{
 	case NetworkConnection::Protocol::UDP:
-		return udpAddress;
+		return serverUDPAddress;
 		break;
 	case NetworkConnection::Protocol::TCP:
 		return remoteConnection.Address();

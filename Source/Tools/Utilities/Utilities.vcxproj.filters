@@ -189,6 +189,9 @@
     <ClInclude Include="Extensions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Network\RPCWrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game\Timer.cpp">

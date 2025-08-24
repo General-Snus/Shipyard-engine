@@ -67,7 +67,7 @@ private:
 class PSO
 {
 public:
-	friend class PSOCache;
+	friend class PSOCache; 
 
 	Texture* RenderTargets()
 	{
@@ -78,7 +78,7 @@ public:
 	{
 		return m_numRenderTargets;
 	};
-	ID3D12PipelineState* GetPipelineState() const;
+	Ref<ID3D12PipelineState> GetPipelineState() const;
 
 private:
 	//D3D12_GRAPHICS_PIPELINE_STATE_DESC m_psoDescription = {};

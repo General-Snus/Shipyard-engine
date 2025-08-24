@@ -39,14 +39,14 @@ bool NetworkObject::ShouldSync(const NetworkRunner& runner) const
 
 bool NetworkObject::ShouldSync(const NetworkRunner& runner, float CustomSyncFrequency) const
 {
-	auto diff = updatePoint - runner.serverTime();
+	auto diff = clientUpdateTimePoint - runner.serverTime();
 	float secondSinceLastUpdate = (float)std::chrono::duration_cast<std::chrono::microseconds>(diff).count() * .001f;
 	return secondSinceLastUpdate < 1 / CustomSyncFrequency;
 }
 
 void NetworkObject::Synced(const ServerTimePoint& time)
 {
-	updatePoint = time;
+	clientUpdateTimePoint = time;
 }
 
 void NetworkObject::DisperseNetMessage(const NetMessage& netMessageForIndividualobject)
@@ -82,6 +82,7 @@ void NetworkTransform::Init()
 		//Rather out of place here, need a good place for prerequisite checks 
 		this->syncFrequency = netObject->syncFrequency;
 		this->uniqueNetId = netObject->GetServerID();
+		this->clientUpdateTimePoint = netObject->GetLastSyncTime();
 	}
 }
 

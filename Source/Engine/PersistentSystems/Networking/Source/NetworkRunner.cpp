@@ -308,17 +308,18 @@ bool NetworkRunner::Send(NetMessage& message, NetworkConnection::Protocol protoc
 bool NetworkRunner::SendTo(const Remote& remote, NetMessage& message, NetworkConnection::Protocol protocol) const
 {
 	remote.sentDataPerFrame += sizeof(message);
+	if (!remote.hasConnectedOverUDP) { return false; }
+
 	switch (protocol)
 	{
 	case NetworkConnection::Protocol::UDP:
-		return connection.SendUDP(remote.udpAddress, message);
+		return connection.SendUDP(remote.serverUDPAddress, message);
 		break;
 	case NetworkConnection::Protocol::TCP:
 		return remote.remoteConnection.SendTCP(message);
 		break;
 	default:
-		std::unreachable();
-		break;
+		return false;
 	}
 }
 
@@ -412,6 +413,7 @@ const Remote* NetworkRunner::IdToRemote(NetworkedId id) const
 	return nullptr;
 }
 
+//Make the actuall client time lerping please and thanks
 ServerTimePoint NetworkRunner::serverTime() const
 {
 	return ServerClock::now();
@@ -501,7 +503,7 @@ bool NetworkRunner::Broadcast(NetMessage& message, NetworkConnection::Protocol p
 			allSucceeded &= SendTo(client, message, protocol);
 			break;
 		default:
-			std::unreachable();
+			return false;
 			break;
 		}
 	}
@@ -519,7 +521,7 @@ bool NetworkRunner::Unicast(NetMessage& message, Remote client, NetworkConnectio
 		{
 			return false;
 		}
-		return connection.SendUDP(client.udpAddress, message);
+		return connection.SendUDP(client.serverUDPAddress, message);
 		break;
 	case NetworkConnection::Protocol::TCP:
 		return connection.SendTCP(message);
@@ -529,33 +531,7 @@ bool NetworkRunner::Unicast(NetMessage& message, Remote client, NetworkConnectio
 		break;
 	}
 }
-
-bool NetworkRunner::Multicast(NetMessage& message, std::span<Remote> spanOfClient, NetworkConnection::Protocol protocol) const
-{
-	OPTICK_EVENT();
-	bool allSucceded = true;
-	for (const auto& client : spanOfClient)
-	{
-		switch (protocol)
-		{
-		case NetworkConnection::Protocol::UDP:
-			if (!client.hasConnectedOverUDP)
-			{
-				continue;
-			}
-			allSucceded &= client.remoteConnection.SendUDP(client.udpAddress, message);
-			break;
-		case NetworkConnection::Protocol::TCP:
-			allSucceded &= client.remoteConnection.SendTCP(message);
-			break;
-		default:
-			break;
-		}
-	}
-
-	return allSucceded;
-}
-
+ 
 void NetworkRunner::acceptNewClients(std::stop_token stop_token)
 {
 	NetworkConnection newConnection;

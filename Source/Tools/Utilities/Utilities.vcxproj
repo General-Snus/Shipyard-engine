@@ -256,6 +256,7 @@
     <ClInclude Include="Extensions.h" />
     <ClInclude Include="Input\Mapper.hpp" />
     <ClInclude Include="LinearAlgebra\Frustrum.h" />
+    <ClInclude Include="Network\RPCWrapper.h" />
     <ClInclude Include="Ref.h" />
     <ClInclude Include="DataStructures\Sort.hpp" />
     <ClInclude Include="DataStructures\Stack.hpp" />

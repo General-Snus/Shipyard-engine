@@ -65,4 +65,3 @@ protected:
 	Ref<ID3D12Resource>				  m_Resource;
 	D3D12_FEATURE_DATA_FORMAT_SUPPORT m_FormatSupport;
 };
-

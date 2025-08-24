@@ -139,6 +139,7 @@ constexpr T Cast(U&& value)
 {
     return static_cast<T>(std::forward<U>(value));
 }
+
 template <auto V>
 concept Positive = (V > 0); 
 
@@ -147,6 +148,12 @@ concept PositiveInt = (V > 0);
 
 template <FloatingPoint auto V>
 concept PositiveFloat = (V > 0);
+
+template<typename F>
+concept IsFunction = std::is_function_v;
+
+template<typename T>
+concept InputRange = std::ranges::input_range<T>;
 
 template <typename T, T... S, typename F>
 constexpr void for_sequence(std::integer_sequence<T, S...>, F f)

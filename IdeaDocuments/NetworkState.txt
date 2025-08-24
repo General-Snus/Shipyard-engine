@@ -1,0 +1,198 @@
+Absolutely — here's a **bundled markdown-formatted summary** of everything from the point where you asked:
+
+> *"So in this specific case, I want to be able to add functions from a client that will tell the host that they had done something that the host needs to interpet. Like oh i want to move my character. How would input usually be handled?"*
+
+---
+
+# 🎮 Networked Input Handling and State Replication (Design Notes)
+
+## ✅ General Pattern: Input → Command → Network → Server-side Dispatch
+
+### Client Flow
+
+1. Player input (keyboard, gamepad, etc.)
+2. Input mapped to abstract commands like `"MoveForward"` or `"Jump"`
+3. Commands serialized and sent over the network
+4. Server interprets and applies the commands to game state
+
+### Server Flow
+
+1. Receives input command message
+2. Deserializes and maps to gameplay functions
+3. Updates character / entity state accordingly
+
+---
+
+## ✅ Your Idea: `NetworkInput` as an Input Mapper for Networked Systems
+
+* Define a component (`NetworkInput`) that listens to local input
+* Instead of directly executing gameplay code, it **emits events/commands** to the server
+* Input mappings can be declared at runtime or in configuration
+
+---
+
+## 🔁 Alternatives to Networked Input Design
+
+| Approach                     | Decoupling | Flexibility | Notes                                       |
+| ---------------------------- | ---------- | ----------- | ------------------------------------------- |
+| **Command pattern**          | High       | High        | Serialize/dispatch function-like commands   |
+| **Event bus (pub-sub)**      | High       | Medium      | Internal bus, easy to connect sources       |
+| **Data-driven inputs**       | High       | High        | Flexible, moddable, can be slower           |
+| **State sync (input state)** | ✅ High\*   | Medium      | Send full state instead of discrete input   |
+| **Scripting/DSL**            | High       | Very High   | Sends interpretable logic or command text   |
+| **Reactive (FRP)**           | High       | Medium      | Input as time-varying streams               |
+| **Hybrid client prediction** | Medium     | Medium      | Predict locally, confirm/correct via server |
+
+\* You correctly noted that **state sync** can be very decoupled if the network system just replicates values without knowing their semantics.
+
+---
+
+## ✅ State Sync Design (Your Proposal)
+
+> All replicated `NetworkBehaviour` components are given:
+>
+> * A reference to `NetworkRunner` (singleton manager)
+> * A unique `EntityID`
+> * A way to track and report changed fields (`ComponentName`, `FieldIndex`, `Value`)
+
+This is **aligned with real-world multiplayer engines** like Unity Netcode, Unreal Engine, Godot, etc.
+
+---
+
+## 🔧 Dirty Tracking with `Replicated<T>`
+
+### Wrapper Class
+
+```cpp
+template<typename T>
+class Replicated {
+    T value;
+    bool dirty = false;
+    std::function<void()> onDirtyCallback;
+
+public:
+    void set(const T& newVal) {
+        if (value != newVal) {
+            value = newVal;
+            dirty = true;
+            if (onDirtyCallback) onDirtyCallback();
+        }
+    }
+
+    void bindOnDirty(std::function<void()> cb) { onDirtyCallback = cb; }
+    const T& get() const { return value; }
+    bool isDirty() const { return dirty; }
+    void clearDirty() { dirty = false; }
+};
+```
+
+---
+
+## 🧱 Base Class: `NetworkBehaviour` with Centralized Tracking
+
+```cpp
+class NetworkBehaviour {
+protected:
+    std::unordered_set<std::string> dirtyFields;
+    std::vector<std::function<void(std::ostream&)>> serializers;
+    std::vector<std::function<void(std::istream&)>> deserializers;
+
+    void markDirty(const std::string& name) { dirtyFields.insert(name); }
+
+    void registerField(const std::string& name,
+                       std::function<void(std::ostream&)> serializer,
+                       std::function<void(std::istream&)> deserializer) {
+        serializers.push_back([=](std::ostream& out) {
+            if (dirtyFields.count(name)) serializer(out);
+        });
+        deserializers.push_back(deserializer);
+    }
+
+public:
+    void serializeDirty(std::ostream& out) {
+        for (auto& s : serializers) s(out);
+        dirtyFields.clear();
+    }
+
+    void deserialize(std::istream& in) {
+        for (auto& d : deserializers) d(in);
+    }
+};
+```
+
+---
+
+### Macro: `REPLICATE_FIELD`
+
+```cpp
+#define REPLICATE_FIELD(fieldName) \
+    fieldName.bindOnDirty([this]() { this->markDirty(#fieldName); }); \
+    this->registerField( \
+        #fieldName, \
+        [this](std::ostream& out) { out.write((char*)&(fieldName.get()), sizeof(fieldName.get())); }, \
+        [this](std::istream& in) { decltype(fieldName.get()) temp; in.read((char*)&temp, sizeof(temp)); fieldName = temp; } \
+    );
+```
+
+---
+
+## 📦 Variable Sync Message: `VariableNetMessage<T>`
+
+```cpp
+template<typename T>
+struct VariableNetMessage {
+    uint32_t entityId;
+    uint32_t componentTypeId;
+    uint16_t fieldIndex;
+    T value;
+
+    void serialize(std::vector<uint8_t>& buffer) const {
+        append(buffer, entityId);
+        append(buffer, componentTypeId);
+        append(buffer, fieldIndex);
+        append(buffer, value);
+    }
+
+    static VariableNetMessage deserialize(const uint8_t* data, size_t len);
+};
+```
+
+---
+
+## 🧠 Message Identity Breakdown
+
+* **`EntityID`**: Unique ID for the networked object
+* **`ComponentTypeID`**: Registered ID of the component (via reflection/type hash)
+* **`FieldIndex`**: Position or ID of the variable within that component
+* **`Value`**: The new value of the field
+
+This approach avoids the need for string names in the wire format, keeping messages small and fast.
+
+---
+
+## 🧩 Integration via `NetworkRunner`
+
+* Acts as central authority
+* Knows all networked entities
+* Routes incoming `VariableNetMessage<T>` to correct object and field
+
+---
+
+## ✅ Summary: You’re on the Right Track
+
+You're essentially designing a **modular, scalable replication system** that works like a simplified hybrid of Unreal and Unity Netcode:
+
+* `Replicated<T>` tracks changes automatically
+* `NetworkBehaviour` manages per-field tracking and serialization
+* `NetworkRunner` orchestrates everything centrally
+* `VariableNetMessage<T>` contains just enough to apply changes
+
+---
+
+Let me know if you'd like:
+
+* A working prototype of `NetworkRunner`'s field registry
+* Serialization helpers for variable-length or complex types (e.g. `std::string`, `glm::vec3`)
+* Wire format optimizations (like delta compression or batching)
+
+You’ve got a solid system brewing!

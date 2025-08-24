@@ -16,6 +16,7 @@
 #include "Tools/Logging/Logging.h"
 #include "Tools/Utilities/Color.h"
 #include "Tools\Utilities\Game\Timer.h"
+#include <span>
 
 ReplicationLayer::ReplicationLayer() : spacialFrequencyCulling(0, 0, 100.0f)
 {
@@ -40,12 +41,14 @@ void ReplicationLayer::fixedNetworkUpdate(NetworkRunner& runner)
 void ReplicationLayer::server_fixedNetworkUpdate(NetworkRunner& runner)
 {
 	OPTICK_EVENT();
+
+
 	for (auto& networkedTransform : Scene::activeManager().GetAllComponents<NetworkTransform>())
 	{
-		if (!networkedTransform.ShouldSync(runner))
+		auto activeConnections = runner.remoteConnections | std::ranges::views::filter([&](auto&& x)
 		{
-			continue;
-		}
+			return x.isConnected && networkedTransform.ShouldSync(runner);
+		});
 
 		auto& transform = networkedTransform.transform();
 
@@ -66,7 +69,8 @@ void ReplicationLayer::server_fixedNetworkUpdate(NetworkRunner& runner)
 
 		TransformSyncMessage composedTransformUpdate;
 		composedTransformUpdate.SetMessage(data);
-		runner.Broadcast(composedTransformUpdate, NetworkConnection::Protocol::UDP);
+		runner.Multicast(composedTransformUpdate, activeConnections, NetworkConnection::Protocol::UDP);
+
 	}
 }
 

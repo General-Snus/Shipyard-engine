@@ -67,7 +67,7 @@ namespace Passes {
 				list->GetGraphicsCommandList()->RSSetScissorRects(1,&shadowMap->GetRect());
 
 				list->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_DEPTH_WRITE);
-				list->TrackResource(*shadowMap);
+				list->TrackResource(shadowMap);
 				GPUInstance.ClearDepth(*list,shadowMap.get());
 				list->SetRenderTargets(0,nullptr,shadowMap.get());
 				list->AllocateBuffer<FrameBuffer>(eRootBindings::frameBuffer,light.GetShadowMapFrameBuffer(map));
@@ -128,7 +128,7 @@ namespace Passes {
 
 				commandList->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_DEPTH_READ |
 					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-				commandList->TrackResource(*shadowMap);
+				commandList->TrackResource(shadowMap);
 			}
 			break;
 			case eLightType::uninitialized:

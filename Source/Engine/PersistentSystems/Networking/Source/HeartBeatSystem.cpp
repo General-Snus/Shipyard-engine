@@ -28,9 +28,9 @@ bool HeartBeatSystem::RecieveMessage(NetworkRunner& runner, const  RecievedMessa
 			return false;
 		}
 
-		if (!remote->hasConnectedOverUDP)
+		if (!remote->hasConnectedOverUDP && msg.from.isValid())
 		{
-			remote->udpAddress = msg.from;
+			remote->serverUDPAddress = msg.from;
 			remote->hasConnectedOverUDP = true;
 		}
 

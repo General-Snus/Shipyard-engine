@@ -190,17 +190,18 @@ void Renderer::SetupDefaultVariables()
 void Renderer::Init_brdfLUT()
 {
 	const auto commandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
-	const auto commandList = commandQueue->GetCommandList(L"RenderFrame");
+	const auto commandList = commandQueue->GetCommandList(L"BRDF Creation");
 	const auto graphicCommandList = commandList->GetGraphicsCommandList();
 
 	const Vector2ui size = { 512,512 };
 	BRDLookUpTable = std::make_shared<Texture>();
 	BRDLookUpTable->AllocateTexture(size, L"brdfLUT", Vector4f(), DXGI_FORMAT_R16G16_FLOAT);
 	BRDLookUpTable->SetView(ViewType::SRV);
-	commandList->SetRenderTargets(1, BRDLookUpTable.get(), nullptr);
+	commandList->SetRenderTargets(1, BRDLookUpTable.get(), nullptr); 
+	commandList->TrackResource(BRDLookUpTable);
 
 	constexpr std::array rt = { DXGI_FORMAT_R16G16_FLOAT };
-	const auto           brdfPSO = m_Cache->CreatePSO("Shaders/ScreenspaceQuad_VS.cso", "Shaders/brdfLUT_PS.cso", rt);
+	const PSO brdfPSO = *m_Cache->CreatePSO("Shaders/ScreenspaceQuad_VS.cso", "Shaders/brdfLUT_PS.cso", rt).get();
 
 	const D3D12_VIEWPORT viewPort = {
 		0.0f,0.0f,static_cast<float>(size.x),static_cast<float>(size.y),D3D12_MIN_DEPTH,D3D12_MAX_DEPTH
@@ -213,10 +214,10 @@ void Renderer::Init_brdfLUT()
 	const auto& rootSignature = m_Cache->m_RootSignature->GetRootSignature();
 	graphicCommandList->SetGraphicsRootSignature(rootSignature.Get());
 	commandList->TrackResource(rootSignature);
+	 
+	commandList->SetPipelineState(brdfPSO);
 
-	graphicCommandList->SetPipelineState(brdfPSO->GetPipelineState());
-
-	graphicCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		graphicCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	graphicCommandList->IASetVertexBuffers(0, 1, nullptr);
 	graphicCommandList->IASetIndexBuffer(nullptr);
 	graphicCommandList->DrawInstanced(6, 1, 0, 0);
@@ -422,7 +423,7 @@ void Renderer::EnvironmentLightPass(std::shared_ptr<CommandList> commandList) co
 
 		const auto& pipelineState = environmentLight->GetPipelineState();
 		commandList->GetGraphicsCommandList()->SetPipelineState(pipelineState);
-		//commandList->TrackResource(pipelineState);
+		 commandList->TrackResource(pipelineState);
 
 		for (unsigned i = 0; i < bufferCount; i++)
 		{

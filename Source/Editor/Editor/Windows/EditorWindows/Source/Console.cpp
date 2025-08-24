@@ -78,10 +78,11 @@ void Console::RenderImGUi()
 
 			// Use ImGuiListClipper for efficient scrolling
 			ImGuiListClipper clipper;
-			clipper.Begin((int)messages.size());
+			clipper.Begin((int)messages.size(), 2*ImGui::GetTextLineHeightWithSpacing());
 
 			while (clipper.Step())
 			{
+				
 				for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
 				{
 					const auto& logEntity = messages[i];

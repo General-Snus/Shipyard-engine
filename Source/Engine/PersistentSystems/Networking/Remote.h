@@ -4,7 +4,7 @@
 #include <mutex> 
 #include <vector> 
 #include "Engine/PersistentSystems/Networking/NetMessage/NetMessage.h"
-#include "Engine/PersistentSystems/Networking/NetworkStructs.h" 
+#include "Engine/PersistentSystems/Networking/NetworkStructs.h"
 #include <Tools/Utilities/uuidv4/uuid_v4.h>
 #include <Tools/Utilities/DataStructures/CircularBuffer.h>
 #pragma comment(lib, "Ws2_32.lib")
@@ -20,7 +20,7 @@ struct Remote {
 		NetAddress from;
 	};;
 	
-	NetAddress udpAddress;
+	NetAddress serverUDPAddress;
 	NetworkConnection remoteConnection;
 	bool isConnected;
 

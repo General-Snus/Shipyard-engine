@@ -23,8 +23,8 @@ void ResourceStateTracker::ResourceBarrier(const D3D12_RESOURCE_BARRIER &barrier
         // First check if there is already a known "final" state for the given resource.
         // If there is, the resource has been used on the command list before and
         // already has a known state within the command list execution.
-        const auto iter = m_FinalResourceState.find(transitionBarrier.pResource);
-        if (iter != m_FinalResourceState.end())
+        const auto iter = m_LastKnownResourceState.find(transitionBarrier.pResource);
+        if (iter != m_LastKnownResourceState.end())
         {
             const auto &resourceState = iter->second;
             // If the known final state of the resource is different...
@@ -63,7 +63,7 @@ void ResourceStateTracker::ResourceBarrier(const D3D12_RESOURCE_BARRIER &barrier
         }
 
         // Push the final known state (possibly replacing the previously known state for the subresource).
-        m_FinalResourceState[transitionBarrier.pResource].SetSubresourceState(transitionBarrier.Subresource,
+        m_LastKnownResourceState[transitionBarrier.pResource].SetSubresourceState(transitionBarrier.Subresource,
                                                                               transitionBarrier.StateAfter);
     }
     else
@@ -191,12 +191,12 @@ void ResourceStateTracker::CommitFinalResourceStates()
     OPTICK_GPU_EVENT("CommitFinalResourceStates");
     assert(ms_IsLocked);
 
-    for (const auto &resourceState : m_FinalResourceState)
+    for (const auto &resourceState : m_LastKnownResourceState)
     {
         ms_GlobalResourceState[resourceState.first] = resourceState.second;
     }
 
-    m_FinalResourceState.clear();
+    m_LastKnownResourceState.clear();
 }
 
 void ResourceStateTracker::Reset()
@@ -205,7 +205,7 @@ void ResourceStateTracker::Reset()
     // Reset the pending, current, and final resource states.
     m_PendingResourceBarriers.clear();
     m_ResourceBarriers.clear();
-    m_FinalResourceState.clear();
+    m_LastKnownResourceState.clear();
 }
 
 void ResourceStateTracker::Lock()

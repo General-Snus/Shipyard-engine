@@ -298,7 +298,7 @@ std::unique_ptr<PSO> PSOCache::CreatePSO(const std::filesystem::path& vertexShad
 	return pso;
 }
 
-ID3D12PipelineState* PSO::GetPipelineState() const
+Ref<ID3D12PipelineState> PSO::GetPipelineState() const
 {
-	return m_PipelineState.Get();
+	return m_PipelineState;
 }

@@ -33,7 +33,7 @@ public:
 
 	ServerTimePoint GetLastSyncTime() const
 	{
-		return updatePoint;
+		return clientUpdateTimePoint;
 	}
 
 	bool ShouldSync(const NetworkRunner& runner) const;
@@ -44,7 +44,7 @@ public:
 
 	float syncFrequency = 20.0f;
 protected:
-	ServerTimePoint updatePoint;
+	ServerTimePoint clientUpdateTimePoint;
 	NetworkedId uniqueNetId;
 };
 REFL_AUTO(type(NetworkObject))

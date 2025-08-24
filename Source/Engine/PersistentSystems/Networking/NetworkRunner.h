@@ -11,9 +11,10 @@
 #include <unordered_map>
 #include <thread>
 #include <string>
-#include <mutex>
-#include <span>
+#include <mutex> 
+#include <ranges> 
 #include "Engine\AssetManager\ComponentSystem\Components\Network\NetworkSync.h"
+#include "Tools\Utilities\TemplateHelpers.h"
 
 //This entire thing is fucked, you should handle messages directly not per frame update and construct commands for the engine in all cases but thats a lot of time
 #define Runner ServiceLocator::Instance().GetService<NetworkRunner>()
@@ -80,7 +81,8 @@ private:
 
 	bool Broadcast(NetMessage& message, NetworkConnection::Protocol protocol) const; // Send to All
 	bool Unicast(NetMessage& message, Remote client, NetworkConnection::Protocol protocol)  const; // Send to One
-	bool Multicast(NetMessage& message, std::span<Remote> client, NetworkConnection::Protocol protocol) const; // Send to Set
+
+	bool Multicast(NetMessage& message, InputRange auto&& client, NetworkConnection::Protocol protocol) const; // Send to Set
 
 	void acceptNewClients(std::stop_token stop_token);
 	void collectReceivedMessages(std::stop_token stop_token, NetworkedId recieversOwnId, NetworkConnection::Protocol protocol);
@@ -129,4 +131,17 @@ inline bool NetworkRunner::ReadMessages(NetworkRunner::MessageList& read) const
 	{
 		return false;
 	}
+}
+
+
+inline bool NetworkRunner::Multicast(NetMessage& message, InputRange auto&& rangeOfClient, NetworkConnection::Protocol protocol) const
+{
+	OPTICK_EVENT();
+	bool allSucceded = true;
+	for (const Remote& client : rangeOfClient)
+	{
+		allSucceded &= SendTo(client, message, protocol);
+	}
+
+	return allSucceded;
 }

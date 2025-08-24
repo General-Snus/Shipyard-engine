@@ -444,6 +444,28 @@ sockaddr NetAddress::as_sockaddr() const
 	return std::bit_cast<sockaddr>(as_sockaddr_in());
 }
 
+bool NetAddress::isValid() const
+{
+	if (port > 65535) return false;
+	switch (family)
+	{
+	case AddressFamily::ipv4:
+	case AddressFamily::ipv6:
+		break;
+	default:
+		return false; //unsupported
+	}
+
+	auto sa = as_sockaddr_in();
+	char buf[INET_ADDRSTRLEN];
+	if (inet_ntop(AF_INET, &sa.sin_addr, buf, sizeof(buf)) == nullptr)
+	{
+		return false;
+	}
+
+	return true;
+}
+
 namespace NetworkHelpers
 {
 	SocketSettings GetSocketSettings(unsigned long long sock)

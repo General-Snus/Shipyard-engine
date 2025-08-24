@@ -5,7 +5,7 @@
 #include <type_traits>
 
 template<typename T>
-concept releaseable =  requires(T t)
+concept releaseable = requires(T t)
 {
 	t.Release();//Make sure its a IUnknown instead or just fulfills its interface
 };
@@ -17,34 +17,36 @@ public:
 	using InterfaceType = T;
 
 public:
-	RefenceCountedContainer(): ptr_(nullptr)
-	{}
+	RefenceCountedContainer() : ptr_(nullptr)
+	{
+	}
 
-	explicit RefenceCountedContainer(decltype(__nullptr)): ptr_(nullptr)
-	{}
+	explicit RefenceCountedContainer(decltype(__nullptr)) : ptr_(nullptr)
+	{
+	}
 
 	template<class U>
-	explicit RefenceCountedContainer(U *other): ptr_(other)
+	explicit RefenceCountedContainer(U* other) : ptr_(other)
 	{
 		InternalAddRef();
 	}
 
-	RefenceCountedContainer(const RefenceCountedContainer& other) noexcept: ptr_(other.ptr_)
+	RefenceCountedContainer(const RefenceCountedContainer& other) noexcept : ptr_(other.ptr_)
 	{
 		InternalAddRef();
 	}
 
 	// copy constructor that allows to instantiate class when U* is convertible to T*
 	template<class U>
-	RefenceCountedContainer(const RefenceCountedContainer<U> &other,typename std::enable_if<std::is_convertible_v<U*,T*>,void *>::type * = 0) noexcept:
+	RefenceCountedContainer(const RefenceCountedContainer<U>& other, typename std::enable_if<std::is_convertible_v<U*, T*>, void*>::type* = 0) noexcept :
 		ptr_(other.ptr_)
 	{
 		InternalAddRef();
 	}
 
-	RefenceCountedContainer(RefenceCountedContainer &&other) noexcept: ptr_(nullptr)
+	RefenceCountedContainer(RefenceCountedContainer&& other) noexcept : ptr_(nullptr)
 	{
-		if(this != reinterpret_cast<RefenceCountedContainer*>(&reinterpret_cast<unsigned char&>(other)))
+		if (this != reinterpret_cast<RefenceCountedContainer*>(&reinterpret_cast<unsigned char&>(other)))
 		{
 			Swap(other);
 		}
@@ -52,7 +54,7 @@ public:
 
 	// Move constructor that allows instantiation of a class when U* is convertible to T*
 	template<class U>
-	RefenceCountedContainer(RefenceCountedContainer<U>&& other,typename std::enable_if<std::is_convertible_v<U*,T*>,void *>::type * = 0) noexcept:
+	RefenceCountedContainer(RefenceCountedContainer<U>&& other, typename std::enable_if<std::is_convertible_v<U*, T*>, void*>::type* = 0) noexcept :
 		ptr_(other.ptr_)
 	{
 		other.ptr_ = nullptr;
@@ -69,9 +71,9 @@ public:
 		return *this;
 	}
 
-	RefenceCountedContainer& operator=(T *other) noexcept
+	RefenceCountedContainer& operator=(T* other) noexcept
 	{
-		if(ptr_ != other)
+		if (ptr_ != other)
 		{
 			RefenceCountedContainer(other).Swap(*this);
 		}
@@ -79,15 +81,15 @@ public:
 	}
 
 	template <typename U>
-	RefenceCountedContainer& operator=(U *other) noexcept
+	RefenceCountedContainer& operator=(U* other) noexcept
 	{
 		RefenceCountedContainer(other).Swap(*this);
 		return *this;
 	}
 
-	RefenceCountedContainer& operator=(const RefenceCountedContainer &other) noexcept
+	RefenceCountedContainer& operator=(const RefenceCountedContainer& other) noexcept
 	{
-		if(ptr_ != other.ptr_)
+		if (ptr_ != other.ptr_)
 		{
 			RefenceCountedContainer(other).Swap(*this);
 		}
@@ -101,7 +103,7 @@ public:
 		return *this;
 	}
 
-	RefenceCountedContainer& operator=(RefenceCountedContainer &&other) noexcept
+	RefenceCountedContainer& operator=(RefenceCountedContainer&& other) noexcept
 	{
 		RefenceCountedContainer(static_cast<RefenceCountedContainer&&>(other)).Swap(*this);
 		return *this;
@@ -134,11 +136,12 @@ public:
 		return ptr_;
 	}
 
-	operator bool() const {
+	operator bool() const
+	{
 		return Get() != nullptr;
 	}
 
-	operator T*() const
+	operator T* () const
 	{
 		return Get();
 	}
@@ -173,7 +176,7 @@ public:
 
 	void Attach(InterfaceType* other)
 	{
-		if(ptr_ != nullptr)
+		if (ptr_ != nullptr)
 		{
 			auto ref = ptr_->Release();
 			(void)ref;
@@ -193,17 +196,17 @@ public:
 	template<releaseable U>
 	HRESULT As(RefenceCountedContainer<U>* p) const
 	{
-		return ptr_->QueryInterface(__uuidof(U),reinterpret_cast<void**>(p->ReleaseAndGetAddressOf()));
+		return ptr_->QueryInterface(__uuidof(U), reinterpret_cast<void**>(p->ReleaseAndGetAddressOf()));
 	}
 
 
 protected:
-	InterfaceType *ptr_;
+	InterfaceType* ptr_;
 	template<releaseable U> friend class RefenceCountedContainer;
 
 	void InternalAddRef() const
 	{
-		if(ptr_ != nullptr)
+		if (ptr_ != nullptr)
 		{
 			ptr_->AddRef();
 		}
@@ -214,7 +217,7 @@ protected:
 		unsigned long ref = 0;
 		T* temp = ptr_;
 
-		if(temp != nullptr)
+		if (temp != nullptr)
 		{
 			ptr_ = nullptr;
 			ref = temp->Release();
@@ -226,4 +229,4 @@ protected:
 };
 
 template <releaseable T>
-using Ref = RefenceCountedContainer<T>;
+using Ref = RefenceCountedContainer<T>; 

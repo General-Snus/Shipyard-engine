@@ -61,11 +61,15 @@ struct NetAddress {
 	std::string IPStr() const;
 	sockaddr_in as_sockaddr_in() const;
 	sockaddr as_sockaddr() const;
+	bool isValid() const;
 
 	unsigned long address{};
 	unsigned short port{};
 	AddressFamily family = AddressFamily::ipv4;
 };
+  
+
+
 using NetworkSocket = unsigned long long;
 constexpr static int ReceiveSuccessful = 0;
 
