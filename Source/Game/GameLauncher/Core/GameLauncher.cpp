@@ -90,6 +90,7 @@ void YourGameLauncher::Update(float delta)
 {
 	OPTICK_EVENT();
 	UNREFERENCED_PARAMETER(delta);
+	//This checks that you are the server or that you are in a context that allows it
 	if (!Runner.HasStateAuthority)
 	{
 		return;

@@ -27,14 +27,15 @@ bool GPU::Initialize(HWND aWindowHandle, bool enableDeviceDebug, Vector2ui backb
 	if (enableDeviceDebug)
 	{
 #if !USE_NSIGHT_AFTERMATH
-		Ref<ID3D12Debug3> debugController;
+		Ref<ID3D12Debug6> debugController;
 		const auto           result = D3D12GetDebugInterface(IID_PPV_ARGS(debugController.GetAddressOf()));
 		if (SUCCEEDED(result))
 		{
 			debugController->EnableDebugLayer();
 			debugController->SetEnableGPUBasedValidation(TRUE);
 			debugController->SetEnableSynchronizedCommandQueueValidation(TRUE);
-			// debugController->SetEnableAutoName(TRUE);
+			debugController->SetEnableAutoName(TRUE);
+
 			//  Enable additional debug layers.
 			dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 		}
@@ -141,6 +142,14 @@ bool GPU::Initialize(HWND aWindowHandle, bool enableDeviceDebug, Vector2ui backb
 
 	ResizeBackbuffer(backbufferResolution);
 	return true;
+}
+
+//Nullptr if not debug or not found
+Ref<ID3D12InfoQueue> GPU::QueryInfoQueue()
+{ 
+	Ref<ID3D12InfoQueue> ptt; 
+	m_Device->QueryInterface(IID_PPV_ARGS(ptt.GetAddressOf()));
+	return ptt;
 }
 
 bool GPU::UnInitialize()
@@ -469,7 +478,7 @@ Ref<ID3D12DescriptorHeap> GPU::CreateDescriptorHeap(const Ref<DeviceType>& devic
 	return descriptorHeap;
 }
 
-std::shared_ptr<GPUCommandQueue> GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE type ) const
+std::shared_ptr<GPUCommandQueue> GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE type) const
 {
 	OPTICK_EVENT();
 	std::shared_ptr<GPUCommandQueue> commandQueue;

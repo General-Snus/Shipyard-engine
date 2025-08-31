@@ -1,17 +1,17 @@
 #pragma once 
 #include "NetMessage.h"
-//Already included is
-//NetworkedId Id;		UUID of the client
-//TimePoint timePoint;	Time it was sent by the sender
+#include <cstring>  
+
 struct HeartBeatData
 {
 	TimePoint serverTime;
 	TimePoint timeSentByClient;
 	float lastRoundTripTime;
 	float bytePerSeconds;
+	Networking::AreaOfInterest aoi;
 };
 
-class HeartBeatMessage: public NetMessage
+class HeartBeatMessage : public NetMessage
 {
 public:
 	HeartBeatMessage()
@@ -19,16 +19,16 @@ public:
 		myType = type;
 	}
 
-	void SetMessage(const HeartBeatData &someData)
+	void SetMessage(const HeartBeatData& someData)
 	{
-		static_assert(NETMESSAGE_BUFFERSIZE > sizeof(someData));
-		memcpy(&dataBuffer,&someData,sizeof(someData));
+		static_assert(NETMESSAGE_BUFFERSIZE > sizeof(HeartBeatData), "Buffer too small for HeartBeatData");
+		std::memcpy(&dataBuffer, &someData, sizeof(HeartBeatData));
 	}
 
 	HeartBeatData ReadMessage() const
 	{
 		HeartBeatData data;
-		memcpy(&data,&dataBuffer,sizeof(data));
+		std::memcpy(&data, &dataBuffer, sizeof(HeartBeatData));
 		return data;
 	}
 

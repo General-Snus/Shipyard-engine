@@ -64,6 +64,8 @@ public:
 	// Returns the cross product of this and aVector
 	constexpr Vector3<T> Cross(const Vector3<T>& aVector) const;
 
+	static constexpr Vector3<T> zero();
+	static constexpr Vector3<T> one();
 	static constexpr Vector3<T> right();
 	static constexpr Vector3<T> up();
 	static constexpr Vector3<T> forward();
@@ -285,6 +287,17 @@ constexpr Vector3<T> Vector3<T>::Cross(const Vector3<T>& aVector) const
 	return Vector3<T>(y * aVector.z - aVector.y * z, z * aVector.x - aVector.z * x, x * aVector.y - aVector.x * y);
 }
 
+template<class T>
+inline constexpr Vector3<T> Vector3<T>::zero()
+{
+	return Vector3<T>(0, 0, 0);
+}
+
+template<class T>
+inline constexpr Vector3<T> Vector3<T>::one()
+{
+	return Vector3<T>(1, 1, 1);
+}
 template <class T>
 constexpr Vector3<T> Vector3<T>::right()
 {

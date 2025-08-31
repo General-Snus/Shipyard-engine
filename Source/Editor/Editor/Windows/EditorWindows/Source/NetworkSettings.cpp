@@ -85,19 +85,23 @@ Here you can adjust network settings to your liking or something.
 	ImGui::Separator();
 
 	///Average out the down&Uplink
-	downlink.Add(Runner.downlinkRate());
-	uplink.Add(Runner.uplinkRate());
-
 	if (Runner.IsServer)
 	{
+		downlink.Add(Runner.downlinkRate());
+		uplink.Add(Runner.uplinkRate());
+
 		ImGui::Text("-Remotes\n");
-		for (size_t i = 0; i < Runner.remoteConnections.size(); i++)
+		for (int i = 0; i < Runner.remoteConnections.size(); i++)
 		{
 			const auto& client = Runner.remoteConnections[i];
 			if (!client.isConnected)
 			{
 				continue;
 			}
+
+			//WARNING ERRORNOUS CODE, only works if only 1 client is connected. IDGAF
+			downlink.Add(Runner.downlinkRate(i));
+			uplink.Add(Runner.uplinkRate(i));
 
 			auto timeSince = std::chrono::duration_cast<std::chrono::seconds>((std::chrono::high_resolution_clock::now() - client.lastRecievedMessageTime));
 			ImGui::Text(std::format(
@@ -122,7 +126,7 @@ Here you can adjust network settings to your liking or something.
 				client.hasConnectedOverUDP,
 				downlink.Average(),
 				uplink.Average(),
-				uplink.Average() / Runner.heartBeatSystem.downlinkRate()
+				(uplink.Average() / client.dataSent.Average())
 			).c_str());
 
 			DrawPingPlot(client.rtt());
@@ -130,6 +134,9 @@ Here you can adjust network settings to your liking or something.
 	}
 	else
 	{
+		downlink.Add(Runner.downlinkRate());
+		uplink.Add(Runner.uplinkRate());
+
 		ImGui::Text(std::format(
 			R"(
 			My Status:

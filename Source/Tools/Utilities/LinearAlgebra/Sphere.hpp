@@ -13,7 +13,7 @@ public:
 	Vector3<T> GetCenter() const;
 	T          GetRadius() const;
 	bool       ExpandSphere(const Sphere<T>& sphere);
-
+	Sphere<T> Expanded(float expandBy);
 	Vector3<T> ClosestPoint(const Vector3<T>& aPosition) const
 	{
 		Vector3<T>  relativeVector = aPosition - Center;
@@ -50,6 +50,12 @@ Sphere<T>::Sphere(const Vector3<T>& aCenter, T aRadius)
 {
 	Center = aCenter;
 	Radius = aRadius;
+}
+
+template <class T>
+Sphere<T> Sphere<T>::Expanded(float expandBy)
+{
+	return Sphere<T>(Center, Radius + expandBy);
 }
 
 template <class T>

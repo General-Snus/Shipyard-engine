@@ -16,7 +16,7 @@
 using enum SessionConfiguration::HostType;
 using enum NetworkConnection::Status;
 
-using namespace NetworkHelpers;
+using namespace Networking;
 
 bool IsSocketBound(NetworkSocket socket)
 {
@@ -390,10 +390,16 @@ int NetworkConnection::ReceiveTCP(NetMessage* message, NetAddress* receivedFrom,
 	}
 
 	auto receivedLength = recv(TCPSocket, (char*)message, bufferSize, 0);
+
+	if (receivedLength == 0 && bufferSize != 0)
+	{
+		LOGGER.Err("Connection has been closed by peer");
+		return -2; // This isnt a error per say but recieveTCP fails so returning socketerror makes sense
+	}
+
 	if (receivedLength == SOCKET_ERROR || receivedLength > MAX_NETMESSAGE_SIZE)
 	{
 		LOGGER.ErrC("Failed to recieve TCP message ", GetWSAErrorString(WSAGetLastError()));
-		auto socketInfo = NetworkHelpers::GetSocketSettings(TCPSocket); socketInfo;
 		return WSAGetLastError();
 	}
 	else
@@ -466,7 +472,7 @@ bool NetAddress::isValid() const
 	return true;
 }
 
-namespace NetworkHelpers
+namespace Networking
 {
 	SocketSettings GetSocketSettings(unsigned long long sock)
 	{
@@ -625,7 +631,6 @@ namespace NetworkHelpers
 				CASE(WSANO_DATA)
 		default:
 			{
-
 				return std::format("Not a Winsock error (%d)", error);;
 			}
 		}

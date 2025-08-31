@@ -20,11 +20,9 @@ bool HeartBeatSystem::RecieveMessage(NetworkRunner& runner, const  RecievedMessa
 
 	if (runner.IsServer)
 	{
-		Remote* remote = runner.IdToRemote(pulse.GetId());
-
+		Remote* remote = runner.IdToRemote(pulse.GetId()); 
 		if (remote == nullptr)
 		{
-			assert(false);
 			return false;
 		}
 
@@ -34,8 +32,10 @@ bool HeartBeatSystem::RecieveMessage(NetworkRunner& runner, const  RecievedMessa
 			remote->hasConnectedOverUDP = true;
 		}
 
+		remote->dataSent.Add(data.bytePerSeconds);
 		remote->lastHeartbeatTime = now;
 		remote->roundTripBuffer.Add(data.lastRoundTripTime);
+		remote->areaOfInterest = data.aoi;
 
 		HeartBeatMessage sendMessage;
 		data.serverTime = now;
@@ -64,10 +64,11 @@ void HeartBeatSystem::UpdateClient(NetworkRunner& runner) const
 	const auto now = std::chrono::high_resolution_clock::now();
 	HeartBeatMessage message;
 	HeartBeatData data;
-	data.bytePerSeconds = runner.uplinkRate();//Client sets it to sent, server set it to sent to client
+	data.bytePerSeconds = runner.cachedSentDataPerFrame * TimerInstance.getDeltaTime();//Client sets it to sent, server set it to sent to client
 	data.lastRoundTripTime = rtt();
 	data.timeSentByClient = now;
 	data.serverTime = {};
+	data.aoi = runner.layer.AOI();
 	message.SetMessage(data);
 	runner.Send(message, NetworkConnection::Protocol::UDP);
 }

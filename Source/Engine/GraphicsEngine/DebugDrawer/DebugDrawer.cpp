@@ -31,18 +31,18 @@ bool DebugDrawer::Initialize()
 	std::vector<uint32_t> indicies;
 	indicies.resize(65536);
 
-	commandList->CreateVertexBuffer<DebugVertex>(*vertexBuffer,vertices,CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK,
-																								D3D12_MEMORY_POOL_L0));
-	commandList->CreateIndexBuffer(*indexBuffer,indicies,
+	commandList->CreateVertexBuffer<DebugVertex>(*vertexBuffer, vertices, CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK,
+		D3D12_MEMORY_POOL_L0));
+	commandList->CreateIndexBuffer(*indexBuffer, indicies,
 								   CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK,
-														   D3D12_MEMORY_POOL_L0));
+									   D3D12_MEMORY_POOL_L0));
 	commandQueue->ExecuteCommandList(commandList);
 	return true;
 }
 
-void DebugDrawer::SetDebugPrimitiveTransform(const PrimitiveHandle& aHandle,const Matrix& aTransform)
+void DebugDrawer::SetDebugPrimitiveTransform(const PrimitiveHandle& aHandle, const Matrix& aTransform)
 {
-	if(myDebugPrimitives.contains(aHandle.myValue))
+	if (myDebugPrimitives.contains(aHandle.myValue))
 	{
 		myDebugPrimitives[aHandle.myValue].Transform = aTransform;
 		myPrimitiveListDirty = true;
@@ -51,7 +51,7 @@ void DebugDrawer::SetDebugPrimitiveTransform(const PrimitiveHandle& aHandle,cons
 
 void DebugDrawer::RemoveDebugPrimitive(PrimitiveHandle& aHandle)
 {
-	if(myDebugPrimitives.contains(aHandle.myValue))
+	if (myDebugPrimitives.contains(aHandle.myValue))
 	{
 		myDebugPrimitives.erase(aHandle.myValue);
 		myPrimitiveListDirty = true;
@@ -61,36 +61,41 @@ void DebugDrawer::RemoveDebugPrimitive(PrimitiveHandle& aHandle)
 void DebugDrawer::Update(float aDeltaTime)
 {
 	OPTICK_EVENT();
-	for(auto it = myDebugLifetime.begin(); it != myDebugLifetime.end(); ++it)
+	for (auto& [primitive, lifetime] : myDebugLifetime)
 	{
-		it->second -= aDeltaTime;
-		if(it->second < 0.f)
+		lifetime -= aDeltaTime;
+		if (lifetime < 0.f)
 		{
-			myDebugPrimitives.erase(it->first);
+			myDebugPrimitives.erase(primitive);
 			myPrimitiveListDirty = true;
 		}
 	}
+	std::erase_if(myDebugLifetime, [](const auto& ref)
+	{
+		return ref.second < 0;
+	});
+
 }
 
 void DebugDrawer::Render(std::shared_ptr<CommandList> commandList)
 {
-	if(myPrimitiveListDirty)
+	if (myPrimitiveListDirty)
 	{
 		myNumLineIndices = 0;
-		CD3DX12_RANGE readRange(0,0);
+		CD3DX12_RANGE readRange(0, 0);
 
 		auto vertBuffer = vertexBuffer->Resource();
 		auto indicesBuffer = indexBuffer->Resource();
 
 		DebugVertex* vxMappedData = nullptr;
-		HRESULT      hr = vertBuffer->Map(0,&readRange,reinterpret_cast<void**>(&vxMappedData));
-		if(FAILED(hr))
+		HRESULT      hr = vertBuffer->Map(0, &readRange, reinterpret_cast<void**>(&vxMappedData));
+		if (FAILED(hr))
 		{
 			return;
 		}
 		unsigned int* ixMappedData = nullptr;
-		hr = indicesBuffer->Map(0,&readRange,reinterpret_cast<void**>(&ixMappedData));
-		if(FAILED(hr))
+		hr = indicesBuffer->Map(0, &readRange, reinterpret_cast<void**>(&ixMappedData));
+		if (FAILED(hr))
 		{
 			return;
 		}
@@ -98,21 +103,21 @@ void DebugDrawer::Render(std::shared_ptr<CommandList> commandList)
 		size_t currentVxOffset = 0;
 		size_t currentIxOffset = 0;
 
-		for(auto it = myDebugPrimitives.begin(); it != myDebugPrimitives.end(); ++it)
+		for (auto it = myDebugPrimitives.begin(); it != myDebugPrimitives.end(); ++it)
 		{
 			Primitive& currentPrimitive = it->second;
 			DebugVertex* vxPtr = vxMappedData + currentVxOffset;
 			unsigned int* ixPtr = ixMappedData + currentIxOffset;
 			const unsigned int vxOffset = static_cast<unsigned int>(currentVxOffset);
 
-			for(size_t v = 0; v < currentPrimitive.Vertices.size(); ++v)
+			for (size_t v = 0; v < currentPrimitive.Vertices.size(); ++v)
 			{
 				vxPtr[v] = currentPrimitive.Vertices[v];
 				vxPtr[v].Position = Vector4f(currentPrimitive.Vertices[v].Position * currentPrimitive.Transform);
 				vxPtr[v].Position.w = 1.0f;
 			}
 
-			for(size_t i = 0; i < currentPrimitive.Indices.size(); ++i)
+			for (size_t i = 0; i < currentPrimitive.Indices.size(); ++i)
 			{
 				ixPtr[i] = currentPrimitive.Indices[i] + vxOffset;
 			}
@@ -123,12 +128,12 @@ void DebugDrawer::Render(std::shared_ptr<CommandList> commandList)
 
 		myNumLineIndices = currentIxOffset;
 
-		vertBuffer->Unmap(0,&readRange);
-		indicesBuffer->Unmap(0,&readRange);
+		vertBuffer->Unmap(0, &readRange);
+		indicesBuffer->Unmap(0, &readRange);
 		myPrimitiveListDirty = false;
 	}
 
-	if(myNumLineIndices > 0)
+	if (myNumLineIndices > 0)
 	{
 		MaterialBuffer materialBuffer;
 
@@ -140,67 +145,67 @@ void DebugDrawer::Render(std::shared_ptr<CommandList> commandList)
 
 		const auto& alloc = GPUInstance.m_GraphicsMemory->AllocateConstant(materialBuffer);
 		commandList->GetGraphicsCommandList()->SetGraphicsRootConstantBufferView(
-			REG_DefaultMaterialBuffer,alloc.GpuAddress());
+			REG_DefaultMaterialBuffer, alloc.GpuAddress());
 
-		commandList->ConfigureInputAssembler(D3D_PRIMITIVE_TOPOLOGY_LINELIST,*indexBuffer);
+		commandList->ConfigureInputAssembler(D3D_PRIMITIVE_TOPOLOGY_LINELIST, *indexBuffer);
 		const auto& pso = RENDERER.GetPSOCache().GetState(PSOCache::ePipelineStateID::DebugDraw);
 		commandList->SetPipelineState(*pso);
-		commandList->GetGraphicsCommandList()->DrawIndexedInstanced(static_cast<UINT>(myNumLineIndices),1,0,0,0);
+		commandList->GetGraphicsCommandList()->DrawIndexedInstanced(static_cast<UINT>(myNumLineIndices), 1, 0, 0, 0);
 	}
 }
 
-DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugLine(const Vector3f& aStart,const Vector3f& aFinish,
-													   const Vector3f& aColor,const float     lifetime)
+DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugLine(const Vector3f& aStart, const Vector3f& aFinish,
+													   const Vector3f& aColor, const float     lifetime)
 {
 	Primitive primitive{};
-	primitive.Vertices.push_back(DebugVertex(aStart,Vector4f(aColor,1.0f)));
-	primitive.Vertices.push_back(DebugVertex(aFinish,Vector4f(aColor,1.0f)));
+	primitive.Vertices.push_back(DebugVertex(aStart, Vector4f(aColor, 1.0f)));
+	primitive.Vertices.push_back(DebugVertex(aFinish, Vector4f(aColor, 1.0f)));
 	primitive.Indices.push_back(0);
 	primitive.Indices.push_back(1);
 
-	return CreatePrimitiveHandle(primitive,lifetime);
+	return CreatePrimitiveHandle(primitive, lifetime);
 }
 
-DebugDrawer::PrimitiveHandle DebugDrawer::DebugRay(const Vector3f& aStart,const Vector3f& aDirection,float length,
-												   const Vector3f& aColor,const float     lifetime)
+DebugDrawer::PrimitiveHandle DebugDrawer::DebugRay(const Vector3f& aStart, const Vector3f& aDirection, float length,
+												   const Vector3f& aColor, const float     lifetime)
 {
 	assert(length > 0.0f && "Length must be greater than 0");
 
 	Primitive primitive{};
-	primitive.Vertices.emplace_back(aStart,Vector4f(aColor,1.0f));
-	primitive.Vertices.emplace_back(aDirection.GetNormalized() * length,Vector4f(aColor,1.0f));
+	primitive.Vertices.emplace_back(aStart, Vector4f(aColor, 1.0f));
+	primitive.Vertices.emplace_back(aDirection.GetNormalized() * length, Vector4f(aColor, 1.0f));
 	primitive.Indices.emplace_back(0);
 	primitive.Indices.emplace_back(1);
 
-	return CreatePrimitiveHandle(primitive,lifetime);
+	return CreatePrimitiveHandle(primitive, lifetime);
 }
-DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugGizmo(const Vector3f& aCenter,const float aLength,
+DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugGizmo(const Vector3f& aCenter, const float aLength,
 														const float     lifetime)
 {
 	Primitive primitive{};
 	//X 
-	primitive.Vertices.push_back(DebugVertex(aCenter,{1,0,0,1}));
-	primitive.Vertices.push_back(DebugVertex({aLength,0,0},{1,0,0,1}));
+	primitive.Vertices.push_back(DebugVertex(aCenter, { 1,0,0,1 }));
+	primitive.Vertices.push_back(DebugVertex({ aLength,0,0 }, { 1,0,0,1 }));
 	primitive.Indices.push_back(0);
 	primitive.Indices.push_back(1);
 
 	//Y
-	primitive.Vertices.push_back(DebugVertex(aCenter,{0,1,0,1}));
-	primitive.Vertices.push_back(DebugVertex({0,aLength,0},{0,1,0,1}));
+	primitive.Vertices.push_back(DebugVertex(aCenter, { 0,1,0,1 }));
+	primitive.Vertices.push_back(DebugVertex({ 0,aLength,0 }, { 0,1,0,1 }));
 	primitive.Indices.push_back(2);
 	primitive.Indices.push_back(3);
 
 	//Z
-	primitive.Vertices.push_back(DebugVertex(aCenter,{0,0,1,1}));
-	primitive.Vertices.push_back(DebugVertex({0,0,aLength},{0,0,1,1}));
+	primitive.Vertices.push_back(DebugVertex(aCenter, { 0,0,1,1 }));
+	primitive.Vertices.push_back(DebugVertex({ 0,0,aLength }, { 0,0,1,1 }));
 	primitive.Indices.push_back(4);
 	primitive.Indices.push_back(5);
 
-	return CreatePrimitiveHandle(primitive,lifetime);
+	return CreatePrimitiveHandle(primitive, lifetime);
 }
 
-DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugBox(const Vector3f& aMin,const Vector3f& aMax,
-													  const Vector3f& aColor,const float   lifetime)
+DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugBox(const Vector3f& aMin, const Vector3f& aMax,
+													  const Vector3f& aColor, const float   lifetime)
 {
 
 	Primitive primitive{};
@@ -209,21 +214,21 @@ DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugBox(const Vector3f& aMin,const
 	Vector3f vertex = min;
 
 	primitive.Vertices.reserve(8);
-	primitive.Vertices.emplace_back(vertex,Vector4f(aColor,1.0f));
+	primitive.Vertices.emplace_back(vertex, Vector4f(aColor, 1.0f));
 	vertex.x = max.x;
-	primitive.Vertices.emplace_back(vertex,Vector4f(aColor,1.0f));
+	primitive.Vertices.emplace_back(vertex, Vector4f(aColor, 1.0f));
 	vertex.y = max.y;
-	primitive.Vertices.emplace_back(vertex,Vector4f(aColor,1.0f));
+	primitive.Vertices.emplace_back(vertex, Vector4f(aColor, 1.0f));
 	vertex.z = max.z;
-	primitive.Vertices.emplace_back(vertex,Vector4f(aColor,1.0f));
+	primitive.Vertices.emplace_back(vertex, Vector4f(aColor, 1.0f));
 	vertex.y = min.y;
-	primitive.Vertices.emplace_back(vertex,Vector4f(aColor,1.0f));
+	primitive.Vertices.emplace_back(vertex, Vector4f(aColor, 1.0f));
 	vertex.x = min.x;
-	primitive.Vertices.emplace_back(vertex,Vector4f(aColor,1.0f));
+	primitive.Vertices.emplace_back(vertex, Vector4f(aColor, 1.0f));
 	vertex.y = max.y;
-	primitive.Vertices.emplace_back(vertex,Vector4f(aColor,1.0f));
+	primitive.Vertices.emplace_back(vertex, Vector4f(aColor, 1.0f));
 	vertex.z = min.z;
-	primitive.Vertices.emplace_back(vertex,Vector4f(aColor,1.0f));
+	primitive.Vertices.emplace_back(vertex, Vector4f(aColor, 1.0f));
 
 
 	primitive.Indices.reserve(24);
@@ -254,22 +259,22 @@ DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugBox(const Vector3f& aMin,const
 	primitive.Indices.push_back(6);
 	primitive.Indices.push_back(7);
 
-	return CreatePrimitiveHandle(primitive,lifetime);
+	return CreatePrimitiveHandle(primitive, lifetime);
 }
-  //todo this is shit and is 2d only add normal fucker
+//todo this is shit and is 2d only add normal fucker
 DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugQuad(const Vector3f& center, const Vector3f& halfSize,
 													  const Vector3f& aColor, const float   lifetime)
 {
 	Primitive primitive{};
 	primitive.Vertices.reserve(8);
-	 
+
 	primitive.Vertices.emplace_back(center + Vector3f(-halfSize.x, 0, halfSize.z), Vector4f(aColor, 1.0f)); // top left 
 
 	primitive.Vertices.emplace_back(center + Vector3f(halfSize.x, 0, halfSize.z), Vector4f(aColor, 1.0f)); // top right
 
 	primitive.Vertices.emplace_back(center + Vector3f(halfSize.x, 0, -halfSize.z), Vector4f(aColor, 1.0f)); // bottom right
 
-	primitive.Vertices.emplace_back(center + Vector3f(-halfSize.x,0, -halfSize.z), Vector4f(aColor, 1.0f)); // bottom left
+	primitive.Vertices.emplace_back(center + Vector3f(-halfSize.x, 0, -halfSize.z), Vector4f(aColor, 1.0f)); // bottom left
 
 	primitive.Indices.reserve(8);
 	primitive.Indices.push_back(0);
@@ -279,7 +284,7 @@ DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugQuad(const Vector3f& center, c
 	primitive.Indices.push_back(2);
 	primitive.Indices.push_back(3);
 	primitive.Indices.push_back(3);
-	primitive.Indices.push_back(0); 
+	primitive.Indices.push_back(0);
 
 	return CreatePrimitiveHandle(primitive, lifetime);
 }
@@ -564,8 +569,8 @@ DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugQuad(const Vector3f& center, c
 //	return CreatePrimitiveHandle(primitive);
 //}
 
-DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugGrid(const Vector3f& aCenter,const float          anExtent,
-													   const unsigned int someNumCells,const Vector3f& aColor,
+DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugGrid(const Vector3f& aCenter, const float          anExtent,
+													   const unsigned int someNumCells, const Vector3f& aColor,
 													   const float        lifetime)
 {
 	Primitive primitive{};
@@ -573,17 +578,17 @@ DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugGrid(const Vector3f& aCenter,c
 	primitive.Vertices.reserve(static_cast<size_t>(someNumCells) * 4 + 4);
 	primitive.Indices.reserve(static_cast<size_t>(someNumCells) * 4 + 4);
 
-	DebugVertex vertex(Vector3f(),Vector4f(aColor,1.0f));
+	DebugVertex vertex(Vector3f(), Vector4f(aColor, 1.0f));
 
 	const float offset = (anExtent * 2.f) / static_cast<float>(someNumCells);
 
-	auto aStartPos = Vector4f(aCenter.x,aCenter.y,aCenter.z,1.0f);
+	auto aStartPos = Vector4f(aCenter.x, aCenter.y, aCenter.z, 1.0f);
 	aStartPos.x -= anExtent;
 	aStartPos.z -= anExtent;
 	Vector4f anEndPos = aStartPos;
 	anEndPos.x += anExtent * 2;
 
-	for(unsigned int i = 0; i <= someNumCells * 2; i += 2)
+	for (unsigned int i = 0; i <= someNumCells * 2; i += 2)
 	{
 		vertex.Position = aStartPos;
 		primitive.Vertices.push_back(vertex);
@@ -597,13 +602,13 @@ DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugGrid(const Vector3f& aCenter,c
 		primitive.Indices.push_back(i + 1);
 	}
 
-	aStartPos = Vector4f(aCenter,1);
+	aStartPos = Vector4f(aCenter, 1);
 	aStartPos.x -= anExtent;
 	aStartPos.z -= anExtent;
 	anEndPos = aStartPos;
 	anEndPos.z += anExtent * 2;
 
-	for(unsigned int i = 0; i <= someNumCells * 2; i += 2)
+	for (unsigned int i = 0; i <= someNumCells * 2; i += 2)
 	{
 		vertex.Position = aStartPos;
 		primitive.Vertices.push_back(vertex);
@@ -617,16 +622,16 @@ DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugGrid(const Vector3f& aCenter,c
 		primitive.Indices.push_back((someNumCells * 2 + 2) + i + 1);
 	}
 
-	return CreatePrimitiveHandle(primitive,lifetime);
+	return CreatePrimitiveHandle(primitive, lifetime);
 }
 
-DebugDrawer::PrimitiveHandle DebugDrawer::CreatePrimitiveHandle(const Primitive& aPrimitive,float lifetime)
+DebugDrawer::PrimitiveHandle DebugDrawer::CreatePrimitiveHandle(const Primitive& aPrimitive, float lifetime)
 {
 	PrimitiveHandle handle;
 	handle.myValue = myNextIndex++;
 
 
-	if(lifetime > 0.0f)
+	if (lifetime > 0.0f)
 	{
 		myDebugLifetime[handle.myValue] = lifetime;
 	}

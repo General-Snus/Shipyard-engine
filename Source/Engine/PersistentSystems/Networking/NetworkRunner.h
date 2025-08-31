@@ -21,6 +21,7 @@
 class NetworkRunner : public Singleton {
 	friend class NetworkSettings;
 	friend class ReplicationLayer;
+	friend class HeartBeatSystem;
 	friend class NetworkObject;
 
 public:
@@ -33,6 +34,8 @@ public:
 	~NetworkRunner();
 
 	NetworkConnection::Status StartSession(SessionConfiguration configuration);
+
+	void ZeroDataRates();
 
 	void Update();
 	void ProcessIncoming(const eNetMessageType& type, RecievedMessage& incomingMessage);
@@ -59,7 +62,10 @@ public:
 	ServerTimePoint serverTime() const;
 
 	float uplinkRate(); // per second
-	float downlinkRate();// per second
+	float downlinkRate();
+	float downlinkRate(int remoteIndex);
+	float uplinkRate(int remoteIndex);
+	// per second
 public:
 	ReplicationLayer layer;
 	HeartBeatSystem heartBeatSystem;
@@ -95,6 +101,7 @@ private:
 	NetworkConnection connection;
 	std::atomic<int> readDataPerFrame;
 	std::atomic<int> sentDataPerFrame;
+	int cachedSentDataPerFrame;
 
 	//[Server]
 	std::array<Remote, MAX_PLAYERS> remoteConnections;
@@ -140,6 +147,7 @@ inline bool NetworkRunner::Multicast(NetMessage& message, InputRange auto&& rang
 	bool allSucceded = true;
 	for (const Remote& client : rangeOfClient)
 	{
+		if (!client.isConnected) { continue; }
 		allSucceded &= SendTo(client, message, protocol);
 	}
 

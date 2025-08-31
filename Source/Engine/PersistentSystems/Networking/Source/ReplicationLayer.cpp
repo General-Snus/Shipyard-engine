@@ -32,6 +32,12 @@ void ReplicationLayer::fixedNetworkUpdate(NetworkRunner& runner)
 	}
 	else
 	{
+		if (Scene::activeManager().GetPlayer().IsValid())
+		{
+			const auto& transform = Scene::activeManager().GetPlayer().transform();
+			RegisterPlayerAOI(Networking::AreaOfInterest(transform.GetPosition(), defaultAOIRange * transform.myScale.Dot(Vector3f::one())));
+		}
+
 		client_ReadIncoming(runner);
 		client_fixedNetworkUpdate(runner);
 	}
@@ -41,13 +47,14 @@ void ReplicationLayer::fixedNetworkUpdate(NetworkRunner& runner)
 void ReplicationLayer::server_fixedNetworkUpdate(NetworkRunner& runner)
 {
 	OPTICK_EVENT();
-
-
 	for (auto& networkedTransform : Scene::activeManager().GetAllComponents<NetworkTransform>())
 	{
 		auto activeConnections = runner.remoteConnections | std::ranges::views::filter([&](auto&& x)
 		{
-			return x.isConnected && networkedTransform.ShouldSync(runner);
+			const auto syncRate = ShouldSpacialCull(networkedTransform.myPosition, x.GetAreaOfInterest());
+			return x.isConnected
+				&& (networkedTransform.neverNotSync || syncRate != Networking::SyncRates::noUpdate)
+				&& networkedTransform.ShouldSync(runner, syncTimes[Cast<int>(std::clamp(syncRate, Networking::SyncRates::low, Networking::SyncRates::high))]);
 		});
 
 		auto& transform = networkedTransform.transform();
@@ -238,7 +245,35 @@ bool ReplicationLayer::unRegisterObject(const NetworkRunner& runner, const Netwo
 	return false;
 }
 
+void ReplicationLayer::RegisterPlayerAOI(Networking::AreaOfInterest newAOI)
+{
+	aoi = newAOI;
+}
+
+Networking::AreaOfInterest ReplicationLayer::AOI() const
+{
+	return aoi;
+}
+
 void ReplicationLayer::Close()
 {
 	idToObjectMap.clear();
+}
+
+Networking::SyncRates ReplicationLayer::ShouldSpacialCull(Vector3f positionOfObject, Networking::AreaOfInterest remoteZone) const
+{
+	if (remoteZone.IsInside(positionOfObject))
+	{
+		return Networking::SyncRates::high;
+	}
+	else if (remoteZone.Expanded(remoteZone.GetRadius() * 4).IsInside(positionOfObject))
+	{
+		return Networking::SyncRates::low;
+	}
+	else
+	{
+		return Networking::SyncRates::noUpdate;
+	}
+
+
 }

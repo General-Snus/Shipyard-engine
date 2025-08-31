@@ -150,7 +150,7 @@ template <FloatingPoint auto V>
 concept PositiveFloat = (V > 0);
 
 template<typename F>
-concept IsFunction = std::is_function_v;
+concept IsFunction = std::is_function_v<F>;
 
 template<typename T>
 concept InputRange = std::ranges::input_range<T>;

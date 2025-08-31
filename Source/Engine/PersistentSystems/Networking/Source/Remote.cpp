@@ -12,13 +12,13 @@ void Remote::Close() { // todo
 	receiveTCP.request_stop();
 	remoteConnection.Close();
 	isConnected = false;
-	hasConnectedOverUDP= false;
-	nickname= "RemoteNickname";
-	id = {}; 
+	hasConnectedOverUDP = false;
+	nickname = "RemoteNickname";
+	id = {};
 	lastRecievedMessageTime = {};
 	lastHeartbeatTime = {};
-	roundTrip = {}; 
-	Consume(); 
+	roundTrip = {};
+	Consume();
 }
 
 const std::vector<Remote::RemoteRecievedMessage>& Remote::Read() {
@@ -38,7 +38,7 @@ void Remote::TryUDPConnection(NetAddress serverAddress)
 
 NetAddress Remote::AddressByProtocol(NetworkConnection::Protocol protocol)
 {
-	switch(protocol)
+	switch (protocol)
 	{
 	case NetworkConnection::Protocol::UDP:
 		return serverUDPAddress;
@@ -57,23 +57,28 @@ float Remote::rtt() const
 	return float(roundTripBuffer.Sum()) / (float)roundTripBuffer.Count();
 }
 
+Networking::AreaOfInterest Remote::GetAreaOfInterest() const
+{
+	return areaOfInterest;
+}
+
 void Remote::collectReceivedMessages(std::stop_token stop_token) {
 	NetMessage incomingMessage;
 	NetAddress recievedFromAddress;
 
 	OPTICK_THREAD("Remote::collectReceivedMessages");
-	while(!stop_token.stop_requested()) {
-		if(auto error = remoteConnection.ReceiveTCP(&incomingMessage,&recievedFromAddress) == ReceiveSuccessful) {
+	while (!stop_token.stop_requested()) {
+		int error = remoteConnection.ReceiveTCP(&incomingMessage, &recievedFromAddress);
+		if (error == ReceiveSuccessful) {
 			std::scoped_lock lock(messageMutex);
 			readDataPerFrame += sizeof(incomingMessage);
 			//bit discusting but here we go
-			if(incomingMessage.myType == eNetMessageType::NewConnection)
+			if (incomingMessage.myType == eNetMessageType::NewConnection)
 			{
 				HandshakeMessage message = std::bit_cast<HandshakeMessage>(incomingMessage);
 				nickname = message.ReadMessage();
 				id = message.GetId();
 			}
-
 
 			lastRecievedMessageTime = std::chrono::high_resolution_clock::now();
 			RemoteRecievedMessage recv{
@@ -82,10 +87,11 @@ void Remote::collectReceivedMessages(std::stop_token stop_token) {
 			};
 
 			messages.emplace_back(recv);
-		} else {
+		}
+		else {
 			isConnected = false;
 			this->Close();
-			LOGGER.Err(std::format("Remote connection encountered errors and will shut down. {}",NetworkHelpers::GetWSAErrorString(error)));
+			LOGGER.Err(std::format("Remote connection encountered errors and will shut down. {}", Networking::GetWSAErrorString(error)));
 		}
 
 	}

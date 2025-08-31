@@ -1,6 +1,10 @@
 #pragma once
 
-
+/// <summary>
+/// This is not a strict average but a performance friendly one. Older values added will get lowered influence but will provide a rather stable output
+/// </summary>
+/// <typeparam name="T"></typeparam>
+/// <typeparam name="max_size"></typeparam>
 template<typename T, size_t max_size>
 class Avg {
 public:

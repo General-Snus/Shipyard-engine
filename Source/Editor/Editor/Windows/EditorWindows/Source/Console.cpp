@@ -1,6 +1,7 @@
 #include "../Console.h"
 
 #include <External/Optick/include/optick.h>
+#include <DirectX\DX12\Graphics\GPU.h> 
 
 #include <ranges>
 #include "imgui.h"
@@ -8,6 +9,10 @@
 void Console::RenderImGUi()
 {
 	OPTICK_EVENT();
+
+
+	PushDebugLayerToConsole();
+
 	ImGui::Begin("Console", &m_KeepWindow, ImGuiWindowFlags_NoResize);
 	{
 		// TODO clipper
@@ -78,15 +83,15 @@ void Console::RenderImGUi()
 
 			// Use ImGuiListClipper for efficient scrolling
 			ImGuiListClipper clipper;
-			clipper.Begin((int)messages.size(), 2*ImGui::GetTextLineHeightWithSpacing());
+			clipper.Begin((int)messages.size(), 2 * ImGui::GetTextLineHeightWithSpacing());
 
 			while (clipper.Step())
 			{
-				
+
 				for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
 				{
 					const auto& logEntity = messages[i];
-					const auto& [type, message, trace,nr] = logEntity;
+					const auto& [type, message, trace, nr] = logEntity;
 
 					if (message.empty() || (filter & type) == none)
 					{
@@ -133,4 +138,50 @@ void Console::RenderImGUi()
 		ImGui::EndChild();
 	}
 	ImGui::End();
+}
+
+void Console::PushDebugLayerToConsole()
+{
+	SIZE_T messageLength = 0;
+	auto pInfoQueue = GPUInstance.QueryInfoQueue();
+	if (pInfoQueue)
+	{
+		static std::vector<byte> bytes;
+		for (size_t i = 0; i < pInfoQueue->GetNumStoredMessages(); i++)
+		{
+			HRESULT hr = pInfoQueue->GetMessage(i, NULL, &messageLength);
+			if (FAILED(hr)) { continue; }
+			// Allocate space and get the message
+			bytes.resize(messageLength);
+			D3D12_MESSAGE* pMessage = (D3D12_MESSAGE*)bytes.data();
+			hr = pInfoQueue->GetMessage(i, pMessage, &messageLength);
+			if (FAILED(hr)) { continue; }
+
+			std::string str;
+			str.reserve(pMessage->DescriptionByteLength);
+			str.assign(pMessage->pDescription, pMessage->DescriptionByteLength);
+
+			switch (pMessage->Severity)
+			{
+			case D3D12_MESSAGE_SEVERITY_CORRUPTION:
+				LOGGER.Err(str);
+				break;
+			case D3D12_MESSAGE_SEVERITY_ERROR:
+				LOGGER.Err(str);
+				break;
+			case D3D12_MESSAGE_SEVERITY_WARNING:
+				LOGGER.Warn(str);
+				break;
+			//case D3D12_MESSAGE_SEVERITY_INFO:
+			//	LOGGER.Log(str);
+			//	break;
+			//case D3D12_MESSAGE_SEVERITY_MESSAGE:
+			//	LOGGER.Log(str);
+				break;
+			default:
+				break;
+			}
+		}
+		pInfoQueue->ClearStoredMessages();
+	};
 }

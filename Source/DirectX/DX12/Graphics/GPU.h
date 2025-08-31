@@ -103,6 +103,7 @@ public:
 	static void GetHardwareAdapter(_In_ IDXGIFactory4* pFactory, _Outptr_result_maybenull_ IDXGIAdapter1** ppAdapter,
 								   bool                requestHighPerformanceAdapter = false);
 
+	Ref<ID3D12InfoQueue> QueryInfoQueue();
 #if (USE_NSIGHT_AFTERMATH)
 	static void setAftermathEventMarker(const std::string& markerData, bool appManagedMarker);
 	static std::string createMarkerStringForFrame(const char* markerString);

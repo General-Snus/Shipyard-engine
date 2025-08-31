@@ -14,7 +14,7 @@ public:
 	bool RecieveMessage(NetworkRunner& runner,const RecievedMessage& msg);
 private:
 	void UpdateClient(NetworkRunner& runner) const;
-	Avg<float, 10000> downlinkPerSecond; // The server includes sent data per second to the client so it can compared to its recieved data 
+	Avg<float, 1000> downlinkPerSecond; // The server includes sent data per second to the client so it can compared to its recieved data 
 	TimePoint lastRecievedHearthBeatMessage; // if client, also if server for no real reason
 	CircularBuffer<float,10> roundTripBuffer;
 };

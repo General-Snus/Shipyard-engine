@@ -36,13 +36,15 @@ public:
 		return clientUpdateTimePoint;
 	}
 
+	bool neverNotSync = false; // Potentailly for other players or bullets
+
 	bool ShouldSync(const NetworkRunner& runner) const;
 	bool ShouldSync(const NetworkRunner& runner, float customSyncTime) const;
 	void Synced(const ServerTimePoint& time);
 
 	void DisperseNetMessage(const NetMessage& netMessageForIndividualobject);
 
-	float syncFrequency = 20.0f;
+	float syncFrequency = 20.0f; //Default is 20
 protected:
 	ServerTimePoint clientUpdateTimePoint;
 	NetworkedId uniqueNetId;

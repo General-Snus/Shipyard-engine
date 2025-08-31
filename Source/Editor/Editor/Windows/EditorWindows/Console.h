@@ -9,6 +9,8 @@ class Console : public EditorWindow
   public:
     void RenderImGUi() override;
 
+    void PushDebugLayerToConsole();
+
   private:
     LoggerService::LogType filter = LoggerService::LogType::message;
     LoggerService::LogMsg pickedMessage;

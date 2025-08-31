@@ -118,7 +118,7 @@ NetworkConnection::Status NetworkRunner::StartSession(SessionConfiguration confi
 
 
 	if (Initialized)
-	{ 
+	{
 		//Both server and client should listen to UDP
 		if (receiveUDP.joinable())
 		{
@@ -135,10 +135,9 @@ NetworkConnection::Status NetworkRunner::StartSession(SessionConfiguration confi
 	return status;
 }
 
-void NetworkRunner::Update()
+void NetworkRunner::ZeroDataRates()
 {
-	OPTICK_EVENT();
-
+	cachedSentDataPerFrame = sentDataPerFrame;
 	sentDataPerFrame = 0;
 	readDataPerFrame = 0;
 	for (auto& remote : remoteConnections)
@@ -147,6 +146,14 @@ void NetworkRunner::Update()
 		remote.sentDataPerFrame = 0;
 	}
 
+}
+
+void NetworkRunner::Update()
+{
+	OPTICK_EVENT();
+	if (!Initialized) { return; }
+
+	Runner.ZeroDataRates();
 	moveMessageMapToRead();
 	heartBeatSystem.Update(*this);
 
@@ -257,11 +264,11 @@ void NetworkRunner::Close()
 	layer.Close();
 	receiveTCP.request_stop();
 	receiveUDP.request_stop();
-	connection.Close();
-
+	connection.Close(); 
 	IsServer = false;
 	HasStateAuthority = false;
 	HasInputAuthority = false;
+	Initialized = false;
 }
 
 bool NetworkRunner::Send(NetMessage& message, NetworkConnection::Protocol protocol)
@@ -308,11 +315,10 @@ bool NetworkRunner::Send(NetMessage& message, NetworkConnection::Protocol protoc
 bool NetworkRunner::SendTo(const Remote& remote, NetMessage& message, NetworkConnection::Protocol protocol) const
 {
 	remote.sentDataPerFrame += sizeof(message);
-	if (!remote.hasConnectedOverUDP) { return false; }
-
 	switch (protocol)
 	{
 	case NetworkConnection::Protocol::UDP:
+		if (!remote.hasConnectedOverUDP) { return false; }
 		return connection.SendUDP(remote.serverUDPAddress, message);
 		break;
 	case NetworkConnection::Protocol::TCP:
@@ -417,7 +423,7 @@ const Remote* NetworkRunner::IdToRemote(NetworkedId id) const
 ServerTimePoint NetworkRunner::serverTime() const
 {
 	return ServerClock::now();
-} 
+}
 
 //The data uplink as server is the combined send on all remotes and its udp socket
 //The data uplink of a client is just the runners send of tcp and udp socket
@@ -456,6 +462,18 @@ float NetworkRunner::downlinkRate()
 	{
 		return float(readDataPerFrame) * TimerInstance.getDeltaTime();
 	}
+}
+
+float NetworkRunner::downlinkRate(int remoteIndex)
+{
+	assert("This can only be called on the server" && IsServer);
+	return IsServer ? float(remoteConnections.at(remoteIndex).readDataPerFrame) * TimerInstance.getDeltaTime() : 0;
+}
+
+float NetworkRunner::uplinkRate(int remoteIndex)
+{
+	assert("This can only be called on the server" && IsServer);
+	return IsServer ? float(remoteConnections.at(remoteIndex).sentDataPerFrame) * TimerInstance.getDeltaTime() : 0;
 }
 
 bool NetworkRunner::registerObject(const NetworkObject& object)
@@ -531,7 +549,7 @@ bool NetworkRunner::Unicast(NetMessage& message, Remote client, NetworkConnectio
 		break;
 	}
 }
- 
+
 void NetworkRunner::acceptNewClients(std::stop_token stop_token)
 {
 	NetworkConnection newConnection;
@@ -602,7 +620,8 @@ void NetworkRunner::collectReceivedMessages(std::stop_token stop_token, Networke
 
 		if (protocol == NetworkConnection::Protocol::TCP)
 		{
-			if (int error = connection.ReceiveTCP(&incomingMessage, &recievedFromAddress) == ReceiveSuccessful)
+			int error = connection.ReceiveTCP(&incomingMessage, &recievedFromAddress);
+			if (error == ReceiveSuccessful)
 			{
 				readDataPerFrame += sizeof(incomingMessage);
 
@@ -621,10 +640,13 @@ void NetworkRunner::collectReceivedMessages(std::stop_token stop_token, Networke
 
 				threadedMessageMap[incomingMessage.myType].emplace_back(recv);
 			}
+			else if (error == Disconnected)
+			{
+				Close();
+			}
 			else
 			{
-				error;
-
+				LOGGER.ErrC("Could not recieve tcp due to error of type: {}", error);
 			}
 		}
 	}

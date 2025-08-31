@@ -8,6 +8,6 @@ public:
 	void RenderImGUi() override;
 	void DrawPingPlot(float newPing); 
 private:
-	Avg<float, 10000> downlink;
-	Avg<float, 10000> uplink;
+	Avg<float, 100> downlink;
+	Avg<float, 100> uplink;
 }; 

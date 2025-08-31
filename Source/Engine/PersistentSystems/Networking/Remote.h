@@ -7,10 +7,13 @@
 #include "Engine/PersistentSystems/Networking/NetworkStructs.h"
 #include <Tools/Utilities/uuidv4/uuid_v4.h>
 #include <Tools/Utilities/DataStructures/CircularBuffer.h>
+#include <Tools/Utilities/DataStructures/MathStructs.h>
+#include <Tools/Utilities/LinearAlgebra/Sphere.hpp>
+
 #pragma comment(lib, "Ws2_32.lib")
 #undef max
 
-struct Remote { 
+struct Remote {
 	friend class NetworkRunner;
 	friend class HeartBeatSystem;
 	friend class NetworkSettings;
@@ -30,16 +33,19 @@ struct Remote {
 	void TryUDPConnection(NetAddress serverAddress); 
 	NetAddress AddressByProtocol(NetworkConnection::Protocol protocol);
 	float rtt() const;
+	Networking::AreaOfInterest GetAreaOfInterest() const;
 private:
 	NetworkedId id;
 	std::string nickname;
+
+	Networking::AreaOfInterest areaOfInterest;
 
 	bool hasConnectedOverUDP = false;
 	TimePoint lastRecievedMessageTime;
 	TimePoint lastHeartbeatTime;
 	Duration roundTrip;
 	CircularBuffer<float,15> roundTripBuffer;
-
+	Avg<float, 100> dataSent;
 	mutable std::atomic<int> readDataPerFrame; // I want it to be sent as const and this is threadsafe anyhow
 	mutable std::atomic<int> sentDataPerFrame; // I want it to be sent as const and this is threadsafe anyhow
 

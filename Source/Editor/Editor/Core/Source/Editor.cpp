@@ -692,8 +692,6 @@ void Editor::Update()
 		FocusObject(m_SelectedGameObjects[0]);
 	}
 
-	
-
 	if (Input.IsKeyHeld(Keys::CONTROL) && Input.IsKeyPressed(Keys::C))
 	{
 		Copy();

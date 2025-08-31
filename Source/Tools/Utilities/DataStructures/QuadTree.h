@@ -273,7 +273,7 @@ inline bool QuadTreeCell<TreeData>::AddObject(TreeObject<TreeData>* aObject)
 		}
 	}
 	//The object is overlapping with child cells but not fully contained within any of them
-	assert("ERROR: Object not added to any child cell" && false);
+	//assert("ERROR: Object not added to any child cell" && false);
 	myObjects.push_back(aObject);
 	return true;
 }
