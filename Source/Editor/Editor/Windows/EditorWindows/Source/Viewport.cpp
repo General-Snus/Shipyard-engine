@@ -1,20 +1,23 @@
 #include "../Viewport.h"
-#include "ImGuiHelpers.hpp"
-#include "imgui_internal.h"
-#include "Editor/Editor/Core/Editor.h"
+#include "DirectX/XTK/Inc/SimpleMath.h" 
+#include "Editor/Editor/Helpers/ImGuiHelpers.h"
 #include "Editor/Editor/Windows/Window.h"
-#include "Engine/AssetManager/ComponentSystem/GameObject.h"
-#include "Engine/AssetManager/ComponentSystem/GameObjectManager.h"
 #include "Engine/AssetManager/ComponentSystem/Components/CameraComponent.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
-#include "DirectX/XTK/Inc/SimpleMath.h" 
-#include <Tools/ImGui/ImGuizmo.h> 
-#include <Engine/AssetManager/AssetManager.h>
-#include <Engine/PersistentSystems/SceneUtilities.h>
-#include <Font/IconsFontAwesome5.h>
+#include "Engine/AssetManager/ComponentSystem/GameObject.h"
+#include "Engine/AssetManager/ComponentSystem/GameObjectManager.h"
+#include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
 #include "Engine/PersistentSystems/Scene.h"
 #include "Tools/Logging/Logging.h"
 #include "Tools/Utilities/Input/Input.hpp"
+#include "imgui_internal.h" 
+#include <Engine/AssetManager/AssetManager.h>
+#include <Engine/PersistentSystems/SceneUtilities.h>
+#include <Font/IconsFontAwesome5.h>
+#include <Tools/ImGui/ImGuizmo.h> 
+#include <filesystem>
+#include "Core\Editor.h"
+#include <vector>
 
 ImGuizmo::OPERATION m_CurrentGizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
 ImGuizmo::MODE      m_CurrentGizmoMode = ImGuizmo::MODE::WORLD;
@@ -46,7 +49,7 @@ Viewport::~Viewport() = default;
 
 std::shared_ptr<Scene> Viewport::GetAttachedScene() const
 {
-	return sceneToRender ? sceneToRender : EDITOR_INSTANCE.GetActiveScene();
+	return sceneToRender;
 }
 
 Texture* Viewport::GetTarget() const
@@ -89,11 +92,11 @@ void Viewport::Update()
 	{
 		if (auto* camera = GetAttachedScene()->GetGOM().GetCamera().TryGetComponent<Camera>())
 		{
-			camera->IsInControl(EDITOR_INSTANCE.gameState.LauncherIsPlaying());
+			camera->IsInControl(false);
 			camera->SetResolution(ViewportResolution);
 		}
 	}
-	else 
+	else
 	{
 		editorCamera.Update();
 		editorCamera.IsInControl(IsSelected());
@@ -103,7 +106,7 @@ void Viewport::Update()
 
 void Viewport::ResolutionUpdate()
 {
-	
+
 }
 
 Vector2f Viewport::getCursorInWindowPostion() const
@@ -174,7 +177,7 @@ void Viewport::RenderImGUi()
 	// const auto aspecRatio = (res.x / res.y);
 	// ImGui::SetNextWindowSizeConstraints(ImVec2(0,0),ImVec2(FLT_MAX,FLT_MAX),CustomConstraints::AspectRatio,(void*)&aspecRatio);
 
-	const std::vector<GameObject>& selectedObjects = EDITOR_INSTANCE.GetSelectedGameObjects();
+	const std::vector<GameObject>& selectedObjects = GetEditor().GetSelectedGameObjects();
 
 	TakeInput();
 
@@ -190,13 +193,13 @@ void Viewport::RenderImGUi()
 	}
 
 	if (ImGui::Begin(title.c_str(), &m_KeepWindow, windowFlags))
-	{  
+	{
 		isWindowFocused = ImGui::IsWindowFocused();
-		IsVisible = ImGui::IsItemVisible(); 
+		IsVisible = ImGui::IsItemVisible();
 		ViewportResolution = { ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y };
 
 		auto& ViewportCamera = GetCamera();
-		ViewportCamera.SetResolution(ViewportResolution); 
+		ViewportCamera.SetResolution(ViewportResolution);
 		const auto cursorPosition = ImGui::GetCursorScreenPos();
 		ImGui::Image(m_RenderTarget, *(ImVec2*)&ViewportResolution.x);
 		IsMouseHoverering = isWindowFocused;
@@ -211,7 +214,7 @@ void Viewport::RenderImGUi()
 			if (const ImGuiPayload* test = ImGui::AcceptDragDropPayload("ContentAsset_Mesh"))
 			{
 				const std::filesystem::path data = std::string(static_cast<char*>(test->Data), test->DataSize);
-				const std::string           type = ENGINE_RESOURCES.AssetType(data);
+				const std::string           type = GetEngineResources().AssetType(data);
 
 				SceneUtils::AddAssetToScene(data, sceneToRender);
 

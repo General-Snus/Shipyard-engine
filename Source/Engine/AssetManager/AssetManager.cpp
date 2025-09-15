@@ -1,6 +1,11 @@
 #include "AssetManager.pch.h"
 
-#include "Objects/BaseAssets/MasterIncludeAssets.h"
+#include "AssetManager.h"
+#include "Objects\BaseAssets\Animations.h"
+#include "Objects\BaseAssets\MaterialAsset.h"
+#include "Objects\BaseAssets\MeshAsset.h"
+#include "Objects\BaseAssets\ShipyardShader.h"
+#include "Objects\BaseAssets\TextureAsset.h"
 
 std::shared_ptr<AssetBase> EngineResourcesLoader::TryLoadAsset(const std::filesystem::path &path)
 {

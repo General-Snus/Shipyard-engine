@@ -1,6 +1,5 @@
 #pragma once
 #include "Tools/Utilities/DataStructures/Queue.hpp" 
-#include <Engine/AssetManager/Objects/BaseAssets/BaseAsset.h>  
 #include <Tools/Utilities/System/SingletonTemplate.h>
 #include <unordered_map>
 
@@ -14,7 +13,7 @@ template <class T> struct LoadTask
 	bool ExactPath;
 	std::shared_ptr<T> asset;
 };
-
+class AssetBase;
 class Library
 {
 	using assetMap = std::unordered_map<std::filesystem::path, std::shared_ptr<AssetBase>>;

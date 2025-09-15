@@ -5,12 +5,14 @@
 #include "DirectX/XTK/Inc/DirectXHelpers.h"
 #include "Engine/AssetManager/AssetManager.h"
 #include "Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h"
+#include "External/Optick/include/optick.h"
 #include "Graphics/Enums.h"
 #include "Graphics/Helpers.h"
-#include "External/Optick/include/optick.h"
+#include "Graphics\Gpu_fwd.h"
 #include "Tools/Utilities/LinearAlgebra/Vector4.hpp"
 #include "Tools/Utilities/Ref.h"
-#include "combaseapi.h"
+#include "Tools\Utilities\LinearAlgebra\Vector2.hpp"
+#include "Windows.h"
 #include "d3d12.h"
 #include "d3dcommon.h"
 #include "d3dx12_core.h"
@@ -20,6 +22,13 @@
 #include "dxgiformat.h"
 #include <Engine/GraphicsEngine/Shaders/Registers.h>
 #include <Graphics/RootSignature.h>
+#include <filesystem>
+#include <format>
+#include <iterator>
+#include <memory>
+#include <span>
+#include <string_view>
+#include <utility>
 
 void PSOCache::InitAllStates(Vector2ui RenderResolution)
 {
@@ -261,12 +270,12 @@ std::unique_ptr<PSO> PSOCache::CreatePSO(const std::filesystem::path& vertexShad
 	stream.pRootSignature = m_RootSignature->GetRootSignature().Get();
 	stream.PrimitiveTopologyType = primitive;
 
-	if (ENGINE_RESOURCES.ForceLoadAsset<ShipyardShader>(vertexShader.string(), pso->m_vs))
+	if (GetEngineResources().ForceLoadAsset<ShipyardShader>(vertexShader.string(), pso->m_vs))
 	{
 		auto blob = (ID3DBlob*)pso->m_vs->GetBlob();
 		stream.VS = CD3DX12_SHADER_BYTECODE(blob);
 	}
-	if (ENGINE_RESOURCES.ForceLoadAsset<ShipyardShader>(pixelShader.string(), pso->m_ps))
+	if (GetEngineResources().ForceLoadAsset<ShipyardShader>(pixelShader.string(), pso->m_ps))
 	{
 		auto blob = (ID3DBlob*)pso->m_ps->GetBlob();
 		stream.PS = CD3DX12_SHADER_BYTECODE(blob);

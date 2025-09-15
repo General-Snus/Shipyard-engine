@@ -99,7 +99,7 @@ public:
 			commandList.erase(commandList.begin() + (cursor + 1), commandList.begin() + commandList.size());
 		}
 		commandList.push_back({ptr});
-		cursor = static_cast<int>(commandList.size()) - 1;
+		cursor = (commandList.size() - 1);
 	}
 
 	template <typename T>

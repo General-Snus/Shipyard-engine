@@ -1,10 +1,10 @@
 #pragma once
 #include "../../Component.h"
 
-class CombatComponent : public Component
+class CombatComponent : public Reflectable<CombatComponent>, public Component
 {
   public:
-    ReflectableTypeRegistration();
+    reflectable(CombatComponent);
     CombatComponent(const SY::UUID anOwnerID, GameObjectManager *aManager);
     ~CombatComponent() override = default;
     void Init() override;

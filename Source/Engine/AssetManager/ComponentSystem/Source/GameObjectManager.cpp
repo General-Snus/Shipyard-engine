@@ -1,10 +1,9 @@
 #include "AssetManager.pch.h"
 
 #include "../GameObjectManager.h"
-#include "../GameObject.h"
-
-#include "Editor/Editor/Core/Editor.h"
 #include "Engine/AssetManager/ComponentSystem/ComponentManager.h"
+#include "Engine/AssetManager/ComponentSystem/Components/CameraComponent.h"
+#include "Engine/AssetManager/ComponentSystem/GameObject.h"
 
 GameObjectManager::~GameObjectManager() = default;
 
@@ -79,7 +78,7 @@ void GameObjectManager::DeleteGameObject(const SY::UUID aGameObjectID, bool forc
 			}
 
 			myGameObjects.erase(aGameObjectID);
-			EDITOR_INSTANCE.CheckSelectedForRemoved();
+			//GetEditor().CheckSelectedForRemoved();
 		}
 		else
 		{
@@ -298,7 +297,7 @@ void GameObjectManager::DeleteObjects()
 				cm.second->DeleteGameObject(myObjectsToDelete[i]);
 			}
 			myGameObjects.erase(myObjectsToDelete[i]);
-			EDITOR_INSTANCE.CheckSelectedForRemoved();
+			//GetEditor().CheckSelectedForRemoved();
 		}
 		else
 		{

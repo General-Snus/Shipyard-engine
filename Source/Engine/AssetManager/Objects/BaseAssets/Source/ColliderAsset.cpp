@@ -7,6 +7,8 @@
 #include <Tools/Utilities/LinearAlgebra/AABB3D.hpp>
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
+#include "AssetManager.h"
+#include "Engine\GraphicsEngine\Renderer.h"
 
 ColliderAsset::ColliderAsset(eColliderType type) : AssetBase(L""),type(type) {}
 
@@ -14,7 +16,7 @@ ColliderAsset::ColliderAsset(const std::filesystem::path& aFilePath) : AssetBase
 
 ColliderAsset::~ColliderAsset() {
 	for(DebugDrawer::PrimitiveHandle& handle : myHandles) {
-		RENDERER.debugDrawer.RemoveDebugPrimitive(handle);
+		GetRenderer().debugDrawer.RemoveDebugPrimitive(handle);
 	}
 
 	myHandles.clear();
@@ -26,7 +28,7 @@ void ColliderAsset::Init() {}
 
 void ColliderAsset::RemoveDebugLines() {
 	for(DebugDrawer::PrimitiveHandle& handle : myHandles) {
-		RENDERER.debugDrawer.RemoveDebugPrimitive(handle);
+		GetRenderer().debugDrawer.RemoveDebugPrimitive(handle);
 	}
 }
 
@@ -36,15 +38,15 @@ ColliderAssetAABB::ColliderAssetAABB(const AABB3D<float>& rf) : ColliderAsset(eC
 
 void ColliderAssetAABB::RenderDebugLines(Transform& data) {
 	for(DebugDrawer::PrimitiveHandle& handle : myHandles) {
-		RENDERER.debugDrawer.RemoveDebugPrimitive(handle);
+		GetRenderer().debugDrawer.RemoveDebugPrimitive(handle);
 	}
 	myHandles.clear();
 	const auto handle =
-		RENDERER.debugDrawer.AddDebugBox(myOriginalAABB.GetMin(),myOriginalAABB.GetMax());
+		GetRenderer().debugDrawer.AddDebugBox(myOriginalAABB.GetMin(),myOriginalAABB.GetMax());
 	myHandles.push_back(handle);
 
 	for(auto const& aHandle : myHandles) {
-		RENDERER.debugDrawer.SetDebugPrimitiveTransform(aHandle,data.WorldMatrix());
+		GetRenderer().debugDrawer.SetDebugPrimitiveTransform(aHandle,data.WorldMatrix());
 	}
 }
 
@@ -64,7 +66,7 @@ ColliderAssetSphere::ColliderAssetSphere(const Sphere<float>& rf) : ColliderAsse
 
 void ColliderAssetSphere::RenderDebugLines(Transform& data) {
 	for(DebugDrawer::PrimitiveHandle& handle : myHandles) {
-		RENDERER.debugDrawer.RemoveDebugPrimitive(handle);
+		GetRenderer().debugDrawer.RemoveDebugPrimitive(handle);
 	}
 
 	myHandles.clear();
@@ -72,10 +74,10 @@ void ColliderAssetSphere::RenderDebugLines(Transform& data) {
 	const Vector3f min = Vector3f(-1.0f,-1.0f,-1.0f);
 	const Vector3f max = Vector3f(1.0f,1.0f,1.0f);
 	 
-	const DebugDrawer::PrimitiveHandle handle = RENDERER.debugDrawer.AddDebugBox(
+	const DebugDrawer::PrimitiveHandle handle = GetRenderer().debugDrawer.AddDebugBox(
 		min * mySphere.GetRadius(),
 		max * mySphere.GetRadius());
-	RENDERER.debugDrawer.SetDebugPrimitiveTransform(handle,data.LocalMatrix());
+	GetRenderer().debugDrawer.SetDebugPrimitiveTransform(handle,data.LocalMatrix());
 	myHandles.push_back(handle);
 }
 
@@ -106,7 +108,7 @@ ColliderAssetPlanar::ColliderAssetPlanar(const std::shared_ptr<Mesh>& rf) : Coll
 
 ColliderAssetPlanar::ColliderAssetPlanar(const std::filesystem::path& path) : ColliderAsset(eColliderType::PLANAR) {
 	path;
-	ENGINE_RESOURCES.ForceLoadAsset<Mesh>(path,aColliderMesh);
+	GetEngineResources().ForceLoadAsset<Mesh>(path,aColliderMesh);
 }
 
 void ColliderAssetPlanar::RenderDebugLines(Transform& data) {
@@ -120,15 +122,15 @@ ColliderAssetBox::ColliderAssetBox(const AABB3D<float>& rf) : ColliderAsset(eCol
 
 void ColliderAssetBox::RenderDebugLines(Transform& data) {
 	for(DebugDrawer::PrimitiveHandle& handle : myHandles) {
-		RENDERER.debugDrawer.RemoveDebugPrimitive(handle);
+		GetRenderer().debugDrawer.RemoveDebugPrimitive(handle);
 	}
 	myHandles.clear();
 	const auto handle =
-		RENDERER.debugDrawer.AddDebugBox(myBox.GetMin(),myBox.GetMax());
+		GetRenderer().debugDrawer.AddDebugBox(myBox.GetMin(),myBox.GetMax());
 	myHandles.push_back(handle);
 
 	for(auto const& aHandle : myHandles) {
-		RENDERER.debugDrawer.SetDebugPrimitiveTransform(aHandle,data.WorldMatrix());
+		GetRenderer().debugDrawer.SetDebugPrimitiveTransform(aHandle,data.WorldMatrix());
 	}
 }
 

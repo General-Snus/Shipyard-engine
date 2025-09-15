@@ -1,11 +1,11 @@
 #pragma once
+#include "../Windows/SplashWindow.h"
 #include <Editor/Editor/Defines.h>
 #include <Game/GameLauncher/Core/GameLauncher.h>
 #include <Tools/Utilities/DataStructures/Queue.hpp>
 #include <Tools/Utilities/LinearAlgebra/Sphere.hpp>
 #include <Tools/Utilities/System/ServiceLocator.h>
 #include <Tools/Utilities/System/SingletonTemplate.h>
-#include "../Windows/SplashWindow.h"
 
 class Viewport;
 class CommandBuffer;
@@ -21,8 +21,7 @@ enum class EditorCallback
 	SceneChange,
 	WM_DropFile
 };
-
-#define EDITOR_INSTANCE ServiceLocator::Instance().GetService<Editor>()
+ 
 
 class Editor : public Singleton
 {
@@ -41,8 +40,8 @@ public:
 	bool Initialize(HWND aHandle);
 	void DoWinProc(Window* window, const MSG& msg);
 
-	RECT                  GetViewportRECT();
-	Vector2<unsigned int> GetViewportResolution();
+	RECT                  GetViewportRECT() const;
+	Vector2<unsigned int> GetViewportResolution() const;
 
 	bool GetIsGUIActive() const
 	{
@@ -90,3 +89,8 @@ private:
 	std::vector<std::shared_ptr<Viewport>> m_Viewports;
 	bool                                   IsGUIActive = false;
 };
+
+inline Editor& GetEditor()
+{
+	return ServiceLocator::Instance().GetService<Editor>();
+}

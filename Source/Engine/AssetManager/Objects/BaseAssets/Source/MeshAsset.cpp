@@ -6,10 +6,12 @@
 #include "DirectX/DX12/Graphics/CommandList.h"
 #include "DirectX/DX12/Graphics/Helpers.h"
 #include "Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h"
+#include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
+#include "Engine/AssetManager/AssetManager.h"
 #include "Engine/GraphicsEngine/Renderer.h"
 #include "Engine/GraphicsEngine/Rendering/Vertex.h"
-#include <Engine/GraphicsEngine/GraphicsEngineUtilities.h> 
-#include <Tools/ImGui/ImGuiHelpers.hpp>
+#include <Engine/GraphicsEngine/GraphicsEngineUtilities.h>  
+#include "Editor\Editor\Helpers\ImGuiHelpers.h"
 #include <Tools/Utilities/Math.hpp>
 
 Mesh::Mesh(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)
@@ -23,6 +25,7 @@ const std::unordered_map<unsigned int, std::shared_ptr<Material>>& Mesh::GetMate
 
 void Mesh::FillMaterialPaths(const aiScene* scene)
 {
+	static auto t = GetTypeInfo();
 	OPTICK_EVENT();
 	for (auto& [key, matPath] : idToMaterial)
 	{
@@ -135,12 +138,12 @@ void Mesh::FillMaterialPaths(const aiScene* scene)
 
 		if (!textureLoaded)
 		{
-			materials[key] = RENDERER.GetDefaultMaterial();
+			materials[key] = GetRenderer().GetDefaultMaterial();
 			continue;
 		}
 
 		Material::CreateJson(dataMat, matPath);
-		materials[key] = ENGINE_RESOURCES.LoadAsset<Material>(matPath);
+		materials[key] = GetEngineResources().LoadAsset<Material>(matPath);
 	}
 }
 
@@ -148,8 +151,8 @@ std::shared_ptr<TextureHolder> Mesh::GetEditorIcon()
 {
 	OPTICK_EVENT();
 	auto imageTexture =
-		ENGINE_RESOURCES.LoadAsset<TextureHolder>(std::format("INTERNAL_IMAGE_UI_{}", AssetPath.filename().string()));
-	const std::shared_ptr<Mesh> mesh = ENGINE_RESOURCES.LoadAsset<Mesh>(AssetPath, true);
+		GetEngineResources().LoadAsset<TextureHolder>(std::format("INTERNAL_IMAGE_UI_{}", AssetPath.filename().string()));
+	const std::shared_ptr<Mesh> mesh = GetEngineResources().LoadAsset<Mesh>(AssetPath, true);
 
 	if (!imageTexture->isLoadedComplete)
 	{
@@ -157,11 +160,11 @@ std::shared_ptr<TextureHolder> Mesh::GetEditorIcon()
 		if (!imageTexture->isBeingLoaded && meshReady)
 		{
 			GraphicsEngineUtilities::GenerateSceneForIcon(mesh, imageTexture,
-			                                              RENDERER.GetDefaultMaterial());
+														  GetRenderer().GetDefaultMaterial());
 		}
 		else
 		{
-			imageTexture = ENGINE_RESOURCES.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+			imageTexture = GetEngineResources().LoadAsset<TextureHolder>("Textures/Widgets/File.png");
 		}
 	}
 	return imageTexture;
@@ -176,9 +179,9 @@ bool Mesh::InspectorView()
 	}
 
 	{
-		auto imageTexture = ENGINE_RESOURCES.LoadAsset<TextureHolder>(
+		auto imageTexture = GetEngineResources().LoadAsset<TextureHolder>(
 			std::format("INTERNAL_IMAGE_UI_{}", AssetPath.filename().string()));
-		const std::shared_ptr<Mesh> mesh = ENGINE_RESOURCES.LoadAsset<Mesh>(AssetPath, true);
+		const std::shared_ptr<Mesh> mesh = GetEngineResources().LoadAsset<Mesh>(AssetPath, true);
 
 		if (!imageTexture->isLoadedComplete)
 		{
@@ -186,11 +189,11 @@ bool Mesh::InspectorView()
 			if (!imageTexture->isBeingLoaded && meshReady)
 			{
 				GraphicsEngineUtilities::GenerateSceneForIcon(mesh, imageTexture,
-				                                              RENDERER.GetDefaultMaterial());
+															  GetRenderer().GetDefaultMaterial());
 			}
 			else
 			{
-				imageTexture = ENGINE_RESOURCES.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+				imageTexture = GetEngineResources().LoadAsset<TextureHolder>("Textures/Widgets/File.png");
 			}
 		}
 
@@ -200,7 +203,7 @@ bool Mesh::InspectorView()
 			ImGui::TableNextColumn();
 			ImGui::Text("Static Mesh");
 			ImGui::TableNextColumn();
-			ImGui::Image(imageTexture, {100, 100});
+			ImGui::Image(imageTexture, { 100, 100 });
 			ImGui::EndTable();
 		}
 		ImGui::Separator();
@@ -237,7 +240,7 @@ void Mesh::Init()
 	}
 
 	Assimp::Importer importer;
-	const aiScene*   scene = importer.ReadFile(
+	const aiScene* scene = importer.ReadFile(
 		AssetPath.string(), static_cast<unsigned int>(aiProcess_CalcTangentSpace) | aiProcess_Triangulate |
 		aiProcess_ValidateDataStructure | aiProcess_SortByPType | aiProcess_GenBoundingBoxes |
 		aiProcess_GlobalScale | aiProcessPreset_TargetRealtime_MaxQuality |
@@ -299,16 +302,16 @@ bool Mesh::processMesh(aiMesh* mesh, const aiScene* scene, Element& outElement)
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 	{
 		auto position = Vector3f(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-		auto color = Vector4f(Math::RandomEngine::randomInRange<float>(0,1),Math::RandomEngine::randomInRange<float>(0,1),
+		auto color = Vector4f(Math::RandomEngine::randomInRange<float>(0, 1), Math::RandomEngine::randomInRange<float>(0, 1),
 			Math::RandomEngine::randomInRange<float>(0, 1), 1.0f);
 
 		auto boneId = Vector4<unsigned int>(0, 0, 0, 0);
 
 		/*auto boneWeight = Vector4f(
-		    vert.BoneWeights[0],
-		    vert.BoneWeights[1],
-		    vert.BoneWeights[2],
-		    vert.BoneWeights[3],
+			vert.BoneWeights[0],
+			vert.BoneWeights[1],
+			vert.BoneWeights[2],
+			vert.BoneWeights[3],
 		);*/
 
 		auto boneWeight = Vector4f(0, 0, 0, 0);

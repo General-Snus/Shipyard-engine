@@ -2,10 +2,10 @@
 #include "Controller.h" 
 
 
-class PlayerController : public Controller
+class PlayerController : public Controller, public Reflectable<PlayerController>
 {
 public:
-	ReflectableTypeRegistration()
+	reflectable(PlayerController);
 	explicit PlayerController();
 	bool Update(GameObject input) override;
 

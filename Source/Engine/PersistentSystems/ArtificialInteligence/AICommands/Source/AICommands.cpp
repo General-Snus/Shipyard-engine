@@ -60,12 +60,12 @@ bool IsTargetInRange(GameObject input)
 			if(hit.objectHit.GetID() == obj.GetID())
 			{
 				color = {0,1,0};
-				RENDERER.debugDrawer.AddDebugLine(myTransform.GetPosition(),closestTarget,color,
+				GetRenderer().debugDrawer.AddDebugLine(myTransform.GetPosition(),closestTarget,color,
 																0.01f);
 				return true;
 			}
 		}
-		RENDERER.debugDrawer.AddDebugLine(myTransform.GetPosition(),closestTarget,color,0.01f);
+		GetRenderer().debugDrawer.AddDebugLine(myTransform.GetPosition(),closestTarget,color,0.01f);
 	}
 	return false;
 }

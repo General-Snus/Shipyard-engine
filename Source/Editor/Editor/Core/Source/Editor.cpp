@@ -11,13 +11,12 @@
 #include "Editor/Editor/Windows/EditorWindows/Viewport.h"
 #include "Engine/AssetManager/AssetManager.h"
 #include "Engine/AssetManager/ComponentSystem/ComponentManager.h"
-#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
-#include "Engine/AssetManager/ComponentSystem/GameObjectManager.h" 
+#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h" 
 #include "Engine/GraphicsEngine/Renderer.h"
 #include "Engine/PersistentSystems/Scene.h"
 #include "Engine/PersistentSystems/System/SceneGraph/WorldGraph.h"
 #include "ImGuizmo.h"
-#include "Tools/ImGui/ImGuiHelpers.hpp"
+#include "Editor/Editor/Helpers/ImGuiHelpers.h"
 #include "Tools/Utilities/Input/EnumKeys.h"
 #include "Tools/Utilities/LinearAlgebra/Vectors.hpp" 
 #include "Tools/Utilities/System/Event.h"
@@ -36,13 +35,16 @@
 #include <Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h> 
 #include <Engine/AssetManager/ComponentSystem/Components/Transform.h> 
 #include <Engine/AssetManager/ComponentSystem/GameObject.h> 
+#include <External/Optick/include/optick.h>
+#include <External/nlohmann/json.hpp>
+
 #include <Tools/ImGui/Font/IconsFontAwesome6.h>
 #include <Tools/ImGui/backends/imgui_impl_dx12.h> 
 #include <Tools/ImGui/backends/imgui_impl_win32.h>  
 #include <Tools/ImGui/imgui.h> 
+#include <Tools/ImGui/imgui_internal.h>
+
 #include <Tools/Logging/Logging.h>
-#include <External/Optick/include/optick.h>
-#include <External/nlohmann/json.hpp>
 #include <Tools/Utilities/Color.h>
 #include <Tools/Utilities/Game/Timer.h>
 #include <Tools/Utilities/Input/Input.hpp>
@@ -70,7 +72,7 @@ enum Theme {
 	builtIn
 };
 
-void SetupImGuiStyle(Theme theme)
+static void SetupImGuiStyle(Theme theme)
 {
 	OPTICK_EVENT();
 	ImGuizmo::AllowAxisFlip(false);
@@ -177,7 +179,7 @@ void SetupImGuiStyle(Theme theme)
 	colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 1.0f);
 	colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
 
-	auto path = ENGINE_RESOURCES.Directory() / "Theme.json";
+	auto path = GetEngineResources().Directory() / "Theme.json";
 	if (theme != builtIn && exists(path))
 	{
 		std::ifstream file(path);
@@ -273,12 +275,12 @@ void SetupImGuiStyle(Theme theme)
 	}
 }
 
-void LoadFont()
+static void LoadFont()
 {
 	bool     haveLoadedFont = false;
 	ImGuiIO& io = ImGui::GetIO();
 
-	auto path = ENGINE_RESOURCES.Directory() / "Theme.json";
+	auto path = GetEngineResources().Directory() / "Theme.json";
 	if (exists(path))
 	{
 		std::ifstream file(path);
@@ -292,11 +294,11 @@ void LoadFont()
 			float                 fontSize = json["FontSize"];
 			std::filesystem::path FontPath = json["FontPath"];
 
-			const std::string backupFont = ENGINE_RESOURCES.Directory().string() + "/Fonts/roboto/Roboto-Light.ttf";
-			const std::string backupBoldFont = ENGINE_RESOURCES.Directory().string() + "/Fonts/roboto/Roboto-Bold.ttf";
-			const std::string awsomeFont = ENGINE_RESOURCES.Directory().string() +
+			const std::string backupFont = GetEngineResources().Directory().string() + "/Fonts/roboto/Roboto-Light.ttf";
+			const std::string backupBoldFont = GetEngineResources().Directory().string() + "/Fonts/roboto/Roboto-Bold.ttf";
+			const std::string awsomeFont = GetEngineResources().Directory().string() +
 				"/Fonts/FontAwesome/fa-solid-900.ttf";
-			const std::string font_path = ENGINE_RESOURCES.Directory().string() + (FontPath).string();
+			const std::string font_path = GetEngineResources().Directory().string() + (FontPath).string();
 
 			if (!io.Fonts->AddFontFromFileTTF(font_path.c_str(), fontSize))
 			{
@@ -330,7 +332,7 @@ void LoadFont()
 	if (!haveLoadedFont)
 	{
 		ImFontConfig      font_config{};
-		const std::string backupFont = ENGINE_RESOURCES.Directory().string() + "/Fonts/roboto/Roboto-Light.ttf";
+		const std::string backupFont = GetEngineResources().Directory().string() + "/Fonts/roboto/Roboto-Light.ttf";
 		io.Fonts->AddFontFromFileTTF(backupFont.c_str(), 16.0f, &font_config);
 		font_config.MergeMode = true;
 
@@ -400,7 +402,7 @@ bool Editor::Initialize(HWND aHandle)
 
 
 	ImGui_ImplWin32_Init(aHandle);
-	renderer.InitializeImguiBackends();
+	GetRenderer().InitializeImguiBackends();
 
 	LoadFont();
 	SetupImGuiStyle(builtIn);
@@ -418,15 +420,15 @@ bool Editor::Initialize(HWND aHandle)
 
 	m_ActiveScene = std::make_shared<Scene>("Editor Scene");
 
-	Scene::activeManager().SetUpdatePriority<Transform>(ComponentManagerBase::UpdatePriority::Transform);
-	Scene::activeManager().SetUpdatePriority<cPhysics_Kinematic>(ComponentManagerBase::UpdatePriority::Physics);
-	Scene::activeManager().SetUpdatePriority<cPhysXDynamicBody>(ComponentManagerBase::UpdatePriority::Physics);
+	Scene::activeManager().SetUpdatePriority<Transform>(UpdatePriority::Transform);
+	Scene::activeManager().SetUpdatePriority<cPhysics_Kinematic>(UpdatePriority::Physics);
+	Scene::activeManager().SetUpdatePriority<cPhysXDynamicBody>(UpdatePriority::Physics);
 	// Force no write to thread after this?
 	//WorldGraph::InitializeWorld();
 
 	m_Callbacks[EditorCallback::ObjectSelected] = Event();
 	m_Callbacks[EditorCallback::SceneChange] = Event();
-	m_Callbacks[EditorCallback::SceneChange].AddListener([]() { EDITOR_INSTANCE.GetSelectedGameObjects().clear(); });
+	m_Callbacks[EditorCallback::SceneChange].AddListener([]() { (GetEditor()).GetSelectedGameObjects().clear(); });
 	m_Callbacks[EditorCallback::WM_DropFile] = Event();
 	gameState.Intialize("");
 
@@ -475,7 +477,7 @@ void Editor::DoWinProc(Window* window, const MSG& aMessage)
 		}
 	case WM_EXITSIZEMOVE:
 	{
-		//RENDERER.ResizeBuffers(window->Resolution());
+		//GetRenderer().ResizeBuffers(window->Resolution());
 		for (const auto& viewport : m_Viewports)
 		{
 			viewport->ResolutionUpdate();
@@ -491,7 +493,7 @@ void Editor::DoWinProc(Window* window, const MSG& aMessage)
 		ImGui_ImplDX12_Shutdown();
 		ImGui_ImplWin32_Shutdown();
 		ImGui::DestroyContext();
-		RENDERER.Shutdown();
+		GetRenderer().Shutdown();
 		return;
 	default:
 		break;
@@ -586,7 +588,7 @@ void Editor::Copy()
 
 void Editor::Paste()
 {
-	auto          selected = GetSelectedGameObjects();
+	//auto& selected = GetSelectedGameObjects();
 	CommandPacket packet;
 	for (auto& object : copiedObjects)
 	{
@@ -703,7 +705,7 @@ void Editor::Update()
 
 	if (Input.IsKeyPressed(Keys::F10))
 	{
-		ENGINE_RESOURCES.ClearUnused();
+		GetEngineResources().ClearUnused();
 	}
 	if (Input.IsKeyPressed(Keys::F6))
 	{
@@ -715,7 +717,7 @@ void Editor::Update()
 	// End
 
 	gameState.Update(delta);
-	RENDERER.Update(delta);
+	GetRenderer().Update(delta);
 	Shipyard_PhysXInstance.EndRead(delta);
 }
 
@@ -727,7 +729,7 @@ void Editor::Render()
 		viewport->Update();
 	}
 	Shipyard_PhysXInstance.Render();
-	RENDERER.Render(m_Viewports);
+	GetRenderer().Render(m_Viewports);
 }
 
 void Editor::AddViewPort()
@@ -898,12 +900,12 @@ void Editor::TopBar()
 }
 
 
-RECT Editor::GetViewportRECT()
+RECT Editor::GetViewportRECT() const
 {
 	return ViewportRect;
 }
 
-Vector2<unsigned int> Editor::GetViewportResolution()
+Vector2<unsigned int> Editor::GetViewportResolution() const
 {
 	const RECT rect = GetViewportRECT();
 	return Vector2<unsigned int>(rect.right - rect.left, rect.bottom - rect.top);

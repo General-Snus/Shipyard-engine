@@ -161,29 +161,29 @@ void Renderer::SetupDefaultVariables()
 
 
 	////Particle
-	ENGINE_RESOURCES.ForceLoadAsset<TextureHolder>(L"Textures/Default/DefaultParticle_P.dds", defaultParticleTexture);
+	GetEngineResources().ForceLoadAsset<TextureHolder>(L"Textures/Default/DefaultParticle_P.dds", defaultParticleTexture);
 	defaultParticleTexture->SetTextureType(eTextureType::ParticleMap);
 
-	ENGINE_RESOURCES.ForceLoadAsset<TextureHolder>(L"Textures/Default/NoiseTable.dds", NoiseTable);
+	GetEngineResources().ForceLoadAsset<TextureHolder>(L"Textures/Default/NoiseTable.dds", NoiseTable);
 
-	ENGINE_RESOURCES.ForceLoadAsset<TextureHolder>("Textures/Default/DefaultTile.dds", defaultTexture);
+	GetEngineResources().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultTile.dds", defaultTexture);
 	defaultTexture->SetTextureType(eTextureType::ColorMap);
-	ENGINE_RESOURCES.ForceLoadAsset<TextureHolder>("Textures/Default/DefaultNormal.dds", defaultNormalTexture);
+	GetEngineResources().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultNormal.dds", defaultNormalTexture);
 	defaultNormalTexture->SetTextureType(eTextureType::NormalMap);
-	ENGINE_RESOURCES.ForceLoadAsset<TextureHolder>("Textures/Default/DefaultMaterial.dds", defaultMatTexture);
+	GetEngineResources().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultMaterial.dds", defaultMatTexture);
 	defaultMatTexture->SetTextureType(eTextureType::MaterialMap);
-	ENGINE_RESOURCES.ForceLoadAsset<TextureHolder>("Textures/Default/DefaultEffect.dds", defaultEffectTexture);
+	GetEngineResources().ForceLoadAsset<TextureHolder>("Textures/Default/DefaultEffect.dds", defaultEffectTexture);
 	defaultEffectTexture->SetTextureType(eTextureType::EffectMap);
 
-	ENGINE_RESOURCES.ForceLoadAsset<ShipyardShader>("Shaders/Default_VS.cso", defaultVS);
-	ENGINE_RESOURCES.ForceLoadAsset<ShipyardShader>("Shaders/Default_PS.cso", defaultPS);
-	ENGINE_RESOURCES.ForceLoadAsset<Material>("Materials/Default.json", defaultMaterial);
+	GetEngineResources().ForceLoadAsset<ShipyardShader>("Shaders/Default_VS.cso", defaultVS);
+	GetEngineResources().ForceLoadAsset<ShipyardShader>("Shaders/Default_PS.cso", defaultPS);
+	GetEngineResources().ForceLoadAsset<Material>("Materials/Default.json", defaultMaterial);
 	defaultMaterial->SetShader(defaultVS, defaultPS);
 
-	ENGINE_RESOURCES.ForceLoadAsset<Mesh>("default.fbx", defaultMesh);
+	GetEngineResources().ForceLoadAsset<Mesh>("default.fbx", defaultMesh);
 
 	// Light
-	ENGINE_RESOURCES.ForceLoadAsset<TextureHolder>("Textures/skansen_cubemap.dds", defaultCubeMap);
+	GetEngineResources().ForceLoadAsset<TextureHolder>("Textures/skansen_cubemap.dds", defaultCubeMap);
 	defaultCubeMap->SetTextureType(eTextureType::CubeMap);
 }
 
@@ -333,7 +333,7 @@ void Renderer::EndFrame(Viewport* gamePort)
 	OPTICK_GPU_EVENT("EndFrame");
 
 	// imgui pass is not written and we have to manually transfer the viewport to backbuffer
-	if (EDITOR_INSTANCE.GetIsGUIActive())
+	if (GetEditor().GetIsGUIActive())
 	{
 		ImGuiPass();
 	}
@@ -521,7 +521,7 @@ void Renderer::ViewportToBackBuffer(Viewport* viewport)
 
 void Renderer::ImGuiPass()
 {
-	if (!EDITOR_INSTANCE.GetIsGUIActive()) { return; }
+	if (!GetEditor().GetIsGUIActive()) { return; }
 
 	const auto commandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 	const auto commandList = commandQueue->GetCommandList();

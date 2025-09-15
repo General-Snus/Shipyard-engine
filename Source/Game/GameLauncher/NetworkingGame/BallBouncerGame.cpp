@@ -2,6 +2,10 @@
 #include "BallBouncerGame.h"
 #include "Engine\AssetManager\GameResourcesLoader.h"
 #include "Engine\AssetManager\ComponentSystem\Components\Network\NetworkSync.h"
+#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
+#include "Engine/AssetManager/ComponentSystem/Components/Collider.h"
+#include "Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h"
+#include "Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h"
 
 GameObject BallEradicationGame::MakeBall(Vector3f position)
 {

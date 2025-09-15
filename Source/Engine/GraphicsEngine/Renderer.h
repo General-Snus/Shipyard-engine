@@ -14,9 +14,7 @@ class Mesh;
 class Material;
 class PSOCache;
 class ShipyardShader;
-
-#define RENDERER ServiceLocator::Instance().GetService<Renderer>()
-
+ 
 class Renderer: public Singleton {
 	friend class GraphicsEngineUtilities;
 
@@ -121,3 +119,9 @@ public:
 		}
 	}
 };
+
+inline Renderer& GetRenderer()
+{
+	return ServiceLocator::Instance().GetService<Renderer>();
+
+}

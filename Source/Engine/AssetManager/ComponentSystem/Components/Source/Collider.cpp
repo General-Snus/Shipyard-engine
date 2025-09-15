@@ -5,6 +5,7 @@
 #include <Engine/PersistentSystems/System/Colission/OnCollision.h>
 #include <Tools/Utilities/LinearAlgebra/Intersection.hpp>
 #include "Editor/Editor/Core/ApplicationState.h"
+#include "ComponentSystem\Components\MeshRenderer.h"
 
 Collider::Collider(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager) {
 	if(const auto renderer = TryGetComponent<MeshRenderer>()) {
@@ -109,7 +110,7 @@ bool Collider::InspectorView() {
 	if(!Component::InspectorView()) {
 		return false;
 	}
-	Reflect<Collider>();
+	Reflect();
 	if(myCollider) {
 		myCollider->InspectorView();
 

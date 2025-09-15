@@ -28,7 +28,7 @@ bool UserComponent::InspectorView()
 		return false;
 	}
 
-	Reflect<UserComponent>();
+	Reflect();
 
 	return false;
 }

@@ -93,6 +93,15 @@
     <ClInclude Include="Windows\EditorWindows\NetworkSettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Handlers\SelectionHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Handlers\Collection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Helpers\ImGuiHelpers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Source\Editor.cpp">
@@ -170,9 +179,16 @@
     <ClCompile Include="Windows\EditorWindows\Source\NetworkSettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Handlers\Collection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Helpers\ImGuiHelpers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
+    <None Include="Core\Handlers\HandlerInstruction.md" />
     <None Include="packages.config" />
   </ItemGroup>
 </Project>

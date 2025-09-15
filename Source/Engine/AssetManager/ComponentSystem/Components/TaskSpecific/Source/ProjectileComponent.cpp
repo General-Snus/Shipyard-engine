@@ -2,6 +2,7 @@
 
 #include "Engine/AssetManager/ComponentSystem/Components/TaskSpecific/ProjectileComponent.h"
 #include "Engine/AssetManager/ComponentSystem/Components/ActorSystem/CombatComponent.h"
+#include "Engine/PersistentSystems/Scene.h"
 
 ProjectileComponent::ProjectileComponent(const SY::UUID anOwnerId, GameObjectManager* aManager)
 	: Component(anOwnerId, aManager)

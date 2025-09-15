@@ -28,7 +28,7 @@ bool cActor::InspectorView()
     {
         return false;
     }
-    Reflect<cActor>();
+    Reflect ();
 
     std::string controllerType = "No controller";
     if (controller)

@@ -2,10 +2,10 @@
 #include <Engine/AssetManager/ComponentSystem/Component.h>
 #include <Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h>
 
-class cPhysics_Kinematic : public Component
+class cPhysics_Kinematic : public Reflectable<cPhysics_Kinematic>, public Component
 {
   public:
-    ReflectableTypeRegistration();
+    reflectable(cPhysics_Kinematic);
     cPhysics_Kinematic(const SY::UUID anOwnerId, GameObjectManager *aManager);
     ~cPhysics_Kinematic() override;
     void Init() override;

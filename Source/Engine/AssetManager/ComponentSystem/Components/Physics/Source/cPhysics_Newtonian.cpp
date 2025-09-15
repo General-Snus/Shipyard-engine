@@ -21,6 +21,6 @@ bool cPhysics_Newtonian::InspectorView()
     {
         return false;
     }
-    Reflect<cPhysics_Newtonian>();
+    Reflect();
     return true;
 }

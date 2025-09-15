@@ -1,67 +1,34 @@
-#pragma once
-#include <functional>
+#pragma once 
+#include "Engine/AssetManager/Reflection/Reflectable.h" 
+#include "Engine/AssetManager/Interfaces.h" 
 #include <filesystem>
-#include <Engine/AssetManager/Enums.h>
-#include "Engine/AssetManager/Reflection/ReflectionTemplate.h" 
-#include "Tools/Logging/Logging.h"
-#include "Tools/Reflection/refl.hpp"
+#include <functional>
+#include <memory>
 
 class Scene;
 class TextureHolder;
-
-class AssetBase : public Reflectable
+ 
+class AssetBase : public AvailableInInspector, public Reflectable<AssetBase>
 {
 public:
-	ReflectableTypeRegistration();
+	reflectable(AssetBase)
 	AssetBase(const std::filesystem::path& aFilePath);
 	virtual ~AssetBase() = default;
 	// When overriding you have the responisiblitity to set the isloadedcomplete flag
 	virtual void Init() = 0;
 
-	const std::filesystem::path& GetAssetPath() const
-	{
-		return AssetPath;
-	};
-	bool                                   InspectorView() override;
+	const std::filesystem::path& GetAssetPath() const;
+	bool InspectorView() override;
 	virtual std::shared_ptr<TextureHolder> GetEditorIcon();
 
-	virtual bool InjectIntoScene(std::shared_ptr<Scene> SceneToAddAsset)
-	{
-		SceneToAddAsset;
-		LOGGER.Warn(
-			std::format("Asset could not be added to scene\nAsset of type {} is not possible to load into scene",
-			            GetTypeInfo().Name()));
-		return false;
-	};
-
+	virtual bool InjectIntoScene(std::shared_ptr<Scene> SceneToAddAsset);
 
 	//Warning,this is a blocking operation, timeout is seconds, negative is infinite block
-	void WaitForReady(float timeout = 100.0f)
-	{
-		assert(isBeingLoaded &&
-			"You really should already be trying to load the bloody asset if you wait to wait for it to be ready");
+	void WaitForReady(float timeout = 100.0f) const;
 
-		using fsec = std::chrono::duration<float>;
-		if (timeout > 0.0f)
-		{
-			const auto startTime = std::chrono::system_clock::now();
-			float      countdown = 0.0f;
-			while (countdown > timeout && isLoadedComplete == false)
-			{
-				auto diff = std::chrono::system_clock::now() - startTime;
-				countdown = std::chrono::duration_cast<fsec>(diff).count();
-			}
-			return;
-		}
-
-		while (isLoadedComplete == false)
-		{
-		}
-	}
-
-	std::filesystem::path              AssetPath;
-	bool                               isLoadedComplete = false;
-	bool                               isBeingLoaded = false;
+	std::filesystem::path AssetPath;
+	bool isLoadedComplete = false;
+	bool isBeingLoaded = false;
 	std::vector<std::function<void()>> callBackOnFinished;
 };
 

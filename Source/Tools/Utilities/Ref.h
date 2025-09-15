@@ -4,13 +4,14 @@
 //Simple reference counted container
 #include <type_traits>
 
-template<typename T>
-concept releaseable = requires(T t)
-{
-	t.Release();//Make sure its a IUnknown instead or just fulfills its interface
-};
+//template<typename T>
+//concept releaseable = requires(T t)
+//{
+//	t.Release();//Make sure its a IUnknown instead or just fulfills its interface
+//};
+ 
 
-template<releaseable T>
+template<typename T>
 class RefenceCountedContainer
 {
 public:
@@ -193,7 +194,7 @@ public:
 
 
 	// query for U interface
-	template<releaseable U>
+	template<typename U>
 	HRESULT As(RefenceCountedContainer<U>* p) const
 	{
 		return ptr_->QueryInterface(__uuidof(U), reinterpret_cast<void**>(p->ReleaseAndGetAddressOf()));
@@ -202,7 +203,7 @@ public:
 
 protected:
 	InterfaceType* ptr_;
-	template<releaseable U> friend class RefenceCountedContainer;
+	template<typename U> friend class RefenceCountedContainer;
 
 	void InternalAddRef() const
 	{
@@ -228,5 +229,6 @@ protected:
 
 };
 
-template <releaseable T>
+
+template <typename T>
 using Ref = RefenceCountedContainer<T>; 

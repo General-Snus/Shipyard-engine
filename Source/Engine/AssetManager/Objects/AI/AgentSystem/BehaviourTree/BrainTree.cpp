@@ -1,6 +1,7 @@
 #include "AssetManager.pch.h"
 
 #include "BrainTree.h"
+#include "Engine\AssetManager\ComponentSystem\GameObject.h"
 
 namespace BrainTree
 {

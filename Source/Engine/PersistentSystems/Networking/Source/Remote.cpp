@@ -36,7 +36,7 @@ void Remote::TryUDPConnection(NetAddress serverAddress)
 	serverAddress;
 }
 
-NetAddress Remote::AddressByProtocol(NetworkConnection::Protocol protocol)
+NetAddress Remote::AddressByProtocol(NetworkConnection::Protocol protocol) const
 {
 	switch (protocol)
 	{

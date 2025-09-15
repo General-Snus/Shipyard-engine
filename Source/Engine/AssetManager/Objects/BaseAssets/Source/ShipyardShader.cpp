@@ -1,64 +1,83 @@
 #include "AssetManager.pch.h"
 
-#include "../ShipyardShader.h" 
-#include "DirectX/DX12/Graphics/Helpers.h"
-#include <d3d12shader.h> 
+#include "../ShipyardShader.h"
+#include <d3d12shader.h>
+#include "wrl.h"
+#include "AssetManager.h"
 
+
+using namespace Microsoft::WRL;
 static inline ComPtr<IDxcCompiler3> pCompiler;
 static inline ComPtr<IDxcUtils> pUtils;
 static inline ComPtr<IDxcLibrary>  pLibrary;
 static inline uint32_t             codePage = CP_UTF8;
 
-ShipyardShader::ShipyardShader(const std::filesystem::path& aFilePath) : AssetBase(aFilePath) {
+ShipyardShader::ShipyardShader(const std::filesystem::path& aFilePath) : AssetBase(aFilePath)
+{
 	m_ShaderName = aFilePath.filename();
 }
 
 
-void initStatics() {
-	if(!pCompiler) {
-		DxcCreateInstance(CLSID_DxcCompiler,__uuidof(IDxcCompiler3),&pCompiler);
+void initStatics()
+{
+	if (!pCompiler)
+	{
+		DxcCreateInstance(CLSID_DxcCompiler, __uuidof(IDxcCompiler3), &pCompiler);
 	}
-	if(!pUtils) {
-		DxcCreateInstance(CLSID_DxcUtils,__uuidof(IDxcUtils),&pUtils);
+	if (!pUtils)
+	{
+		DxcCreateInstance(CLSID_DxcUtils, __uuidof(IDxcUtils), &pUtils);
 	}
-	if(!pLibrary) {
-		DxcCreateInstance(CLSID_DxcLibrary,__uuidof(IDxcLibrary),&pLibrary);
+	if (!pLibrary)
+	{
+		DxcCreateInstance(CLSID_DxcLibrary, __uuidof(IDxcLibrary), &pLibrary);
 	}
 }
-void ShipyardShader::Init() {
+void ShipyardShader::Init()
+{
 
 	initStatics();
 	isBeingLoaded = true;
 
-	if(!is_regular_file(AssetPath)) {
+	if (!is_regular_file(AssetPath))
+	{
 		LOGGER.Warn("Failed to load shader at: " + AssetPath.string());
 		isBeingLoaded = false;
 		isLoadedComplete = false;
 		return;
 	}
 
-	if((AssetPath.extension() == ".hlsl")) {
+	if ((AssetPath.extension() == ".hlsl"))
+	{
 #define shaderVersionVS L"vs_6.5"
 #define shaderVersionGS L"gs_6.5"
 #define shaderVersionPS L"ps_6.5"
 #define shaderVersionCS L"vs_6.5"
 
 		const std::string stem = AssetPath.stem().string();
-		if(stem.size() > 2) {
+		if (stem.size() > 2)
+		{
 			std::string lastCharacter = (stem.substr(stem.size() - 2));
 
-			std::ranges::transform(lastCharacter,lastCharacter.begin(),
+			std::ranges::transform(lastCharacter, lastCharacter.begin(),
 				[](auto a) { return static_cast<char>(::tolower(a)); });
-			if(lastCharacter == "vs") {
+			if (lastCharacter == "vs")
+			{
 				//CompileShader(AssetPath.wstring().c_str(),L"main",shaderVersionVS,&m_Blob);
 				return;
-			} else if(lastCharacter == "gs") {
+			}
+			else if (lastCharacter == "gs")
+			{
 				//CompileShader(AssetPath.wstring().c_str(),L"main",shaderVersionGS,&m_Blob);
 				return;
-			} else if(lastCharacter == "ps") {
+			}
+			else if (lastCharacter == "ps")
+			{
 				//CompileShader(AssetPath.wstring().c_str(),L"main",shaderVersionPS,&m_Blob);
 				return;
-			} else if(lastCharacter == "cs") {
+			}
+			else if (lastCharacter == "cs")
+			{
 				//CompileShader(AssetPath.wstring().c_str(),L"main",shaderVersionCS,&m_Blob);
 				return;
 			}
@@ -66,19 +85,19 @@ void ShipyardShader::Init() {
 	}
 
 	// Helpers::ThrowIfFailed(D3DReadFileToBlob(AssetPath.wstring().c_str(), &m_Blob));
-
 	Ref<IDxcBlobEncoding> pSourceBlob;
-	const HRESULT            hr = pLibrary->CreateBlobFromFile(AssetPath.wstring().c_str(),&codePage,pSourceBlob.GetAddressOf());
+	const auto hr = pLibrary->CreateBlobFromFile(AssetPath.wstring().c_str(), &codePage, pSourceBlob.GetAddressOf());
 	//const HRESULT            hr = pUtils->LoadFile(AssetPath.wstring().c_str(),&codePage,&pSourceBlob);
 	m_Blob = pSourceBlob;
 
-	if(FAILED(hr)) {
+	if (FAILED(hr))
+	{
 		LOGGER.Err("Shader blob compilation failed");
 	}
 	isBeingLoaded = false;
 	isLoadedComplete = true;
 }
-//
+
 //HRESULT ShipyardShader::CompileShader(const std::filesystem::path& path,_In_ LPCWSTR entryPoint,_In_ LPCWSTR profile,
 //	_Outptr_ IDxcBlob** blob) {
 //	if(!path.empty() || !entryPoint || !profile || !blob) {
@@ -112,11 +131,10 @@ void ShipyardShader::Init() {
 //	//return hr;
 //}
 
-
-HRESULT ShipyardShader::CompileShader(const char* shader,const wchar_t* entryPoint,const wchar_t* target,
-	IDxcBlob** blob) {
-
-	if(!shader || !entryPoint || !target || !blob) {
+HRESULT ShipyardShader::CompileShader(const char* shader, const wchar_t* entryPoint, const wchar_t* target, IDxcBlob** blob)
+{
+	if (!shader || !entryPoint || !target || !blob)
+	{
 		return E_INVALIDARG;
 	}
 
@@ -139,10 +157,10 @@ HRESULT ShipyardShader::CompileShader(const char* shader,const wchar_t* entryPoi
 	ComPtr<IDxcIncludeHandler> pIncludeHandler;
 	pUtils->CreateDefaultIncludeHandler(&pIncludeHandler);
 
-
 	// Compile the shader  
 	ComPtr<IDxcResult> pResults;
-	if(FAILED(pCompiler->Compile(&sourceBuffer,arguments.data(),(uint32_t)arguments.size(),pIncludeHandler.Get(),IID_PPV_ARGS(pResults.GetAddressOf())))) {
+	if (FAILED(pCompiler->Compile(&sourceBuffer, arguments.data(), (uint32_t)arguments.size(), pIncludeHandler.Get(), IID_PPV_ARGS(pResults.GetAddressOf()))))
+	{
 		// Either an unrecoverable error exception was caught or a failing HRESULT was returned
 		// Use fputs to prevent any chance of new allocations
 		// Terminate the process
@@ -153,13 +171,14 @@ HRESULT ShipyardShader::CompileShader(const char* shader,const wchar_t* entryPoi
 	//
 	// Print errors if present.
 	//
-	ComPtr<IDxcBlobUtf8> pErrors = nullptr;
+	ComPtr<IDxcBlobUtf8> pErrors;
 	// Note that d3dcompiler would return null if no errors or warnings are present.
 	// IDxcCompiler3::Compile will always return an error buffer,
 	// but its length will be zero if there are no warnings or errors.
-	if(SUCCEEDED(pResults->GetOutput(DXC_OUT_ERRORS,IID_PPV_ARGS(&pErrors),nullptr)) &&
-		pErrors != nullptr && pErrors->GetStringLength() != 0) {
-		const auto str = std::format("Warnings and Errors:\n{}\n",pErrors->GetStringPointer());
+	if (SUCCEEDED(pResults->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&pErrors), nullptr)) &&
+		pErrors != nullptr && pErrors->GetStringLength() != 0)
+	{
+		const auto str = std::format("Warnings and Errors:\n{}\n", pErrors->GetStringPointer());
 		LOGGER.Warn(str);
 	}
 
@@ -167,7 +186,8 @@ HRESULT ShipyardShader::CompileShader(const char* shader,const wchar_t* entryPoi
 	// Quit if the compilation failed.
 	//
 	HRESULT hrStatus;
-	if(FAILED(pResults->GetStatus(&hrStatus)) || FAILED(hrStatus)) {
+	if (FAILED(pResults->GetStatus(&hrStatus)) || FAILED(hrStatus))
+	{
 		// Compilation failed, but successful HRESULT was returned.
 		// Could reuse the compiler and allocator objects. For simplicity, exit here anyway
 		LOGGER.Warn("Compilation Failed\n");
@@ -179,7 +199,8 @@ HRESULT ShipyardShader::CompileShader(const char* shader,const wchar_t* entryPoi
 	////     
 	ComPtr<IDxcBlob> pShader;
 	ComPtr<IDxcBlobUtf16> pShaderName = nullptr;
-	if(SUCCEEDED(pResults->GetOutput(DXC_OUT_OBJECT,IID_PPV_ARGS(&pShader),&pShaderName)) && pShader != nullptr) {
+	if (SUCCEEDED(pResults->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&pShader), &pShaderName)) && pShader != nullptr)
+	{
 		//	FILE* fp = NULL;
 
 		//	_wfopen_s(&fp,pShaderName->GetStringPointer(),L"wb");
@@ -192,13 +213,14 @@ HRESULT ShipyardShader::CompileShader(const char* shader,const wchar_t* entryPoi
 	//
 	ComPtr<IDxcBlob> pPDB = nullptr;
 	ComPtr<IDxcBlobUtf16> pPDBName = nullptr;
-	if(SUCCEEDED(pResults->GetOutput(DXC_OUT_PDB,IID_PPV_ARGS(&pPDB),&pPDBName))) {
+	if (SUCCEEDED(pResults->GetOutput(DXC_OUT_PDB, IID_PPV_ARGS(&pPDB), &pPDBName)))
+	{
 		FILE* fp = NULL;
 
 		// Note that if you don't specify -Fd, a pdb name will be automatically generated.
 		// Use this file name to save the pdb so that PIX can find it quickly.
-		_wfopen_s(&fp,pPDBName->GetStringPointer(),L"wb");
-		fwrite(pPDB->GetBufferPointer(),pPDB->GetBufferSize(),1,fp);
+		_wfopen_s(&fp, pPDBName->GetStringPointer(), L"wb");
+		fwrite(pPDB->GetBufferPointer(), pPDB->GetBufferSize(), 1, fp);
 		fclose(fp);
 	}
 
@@ -207,8 +229,9 @@ HRESULT ShipyardShader::CompileShader(const char* shader,const wchar_t* entryPoi
 	// Get separate reflection.
 	//
 	ComPtr<IDxcBlob> pReflectionData;
-	if(SUCCEEDED(pResults->GetOutput(DXC_OUT_REFLECTION,IID_PPV_ARGS(&pReflectionData),nullptr)) &&
-		pReflectionData != nullptr) {
+	if (SUCCEEDED(pResults->GetOutput(DXC_OUT_REFLECTION, IID_PPV_ARGS(&pReflectionData), nullptr)) &&
+		pReflectionData != nullptr)
+	{
 		// Optionally, save reflection blob for later here.
 
 		// Create reflection interface.
@@ -218,7 +241,7 @@ HRESULT ShipyardShader::CompileShader(const char* shader,const wchar_t* entryPoi
 		ReflectionData.Size = pReflectionData->GetBufferSize();
 
 		ComPtr< ID3D12ShaderReflection > pReflection;
-		pUtils->CreateReflection(&ReflectionData,IID_PPV_ARGS(&pReflection));
+		pUtils->CreateReflection(&ReflectionData, IID_PPV_ARGS(&pReflection));
 
 		// Use reflection interface here.
 
@@ -228,24 +251,30 @@ HRESULT ShipyardShader::CompileShader(const char* shader,const wchar_t* entryPoi
 	return 0;
 }
 
-void ShipyardShader::SetShader(const Ref<IDxcBlob>& aShader) {
+void ShipyardShader::SetShader(const Ref<IDxcBlob>& aShader)
+{
 	m_Blob = aShader;
 }
 
-IDxcBlob* ShipyardShader::GetBlob() const {
+IDxcBlob* ShipyardShader::GetBlob() const
+{
 	return m_Blob.Get();
 }
 
-LPVOID ShipyardShader::GetBufferPtr() {
+LPVOID ShipyardShader::GetBufferPtr()
+{
 	return m_Blob->GetBufferPointer();
 }
 
-size_t ShipyardShader::GetBlobSize() const {
+size_t ShipyardShader::GetBlobSize() const
+{
 	return m_Blob->GetBufferSize();
 }
 
-bool ShipyardShader::InspectorView() {
-	if(!AssetBase::InspectorView()) {
+bool ShipyardShader::InspectorView()
+{
+	if (!AssetBase::InspectorView())
+	{
 		return false;
 	}
 
@@ -259,12 +288,13 @@ bool ShipyardShader::InspectorView() {
 
 	//
 
-	ImGui::Text("Shader Name: %s",m_ShaderName.string().c_str());
-	ImGui::Text("Shader byte size: %i",m_Blob->GetBufferSize());
+	ImGui::Text("Shader Name: %s", m_ShaderName.string().c_str());
+	ImGui::Text("Shader byte size: %i", m_Blob->GetBufferSize());
 
 	return true;
 }
 
-std::shared_ptr<TextureHolder> ShipyardShader::GetEditorIcon() {
-	return ENGINE_RESOURCES.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+std::shared_ptr<TextureHolder> ShipyardShader::GetEditorIcon()
+{
+	return GetEngineResources().LoadAsset<TextureHolder>("Textures/Widgets/File.png");
 }

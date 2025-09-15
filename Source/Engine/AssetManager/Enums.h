@@ -11,6 +11,14 @@ enum class eTextureType
 	ParticleMap = 4,
 	CubeMap = 100
 };
+enum class UpdatePriority
+{
+	Transform,
+	Normal = 100,
+	Physics,
+	Collision,
+	Render
+};
 
 enum class   Layer
 {

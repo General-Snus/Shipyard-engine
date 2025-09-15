@@ -41,7 +41,7 @@ void ReplicationLayer::fixedNetworkUpdate(NetworkRunner& runner)
 		client_ReadIncoming(runner);
 		client_fixedNetworkUpdate(runner);
 	}
-	spacialFrequencyCulling.Draw(RENDERER.debugDrawer);
+	spacialFrequencyCulling.Draw(GetRenderer().debugDrawer);
 }
 
 void ReplicationLayer::server_fixedNetworkUpdate(NetworkRunner& runner)

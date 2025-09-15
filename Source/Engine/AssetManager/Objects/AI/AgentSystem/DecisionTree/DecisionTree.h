@@ -1,4 +1,5 @@
 #pragma once
+#include <Engine\AssetManager\ComponentSystem\GameObject.h>
 #include <functional>
 
 class DecisionTree

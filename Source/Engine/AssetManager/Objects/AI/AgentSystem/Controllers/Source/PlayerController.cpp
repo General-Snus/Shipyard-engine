@@ -2,24 +2,25 @@
 
 #include "../PlayerController.h"
 #include <Tools/Utilities/Input/Input.hpp>
+#include <Engine\AssetManager\ComponentSystem\Components\Transform.h>
 
 PlayerController::PlayerController()
 {
-    this->controllerType = eControllerType::player;
+	this->controllerType = eControllerType::player;
 }
 
 bool PlayerController::Update(GameObject input)
 {
-    const auto *transform = input.TryGetComponent<Transform>();
+	const auto* transform = input.TryGetComponent<Transform>();
 
-    InputPosition(transform->GetPosition());
+	InputPosition(transform->GetPosition());
 
-    return true;
+	return true;
 }
 
-void PlayerController::InputPosition(const Vector3f &currentPosition)
+void PlayerController::InputPosition(const Vector3f& currentPosition)
 {
-    const Vector3f position = currentPosition;
-    const Vector3f direction = {0.0f, 0.0f, 1.0f};
-    Vector3f hitPoint = {0.0f, 0.0f, 1.0f};
+	const Vector3f position = currentPosition;
+	const Vector3f direction = { 0.0f, 0.0f, 1.0f };
+	Vector3f hitPoint = { 0.0f, 0.0f, 1.0f };
 }

@@ -3,7 +3,7 @@
 #include <format>
 #include <Engine/AssetManager/ComponentSystem/Components/Transform.h>
 #include <Font/IconsFontAwesome5.h>
-#include "ImGuiHelpers.hpp"
+#include "Editor/Editor/Helpers/ImGuiHelpers.h"
 #include "Editor/Editor/Commands/SceneAction.h"
 #include "Editor/Editor/Core/Editor.h"
 #include "Engine/AssetManager/AssetManager.h"
@@ -12,6 +12,7 @@
 #include "Engine/PersistentSystems/Scene.h"
 #include "Tools/Utilities/Math.hpp"
 #include "Tools/Utilities/Input/Input.hpp"
+#include "imgui_internal.h"
 
 #undef min
 #undef max
@@ -87,25 +88,25 @@ void Hierarchy::PopupMenu(SY::UUID id) {
 		}
 		ImGui::Separator();
 		if(ImGui::Selectable("Copy")) {
-			EDITOR_INSTANCE.Copy();
+			GetEditor().Copy();
 		}
 		if(ImGui::Selectable("Paste")) {
-			EDITOR_INSTANCE.Paste();
+			GetEditor().Paste();
 		}
 		ImGui::Separator();
 		if(ImGui::Selectable("Move camera to object",false,flag)) {
-			EDITOR_INSTANCE.FocusObject(Scene::activeManager().GetGameObject(id));
+			GetEditor().FocusObject(Scene::activeManager().GetGameObject(id));
 		}
 		if(ImGui::Selectable("Align With View",false,flag)) {
 			// Move object to align with scene camera
-			EDITOR_INSTANCE.AlignObject(Scene::activeManager().GetGameObject(id));
+			GetEditor().AlignObject(Scene::activeManager().GetGameObject(id));
 		}
 		if(ImGui::Selectable("Align View to Selected",false,flag)) {
 			// Move scene camera to align with selected object
-			EDITOR_INSTANCE.FocusObject(Scene::activeManager().GetGameObject(id),false);
+			GetEditor().FocusObject(Scene::activeManager().GetGameObject(id),false);
 		}
 		if(ImGui::Selectable("Set as Parent",false,flag)) {
-			const auto selected = EDITOR_INSTANCE.GetSelectedGameObjects();
+			const auto selected = GetEditor().GetSelectedGameObjects();
 
 			for(auto& child : selected) {
 				// TODO Whole component change function
@@ -135,7 +136,7 @@ void Hierarchy::RenderNode(Transform& transform) {
 	const auto& data = transform.gameObject();
 	const auto  id = data.GetID();
 	bool        isSelected = false;
-	const auto& selectedObjects = EDITOR_INSTANCE.GetSelectedGameObjects();
+	const auto& selectedObjects = GetEditor().GetSelectedGameObjects();
 	for(const auto& i : selectedObjects) {
 		if(i.GetID() == id) {
 			isSelected = true;
@@ -164,9 +165,9 @@ void Hierarchy::RenderNode(Transform& transform) {
 		if(ImGui::IsItemHovered()) {
 			if(ImGui::IsItemClicked() && !isSelected || ImGui::IsItemJustReleased()) {
 				clickedAnyNode = true;
-				EDITOR_INSTANCE.m_Callbacks[EditorCallback::ObjectSelected].Invoke();
+				GetEditor().m_Callbacks[EditorCallback::ObjectSelected].Invoke();
 
-				auto& refSelected = EDITOR_INSTANCE.GetSelectedGameObjects();
+				auto& refSelected = GetEditor().GetSelectedGameObjects();
 				!Input.IsKeyHeld(Keys::SHIFT) ? refSelected.clear() : __nop();
 				refSelected.push_back(Scene::activeManager().GetGameObject(id));
 			}
@@ -192,7 +193,7 @@ inline void Hierarchy::DragDrop(Transform& transform) {
 	if(ImGui::BeginDragDropTarget()) {
 		if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("HIERARCHY_NODE")) {
 			// TODO do we want all selected? We can guarantee that the payload is one of them
-			const auto& list = EDITOR_INSTANCE.GetSelectedGameObjects();
+			const auto& list = GetEditor().GetSelectedGameObjects();
 			if(!list.empty()) {
 				for(auto& obj : list) {
 					if(!obj.IsValid() && obj.GetID() != transform.GetOwner()) {
@@ -287,12 +288,12 @@ void Hierarchy::RenderImGUi() {
 	}
 
 	if(!clickedAnyNode && ImGui::IsItemClicked()) {
-		EDITOR_INSTANCE.GetSelectedGameObjects().clear();
+		GetEditor().GetSelectedGameObjects().clear();
 	}
 
 	if(ImGui::BeginDragDropTarget()) {
 		if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("HIERARCHY_NODE")) {
-			const auto& list = EDITOR_INSTANCE.GetSelectedGameObjects();
+			const auto& list = GetEditor().GetSelectedGameObjects();
 			if(!list.empty()) {
 				for(auto& obj : list) {
 					if(!obj.IsValid()) {

@@ -5,6 +5,7 @@
 #include <External/nlohmann/json.hpp>
 #include "Engine/AssetManager/AssetManager.h"
 #include "LinearAlgebra/Vectors.hpp"
+#include "Tools\Logging\Logging.h"
 
 #undef min
 #undef max
@@ -35,7 +36,7 @@ void ColorManager::InitializeDefaultColors()
 
 void ColorManager::LoadColorsFromFile(const std::filesystem::path& path)
 {
-	const auto contentPath = ENGINE_RESOURCES.Directory() / path;
+	const auto contentPath = GetEngineResources().Directory() / path;
 	if (!exists(contentPath))
 	{
 		LOGGER.Warn("Color file not found: " + contentPath.string());
@@ -65,7 +66,7 @@ void ColorManager::LoadColorsFromFile(const std::filesystem::path& path)
 
 void ColorManager::DumpToFile(const std::filesystem::path& path)
 {
-	const auto contentPath = ENGINE_RESOURCES.Directory() / path;
+	const auto contentPath = GetEngineResources().Directory() / path;
 
 	if (!exists(contentPath))
 	{

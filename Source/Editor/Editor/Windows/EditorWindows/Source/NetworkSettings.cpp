@@ -1,10 +1,11 @@
 #include "../NetworkSettings.h"
 
 #include "imgui.h"
-#include "ImGuiHelpers.hpp"
+#include "Editor/Editor/Helpers/ImGuiHelpers.h"
 #include <format>
 #include <Engine/PersistentSystems/Networking/NetworkRunner.h>
 #include <WinSock2.h>
+#include "misc\cpp\imgui-combo-filter.h"
 
 
 NetworkSettings::NetworkSettings() {}

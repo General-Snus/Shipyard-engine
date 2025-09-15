@@ -15,7 +15,7 @@ bool GraphicsEngineUtilities::GenerateSceneForIcon(std::shared_ptr<Mesh> meshAss
 												   std::shared_ptr<Material> material)
 {
 	OPTICK_EVENT();
-	if (RENDERER.GetAmountOfRenderJob())
+	if (GetRenderer().GetAmountOfRenderJob())
 	{
 		return false;
 	}
@@ -23,7 +23,7 @@ bool GraphicsEngineUtilities::GenerateSceneForIcon(std::shared_ptr<Mesh> meshAss
 	renderTarget->isBeingLoaded = true;
 	const auto res = Vector2ui(1920, 1080);
 	{
-		auto& camera = RENDERER.newScene->GetGOM().GetCamera().GetComponent<Camera>();
+		auto& camera = GetRenderer().newScene->GetGOM().GetCamera().GetComponent<Camera>();
 		camera.SetResolution(res);
 		auto &transform = camera.transform();
 		const Vector3f position = meshAsset->Bounds.GetCenter() + Vector3f(0, 0, -meshAsset->Bounds.GetRadius());
@@ -32,13 +32,13 @@ bool GraphicsEngineUtilities::GenerateSceneForIcon(std::shared_ptr<Mesh> meshAss
 	}
 
 	{
-		const auto target = RENDERER.newScene->GetGOM().GetPlayer();
+		const auto target = GetRenderer().newScene->GetGOM().GetPlayer();
 		auto &mr = target.GetComponent<MeshRenderer>();
 		mr.SetNewMesh(meshAsset);
 		mr.SetMaterial(material);
 	}
 
-	const auto newViewport = std::make_shared<Viewport>(true, res, RENDERER.newScene, renderTarget);
-	RENDERER.AddRenderJob(newViewport);
+	const auto newViewport = std::make_shared<Viewport>(true, res, GetRenderer().newScene, renderTarget);
+	GetRenderer().AddRenderJob(newViewport);
 	return true;
 }

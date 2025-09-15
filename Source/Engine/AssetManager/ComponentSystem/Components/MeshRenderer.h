@@ -10,10 +10,10 @@ class Material;
 class TextureHolder;
 class Skeleton;
 
-class MeshRenderer : public Component
+class MeshRenderer : public Reflectable<MeshRenderer>, public Component
 {
-  public:
-	ReflectableTypeRegistration();
+public:
+    reflectable(MeshRenderer);
     MeshRenderer() = delete;                                             // Create a generic cube
     MeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager); // Create a generic cube
     MeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager, const std::filesystem::path &aFilePath,
@@ -50,12 +50,12 @@ class MeshRenderer : public Component
 
 REFL_AUTO(type(MeshRenderer), field(isInstanced))
 
-class cSkeletalMeshRenderer : public MeshRenderer
+class cSkeletalMeshRenderer : public Reflectable<cSkeletalMeshRenderer>, public MeshRenderer
 {
     friend class cAnimator;
 
   public:
-    ReflectableTypeRegistration();
+    reflectable(cSkeletalMeshRenderer);
     cSkeletalMeshRenderer() = delete;
     cSkeletalMeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager);
     cSkeletalMeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager,

@@ -1,6 +1,8 @@
 #include "AssetManager.pch.h"
 
 #include "../cPhysics_Kinematic.h"
+#include "Engine\GraphicsEngine\Renderer.h"
+#include "Engine\AssetManager\ComponentSystem\Components\Transform.h"
 
 cPhysics_Kinematic::cPhysics_Kinematic(const SY::UUID anOwnerId, GameObjectManager* aManager)
 	: Component(anOwnerId, aManager)
@@ -17,7 +19,7 @@ cPhysics_Kinematic::~cPhysics_Kinematic()
 {
 	for (DebugDrawer::PrimitiveHandle& handle : myHandles)
 	{
-		RENDERER.debugDrawer.RemoveDebugPrimitive(handle);
+		GetRenderer().debugDrawer.RemoveDebugPrimitive(handle);
 	}
 
 	myHandles.clear();
@@ -37,15 +39,15 @@ void cPhysics_Kinematic::InitPrimitive()
 {
 	for (DebugDrawer::PrimitiveHandle& handle : myHandles)
 	{
-		RENDERER.debugDrawer.RemoveDebugPrimitive(handle);
+		GetRenderer().debugDrawer.RemoveDebugPrimitive(handle);
 	}
 
 	const Vector3f position = GetComponent<Transform>().GetPosition();
 	// Velocity
-	RENDERER.debugDrawer.AddDebugLine(position, position + ph_velocity, Vector3f(1.0f, 0.0f, 0.0f), .01f);
+	GetRenderer().debugDrawer.AddDebugLine(position, position + ph_velocity, Vector3f(1.0f, 0.0f, 0.0f), .01f);
 
 	// Acceleration
-	RENDERER.debugDrawer.AddDebugLine(position, position + ph_acceleration, Vector3f(0.0f, 0.0f, 1.0f),
+	GetRenderer().debugDrawer.AddDebugLine(position, position + ph_acceleration, Vector3f(0.0f, 0.0f, 1.0f),
 	                                                .01f);
 }
 
@@ -94,6 +96,6 @@ bool cPhysics_Kinematic::InspectorView()
 	{
 		return false;
 	}
-	Reflect<cPhysics_Kinematic>();
+	Reflect();
 	return true;
 }

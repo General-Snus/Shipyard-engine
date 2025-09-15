@@ -3,10 +3,10 @@
 #include <Engine/AssetManager/Objects/AI/AgentSystem/Actor.h>
 #include <Engine/AssetManager/Objects/AI/AgentSystem/Controllers/Controller.h>
 
-class cActor : public Component
+class cActor : public Reflectable<cActor>, public Component
 {
   public:
-    ReflectableTypeRegistration();
+    reflectable(cActor);
     cActor(const SY::UUID anOwnerId, GameObjectManager *aManager);
     ~cActor() override = default;
     void Init() override;

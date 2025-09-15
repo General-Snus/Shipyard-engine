@@ -1,8 +1,10 @@
 #pragma once
-class cPhysics_Newtonian : public Component
+#include <ComponentSystem/Component.h>
+
+class cPhysics_Newtonian : public Reflectable<cPhysics_Newtonian>, public Component
 {
 public:
-	ReflectableTypeRegistration();
+    reflectable(cPhysics_Newtonian);
     cPhysics_Newtonian(const SY::UUID anOwnerId, GameObjectManager *aManager);
     void Init() override;
     void Update() override; 

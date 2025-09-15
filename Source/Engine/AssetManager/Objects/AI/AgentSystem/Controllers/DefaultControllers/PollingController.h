@@ -4,10 +4,10 @@
 
 class PollingStation;
 
-class PollingController : public Controller
+class PollingController : public Controller, public Reflectable<PollingController>
 {
 public:
-	ReflectableTypeRegistration()
+	reflectable(PollingController)
 	explicit PollingController(PollingStation* aPollingStation);
 	bool Update(GameObject input) override;
 

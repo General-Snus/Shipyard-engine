@@ -3,6 +3,7 @@
 
 #include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
 #include "Engine/AssetManager/Objects/BaseAssets/Animations.h"
+#include "AssetManager.h"
 
 cAnimator::cAnimator(const SY::UUID anOwnerId, GameObjectManager* aManager)
 	: Component(anOwnerId, aManager), myCurrentAnimation(0), myAnimationTimer(0)
@@ -23,7 +24,7 @@ cAnimator::cAnimator(const SY::UUID anOwnerId, GameObjectManager* aManager, cons
 	{
 		LOGGER.Err("cSkeletalMeshRenderer component does not have a skeleton");
 	}
-	myAnimations.push_back(ENGINE_RESOURCES.LoadAsset<Animation>(aFilePath));
+	myAnimations.push_back(GetEngineResources().LoadAsset<Animation>(aFilePath));
 }
 
 void cAnimator::Update()
@@ -58,8 +59,8 @@ void cAnimator::RenderAnimation(const std::shared_ptr<Mesh>& aData, const Matrix
 {
 	aData;
 	aTransform;
-	//RENDERER.ShadowCommands<GfxCmd_RenderSkeletalMeshShadow>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
-	//RENDERER.DeferredCommand<GfxCmd_RenderSkeletalMesh>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
+	//GetRenderer().ShadowCommands<GfxCmd_RenderSkeletalMeshShadow>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
+	//GetRenderer().DeferredCommand<GfxCmd_RenderSkeletalMesh>(aData,aTransform,myBoneTransforms.data(),static_cast<unsigned int>(mySkeleton->myBones.size()));
 }
 
 void cAnimator::AddAnimation(std::shared_ptr<Animation> aAnimation)
@@ -69,7 +70,7 @@ void cAnimator::AddAnimation(std::shared_ptr<Animation> aAnimation)
 
 void cAnimator::AddAnimation(const std::filesystem::path& aFilePath)
 {
-	myAnimations.push_back(ENGINE_RESOURCES.LoadAsset<Animation>(aFilePath));
+	myAnimations.push_back(GetEngineResources().LoadAsset<Animation>(aFilePath));
 }
 
 void cAnimator::SetHierarchy(unsigned int aBoneID, const Matrix& aParentMatrix)
@@ -129,6 +130,6 @@ bool cAnimator::InspectorView()
 	{
 		return false;
 	}
-	Reflect<cAnimator>();
+	Reflect();
 	return true;
 }

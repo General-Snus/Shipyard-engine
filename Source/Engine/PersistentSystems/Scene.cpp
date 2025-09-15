@@ -9,7 +9,7 @@ Scene::Scene(const std::string& sceneName) : m_GameObjectManager(*this), SceneNa
 
 GameObjectManager& Scene::activeManager()
 {
-	return EDITOR_INSTANCE.GetActiveScene()->GetGOM();
+	return GetEditor().GetActiveScene()->GetGOM();
 }
 
 void Scene::merge(const Scene& scene)

@@ -1,15 +1,12 @@
-
 #include "PersistentSystems.pch.h"
 
-#include "../NetworkStructs.h"
 #include "../NetMessage/NetMessage.h"
+#include "../NetworkStructs.h"
 #include <Networking/NetMessage/StringMessages.h>
-#include <WinSock2.h>
+#include <WinSock2.h> 
+#include <stdio.h>
 #include <string.h>  
 #include <ws2tcpip.h>
-#include <iphlpapi.h>
-#include <stdio.h>
-#include <icmpapi.h>
 
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -20,7 +17,7 @@ using namespace Networking;
 
 bool IsSocketBound(NetworkSocket socket)
 {
-	sockaddr_in localAddr;
+	sockaddr_in localAddr{};
 	int addrLen = sizeof(localAddr);
 
 	// Attempt to get the local address and port
@@ -325,7 +322,7 @@ bool NetworkConnection::ReceiveUDP(NetMessage* message, NetAddress* receivedFrom
 
 	if (msTimeout > 0)
 	{
-		struct timeval tv;
+		struct timeval tv {};
 		tv.tv_sec = (long)(msTimeout / 1000.f);
 		tv.tv_usec = (long)msTimeout;
 
@@ -378,7 +375,7 @@ int NetworkConnection::ReceiveTCP(NetMessage* message, NetAddress* receivedFrom,
 
 	if (msTimeout > 0)
 	{
-		struct timeval tv;
+		struct timeval tv {};
 		tv.tv_sec = (long)(msTimeout / 1000.f);
 		tv.tv_usec = (long)msTimeout;
 
@@ -431,6 +428,8 @@ std::string NetAddress::IPStr() const
 	case AddressFamily::ipv6:
 		inet_ntop(AF_INET6, &address, arr, INET6_ADDRSTRLEN);
 		break;
+	default:
+		return "";
 	}
 
 	return std::string(arr);
@@ -477,7 +476,7 @@ namespace Networking
 	SocketSettings GetSocketSettings(unsigned long long sock)
 	{
 		SocketSettings settings = { 0 };
-		int optionValue;
+		int optionValue{};
 		int optionLength = sizeof(optionValue);
 
 		// Retrieve the receive buffer size (SO_RCVBUF)

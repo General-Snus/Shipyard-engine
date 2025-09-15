@@ -2,22 +2,21 @@
 #include "Engine/AssetManager/ComponentSystem/Component.h"
 #include <Engine/GraphicsEngine/Rendering/Buffers/FrameBuffer.h>
 #include <Tools/Utilities/Color.h >
-
 #include "Engine/AssetManager/Objects/BaseAssets/LightDataBase.h"
 
 enum class eLightType : unsigned int
 {
-	Directional = 0,
-	Point = 1,
-	Spot = 2,
-	uninitialized = 3
+    Directional = 0,
+    Point = 1,
+    Spot = 2,
+    uninitialized = 3
 };
 class DirectionalLight;
 class SpotLight;
 class PointLight;
 
 class Texture;
-class Light : public Component
+class Light : public Reflectable<Light>, public Component
 {
 
 	friend class Renderer;
@@ -25,7 +24,7 @@ class Light : public Component
 	friend class EnvironmentLightPSO;
 
 public:
-	ReflectableTypeRegistration();
+	reflectable(Light);
 	Light() = delete;
 	Light(const SY::UUID anOwnerId, GameObjectManager* aManager);
 	Light(const SY::UUID anOwnerId, GameObjectManager* aManager, const eLightType type);
@@ -102,7 +101,6 @@ REFL_AUTO(type(Light), field(isRendered), field(isShadowCaster), field(boundToTr
 
 template <> inline std::shared_ptr<DirectionalLight> Light::GetData<DirectionalLight>()
 {
-	// myDirectionLightData->Color = m_Color.GetRGB();
 	return myDirectionLightData;
 }
 
@@ -113,6 +111,5 @@ template <> inline std::shared_ptr<SpotLight> Light::GetData<SpotLight>()
 
 template <> inline std::shared_ptr<PointLight> Light::GetData<PointLight>()
 {
-	// myPointLightData->Color = m_Color.GetRGB();
 	return myPointLightData;
 }

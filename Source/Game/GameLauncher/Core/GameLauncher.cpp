@@ -12,6 +12,10 @@
 #include "Tools/ImGui/crude_json.h"
 #include "Tools/Utilities/LinearAlgebra/Easing.h"
 #include "Engine\PersistentSystems\Networking\NetworkRunner.h"
+#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
+#include "Engine/AssetManager/ComponentSystem/Components/Collider.h"
+#include "Engine/AssetManager/ComponentSystem/Components/LightComponent.h"
+#include "Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h"
 
 extern "C" {
 	inline GAME_API GameLauncher* entrypointMain()
@@ -202,7 +206,7 @@ void YourGameLauncher::Update(float delta)
 			const auto& cameraTransform = manager.GetCamera().transform();
 			auto& camera = manager.GetCamera().GetComponent<Camera>();
 
-			const auto coord = EDITOR_INSTANCE.GetMainViewport()->getCursorInWindowPostion();
+			const auto coord = GetEditor().GetMainViewport()->getCursorInWindowPostion();
 			const auto position = cameraTransform.GetPosition(WORLD);
 			const auto direction = camera.GetPointerDirection(coord);
 			const bool raycastHit = Raycast(position, direction, hit);

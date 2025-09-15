@@ -4,11 +4,13 @@
 #include <Tools/Utilities/Math.hpp>
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
 
-#include <Tools/ImGui/ImGuiHelpers.hpp>
+#include "Editor/Editor/Helpers/ImGuiHelpers.h"
 #include "Tools/ImGui/imgui.h"
 
 #include <Editor/Editor/Commands/CommandBuffer.h>
 #include <Editor/Editor/Commands/VarChanged.h>
+#include "Tools\ImGui\imgui_internal.h"
+#include "Engine\GraphicsEngine\Renderer.h"
 
 Transform::Transform(const SY::UUID anOwnerId,GameObjectManager* aManager) : Component(anOwnerId,aManager) {}
 
@@ -273,10 +275,10 @@ bool Transform::GetIsDirty() const {
 void Transform::SetGizmo(bool enabled) {
 	IsDebugGizmoEnabled = enabled;
 	if(enabled) {
-		primitive = RENDERER.debugDrawer.AddDebugGizmo(Vector3f(),1.0f);
-		RENDERER.debugDrawer.SetDebugPrimitiveTransform(primitive,localMatrix);
+		primitive = GetRenderer().debugDrawer.AddDebugGizmo(Vector3f(),1.0f);
+		GetRenderer().debugDrawer.SetDebugPrimitiveTransform(primitive,localMatrix);
 	} else {
-		RENDERER.debugDrawer.RemoveDebugPrimitive(primitive);
+		GetRenderer().debugDrawer.RemoveDebugPrimitive(primitive);
 	}
 }
 

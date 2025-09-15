@@ -3,11 +3,15 @@
 #include <Engine/GraphicsEngine/Shaders/Registers.h>
 
 #include <Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h>
+#include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
+#include <Engine/AssetManager/AssetManager.h>
 #include "Engine/GraphicsEngine/Renderer.h"
 
 #include <Engine/GraphicsEngine/GraphicsEngineUtilities.h>
 #include "Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h"
 #include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
+#include "AssetManagerUtills.hpp"
+#include <Tools\ImGui\imgui.h>
 
 bool Material::CreateJson(const DataMaterial& data, const std::filesystem::path& writePath)
 {
@@ -41,7 +45,7 @@ bool Material::CreateJson(const DataMaterial& data, const std::filesystem::path&
 		}
 	}
 
-	std::ofstream stream(ENGINE_RESOURCES.Directory() / writePath.string());
+	std::ofstream stream(GetEngineResources().Directory() / writePath.string());
 	stream << std::setw(4) << json;
 	stream.close();
 	return true;
@@ -55,27 +59,27 @@ void Material::Init()
 {
 	data.textures.resize(4);
 	data.textures[static_cast<int>(eTextureType::ColorMap)].second =
-		RENDERER.GetDefaultTexture(eTextureType::ColorMap);
+		GetRenderer().GetDefaultTexture(eTextureType::ColorMap);
 	data.textures[static_cast<int>(eTextureType::NormalMap)].second =
-		RENDERER.GetDefaultTexture(eTextureType::NormalMap);
+		GetRenderer().GetDefaultTexture(eTextureType::NormalMap);
 	data.textures[static_cast<int>(eTextureType::MaterialMap)].second =
-		RENDERER.GetDefaultTexture(eTextureType::MaterialMap);
+		GetRenderer().GetDefaultTexture(eTextureType::MaterialMap);
 	data.textures[static_cast<int>(eTextureType::EffectMap)].second =
-		RENDERER.GetDefaultTexture(eTextureType::EffectMap);
+		GetRenderer().GetDefaultTexture(eTextureType::EffectMap);
 
-	if (RENDERER.GetDefaultMaterial())
+	if (GetRenderer().GetDefaultMaterial())
 	{
 		data.materialData =
-			RENDERER.GetDefaultMaterial()
-				->data.materialData; // yo dawg i put some data in your data so you can data while you data
+			GetRenderer().GetDefaultMaterial()
+			->data.materialData; // yo dawg i put some data in your data so you can data while you data
 	}
 	else
 	{
 		data.materialData = MaterialBuffer();
 	}
 
-	data.vertexShader = RENDERER.GetDefaultVSShader();
-	data.pixelShader = RENDERER.GetDefaultPSShader();
+	data.vertexShader = GetRenderer().GetDefaultVSShader();
+	data.pixelShader = GetRenderer().GetDefaultPSShader();
 
 	if (exists(AssetPath) && AssetPath.extension() == ".json")
 	{
@@ -124,7 +128,7 @@ void Material::Init()
 					continue;
 				}
 
-				texture = ENGINE_RESOURCES.LoadAsset<TextureHolder>(path);
+				texture = GetEngineResources().LoadAsset<TextureHolder>(path);
 
 				const int type = i["TextureType"];
 				texture->SetTextureType(static_cast<eTextureType>(type));
@@ -152,7 +156,7 @@ bool Material::InspectorView()
 	{
 		return false;
 	}
-	Reflect<Material>();
+	Reflect();
 
 	// if (ImGui::TreeNodeEx(AssetPath.filename().string().c_str()))
 	{
@@ -165,6 +169,7 @@ bool Material::InspectorView()
 		// data.pixelShader.lock()->InspectorView();
 
 		ImGui::Text("Material Data");
+		using namespace Reflection;
 		if (ReflectSingleValue(data.m_color, *this, "Material Color"))
 		{
 			data.materialData.albedoColor = data.m_color.GetRGBA();
@@ -215,7 +220,7 @@ bool Material::InspectorView()
 				ImGui::Text(std::format("Flags: {}", magic_enum::enum_name(flags)).c_str());
 				ImGui::Text(std::format("Dimension: {}", magic_enum::enum_name(dim)).c_str());
 				ImGui::Text(std::format("Mips: {}", mip).c_str());
-				ImGui::EndColumns();
+				ImGui::Columns();
 			}
 		}
 	}
@@ -225,11 +230,11 @@ bool Material::InspectorView()
 std::shared_ptr<TextureHolder> Material::GetEditorIcon()
 {
 	auto imageTexture =
-		ENGINE_RESOURCES.LoadAsset<TextureHolder>(std::format("INTERNAL_IMAGE_UI_{}", AssetPath.filename().string()));
+		GetEngineResources().LoadAsset<TextureHolder>(std::format("INTERNAL_IMAGE_UI_{}", AssetPath.filename().string()));
 	if (!imageTexture || !imageTexture->isLoadedComplete)
 	{
-		const std::shared_ptr<Mesh>     mesh = ENGINE_RESOURCES.LoadAsset<Mesh>("Materials/MaterialPreviewMesh.fbx");
-		const std::shared_ptr<Material> materialPreview = ENGINE_RESOURCES.LoadAsset<Material>(AssetPath, true);
+		const std::shared_ptr<Mesh>     mesh = GetEngineResources().LoadAsset<Mesh>("Materials/MaterialPreviewMesh.fbx");
+		const std::shared_ptr<Material> materialPreview = GetEngineResources().LoadAsset<Material>(AssetPath, true);
 
 		const bool meshReady = mesh->isLoadedComplete && !mesh->isBeingLoaded;
 		const bool materialReady = materialPreview->isLoadedComplete && !materialPreview->isBeingLoaded;
@@ -241,7 +246,7 @@ std::shared_ptr<TextureHolder> Material::GetEditorIcon()
 		}
 		else
 		{
-			imageTexture = ENGINE_RESOURCES.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+			imageTexture = GetEngineResources().LoadAsset<TextureHolder>("Textures/Widgets/File.png");
 		}
 	}
 	return imageTexture;
@@ -283,7 +288,7 @@ void Material::SetColor(const Vector4f& aColor)
 }
 
 void Material::SetShader(const std::shared_ptr<ShipyardShader>& aVertexShader,
-                         const std::shared_ptr<ShipyardShader>& aPixelShader)
+						 const std::shared_ptr<ShipyardShader>& aPixelShader)
 {
 	data.vertexShader = aVertexShader;
 	data.pixelShader = aPixelShader;

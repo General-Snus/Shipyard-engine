@@ -31,7 +31,7 @@ struct Remote {
 	void Close();
 	void Consume();
 	void TryUDPConnection(NetAddress serverAddress); 
-	NetAddress AddressByProtocol(NetworkConnection::Protocol protocol);
+	NetAddress AddressByProtocol(NetworkConnection::Protocol protocol) const;
 	float rtt() const;
 	Networking::AreaOfInterest GetAreaOfInterest() const;
 private:

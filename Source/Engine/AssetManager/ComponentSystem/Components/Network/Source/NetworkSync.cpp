@@ -27,7 +27,7 @@ bool NetworkObject::InspectorView()
 	{
 		return false;
 	}
-	Reflect<NetworkObject>();
+	Reflect();
 	ImGui::InputText("Unique id", uniqueNetId.id.String().data(), uniqueNetId.id.String().size(), ImGuiInputTextFlags_ReadOnly);
 	return true;
 }
@@ -69,8 +69,7 @@ bool NetworkTransform::InspectorView()
 	if (!Component::InspectorView())
 	{
 		return false;
-	}
-	Reflect<NetworkTransform>();
+	}Reflect();
 	ImGui::InputText("Unique id", uniqueNetId.id.String().data(), uniqueNetId.id.String().size(), ImGuiInputTextFlags_ReadOnly);
 	return true;
 }

@@ -27,7 +27,7 @@ void GraphicsDebugger::RenderImGUi()
 			if (ImGui::RadioButton(testArray[i], false))
 			{
 				currentlyActiveLayer = i;
-				if (const auto viewport = EDITOR_INSTANCE.GetMainViewport())
+				if (const auto viewport = GetEditor().GetMainViewport())
 				{
 					viewport->GetCamera().filter = static_cast<DebugFilter>(currentlyActiveLayer);
 				}

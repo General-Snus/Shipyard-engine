@@ -1,7 +1,7 @@
 #pragma once
-#include "PollingStation.h"
-#include <Engine/AssetManager/ComponentSystem/GameObject.h>
-
+#include "PollingStation.h" 
+#include "Engine\AssetManager\ComponentSystem\GameObject.h"
+class GameObject;
 class Target_PollingStation : public PollingStation
 {
   public:

@@ -1,6 +1,7 @@
 #pragma once
 #include <Engine/AssetManager/ComponentSystem/GameObject.h>
 #include <Engine/AssetManager/Objects/AI/AgentSystem/BehaviourTree/BrainTree.h>
+#include <Engine/AssetManager/Reflection/Reflectable.h>
 
 /// <summary>
 /// Thought process was something like this:
@@ -32,10 +33,10 @@ bool IsFullyHealed(GameObject input);
 
 namespace BehaviourTreeAICommands
 {
-class IsTargetInSight : public BrainTree::Leaf
+class IsTargetInSight : public Reflectable<IsTargetInSight>, public BrainTree::Leaf
 {
   public:
-    ReflectableTypeRegistration();
+    reflectable(IsTargetInSight);
     using BrainTree::Leaf::Leaf;
 
     Status update() override;
@@ -43,19 +44,19 @@ class IsTargetInSight : public BrainTree::Leaf
   private:
 };
 
-class IsTargetInRange : public BrainTree::Leaf
+class IsTargetInRange : public Reflectable<IsTargetInRange>, public BrainTree::Leaf
 {
   public:
-    ReflectableTypeRegistration();
+    reflectable(IsTargetInRange);
     using BrainTree::Leaf::Leaf;
 
     Status update() override;
 };
 
-class IsTargetAlive : public BrainTree::Leaf
+class IsTargetAlive : public Reflectable<IsTargetAlive>, public BrainTree::Leaf
 {
   public:
-    ReflectableTypeRegistration();
+    reflectable(IsTargetAlive);
     using BrainTree::Leaf::Leaf;
 
     Status update() override;
@@ -63,19 +64,19 @@ class IsTargetAlive : public BrainTree::Leaf
   private:
 };
 
-class IsDead : public BrainTree::Decorator
+class IsDead : public Reflectable<IsDead>, public BrainTree::Decorator
 {
   public:
-    ReflectableTypeRegistration();
+    reflectable(IsDead);
     Status update() override;
 
   private:
 };
 
-class IsHealthy : public BrainTree::Decorator
+class IsHealthy : public Reflectable<IsHealthy>, public BrainTree::Decorator
 {
   public:
-    ReflectableTypeRegistration();
+    reflectable(IsHealthy);
 
     Status update() override;
 
@@ -83,50 +84,50 @@ class IsHealthy : public BrainTree::Decorator
 };
 
 // Action functions
-class ShootAtTarget : public BrainTree::Leaf
+class ShootAtTarget : public Reflectable<ShootAtTarget>, public BrainTree::Leaf
 {
   public:
-    ReflectableTypeRegistration();
+    reflectable(ShootAtTarget);
     using BrainTree::Leaf::Leaf;
 
     Status update() override;
 };
-class Retreat : public BrainTree::Leaf
+class Retreat : public Reflectable<Retreat>, public BrainTree::Leaf
 {
   public:
-    ReflectableTypeRegistration();
+    reflectable(Retreat);
     using BrainTree::Leaf::Leaf;
 
     Status update() override;
 };
-class MoveFreely : public BrainTree::Leaf
+class MoveFreely : public Reflectable<MoveFreely>, public BrainTree::Leaf
 {
   public:
-    ReflectableTypeRegistration();
+    reflectable(MoveFreely);
     using BrainTree::Leaf::Leaf;
 
     Status update() override;
 };
-class AlignToTarget : public BrainTree::Leaf
+class AlignToTarget : public Reflectable<AlignToTarget>, public BrainTree::Leaf
 {
   public:
-    ReflectableTypeRegistration();
+    reflectable(AlignToTarget);
     using BrainTree::Leaf::Leaf;
 
     Status update() override;
 };
-class DeathSpin : public BrainTree::Leaf
+class DeathSpin : public Reflectable<DeathSpin>, public BrainTree::Leaf
 {
   public:
-    ReflectableTypeRegistration();
+    reflectable(DeathSpin);
     using BrainTree::Leaf::Leaf;
 
     Status update() override;
 };
-class IsFullyHealed : public BrainTree::Decorator
+class IsFullyHealed : public Reflectable<IsFullyHealed>, public BrainTree::Decorator
 {
   public:
-    ReflectableTypeRegistration();
+    reflectable(IsFullyHealed);
     Status update() override;
 };
 

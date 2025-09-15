@@ -1,4 +1,5 @@
 #pragma once
+#include <Tools\Utilities\TemplateHelpers.h>
 #include <DirectX/DX12/Graphics/GpuResource.h>
 
 struct BufferDescription { 

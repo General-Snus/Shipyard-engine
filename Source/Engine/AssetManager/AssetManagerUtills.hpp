@@ -1,11 +1,13 @@
 #pragma once 
-#include <memory>
 #include <Editor/Editor/Core/Editor.h>
 #include <Editor/Editor/Windows/EditorWindows/CustomFuncWindow.h>
 #include <Engine/AssetManager/AssetManager.h>
+#include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
 #include <Engine/GraphicsEngine/Renderer.h>
+#include <Editor\Editor\Helpers\ImGuiHelpers.h>
 #include <Tools/ImGui/imgui.h>
-#include <Tools/ImGui/ImGuiHelpers.hpp>
+#include <Tools/ImGui/imgui_internal.h>
+#include <memory>
 
 #include "Tools/Utilities/Math.hpp"
 
@@ -17,7 +19,7 @@ concept SupportOwnWindow = requires(T a) { a.InspectorView(); };
 template <typename asset = Mesh>
 void PopUpContextForAsset(std::shared_ptr<asset>& replace)
 {
-	ImGui::SetNextWindowSize({0, 200});
+	ImGui::SetNextWindowSize({ 0, 200 });
 	if (ImGui::BeginPopupContextItem())
 	{
 		static char buf[128] = "";
@@ -25,7 +27,7 @@ void PopUpContextForAsset(std::shared_ptr<asset>& replace)
 		const std::string keyTerm = buf;
 
 		ImGui::BeginChild("test");
-		const auto& assetMap = ENGINE_RESOURCES.GetLibraryOfType<asset>()->GetContentCatalogue<asset>();
+		const auto& assetMap = GetEngineResources().GetLibraryOfType<asset>()->GetContentCatalogue<asset>();
 
 		using localPair = std::pair<std::string, std::shared_ptr<asset>>;
 		static std::vector<localPair> sortedList;
@@ -62,7 +64,7 @@ void PopUpContextForAsset(std::shared_ptr<asset>& replace)
 				const auto& [path, content] = sortedList[row];
 				ImGui::TextWrapped(path.c_str());
 				ImGui::SameLine();
-				if (ImGui::ImageButton(("PopUpContextMenu" + path).c_str(), content->GetEditorIcon(), {100, 100}))
+				if (ImGui::ImageButton(("PopUpContextMenu" + path).c_str(), content->GetEditorIcon(), { 100, 100 }))
 				{
 					replace = content;
 					ZeroMemory(buf, 128);
@@ -83,30 +85,29 @@ void SwitchableAsset(std::shared_ptr<assetType>& asset, std::string PayloadType,
 	if (asset)
 	{
 		ImGui::Text(asset->AssetPath.stem().string().c_str());
-		if (ImGui::ImageButton(std::format("##EmptyWindow_ID:{}", reinterpret_cast<const char*>(asset.get())).c_str(),
-		                       asset->GetEditorIcon(),
-		                       {100, 100}, ImGuiButtonFlags_PressedOnDoubleClick) &&
-			supportInspector)
+		auto imageButtonClicked = ImGui::ImageButton(std::format("##EmptyWindow_ID:{}", reinterpret_cast<const char*>(asset.get())).c_str(), asset->GetEditorIcon(), { 100, 100 }, ImGuiButtonFlags_PressedOnDoubleClick);
+
+		if (imageButtonClicked && supportInspector)
 		{
 			if constexpr (SupportOwnWindow<std::shared_ptr<assetType>> ||
 				SupportOwnWindowPtr<std::shared_ptr<assetType>>)
 			{
 				auto newWindow = std::make_shared<CustomFuncWindow>(std::bind(&assetType::InspectorView, asset));
 				newWindow->SetWindowName(asset->GetAssetPath().filename().string());
-				EDITOR_INSTANCE.g_EditorWindows.emplace_back(newWindow);
+				GetEditor().g_EditorWindows.emplace_back(newWindow);
 			}
 		}
 	}
 	else
 	{
 		std::shared_ptr<TextureHolder> texture =
-			ENGINE_RESOURCES.LoadAsset<TextureHolder>("Textures\\Widgets\\File.png");
+			GetEngineResources().LoadAsset<TextureHolder>("Textures\\Widgets\\File.png");
 		if (!texture)
 		{
-			texture = RENDERER.GetDefaultTexture(eTextureType::MaterialMap);
+			texture = GetRenderer().GetDefaultTexture(eTextureType::MaterialMap);
 		}
 
-		ImGui::ImageButton((char*)&texture, texture, {100, 100}, ImGuiButtonFlags_PressedOnDoubleClick);
+		ImGui::ImageButton((char*)&texture, texture, { 100, 100 }, ImGuiButtonFlags_PressedOnDoubleClick);
 	}
 
 	if (ImGui::BeginItemTooltip())
@@ -120,7 +121,7 @@ void SwitchableAsset(std::shared_ptr<assetType>& asset, std::string PayloadType,
 		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(PayloadType.c_str()))
 		{
 			const auto path = std::string(static_cast<const char*>(payload->Data), payload->DataSize);
-			asset = ENGINE_RESOURCES.LoadAsset<assetType>(path);
+			asset = GetEngineResources().LoadAsset<assetType>(path);
 		}
 		ImGui::EndDragDropTarget();
 	}

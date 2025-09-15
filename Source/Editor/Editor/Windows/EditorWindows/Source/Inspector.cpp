@@ -8,11 +8,12 @@
 #include "Engine/AssetManager/Enums.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
 #include "Tools/Logging/Logging.h"
-#include "Tools/Utilities/TemplateHelpers.h"
+#include "Tools/Utilities/TemplateHelpers.h" 
+#include "imgui_internal.h"
 
 Inspector::Inspector()
 {
-	EDITOR_INSTANCE.m_Callbacks[EditorCallback::ObjectSelected].AddListener([this]() { this->ToFront(); });
+	GetEditor().m_Callbacks[EditorCallback::ObjectSelected].AddListener([this]() { this->ToFront(); });
 }
 
 void Inspector::ToFront()
@@ -33,7 +34,7 @@ void Inspector::RenderImGUi()
 	}
 
 	GameObject gameobject;
-	const auto& selectedGameObjects = EDITOR_INSTANCE.GetSelectedGameObjects();
+	const auto& selectedGameObjects = GetEditor().GetSelectedGameObjects();
 	if (!selectedGameObjects.empty())
 	{
 		gameobject = selectedGameObjects[0];

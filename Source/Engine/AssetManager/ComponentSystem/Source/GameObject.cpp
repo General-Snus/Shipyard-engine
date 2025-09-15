@@ -11,6 +11,9 @@ GameObject GameObject::Create(const std::string& name, std::shared_ptr<Scene> re
 	return object;
 }
 
+GameObject::GameObject() = default;
+GameObject::~GameObject() = default;
+
 Transform& GameObject::transform() const
 {
 	return GetComponent<Transform>();
@@ -38,4 +41,47 @@ std::vector<Component*> GameObject::GetAllComponents() const
 	assert(myManager != nullptr && "GameObject has no manager");
 	assert(myID.IsValid() && "GameObject has no ID");
 	return myManager->GetAllAttachedComponents(myID);
+}
+
+std::vector<Component*> GameObject::CopyAllComponents() const
+{
+	assert(myManager != nullptr && "GameObject has no manager");
+	assert(myID.IsValid() && "GameObject has no ID");
+	return myManager->CopyAllAttachedComponents(myID);
+}
+
+inline bool GameObject::GetActive() const
+{
+	assert(myManager != nullptr && "GameObject has no manager");
+	assert(myID.IsValid() && "GameObject has no ID");
+	return myManager->GetActive(myID);
+}
+
+inline bool GameObject::operator==(const GameObject& other) const
+{
+	return !(myID != other.myID || myManager != other.myManager);
+}
+
+inline GameObject::operator SY::UUID() const
+{
+	return myID;
+}
+
+inline GameObject::operator std::string() const
+{
+	return GetName();
+}
+
+inline void GameObject::SetActive(const bool aState) const
+{
+	assert(myManager != nullptr && "GameObject has no manager");
+	assert(myID.IsValid() && "GameObject has no ID");
+	myManager->SetActive(myID, aState);
+}
+
+inline void GameObject::OnSiblingChanged(const std::type_info* SourceClass) const
+{
+	assert(myManager != nullptr && "GameObject has no manager");
+	assert(myID.IsValid() && "GameObject has no ID");
+	myManager->OnSiblingChanged(myID, SourceClass);
 }

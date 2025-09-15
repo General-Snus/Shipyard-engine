@@ -7,6 +7,7 @@
 #include "Engine/GraphicsEngine/Renderer.h"
 
 #include "Tools/Utilities/LinearAlgebra/Easing.h"
+#include "AssetManager.h"
 
 
 void ParticleEmitter::InitParticle(Particlevertex& vertex) const
@@ -29,11 +30,11 @@ ParticleEmitter::ParticleEmitter(const ParticleEmitterTemplate& aTemplate) : Ass
 {
 	if (aTemplate.EmmiterSettings.ParticleTexture.empty())
 	{
-		texture = RENDERER.GetDefaultTexture(eTextureType::ParticleMap);
+		texture = GetRenderer().GetDefaultTexture(eTextureType::ParticleMap);
 	}
 	else
 	{
-		texture = ENGINE_RESOURCES.LoadAsset<TextureHolder>(aTemplate.EmmiterSettings.ParticleTexture);
+		texture = GetEngineResources().LoadAsset<TextureHolder>(aTemplate.EmmiterSettings.ParticleTexture);
 	}
 
 	settings = aTemplate.EmmiterSettings;

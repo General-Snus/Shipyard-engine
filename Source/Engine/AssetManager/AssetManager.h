@@ -1,13 +1,14 @@
 #pragma once
 #define AsUINT(v) static_cast<unsigned>(v)
 
+#include <filesystem>
+#include <typeinfo>
+
 #include <Editor/Editor/Defines.h>
 #include <Engine/AssetManager/ComponentSystem/UUID.h>
 #include <Tools/Utilities/System/ServiceLocator.h>
 #include <Tools/Utilities/System/ThreadPool.hpp>
 #include "Loader/LoaderBase.h"
-
-#define ENGINE_RESOURCES ServiceLocator::Instance().GetService<EngineResourcesLoader>()
 
 class EngineResourcesLoader : public ResourceLoaderBase
 {
@@ -33,10 +34,10 @@ bool EngineResourcesLoader::ForceLoadAsset(const std::filesystem::path& aFilePat
 
 template <class T>
 bool EngineResourcesLoader::ForceLoadAsset(const std::filesystem::path& identifierPath, const bool useExact,
-                                           std::shared_ptr<T>&          outAsset)
+										   std::shared_ptr<T>& outAsset)
 {
 	OPTICK_EVENT();
-	const std::type_info*    typeInfo = &typeid(T);
+	const std::type_info* typeInfo = &typeid(T);
 	std::shared_ptr<Library> library = GetLibraryOfType<T>();
 
 	if (!library)
@@ -50,7 +51,7 @@ bool EngineResourcesLoader::ForceLoadAsset(const std::filesystem::path& identifi
 
 	if (useExact)
 	{
-		Identifier = relative(identifierPath, workingDirectory); // Might invoke unexpected behaviour
+		Identifier = std::filesystem::relative(identifierPath, workingDirectory); // Might invoke unexpected behaviour
 		// but stops you from duplication
 
 		// TODO FIgure out if use exact is even a good thing to have? Can i automate
@@ -86,7 +87,7 @@ template <class T>
 std::shared_ptr<T> EngineResourcesLoader::LoadAsset(const std::filesystem::path& identifierPath, const bool useExact)
 {
 	OPTICK_EVENT();
-	const std::type_info*    typeInfo = &typeid(T);
+	const std::type_info* typeInfo = &typeid(T);
 	std::shared_ptr<Library> library = GetLibraryOfType<T>();
 
 	if (!library)
@@ -99,7 +100,7 @@ std::shared_ptr<T> EngineResourcesLoader::LoadAsset(const std::filesystem::path&
 
 	if (useExact)
 	{
-		Identifier = relative(identifierPath, workingDirectory);
+		Identifier = std::filesystem::relative(identifierPath, workingDirectory);
 	}
 	else
 	{
@@ -112,8 +113,9 @@ std::shared_ptr<T> EngineResourcesLoader::LoadAsset(const std::filesystem::path&
 	{
 		std::pair<std::filesystem::path, std::shared_ptr<T>> newObject(Identifier, std::make_shared<T>(loadObjectFrom));
 		ptr = library->Add(newObject);
-		myAssetQueue.EnqueueUnique(newObject.second);
-		newObject.second->isBeingLoaded = true;
+		// enqueue as AssetBase
+		myAssetQueue.EnqueueUnique(std::static_pointer_cast<AssetBase>(newObject.second));
+		std::static_pointer_cast<AssetBase>(newObject.second)->isBeingLoaded = true;
 #if THREADED_ASSET_LOADING
 		ThreadPoolInstance.SubmitWork(std::bind(&EngineResourcesLoader::ThreadedLoading, this));
 #else
@@ -127,7 +129,7 @@ template <class T>
 bool EngineResourcesLoader::HasAsset(const std::filesystem::path& identifierPath, const bool useExact) const
 {
 	OPTICK_EVENT();
-	const std::type_info*          typeInfo = &typeid(T);
+	const std::type_info* typeInfo = &typeid(T);
 	const std::shared_ptr<Library> library = GetLibraryOfType<T>();
 
 	if (!library)
@@ -139,7 +141,7 @@ bool EngineResourcesLoader::HasAsset(const std::filesystem::path& identifierPath
 
 	if (useExact)
 	{
-		Identifier = relative(identifierPath, workingDirectory);
+		Identifier = std::filesystem::relative(identifierPath, workingDirectory);
 	}
 	else
 	{
@@ -147,4 +149,9 @@ bool EngineResourcesLoader::HasAsset(const std::filesystem::path& identifierPath
 	}
 
 	return library->Has(Identifier);
+}
+
+inline EngineResourcesLoader& GetEngineResources()
+{
+	return ServiceLocator::Instance().GetService<EngineResourcesLoader>();
 }

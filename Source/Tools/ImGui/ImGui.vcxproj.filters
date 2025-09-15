@@ -81,9 +81,6 @@
     <ClInclude Include="ImSequencer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ImGuiHelpers.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="backends\imgui_impl_dx12.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -109,6 +106,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="misc\cpp\imgui-combo-filter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_markdown.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

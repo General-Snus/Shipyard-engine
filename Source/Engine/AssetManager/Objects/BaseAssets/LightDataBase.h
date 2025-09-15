@@ -1,24 +1,28 @@
 #pragma once
-#include <Engine/AssetManager/Reflection/ReflectionTemplate.h>
 #include "Tools/Utilities/LinearAlgebra/Matrix4x4.h"
+#include <Engine/AssetManager/Reflection/Reflectable.h>
+#pragma warning(push)
+#pragma warning(disable : 4324) // structure was padded due to alignment specifier
 
-class alignas(16) SpotLight : public Reflectable
+class alignas(16) SpotLight : public Reflectable<SpotLight>
 {
-	ReflectableTypeRegistration();
+public:
+	reflectable(SpotLight);
+
 	int64_t alignment{};
 
 public:
-	Vector3f Color = {1, 1, 1};
-	float    Power = 15;
+	Vector3f Color = { 1, 1, 1 };
+	float Power = 15;
 
-	Vector3f Position = {0, 0, 0}; // 12
-	float    Range = 30;           // 4
+	Vector3f Position = { 0, 0, 0 }; // 12
+	float Range = 30;           // 4
 
-	Vector3f Direction = {0, 0, 1}; // 12
-	float    InnerConeAngle = 15;   // 4
+	Vector3f Direction = { 0, 0, 1 }; // 12
+	float InnerConeAngle = 15;   // 4
 
 	float OuterConeAngle = 45; // 4
-	int   shadowMapIndex = -1;
+	int shadowMapIndex = -1;
 
 	alignas(4) bool castShadow = true;
 	;
@@ -55,21 +59,23 @@ struct aligned_int // I love 16 byte alignment
 	int value{};
 
 private:
-	const int padding1{0};
-	const int padding2{0};
-	const int padding3{0};
+	const int padding1{ 0 };
+	const int padding2{ 0 };
+	const int padding3{ 0 };
 };
 
-class alignas(16) PointLight : Reflectable
+class alignas(16) PointLight : public Reflectable<PointLight>
 {
-	ReflectableTypeRegistration();
+public:
+	reflectable(PointLight);
+
 	int64_t alignment{};
 
 public:
-	Vector3f Color = {1, 1, 1};
+	Vector3f Color = { 1, 1, 1 };
 	float    Power = 10;
 
-	Vector3f Position = {0, 0, 0};
+	Vector3f Position = { 0, 0, 0 };
 	float    Range = 20;
 
 	Matrix lightView[6]{};
@@ -82,20 +88,22 @@ private:
 	int64_t alignment16{};
 
 public:
-	aligned_int shadowMapIndex[6] = {-1, -1, -1, -1, -1, -1};
+	aligned_int shadowMapIndex[6] = { -1, -1, -1, -1, -1, -1 };
 };
 
 REFL_AUTO(type(PointLight), field(Power), field(Range))
 
-class alignas(16) DirectionalLight : public Reflectable
+class alignas(16) DirectionalLight : public Reflectable<DirectionalLight>
 {
-	ReflectableTypeRegistration();
+public:
+	reflectable(DirectionalLight);
+
 	int64_t alignment{};
 
 public:
-	Vector3f Color = {1, 1, 1};
+	Vector3f Color = { 1, 1, 1 };
 	float    Power = 5; // watt
-	Vector4f Direction = {0, 0, 1, 1};
+	Vector4f Direction = { 0, 0, 1, 1 };
 	Matrix   lightView{};
 	Matrix   projection{};
 
@@ -107,3 +115,5 @@ private:
 };
 
 REFL_AUTO(type(DirectionalLight), field(Power))
+
+#pragma warning(pop)

@@ -24,22 +24,22 @@ bool AIController::Update(GameObject input)
 	SteeringBehaviour::Wander(&physicsComponent,fwd,5.0f);
 
 	//Avg velocity within a circle
-	const Vector3f avgVelocity = std::bit_cast<MultipleTargets_PollingStation*>(FormationStation)->GetAverageVelocityWithinCircle(position,influenceRadius);
+	const Vector3f avgVelocity = static_cast<MultipleTargets_PollingStation*>(FormationStation)->GetAverageVelocityWithinCircle(position,influenceRadius);
 	SteeringBehaviour::VelocityMatching(&physicsComponent,avgVelocity,1.0f);
 
-	const auto arg = std::bit_cast<MultipleTargets_PollingStation*>(FormationStation)->GetTargetPosition();
+	const auto arg = static_cast<MultipleTargets_PollingStation*>(FormationStation)->GetTargetPosition();
 	settings.decayCoefficient = 10.0f;
 	settings.threshold = 2.0f;
 	SteeringBehaviour::Separation(arg,&physicsComponent,position,input.GetID(),settings);
 
 	//Collider separation for seperating the groups to clearerer see behaviour
-	const auto colliders = std::bit_cast<MultipleTargets_PollingStation*>(pollingStation)->GetTargetPosition();
+	const auto colliders = static_cast<MultipleTargets_PollingStation*>(pollingStation)->GetTargetPosition();
 	settings.decayCoefficient = 20.0f;
 	settings.threshold = 5.0f;
 	SteeringBehaviour::Separation(colliders,&physicsComponent,position,input.GetID(),settings);
 
 
-	SteeringBehaviour::Cohesion(&physicsComponent,position,std::bit_cast<MultipleTargets_PollingStation*>(FormationStation),influenceRadius,2.0f);
+	SteeringBehaviour::Cohesion(&physicsComponent,position,static_cast<MultipleTargets_PollingStation*>(FormationStation),influenceRadius,2.0f);
 	//physicsComponent.ph_velocity.Normalize();
 	//physicsComponent.ph_velocity *= 4.5f; 
 

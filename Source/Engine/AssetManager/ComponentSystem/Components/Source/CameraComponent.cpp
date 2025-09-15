@@ -354,7 +354,7 @@ bool Camera::InspectorView()
 	{
 		return false;
 	}
-	bool changed = Reflect<Camera>();
+	bool changed = Reflect();
 	 
 	if(isOrtho)
 	{

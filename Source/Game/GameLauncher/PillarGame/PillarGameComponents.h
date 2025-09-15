@@ -5,8 +5,8 @@ class PlayerComponent : public Component
 {
 public:
 	using Component::Component;
-	ReflectableTypeRegistration();
-	defaultInspector();
+	// ReflectableTypeRegistration();
+	defaultComponentInspector();
 
 	int        playerId = 0;
 	GameObject currentHook;
@@ -23,8 +23,8 @@ class HookComponent : public Component
 {
 public:
 	using Component::Component;
-	ReflectableTypeRegistration();
-	defaultInspector();
+	// ReflectableTypeRegistration();
+	defaultComponentInspector();
 
 	bool       hasConnection = false;
 	GameObject connection;

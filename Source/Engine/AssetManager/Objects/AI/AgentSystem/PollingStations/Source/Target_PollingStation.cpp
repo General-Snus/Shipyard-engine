@@ -5,6 +5,7 @@
 #include "Engine/AssetManager/ComponentSystem/Components/ActorSystem/CombatComponent.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Collider.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h"
+#include "Engine\AssetManager\ComponentSystem\Components\Transform.h"
 
 Target_PollingStation::Target_PollingStation(const GameObject aTarget) : target(aTarget), PollingStation()
 {

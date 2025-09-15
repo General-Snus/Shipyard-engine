@@ -165,9 +165,6 @@
     <ClInclude Include="ComponentSystem\MasterIncludeComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\BaseAssets\MasterIncludeAssets.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Objects\AI\AgentSystem\BehaviourTree\BrainTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -178,6 +175,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Loader\LoaderBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Reflection\Reflectable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Interfaces.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

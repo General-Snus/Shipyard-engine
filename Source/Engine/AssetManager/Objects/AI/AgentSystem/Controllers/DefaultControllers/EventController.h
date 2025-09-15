@@ -3,10 +3,10 @@
 #include "Engine/AssetManager/Objects/AI/AgentSystem/AIEventManager.h"
 #include "Engine/AssetManager/Objects/AI/NavMesh/NavMesh.h"
 
-class EventController : public Controller
+class EventController : public Controller, public Reflectable<EventController>
 {
   public:
-    ReflectableTypeRegistration()
+    reflectable(EventController)
     explicit EventController();
     bool Update(GameObject aPosition) override;
     void Recieve(const AIEvent &aEvent) override;

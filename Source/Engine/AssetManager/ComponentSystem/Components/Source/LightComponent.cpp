@@ -92,24 +92,24 @@ void Light::SetIsShadowCaster(const bool active)
 	{
 		isDirty = true;
 		std::wstring name = L"unNamedMap";
-		Vector2ui    resolution = {512, 512};
+		Vector2ui    resolution = { 512, 512 };
 		int          mapsToCreate = 0;
 		switch (myLightType)
 		{
 			using enum eLightType;
 		case Directional:
 			name = L"directionalLight";
-			resolution = {4096, 4096};
+			resolution = { 4096, 4096 };
 			mapsToCreate = 1;
 			break;
 		case Point:
 			name = L"pointLight";
-			resolution = {512, 512};
+			resolution = { 512, 512 };
 			mapsToCreate = 6;
 			break;
 		case Spot:
 			name = L"spotLight";
-			resolution = {1024, 1024};
+			resolution = { 1024, 1024 };
 			mapsToCreate = 1;
 			break;
 		case uninitialized:
@@ -130,7 +130,7 @@ void Light::SetIsShadowCaster(const bool active)
 			shadowMap[i]->AllocateDepthTexture(
 				resolution,
 				name + std::to_wstring(i) + L"_" + std::to_wstring(resolution.x) + L"|" + std::to_wstring(resolution.y),
-				0,0, DXGI_FORMAT_D32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+				0, 0, DXGI_FORMAT_D32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
 			shadowMap[i]->SetView(ViewType::DSV);
 			shadowMap[i]->SetView(ViewType::SRV);
@@ -361,7 +361,7 @@ Vector3f Light::GetDirection() const
 		using enum eLightType;
 	case Directional:
 		return Vector3f(myDirectionLightData->Direction.x, myDirectionLightData->Direction.y,
-		                myDirectionLightData->Direction.z);
+						myDirectionLightData->Direction.z);
 		break;
 	case Point:
 		return Vector3f();
@@ -598,8 +598,8 @@ void Light::RedrawDirectionMap()
 	const Vector3f worldCenter = {};
 	const Vector3f lightPosition = radius * 5.0f *
 		-Vector3f(myDirectionLightData->Direction.x, myDirectionLightData->Direction.y,
-		          myDirectionLightData->Direction.z);
-	myDirectionLightData->lightView = Matrix::LookAt(lightPosition, worldCenter, {0, 1, 0}); // REFACTOR, Magic value up
+				  myDirectionLightData->Direction.z);
+	myDirectionLightData->lightView = Matrix::LookAt(lightPosition, worldCenter, { 0, 1, 0 }); // REFACTOR, Magic value up
 
 	const Vector4f cameraCenter = Vector4f(worldCenter, 0.0f) * myDirectionLightData->lightView;
 	myDirectionLightData->lightView = Matrix::GetFastInverse(myDirectionLightData->lightView);
@@ -621,20 +621,22 @@ void Light::RedrawPointMap()
 	constexpr float nearField = .01f;
 	const float     farfield = std::max(myPointLightData->Range * 5, nearField + 0.0001f);
 
-	const auto dxMatrix = DirectX::XMMatrixPerspectiveFovLH(fow,1,farfield,nearField);
+	const auto dxMatrix = DirectX::XMMatrixPerspectiveFovLH(fow, 1, farfield, nearField);
 	myPointLightData->projection = Matrix(&dxMatrix);
 
-	for(int i = 0; i < 6; i++) {
+	for (int i = 0; i < 6; i++)
+	{
 		myPointLightData->lightView[i] = GetLightViewMatrix(i);
 	}
 }
 
-void Light::RedrawSpotMap() {
+void Light::RedrawSpotMap()
+{
 	OPTICK_EVENT();
 	const Vector3f lightPosition = mySpotLightData->Position;
 	mySpotLightData->lightView =
-		Matrix::LookAt(lightPosition,lightPosition + mySpotLightData->Direction.GetNormalized(),
-			{0, 1, 0}); // REFACTOR, Magic value up
+		Matrix::LookAt(lightPosition, lightPosition + mySpotLightData->Direction.GetNormalized(),
+			{ 0, 1, 0 }); // REFACTOR, Magic value up
 
 	const float     fow = mySpotLightData->OuterConeAngle;
 	const float     farfield = mySpotLightData->Range * 2;
@@ -704,19 +706,19 @@ FrameBuffer Light::GetShadowMapFrameBuffer(const int number) const
 	case Directional:
 		fb.projection = myDirectionLightData->projection;
 		fb.view = myDirectionLightData->lightView;
-		fb.render_resolution = {shadowMap[0]->GetWidth(), shadowMap[0]->GetHeight()};
+		fb.render_resolution = { shadowMap[0]->GetWidth(), shadowMap[0]->GetHeight() };
 		fb.camera_position = GetPosition();
 		break;
 	case Point:
 		fb.projection = myPointLightData->projection;
 		fb.view = GetLightViewMatrix(number);
-		fb.render_resolution = {shadowMap[number]->GetWidth(), shadowMap[number]->GetHeight()};
+		fb.render_resolution = { shadowMap[number]->GetWidth(), shadowMap[number]->GetHeight() };
 		fb.camera_position = GetPosition();
 		break;
 	case Spot:
 		fb.projection = mySpotLightData->projection;
 		fb.view = mySpotLightData->lightView;
-		fb.render_resolution = {shadowMap[0]->GetWidth(), shadowMap[0]->GetHeight()};
+		fb.render_resolution = { shadowMap[0]->GetWidth(), shadowMap[0]->GetHeight() };
 		fb.camera_position = GetPosition();
 		break;
 	case uninitialized:
@@ -745,7 +747,7 @@ bool Light::InspectorView()
 	}
 
 	const bool previousShadowCasterValue = isShadowCaster;
-	Reflect<Light>();
+	Reflect();
 
 	// stupid stupid stupid, no textures would be allocated otherwise
 	if (isShadowCaster != previousShadowCasterValue)
@@ -757,13 +759,13 @@ bool Light::InspectorView()
 	switch (myLightType)
 	{
 	case Directional:
-		Reflect<DirectionalLight>(*myDirectionLightData);
+		Reflection::Reflect<DirectionalLight>(*myDirectionLightData);
 		break;
 	case Point:
-		Reflect<PointLight>(*myPointLightData);
+		Reflection::Reflect<PointLight>(*myPointLightData);
 		break;
 	case Spot:
-		Reflect<SpotLight>(*mySpotLightData);
+		Reflection::Reflect<SpotLight>(*mySpotLightData);
 		break;
 	case uninitialized:
 		break;

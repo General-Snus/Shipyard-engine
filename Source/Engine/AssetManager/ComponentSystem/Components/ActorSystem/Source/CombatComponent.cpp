@@ -105,6 +105,6 @@ bool CombatComponent::InspectorView()
 	{
 		return false;
 	}
-	Reflect<CombatComponent>();
+	Reflect();
 	return true;
 }

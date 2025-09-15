@@ -1,10 +1,10 @@
 #pragma once
 #include <Engine/AssetManager/ComponentSystem/Component.h>
 
-class ProjectileComponent : public Component
+class ProjectileComponent : public Reflectable<ProjectileComponent>, public Component
 {
-  public:
-    ReflectableTypeRegistration();
+public:
+    reflectable(ProjectileComponent);
     ProjectileComponent(const SY::UUID anOwnerID, GameObjectManager *aManager);
     ~ProjectileComponent() override = default;
     void Init() override;
@@ -14,7 +14,7 @@ class ProjectileComponent : public Component
 
     void OnColliderEnter(const SY::UUID aGameObjectID) override;
 
-  private:
+private:
     float lifetime;
     GameObject Creator;
 };

@@ -2,10 +2,10 @@
 #include "../PollingStations/Target_PollingStation.h" 
 #include "DefaultControllers/PollingController.h"
 
-class AIController : public PollingController
+class AIController : public PollingController, public Reflectable<AIController>
 {
 public:
-	ReflectableTypeRegistration()
+	reflectable(AIController)
 	explicit AIController(MultipleTargets_PollingStation* aTargetsPollingStation,MultipleTargets_PollingStation* formationStation);
 	bool Update(GameObject input) override;
 	void Recieve(const AIEvent& aEvent) override;

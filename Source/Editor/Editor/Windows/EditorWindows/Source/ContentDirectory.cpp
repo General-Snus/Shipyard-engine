@@ -3,7 +3,7 @@
 #include <Engine/AssetManager/AssetManager.h>
 #include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
 #include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
-#include <Tools/ImGui/ImGuiHelpers.hpp>
+#include "Editor/Editor/Helpers/ImGuiHelpers.h"
 #include <Tools/Utilities/Input/Input.hpp> 
 #include <Editor/Editor/Core/Editor.h>  
 #include <Editor/Editor/Windows/EditorWindows/CustomFuncWindow.h> 
@@ -12,10 +12,11 @@
 #include "Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h"  
 #include <shellapi.h>
 #include <ShlObj.h>
+#include <ranges>
 
-ContentDirectory::ContentDirectory(): m_CurrentPath(ENGINE_RESOURCES.Directory())
+ContentDirectory::ContentDirectory(): m_CurrentPath(GetEngineResources().Directory())
 {
-	EDITOR_INSTANCE.m_Callbacks[EditorCallback::WM_DropFile].AddListener([this]() { this->WMDroppedFile(); });
+	GetEditor().m_Callbacks[EditorCallback::WM_DropFile].AddListener([this]() { this->WMDroppedFile(); });
 }
 
 void ContentDirectory::Node(const int index,const float cellWidth)
@@ -33,7 +34,7 @@ void ContentDirectory::Node(const int index,const float cellWidth)
 	{
 		OPTICK_EVENT("BeginDragDropSource");
 		const std::string payload = path.string();
-		ImGui::SetDragDropPayload(std::format("ContentAsset_{}",ENGINE_RESOURCES.AssetType(path)).c_str(),
+		ImGui::SetDragDropPayload(std::format("ContentAsset_{}",GetEngineResources().AssetType(path)).c_str(),
 								  payload.c_str(),payload.size());
 		ImGui::Text(path.stem().string().c_str());
 		ImGui::EndDragDropSource();
@@ -53,7 +54,7 @@ void ContentDirectory::Node(const int index,const float cellWidth)
 		if(ImGui::Selectable("Show in Explorer"))
 		{
 			PIDLIST_ABSOLUTE pidl = ILCreateFromPathW(
-				absolute(ENGINE_RESOURCES.Directory() / path).wstring().c_str());
+				absolute(GetEngineResources().Directory() / path).wstring().c_str());
 			if(pidl)
 			{
 				SHOpenFolderAndSelectItems(pidl,0,nullptr,0);
@@ -62,22 +63,22 @@ void ContentDirectory::Node(const int index,const float cellWidth)
 		}
 		if(ImGui::Selectable("Open"))
 		{
-			if(auto asset = ENGINE_RESOURCES.TryLoadAsset(path))
+			if(auto asset = GetEngineResources().TryLoadAsset(path))
 			{
 				auto newWindow = std::make_shared<CustomFuncWindow>(std::bind(&AssetBase::InspectorView,asset));
 				newWindow->SetWindowName(asset->GetAssetPath().filename().string());
-				EDITOR_INSTANCE.g_EditorWindows.emplace_back(newWindow);
+				GetEditor().g_EditorWindows.emplace_back(newWindow);
 			}
 		}
 		if(ImGui::Selectable("Open External"))
 		{
-			ShellExecute(nullptr,nullptr,(ENGINE_RESOURCES.Directory() / path).wstring().c_str(),nullptr,nullptr,
+			ShellExecute(nullptr,nullptr,(GetEngineResources().Directory() / path).wstring().c_str(),nullptr,nullptr,
 						 SW_SHOW);
 		}
 		if(ImGui::Selectable("Delete"))
 		{
 			std::error_code _Ec;
-			if(!std::filesystem::remove(absolute((ENGINE_RESOURCES.Directory() / path)), _Ec))
+			if(!std::filesystem::remove(absolute((GetEngineResources().Directory() / path)), _Ec))
 			{
 				LOGGER.Err(_Ec.message(), true);
 			}
@@ -92,7 +93,7 @@ void ContentDirectory::Node(const int index,const float cellWidth)
 		ImGui::Separator();
 		if(ImGui::Selectable("Copy Path"))
 		{
-			const char*   output = absolute((ENGINE_RESOURCES.Directory() / path)).string().c_str();
+			const char*   output = absolute((GetEngineResources().Directory() / path)).string().c_str();
 			const size_t  len = strlen(output) + 1;
 			const HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE,len);
 			memcpy(GlobalLock(hMem),output,len);
@@ -105,7 +106,7 @@ void ContentDirectory::Node(const int index,const float cellWidth)
 		ImGui::Separator();
 		if(ImGui::Selectable("ReImport"))
 		{
-			if(const auto asset = ENGINE_RESOURCES.TryLoadAsset(path))
+			if(const auto asset = GetEngineResources().TryLoadAsset(path))
 			{
 				asset->Init();
 			}
@@ -120,20 +121,20 @@ void ContentDirectory::Node(const int index,const float cellWidth)
 	if(isHovered && isLookingForHovered)
 	{
 		isLookingForHovered = false;
-		m_hoveredPath = (ENGINE_RESOURCES.Directory() / path);
+		m_hoveredPath = (GetEngineResources().Directory() / path);
 	}
 	if(isHovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 	{
 		OPTICK_EVENT("IsMouseDoubleClicked");
 		if(data.isDirectory)
 		{
-			m_CurrentPath = (ENGINE_RESOURCES.Directory() / path);
+			m_CurrentPath = (GetEngineResources().Directory() / path);
 
 			ZeroMemory(buf,128);
 			IsDirty = true;
 		} else
 		{
-			ShellExecute(nullptr,nullptr,(ENGINE_RESOURCES.Directory() / path).wstring().c_str(),nullptr,nullptr,
+			ShellExecute(nullptr,nullptr,(GetEngineResources().Directory() / path).wstring().c_str(),nullptr,nullptr,
 						 SW_SHOW);
 		}
 	}
@@ -234,11 +235,11 @@ void ContentDirectory::FillPaths(const std::string& keyTerm)
 	m_CurrentDirectoryPaths.clear();
 	if(!keyTerm.empty())
 	{
-		for(const auto& it : std::filesystem::recursive_directory_iterator(ENGINE_RESOURCES.Directory()))
+		for(const auto& it : std::filesystem::recursive_directory_iterator(GetEngineResources().Directory()))
 		{
 			OPTICK_EVENT("Iteration");
 			const std::string name = it.path().filename().string();
-			const auto        relativePath = relative(it.path(),ENGINE_RESOURCES.Directory());
+			const auto        relativePath = relative(it.path(),GetEngineResources().Directory());
 
 			is_directory(it.path())
 				? m_CurrentDirectoryPaths.emplace_back(name,relativePath,true)
@@ -250,7 +251,7 @@ void ContentDirectory::FillPaths(const std::string& keyTerm)
 		{
 			OPTICK_EVENT("Iteration");
 			const std::string name = it.path().filename().string();
-			const auto        relativePath = relative(it.path(),ENGINE_RESOURCES.Directory());
+			const auto        relativePath = relative(it.path(),GetEngineResources().Directory());
 
 			is_directory(it.path())
 				? m_CurrentDirectoryPaths.emplace_back(name,relativePath,true)
@@ -268,7 +269,7 @@ void ContentDirectory::DoMoveOperation()
 		isLookingForHovered = false;
 	}
 
-	auto& paths = EDITOR_INSTANCE.WM_DroppedPath;
+	auto& paths = GetEditor().WM_DroppedPath;
 
 	for(auto& pathToMoveFrom : paths | std::ranges::views::reverse)
 	{
@@ -341,21 +342,21 @@ std::shared_ptr<TextureHolder> ContentDirectory::IconFromExtension(const std::fi
 	std::shared_ptr<TextureHolder> imageTexture;
 	if(isDirectory)
 	{
-		imageTexture = ENGINE_RESOURCES.LoadAsset<TextureHolder>("Textures/Widgets/Folder.png");
+		imageTexture = GetEngineResources().LoadAsset<TextureHolder>("Textures/Widgets/Folder.png");
 	}
 
 	else if(extension == ".dds" || extension == ".png" || extension == ".hdr" || extension == ".jpg")
 	{
-		imageTexture = ENGINE_RESOURCES.LoadAsset<TextureHolder>(path);
+		imageTexture = GetEngineResources().LoadAsset<TextureHolder>(path);
 		if(!imageTexture->isLoadedComplete)
 		{
-			imageTexture = ENGINE_RESOURCES.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+			imageTexture = GetEngineResources().LoadAsset<TextureHolder>("Textures/Widgets/File.png");
 		}
 	}
 
 	else if(extension == ".fbx")
 	{
-		const std::shared_ptr<Mesh> mesh = ENGINE_RESOURCES.LoadAsset<Mesh>(path);
+		const std::shared_ptr<Mesh> mesh = GetEngineResources().LoadAsset<Mesh>(path);
 		if(mesh && mesh->isLoadedComplete)
 		{
 			imageTexture = mesh->GetEditorIcon();
@@ -364,7 +365,7 @@ std::shared_ptr<TextureHolder> ContentDirectory::IconFromExtension(const std::fi
 
 	else if(extension == ".json")
 	{
-		const std::shared_ptr<Material> materialPreview = ENGINE_RESOURCES.LoadAsset<Material>(path);
+		const std::shared_ptr<Material> materialPreview = GetEngineResources().LoadAsset<Material>(path);
 		if(materialPreview && materialPreview->isLoadedComplete)
 		{
 			imageTexture = materialPreview->GetEditorIcon();
@@ -373,17 +374,17 @@ std::shared_ptr<TextureHolder> ContentDirectory::IconFromExtension(const std::fi
 
 	else if(extension == ".Graph")
 	{
-		imageTexture = ENGINE_RESOURCES.LoadAsset<TextureHolder>("Textures/Widgets/Graph.png");
+		imageTexture = GetEngineResources().LoadAsset<TextureHolder>("Textures/Widgets/Graph.png");
 	}
 
 	else if(extension == ".cso" || extension == ".hlsl")
 	{
-		imageTexture = ENGINE_RESOURCES.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+		imageTexture = GetEngineResources().LoadAsset<TextureHolder>("Textures/Widgets/File.png");
 	}
 
 	if(!imageTexture)
 	{
-		imageTexture = ENGINE_RESOURCES.LoadAsset<TextureHolder>("Textures/Widgets/File.png");
+		imageTexture = GetEngineResources().LoadAsset<TextureHolder>("Textures/Widgets/File.png");
 	}
 
 	return imageTexture;
@@ -396,7 +397,7 @@ void ContentDirectory::DirectoryBar()
 		IsDirty = true;
 	}
 	ImGui::SameLine();
-	if(ImGui::ArrowButton("##BackButton",ImGuiDir_Up) && m_CurrentPath != ENGINE_RESOURCES.Directory())
+	if(ImGui::ArrowButton("##BackButton",ImGuiDir_Up) && m_CurrentPath != GetEngineResources().Directory())
 	{
 		IsDirty = true;
 		m_CurrentPath = m_CurrentPath.parent_path();
@@ -404,15 +405,15 @@ void ContentDirectory::DirectoryBar()
 
 	ImGui::SameLine();
 	std::filesystem::path recursivePath = m_CurrentPath;
-	if(ImGui::Button(ENGINE_RESOURCES.Directory().string().c_str()))
+	if(ImGui::Button(GetEngineResources().Directory().string().c_str()))
 	{
 		IsDirty = true;
-		m_CurrentPath = ENGINE_RESOURCES.Directory();
+		m_CurrentPath = GetEngineResources().Directory();
 	}
 
 	ImGui::SameLine();
 	std::vector<std::filesystem::path> pathList;
-	while(recursivePath != ENGINE_RESOURCES.Directory())
+	while(recursivePath != GetEngineResources().Directory())
 	{
 		pathList.emplace_back(recursivePath);
 		recursivePath = recursivePath.parent_path();
@@ -431,7 +432,7 @@ void ContentDirectory::DirectoryBar()
 
 void ContentDirectory::WMDroppedFile()
 {
-	const auto path = EDITOR_INSTANCE.WM_DroppedPath;
+	const auto path = GetEditor().WM_DroppedPath;
 	if(!path.empty())
 	{
 		isLookingForHovered = true;

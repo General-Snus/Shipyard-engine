@@ -24,12 +24,12 @@ struct MaterialBuffer
     float padding;
 };
 
-class Material : public AssetBase
+class Material : public Reflectable<Material>, public AssetBase
 {
     friend class MeshRenderer;
 
   public:
-    ReflectableTypeRegistration();
+    reflectable(Material);
     struct DataMaterial
     {
         std::shared_ptr<ShipyardShader> vertexShader;

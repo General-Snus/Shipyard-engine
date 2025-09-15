@@ -15,7 +15,7 @@ GameState::GameState() = default;
 void GameState::Intialize(std::filesystem::path aPathToProjectFolder)
 {
 	pathToProjectFolder = aPathToProjectFolder;
-	m_EditorBackupScene = EDITOR_INSTANCE.GetActiveScene();
+	m_EditorBackupScene = GetEditor().GetActiveScene();
 }
 
 bool GameState::AttemptDllLoad()
@@ -53,9 +53,9 @@ void GameState::StartPlaySession()
 
 	m_GameScene = std::make_shared<Scene>("GameScene");
 
-	m_EditorBackupScene = EDITOR_INSTANCE.GetActiveScene();
+	m_EditorBackupScene = GetEditor().GetActiveScene();
 	m_GameScene->merge(*m_EditorBackupScene);
-	EDITOR_INSTANCE.SetActiveScene(m_GameScene);
+	GetEditor().SetActiveScene(m_GameScene);
 
 
 	SessionConfiguration config = {
@@ -75,7 +75,7 @@ void GameState::EndPlaySession()
 	OPTICK_EVENT();
 	Runner.Close();
 
-	EDITOR_INSTANCE.SetActiveScene(m_EditorBackupScene);
+	GetEditor().SetActiveScene(m_EditorBackupScene);
 	if (m_GameScene)
 	{
 		m_GameScene->unload();

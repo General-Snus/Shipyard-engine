@@ -1,29 +1,31 @@
 #include "AssetManager.pch.h"
 
 #include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
+#include <Engine\AssetManager\Reflection\ReflectionTemplate.h>
 #include "Engine/AssetManager/ComponentSystem/Components/Animator.h"
 #include "Engine/AssetManager/Objects/BaseAssets/Animations.h"
 #include "Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h"
 #include "Engine/AssetManager/Objects/BaseAssets/MeshAsset.h" 
+#include "Engine/AssetManager/AssetManagerUtills.hpp" 
 #include "Tools/ImGui/imgui.h" 
 
 // Must define function EditorIcon for asset
 
 MeshRenderer::MeshRenderer(const SY::UUID anOwnerId, GameObjectManager* aManager) : Component(anOwnerId, aManager)
 {
-	m_Mesh = ENGINE_RESOURCES.LoadAsset<Mesh>("default.fbx");
+	m_Mesh = GetEngineResources().LoadAsset<Mesh>("default.fbx");
 }
 
 inline MeshRenderer::MeshRenderer(const SY::UUID               anOwnerId, GameObjectManager* aManager,
                                   const std::filesystem::path& aFilePath, bool               useExact)
 	: Component(anOwnerId, aManager)
 {
-	m_Mesh = ENGINE_RESOURCES.LoadAsset<Mesh>(aFilePath, useExact);
+	m_Mesh = GetEngineResources().LoadAsset<Mesh>(aFilePath, useExact);
 }
 
 void MeshRenderer::SetNewMesh(const std::filesystem::path& aFilePath)
 {
-	m_Mesh = ENGINE_RESOURCES.LoadAsset<Mesh>(aFilePath);
+	m_Mesh = GetEngineResources().LoadAsset<Mesh>(aFilePath);
 }
 
 void MeshRenderer::SetNewMesh(std::shared_ptr<Mesh> aMesh)
@@ -33,12 +35,12 @@ void MeshRenderer::SetNewMesh(std::shared_ptr<Mesh> aMesh)
 
 void MeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath)
 {
-	SetMaterial(ENGINE_RESOURCES.LoadAsset<Material>(aFilePath), 0);
+	SetMaterial(GetEngineResources().LoadAsset<Material>(aFilePath), 0);
 }
 
 void MeshRenderer::SetMaterialPath(const std::filesystem::path& aFilePath, int elementIndex)
 {
-	SetMaterial(ENGINE_RESOURCES.LoadAsset<Material>(aFilePath), elementIndex);
+	SetMaterial(GetEngineResources().LoadAsset<Material>(aFilePath), elementIndex);
 }
 
 void MeshRenderer::SetMaterial(const std::shared_ptr<Material> aMaterial)
@@ -130,7 +132,7 @@ bool MeshRenderer::InspectorView()
 	{
 		return false;
 	}
-	Reflect<MeshRenderer>();
+
 	{
 		if (ImGui::TreeNodeEx("Static meshes", ImGuiTreeNodeFlags_DefaultOpen)) // Replace with element name
 		{
@@ -251,14 +253,14 @@ cSkeletalMeshRenderer::cSkeletalMeshRenderer(const SY::UUID               anOwne
                                              const std::filesystem::path& aFilePath)
 	: MeshRenderer(anOwnerId, aManager, aFilePath)
 {
-	mySkeleton = ENGINE_RESOURCES.LoadAsset<Skeleton>(aFilePath);
+	mySkeleton = GetEngineResources().LoadAsset<Skeleton>(aFilePath);
 	assert(mySkeleton);
 }
 
 void cSkeletalMeshRenderer::SetNewMesh(const std::filesystem::path& aFilePath)
 {
-	m_Mesh = ENGINE_RESOURCES.LoadAsset<Mesh>(aFilePath);
-	mySkeleton = ENGINE_RESOURCES.LoadAsset<Skeleton>(aFilePath);
+	m_Mesh = GetEngineResources().LoadAsset<Mesh>(aFilePath);
+	mySkeleton = GetEngineResources().LoadAsset<Skeleton>(aFilePath);
 }
 
 bool cSkeletalMeshRenderer::InspectorView()
@@ -267,7 +269,7 @@ bool cSkeletalMeshRenderer::InspectorView()
 	{
 		return false;
 	}
-	Reflect<cSkeletalMeshRenderer>();
+	Reflect();
 	return true;
 }
 

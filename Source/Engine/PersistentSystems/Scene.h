@@ -1,7 +1,7 @@
 #pragma once
-#include <memory>
 #include <Engine/AssetManager/ComponentSystem/GameObjectManager.h>
 #include <Tools/Utilities/LinearAlgebra/Sphere.hpp>
+#include <memory>
 
 class Scene : public std::enable_shared_from_this<Scene>
 {

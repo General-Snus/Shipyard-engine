@@ -1,11 +1,11 @@
 #pragma once
 #include <Engine/AssetManager/ComponentSystem/Component.h>
+#include <Engine/AssetManager/Reflection/Reflectable.h>
 
-class UserComponent : public Component
+class UserComponent : public Reflectable<UserComponent>, public Component
 {
-
-  public:
-    ReflectableTypeRegistration();
+public:
+    reflectable(UserComponent);
     UserComponent(const SY::UUID anOwnerID, GameObjectManager *aManager) : Component(anOwnerID, aManager)
     {
     }

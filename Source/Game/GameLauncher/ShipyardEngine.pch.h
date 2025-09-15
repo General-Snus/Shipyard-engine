@@ -8,10 +8,8 @@
 // Component Internal
 #include "Engine/PersistentSystems/Scene.h"
 #include <Engine/AssetManager/ComponentSystem/Component.h>
-#include <Engine/AssetManager/ComponentSystem/GameObject.h>
-#include <Engine/AssetManager/ComponentSystem/MasterIncludeComponent.h>
-#include <Engine/AssetManager/ComponentSystem/UUID.h>
-#include <Engine/AssetManager/Objects/BaseAssets/MasterIncludeAssets.h>
+#include <Engine/AssetManager/ComponentSystem/GameObject.h> 
+#include <Engine/AssetManager/ComponentSystem/UUID.h> 
 
 // Utilities and third party
 #include "Engine/AssetManager/Reflection/ReflectionTemplate.h"

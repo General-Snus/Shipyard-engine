@@ -1,5 +1,6 @@
 #pragma once
 #include <Engine/AssetManager/ComponentSystem/Component.h>
+#include <Engine/AssetManager/ComponentSystem/GameObject.h>
 #include <Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h>
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
 #include <Tools/Utilities/LinearAlgebra/Quaternions.hpp>
@@ -12,18 +13,15 @@ enum eSpace {
 
 
 // LEFTHANDED X RIGHT Y UP Z FORWARD AS GOD INTENDED
-class Transform : public Component {
+class Transform : public Reflectable<Transform>, public Component {
 	friend class ReplicationLayer;
 public:
-	ReflectableTypeRegistration();
+	reflectable(Transform);
 	Transform() = delete;
 	Transform(SY::UUID anOwnerId,GameObjectManager* aManager);
 	void Destroy() override;
 	void Init() override;
-	void Update() override;
-	// Be ware, the matrix is built by the transform, changes wont carry but you can use this to avoid making copies of
-	// the orignal matrix
-	Matrix& GetMutableTransform();
+	void Update() override; 
 	const Matrix& LocalMatrix();
 	const Matrix& unmodified_WorldMatrix() const;
 	const Matrix& unmodified_LocalMatrix() const;

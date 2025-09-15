@@ -122,9 +122,9 @@ inline constexpr bool is_array = false;
 template <typename T, std::size_t N>
 inline constexpr bool is_array<std::array<T, N>> = true;
 template <typename T, std::size_t N>
-inline constexpr bool is_array<const std::array<T, N>> = true;
+inline constexpr bool is_array<const std::array<T, N>> = true; 
 
-
+#pragma region Concepts
 template <typename T>
 concept FloatingPoint = std::floating_point<T>;
 
@@ -143,17 +143,36 @@ constexpr T Cast(U&& value)
 template <auto V>
 concept Positive = (V > 0); 
 
-template <Integer auto V>
-concept PositiveInt = (V > 0);
+template <auto V>
+concept PositiveInt = Integer<decltype(V)> && (V > 0);
 
 template <FloatingPoint auto V>
-concept PositiveFloat = (V > 0);
+concept PositiveFloat = FloatingPoint<decltype(V)> && (V > 0);
 
 template<typename F>
 concept IsFunction = std::is_function_v<F>;
 
 template<typename T>
 concept InputRange = std::ranges::input_range<T>;
+
+
+template <typename T>
+concept Hashable = requires(T v)
+{
+    { std::hash<T>{}(v) } -> std::convertible_to<std::size_t>;
+};
+
+template<typename Base, typename Derived>
+concept IsDerived = std::is_base_of<Base, Derived>::value;
+
+template <typename T>
+concept pointerSyntax = requires(T a) { a->GetTypeInfo(); };
+template <typename T>
+concept IsComponent = requires(T a) { a.gameObject(); };
+template <typename T>
+concept IsComponentPtr = requires(T a) { a->gameObject(); };
+
+#pragma endregion
 
 template <typename T, T... S, typename F>
 constexpr void for_sequence(std::integer_sequence<T, S...>, F f)
@@ -191,9 +210,6 @@ template <typename Base, typename Derived>
 inline constexpr bool is_derived_from_v = is_derived_from<Base, Derived>::value;
 
 
-template<typename Base, typename Derived>
-concept IsDerived = std::is_base_of<Base, Derived>::value;
-
 template <typename T, typename... Ts>
 constexpr bool Contains = (std::is_same<T, Ts>{} || ...);
 template <typename Subset, typename Set>
@@ -201,9 +217,3 @@ constexpr bool IsSubsetOf = false;
 template <typename... Ts, typename... Us>
 constexpr bool IsSubsetOf<std::tuple<Ts...>, std::tuple<Us...>> = (Contains<Ts, Us...> && ...);
 
-
-template <typename T>
-concept Hashable = requires(T v)
-{
-    { std::hash<T>{}(v) } -> std::convertible_to<std::size_t>;
-};

@@ -1,13 +1,12 @@
 #include "tex_inspect_directx12.h" 
 #include "imgui_tex_inspect_internal.h"
-#include <d3d12.h>
-#include <Engine/AssetManager/AssetManager.h>
-#include <Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h>
+#include <d3d12.h>  
 #include <DirectX/DX12/Graphics/Resources/Texture.h>
 #include <DirectX/DX12/Graphics/Resources/GpuBuffer.h>
-#include "imgui_impl_dx12.h"
-#include "DirectX/DX12/Graphics/GPU.h"
-#include <Engine/GraphicsEngine/Shaders/Registers.h>
+#include "imgui_impl_dx12.h" 
+#include <d3d12shader.h> 
+#include <dxcapi.h>
+#include <Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h>
 
 namespace ImGuiTexInspect {
 
@@ -78,7 +77,7 @@ namespace ImGuiTexInspect {
 
             const auto* entry = L"main";
             const auto* target = L"vs_6_5";
-            if(FAILED(ShipyardShader::CompileShader(vertexShader,entry,target,&vertexShaderBlob))) {
+            if ((((HRESULT)(ShipyardShader::CompileShader(vertexShader, entry, target, &vertexShaderBlob))) < 0)) {
                 return false; // NB: Pass ID3DBlob* pErrorBlob to D3DCompile() to get error showing in (const char*)pErrorBlob->GetBufferPointer(). Make sure to Release() the blob!
             }
 
@@ -146,7 +145,7 @@ namespace ImGuiTexInspect {
             psoDesc.PS = {pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize()};
 
             //std::shared_ptr<ShipyardShader> psShader;
-            //ENGINE_RESOURCES.ForceLoadAsset<ShipyardShader>("Shaders/TextureInspectShader.cso",psShader);
+            //GetEngineResources().ForceLoadAsset<ShipyardShader>("Shaders/TextureInspectShader.cso",psShader);
             //psoDesc.PS = {psShader->GetBufferPtr(), psShader->GetBlobSize()};
         }
 

@@ -1,6 +1,7 @@
-#ifndef GameObjectDef
-#define GameObjectDef
+#pragma once
+
 #include "Engine/AssetManager/ComponentSystem/GameObjectManager.h"
+#include <Engine\AssetManager\Enums.h>
 
 class Transform;
 class Scene;
@@ -11,10 +12,10 @@ class GameObject
 public:
 	// If no default argument is provided, the function will create a new GameObject in the active scene
 	static GameObject Create(
-		const std::string&     name = "",
+		const std::string& name = "",
 		std::shared_ptr<Scene> ref = nullptr); // why not set scene to active scene by default? INCLUDE HELL
-	GameObject() = default; // this is not a valid gameobject and will evaluate to false, only created ones are valid
-	~GameObject() = default;
+	GameObject(); // this is not a valid gameobject and will evaluate to false, only created ones are valid
+	~GameObject();
 
 	template <class T>
 	void RemoveComponent();
@@ -84,7 +85,7 @@ public:
 	}
 
 	Transform& transform() const;
-	Scene&     scene() const;
+	Scene& scene() const;
 
 private:
 	friend class GameObjectManager; // Only the asset manager can create and destroy components
@@ -97,20 +98,8 @@ private:
 	GameObjectManager* myManager = nullptr;
 };
 
-__forceinline std::vector<Component*> GameObject::CopyAllComponents() const
-{
-	assert(myManager != nullptr && "GameObject has no manager");
-	assert(myID.IsValid() && "GameObject has no ID");
-	return myManager->CopyAllAttachedComponents(myID);
-}
 
 // TODO RENAME
-inline bool GameObject::GetActive() const
-{
-	assert(myManager != nullptr && "GameObject has no manager");
-	assert(myID.IsValid() && "GameObject has no ID");
-	return myManager->GetActive(myID);
-}
 
 template <class T>
 void GameObject::RemoveComponent()
@@ -167,33 +156,3 @@ T& GameObject::GetComponent() const
 	assert(myID.IsValid() && "GameObject has no ID");
 	return myManager->GetComponent<T>(myID);
 }
-
-inline bool GameObject::operator==(const GameObject& other) const
-{
-	return !(myID != other.myID || myManager != other.myManager);
-}
-
-inline GameObject::operator SY::UUID() const
-{
-	return myID;
-}
-
-inline GameObject::operator std::string() const
-{
-	return GetName();
-}
-
-inline void GameObject::SetActive(const bool aState) const
-{
-	assert(myManager != nullptr && "GameObject has no manager");
-	assert(myID.IsValid() && "GameObject has no ID");
-	myManager->SetActive(myID, aState);
-}
-
-inline void GameObject::OnSiblingChanged(const std::type_info* SourceClass) const
-{
-	assert(myManager != nullptr && "GameObject has no manager");
-	assert(myID.IsValid() && "GameObject has no ID");
-	myManager->OnSiblingChanged(myID, SourceClass);
-}
-#endif
