@@ -27,8 +27,6 @@ using ID3DBlob = ID3D10Blob;
 using DxCommandList = ID3D12GraphicsCommandList10;
 using DeviceType = ID3D12Device8;
 
-#define GPUInstance ServiceLocator::Instance().GetService<GPU>()
-
 template <typename U>
 concept D3D12ObjectLike =
 std::derived_from<std::remove_pointer_t<std::remove_cvref_t<U>>, ID3D12Object>;

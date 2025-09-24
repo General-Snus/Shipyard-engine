@@ -120,7 +120,7 @@ void TextureHolder::Init()
 			}
 		}
 
-		if (!GPUInstance.LoadTexture(RawTexture.get(), AssetPath.wstring()))
+		if (!GetGPU().LoadTexture(RawTexture.get(), AssetPath.wstring()))
 		{
 			const std::string msg = "Error: Coulnt dds texture at " + AssetPath.string();
 			LOGGER.Err(msg);

@@ -603,7 +603,7 @@ void GPUSwapchain::Create(HWND hwnd, Ref<ID3D12CommandQueue>, UINT Width, UINT H
 
 	Ref<IDXGISwapChain1> swapChain;
 	if (FAILED(dxgiFactory4->CreateSwapChainForHwnd(
-		GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT)->GetCommandQueue().Get(),
+		GetGPU().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT)->GetCommandQueue().Get(),
 		// Swap chain needs the queue so that it can force a flush on it.
 		hwnd, &m_Desc, nullptr, nullptr, swapChain.GetAddressOf())))
 	{
@@ -625,7 +625,7 @@ void GPUSwapchain::Create(HWND hwnd, Ref<ID3D12CommandQueue>, UINT Width, UINT H
 
 void GPUSwapchain::Present() const
 {
-	Helpers::ThrowIfFailed(GPUInstance.m_Swapchain->m_SwapChain->Present(m_Desc.SwapEffect, m_Desc.Flags));
+	Helpers::ThrowIfFailed(GetGPU().m_Swapchain->m_SwapChain->Present(m_Desc.SwapEffect, m_Desc.Flags));
 }
 
 void GPUSwapchain::Resize(Vector2ui resolution) const

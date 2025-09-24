@@ -30,23 +30,21 @@ namespace Reflection
 		return false;
 	}
 
-	inline bool ImGuiReflect(bool& ref, const std::string& identifier);
+	bool ImGuiReflect(bool& ref, const std::string& identifier);
 
-	inline bool ImGuiReflect(const GameObject& ref, const std::string& identifier);
+	bool ImGuiReflect(const GameObject& ref, const std::string& identifier);
 
-	inline bool ImGuiReflect(Color& ref, const std::string& identifier);
+	bool ImGuiReflect(Color& ref, const std::string& identifier);
 
-	inline bool ImGuiReflect(Vector2<float>& ref, const std::string& identifier);
+	bool ImGuiReflect(Vector2<float>& ref, const std::string& identifier);
 
-	inline bool ImGuiReflect(Vector3<float>& ref, const std::string& identifier);
+	bool ImGuiReflect(Vector3<float>& ref, const std::string& identifier);
 
-	inline bool ImGuiReflect(Vector4<float>& ref, const std::string& identifier);
+	bool ImGuiReflect(Vector4<float>& ref, const std::string& identifier);
 
-	inline bool ImGuiReflect(float& ref, const std::string& identifier);
+	bool ImGuiReflect(float& ref, const std::string& identifier);
 
-	inline bool ImGuiReflect(int& ref, const std::string& identifier);
-
-
+	bool ImGuiReflect(int& ref, const std::string& identifier);
 
 	template <typename T>
 	concept InspectorSyntax = requires(T a) { a.InspectorView(); };

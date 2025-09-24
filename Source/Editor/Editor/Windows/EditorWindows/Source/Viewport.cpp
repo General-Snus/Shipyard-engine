@@ -49,7 +49,7 @@ Viewport::~Viewport() = default;
 
 std::shared_ptr<Scene> Viewport::GetAttachedScene() const
 {
-	return sceneToRender;
+	return sceneToRender ? sceneToRender : GetEditor().GetActiveScene();
 }
 
 Texture* Viewport::GetTarget() const
@@ -69,15 +69,18 @@ bool Viewport::IsHovered() const
 
 bool Viewport::IsRenderReady() const
 {
+	if (!IsVisible) { return false; }
+	if (!GetAttachedScene()) { return false; }
+
 	// if you are main and there is a active camera
-	if (isGameViewport && IsVisible)
+	if (isGameViewport)
 	{
 		const auto camera = GetAttachedScene()->GetGOM().GetCamera().TryGetComponent<Camera>();
 		return camera ? camera->IsActive() : false;
 	}
 
 	// Return only true if the local camera is valid and it is visible in imgui
-	return IsVisible;
+	return true;
 }
 
 bool Viewport::IsGameViewport() const
@@ -90,6 +93,11 @@ void Viewport::Update()
 	OPTICK_EVENT();
 	if (isGameViewport)
 	{
+		if (!GetAttachedScene())
+		{
+			LOGGER.Err("No attached scene to game camera");
+			return;
+		}
 		if (auto* camera = GetAttachedScene()->GetGOM().GetCamera().TryGetComponent<Camera>())
 		{
 			camera->IsInControl(false);
@@ -129,6 +137,7 @@ const Camera& Viewport::GetCamera() const
 
 Camera& Viewport::GetCamera()
 {
+	if (!GetAttachedScene()) { return editorCamera; }
 	if (isGameViewport)
 	{
 		if (auto* camera = GetAttachedScene()->GetGOM().GetCamera().TryGetComponent<Camera>())
@@ -265,10 +274,7 @@ void Viewport::RenderImGUi()
 					transform.Move(tra);
 
 					LOGGER.Log(localMatrix.rotationMatrix().toString());
-
 					transform.DecomposeMatrixToTransform(localMatrix);
-
-
 				}
 				else
 				{

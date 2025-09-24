@@ -12,7 +12,7 @@ namespace Helpers
 		{
 			if (hr == DXGI_ERROR_DEVICE_REMOVED)
 			{
-				hr = GPUInstance.m_Device->GetDeviceRemovedReason();
+				hr = GetGPU().m_Device->GetDeviceRemovedReason();
 			}
 
 			const _com_error   err(hr);

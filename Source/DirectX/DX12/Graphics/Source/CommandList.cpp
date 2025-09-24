@@ -75,7 +75,7 @@ template <typename T>
 void CommandList::SetConstantBuffer(unsigned slot, const T& constantBuffer)
 {
 	OPTICK_GPU_EVENT("SetConstantBuffer");
-	const auto& alloc = GPUInstance.m_GraphicsMemory->AllocateConstant<T>(constantBuffer);
+	const auto& alloc = GetGPU().m_GraphicsMemory->AllocateConstant<T>(constantBuffer);
 	m_CommandList->SetGraphicsRootConstantBufferView(slot, alloc.GpuAddress());
 }
 
@@ -149,7 +149,7 @@ void CommandList::SetDescriptorTable(unsigned slot, Texture* texture)
 
 	m_CommandList->SetGraphicsRootDescriptorTable(
 		slot,
-		GPUInstance.m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->GetGpuHandle(offset));
+		GetGPU().m_ResourceDescriptors[static_cast<int>(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV)]->GetGpuHandle(offset));
 
 	TrackResource(texture->Resource());
 }

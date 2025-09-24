@@ -105,7 +105,7 @@ void GpuResource::SetView(ViewType view)
 		return;
 	}
 
-	auto device = GPUInstance.m_Device;
+	auto device = GetGPU().m_Device;
 	CheckFeatureSupport();
 	CD3DX12_RESOURCE_DESC desc(m_Resource->GetDesc());
 
@@ -113,8 +113,8 @@ void GpuResource::SetView(ViewType view)
 	{
 	case ViewType::UAV:
 	{
-		HeapHandle handle = GPUInstance.GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
-		CreateUnorderedAccessView(GPUInstance.m_Device.Get(), m_Resource.Get(), handle.cpuPtr, desc.MipLevels);
+		HeapHandle handle = GetGPU().GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
+		CreateUnorderedAccessView(GetGPU().m_Device.Get(), m_Resource.Get(), handle.cpuPtr, desc.MipLevels);
 		m_DescriptorHandles[ViewType::UAV] = handle;
 	}
 	break;
@@ -128,21 +128,21 @@ void GpuResource::SetView(ViewType view)
 			SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 			SRVDesc.Texture2D.MipLevels = 1;
 
-			HeapHandle handle = GPUInstance.GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
-			GPUInstance.m_Device->CreateShaderResourceView(m_Resource.Get(), &SRVDesc, handle.cpuPtr);
+			HeapHandle handle = GetGPU().GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
+			GetGPU().m_Device->CreateShaderResourceView(m_Resource.Get(), &SRVDesc, handle.cpuPtr);
 			m_DescriptorHandles[ViewType::SRV] = handle;
 		}
 		else
 		{
-			HeapHandle handle = GPUInstance.GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
-			CreateShaderResourceView(GPUInstance.m_Device.Get(), m_Resource.Get(), handle.cpuPtr);
+			HeapHandle handle = GetGPU().GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
+			CreateShaderResourceView(GetGPU().m_Device.Get(), m_Resource.Get(), handle.cpuPtr);
 			m_DescriptorHandles[ViewType::SRV] = handle;
 		}
 	}
 	break;
 	case ViewType::RTV:
 	{
-		HeapHandle handle = GPUInstance.GetHeapHandle(eHeapTypes::HEAP_TYPE_RTV);
+		HeapHandle handle = GetGPU().GetHeapHandle(eHeapTypes::HEAP_TYPE_RTV);
 
 		device->CreateRenderTargetView(m_Resource.Get(), nullptr, handle.cpuPtr);
 		m_DescriptorHandles[ViewType::RTV] = handle;
@@ -150,7 +150,7 @@ void GpuResource::SetView(ViewType view)
 	break;
 	case ViewType::DSV:
 	{
-		HeapHandle handle = GPUInstance.GetHeapHandle(eHeapTypes::HEAP_TYPE_DSV);
+		HeapHandle handle = GetGPU().GetHeapHandle(eHeapTypes::HEAP_TYPE_DSV);
 
 		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
 		dsvDesc.Format = m_Format;
@@ -177,7 +177,7 @@ void GpuResource::SetView(ViewType view, HeapHandle handle)
 		return;
 	}
 
-	auto device = GPUInstance.m_Device;
+	auto device = GetGPU().m_Device;
 	CheckFeatureSupport();
 	CD3DX12_RESOURCE_DESC desc(m_Resource->GetDesc());
 
@@ -185,7 +185,7 @@ void GpuResource::SetView(ViewType view, HeapHandle handle)
 	{
 	case ViewType::UAV:
 	{
-		CreateUnorderedAccessView(GPUInstance.m_Device.Get(), m_Resource.Get(), handle.cpuPtr, desc.MipLevels);
+		CreateUnorderedAccessView(GetGPU().m_Device.Get(), m_Resource.Get(), handle.cpuPtr, desc.MipLevels);
 		m_DescriptorHandles[ViewType::UAV] = handle;
 	}
 	break;
@@ -199,12 +199,12 @@ void GpuResource::SetView(ViewType view, HeapHandle handle)
 			SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 			SRVDesc.Texture2D.MipLevels = 1;
 
-			GPUInstance.m_Device->CreateShaderResourceView(m_Resource.Get(), &SRVDesc, handle.cpuPtr);
+			GetGPU().m_Device->CreateShaderResourceView(m_Resource.Get(), &SRVDesc, handle.cpuPtr);
 			m_DescriptorHandles[ViewType::SRV] = handle;
 		}
 		else
 		{
-			CreateShaderResourceView(GPUInstance.m_Device.Get(), m_Resource.Get(), handle.cpuPtr);
+			CreateShaderResourceView(GetGPU().m_Device.Get(), m_Resource.Get(), handle.cpuPtr);
 			m_DescriptorHandles[ViewType::SRV] = handle;
 		}
 	}
@@ -277,7 +277,7 @@ int GpuResource::GetHeapOffset() const
 {
 	OPTICK_EVENT();
 	if (m_DescriptorHandles.at(m_RecentBoundType).heapOffset != -1 &&
-		m_DescriptorHandles.at(m_RecentBoundType).heapOffset > GPUInstance.m_HeapSizes[static_cast<int>(
+		m_DescriptorHandles.at(m_RecentBoundType).heapOffset > GetGPU().m_HeapSizes[static_cast<int>(
 			m_RecentBoundType)])
 	{
 		throw InternalGPUError("HeapOffset was out of range of heap");
@@ -326,7 +326,7 @@ void GpuResource::CheckFeatureSupport()
 		const auto desc = m_Resource->GetDesc();
 
 		m_FormatSupport.Format = desc.Format;
-		Helpers::ThrowIfFailed(GPUInstance.m_Device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &m_FormatSupport,
+		Helpers::ThrowIfFailed(GetGPU().m_Device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &m_FormatSupport,
 			sizeof(D3D12_FEATURE_DATA_FORMAT_SUPPORT)));
 	}
 	else

@@ -109,7 +109,7 @@ void PSOCache::InitDefaultSignature()
 	Helpers::ThrowIfFailed(
 		D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, signature.GetAddressOf(), error.GetAddressOf()));
 	Helpers::ThrowIfFailed(
-		GPUInstance.m_Device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(),
+		GetGPU().m_Device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(),
 			IID_PPV_ARGS(m_RootSignature->GetRootSignature().GetAddressOf())));
 
 	constexpr D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags =
@@ -171,12 +171,12 @@ void PSOCache::InitDefaultSignature()
 	rootSignatureDescription.Init_1_1(static_cast<int>(eRootBindings::NumRootParameters), rootParameters,
 									  std::size(samplers), samplers, rootSignatureFlags);
 
-	m_RootSignature->SetRootSignatureDesc(rootSignatureDescription.Desc_1_1, GPUInstance.m_FeatureData);
+	m_RootSignature->SetRootSignatureDesc(rootSignatureDescription.Desc_1_1, GetGPU().m_FeatureData);
 }
 
 void PSOCache::InitMipmapSignature()
 {
-	// auto device = GPUInstance.m_Device;
+	// auto device = GetGPU().m_Device;
 	// D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
 	// featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
 	// if (FAILED(device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE,&featureData,sizeof(featureData))))
@@ -191,7 +191,7 @@ void PSOCache::InitMipmapSignature()
 	//	ComPtr<ID3DBlob> signature;
 	//	ComPtr<ID3DBlob> error;
 	//	Helpers::ThrowIfFailed(D3D12SerializeRootSignature(&rootSignatureDesc,D3D_ROOT_SIGNATURE_VERSION_1,&signature,&error));
-	//	Helpers::ThrowIfFailed(GPUInstance.m_Device->CreateRootSignature(
+	//	Helpers::ThrowIfFailed(GetGPU().m_Device->CreateRootSignature(
 	//		0,
 	//		signature->GetBufferPointer(),
 	//		signature->GetBufferSize(),
@@ -240,7 +240,7 @@ std::unique_ptr<PSO> PSOCache::CreatePSO(const std::filesystem::path& vertexShad
 										 std::wstring_view name, D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive)
 {
 	auto pso = std::make_unique<PSO>();
-	pso->m_Device = GPUInstance.m_Device;
+	pso->m_Device = GetGPU().m_Device;
 	pso->m_numRenderTargets = static_cast<int>(renderTargetFormat.size());
 
 	struct PipelineStateStream

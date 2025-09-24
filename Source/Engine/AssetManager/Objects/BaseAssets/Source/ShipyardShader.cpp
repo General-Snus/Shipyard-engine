@@ -4,6 +4,7 @@
 #include <d3d12shader.h>
 #include "wrl.h"
 #include "AssetManager.h"
+#include "Engine\AssetManager\Objects\BaseAssets\TextureAsset.h"
 
 
 using namespace Microsoft::WRL;

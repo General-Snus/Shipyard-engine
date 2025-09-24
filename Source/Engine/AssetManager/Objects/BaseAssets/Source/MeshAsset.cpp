@@ -354,7 +354,7 @@ bool Mesh::processMesh(aiMesh* mesh, const aiScene* scene, Element& outElement)
 		}
 	}
 
-	auto commandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COPY);
+	auto commandQueue = GetGPU().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COPY);
 	auto commandList = commandQueue->GetCommandList();
 
 	OPTICK_GPU_CONTEXT(commandList->GetGraphicsCommandList().Get());

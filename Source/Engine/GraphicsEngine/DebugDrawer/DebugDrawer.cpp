@@ -22,7 +22,7 @@ bool DebugDrawer::Initialize()
 	indexBuffer = std::make_shared<IndexResource>("DebugDrawerIndexBuffer");
 
 
-	const auto commandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COPY);
+	const auto commandQueue = GetGPU().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COPY);
 	const auto commandList = commandQueue->GetCommandList();
 
 	std::vector<DebugVertex> vertices;
@@ -143,7 +143,7 @@ void DebugDrawer::Render(std::shared_ptr<CommandList> commandList)
 		assert(materialBuffer.vertexBufferIndex != -1 && "HEAP INDEX OUT OF BOUND");
 		assert(materialBuffer.vertexOffset != -1 && "HEAP INDEX OUT OF BOUND");
 
-		const auto& alloc = GPUInstance.m_GraphicsMemory->AllocateConstant(materialBuffer);
+		const auto& alloc = GetGPU().m_GraphicsMemory->AllocateConstant(materialBuffer);
 		commandList->GetGraphicsCommandList()->SetGraphicsRootConstantBufferView(
 			REG_DefaultMaterialBuffer, alloc.GpuAddress());
 

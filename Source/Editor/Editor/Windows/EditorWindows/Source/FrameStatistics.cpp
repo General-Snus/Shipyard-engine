@@ -69,7 +69,7 @@ void FrameStatistics::RenderImGUi()
 
 		myAverageCPUByApp[myDataIndex] = static_cast<float>(App_CPU_Usage());
 
-		//const auto mem = GPUInstance.m_GraphicsMemory->GetStatistics();
+		//const auto mem = GetGPU().m_GraphicsMemory->GetStatistics();
 		//m_committedMemory[myDataIndex] = static_cast<float>(mem.committedMemory);
 		//m_totalMemory[myDataIndex] = static_cast<float>(mem.totalMemory);
 		//m_totalPages[myDataIndex] = static_cast<float>(mem.totalPages);

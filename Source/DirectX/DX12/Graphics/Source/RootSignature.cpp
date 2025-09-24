@@ -55,7 +55,7 @@ void GPURootSignature::SetRootSignatureDesc(const D3D12_ROOT_SIGNATURE_DESC1& ro
 {
 	Destroy();
 
-	const auto device = GPUInstance.m_Device;
+	const auto device = GetGPU().m_Device;
 
 	const UINT             numParameters = rootSignatureDesc.NumParameters;
 	D3D12_ROOT_PARAMETER1* pParameters = numParameters > 0 ? new D3D12_ROOT_PARAMETER1[numParameters] : nullptr;

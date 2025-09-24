@@ -58,7 +58,7 @@ GpuBuffer::GpuBuffer(const BufferDescription& desc, void* intialData) : desc(des
 	}
 	  
 
-	auto& device = GPUInstance.m_Device;
+	auto& device = GetGPU().m_Device;
 	HRESULT hr = device->CreateCommittedResource(
 		&heap.Properties,
 		heap.Flags,
@@ -92,7 +92,7 @@ GpuBuffer::GpuBuffer(const BufferDescription& desc, void* intialData) : desc(des
 
 	if (intialData != nullptr && desc.resource_usage != BufferDescription::ResourceUsage::Upload)
 	{
-		const auto commandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COPY);
+		const auto commandQueue = GetGPU().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COPY);
 		auto       commandList = commandQueue->GetCommandList(L"GpuBufferInitialization");
 
 		commandList->CopyBuffer(*this,1, sizeof(desc.size), mapped_data,D3D12_RESOURCE_FLAG_NONE, CD3DX12_HEAP_PROPERTIES(heap.Properties));

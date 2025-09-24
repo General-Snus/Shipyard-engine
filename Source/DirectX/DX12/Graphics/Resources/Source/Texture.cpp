@@ -52,7 +52,7 @@ bool Texture::AllocateTexture(const Vector2ui dimentions, const std::filesystem:
 
 	const CD3DX12_CLEAR_VALUE clearValue = { Format, &m_ClearColor.x };
 
-	Helpers::ThrowIfFailed(GPUInstance.m_Device->CreateCommittedResource(
+	Helpers::ThrowIfFailed(GetGPU().m_Device->CreateCommittedResource(
 		&heapProps, D3D12_HEAP_FLAG_NONE, &txtDesc, D3D12_RESOURCE_STATE_COMMON, &clearValue,
 		IID_PPV_ARGS(m_Resource.ReleaseAndGetAddressOf())));
 	m_Resource->SetName(name.wstring().c_str());
@@ -76,13 +76,13 @@ bool Texture::AllocateTexture(const Vector2ui dimentions, const std::filesystem:
 	textureData.RowPitch = txtDesc.Width * pixelSize;
 	textureData.SlicePitch = size;
 
-	ResourceUploadBatch resourceUpload(GPUInstance.m_Device.Get());
+	ResourceUploadBatch resourceUpload(GetGPU().m_Device.Get());
 	resourceUpload.Begin();
 	resourceUpload.Upload(m_Resource.Get(), 0, &textureData, 1);
 	resourceUpload.Transition(m_Resource.Get(), D3D12_RESOURCE_STATE_COPY_DEST, targetResourceState);
 
 	const auto uploadResourcesFinished =
-		resourceUpload.End(GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT)->GetCommandQueue().Get());
+		resourceUpload.End(GetGPU().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT)->GetCommandQueue().Get());
 
 	uploadResourcesFinished.wait();
 	if (!uploadResourcesFinished.valid())
@@ -119,7 +119,7 @@ bool Texture::AllocateDepthTexture(const Vector2ui dimentions, const std::filesy
 	const D3D12_RESOURCE_DESC depthStencilDesc = CD3DX12_RESOURCE_DESC::Tex2D(
 	DXGI_FORMAT_D32_FLOAT, width, height, 1, 0, 1, 0, flags);
 
-	Helpers::ThrowIfFailed(GPUInstance.m_Device->CreateCommittedResource(
+	Helpers::ThrowIfFailed(GetGPU().m_Device->CreateCommittedResource(
 		&heapProps, D3D12_HEAP_FLAG_NONE, &depthStencilDesc, targetResourceState, &clearValue,
 		IID_PPV_ARGS(m_Resource.ReleaseAndGetAddressOf())));
 	m_Resource->SetName(name.wstring().c_str()); 
@@ -144,8 +144,8 @@ void Texture::SetView(D3D12_SHADER_RESOURCE_VIEW_DESC view)
 		return;
 	}
 
-	const HeapHandle handle = GPUInstance.GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
-	GPUInstance.m_Device->CreateShaderResourceView(m_Resource.Get(), &view, handle.cpuPtr);
+	const HeapHandle handle = GetGPU().GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
+	GetGPU().m_Device->CreateShaderResourceView(m_Resource.Get(), &view, handle.cpuPtr);
 	m_DescriptorHandles[ViewType::SRV] = handle;
 }
 
@@ -162,7 +162,7 @@ void Texture::SetView(ViewType view)
 		return;
 	}
 
-	auto device = GPUInstance.m_Device;
+	auto device = GetGPU().m_Device;
 	CheckFeatureSupport();
 	CD3DX12_RESOURCE_DESC desc(m_Resource->GetDesc());
 
@@ -170,8 +170,8 @@ void Texture::SetView(ViewType view)
 	{
 	case ViewType::UAV:
 	{
-		HeapHandle handle = GPUInstance.GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
-		CreateUnorderedAccessView(GPUInstance.m_Device.Get(), m_Resource.Get(), handle.cpuPtr, desc.MipLevels);
+		HeapHandle handle = GetGPU().GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
+		CreateUnorderedAccessView(GetGPU().m_Device.Get(), m_Resource.Get(), handle.cpuPtr, desc.MipLevels);
 		m_DescriptorHandles[ViewType::UAV] = handle;
 	}
 	break;
@@ -185,28 +185,28 @@ void Texture::SetView(ViewType view)
 			SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 			SRVDesc.Texture2D.MipLevels = 1;
 
-			HeapHandle handle = GPUInstance.GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
-			GPUInstance.m_Device->CreateShaderResourceView(m_Resource.Get(), &SRVDesc, handle.cpuPtr);
+			HeapHandle handle = GetGPU().GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
+			GetGPU().m_Device->CreateShaderResourceView(m_Resource.Get(), &SRVDesc, handle.cpuPtr);
 			m_DescriptorHandles[ViewType::SRV] = handle;
 		}
 		else
 		{
-			HeapHandle handle = GPUInstance.GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
-			CreateShaderResourceView(GPUInstance.m_Device.Get(), m_Resource.Get(), handle.cpuPtr, isCubeMap);
+			HeapHandle handle = GetGPU().GetHeapHandle(eHeapTypes::HEAP_TYPE_CBV_SRV_UAV);
+			CreateShaderResourceView(GetGPU().m_Device.Get(), m_Resource.Get(), handle.cpuPtr, isCubeMap);
 			m_DescriptorHandles[ViewType::SRV] = handle;
 		}
 		break;
 	}
 	case ViewType::RTV:
 	{
-		HeapHandle handle = GPUInstance.GetHeapHandle(eHeapTypes::HEAP_TYPE_RTV);
+		HeapHandle handle = GetGPU().GetHeapHandle(eHeapTypes::HEAP_TYPE_RTV);
 		device->CreateRenderTargetView(m_Resource.Get(), nullptr, handle.cpuPtr);
 		m_DescriptorHandles[ViewType::RTV] = handle;
 		break;
 	}
 	case ViewType::DSV:
 	{
-		HeapHandle handle = GPUInstance.GetHeapHandle(eHeapTypes::HEAP_TYPE_DSV);
+		HeapHandle handle = GetGPU().GetHeapHandle(eHeapTypes::HEAP_TYPE_DSV);
 
 		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
 		dsvDesc.Format = m_Format;
@@ -276,7 +276,7 @@ bool Texture::CopyDataInto(void* destination, Vector2ui pixel, Vector2ui rect)
 	D3D12_RESOURCE_DESC readbackBufferDesc{ CD3DX12_RESOURCE_DESC::Buffer(bufferSize) };
 
 	Ref<ID3D12Resource> pStaging;
-	hr = GPUInstance.m_Device->CreateCommittedResource(
+	hr = GetGPU().m_Device->CreateCommittedResource(
 		&readBackHeapProperties,
 		D3D12_HEAP_FLAG_NONE,
 		&readbackBufferDesc,
@@ -293,7 +293,7 @@ bool Texture::CopyDataInto(void* destination, Vector2ui pixel, Vector2ui rect)
 	SetDebugObjectName(pStaging.Get(), L"ScreenGrab staging");
 	assert(pStaging.Get());
 
-	const auto commandQueue = GPUInstance.GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+	const auto commandQueue = GetGPU().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 	const auto commandList = commandQueue->GetCommandList();
 
 	auto previousState = m_TransitioningState;

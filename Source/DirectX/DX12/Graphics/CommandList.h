@@ -4,6 +4,7 @@
 #include <DirectX/DX12/Graphics/Gpu_fwd.h>
 #include <Tools/Utilities/Ref.h>
 #include <cstdint>
+#include "GPU.h"
 
 #ifndef incCommandList
 #define incCommandList
@@ -27,7 +28,7 @@ public:
 	template <typename T>
 	void AllocateBuffer(eRootBindings binding, const T& var)
 	{
-		const auto& alloc = GPUInstance.m_GraphicsMemory->AllocateConstant(var);
+		const auto& alloc = GetGPU().m_GraphicsMemory->AllocateConstant(var);
 		m_CommandList->SetGraphicsRootConstantBufferView(static_cast<int>(binding), alloc.GpuAddress());
 	}
 
@@ -53,11 +54,11 @@ public:
 		return m_CommandList;
 	}
 
-	void TrackResource(D12Resource auto && object)
+	void TrackResource(D12Resource auto&& object)
 	{
 		OPTICK_EVENT();
 		m_TrackedObjects.push_back(GetResource(object));
-	} 
+	}
 
 	void ReleaseTrackedObjects();
 	void FlushResourceBarriers() const;

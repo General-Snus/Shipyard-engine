@@ -68,7 +68,7 @@ namespace Passes {
 
 				list->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_DEPTH_WRITE);
 				list->TrackResource(shadowMap);
-				GPUInstance.ClearDepth(*list,shadowMap.get());
+				GetGPU().ClearDepth(*list,shadowMap.get());
 				list->SetRenderTargets(0,nullptr,shadowMap.get());
 				list->AllocateBuffer<FrameBuffer>(eRootBindings::frameBuffer,light.GetShadowMapFrameBuffer(map));
 
@@ -316,7 +316,7 @@ void GBuffer::Render(const Renderer& instance,std::shared_ptr<CommandList>& comm
 			assert(materialBuffer.vertexBufferIndex != -1 && "HEAP INDEX OUT OF BOUND");
 			assert(materialBuffer.vertexOffset != -1 && "HEAP INDEX OUT OF BOUND");
 
-			const auto& alloc2 = GPUInstance.m_GraphicsMemory->AllocateConstant<MaterialBuffer>(materialBuffer);
+			const auto& alloc2 = GetGPU().m_GraphicsMemory->AllocateConstant<MaterialBuffer>(materialBuffer);
 			commandList->GetGraphicsCommandList()->SetGraphicsRootConstantBufferView(REG_DefaultMaterialBuffer,
 				alloc2.GpuAddress());
 

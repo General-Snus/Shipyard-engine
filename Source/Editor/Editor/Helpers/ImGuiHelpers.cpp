@@ -12,14 +12,14 @@
 
 namespace ImGui
 {
-	inline void InitializeOnNewContext(ImGuiContextHolder& context)
+	void InitializeOnNewContext(ImGuiContextHolder& context)
 	{
 		OPTICK_EVENT();
 		ImGui::SetCurrentContext(context.ctx);
 		ImGui::SetAllocatorFunctions(context.v1, context.v2, context.v3);
 	}
 
-	inline bool BeginMainMenuBar(int barNumber)
+	bool BeginMainMenuBar(int barNumber)
 	{
 		OPTICK_EVENT();
 		if (barNumber == 0)
@@ -56,7 +56,7 @@ namespace ImGui
 		return is_open;
 	};
 
-	inline bool ToggleButton(const char* str_id, bool* v)
+	bool ToggleButton(const char* str_id, bool* v)
 	{
 		OPTICK_EVENT();
 		bool returnValue = false;
@@ -101,7 +101,7 @@ namespace ImGui
 		return returnValue;
 	}
 
-	inline Vector2f CursorPositionInWindow()
+	Vector2f CursorPositionInWindow()
 	{
 		const auto mp = Input.GetMousePosition();
 		const auto imgui_cursor = ImGui::GetWindowPos();
@@ -120,7 +120,7 @@ namespace ImGui
 				std::clamp(relativeNDC.y, -1.0f, 1.0f) };
 	}
 
-	inline void Image(::Texture& aTexture, const ImVec2& image_size, const ImVec2& uv0,
+	void Image(::Texture& aTexture, const ImVec2& image_size, const ImVec2& uv0,
 	const ImVec2& uv1, const ImVec4& tint_col,
 	const ImVec4& border_col)
 	{
@@ -131,7 +131,7 @@ namespace ImGui
 		}
 	}
 
-	inline void Image(std::shared_ptr<TextureHolder> aTexture, const ImVec2& image_size, const ImVec2& uv0,
+	void Image(std::shared_ptr<TextureHolder> aTexture, const ImVec2& image_size, const ImVec2& uv0,
 		const ImVec2& uv1, const ImVec4& tint_col,
 		const ImVec4& border_col)
 	{
@@ -142,7 +142,7 @@ namespace ImGui
 		}
 	}
 
-	inline bool ImageButton(const char* strId, std::shared_ptr<TextureHolder> aTexture, const ImVec2& image_size,
+	bool ImageButton(const char* strId, std::shared_ptr<TextureHolder> aTexture, const ImVec2& image_size,
 		ImGuiButtonFlags flags, const ImVec2& uv0, const ImVec2& uv1,
 		const ImVec4& bg_col, const ImVec4& tint_col)
 	{
@@ -172,7 +172,7 @@ namespace ImGui
 		return false;
 	}
 
-	inline bool ImageButton(const char* strId, ::Texture& aTexture, const ImVec2& image_size, ImGuiButtonFlags flags,
+	bool ImageButton(const char* strId, ::Texture& aTexture, const ImVec2& image_size, ImGuiButtonFlags flags,
 	const ImVec2& uv0, const ImVec2& uv1,
 	const ImVec4& bg_col, const ImVec4& tint_col)
 	{
@@ -201,20 +201,20 @@ namespace ImGui
 		}
 	}
 
-	inline bool IsItemJustReleased()
+	bool IsItemJustReleased()
 	{
 		OPTICK_EVENT();
 		return IsItemDeactivated() && !ImGui::IsItemActive();
 	}
 
-	inline  bool IsItemJustActivated()
+	bool IsItemJustActivated()
 	{
 		OPTICK_EVENT();
 		return !IsItemDeactivated() && ImGui::IsItemActive();
 	}
 
 	//TEXT HELPERS
-	inline void TextCentered(std::string text)
+	void TextCentered(std::string text)
 	{
 		OPTICK_EVENT();
 		const auto windowWidth = ImGui::GetWindowSize().x;
@@ -224,7 +224,7 @@ namespace ImGui
 		ImGui::Text(text.c_str());
 	}
 
-	inline void TextCentered(const char* text)
+	void TextCentered(const char* text)
 	{
 		OPTICK_EVENT();
 		const auto windowWidth = ImGui::GetWindowSize().x;
@@ -235,7 +235,7 @@ namespace ImGui
 	}
 
 
-	inline void LinkCallback(ImGui::MarkdownLinkCallbackData data_)
+	void LinkCallback(ImGui::MarkdownLinkCallbackData data_)
 	{
 		std::string url(data_.link, data_.linkLength);
 		if (!data_.isImage)
@@ -244,7 +244,7 @@ namespace ImGui
 		}
 	}
 
-	inline ImGui::MarkdownImageData ImageCallback(ImGui::MarkdownLinkCallbackData data_)
+	ImGui::MarkdownImageData ImageCallback(ImGui::MarkdownLinkCallbackData data_)
 	{
 		data_;
 		// In your application you would load an image based on data_ input. Here we just use the imgui font texture.
@@ -276,7 +276,7 @@ namespace ImGui
 	static ImFont* H2 = nullptr;
 	static ImFont* H3 = nullptr;
 
-	inline void LoadMarkdownFonts(ImFont* path, ImFont* boldPath, float fontSize_)
+	void LoadMarkdownFonts(ImFont* path, ImFont* boldPath, float fontSize_)
 	{
 		path; fontSize_;
 		// Bold headings H2 and H3
@@ -285,7 +285,7 @@ namespace ImGui
 		H1 = boldPath;
 	}
 
-	inline void Markdown(const std::string& markdown_)
+	void Markdown(const std::string& markdown_)
 	{
 		// You can make your own Markdown function with your prefered string container and markdown config.
 		// > C++14 can use ImGui::MarkdownConfig mdConfig{ LinkCallback, NULL, ImageCallback, ICON_FA_LINK, { { H1, true }, { H2, true }, { H3, false } }, NULL };

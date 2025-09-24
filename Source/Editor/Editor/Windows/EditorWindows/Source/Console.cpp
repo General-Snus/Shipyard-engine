@@ -143,7 +143,7 @@ void Console::RenderImGUi()
 void Console::PushDebugLayerToConsole()
 {
 	SIZE_T messageLength = 0;
-	auto pInfoQueue = GPUInstance.QueryInfoQueue();
+	auto pInfoQueue = GetGPU().QueryInfoQueue();
 	if (pInfoQueue)
 	{
 		static std::vector<byte> bytes;

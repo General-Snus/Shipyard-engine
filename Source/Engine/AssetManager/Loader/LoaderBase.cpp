@@ -3,6 +3,8 @@
 #include "LoaderBase.h" 
 #include <Tools/Utilities/Game/Timer.h>
 #include "Objects\BaseAssets\MeshAsset.h"
+#include "Objects\BaseAssets\MaterialAsset.h"
+#include "Objects\BaseAssets\TextureAsset.h"
 #include "Objects\BaseAssets\ShipyardShader.h"
 
 
@@ -49,7 +51,7 @@ void ResourceLoaderBase::ClearUnused()
 	{
 		i.second->ClearUnused();
 	}
-	// GPUInstance.m_GraphicsMemory->GarbageCollect();
+	// GetGPU().m_GraphicsMemory->GarbageCollect();
 }
 
 void ResourceLoaderBase::ThreadedLoading()

@@ -88,3 +88,11 @@ GameObject BallEradicationGame::MakeArena(Vector3f position,Vector3f extent)
 
 	return arenaParent;
 }
+
+BallTag::BallTag(const SY::UUID anOwnerId, GameObjectManager* aManager) : Component(anOwnerId, aManager)
+{
+}
+
+BallGameController::BallGameController(const SY::UUID anOwnerId, GameObjectManager* aManager) : Component(anOwnerId, aManager)
+{
+}

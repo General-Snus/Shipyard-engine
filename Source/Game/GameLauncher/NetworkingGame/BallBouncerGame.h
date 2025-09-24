@@ -7,6 +7,7 @@ class BallTag : public Component, public Reflectable<BallTag>
 public:
 	reflectable(BallTag);
 	defaultComponentInspector();
+	BallTag(const SY::UUID anOwnerId, GameObjectManager* aManager);
 };
 
 REFL_AUTO(type(BallTag))
@@ -16,6 +17,7 @@ class BallGameController : public Component, public Reflectable<BallGameControll
 public:
 	reflectable(BallGameController);
 	defaultComponentInspector();
+	BallGameController(const SY::UUID anOwnerId, GameObjectManager* aManager);
 
 	int maxBallsInGame = 10;
 	float ballSpawnCooldown = 1.0f;

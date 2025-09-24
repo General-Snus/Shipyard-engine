@@ -4,6 +4,7 @@
 #include <Engine/AssetManager/GameResourcesLoader.h>
 #include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Collider.h"
+#include "Engine/AssetManager/ComponentSystem/Components/CameraComponent.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Physics/cPhysXStaticBody.h"
 #include "Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h"
 #include "Engine\GraphicsEngine\Renderer.h"

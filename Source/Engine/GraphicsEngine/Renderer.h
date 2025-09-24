@@ -65,7 +65,7 @@ private:
 	void Init_brdfLUT();
 
 	void     BeginFrame();
-	uint64_t RenderFrame(Viewport& renderViewPort,GameObjectManager& scene);
+	uint64_t RenderFrame(Viewport& renderViewPort);
 	void EndFrame(Viewport* gamePort);
 
 	void PrepareBuffers(std::shared_ptr<CommandList> commandList,Viewport& renderViewPort,GameObjectManager& scene);

@@ -50,36 +50,36 @@ std::vector<Component*> GameObject::CopyAllComponents() const
 	return myManager->CopyAllAttachedComponents(myID);
 }
 
-inline bool GameObject::GetActive() const
+bool GameObject::GetActive() const
 {
 	assert(myManager != nullptr && "GameObject has no manager");
 	assert(myID.IsValid() && "GameObject has no ID");
 	return myManager->GetActive(myID);
 }
 
-inline bool GameObject::operator==(const GameObject& other) const
+bool GameObject::operator==(const GameObject& other) const
 {
 	return !(myID != other.myID || myManager != other.myManager);
 }
 
-inline GameObject::operator SY::UUID() const
+GameObject::operator SY::UUID() const
 {
 	return myID;
 }
 
-inline GameObject::operator std::string() const
+GameObject::operator std::string() const
 {
 	return GetName();
 }
 
-inline void GameObject::SetActive(const bool aState) const
+void GameObject::SetActive(const bool aState) const
 {
 	assert(myManager != nullptr && "GameObject has no manager");
 	assert(myID.IsValid() && "GameObject has no ID");
 	myManager->SetActive(myID, aState);
 }
 
-inline void GameObject::OnSiblingChanged(const std::type_info* SourceClass) const
+void GameObject::OnSiblingChanged(const std::type_info* SourceClass) const
 {
 	assert(myManager != nullptr && "GameObject has no manager");
 	assert(myID.IsValid() && "GameObject has no ID");

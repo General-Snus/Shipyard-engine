@@ -149,3 +149,10 @@ public:
 };
 
 #endif
+
+
+inline GPU& GetGPU()
+{
+	return ServiceLocator::Instance().GetService<GPU>();
+}
+

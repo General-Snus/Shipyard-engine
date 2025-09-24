@@ -377,11 +377,18 @@ bool Editor::Initialize(HWND aHandle)
 	engineResources.RecursiveNameSave();
 	colorManager.InitializeDefaultColors();
 	colorManager.LoadColorsFromFile("Settings/ColorManagerData.ShipyardText");
+
+	bool rendererFailed = false;
 #ifdef _DEBUG
-	renderer.Initialize(true);
+	rendererFailed = !renderer.Initialize(true);
 #else
-	renderer.Initialize(false); // todo Disable
+	rendererFailed = !renderer.Initialize(false); // todo Disable
 #endif // Release
+	if (rendererFailed)
+	{
+		Window::Messagebox("Failure to start","Renderer failed to initialize");
+	}
+
 
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
@@ -482,7 +489,7 @@ void Editor::DoWinProc(Window* window, const MSG& aMessage)
 		{
 			viewport->ResolutionUpdate();
 		}
-		GPUInstance.ResizeBackbuffer(window->Resolution());
+		GetGPU().ResizeBackbuffer(window->Resolution());
 		break;
 	}
 
