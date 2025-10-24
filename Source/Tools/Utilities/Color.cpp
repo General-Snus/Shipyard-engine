@@ -59,7 +59,7 @@ void ColorManager::LoadColorsFromFile(const std::filesystem::path& path)
 	{
 		for (const auto& [name, value] : json["NamedColors"].items())
 		{
-			CreateColor(name, {value[0], value[1], value[2], value[3]});
+			CreateColor(name, { value[0], value[1], value[2], value[3] });
 		}
 	}
 }
@@ -81,7 +81,7 @@ void ColorManager::DumpToFile(const std::filesystem::path& path)
 	for (const auto& [name, value] : m_NamedColor)
 	{
 		auto& vector = j["NamedColors"][name];
-		vector = {value.x, value.y, value.z, value.w};
+		vector = { value.x, value.y, value.z, value.w };
 	}
 
 	std::ofstream o(contentPath);
@@ -149,9 +149,9 @@ Vector4f& ColorManager::GetColor(const std::string& identifier)
 	return m_NamedColor["White"];
 }
 
-Color::Color() : m_ColorName("White"), m_Context(ColorManager::GetHash({1, 1, 1, 1}))
+Color::Color() : m_ColorName("White"), m_Context(ColorManager::GetHash({ 1, 1, 1, 1 }))
 {
-	ColorManagerInstance.CreateColor(m_ColorName, {1, 1, 1, 1});
+	ColorManagerInstance.CreateColor(m_ColorName, { 1, 1, 1, 1 });
 }
 
 Color::Color(const Vector4f& color) : m_Context(ColorManager::GetHash(color))
@@ -159,15 +159,15 @@ Color::Color(const Vector4f& color) : m_Context(ColorManager::GetHash(color))
 	ColorManagerInstance.CreateColor(m_Context, color);
 }
 
-Color::Color(const Vector3f& color) : m_Context(ColorManager::GetHash({color.x, color.y, color.z, 1.f}))
+Color::Color(const Vector3f& color) : m_Context(ColorManager::GetHash({ color.x, color.y, color.z, 1.f }))
 {
-	ColorManagerInstance.CreateColor(m_Context, {color.x, color.y, color.z, 1.f});
+	ColorManagerInstance.CreateColor(m_Context, { color.x, color.y, color.z, 1.f });
 }
 
 Color::Color(float red, float green, float blue, float alpha)
-	: m_Context(ColorManager::GetHash({red, green, blue, alpha}))
+	: m_Context(ColorManager::GetHash({ red, green, blue, alpha }))
 {
-	ColorManagerInstance.CreateColor(m_Context, {red, green, blue, alpha});
+	ColorManagerInstance.CreateColor(m_Context, { red, green, blue, alpha });
 }
 
 Color::Color(const std::string& hexOrName)
@@ -206,7 +206,7 @@ Vector3f Color::GetRGB() const
 {
 	const auto& ref =
 		!m_ColorName.empty() ? ColorManagerInstance.GetColor(m_ColorName) : ColorManagerInstance.GetColor(m_Context);
-	return {ref.x, ref.y, ref.z};
+	return { ref.x, ref.y, ref.z };
 }
 
 bool Color::operator==(const Color& other) const
@@ -217,9 +217,9 @@ bool Color::operator==(const Color& other) const
 	}
 	return false;
 	/*return IsApproximate(r, other.r) &&
-	        IsApproximate(g, other.g) &&
-	        IsApproximate(b, other.b) &&
-	        IsApproximate(a, other.a);*/
+			IsApproximate(g, other.g) &&
+			IsApproximate(b, other.b) &&
+			IsApproximate(a, other.a);*/
 }
 
 Vector4f Color::GetRGBA() const
@@ -230,8 +230,8 @@ Vector4f Color::GetRGBA() const
 float* Color::GetM_RGBA() const
 {
 	return !m_ColorName.empty()
-		       ? &ColorManagerInstance.GetColor(m_ColorName).x
-		       : &ColorManagerInstance.GetColor(m_Context).x;
+		? &ColorManagerInstance.GetColor(m_ColorName).x
+		: &ColorManagerInstance.GetColor(m_Context).x;
 }
 
 Vector4f Color::GetHSV() const
@@ -348,8 +348,18 @@ Color Color::HSVtoRGB(const Color& colorIn)
 		break;
 	}
 
-	return {r, g, b, color.w};
+	return { r, g, b, color.w };
 }
+
+Color Color::RandomHue()
+{ 
+	float saturation = 1.0f;  // full saturation for vivid colors
+	float value = 1.0f;       // full brightness 
+	Color hsvColor(Math::RandomEngine::randomInRange(), saturation, value, 1.0f);
+	 
+	return HSVtoRGB(hsvColor);
+} 
+
 
 Color Color::FromHex(const std::string& hex)
 {

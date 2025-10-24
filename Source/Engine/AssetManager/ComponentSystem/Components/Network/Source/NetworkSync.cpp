@@ -2,6 +2,8 @@
 
 #include "../NetworkSync.h"
 #include "Engine/PersistentSystems/Networking/NetworkRunner.h"
+#include "Engine\PersistentSystems\Networking\NetMessage\PlayerSyncMessage.h"
+#include "Tools\Utilities\Input\EnumKeys.h"
 
 NetworkObject::NetworkObject(const SY::UUID anOwnerId, GameObjectManager* aManager) : Component(anOwnerId, aManager)
 {
@@ -19,6 +21,29 @@ void NetworkObject::Init()
 void NetworkObject::Destroy()
 {
 	Runner.unRegisterObject(*this);
+}
+
+void NetworkObject::RegisterAsPlayer() const
+{
+	if (Runner.IsServer)
+	{
+		return;
+	}
+
+	assert(myManager->GetPlayer() == gameObject());
+
+	const auto& playerTransform = transform();
+
+	auto aoi = Networking::AreaOfInterest
+	{
+		.area = Sphere<float>(playerTransform.GetPosition(), ReplicationLayer::defaultAOIRange * playerTransform.GetScale().Dot(Vector3f::one())),
+		.owner = uniqueNetId
+	};
+
+	Runner.layer.RegisterPlayerAOI(aoi);
+	RegisterPlayerMessage message;
+	message.SetMessage(Runner.layer.AOI());
+	Runner.Send(message, NetworkConnection::Protocol::TCP);
 }
 
 bool NetworkObject::InspectorView()
@@ -85,10 +110,51 @@ void NetworkTransform::Init()
 	}
 }
 
-void NetworkInputListener::AddKeyFunc(Keys key, Action action, MapperFunction func)
+NetworkInputListener::NetworkInputListener(const SY::UUID anOwnerId, GameObjectManager* aManager) : NetworkObject(anOwnerId, aManager)
+{
+}
+
+void NetworkInputListener::Init()
+{
+}
+
+bool NetworkInputListener::InspectorView()
+{
+	if (!Component::InspectorView())
+	{
+		return false;
+	}
+	Reflect();
+	ImGui::InputText("Unique id", uniqueNetId.id.String().data(), uniqueNetId.id.String().size(), ImGuiInputTextFlags_ReadOnly);
+	return true;
+}
+
+void NetworkInputListener::AddKeyFunc(Keys key, Action action, bool allowLocalPrediction, MapperFunction func)
 {
 	UNREFERENCED_PARAMETER(key);
 	UNREFERENCED_PARAMETER(action);
 	UNREFERENCED_PARAMETER(func);
 
+	auto id = this->uniqueNetId;
+
+	auto wrappedFunc = [id, allowLocalPrediction, func](InputContext c) ->InputResponse
+	{
+		if (Runner.IsServer)
+		{
+			return func(c);
+		}
+
+		InputEventMessage eventMessage;
+		eventMessage.SetMessage(InputEventMessage::InputEventMessageData{ c.action, id });
+		Runner.Send(eventMessage, NetworkConnection::Protocol::UDP);
+
+		if (allowLocalPrediction)
+		{
+			return func(c);
+		}
+		return InputResponse::claimInput;
+	};
+
+
+	ServiceLocator::Instance().GetService<InputMapper>().AddListener(this->myOwnerID, key, action, wrappedFunc);
 }

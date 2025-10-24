@@ -56,7 +56,7 @@ namespace ImGui
 		return is_open;
 	};
 
-	bool ToggleButton(const char* str_id, bool* v)
+	bool ToggleButton(const char* str_id, bool* v,const char* label)
 	{
 		OPTICK_EVENT();
 		bool returnValue = false;
@@ -67,7 +67,8 @@ namespace ImGui
 		const float height = ImGui::GetFrameHeight();
 		const float width = height * 1.55f;
 		const float radius = height * 0.50f;
-
+		ImGui::Text(label);
+		ImGui::SameLine();
 		ImGui::InvisibleButton(str_id, ImVec2(width, height));
 		if (ImGui::IsItemClicked())
 		{

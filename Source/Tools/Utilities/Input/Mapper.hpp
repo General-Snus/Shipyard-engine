@@ -2,16 +2,18 @@
 #include <Tools/Utilities/System/ServiceLocator.h>
 #include "Input.hpp"
 #include "EnumKeys.h"
+#include <array>
 
 #define Mapper ServiceLocator::Instance().GetService<InputMapper>()
 class InputMapper;
 
-enum Action {
+enum class Action {
+	None = 0,
 	UIClick,
 	MoveCharacter
 };
 
-enum Phase {
+enum class Phase {
 	None,
 	Pressed,
 	Held,
@@ -33,7 +35,7 @@ enum InputResponse { claimInput, undecided, irrelevant };
 struct InputContext
 {
 public:
-	size_t id;
+	uint32_t id;
 	Action action;
 	InputState state;
 };
@@ -42,33 +44,34 @@ using MapperFunction = std::function<InputResponse(InputContext)>;
 
 struct InputListener {
 public:
-	size_t id;
+	uint32_t id;
 	Action action;
 	MapperFunction onInputFunc;
 };
 
 class InputKeyHandler {
 public:
+	InputKeyHandler() = default;
 	InputKeyHandler(Keys key);
 	void Update(InputMapper& ref);
 
-	void AddListener(size_t entity, Action action,/*Potentiall string for debugging*/ MapperFunction func);
-	void RemoveListener(size_t entity, Action action);
+	void AddListener(uint32_t entity, Action action,/*Potentiall string for debugging*/ MapperFunction func);
+	void RemoveListener(uint32_t entity, Action action);
 
 	InputState state;
 	std::vector<InputListener> listeners;
-
 };
+
 class InputMapper : public Singleton
 {
 public:
 	friend class InputKeyHandler;
-	InputMapper() = default;
+	InputMapper();
 	void         Update();
 
-	void AddListener(size_t entity, Keys key, Action action,/*Potentiall string for debugging*/ MapperFunction func);
+	void AddListener(uint32_t entity, Keys key, Action action,/*Potentiall string for debugging*/ MapperFunction func);
 private:
 	InputKeyHandler& GetKeyHandler(Keys  key);
 	InputManager* manager;
-	std::array<InputKeyHandler, static_cast<size_t>(Keys::COUNT)> keyHandlers;
+	std::array<InputKeyHandler, to_index(Keys::COUNT)> keyHandlers{};
 };

@@ -65,6 +65,7 @@
 #include <Engine/PersistentSystems/Physics/PhysXInterpeter.h>
 #endif // PHYSX 0
 #include "DirectX\DX12\Graphics\GPU.h"
+#include "Tools\Utilities\Input\Mapper.hpp"
 
 enum Theme {
 	light,
@@ -535,6 +536,7 @@ int Editor::Run()
 	}
 
 	Input.Update();
+	Mapper.Update();
 	return 0;
 }
 

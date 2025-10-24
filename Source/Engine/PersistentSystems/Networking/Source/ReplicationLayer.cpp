@@ -17,31 +17,49 @@
 #include "Tools/Utilities/Color.h"
 #include "Tools\Utilities\Game\Timer.h"
 #include <span>
+#include <ratio>
+#include <chrono>
 
 ReplicationLayer::ReplicationLayer() : spacialFrequencyCulling(0, 0, 100.0f)
 {
 }
 
+//Here you fucker, begin here. Make sure the AOI is registed not transported
 void ReplicationLayer::fixedNetworkUpdate(NetworkRunner& runner)
 {
 	OPTICK_EVENT();
 
 	if (runner.IsServer)
 	{
+		server_ReadIncoming(runner);
 		server_fixedNetworkUpdate(runner);
 	}
 	else
 	{
-		if (Scene::activeManager().GetPlayer().IsValid())
-		{
-			const auto& transform = Scene::activeManager().GetPlayer().transform();
-			RegisterPlayerAOI(Networking::AreaOfInterest(transform.GetPosition(), defaultAOIRange * transform.myScale.Dot(Vector3f::one())));
-		}
-
 		client_ReadIncoming(runner);
 		client_fixedNetworkUpdate(runner);
 	}
 	spacialFrequencyCulling.Draw(GetRenderer().debugDrawer);
+}
+void ReplicationLayer::server_ReadIncoming(NetworkRunner& runner)
+{
+	if (runner.messagesMap.contains(RegisterPlayerMessage::type))
+	{
+		for (auto& message : runner.messagesMap.at(RegisterPlayerMessage::type))
+		{
+			auto msg = std::bit_cast<RegisterPlayerMessage>(message.message);
+			auto remoteAoI = msg.ReadMessage();
+
+			if (idToObjectMap.contains(remoteAoI.owner))
+			{
+				Remote* remote = runner.IdToRemote(msg.GetId());
+				if (remote)
+				{
+					remote->areaOfInterest = remoteAoI;
+				}
+			}
+		}
+	}
 }
 
 void ReplicationLayer::server_fixedNetworkUpdate(NetworkRunner& runner)
@@ -58,7 +76,13 @@ void ReplicationLayer::server_fixedNetworkUpdate(NetworkRunner& runner)
 		});
 
 		auto& transform = networkedTransform.transform();
-
+		//std::ranges::for_each(activeConnections, [&](auto&& x)
+		//{
+		//	auto& connectionCuller = spacialFrequencyCulling.GetDataForObject(x.GetId());
+		//	connectionCuller.id = x.GetId();
+		//	const auto syncRate = ShouldSpacialCull(networkedTransform.myPosition, x.GetAreaOfInterest());
+		//	connectionCuller.frequencyInverse = syncTimes[Cast<int>(std::clamp(syncRate, Networking::SyncRates::low, Networking::SyncRates::high))];
+		//});
 		//if(!transform.GetIsDirty()) {
 		//	continue;
 		//}
@@ -104,11 +128,12 @@ void ReplicationLayer::client_fixedNetworkUpdate(const NetworkRunner& runner) co
 		auto& transform = networkedTransform.transform();
 
 		//networkedTransform.translationInterpolation is in unit(meter) per second
-		const auto timeDifference = now - networkedTransform.GetLastSyncTime(); // Time 
-		networkedTransform.translationInterpolation = networkedTransform.myPosition - transform.myPosition; // Distance
+		std::chrono::duration<float> timeDifference = now - networkedTransform.GetLastSyncTime(); // Time
+		const auto delta = timeDifference.count();
+		//networkedTransform.translationInterpolation = networkedTransform.myPosition - transform.myPosition; // Distance
 
 		//Distance/Time = velocity
-		const float delta = TimerInstance.getDeltaTime();
+		LOGGER.LogC("Delta at fixed update", delta);
 		auto newPosition = networkedTransform.myPosition + networkedTransform.translationInterpolation * delta;
 		//auto newQuaternion = figure this fucker out sometime * secondsDifference; 
 		transform.SetPosition(newPosition);
@@ -161,6 +186,7 @@ void ReplicationLayer::client_ReadIncoming(const NetworkRunner& runner)
 		}
 	}
 
+	auto now = runner.serverTime();
 	if (runner.messagesMap.contains(TransformSyncMessage::type))
 	{
 		for (auto& transformMessage : runner.messagesMap.at(TransformSyncMessage::type))
@@ -175,21 +201,31 @@ void ReplicationLayer::client_ReadIncoming(const NetworkRunner& runner)
 			}
 
 			auto& netTransform = idToObjectMap.at(messageContent.uniqueComponentId).GetComponent<NetworkTransform>();
-
+			auto previousSyncTime = netTransform.GetLastSyncTime();
 			netTransform.Synced(msg.TimeSent());
+
+			//std::chrono::duration<float> timeDifference = now - netTransform.GetLastSyncTime(); // Time
+			//const auto delta = timeDifference.count();
+
+			const Vector3 previousPosition = netTransform.myPosition;
 			netTransform.myPosition = messageContent.myPosition;
 			netTransform.myQuaternion = messageContent.myQuaternion;
 			netTransform.myScale = messageContent.myScale;
+			auto dt = std::chrono::duration<float>(netTransform.GetLastSyncTime() - previousSyncTime).count();
+			if (dt > 0.0f)
+			{
+				netTransform.translationInterpolation = (netTransform.myPosition - previousPosition) / dt;
+			}
 		}
 	}
 }
 
-void ReplicationLayer::receiveMessage(const NetMessage&)
+void ReplicationLayer::ReceiveMessage(const NetMessage&)
 {
 
 }
 
-bool ReplicationLayer::registerObject(const NetworkRunner& runner, const NetworkObject& object)
+bool ReplicationLayer::RegisterObject(const NetworkRunner& runner, const NetworkObject& object)
 {
 	OPTICK_EVENT();
 
@@ -228,7 +264,7 @@ bool ReplicationLayer::registerObject(const NetworkRunner& runner, const Network
 	return false;
 }
 
-bool ReplicationLayer::unRegisterObject(const NetworkRunner& runner, const NetworkObject& object)
+bool ReplicationLayer::UnRegisterObject(const NetworkRunner& runner, const NetworkObject& object)
 {
 	OPTICK_EVENT();
 	assert(runner.IsServer);
@@ -250,6 +286,22 @@ void ReplicationLayer::RegisterPlayerAOI(Networking::AreaOfInterest newAOI)
 	aoi = newAOI;
 }
 
+bool ReplicationLayer::ContainsObject(const NetworkedId& id) const
+{
+	return idToObjectMap.contains(id);
+}
+
+bool ReplicationLayer::TryFetchNetworkObject(const NetworkedId& id, NetworkObject* object) const
+{
+	if (!ContainsObject(id))
+	{
+		object = nullptr;
+		return false;
+	}
+	*object = idToObjectMap.at(id);
+	return true;
+}
+
 Networking::AreaOfInterest ReplicationLayer::AOI() const
 {
 	return aoi;
@@ -262,11 +314,11 @@ void ReplicationLayer::Close()
 
 Networking::SyncRates ReplicationLayer::ShouldSpacialCull(Vector3f positionOfObject, Networking::AreaOfInterest remoteZone) const
 {
-	if (remoteZone.IsInside(positionOfObject))
+	if (remoteZone.area.IsInside(positionOfObject))
 	{
 		return Networking::SyncRates::high;
 	}
-	else if (remoteZone.Expanded(remoteZone.GetRadius() * 4).IsInside(positionOfObject))
+	else if (remoteZone.area.Expanded(remoteZone.area.GetRadius() * 4).IsInside(positionOfObject))
 	{
 		return Networking::SyncRates::low;
 	}

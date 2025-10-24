@@ -15,6 +15,7 @@ public:
 	ReplicationLayer();
 	//Fixed network update contains the component updates in the server
 	void fixedNetworkUpdate(NetworkRunner& runner);
+	void server_ReadIncoming(NetworkRunner& runner);
 	void server_fixedNetworkUpdate(NetworkRunner& runner);
 	// Transform Example: looks at transform, sets networktransform to same and copies data, ensures that its object exists
 	//It then sends the udp messages of its new information 
@@ -24,19 +25,21 @@ public:
 	void client_ReadIncoming(const NetworkRunner& runner);
 
 	//If the id to the object does not exist then we need to create it, in case that we are the server
-	void receiveMessage(const NetMessage&);
-
+	void ReceiveMessage(const NetMessage&);
 	//Registers a object to the map, made on the server 
-	bool registerObject(const NetworkRunner& runner, const NetworkObject& object);
-	bool unRegisterObject(const NetworkRunner& runner, const NetworkObject& object);
+	bool RegisterObject(const NetworkRunner& runner, const NetworkObject& object);
+	bool UnRegisterObject(const NetworkRunner& runner, const NetworkObject& object);
 	void RegisterPlayerAOI(Networking::AreaOfInterest aoi);
+	bool ContainsObject(const NetworkedId& id) const; 
+	bool TryFetchNetworkObject(const NetworkedId& id, NetworkObject* object) const;
+
 	Networking::AreaOfInterest AOI() const;
 
 	void Close();
-private:
-	//The position that you expect your replication layer to cull for you from. Does not apply to the server
-	Networking::AreaOfInterest aoi = Networking::AreaOfInterest(Vector3f::zero(), defaultAOIRange);
 	constexpr static float  defaultAOIRange = 5.0f;
+private:
+	//The position that you expect your replication layer to cull for you from.
+	Networking::AreaOfInterest aoi;
 	Networking::SyncRates ShouldSpacialCull(Vector3f positionOfObject, Networking::AreaOfInterest remoteZone) const;
 	constexpr static std::array<float, Cast<int>(Networking::SyncRates::count)> syncTimes = {
 		-1.0f,

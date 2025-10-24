@@ -484,7 +484,23 @@ bool NetworkRunner::registerObject(const NetworkObject& object)
 		return false;
 	}
 
-	return layer.registerObject(*this, object);
+	return layer.RegisterObject(*this, object);
+}
+
+/// <summary>
+/// Only Clients can register players, server will always be aware so no culling can be done by server.
+/// If its wished to cull for both server and client player either do it manually or run a headless server config
+/// </summary> 
+bool NetworkRunner::RegisterPlayer(const NetworkObject& object) const
+{
+	OPTICK_EVENT();
+	if (IsServer)
+	{
+		return false;
+	}
+
+	object.RegisterAsPlayer();
+	return true;
 }
 
 bool NetworkRunner::unRegisterObject(const NetworkObject& object)
@@ -495,7 +511,7 @@ bool NetworkRunner::unRegisterObject(const NetworkObject& object)
 		return false;
 	}
 
-	return layer.unRegisterObject(*this, object);
+	return layer.UnRegisterObject(*this, object);
 }
 
 bool NetworkRunner::Broadcast(NetMessage& message, NetworkConnection::Protocol protocol) const

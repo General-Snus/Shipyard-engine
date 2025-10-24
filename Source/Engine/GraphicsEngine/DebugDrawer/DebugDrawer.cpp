@@ -261,6 +261,69 @@ DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugBox(const Vector3f& aMin, cons
 
 	return CreatePrimitiveHandle(primitive, lifetime);
 }
+
+DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugSphere(
+	const Vector3f& center, float radius, const Color& color,
+	float lifetime, int resolution)
+{
+	DebugDrawer::Primitive primitive{};
+
+	// Clamp resolution to reasonable values to avoid too few or too many vertices
+	resolution = std::max(4, std::min(resolution, 64));
+
+	primitive.Vertices.reserve((resolution + 1) * (resolution + 1));
+	primitive.Indices.reserve(resolution * (resolution + 1) * 4); // rough estimate
+
+	// Generate vertices
+	for (int lat = 0; lat <= resolution; ++lat)
+	{
+		float theta = (float)lat / resolution * Math::PI;  // 0 to PI
+
+		for (int lon = 0; lon <= resolution; ++lon)
+		{
+			float phi = (float)lon / resolution * 2.0f * Math::PI;  // 0 to 2PI
+
+			float x = radius * sin(theta) * cos(phi);
+			float y = radius * cos(theta);
+			float z = radius * sin(theta) * sin(phi);
+
+			Vector3f pos = center + Vector3f(x, y, z);
+			primitive.Vertices.emplace_back(pos, color.GetRGBA());
+		}
+	}
+
+	// Generate indices for line segments connecting vertices (wireframe)
+	// Horizontal lines (along longitude)
+	for (int lat = 0; lat <= resolution; ++lat)
+	{
+		for (int lon = 0; lon < resolution; ++lon)
+		{
+			int current = lat * (resolution + 1) + lon;
+			int next = current + 1;
+
+			primitive.Indices.push_back(current);
+			primitive.Indices.push_back(next);
+		}
+	}
+
+	// Vertical lines (along latitude)
+	for (int lon = 0; lon <= resolution; ++lon)
+	{
+		for (int lat = 0; lat < resolution; ++lat)
+		{
+			int current = lat * (resolution + 1) + lon;
+			int next = current + (resolution + 1);
+
+			primitive.Indices.push_back(current);
+			primitive.Indices.push_back(next);
+		}
+	}
+
+	return CreatePrimitiveHandle(primitive, lifetime);
+}
+
+
+
 //todo this is shit and is 2d only add normal fucker
 DebugDrawer::PrimitiveHandle DebugDrawer::AddDebugQuad(const Vector3f& center, const Vector3f& halfSize,
 													  const Vector3f& aColor, const float   lifetime)

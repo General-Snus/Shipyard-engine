@@ -4,11 +4,11 @@
 template <class T>
 class Sphere
 {
-public: 
-	Sphere(); 
-	Sphere(const Sphere<T>& aSphere); 
-	Sphere(const Vector3<T>& aCenter, T aRadius); 
-	void InitWithCenterAndRadius(const Vector3<T>& aCenter, T aRadius); 
+public:
+	Sphere();
+	Sphere(const Sphere<T>& aSphere);
+	Sphere(const Vector3<T>& aCenter, T aRadius);
+	void InitWithCenterAndRadius(const Vector3<T>& aCenter, T aRadius);
 	bool       IsInside(const Vector3<T>& aPosition) const;
 	Vector3<T> GetCenter() const;
 	T          GetRadius() const;
@@ -25,7 +25,6 @@ public:
 		return Center + relativeVector * (Radius / length);
 	}
 
-private:
 	Vector3<T> Center;
 	T          Radius;
 };

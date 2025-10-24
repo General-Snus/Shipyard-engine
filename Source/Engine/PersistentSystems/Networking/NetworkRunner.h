@@ -61,6 +61,34 @@ public:
 
 	ServerTimePoint serverTime() const;
 
+	auto ConnectedRemote() const
+	{
+		if (!IsServer)
+		{
+			throw std::runtime_error("Clients do not have access to active remotes");
+		}
+
+		return remoteConnections | std::views::filter([](const Remote& r) { return r.isConnected; });
+	}
+
+	auto AllPlayers() const
+	{
+		if (!IsServer)
+		{
+			throw std::runtime_error("Clients do not have access to active remotes");
+		}
+		auto retArg = remoteConnections
+			| std::views::filter([](const Remote& r) { return r.isConnected && Runner.layer.ContainsObject(r.areaOfInterest.owner); })
+			| std::views::transform([](const Remote& r) -> const auto&
+		{
+			NetworkObject* obj = nullptr;
+			Runner.layer.TryFetchNetworkObject(r.areaOfInterest.owner, obj);
+			return *obj;
+		});
+
+		return retArg;
+	}
+
 	float uplinkRate(); // per second
 	float downlinkRate();
 	float downlinkRate(int remoteIndex);
@@ -81,6 +109,7 @@ public:
 	static const int MAX_PLAYERS = 64;
 private:
 	bool registerObject(const NetworkObject& object);
+	bool RegisterPlayer(const NetworkObject& object) const;
 	bool unRegisterObject(const NetworkObject& object);
 
 

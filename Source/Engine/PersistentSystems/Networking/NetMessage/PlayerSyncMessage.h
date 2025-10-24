@@ -1,9 +1,9 @@
-﻿#pragma once
+#pragma once
 #include "NetMessage.h"
 #include "Tools\Utilities\LinearAlgebra\Quaternions.hpp"
+#include "Tools\Utilities\Input\Mapper.hpp"
 #include <cassert>
-#include "cstring"
-#include "Networking\NetworkStructs.h"
+#include "cstring" 
 #include "Tools\Utilities\LinearAlgebra\Vector3.hpp"
 
 struct TransformSyncData
@@ -100,9 +100,6 @@ public:
 private:
 };
 
-
-
-
 class DestroyObjectMessage: public NetMessage
 {
 public:
@@ -127,3 +124,73 @@ public:
 	constexpr static eNetMessageType type = eNetMessageType::DestroyObjectMessage;
 private:
 };
+ 
+class RegisterPlayerMessage : public NetMessage
+{
+public:
+	RegisterPlayerMessage()
+	{
+		myType = type;
+	}
+
+	void SetMessage(const Networking::AreaOfInterest& someData)
+	{
+		static_assert(NETMESSAGE_BUFFERSIZE > sizeof(someData));
+
+		auto addr = dataBuffer.data();
+
+		memcpy(addr, &someData, sizeof(someData));
+
+		addr += sizeof(someData);
+		 
+	}
+
+	Networking::AreaOfInterest ReadMessage() const
+	{
+		Networking::AreaOfInterest data;
+		memcpy(&data, &dataBuffer, sizeof(data)); 
+		return data;
+	}
+
+	constexpr static eNetMessageType type = eNetMessageType::PlayerRegistered;
+private:
+};
+
+
+class InputEventMessage : public NetMessage
+{
+	
+public:
+	struct InputEventMessageData {
+		Action action;
+		NetworkedId object;
+	};
+
+	InputEventMessage()
+	{
+		myType = type;
+	}
+
+	void SetMessage(const InputEventMessageData& someData)
+	{
+		static_assert(NETMESSAGE_BUFFERSIZE > sizeof(someData));
+
+		auto addr = dataBuffer.data();
+
+		memcpy(addr, &someData, sizeof(someData));
+
+		addr += sizeof(someData);
+
+	}
+
+	InputEventMessageData ReadMessage() const
+	{
+		InputEventMessageData data;
+		memcpy(&data, &dataBuffer, sizeof(data));
+		return data;
+	}
+
+	constexpr static eNetMessageType type = eNetMessageType::InputEventMessage;
+private:
+};
+

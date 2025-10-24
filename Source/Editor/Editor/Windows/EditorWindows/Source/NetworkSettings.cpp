@@ -6,6 +6,7 @@
 #include <Engine/PersistentSystems/Networking/NetworkRunner.h>
 #include <WinSock2.h>
 #include "misc\cpp\imgui-combo-filter.h"
+#include "Engine\GraphicsEngine\Renderer.h"
 
 
 NetworkSettings::NetworkSettings() {}
@@ -85,6 +86,11 @@ Here you can adjust network settings to your liking or something.
 	ImGui::Text(std::format("Server status: {}", magic_enum::enum_name(Runner.connection.GetStatus())).c_str());
 	ImGui::Separator();
 
+
+	static bool showAOI = false;
+
+	ImGui::ToggleButton("AOITOggle", &showAOI, "Show area of interest");
+
 	///Average out the down&Uplink
 	if (Runner.IsServer)
 	{
@@ -131,6 +137,12 @@ Here you can adjust network settings to your liking or something.
 			).c_str());
 
 			DrawPingPlot(client.rtt());
+
+			if (showAOI)
+			{
+				auto sphere = client.areaOfInterest.area;
+				GetRenderer().debugDrawer.AddDebugSphere(sphere.Center, sphere.Radius, Colors::red, .01f);
+			}
 		}
 	}
 	else
@@ -164,8 +176,13 @@ Here you can adjust network settings to your liking or something.
 			uplink.Average() / Runner.heartBeatSystem.downlinkRate()
 
 		).c_str());
-
 		DrawPingPlot(Runner.heartBeatSystem.rtt());
+
+		if (showAOI)
+		{
+			auto sphere = Runner.layer.AOI().area;
+			GetRenderer().debugDrawer.AddDebugSphere(sphere.Center, sphere.Radius, Colors::red, .01f);
+		}
 	}
 
 	ImGui::End();

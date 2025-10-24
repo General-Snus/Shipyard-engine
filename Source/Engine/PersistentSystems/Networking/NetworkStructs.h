@@ -158,7 +158,11 @@ struct SessionConfiguration {
 
 namespace Networking {
 
-	using AreaOfInterest = Sphere<float>;
+	struct AreaOfInterest {
+		Sphere<float> area = {};
+		NetworkedId owner = {};
+	};
+
 	enum class SyncRates : int
 	{
 		noUpdate,

@@ -1,8 +1,9 @@
 #include "Mapper.hpp"
 #include "Game\Timer.h"
+#include <numeric>
+#include "Tools\Utilities\TemplateHelpers.h"
 
-
-void InputMapper::AddListener(size_t entity, Keys key, Action action, MapperFunction func)
+void InputMapper::AddListener(uint32_t entity, Keys key, Action action, MapperFunction func)
 {
 	GetKeyHandler(key).AddListener(entity, action, func);
 }
@@ -10,6 +11,18 @@ void InputMapper::AddListener(size_t entity, Keys key, Action action, MapperFunc
 InputKeyHandler& InputMapper::GetKeyHandler(Keys key)
 {
 	return keyHandlers[int(key)];
+}
+
+InputMapper::InputMapper() :manager(&Input)
+{
+	//Template flexing here
+	auto iota = std::views::iota(0, Cast<int>(Keys::COUNT));
+	auto castedView = ViewCast<Keys>();
+
+	for (auto key : iota | castedView)
+	{
+		keyHandlers[to_index(key)] = InputKeyHandler(key);
+	}
 }
 
 void InputMapper::Update()
@@ -23,7 +36,7 @@ void InputMapper::Update()
 InputKeyHandler::InputKeyHandler(Keys key)
 {
 	state.key = key;
-	state.phase = None;
+	state.phase = Phase::None;
 	state.heldDuration = 0.0f;
 }
 
@@ -35,26 +48,26 @@ void InputKeyHandler::Update(InputMapper& ref)
 
 	if (keyPressedThisFrame)
 	{
-		state.phase = Pressed;
+		state.phase = Phase::Pressed;
 		state.heldDuration = 0;
 		state.mouseStartPosition = Input.GetMousePosition();
 		state.mouseCurrentPosition = Input.GetMousePosition();
 	}
 	else if (keyHeldThisFrame)
 	{
-		state.phase = Held;
+		state.phase = Phase::Held;
 		state.heldDuration += TimerInstance.getDeltaTime();
 		state.mouseCurrentPosition = Input.GetMousePosition();
 	}
 	else if (keyReleasedThisFrame)
 	{
-		state.phase = Released;
+		state.phase = Phase::Released;
 		state.heldDuration += TimerInstance.getDeltaTime();
 		state.mouseCurrentPosition = Input.GetMousePosition();
 	}
 	else
 	{
-		state.phase = None;
+		state.phase = Phase::None;
 		return;
 	}
 
@@ -82,7 +95,7 @@ void InputKeyHandler::Update(InputMapper& ref)
 
 }
 
-void InputKeyHandler::AddListener(size_t entity, Action action, MapperFunction func)
+void InputKeyHandler::AddListener(uint32_t entity, Action action, MapperFunction func)
 {
 	RemoveListener(entity, action);
 
@@ -95,7 +108,7 @@ void InputKeyHandler::AddListener(size_t entity, Action action, MapperFunction f
 	listeners.emplace_back(listener);
 }
 
-void InputKeyHandler::RemoveListener(size_t entity, Action action)
+void InputKeyHandler::RemoveListener(uint32_t entity, Action action)
 {
 
 	for (size_t i = 0; i < listeners.size(); i++)

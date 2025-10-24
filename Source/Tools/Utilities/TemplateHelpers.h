@@ -1,6 +1,8 @@
 #pragma once
 #include <type_traits>
 #include <utility>
+#include <ranges>
+#include <concepts>
 
 #define ENABLE_ENUM_BITWISE_OPERATORS(_ENUM_TYPE)                                                                      \
     inline _ENUM_TYPE operator|(const _ENUM_TYPE &a, const _ENUM_TYPE &b)                                              \
@@ -122,7 +124,7 @@ inline constexpr bool is_array = false;
 template <typename T, std::size_t N>
 inline constexpr bool is_array<std::array<T, N>> = true;
 template <typename T, std::size_t N>
-inline constexpr bool is_array<const std::array<T, N>> = true; 
+inline constexpr bool is_array<const std::array<T, N>> = true;
 
 #pragma region Concepts
 template <typename T>
@@ -137,11 +139,11 @@ concept Arithmetic = Integer<T> || FloatingPoint<T>;
 template<typename T, typename U>
 constexpr T Cast(U&& value)
 {
-    return static_cast<T>(std::forward<U>(value));
+	return static_cast<T>(std::forward<U>(value));
 }
 
 template <auto V>
-concept Positive = (V > 0); 
+concept Positive = (V > 0);
 
 template <auto V>
 concept PositiveInt = Integer<decltype(V)> && (V > 0);
@@ -159,7 +161,7 @@ concept InputRange = std::ranges::input_range<T>;
 template <typename T>
 concept Hashable = requires(T v)
 {
-    { std::hash<T>{}(v) } -> std::convertible_to<std::size_t>;
+	{ std::hash<T>{}(v) } -> std::convertible_to<std::size_t>;
 };
 
 template<typename Base, typename Derived>
@@ -184,6 +186,24 @@ template <auto n, typename F>
 constexpr void for_sequence(F f)
 {
 	for_sequence(std::make_integer_sequence<decltype(n), n>{}, f);
+}
+
+
+template <typename Enum, size_t... I>
+constexpr auto make_enum_array(std::index_sequence<I...>)
+{
+	return std::array<Enum, sizeof...(I)>{ static_cast<Enum>(I)... };
+}
+template <typename Enum>
+constexpr size_t to_index(Enum k)
+{
+	return static_cast<size_t>(k);
+}
+
+template<typename T>
+auto ViewCast()
+{
+	return std::views::transform([](auto i)	-> T { return Cast<T>(i); });
 }
 
 template <typename... Trest>

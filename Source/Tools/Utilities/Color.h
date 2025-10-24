@@ -87,6 +87,7 @@ public:
 	static Vector4f RGBLerp(const Color& colorIn1, const Color& colorIn2, float blend);
 
 	static Color HSVtoRGB(const Color& colorIn);
+	static Color RandomHue();
 
 	static Color FromHex(const std::string& hex);
 };
@@ -97,7 +98,5 @@ namespace Colors {
 	static Color green = Color(0.0f, 1, 0, 1.0f);
 	static Color black = Color(1.0f, 0, 0, 1.0f);
 	static Color white = Color(1, 1, 1, 1.0f);
-	static Color grey = Color(0.5f, 0.5f, 0.5f, 1.0f);
-
-
+	static Color grey = Color(0.5f, 0.5f, 0.5f, 1.0f); 
 }

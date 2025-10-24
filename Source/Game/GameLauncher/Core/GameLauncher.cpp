@@ -68,8 +68,9 @@ void YourGameLauncher::Init()
 			camera.transform().SetRotation({ 90,0,0 });
 		}
 
-		this->arena = BallEradicationGame::MakeArena(Vector3f(), rect);
+		this->arena = BallEradicationGame::MakeArena(Vector3f::zero(), rect);
 		arena.AddComponent<BallGameController>();
+		this->player = BallEradicationGame::MakePlayer(Vector3f::zero());
 
 #ifdef PillarGame
 		constexpr float pillarRadius = 1.0f;
@@ -104,8 +105,23 @@ void YourGameLauncher::Update(float delta)
 	const auto& controller = arena.GetComponent<BallGameController>();
 	for (auto& ball : manager.GetAllComponents<BallTag>())
 	{
+
+
+
 		//Check collisions 
 		const auto& sphere1 = ball.GetComponent<Collider>().GetColliderAssetOfType<ColliderAssetSphere>()->sphere();
+
+		for (const auto& ClientPlayers : Runner.AllPlayers())
+		{
+			const auto& sphere2 = ClientPlayers.GetComponent<Collider>().GetColliderAssetOfType<ColliderAssetSphere>()->sphere();
+			if ((ball.transform().GetPosition() - ClientPlayers.transform().GetPosition()).Length() < sphere1.GetRadius() + sphere2.GetRadius())
+			{
+				manager.DeleteGameObject(ball.gameObject());
+				break;
+			}
+
+		}
+
 		for (const auto& otherBall : manager.GetAllComponents<BallTag>())
 		{
 			if (ball.gameObject() == otherBall.gameObject())
@@ -150,14 +166,14 @@ void YourGameLauncher::Update(float delta)
 
 	auto ballDiff = controller.maxBallsInGame - manager.GetAllComponents<BallTag>().size();
 	ballSpawnTimer -= delta;
-	if(ballDiff > 0 && ballSpawnTimer < 0){
+	if (ballDiff > 0 && ballSpawnTimer < 0)
+	{
 		ballSpawnTimer = controller.ballSpawnCooldown;
 		Vector3f position;
-		position.x = Math::RandomEngine::randomInRange(-rect.x,rect.x);
-		position.z = Math::RandomEngine::randomInRange(-rect.z,rect.z);
+		position.x = Math::RandomEngine::randomInRange(-rect.x, rect.x);
+		position.z = Math::RandomEngine::randomInRange(-rect.z, rect.z);
 		BallEradicationGame::MakeBall(position);
 	}
-
 
 #ifdef PillarGame 
 	static Vector3f lerpPos;

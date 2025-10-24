@@ -21,7 +21,7 @@ namespace ImGui
 
 	bool BeginMainMenuBar(int barNumber);
 
-	bool ToggleButton(const char* str_id, bool* v);
+	bool ToggleButton(const char* str_id, bool* v,const char* label = "");
 
 	Vector2f CursorPositionInWindow();
 

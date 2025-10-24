@@ -17,6 +17,7 @@ struct Remote {
 	friend class NetworkRunner;
 	friend class HeartBeatSystem;
 	friend class NetworkSettings;
+	friend class ReplicationLayer;
 	friend class NetworkSettings;
 	struct RemoteRecievedMessage {
 		NetMessage message;
@@ -40,7 +41,7 @@ private:
 
 	Networking::AreaOfInterest areaOfInterest;
 
-	bool hasConnectedOverUDP = false;
+	bool hasConnectedOverUDP = false;	
 	TimePoint lastRecievedMessageTime;
 	TimePoint lastHeartbeatTime;
 	Duration roundTrip;

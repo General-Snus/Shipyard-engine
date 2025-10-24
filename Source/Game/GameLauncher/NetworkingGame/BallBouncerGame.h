@@ -24,8 +24,10 @@ public:
 };
 
 REFL_AUTO(type(BallGameController), field(maxBallsInGame), field(ballSpawnCooldown))
+ 
 
 namespace BallEradicationGame {
+	GameObject MakePlayer(Vector3f position);
 	GameObject MakeBall(Vector3f position);
 	GameObject MakeArena(Vector3f position, Vector3f Rect);
 }

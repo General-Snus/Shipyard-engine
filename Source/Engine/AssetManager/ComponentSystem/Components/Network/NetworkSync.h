@@ -13,70 +13,72 @@ class NetworkRunner;
 class NetworkObject : public Reflectable<NetworkObject>, public Component
 {
 public:
-    reflectable(NetworkObject);
-    NetworkObject() = delete;
-    NetworkObject(const SY::UUID anOwnerId, GameObjectManager* aManager);
-    NetworkObject(const SY::UUID anOwnerId, GameObjectManager* aManager, NetworkedId id);
-    void Init() override;
-    void Destroy() override;
-    bool InspectorView() override;
+	reflectable(NetworkObject);
+	NetworkObject() = delete;
+	NetworkObject(const SY::UUID anOwnerId, GameObjectManager* aManager);
+	NetworkObject(const SY::UUID anOwnerId, GameObjectManager* aManager, NetworkedId id);
+	void Init() override;
+	void Destroy() override;
+	bool InspectorView() override;
 
-    NetworkedId GetServerID() const
-    {
-        return uniqueNetId;
-    }
-    float SyncFrequencyInverse() const
-    {
-        return 1 / syncFrequency;
-    }
+	void RegisterAsPlayer() const;
 
-    ServerTimePoint GetLastSyncTime() const
-    {
-        return clientUpdateTimePoint;
-    }
+	NetworkedId GetServerID() const
+	{
+		return uniqueNetId;
+	}
+	float SyncFrequencyInverse() const
+	{
+		return 1 / syncFrequency;
+	}
 
-    bool neverNotSync = false;
+	ServerTimePoint GetLastSyncTime() const
+	{
+		return clientUpdateTimePoint;
+	}
 
-    bool ShouldSync(const NetworkRunner& runner) const;
-    bool ShouldSync(const NetworkRunner& runner, float customSyncTime) const;
-    void Synced(const ServerTimePoint& time);
+	bool neverNotSync = false;
 
-    void DisperseNetMessage(const NetMessage& netMessageForIndividualobject);
+	bool ShouldSync(const NetworkRunner& runner) const;
+	bool ShouldSync(const NetworkRunner& runner, float customSyncTime) const;
+	void Synced(const ServerTimePoint& time);
 
-    float syncFrequency = 20.0f;
+	void DisperseNetMessage(const NetMessage& netMessageForIndividualobject);
+
+	float syncFrequency = 20.0f;
 protected:
-    ServerTimePoint clientUpdateTimePoint;
-    NetworkedId uniqueNetId;
+	ServerTimePoint clientUpdateTimePoint;
+	NetworkedId uniqueNetId;
 };
 REFL_AUTO(type(NetworkObject))
 
 class NetworkTransform : public Reflectable<NetworkTransform>, public NetworkObject
 {
 public:
-    reflectable(NetworkTransform);
-    NetworkTransform() = delete;
-    NetworkTransform(const SY::UUID anOwnerId, GameObjectManager* aManager);
-    bool InspectorView() override;
-    void Init() override;
+	reflectable(NetworkTransform);
+	NetworkTransform() = delete;
+	NetworkTransform(const SY::UUID anOwnerId, GameObjectManager* aManager);
+	bool InspectorView() override;
+	void Init() override;
 
-    Vector3f myPosition;
-    Quaternionf    myQuaternion;
-    Vector3f myScale = Vector3f(1, 1, 1);
+	Vector3f myPosition;
+	Quaternionf    myQuaternion;
+	Vector3f myScale = Vector3f(1, 1, 1);
 
-    Vector3f translationInterpolation;
-    Quaternionf    rotationInterpolation;
+	Vector3f translationInterpolation;
+	Quaternionf    rotationInterpolation;
 };
 REFL_AUTO(type(NetworkTransform), field(myPosition), field(translationInterpolation))
 
 class NetworkInputListener : public Reflectable<NetworkInputListener>, public NetworkObject
 {
 public:
-    reflectable(NetworkInputListener);
-    NetworkInputListener() = delete;
-    NetworkInputListener(const SY::UUID anOwnerId, GameObjectManager* aManager);
-    bool InspectorView() override;
-    void Init() override;
+	reflectable(NetworkInputListener);
+	NetworkInputListener() = delete;
+	NetworkInputListener(const SY::UUID anOwnerId, GameObjectManager* aManager);
+	bool InspectorView() override;
+	void Init() override;
 
-    void AddKeyFunc(Keys key, Action action, MapperFunction func);
+	void AddKeyFunc(Keys key, Action action, bool allowLocalPrediction,MapperFunction func);
 };
 REFL_AUTO(type(NetworkInputListener))
