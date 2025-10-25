@@ -83,16 +83,21 @@ void Inspector::RenderImGUi()
 		ImGui::Separator();
 		ImGui::NewLine();
 
-		gameobject.transform().InspectorView();
+		//auto& transform = gameobject.transform();
+		//ImGui::PushID(&transform);
+		//transform.InspectorView();
+		//ImGui::PopID();
+
 		ImGui::NewLine();
-		for (const auto& cmp : gameobject.GetAllComponents())
+		for (auto cmp : gameobject.GetAllComponents() )
 		{
 			if (cmp->GetTypeInfo().Name() == refl::type_descriptor<Transform>::name.str())
 			{
 				continue;
 			}
-
+			ImGui::PushID(cmp);
 			cmp->InspectorView();
+			ImGui::PopID();
 			ImGui::NewLine();
 		}
 

@@ -81,7 +81,6 @@ void Console::RenderImGUi()
 			std::scoped_lock lock(LOGGER.mutexLock());
 			const auto& messages = buffer.LoggedMessages;
 
-			// Use ImGuiListClipper for efficient scrolling
 			ImGuiListClipper clipper;
 			clipper.Begin((int)messages.size(), 2 * ImGui::GetTextLineHeightWithSpacing());
 
@@ -102,10 +101,8 @@ void Console::RenderImGUi()
 					Color logColor = LOGGER.GetColor(type);
 					ImGui::PushStyleColor(ImGuiCol_Text, static_cast<ImVec4>(logColor.GetRGBA()));
 
-					// Use a selectable for interaction instead of a layered button
-					// This is much more efficient.
-					ImGui::PushID(i); // Use index for a unique ID
-					if (ImGui::Selectable(message.c_str(), pickedMessage.logNumber == logEntity.logNumber, ImGuiSelectableFlags_AllowItemOverlap))
+					ImGui::PushID(i);
+					if (ImGui::Selectable(message.c_str(), pickedMessage.logNumber == logEntity.logNumber))
 					{
 						pickedMessage = logEntity;
 					}
@@ -172,11 +169,11 @@ void Console::PushDebugLayerToConsole()
 			case D3D12_MESSAGE_SEVERITY_WARNING:
 				LOGGER.Warn(str);
 				break;
-			//case D3D12_MESSAGE_SEVERITY_INFO:
-			//	LOGGER.Log(str);
-			//	break;
-			//case D3D12_MESSAGE_SEVERITY_MESSAGE:
-			//	LOGGER.Log(str);
+				//case D3D12_MESSAGE_SEVERITY_INFO:
+				//	LOGGER.Log(str);
+				//	break;
+				//case D3D12_MESSAGE_SEVERITY_MESSAGE:
+				//	LOGGER.Log(str);
 				break;
 			default:
 				break;

@@ -141,6 +141,8 @@ constexpr T Cast(U&& value)
 {
 	return static_cast<T>(std::forward<U>(value));
 }
+template <typename T>
+constexpr T* GetAddress(T& obj) noexcept { return &obj; }
 
 template <auto V>
 concept Positive = (V > 0);
