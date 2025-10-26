@@ -50,7 +50,7 @@ protected:
 	ServerTimePoint clientUpdateTimePoint;
 	NetworkedId uniqueNetId;
 };
-REFL_AUTO(type(NetworkObject))
+REFL_AUTO(type(NetworkObject),field(syncFrequency))
 
 class NetworkTransform : public Reflectable<NetworkTransform>, public NetworkObject
 {

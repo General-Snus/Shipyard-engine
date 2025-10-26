@@ -80,25 +80,31 @@ namespace Reflection {
 	template <class T>
 	concept ReflectableClass = isReflectableClass<T>();
 }
+class ReflectableBase {
+public:
+	virtual const Reflection::TypeInfo& GetTypeInfo() const = 0;
+	virtual ~ReflectableBase() = default;
+};
 
 template<class Derived>
-class Reflectable {
+class Reflectable : public ReflectableBase {
 public:
 	bool Reflect()
 	{
 		return Reflection::Reflect<Derived>(static_cast<Derived&>(*this));
 	}
 
-	const Reflection::TypeInfo& GetTypeInfo() const
-	{
-		using safeType = ::refl::trait::remove_qualifiers_t<Derived>;
-		return Reflection::TypeInfo::Get<safeType>();
-	}
+	virtual const Reflection::TypeInfo& GetTypeInfo() const = 0;
 };
 
 #define reflectable( className )			\
 using Reflectable<className>::Reflect;		\
-using Reflectable<className>::GetTypeInfo;	 
+static const Reflection::TypeInfo& StaticTypeInfo() { \
+        return Reflection::TypeInfo::Get<className>(); \
+    } \
+    const Reflection::TypeInfo& GetTypeInfo() const override { \
+        return StaticTypeInfo(); \
+    }
 
 
 

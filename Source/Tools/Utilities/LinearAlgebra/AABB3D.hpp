@@ -145,4 +145,12 @@ template <class T>
 Vector3<T> AABB3D<T>::GetMax() const {
 	return center + extent;
 }
-  
+
+
+template <class T>
+std::ostream& operator<<(std::ostream& os, const AABB3D<T>& aabb)
+{
+	os << "AABB3D(Center: " << aabb.GetCenter()
+		<< ", Extent: " << aabb.GetExtent() << ")";
+	return os;
+}

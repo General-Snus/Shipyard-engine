@@ -40,6 +40,7 @@ private:
 	std::string nickname;
 
 	Networking::AreaOfInterest areaOfInterest;
+	NetworkedId Player;
 
 	bool hasConnectedOverUDP = false;	
 	TimePoint lastRecievedMessageTime;

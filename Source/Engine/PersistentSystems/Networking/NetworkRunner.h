@@ -56,9 +56,9 @@ public:
 
 	bool HasConnection(NetworkedId id);
 	std::string NameOfConnection(NetworkedId id);
+	std::optional<const Remote&> IdToRemote(NetworkedId id) const;
 	Remote* IdToRemote(NetworkedId id);
-	const Remote* IdToRemote(NetworkedId id) const;
-
+ 
 	ServerTimePoint serverTime() const;
 
 	auto ConnectedRemote() const
@@ -111,7 +111,6 @@ private:
 	bool registerObject(const NetworkObject& object);
 	bool RegisterPlayer(const NetworkObject& object) const;
 	bool unRegisterObject(const NetworkObject& object);
-
 
 
 	bool Broadcast(NetMessage& message, NetworkConnection::Protocol protocol) const; // Send to All

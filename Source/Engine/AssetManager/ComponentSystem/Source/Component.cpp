@@ -26,17 +26,22 @@ bool Component::IsActive() const
 }
 bool Component::InspectorView()
 {
+	return ComponentInspectorHeader();
+}
+
+FORCEINLINE bool Component::ComponentInspectorHeader()
+{
 	OPTICK_EVENT();
 
 	bool isOpened = false;
-	const Reflection::TypeInfo &typeInfo = GetTypeInfo();
+	const Reflection::TypeInfo& typeInfo = GetTypeInfo();
 
 	ImGui::Checkbox(std::format("##{}{}", typeInfo.Name().c_str(), std::to_string(myOwnerID).c_str()).c_str(),
-					&m_IsActive);
+		&m_IsActive);
 	ImGui::SameLine(0, 10);
 	isOpened =
 		ImGui::CollapsingHeader(typeInfo.Name().c_str(), ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_DefaultOpen |
-															 ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_OpenOnDoubleClick); 
+			ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_OpenOnDoubleClick);
 	if (isOpened)
 	{
 		ImGui::Indent();

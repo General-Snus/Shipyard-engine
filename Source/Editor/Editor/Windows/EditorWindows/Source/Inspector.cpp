@@ -89,7 +89,7 @@ void Inspector::RenderImGUi()
 		//ImGui::PopID();
 
 		ImGui::NewLine();
-		for (auto cmp : gameobject.GetAllComponents() )
+		for (const auto& cmp : gameobject.GetAllComponents() )
 		{
 			if (cmp->GetTypeInfo().Name() == refl::type_descriptor<Transform>::name.str())
 			{

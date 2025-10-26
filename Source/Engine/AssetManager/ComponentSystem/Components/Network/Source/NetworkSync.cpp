@@ -116,6 +116,13 @@ NetworkInputListener::NetworkInputListener(const SY::UUID anOwnerId, GameObjectM
 
 void NetworkInputListener::Init()
 {
+	if (auto* netObject = TryGetComponent<NetworkObject>())
+	{
+		//Rather out of place here, need a good place for prerequisite checks 
+		this->syncFrequency = netObject->syncFrequency;
+		this->uniqueNetId = netObject->GetServerID();
+		this->clientUpdateTimePoint = netObject->GetLastSyncTime();
+	}
 }
 
 bool NetworkInputListener::InspectorView()

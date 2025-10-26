@@ -151,7 +151,7 @@ template <class T> void ComponentManager<T>::RebaseSelf(SY::UUID gameobjectRebas
 
 template <class T> Component* ComponentManager<T>::TryGetBaseComponent(const SY::UUID aGameObjectID)
 {
-	return reinterpret_cast<Component*>(TryGetComponent(aGameObjectID));
+	return static_cast<Component*>(TryGetComponent(aGameObjectID));
 }
 
 template <class T> T& ComponentManager<T>::AddComponent(const SY::UUID aGameObjectID)

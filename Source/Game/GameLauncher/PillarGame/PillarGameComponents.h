@@ -1,11 +1,11 @@
 #pragma once
 #include <Engine/AssetManager/ComponentSystem/Component.h>
 
-class PlayerComponent : public Component
+class PlayerComponent : public Reflectable<PlayerComponent>, public Component
 {
 public:
 	using Component::Component;
-	// ReflectableTypeRegistration();
+	reflectable(PlayerComponent);
 	defaultComponentInspector();
 
 	int        playerId = 0;
@@ -17,13 +17,13 @@ public:
 };
 
 REFL_AUTO(type(PlayerComponent), field(playerId), field(currentHook), field(wantToHook), field(isDragging),
-          field(timeSinceHook), field(hookCooldown))
+		  field(timeSinceHook), field(hookCooldown))
 
-class HookComponent : public Component
+	class HookComponent : public Reflectable<HookComponent>, public Component
 {
 public:
 	using Component::Component;
-	// ReflectableTypeRegistration();
+	reflectable(HookComponent);
 	defaultComponentInspector();
 
 	bool       hasConnection = false;
@@ -34,6 +34,6 @@ REFL_AUTO(type(HookComponent), field(hasConnection), field(connection))
 namespace PillarGame {
 	void SpawnGround(Vector3f base);
 	GameObject SpawnPillar(Vector3f base);
-	void SpawnHooks(int amount, float radius,GameObject parent);
-	void SpawnPlayer(int id, float radius,GameObject parent);
+	void SpawnHooks(int amount, float radius, GameObject parent);
+	void SpawnPlayer(int id, float radius, GameObject parent);
 }

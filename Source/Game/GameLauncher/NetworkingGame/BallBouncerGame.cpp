@@ -17,7 +17,7 @@ GameObject BallEradicationGame::MakePlayer(Vector3f position)
 	player.AddComponent<NetworkObject>();
 	auto& listener = player.AddComponent<NetworkInputListener>();
 	auto object = player.AddComponent<NetworkTransform>();
-	object.RegisterAsPlayer();
+
 	collider.SetColliderType<ColliderAssetSphere>();
 
 	if (const auto mat = Resources.ForceLoad<Material>("TreeMaterial"))

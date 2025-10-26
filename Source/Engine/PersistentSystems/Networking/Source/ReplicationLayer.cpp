@@ -19,6 +19,7 @@
 #include <span>
 #include <ratio>
 #include <chrono>
+#include "Engine\AssetManager\ComponentSystem\Components\Collider.h"
 
 ReplicationLayer::ReplicationLayer() : spacialFrequencyCulling(0, 0, 100.0f)
 {
@@ -58,6 +59,15 @@ void ReplicationLayer::server_ReadIncoming(NetworkRunner& runner)
 					remote->areaOfInterest = remoteAoI;
 				}
 			}
+		}
+	}
+	if (runner.messagesMap.contains(InputEventMessage::type))
+	{
+		for (auto& message : runner.messagesMap.at(InputEventMessage::type))
+		{
+			auto msg = std::bit_cast<InputEventMessage>(message.message);
+			auto inputEvent = msg.ReadMessage();
+			 
 		}
 	}
 }
@@ -101,7 +111,6 @@ void ReplicationLayer::server_fixedNetworkUpdate(NetworkRunner& runner)
 		TransformSyncMessage composedTransformUpdate;
 		composedTransformUpdate.SetMessage(data);
 		runner.Multicast(composedTransformUpdate, activeConnections, NetworkConnection::Protocol::UDP);
-
 	}
 }
 
@@ -160,6 +169,75 @@ void ReplicationLayer::client_ReadIncoming(const NetworkRunner& runner)
 			}
 		}
 	}
+	if (runner.messagesMap.contains(RegisterPlayerMessage::type))
+	{
+		for (auto& message : runner.messagesMap.at(RegisterPlayerMessage::type))
+		{
+			auto msg = std::bit_cast<RegisterPlayerMessage>(message.message);
+			auto messageContent = msg.ReadMessage();
+
+			if (!idToObjectMap.contains(messageContent.owner))
+			{
+				GameObject player = GameObject::Create("Player");
+				auto& renderer = player.AddComponent<MeshRenderer>("Models/C64.fbx");
+				player.transform().SetPosition(Vector3f::zero());
+
+				auto& collider = player.AddComponent<Collider>();
+				player.AddComponent<NetworkObject>(messageContent.owner);
+				auto& listener = player.AddComponent<NetworkInputListener>();
+				auto object = player.AddComponent<NetworkTransform>();
+				object.RegisterAsPlayer();
+				collider.SetColliderType<ColliderAssetSphere>();
+
+				if (const auto mat = Resources.ForceLoad<Material>("TreeMaterial"))
+				{
+					mat->SetColor(ColorManagerInstance.GetColor("Blue"));
+					renderer.SetMaterial(mat);
+				}
+
+				listener.AddKeyFunc(Keys::W, Action::MoveCharacter, false, [&](InputContext context)
+				{
+					if (context.state.phase == Phase::Pressed || context.state.phase == Phase::Held)
+					{
+						auto object = Scene::activeManager().GetGameObject((context.id));
+						object.transform().Move(Vector3f::forward() * TimerInstance.getDeltaTime() * 20.f);
+						return InputResponse::claimInput;
+					}
+					return InputResponse::undecided;
+				});
+				listener.AddKeyFunc(Keys::S, Action::MoveCharacter, false, [&](InputContext context)
+				{
+					if (context.state.phase == Phase::Pressed || context.state.phase == Phase::Held)
+					{
+						auto object = Scene::activeManager().GetGameObject((context.id));
+						object.transform().Move(-Vector3f::forward() * TimerInstance.getDeltaTime() * 20.f);
+						return InputResponse::claimInput;
+					}
+					return InputResponse::undecided;
+				});
+				listener.AddKeyFunc(Keys::D, Action::MoveCharacter, false, [&](InputContext context)
+				{
+					if (context.state.phase == Phase::Pressed || context.state.phase == Phase::Held)
+					{
+						auto object = Scene::activeManager().GetGameObject((context.id));
+						object.transform().Move(Vector3f::right() * TimerInstance.getDeltaTime() * 20.f);
+						return InputResponse::claimInput;
+					}
+					return InputResponse::undecided;
+				});
+				listener.AddKeyFunc(Keys::A, Action::MoveCharacter, false, [&](InputContext context)
+				{
+					if (context.state.phase == Phase::Pressed || context.state.phase == Phase::Held)
+					{
+						auto object = Scene::activeManager().GetGameObject((context.id));
+						object.transform().Move(-Vector3f::right() * TimerInstance.getDeltaTime() * 20.f);
+						return InputResponse::claimInput;
+					}
+					return InputResponse::undecided;
+				});
+			}
+		}
+	}
 
 	if (runner.messagesMap.contains(CreateObjectMessage::type))
 	{
@@ -197,6 +275,20 @@ void ReplicationLayer::client_ReadIncoming(const NetworkRunner& runner)
 			if (!idToObjectMap.contains(messageContent.uniqueComponentId))
 			{
 				LOGGER.Warn("Received transform for not yet created object");
+
+				//If something is fucky we request the server to send appropriate message to set us right, ex: if missing it send a create
+				QueryObjectStatus queryMsg;
+
+				ObjectStatus::ObjectStatusData queryData;
+				queryData.uniqueNetworkObject = messageContent.uniqueComponentId;
+				queryData.isSpawned = false; 
+
+				queryMsg.SetMessage(queryData);
+
+				auto remote = runner.IdToRemote(transformMessage.idFrom);
+				if (!remote.has_value()) { continue; }
+
+				runner.SendTo(remote.value(), queryMsg, NetworkConnection::Protocol::TCP);
 				continue;
 			}
 

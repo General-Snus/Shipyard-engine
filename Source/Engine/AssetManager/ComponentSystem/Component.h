@@ -15,6 +15,7 @@ enum class eComponentType {
 
 class Component : public Reflectable<Component>, public AvailableInInspector {
 public:
+	reflectable(Component)
 	Component(const SY::UUID anOwnerID, GameObjectManager* aManager);
 	Component(const Component& aComponent);
 	virtual ~Component() noexcept = default;
@@ -81,7 +82,8 @@ public:
 		SetOwnerID(myOwnerID + newBase);
 		SetManager(aManager);
 	}
-
+protected:
+	virtual bool ComponentInspectorHeader();
 private:
 	Component() = delete;
 
@@ -95,6 +97,7 @@ private:
 	{
 		myManager = aManager;
 	}
+
 };
 
 REFL_AUTO(type(Component), field(myOwnerID), field(m_IsActive))

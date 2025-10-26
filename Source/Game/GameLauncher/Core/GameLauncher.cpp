@@ -105,12 +105,8 @@ void YourGameLauncher::Update(float delta)
 	const auto& controller = arena.GetComponent<BallGameController>();
 	for (auto& ball : manager.GetAllComponents<BallTag>())
 	{
-
-
-
 		//Check collisions 
 		const auto& sphere1 = ball.GetComponent<Collider>().GetColliderAssetOfType<ColliderAssetSphere>()->sphere();
-
 		for (const auto& ClientPlayers : Runner.AllPlayers())
 		{
 			const auto& sphere2 = ClientPlayers.GetComponent<Collider>().GetColliderAssetOfType<ColliderAssetSphere>()->sphere();

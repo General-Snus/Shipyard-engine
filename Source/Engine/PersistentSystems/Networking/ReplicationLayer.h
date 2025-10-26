@@ -35,6 +35,12 @@ public:
 
 	Networking::AreaOfInterest AOI() const;
 
+
+	void OnPlayerSpawned(std::function<void>(const NetworkObject&)> callback)
+	{
+		layer.playerSpawnedCallback = callback;
+	}
+
 	void Close();
 	constexpr static float  defaultAOIRange = 5.0f;
 private:

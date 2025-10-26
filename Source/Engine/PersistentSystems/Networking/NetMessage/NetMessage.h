@@ -15,6 +15,8 @@ enum class eNetMessageType : unsigned char {
 	TransformSyncMessage,
 	CreateObjectMessage,
 	DestroyObjectMessage,
+	QueryObjectStatus,
+	ObjectStatus,
 	HearthBeat,
 	Count
 };

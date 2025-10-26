@@ -264,7 +264,7 @@ void NetworkRunner::Close()
 	layer.Close();
 	receiveTCP.request_stop();
 	receiveUDP.request_stop();
-	connection.Close(); 
+	connection.Close();
 	IsServer = false;
 	HasStateAuthority = false;
 	HasInputAuthority = false;
@@ -398,12 +398,13 @@ Remote* NetworkRunner::IdToRemote(NetworkedId id)
 	return nullptr;
 }
 
-const Remote* NetworkRunner::IdToRemote(NetworkedId id) const
+std::optional<const Remote&> NetworkRunner::IdToRemote(NetworkedId id) const
 {
 	OPTICK_EVENT();
+
 	if (id == runnerID)
 	{
-		return nullptr;
+		return {};
 	}
 
 	if (IsServer)
@@ -412,11 +413,11 @@ const Remote* NetworkRunner::IdToRemote(NetworkedId id) const
 		{
 			if (remote.isConnected && remote.id == id)
 			{
-				return &remote;
+				return remote;
 			}
 		}
 	}
-	return nullptr;
+	return {};
 }
 
 //Make the actuall client time lerping please and thanks

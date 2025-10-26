@@ -124,6 +124,61 @@ public:
 	constexpr static eNetMessageType type = eNetMessageType::DestroyObjectMessage;
 private:
 };
+
+class QueryObjectStatus: public NetMessage
+{
+public:
+	QueryObjectStatus()
+	{
+		myType = type;
+	}
+	//What is the state of the object on the client
+	void SetMessage(const ObjectStatus::ObjectStatusData& someData) 
+	{
+		static_assert(NETMESSAGE_BUFFERSIZE > sizeof(someData));
+		memcpy(&dataBuffer, &someData, sizeof(someData));
+	}
+
+	ObjectStatus::ObjectStatusData ReadMessage() const
+	{
+		ObjectStatus::ObjectStatusData data;
+		memcpy(&data, &dataBuffer, sizeof(data));
+		return data;
+	}
+
+	constexpr static eNetMessageType type = eNetMessageType::QueryObjectStatus;
+private:
+};
+
+class ObjectStatus : public NetMessage
+{
+public:
+	ObjectStatus()
+	{
+		myType = type;
+	}
+	struct ObjectStatusData
+	{
+		NetworkedId uniqueNetworkObject;
+		bool isSpawned;
+		// Add more status info as needed
+	};
+	void SetMessage(const ObjectStatusData& someData)
+	{
+		static_assert(NETMESSAGE_BUFFERSIZE > sizeof(someData));
+		memcpy(&dataBuffer, &someData, sizeof(someData));
+	}
+
+	ObjectStatusData ReadMessage() const
+	{
+		ObjectStatusData data;
+		memcpy(&data, &dataBuffer, sizeof(data));
+		return data;
+	}
+
+	constexpr static eNetMessageType type = eNetMessageType::ObjectStatus;
+private:
+};
  
 class RegisterPlayerMessage : public NetMessage
 {
@@ -164,6 +219,7 @@ public:
 	struct InputEventMessageData {
 		Action action;
 		NetworkedId object;
+
 	};
 
 	InputEventMessage()
