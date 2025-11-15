@@ -276,19 +276,19 @@ void ReplicationLayer::client_ReadIncoming(const NetworkRunner& runner)
 			{
 				LOGGER.Warn("Received transform for not yet created object");
 
+				auto remote = runner.IdToRemote(transformMessage.idFrom);
+				if (!remote) { continue; }
+
 				//If something is fucky we request the server to send appropriate message to set us right, ex: if missing it send a create
 				QueryObjectStatus queryMsg;
 
-				ObjectStatus::ObjectStatusData queryData;
+				NetworkObjectStatus queryData;
 				queryData.uniqueNetworkObject = messageContent.uniqueComponentId;
 				queryData.isSpawned = false; 
 
 				queryMsg.SetMessage(queryData);
 
-				auto remote = runner.IdToRemote(transformMessage.idFrom);
-				if (!remote.has_value()) { continue; }
-
-				runner.SendTo(remote.value(), queryMsg, NetworkConnection::Protocol::TCP);
+				runner.SendTo(remote, queryMsg, NetworkConnection::Protocol::TCP);
 				continue;
 			}
 

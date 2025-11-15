@@ -1,8 +1,9 @@
 #pragma once
+#include <concepts>
+#include <ranges>
+#include <stdexcept>
 #include <type_traits>
 #include <utility>
-#include <ranges>
-#include <concepts>
 
 #define ENABLE_ENUM_BITWISE_OPERATORS(_ENUM_TYPE)                                                                      \
     inline _ENUM_TYPE operator|(const _ENUM_TYPE &a, const _ENUM_TYPE &b)                                              \
@@ -231,6 +232,14 @@ struct is_derived_from : std::bool_constant<std::is_base_of_v<Base, Derived>&&
 template <typename Base, typename Derived>
 inline constexpr bool is_derived_from_v = is_derived_from<Base, Derived>::value;
 
+
+class ShipyardError : public std::runtime_error
+{
+public:
+	ShipyardError(const char* message) : std::runtime_error(message)
+	{
+	}
+};
 
 template <typename T, typename... Ts>
 constexpr bool Contains = (std::is_same<T, Ts>{} || ...);

@@ -11,10 +11,10 @@ struct TransformSyncData
 	NetworkedId uniqueComponentId;
 	Vector3<float> myPosition{};
 	Quaternionf    myQuaternion{};
-	Vector3<float> myScale = Vector3f(1,1,1);
+	Vector3<float> myScale = Vector3f(1, 1, 1);
 };
 
-class TransformSyncMessage: public NetMessage
+class TransformSyncMessage : public NetMessage
 {
 public:
 	TransformSyncMessage()
@@ -22,16 +22,16 @@ public:
 		myType = type;
 	}
 
-	void SetMessage(const TransformSyncData &someData)
+	void SetMessage(const TransformSyncData& someData)
 	{
 		static_assert(NETMESSAGE_BUFFERSIZE > sizeof(someData));
-		memcpy(&dataBuffer,&someData,sizeof(someData));
+		memcpy(&dataBuffer, &someData, sizeof(someData));
 	}
 
 	TransformSyncData ReadMessage() const
 	{
 		TransformSyncData data;
-		memcpy(&data,&dataBuffer,sizeof(data));
+		memcpy(&data, &dataBuffer, sizeof(data));
 		return data;
 	}
 
@@ -47,7 +47,7 @@ struct GameobjectInformation
 };
 
 
-class CreateObjectMessage: public NetMessage
+class CreateObjectMessage : public NetMessage
 {
 public:
 	CreateObjectMessage()
@@ -55,21 +55,21 @@ public:
 		myType = type;
 	}
 
-	void SetMessage(const GameobjectInformation &someData)
+	void SetMessage(const GameobjectInformation& someData)
 	{
 		static_assert(NETMESSAGE_BUFFERSIZE > sizeof(someData));
 
 		auto addr = dataBuffer.data();
 
-		memcpy(addr,&someData.uniqueComponentId,sizeof(someData.uniqueComponentId));
+		memcpy(addr, &someData.uniqueComponentId, sizeof(someData.uniqueComponentId));
 
 		addr += sizeof(someData.uniqueComponentId);
 
 
 		std::string concatedNames;
-		for(auto& i : someData.listOfComponentsNames)
+		for (auto& i : someData.listOfComponentsNames)
 		{
-			if(i.size() +1 + concatedNames.size() + sizeof(someData.uniqueComponentId)>  NETMESSAGE_BUFFERSIZE)
+			if (i.size() + 1 + concatedNames.size() + sizeof(someData.uniqueComponentId) > NETMESSAGE_BUFFERSIZE)
 			{
 				break;
 			}
@@ -77,17 +77,17 @@ public:
 			concatedNames += ":";
 		}
 
-		concatedNames.copy(addr,concatedNames.size());
+		concatedNames.copy(addr, concatedNames.size());
 	}
 
 	GameobjectInformation ReadMessage() const
 	{
 		GameobjectInformation data;
-		memcpy(&data,&dataBuffer,sizeof(data.uniqueComponentId));
-		auto addr = dataBuffer.data() + sizeof(data.uniqueComponentId) ;
+		memcpy(&data, &dataBuffer, sizeof(data.uniqueComponentId));
+		auto addr = dataBuffer.data() + sizeof(data.uniqueComponentId);
 		std::string componentsName(addr);
 
-		for(auto& i : componentsName)
+		for (auto& i : componentsName)
 		{
 			i;
 
@@ -100,7 +100,7 @@ public:
 private:
 };
 
-class DestroyObjectMessage: public NetMessage
+class DestroyObjectMessage : public NetMessage
 {
 public:
 	DestroyObjectMessage()
@@ -108,16 +108,16 @@ public:
 		myType = type;
 	}
 
-	void SetMessage(const NetworkedId &someData)
+	void SetMessage(const NetworkedId& someData)
 	{
 		static_assert(NETMESSAGE_BUFFERSIZE > sizeof(someData));
-		memcpy(&dataBuffer,&someData,sizeof(someData));
+		memcpy(&dataBuffer, &someData, sizeof(someData));
 	}
 
 	NetworkedId ReadMessage() const
 	{
 		NetworkedId data;
-		memcpy(&data,&dataBuffer,sizeof(data));
+		memcpy(&data, &dataBuffer, sizeof(data));
 		return data;
 	}
 
@@ -125,7 +125,14 @@ public:
 private:
 };
 
-class QueryObjectStatus: public NetMessage
+struct NetworkObjectStatus
+{
+	NetworkedId uniqueNetworkObject;
+	bool isSpawned;
+	// Add more status info as needed
+};
+
+class QueryObjectStatus : public NetMessage
 {
 public:
 	QueryObjectStatus()
@@ -133,15 +140,15 @@ public:
 		myType = type;
 	}
 	//What is the state of the object on the client
-	void SetMessage(const ObjectStatus::ObjectStatusData& someData) 
+	void SetMessage(const NetworkObjectStatus& someData)
 	{
 		static_assert(NETMESSAGE_BUFFERSIZE > sizeof(someData));
 		memcpy(&dataBuffer, &someData, sizeof(someData));
 	}
 
-	ObjectStatus::ObjectStatusData ReadMessage() const
+	NetworkObjectStatus ReadMessage() const
 	{
-		ObjectStatus::ObjectStatusData data;
+		NetworkObjectStatus data;
 		memcpy(&data, &dataBuffer, sizeof(data));
 		return data;
 	}
@@ -150,6 +157,7 @@ public:
 private:
 };
 
+
 class ObjectStatus : public NetMessage
 {
 public:
@@ -157,21 +165,16 @@ public:
 	{
 		myType = type;
 	}
-	struct ObjectStatusData
-	{
-		NetworkedId uniqueNetworkObject;
-		bool isSpawned;
-		// Add more status info as needed
-	};
-	void SetMessage(const ObjectStatusData& someData)
+
+	void SetMessage(const NetworkObjectStatus& someData)
 	{
 		static_assert(NETMESSAGE_BUFFERSIZE > sizeof(someData));
 		memcpy(&dataBuffer, &someData, sizeof(someData));
 	}
 
-	ObjectStatusData ReadMessage() const
+	NetworkObjectStatus ReadMessage() const
 	{
-		ObjectStatusData data;
+		NetworkObjectStatus data;
 		memcpy(&data, &dataBuffer, sizeof(data));
 		return data;
 	}
@@ -179,7 +182,7 @@ public:
 	constexpr static eNetMessageType type = eNetMessageType::ObjectStatus;
 private:
 };
- 
+
 class RegisterPlayerMessage : public NetMessage
 {
 public:
@@ -197,13 +200,13 @@ public:
 		memcpy(addr, &someData, sizeof(someData));
 
 		addr += sizeof(someData);
-		 
+
 	}
 
 	Networking::AreaOfInterest ReadMessage() const
 	{
 		Networking::AreaOfInterest data;
-		memcpy(&data, &dataBuffer, sizeof(data)); 
+		memcpy(&data, &dataBuffer, sizeof(data));
 		return data;
 	}
 
@@ -214,7 +217,7 @@ private:
 
 class InputEventMessage : public NetMessage
 {
-	
+
 public:
 	struct InputEventMessageData {
 		Action action;

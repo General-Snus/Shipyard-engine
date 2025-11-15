@@ -13,7 +13,7 @@
 #pragma comment(lib, "Ws2_32.lib")
 #undef max
 
-struct Remote {
+class Remote {
 	friend class NetworkRunner;
 	friend class HeartBeatSystem;
 	friend class NetworkSettings;

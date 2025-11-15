@@ -51,13 +51,13 @@ public:
 	//If you are the client, it will be sent to server and broadcasted by it
 	//Will set the id of the message to the runner to ensure consistency, this layer is aware of id, connection is not
 	bool Send(NetMessage& message, NetworkConnection::Protocol protocol);
-	bool SendTo(const Remote& remote, NetMessage& message, NetworkConnection::Protocol protocol) const;
+	bool SendTo(const Remote* remote, NetMessage& message, NetworkConnection::Protocol protocol) const;
 	bool SendTo(const NetworkedId& remote, NetMessage& message, NetworkConnection::Protocol protocol) const;
 
 	bool HasConnection(NetworkedId id);
 	std::string NameOfConnection(NetworkedId id);
-	std::optional<const Remote&> IdToRemote(NetworkedId id) const;
-	Remote* IdToRemote(NetworkedId id);
+	Remote* IdToRemote(NetworkedId id); 
+	const  Remote* IdToRemote(NetworkedId id) const; 
  
 	ServerTimePoint serverTime() const;
 
@@ -176,7 +176,7 @@ inline bool NetworkRunner::Multicast(NetMessage& message, InputRange auto&& rang
 	for (const Remote& client : rangeOfClient)
 	{
 		if (!client.isConnected) { continue; }
-		allSucceded &= SendTo(client, message, protocol);
+		allSucceded &= SendTo(&client, message, protocol);
 	}
 
 	return allSucceded;

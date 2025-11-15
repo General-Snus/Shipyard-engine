@@ -312,17 +312,22 @@ bool NetworkRunner::Send(NetMessage& message, NetworkConnection::Protocol protoc
 	}
 }
 
-bool NetworkRunner::SendTo(const Remote& remote, NetMessage& message, NetworkConnection::Protocol protocol) const
+bool NetworkRunner::SendTo(const Remote* remote, NetMessage& message, NetworkConnection::Protocol protocol) const
 {
-	remote.sentDataPerFrame += sizeof(message);
+	if (remote == nullptr)
+	{
+		throw ShipyardError("Shit fucked, remote missing");
+		return false;
+	}
+	remote->sentDataPerFrame += sizeof(message);
 	switch (protocol)
 	{
 	case NetworkConnection::Protocol::UDP:
-		if (!remote.hasConnectedOverUDP) { return false; }
-		return connection.SendUDP(remote.serverUDPAddress, message);
+		if (!remote->hasConnectedOverUDP) { return false; }
+		return connection.SendUDP(remote->serverUDPAddress, message);
 		break;
 	case NetworkConnection::Protocol::TCP:
-		return remote.remoteConnection.SendTCP(message);
+		return remote->remoteConnection.SendTCP(message);
 		break;
 	default:
 		return false;
@@ -333,7 +338,7 @@ bool NetworkRunner::SendTo(const NetworkedId& remoteId, NetMessage& message, Net
 {
 	if (const auto* remote = IdToRemote(remoteId))
 	{
-		return SendTo(*remote, message, protocol);
+		return SendTo(remote, message, protocol);
 	}
 	return false;
 }
@@ -377,7 +382,7 @@ std::string NetworkRunner::NameOfConnection(NetworkedId id)
 	return "";
 }
 
-Remote* NetworkRunner::IdToRemote(NetworkedId id)
+const Remote* NetworkRunner::IdToRemote(NetworkedId id) const
 {
 	OPTICK_EVENT();
 	if (id == runnerID)
@@ -397,27 +402,25 @@ Remote* NetworkRunner::IdToRemote(NetworkedId id)
 	}
 	return nullptr;
 }
-
-std::optional<const Remote&> NetworkRunner::IdToRemote(NetworkedId id) const
+Remote* NetworkRunner::IdToRemote(NetworkedId id)
 {
 	OPTICK_EVENT();
-
 	if (id == runnerID)
 	{
-		return {};
+		return nullptr;
 	}
 
 	if (IsServer)
 	{
-		for (const auto& remote : remoteConnections)
+		for (auto& remote : remoteConnections)
 		{
 			if (remote.isConnected && remote.id == id)
 			{
-				return remote;
+				return &remote;
 			}
 		}
 	}
-	return {};
+	return nullptr;
 }
 
 //Make the actuall client time lerping please and thanks
@@ -535,7 +538,7 @@ bool NetworkRunner::Broadcast(NetMessage& message, NetworkConnection::Protocol p
 				return false;
 			} // Passthrough!
 		case NetworkConnection::Protocol::TCP:
-			allSucceeded &= SendTo(client, message, protocol);
+			allSucceeded &= SendTo(&client, message, protocol);
 			break;
 		default:
 			return false;

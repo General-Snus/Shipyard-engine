@@ -42,7 +42,7 @@ bool HeartBeatSystem::RecieveMessage(NetworkRunner& runner, const  RecievedMessa
 		data.bytePerSeconds = remote->sentDataPerFrame * delta;
 		sendMessage.SetMessage(data);
 
-		runner.SendTo(*remote, sendMessage, NetworkConnection::Protocol::UDP);
+		runner.SendTo(remote, sendMessage, NetworkConnection::Protocol::UDP);
 	}
 	else
 	{
