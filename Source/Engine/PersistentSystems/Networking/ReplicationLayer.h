@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/AssetManager/ComponentSystem/Components/Network/NetworkSync.h"
 #include "NetMessage/NetMessage.h"
+#include "NetMessage/PlayerSyncMessage.h"
 #include "NetworkStructs.h"
 #include <Tools/Utilities/DataStructures/QuadTree.h>
 #include <utility>
@@ -8,6 +9,7 @@
 #include <functional>
 
 class NetworkRunner;
+class CreateObjectMessage;
 
 class ReplicationLayer
 {
@@ -23,15 +25,20 @@ public:
 
 	// looks at its network transform data and applies interpolation on it
 	void client_fixedNetworkUpdate(const NetworkRunner& runner) const;
-	void client_ReadIncoming(const NetworkRunner& runner);
+	void client_ReadIncoming(NetworkRunner& runner);
 
+	void CreateBallGameObject(NetworkedId& id);
+
+	void AskServerObjectStatus(const NetworkedId& id, NetworkRunner& runner);
+ 
 	//If the id to the object does not exist then we need to create it, in case that we are the server
 	void ReceiveMessage(const NetMessage&);
+	CreateObjectMessage GetObjectSpawnMessage(const NetworkObject& object);
 	//Registers a object to the map, made on the server 
 	bool RegisterObject(const NetworkRunner& runner, const NetworkObject& object);
 	bool UnRegisterObject(const NetworkRunner& runner, const NetworkObject& object);
 	void RegisterPlayerAOI(Networking::AreaOfInterest aoi);
-	bool ContainsObject(const NetworkedId& id) const; 
+	bool ContainsObject(const NetworkedId& id) const;
 	bool TryFetchNetworkObject(const NetworkedId& id, NetworkObject* object) const;
 
 	Networking::AreaOfInterest AOI() const;
@@ -43,7 +50,7 @@ public:
 	}*/
 
 	void Close();
-	constexpr static float  defaultAOIRange = 5.0f;
+	constexpr static float  defaultAOIRange = 10.0f;
 private:
 	//The position that you expect your replication layer to cull for you from.
 	Networking::AreaOfInterest aoi;

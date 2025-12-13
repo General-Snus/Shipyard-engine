@@ -9,6 +9,11 @@
 #include <Tools/Utilities/DataStructures/CircularBuffer.h>
 #include <Tools/Utilities/DataStructures/MathStructs.h>
 #include <Tools/Utilities/LinearAlgebra/Sphere.hpp>
+#include <atomic>
+#include "stop_token"
+#include <string>
+#include "Tools\Utilities\Color.h"
+#include <optional>
 
 #pragma comment(lib, "Ws2_32.lib")
 #undef max
@@ -40,6 +45,7 @@ private:
 	std::string nickname;
 
 	Networking::AreaOfInterest areaOfInterest;
+	std::optional<Color> remoteAssignedColor;
 	NetworkedId Player;
 
 	bool hasConnectedOverUDP = false;	

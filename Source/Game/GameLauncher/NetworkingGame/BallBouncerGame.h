@@ -19,7 +19,7 @@ public:
 	defaultComponentInspector();
 	BallGameController(const SY::UUID anOwnerId, GameObjectManager* aManager);
 
-	int maxBallsInGame = 10;
+	int maxBallsInGame = 1;
 	float ballSpawnCooldown = 1.0f;
 };
 

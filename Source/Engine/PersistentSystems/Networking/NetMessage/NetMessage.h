@@ -3,6 +3,7 @@
 #include <array>
 #include <chrono>
 #include <Engine/PersistentSystems/Networking/NetworkStructs.h>
+#include <type_traits>
 
 enum class eNetMessageType : unsigned char {
 	None,
@@ -39,28 +40,41 @@ class NetMessage {
 	friend class NetworkRunner;
 public:
 	NetMessage() = default;
-	explicit NetMessage(NetworkedId id) : Id(id)  {}
+	explicit NetMessage(NetworkedId id) : Id(id) {}
 	~NetMessage() = default;
 
-	char* GetBuffer() {
+	char* GetBuffer()
+	{
 		return dataBuffer.data();
 	}
-	NetworkedId GetId() const {
+	NetworkedId GetId() const
+	{
 		return  Id;
 	}
-	TimePoint TimeSent() const {
+	TimePoint TimeSent() const
+	{
 		return  timePoint;
 	}
-	void SetId(NetworkedId id){
+	void SetId(NetworkedId id)
+	{
 		Id = id;
 	}
+
+	template<typename T>
+	T& AsMessage()
+	{
+		static_assert(std::is_trivially_copyable_v<T>);
+		static_assert(std::is_base_of_v<NetMessage, T>);
+		return *static_cast<T*>(this);
+	}
+
 protected:
 	NetworkedId Id;
 	TimePoint timePoint;
-	std::array<char,NETMESSAGE_BUFFERSIZE> dataBuffer{}; 
+	std::array<char, NETMESSAGE_BUFFERSIZE> dataBuffer{};
 public:
 	eNetMessageType myType = eNetMessageType::None;
-	constexpr static eNetMessageType type = eNetMessageType::None; 
+	constexpr static eNetMessageType type = eNetMessageType::None;
 };
 
 

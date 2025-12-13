@@ -10,15 +10,16 @@
 GameObject BallEradicationGame::MakePlayer(Vector3f position)
 {
 	GameObject player = GameObject::Create("Player");
+	Scene::activeManager().SetLastGOAsPlayer();
 	auto& renderer = player.AddComponent<MeshRenderer>("Models/C64.fbx");
 	player.transform().SetPosition(position);
 
-	auto& collider = player.AddComponent<Collider>();
+	//auto& collider = player.AddComponent<Collider>();
 	player.AddComponent<NetworkObject>();
 	auto& listener = player.AddComponent<NetworkInputListener>();
 	auto object = player.AddComponent<NetworkTransform>();
 
-	collider.SetColliderType<ColliderAssetSphere>();
+	//collider.SetColliderType<ColliderAssetSphere>();
 
 	if (const auto mat = Resources.ForceLoad<Material>("TreeMaterial"))
 	{

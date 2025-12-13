@@ -135,18 +135,6 @@ NetworkConnection::Status NetworkRunner::StartSession(SessionConfiguration confi
 	return status;
 }
 
-void NetworkRunner::ZeroDataRates()
-{
-	cachedSentDataPerFrame = sentDataPerFrame;
-	sentDataPerFrame = 0;
-	readDataPerFrame = 0;
-	for (auto& remote : remoteConnections)
-	{
-		remote.readDataPerFrame = 0;
-		remote.sentDataPerFrame = 0;
-	}
-
-}
 
 void NetworkRunner::Update()
 {
@@ -190,7 +178,7 @@ void NetworkRunner::ProcessIncoming(const eNetMessageType& type, RecievedMessage
 	break;
 	case eNetMessageType::NewConnection:
 	{
-		const auto          message = std::bit_cast<HandshakeMessage>(incomingMessage.message);
+		const auto& message = incomingMessage.message.AsMessage<HandshakeMessage>();
 		if (incomingMessage.idFrom == runnerID)
 		{
 			runnerName = message.ReadMessage();
@@ -317,7 +305,6 @@ bool NetworkRunner::SendTo(const Remote* remote, NetMessage& message, NetworkCon
 	if (remote == nullptr)
 	{
 		throw ShipyardError("Shit fucked, remote missing");
-		return false;
 	}
 	remote->sentDataPerFrame += sizeof(message);
 	switch (protocol)
@@ -429,6 +416,19 @@ ServerTimePoint NetworkRunner::serverTime() const
 	return ServerClock::now();
 }
 
+
+void NetworkRunner::ZeroDataRates()
+{
+	cachedSentDataPerFrame = sentDataPerFrame;
+	sentDataPerFrame = 0;
+	readDataPerFrame = 0;
+	for (auto& remote : remoteConnections)
+	{
+		remote.readDataPerFrame = 0;
+		remote.sentDataPerFrame = 0;
+	}
+
+}
 //The data uplink as server is the combined send on all remotes and its udp socket
 //The data uplink of a client is just the runners send of tcp and udp socket
 float NetworkRunner::uplinkRate()
@@ -480,6 +480,7 @@ float NetworkRunner::uplinkRate(int remoteIndex)
 	return IsServer ? float(remoteConnections.at(remoteIndex).sentDataPerFrame) * TimerInstance.getDeltaTime() : 0;
 }
 
+
 bool NetworkRunner::registerObject(const NetworkObject& object)
 {
 	OPTICK_EVENT();
@@ -490,7 +491,6 @@ bool NetworkRunner::registerObject(const NetworkObject& object)
 
 	return layer.RegisterObject(*this, object);
 }
-
 /// <summary>
 /// Only Clients can register players, server will always be aware so no culling can be done by server.
 /// If its wished to cull for both server and client player either do it manually or run a headless server config

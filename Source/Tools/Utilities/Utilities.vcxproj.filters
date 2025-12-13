@@ -192,9 +192,6 @@
     <ClInclude Include="Network\RPCWrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Optional_Ref.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game\Timer.cpp">
@@ -225,9 +222,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DataStructures\Source\VoxelGrid.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Optional_Ref.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -42,6 +42,7 @@ void ReplicationLayer::fixedNetworkUpdate(NetworkRunner& runner)
 	}
 	spacialFrequencyCulling.Draw(GetRenderer().debugDrawer);
 }
+
 void ReplicationLayer::server_ReadIncoming(NetworkRunner& runner)
 {
 	if (runner.messagesMap.contains(RegisterPlayerMessage::type))
@@ -67,11 +68,43 @@ void ReplicationLayer::server_ReadIncoming(NetworkRunner& runner)
 		{
 			auto msg = std::bit_cast<InputEventMessage>(message.message);
 			auto inputEvent = msg.ReadMessage();
-			 
+
+		}
+	}
+	if (runner.messagesMap.contains(QueryObjectStatus::type))
+	{
+		for (auto& message : runner.messagesMap.at(QueryObjectStatus::type))
+		{
+			auto msg = std::bit_cast<QueryObjectStatus>(message.message);
+			auto statusMessage = msg.ReadMessage();
+			auto id = statusMessage.uniqueNetworkObject;
+
+			auto existsOnServer = idToObjectMap.contains(id);
+			auto existsOnClient = statusMessage.isSpawned;
+
+			Remote* remote = runner.IdToRemote(msg.GetId());
+			if (!remote) { LOGGER.Warn("Got a status message from a unconnected client, thats weird"); continue; }
+			if (existsOnServer == existsOnClient) { continue; }
+
+			if (existsOnServer && !existsOnClient)
+			{
+				auto spawnMessage = GetObjectSpawnMessage(idToObjectMap.at(id));
+				runner.SendTo(remote, spawnMessage, NetworkConnection::Protocol::TCP);
+			}
+
+			if (!existsOnServer && existsOnClient)
+			{
+				DestroyObjectMessage createObjectMessage;
+				createObjectMessage.SetMessage(id);
+				runner.SendTo(remote, createObjectMessage, NetworkConnection::Protocol::TCP);
+			}
+
+
 		}
 	}
 }
 
+#pragma optimize("", off)
 void ReplicationLayer::server_fixedNetworkUpdate(NetworkRunner& runner)
 {
 	OPTICK_EVENT();
@@ -81,8 +114,8 @@ void ReplicationLayer::server_fixedNetworkUpdate(NetworkRunner& runner)
 		{
 			const auto syncRate = ShouldSpacialCull(networkedTransform.myPosition, x.GetAreaOfInterest());
 			return x.isConnected
-				&& (networkedTransform.neverNotSync || syncRate != Networking::SyncRates::noUpdate)
-				&& networkedTransform.ShouldSync(runner, syncTimes[Cast<int>(std::clamp(syncRate, Networking::SyncRates::low, Networking::SyncRates::high))]);
+				&& (networkedTransform.neverNotSync || syncRate != Networking::SyncRates::noUpdate);
+			//&& networkedTransform.ShouldSync(runner, syncTimes[Cast<int>(std::clamp(syncRate, Networking::SyncRates::low, Networking::SyncRates::high))]);
 		});
 
 		auto& transform = networkedTransform.transform();
@@ -113,6 +146,8 @@ void ReplicationLayer::server_fixedNetworkUpdate(NetworkRunner& runner)
 		runner.Multicast(composedTransformUpdate, activeConnections, NetworkConnection::Protocol::UDP);
 	}
 }
+#pragma optimize("", on)
+
 
 void ReplicationLayer::client_fixedNetworkUpdate(const NetworkRunner& runner) const
 {
@@ -142,7 +177,7 @@ void ReplicationLayer::client_fixedNetworkUpdate(const NetworkRunner& runner) co
 		//networkedTransform.translationInterpolation = networkedTransform.myPosition - transform.myPosition; // Distance
 
 		//Distance/Time = velocity
-		LOGGER.LogC("Delta at fixed update", delta);
+		//LOGGER.LogC("Delta at fixed update", delta);
 		auto newPosition = networkedTransform.myPosition + networkedTransform.translationInterpolation * delta;
 		//auto newQuaternion = figure this fucker out sometime * secondsDifference; 
 		transform.SetPosition(newPosition);
@@ -151,7 +186,7 @@ void ReplicationLayer::client_fixedNetworkUpdate(const NetworkRunner& runner) co
 	}
 }
 
-void ReplicationLayer::client_ReadIncoming(const NetworkRunner& runner)
+void ReplicationLayer::client_ReadIncoming(NetworkRunner& runner)
 {
 	OPTICK_EVENT();
 
@@ -173,17 +208,18 @@ void ReplicationLayer::client_ReadIncoming(const NetworkRunner& runner)
 	{
 		for (auto& message : runner.messagesMap.at(RegisterPlayerMessage::type))
 		{
-			auto msg = std::bit_cast<RegisterPlayerMessage>(message.message);
+			auto& msg = message.message.AsMessage<RegisterPlayerMessage>();
 			auto messageContent = msg.ReadMessage();
+			auto id = messageContent.owner;
 
-			if (!idToObjectMap.contains(messageContent.owner))
+			if (!idToObjectMap.contains(id))
 			{
 				GameObject player = GameObject::Create("Player");
 				auto& renderer = player.AddComponent<MeshRenderer>("Models/C64.fbx");
 				player.transform().SetPosition(Vector3f::zero());
 
 				auto& collider = player.AddComponent<Collider>();
-				player.AddComponent<NetworkObject>(messageContent.owner);
+				player.AddComponent<NetworkObject>(id);
 				auto& listener = player.AddComponent<NetworkInputListener>();
 				auto object = player.AddComponent<NetworkTransform>();
 				object.RegisterAsPlayer();
@@ -245,21 +281,11 @@ void ReplicationLayer::client_ReadIncoming(const NetworkRunner& runner)
 		{
 			auto msg = std::bit_cast<CreateObjectMessage>(message.message);
 			auto messageContent = msg.ReadMessage();
+			auto id = messageContent.uniqueComponentId;
 
-			if (!idToObjectMap.contains(messageContent.uniqueComponentId))
+			if (!idToObjectMap.contains(id))
 			{
-				GameObject ball = GameObject::Create("Ball");
-				auto& renderer = ball.AddComponent<MeshRenderer>("Models/BallEradicationGame/Sphere.fbx");
-				if (const auto mat = Resources.ForceLoad<Material>("TreeMaterial"))
-				{
-					mat->SetColor(ColorManagerInstance.GetColor("Red"));
-					renderer.SetMaterial(mat);
-				}
-
-				ball.AddComponent<NetworkObject>(messageContent.uniqueComponentId);
-				ball.AddComponent<NetworkTransform>();
-
-				idToObjectMap.emplace(messageContent.uniqueComponentId, ball.GetComponent<NetworkObject>());
+				CreateBallGameObject(id);
 			}
 		}
 	}
@@ -271,45 +297,65 @@ void ReplicationLayer::client_ReadIncoming(const NetworkRunner& runner)
 		{
 			auto msg = std::bit_cast<TransformSyncMessage>(transformMessage.message);
 			TransformSyncData messageContent = msg.ReadMessage();
+			auto id = messageContent.uniqueComponentId;
 
-			if (!idToObjectMap.contains(messageContent.uniqueComponentId))
+			if (!idToObjectMap.contains(id))
 			{
-				LOGGER.Warn("Received transform for not yet created object");
-
-				auto remote = runner.IdToRemote(transformMessage.idFrom);
-				if (!remote) { continue; }
-
-				//If something is fucky we request the server to send appropriate message to set us right, ex: if missing it send a create
-				QueryObjectStatus queryMsg;
-
-				NetworkObjectStatus queryData;
-				queryData.uniqueNetworkObject = messageContent.uniqueComponentId;
-				queryData.isSpawned = false; 
-
-				queryMsg.SetMessage(queryData);
-
-				runner.SendTo(remote, queryMsg, NetworkConnection::Protocol::TCP);
+				AskServerObjectStatus(id, runner);
 				continue;
 			}
 
-			auto& netTransform = idToObjectMap.at(messageContent.uniqueComponentId).GetComponent<NetworkTransform>();
+			auto& netTransform = idToObjectMap.at(id).GetComponent<NetworkTransform>();
 			auto previousSyncTime = netTransform.GetLastSyncTime();
+
+			if (msg.TimeSent() < previousSyncTime) { continue; }
 			netTransform.Synced(msg.TimeSent());
+			auto newSyncTime = netTransform.GetLastSyncTime();
 
-			//std::chrono::duration<float> timeDifference = now - netTransform.GetLastSyncTime(); // Time
-			//const auto delta = timeDifference.count();
 
-			const Vector3 previousPosition = netTransform.myPosition;
+			auto dt = std::chrono::duration<float>(newSyncTime - previousSyncTime).count();
+
+			netTransform.translationInterpolation = (messageContent.myPosition - netTransform.myPosition) / dt;
+
 			netTransform.myPosition = messageContent.myPosition;
 			netTransform.myQuaternion = messageContent.myQuaternion;
 			netTransform.myScale = messageContent.myScale;
-			auto dt = std::chrono::duration<float>(netTransform.GetLastSyncTime() - previousSyncTime).count();
-			if (dt > 0.0f)
-			{
-				netTransform.translationInterpolation = (netTransform.myPosition - previousPosition) / dt;
-			}
 		}
 	}
+}
+
+//TODO, you know what to do
+void ReplicationLayer::CreateBallGameObject(NetworkedId& id)
+{
+	GameObject ball = GameObject::Create("Ball");
+	auto& renderer = ball.AddComponent<MeshRenderer>("Models/BallEradicationGame/Sphere.fbx");
+	if (const auto mat = Resources.ForceLoad<Material>("TreeMaterial"))
+	{
+		mat->SetColor(ColorManagerInstance.GetColor("Red"));
+		renderer.SetMaterial(mat);
+	}
+
+	ball.AddComponent<NetworkObject>(id);
+	ball.AddComponent<NetworkTransform>();
+
+	idToObjectMap.emplace(id, ball.GetComponent<NetworkObject>());
+}
+
+void ReplicationLayer::AskServerObjectStatus(const NetworkedId& id, NetworkRunner& runner)
+{
+	LOGGER.Warn("Received transform for not yet created object");
+
+
+	//If something is fucky we request the server to send appropriate message to set us right, ex: if missing it send a create
+	QueryObjectStatus queryMsg;
+
+	NetworkObjectStatus queryData;
+	queryData.uniqueNetworkObject = id;
+	queryData.isSpawned = false;
+
+	queryMsg.SetMessage(queryData);
+
+	runner.Send(queryMsg, NetworkConnection::Protocol::TCP);
 }
 
 void ReplicationLayer::ReceiveMessage(const NetMessage&)
@@ -317,6 +363,22 @@ void ReplicationLayer::ReceiveMessage(const NetMessage&)
 
 }
 
+CreateObjectMessage ReplicationLayer::GetObjectSpawnMessage(const NetworkObject& object)
+{
+	GameobjectInformation data;
+
+	data.uniqueComponentId = object.GetServerID();
+	for (const auto& cmp : object.gameObject().GetAllComponents())
+	{
+		data.listOfComponentsNames.emplace_back(cmp->GetTypeInfo().Name());
+	}
+
+	CreateObjectMessage createObjectMessage;
+	createObjectMessage.SetMessage(data);
+	return createObjectMessage;
+}
+
+//Creates a object locally and 
 bool ReplicationLayer::RegisterObject(const NetworkRunner& runner, const NetworkObject& object)
 {
 	OPTICK_EVENT();
@@ -326,17 +388,8 @@ bool ReplicationLayer::RegisterObject(const NetworkRunner& runner, const Network
 	if (!idToObjectMap.contains(object.GetServerID()))
 	{
 		//All registered objects have been sent to the clients 
-		GameobjectInformation data;
-
-		data.uniqueComponentId = object.GetServerID();
-		for (const auto& cmp : object.gameObject().GetAllComponents())
-		{
-			data.listOfComponentsNames.emplace_back(cmp->GetTypeInfo().Name());
-		}
-
-		CreateObjectMessage createObjectMessage;
-		createObjectMessage.SetMessage(data);
-		runner.Broadcast(createObjectMessage, NetworkConnection::Protocol::TCP);
+		auto spawnMessage = GetObjectSpawnMessage(object);
+		runner.Broadcast(spawnMessage, NetworkConnection::Protocol::TCP);
 		idToObjectMap.emplace(object.GetServerID(), object);
 
 		auto position = new cullerPosition{

@@ -69,9 +69,9 @@ void YourGameLauncher::Init()
 
 		this->arena = BallEradicationGame::MakeArena(Vector3f::zero(), rect);
 		arena.AddComponent<BallGameController>();
+
 		this->player = BallEradicationGame::MakePlayer(Vector3f::zero());
-
-
+		player.GetComponent<NetworkObject>().RegisterAsPlayer();
 	}
 }
 

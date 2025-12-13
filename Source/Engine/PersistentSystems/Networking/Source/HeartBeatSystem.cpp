@@ -3,6 +3,8 @@
 #include "Networking/NetMessage/HeartBeatMessage.h"
 #include "Networking/NetworkRunner.h"
 #include "Tools\Utilities\Game\Timer.h"
+#include "Tools\Utilities\Color.h"
+#include "Engine\GraphicsEngine\Renderer.h"
 
 bool HeartBeatSystem::RecieveMessage(NetworkRunner& runner, const  RecievedMessage& msg)
 {
@@ -20,7 +22,7 @@ bool HeartBeatSystem::RecieveMessage(NetworkRunner& runner, const  RecievedMessa
 
 	if (runner.IsServer)
 	{
-		Remote* remote = runner.IdToRemote(pulse.GetId()); 
+		Remote* remote = runner.IdToRemote(pulse.GetId());
 		if (remote == nullptr)
 		{
 			return false;
@@ -36,6 +38,13 @@ bool HeartBeatSystem::RecieveMessage(NetworkRunner& runner, const  RecievedMessa
 		remote->lastHeartbeatTime = now;
 		remote->roundTripBuffer.Add(data.lastRoundTripTime);
 		remote->areaOfInterest = data.aoi;
+
+		if (not remote->remoteAssignedColor.has_value())
+		{
+			remote->remoteAssignedColor = Color::RandomHue();
+		}
+
+		GetRenderer().debugDrawer.AddDebugSphere(data.aoi.area.Center, data.aoi.area.Radius, remote->remoteAssignedColor.value(), .01f);
 
 		HeartBeatMessage sendMessage;
 		data.serverTime = now;
@@ -53,6 +62,8 @@ bool HeartBeatSystem::RecieveMessage(NetworkRunner& runner, const  RecievedMessa
 		float msRoundTrip = (float)std::chrono::duration_cast<std::chrono::microseconds>(tripTime).count() / 1000.f;
 		roundTripBuffer.Add(msRoundTrip);
 		lastRecievedHearthBeatMessage = now;
+
+		GetRenderer().debugDrawer.AddDebugSphere(data.aoi.area.Center, data.aoi.area.Radius, ColorManagerInstance.GetColor("Red"), .01f);
 	}
 
 	return true;

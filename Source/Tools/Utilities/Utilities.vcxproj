@@ -257,7 +257,6 @@
     <ClInclude Include="Input\Mapper.hpp" />
     <ClInclude Include="LinearAlgebra\Frustrum.h" />
     <ClInclude Include="Network\RPCWrapper.h" />
-    <ClInclude Include="Optional_Ref.h" />
     <ClInclude Include="Ref.h" />
     <ClInclude Include="DataStructures\Sort.hpp" />
     <ClInclude Include="DataStructures\Stack.hpp" />
@@ -306,7 +305,6 @@
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="FileHelpers.hpp" />
     <ClCompile Include="Input\Mapper.cpp" />
-    <ClCompile Include="Optional_Ref.cpp" />
     <ClCompile Include="System\Source\ServiceLocator.cpp" />
     <ClCompile Include="System\Source\Event.cpp" />
     <ClCompile Include="Game\Timer.cpp" />
