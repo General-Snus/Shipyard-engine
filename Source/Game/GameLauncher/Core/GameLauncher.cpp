@@ -4,8 +4,7 @@
 
 #include <UserComponent.h>
 #include "Editor/Editor/Windows/EditorWindows/Viewport.h"
-#include "Engine/PersistentSystems/Physics/Raycast.h"
-#include "PillarGame/PillarGameComponents.h"
+#include "Engine/PersistentSystems/Physics/Raycast.h" 
 #include "NetworkingGame/BallBouncerGame.h" 
 #include "Tools/Utilities/Math.hpp" 
 
@@ -72,15 +71,7 @@ void YourGameLauncher::Init()
 		arena.AddComponent<BallGameController>();
 		this->player = BallEradicationGame::MakePlayer(Vector3f::zero());
 
-#ifdef PillarGame
-		constexpr float pillarRadius = 1.0f;
-		auto            groundPos = Vector3f(0, -.5f, 0);
-		SpawnGround(groundPos);
 
-		auto pillarTransform = SpawnPillar(groundPos);
-		SpawnHooks(50, pillarRadius, pillarTransform);
-		SpawnPlayer(0, pillarRadius, pillarTransform);
-#endif
 	}
 }
 
@@ -170,86 +161,6 @@ void YourGameLauncher::Update(float delta)
 		position.z = Math::RandomEngine::randomInRange(-rect.z, rect.z);
 		BallEradicationGame::MakeBall(position);
 	}
-
-#ifdef PillarGame 
-	static Vector3f lerpPos;
-	static Vector3f lerpRot;
-	for (auto& element : manager.GetAllComponents<PlayerComponent>())
-	{
-		if (element.currentHook)
-		{
-			element.timeSinceHook += delta;
-			auto percentage = element.timeSinceHook / element.hookCooldown;
-
-			if (percentage < 1.0f)
-			{
-				auto position = element.transform().GetPosition();
-				position.y = lerp(lerpPos.y, element.currentHook.transform().GetPosition().y, percentage);
-				element.transform().SetPosition(position);
-
-				auto rotation = element.transform().euler();
-				auto hookPosition = element.currentHook.transform().GetPosition();
-
-				const auto towerCenter2d = Vector2(position.swizzle<VectorIndices::x, VectorIndices::z>()); // Player parent origin
-				const auto hook2dPosition = Vector2(hookPosition.swizzle<VectorIndices::x, VectorIndices::z>());
-				const auto hookToCenter = hook2dPosition - towerCenter2d;
-				const auto q = Quaternionf::LookAt(hookToCenter, Vector3f::up());
-
-				rotation.y = lerp(lerpRot.y, q.GetEulerAngles().y, percentage);
-				element.transform().SetRotation(rotation);
-				return;
-			}
-		}
-
-
-		if (Input.IsKeyHeld(Keys::RIGHT))
-		{
-			element.transform().Rotate(0, -50.0f * delta, 0);
-		}
-
-		if (Input.IsKeyHeld(Keys::LEFT))
-		{
-			element.transform().Rotate(0, 50.0f * delta, 0);
-		}
-
-		if (Input.IsKeyPressed(Keys::SPACE))
-		{
-			Physics::RaycastHit hit;
-			const auto& cameraTransform = manager.GetCamera().transform();
-			auto& camera = manager.GetCamera().GetComponent<Camera>();
-
-			const auto coord = GetEditor().GetMainViewport()->getCursorInWindowPostion();
-			const auto position = cameraTransform.GetPosition(WORLD);
-			const auto direction = camera.GetPointerDirection(coord);
-			const bool raycastHit = Raycast(position, direction, hit);
-			auto* hook = raycastHit ? hit.objectHit.TryGetComponent<HookComponent>() : nullptr;
-
-			if (hook && !hook->hasConnection)
-			{
-				GraphicsEngineInstance.debugDrawer.AddDebugLine(position, hit.point, { 0.0f,1.0f,0 }, 1.0f);
-				LOGGER.Log(hit.objectHit.GetName());
-				if (element.currentHook)
-				{
-					auto& currentHook = element.currentHook.GetComponent<HookComponent>();
-					currentHook.hasConnection = false;
-					currentHook.connection = GameObject();
-				}
-				element.timeSinceHook = 0;
-				element.currentHook = hit.objectHit;
-				hook->connection = element.gameObject();
-				hook->hasConnection = true;
-
-				lerpPos = element.transform().GetPosition();
-				lerpRot = element.transform().euler();
-				return;
-			}
-			else
-			{
-				GraphicsEngineInstance.debugDrawer.AddDebugLine(position, direction + position, { 1.0f,0,0 }, 1.0f);
-			}
-		}
-	}
-#endif
 }
 
 void YourGameLauncher::SyncServices(ServiceLocator& serviceLocator)
