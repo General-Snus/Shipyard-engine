@@ -33,52 +33,62 @@ extern "C" {
 void YourGameLauncher::Init()
 {
 	OPTICK_EVENT();
-	{
-		{
-			GameObject SkySphere = GameObject::Create("SkySphere");
-			auto& mesh = SkySphere.AddComponent<MeshRenderer>("Materials/MaterialPreviewMesh.fbx");
-			mesh.SetMaterialPath("Materials/SkySphere.json");
-			SkySphere.transform().SetScale(-100000, -100000, -100000);
-		}
-
-		{
-			GameObject worldRoot = GameObject::Create();
-			Scene::activeManager().SetLastGOAsWorld();
-
-			worldRoot.SetName("SkyLight");
-			worldRoot.transform().SetRotation(45, 45, 0);
-			auto& light = worldRoot.AddComponent<Light>(eLightType::Directional);
-			light.SetIsShadowCaster(true);
-			light.SetColor("White");
-			light.SetPower(4.0f);
-			light.BindDirectionToTransform(true);
-		}
-
-		{
-			GameObject SceneCamera = GameObject::Create("SceneCamera");
-			auto& camera = SceneCamera.AddComponent<Camera>();
-			Scene::activeManager().SetLastGOAsCamera();
-
-			camera.isOrtho = true;
-			camera.orthoRect = { 110,100 };
-			camera.UpdateProjection(); //yeezz
-
-			camera.transform().SetPosition({ 0,10,0 });
-			camera.transform().SetRotation({ 90,0,0 });
-		}
-
-		this->arena = BallEradicationGame::MakeArena(Vector3f::zero(), rect);
-		arena.AddComponent<BallGameController>();
-
-		this->player = BallEradicationGame::MakePlayer(Vector3f::zero());
-		player.GetComponent<NetworkObject>().RegisterAsPlayer();
-	}
 }
 
 void YourGameLauncher::Start()
 {
 	OPTICK_EVENT();
-	LOGGER.Log("GameLauncher start");
+	{
+		GameObject SkySphere = GameObject::Create("SkySphere");
+		auto& mesh = SkySphere.AddComponent<MeshRenderer>("Materials/MaterialPreviewMesh.fbx");
+		mesh.SetMaterialPath("Materials/SkySphere.json");
+		SkySphere.transform().SetScale(-100000, -100000, -100000);
+	}
+
+	{
+		GameObject worldRoot = GameObject::Create();
+		Scene::activeManager().SetLastGOAsWorld();
+
+		worldRoot.SetName("SkyLight");
+		worldRoot.transform().SetRotation(45, 45, 0);
+		auto& light = worldRoot.AddComponent<Light>(eLightType::Directional);
+		light.SetIsShadowCaster(true);
+		light.SetColor("White");
+		light.SetPower(4.0f);
+		light.BindDirectionToTransform(true);
+	}
+
+	{
+		GameObject SceneCamera = GameObject::Create("SceneCamera");
+		auto& camera = SceneCamera.AddComponent<Camera>();
+		Scene::activeManager().SetLastGOAsCamera();
+
+		camera.isOrtho = true;
+		camera.orthoRect = { 110,100 };
+		camera.UpdateProjection(); //yeezz
+
+		camera.transform().SetPosition({ 0,10,0 });
+		camera.transform().SetRotation({ 90,0,0 });
+	}
+
+	this->arena = BallEradicationGame::MakeArena(Vector3f::zero(), rect);
+	arena.AddComponent<BallGameController>();
+
+
+	if (Runner.IsServer)
+	{
+		this->player = BallEradicationGame::MakePlayer(Vector3f::zero());
+		player.GetComponent<NetworkObject>().RegisterAsPlayer();
+	}
+	else
+	{
+		Runner.layer.CallbackOnPlayerCreated([&](NetworkedId id)
+		{
+			this->player = BallEradicationGame::MakePlayer(Vector3f::zero(), id);
+			player.GetComponent<NetworkObject>().RegisterAsPlayer();
+		});
+	}
+
 }
 
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine\AssetManager\ComponentSystem\Component.h"
-#include "Engine\AssetManager\Reflection\Reflectable.h"
+#include "Engine\AssetManager\Reflection\Reflectable.h" 
+#include "Engine\PersistentSystems\Networking\NetworkStructs.h"
 
 class BallTag : public Component, public Reflectable<BallTag>
 {
@@ -24,10 +25,10 @@ public:
 };
 
 REFL_AUTO(type(BallGameController), field(maxBallsInGame), field(ballSpawnCooldown))
- 
+
 
 namespace BallEradicationGame {
-	GameObject MakePlayer(Vector3f position);
+	GameObject MakePlayer(Vector3f position, NetworkedId id = NetworkedId::Generate());
 	GameObject MakeBall(Vector3f position);
 	GameObject MakeArena(Vector3f position, Vector3f Rect);
 }

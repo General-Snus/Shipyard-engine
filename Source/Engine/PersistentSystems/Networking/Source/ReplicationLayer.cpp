@@ -110,13 +110,15 @@ void ReplicationLayer::server_fixedNetworkUpdate(NetworkRunner& runner)
 	OPTICK_EVENT();
 	for (auto& networkedTransform : Scene::activeManager().GetAllComponents<NetworkTransform>())
 	{
-		auto activeConnections = runner.remoteConnections | std::ranges::views::filter([&](auto&& x)
-		{
-			const auto syncRate = ShouldSpacialCull(networkedTransform.myPosition, x.GetAreaOfInterest());
-			return x.isConnected
-				&& (networkedTransform.neverNotSync || syncRate != Networking::SyncRates::noUpdate);
-			//&& networkedTransform.ShouldSync(runner, syncTimes[Cast<int>(std::clamp(syncRate, Networking::SyncRates::low, Networking::SyncRates::high))]);
-		});
+		auto activeConnections = runner.remoteConnections | std::ranges::views::filter(
+			[&] (auto&& x)
+			{
+				const auto syncRate = ShouldSpacialCull(networkedTransform.myPosition, x.GetAreaOfInterest());
+				return x.isConnected
+					&& (networkedTransform.neverNotSync || syncRate != Networking::SyncRates::noUpdate);
+				//&& networkedTransform.ShouldSync(runner, syncTimes[Cast<int>(std::clamp(syncRate, Networking::SyncRates::low, Networking::SyncRates::high))]);
+			}
+		);
 
 		auto& transform = networkedTransform.transform();
 		//std::ranges::for_each(activeConnections, [&](auto&& x)
@@ -214,63 +216,11 @@ void ReplicationLayer::client_ReadIncoming(NetworkRunner& runner)
 
 			if (!idToObjectMap.contains(id))
 			{
-				GameObject player = GameObject::Create("Player");
-				auto& renderer = player.AddComponent<MeshRenderer>("Models/C64.fbx");
-				player.transform().SetPosition(Vector3f::zero());
-
-				auto& collider = player.AddComponent<Collider>();
-				player.AddComponent<NetworkObject>(id);
-				auto& listener = player.AddComponent<NetworkInputListener>();
-				auto object = player.AddComponent<NetworkTransform>();
-				object.RegisterAsPlayer();
-				collider.SetColliderType<ColliderAssetSphere>();
-
-				if (const auto mat = Resources.ForceLoad<Material>("TreeMaterial"))
+				for (auto& i : callbackList)
 				{
-					mat->SetColor(ColorManagerInstance.GetColor("Blue"));
-					renderer.SetMaterial(mat);
+					i(id);
 				}
-
-				listener.AddKeyFunc(Keys::W, Action::MoveCharacter, false, [&](InputContext context)
-				{
-					if (context.state.phase == Phase::Pressed || context.state.phase == Phase::Held)
-					{
-						auto object = Scene::activeManager().GetGameObject((context.id));
-						object.transform().Move(Vector3f::forward() * TimerInstance.getDeltaTime() * 20.f);
-						return InputResponse::claimInput;
-					}
-					return InputResponse::undecided;
-				});
-				listener.AddKeyFunc(Keys::S, Action::MoveCharacter, false, [&](InputContext context)
-				{
-					if (context.state.phase == Phase::Pressed || context.state.phase == Phase::Held)
-					{
-						auto object = Scene::activeManager().GetGameObject((context.id));
-						object.transform().Move(-Vector3f::forward() * TimerInstance.getDeltaTime() * 20.f);
-						return InputResponse::claimInput;
-					}
-					return InputResponse::undecided;
-				});
-				listener.AddKeyFunc(Keys::D, Action::MoveCharacter, false, [&](InputContext context)
-				{
-					if (context.state.phase == Phase::Pressed || context.state.phase == Phase::Held)
-					{
-						auto object = Scene::activeManager().GetGameObject((context.id));
-						object.transform().Move(Vector3f::right() * TimerInstance.getDeltaTime() * 20.f);
-						return InputResponse::claimInput;
-					}
-					return InputResponse::undecided;
-				});
-				listener.AddKeyFunc(Keys::A, Action::MoveCharacter, false, [&](InputContext context)
-				{
-					if (context.state.phase == Phase::Pressed || context.state.phase == Phase::Held)
-					{
-						auto object = Scene::activeManager().GetGameObject((context.id));
-						object.transform().Move(-Vector3f::right() * TimerInstance.getDeltaTime() * 20.f);
-						return InputResponse::claimInput;
-					}
-					return InputResponse::undecided;
-				});
+				callbackList.clear();
 			}
 		}
 	}
@@ -322,6 +272,11 @@ void ReplicationLayer::client_ReadIncoming(NetworkRunner& runner)
 			netTransform.myScale = messageContent.myScale;
 		}
 	}
+}
+
+void ReplicationLayer::CallbackOnPlayerCreated(std::function<void(NetworkedId)> f)
+{
+	callbackList.push_back(f);
 }
 
 //TODO, you know what to do
@@ -397,6 +352,7 @@ bool ReplicationLayer::RegisterObject(const NetworkRunner& runner, const Network
 			  60.0f,
 			  0.0f
 		};
+
 		auto gridObject = new TreeObject<cullerPosition>(position);
 		gridObject->border = Border2D(
 			Vector2f(object.transform().GetPosition().x, object.transform().GetPosition().z),

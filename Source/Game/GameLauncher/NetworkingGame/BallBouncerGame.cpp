@@ -7,7 +7,7 @@
 #include "Engine/AssetManager/ComponentSystem/Components/Physics/cPhysics_Kinematic.h"
 #include "Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h"
 
-GameObject BallEradicationGame::MakePlayer(Vector3f position)
+GameObject BallEradicationGame::MakePlayer(Vector3f position, NetworkedId id )
 {
 	GameObject player = GameObject::Create("Player");
 	Scene::activeManager().SetLastGOAsPlayer();
@@ -15,7 +15,7 @@ GameObject BallEradicationGame::MakePlayer(Vector3f position)
 	player.transform().SetPosition(position);
 
 	//auto& collider = player.AddComponent<Collider>();
-	player.AddComponent<NetworkObject>();
+	player.AddComponent<NetworkObject>(id);
 	auto& listener = player.AddComponent<NetworkInputListener>();
 	auto object = player.AddComponent<NetworkTransform>();
 

@@ -25,10 +25,9 @@ public:
 
 	// looks at its network transform data and applies interpolation on it
 	void client_fixedNetworkUpdate(const NetworkRunner& runner) const;
-	void client_ReadIncoming(NetworkRunner& runner);
-
+	void client_ReadIncoming(NetworkRunner& runner); 
+	void CallbackOnPlayerCreated(std::function<void(NetworkedId)> f);
 	void CreateBallGameObject(NetworkedId& id);
-
 	void AskServerObjectStatus(const NetworkedId& id, NetworkRunner& runner);
  
 	//If the id to the object does not exist then we need to create it, in case that we are the server
@@ -72,6 +71,7 @@ private:
 		}
 	};
 	QuadTree<cullerPosition> spacialFrequencyCulling;
+	std::vector<std::function<void(NetworkedId)>> callbackList;
 
 	//Suboptimal solution
 	std::unordered_map<NetworkedId, NetworkObject> idToObjectMap;
