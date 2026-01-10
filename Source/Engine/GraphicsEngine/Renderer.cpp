@@ -1,18 +1,41 @@
 #include "GraphicsEngine.pch.h"
 #include "Renderer.h" 
 
+#include "DirectX/DX12/Graphics/CommandList.h"
+#include "DirectX/DX12/Graphics/CommandQueue.h" 
+#include "DirectX/DX12/Graphics/GPU.h" 
+#include "DirectX/DX12/Graphics/PSO.h"
+#include "DirectX/DX12/Graphics/ResourceStateTracker.h"
+#include "DirectX/DX12/Graphics/RootSignature.h" 
+#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
+#include "DirectX/DX12/Graphics/CommandList.h"
+#include "DirectX/DX12/Graphics/CommandQueue.h" 
+#include "DirectX/DX12/Graphics/GPU.h" 
+#include "DirectX/DX12/Graphics/PSO.h"
+#include "DirectX/DX12/Graphics/RootSignature.h" 
+#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
+#include "DirectX/DX12/Graphics/CommandQueue.h" 
+#include "DirectX/DX12/Graphics/GPU.h" 
+#include "DirectX/DX12/Graphics/PSO.h"
+#include "DirectX/DX12/Graphics/RootSignature.h" 
 #include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
 #include "DirectX/DX12/Graphics/GPU.h" 
 #include "DirectX/DX12/Graphics/PSO.h"
 #include "DirectX/DX12/Graphics/RootSignature.h" 
-#include "DirectX/DX12/Graphics/CommandQueue.h" 
-#include "DirectX/DX12/Graphics/CommandList.h"
-#include "DirectX/DX12/Graphics/ResourceStateTracker.h"
+#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
+#include "DirectX/DX12/Graphics/GPU.h" 
+#include "DirectX/DX12/Graphics/PSO.h"
+#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
+#include "DirectX/DX12/Graphics/GPU.h" 
+#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
 
+#include "Editor\Editor\Core\Editor.h"
 #include "Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h"
 #include "Engine/PersistentSystems/Scene.h" 
 #include "Passes/Passes.h" 
 #include "Tools/ImGui/backends/imgui_impl_dx12.h"
+#include "Tools/Utilities/Game/Timer.h"
+#include "Tools\ImGui\imgui.h"
 #include <Editor/Editor/Windows/EditorWindows/Viewport.h> 
 #include <Engine/AssetManager/AssetManager.h>
 #include <Engine/AssetManager/ComponentSystem/Components/LightComponent.h>
@@ -20,8 +43,6 @@
 #include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
 #include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h> 
 #include <Tools/ImGui/imgui_notify.h>
-#include "Editor\Editor\Core\Editor.h"
-#include "Tools\ImGui\imgui.h"
 #include <vector>
 
 bool Renderer::Initialize(bool enableDeviceDebug)
@@ -274,9 +295,18 @@ void Renderer::Render(const std::vector<std::shared_ptr<Viewport>>& renderViewPo
 	m_CustomSceneRenderPasses.clear();
 }
 
-void Renderer::Update(float delta)
+void Renderer::Update(const std::vector<std::shared_ptr<Viewport>>& renderViewPorts)
 {
+	const float delta = TimerInstance.getDeltaTime();
 	debugDrawer.Update(delta);
+
+	for (const auto& container : { renderViewPorts, m_CustomSceneRenderPasses })
+	{
+		for (auto& viewport : container)
+		{
+			viewport->Update();
+		}
+	}
 }
 
 void Renderer::Shutdown()

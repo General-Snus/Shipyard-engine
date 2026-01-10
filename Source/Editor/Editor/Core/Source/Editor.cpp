@@ -734,7 +734,7 @@ void Editor::Update()
 	// End
 
 	gameState.Update(delta);
-	GetRenderer().Update(delta);
+	GetRenderer().Update(m_Viewports);
 	Shipyard_PhysXInstance.EndRead(delta);
 
 	Input.Update();

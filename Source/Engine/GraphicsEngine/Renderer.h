@@ -79,7 +79,7 @@ public:
 	bool InitializeImguiBackends() const;
 	void InitializeCustomRenderScene();
 	void Render(const std::vector<std::shared_ptr<Viewport>>& renderViewPorts);
-	void Update(float delta);
+	void Update(const std::vector<std::shared_ptr<Viewport>>& renderViewPorts);
 	void Shutdown();
 
 
