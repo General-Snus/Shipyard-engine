@@ -146,8 +146,8 @@ bool GPU::Initialize(HWND aWindowHandle, bool enableDeviceDebug, Vector2ui backb
 
 //Nullptr if not debug or not found
 Ref<ID3D12InfoQueue> GPU::QueryInfoQueue()
-{ 
-	Ref<ID3D12InfoQueue> ptt; 
+{
+	Ref<ID3D12InfoQueue> ptt;
 	m_Device->QueryInterface(IID_PPV_ARGS(ptt.GetAddressOf()));
 	return ptt;
 }
@@ -194,11 +194,15 @@ void GPU::ResizeBackbuffer(Vector2ui resolution)
 	UpdateRenderTargetViews(m_Device, m_Swapchain->m_SwapChain);
 }
 
+void GPU::StartNewFrame()
+{
+	m_FrameIndex = m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
+	GraphicsMemory::Get().Commit(m_DirectCommandQueue->GetCommandQueue().Get());
+	m_DirectCommandQueue->WaitForFenceValue(m_FenceValues[m_FrameIndex]);
+}
 void GPU::Present(unsigned aSyncInterval)
 {
-	const auto commandList = m_DirectCommandQueue->GetCommandList();
-	commandList->TransitionBarrier(GetCurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT);
-	m_DirectCommandQueue->ExecuteCommandList(commandList);
+	OPTICK_EVENT("Present");
 
 #if (USE_NSIGHT_AFTERMATH)
 	auto hr = (m_Swapchain->m_SwapChain->Present(aSyncInterval, 0));
@@ -238,13 +242,12 @@ void GPU::Present(unsigned aSyncInterval)
 		return;
 	}
 #else
+
+	OPTICK_GPU_FLIP(m_Swapchain->m_SwapChain.Get());
+	OPTICK_CATEGORY("Present", Optick::Category::Wait);
 	Helpers::ThrowIfFailed(m_Swapchain->m_SwapChain->Present(aSyncInterval, 0));
 #endif
 	m_FenceValues[m_FrameIndex] = m_DirectCommandQueue->Signal();
-	m_FrameIndex = m_Swapchain->m_SwapChain->GetCurrentBackBufferIndex();
-
-	GraphicsMemory::Get().Commit(m_DirectCommandQueue->GetCommandQueue().Get());
-	m_DirectCommandQueue->WaitForFenceValue(m_FenceValues[m_FrameIndex]);
 }
 
 void GPU::UpdateBufferResource(const CommandList& commandList, ID3D12Resource** pDestinationResource,
@@ -396,60 +399,6 @@ bool GPU::LoadTextureFromMemory(Texture* outTexture, const std::filesystem::path
 	outTexture->CheckFeatureSupport();
 	outTexture->SetView(ViewType::SRV);
 	return true;
-}
-
-void GPU::TransitionResource(const CommandList& commandList, const Ref<ID3D12Resource>& resource,
-							 D3D12_RESOURCE_STATES beforeState, D3D12_RESOURCE_STATES         afterState)
-{
-	OPTICK_EVENT();
-	const CD3DX12_RESOURCE_BARRIER barrier =
-		CD3DX12_RESOURCE_BARRIER::Transition(resource.Get(), beforeState, afterState);
-
-	commandList.GetGraphicsCommandList()->ResourceBarrier(1, &barrier);
-}
-
-void GPU::ClearRTV(const CommandList& commandList, D3D12_CPU_DESCRIPTOR_HANDLE rtv, Vector4f clearColor)
-{
-	OPTICK_EVENT();
-	commandList.GetGraphicsCommandList()->ClearRenderTargetView(rtv, &clearColor.x, 0, nullptr);
-}
-
-void GPU::ClearRTV(const CommandList& commandList, Texture* rtv, Vector4f clearColor)
-{
-	OPTICK_EVENT();
-	commandList.GetGraphicsCommandList()->ClearRenderTargetView(rtv->GetHandle(ViewType::RTV).cpuPtr, &clearColor.x, 0,
-																nullptr);
-}
-
-void GPU::ClearRTV(const CommandList& commandList, Texture* rtv, unsigned textureCount, Vector4f clearColor)
-{
-	OPTICK_EVENT();
-	for (unsigned i = 0; i < textureCount; ++i)
-	{
-		commandList.GetGraphicsCommandList()->ClearRenderTargetView(rtv[i].GetHandle(ViewType::RTV).cpuPtr,
-																	&clearColor.x, 0, nullptr);
-	}
-}
-
-void GPU::ClearRTV(const CommandList& commandList, Texture* rtv, unsigned textureCount)
-{
-	OPTICK_EVENT();
-	for (unsigned i = 0; i < textureCount; ++i)
-	{
-		commandList.GetGraphicsCommandList()->ClearRenderTargetView(rtv[i].GetHandle(ViewType::RTV).cpuPtr,
-																	&rtv->m_ClearColor.x, 0, nullptr);
-	}
-}
-
-void GPU::ClearDepth(const CommandList& commandList, Texture* texture)
-{
-	ClearDepth(commandList, texture->GetHandle(ViewType::DSV).cpuPtr);
-}
-
-void GPU::ClearDepth(const CommandList& commandList, D3D12_CPU_DESCRIPTOR_HANDLE dsv, FLOAT depth)
-{
-	OPTICK_EVENT();
-	commandList.GetGraphicsCommandList()->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, depth, 0, 0, nullptr);
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE GPU::GetCurrentRenderTargetView()

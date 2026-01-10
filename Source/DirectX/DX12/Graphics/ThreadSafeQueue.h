@@ -74,6 +74,8 @@ ThreadSafeQueue<T>::ThreadSafeQueue()
 template <typename T>
 ThreadSafeQueue<T>::ThreadSafeQueue(const ThreadSafeQueue<T>& copy)
 {
+	OPTICK_EVENT();
+
 	std::lock_guard<std::mutex> lock(copy.m_Mutex);
 	m_Queue = copy.m_Queue;
 }
@@ -81,6 +83,7 @@ ThreadSafeQueue<T>::ThreadSafeQueue(const ThreadSafeQueue<T>& copy)
 template <typename T>
 void ThreadSafeQueue<T>::Push(T value)
 {
+	OPTICK_EVENT();
 	std::lock_guard<std::mutex> lock(m_Mutex);
 	m_Queue.push(std::move(value));
 }
@@ -88,6 +91,8 @@ void ThreadSafeQueue<T>::Push(T value)
 template <typename T>
 bool ThreadSafeQueue<T>::TryPop(T& value)
 {
+	OPTICK_EVENT();
+
 	std::lock_guard<std::mutex> lock(m_Mutex);
 	if (m_Queue.empty())
 	{
@@ -103,6 +108,8 @@ bool ThreadSafeQueue<T>::TryPop(T& value)
 template <typename T>
 bool ThreadSafeQueue<T>::Empty() const
 {
+	OPTICK_EVENT();
+
 	std::lock_guard<std::mutex> lock(m_Mutex);
 	return m_Queue.empty();
 }
@@ -110,6 +117,8 @@ bool ThreadSafeQueue<T>::Empty() const
 template <typename T>
 size_t ThreadSafeQueue<T>::Size() const
 {
+	OPTICK_EVENT();
+
 	std::lock_guard<std::mutex> lock(m_Mutex);
 	return m_Queue.size();
 }

@@ -2,7 +2,7 @@
 #include "DebugDrawer/DebugDrawer.h"
 #include "Engine/AssetManager/Enums.h"
 #include "Tools/Utilities/System/SingletonTemplate.h"
- 
+
 class Camera;
 class Texture;
 class TextureHolder;
@@ -14,11 +14,11 @@ class Mesh;
 class Material;
 class PSOCache;
 class ShipyardShader;
- 
-class Renderer: public Singleton {
+
+class Renderer : public Singleton {
 	friend class GraphicsEngineUtilities;
 
-public: 
+public:
 	const PSOCache& GetPSOCache() const;
 
 	bool ResizeBuffers(Vector2ui resolution);
@@ -30,6 +30,7 @@ public:
 	float framerate = 60.f;
 private:
 
+	std::vector<std::shared_ptr<CommandList>> commandlists;
 	Vector2ui renderResolution;
 	std::chrono::steady_clock::time_point start;
 	std::chrono::steady_clock::time_point stop;
@@ -64,38 +65,43 @@ private:
 	void SetupDefaultVariables();
 	void Init_brdfLUT();
 
-	void     BeginFrame();
-	uint64_t RenderFrame(Viewport& renderViewPort);
+	void BeginFrame();
+	void RenderFrame(Viewport& renderViewPort);
 	void EndFrame(Viewport* gamePort);
 
-	void PrepareBuffers(std::shared_ptr<CommandList> commandList,Viewport& renderViewPort,GameObjectManager& scene);
+	void PrepareBuffers(std::shared_ptr<CommandList> commandList, Viewport& renderViewPort, GameObjectManager& scene);
 	void EnvironmentLightPass(std::shared_ptr<CommandList> commandList) const;
-	void ToneMapperPass(std::shared_ptr<CommandList> commandList,Texture* target) const;
+	void ToneMapperPass(std::shared_ptr<CommandList> commandList, Texture* target) const;
 	void ImGuiPass();
 	void ViewportToBackBuffer(Viewport* viewport);
 public:
 	bool Initialize(bool enableDeviceDebug);
 	bool InitializeImguiBackends() const;
 	void InitializeCustomRenderScene();
-	void Render(std::vector<std::shared_ptr<Viewport>> renderViewPorts);
+	void Render(const std::vector<std::shared_ptr<Viewport>>& renderViewPorts);
 	void Update(float delta);
 	void Shutdown();
 
 
-	__forceinline std::shared_ptr<ShipyardShader> GetDefaultVSShader() const {
+	__forceinline std::shared_ptr<ShipyardShader> GetDefaultVSShader() const
+	{
 		return defaultVS;
 	}
 
-	__forceinline std::shared_ptr<ShipyardShader> GetDefaultPSShader() const {
+	__forceinline std::shared_ptr<ShipyardShader> GetDefaultPSShader() const
+	{
 		return defaultPS;
 	}
-	 
-	__forceinline std::shared_ptr<Material> GetDefaultMaterial() const {
+
+	__forceinline std::shared_ptr<Material> GetDefaultMaterial() const
+	{
 		return defaultMaterial;
 	}
 
-	__forceinline std::shared_ptr<TextureHolder> GetDefaultTexture(eTextureType type) const {
-		switch(type) {
+	__forceinline std::shared_ptr<TextureHolder> GetDefaultTexture(eTextureType type) const
+	{
+		switch (type)
+		{
 		case eTextureType::ColorMap:
 			return defaultTexture;
 

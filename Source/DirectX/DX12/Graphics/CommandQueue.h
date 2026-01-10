@@ -20,7 +20,7 @@ class GPUCommandQueue
     uint64_t Signal();
     bool IsFenceComplete(uint64_t fenceValue);
     void WaitForFenceValue(uint64_t fenceValue);
-    void ProccessInFlightCommandLists();
+    void ProccessInFlightCommandLists(std::stop_token stop_token);
     void Flush();
 
     void Wait(const GPUCommandQueue &other) const;
@@ -41,6 +41,7 @@ class GPUCommandQueue
 
     std::jthread m_ProcessInFlightCommandListsThread;
     std::atomic_bool m_bProcessInFlightCommandLists;
+    std::stop_token stopProcessingCommandList;
     std::mutex m_ProcessInFlightCommandListsThreadMutex;
     std::condition_variable m_ProcessInFlightCommandListsThreadCV;
 

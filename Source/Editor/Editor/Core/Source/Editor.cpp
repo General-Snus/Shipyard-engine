@@ -744,10 +744,6 @@ void Editor::Update()
 void Editor::Render()
 {
 	OPTICK_EVENT();
-	for (const auto& viewport : m_Viewports)
-	{
-		viewport->Update();
-	}
 	Shipyard_PhysXInstance.Render();
 	GetRenderer().Render(m_Viewports);
 }

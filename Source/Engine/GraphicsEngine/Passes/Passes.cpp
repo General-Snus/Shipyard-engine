@@ -19,120 +19,130 @@
 #include "Engine/GraphicsEngine/Rendering/Buffers/ObjectBuffer.h"
 #include <Engine/GraphicsEngine/Rendering/Buffers/LightBuffer.h>
 #include "Engine/GraphicsEngine/Renderer.h"
+#include "d3dcommon.h"
+#include "DirectX\DX12\Graphics\Enums.h"
+#include <utility>
+#include "d3d12.h"
+#include <vector>
+#include "Engine\AssetManager\Objects\BaseAssets\LightDataBase.h"
 
 namespace Passes {
-	void ShadowPass(const Renderer& instance,std::shared_ptr<CommandList>& commandList,GameObjectManager& scene) {
+	void ShadowPass(const Renderer& instance, std::shared_ptr<CommandList>& commandList, GameObjectManager& scene)
+	{
 		OPTICK_GPU_EVENT("WriteShadows");
-
 		const auto& meshRendererList = scene.GetAllComponents<MeshRenderer>();
 		const auto  graphicCommandList = commandList->GetGraphicsCommandList();
-
 		const auto& shadowMapper = instance.GetPSOCache().GetState(PSOCache::ePipelineStateID::ShadowMapper);
-
 		const auto& pipelineState = shadowMapper->GetPipelineState();
 		graphicCommandList->SetPipelineState(pipelineState);
-		//commandList->TrackResource(pipelineState);
+		commandList->TrackResource(pipelineState);
 
-		auto renderShadows = [](const std::vector<MeshRenderer>& objectsToRender,
-			const std::shared_ptr<CommandList>& list,
-			const std::string_view              debugName) {
-				debugName;
-				MaterialBuffer materialBuffer;
-				for(const auto& object : objectsToRender) {
-					if(!object.IsActive()) {
-						continue;
-					}
-					const auto& transform = object.GetComponent<Transform>();
-					list->AllocateBuffer<ObjectBuffer>(eRootBindings::objectBuffer,{transform.unmodified_WorldMatrix()});
-					for(const auto& element : object.GetElements()) {
-						OPTICK_GPU_EVENT(debugName.data());
-						list->ConfigureInputAssembler(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.IndexResource);
-						materialBuffer.vertexBufferIndex = element.VertexBuffer.GetHandle(ViewType::SRV).heapOffset;
-						list->AllocateBuffer<MaterialBuffer>(eRootBindings::materialBuffer,materialBuffer);
-						list->GetGraphicsCommandList()->DrawIndexedInstanced(
-							element.IndexResource.GetIndexCount(),1,0,0,0);
-					}
-				}
-			};
-
-		auto setShadowPrerequisite = [](const Light& light,int map,
-			const std::shared_ptr<CommandList>& list) -> std::shared_ptr<Texture> {
-				OPTICK_GPU_EVENT("setShadowPrerequisite");
-				const auto& shadowMap = light.GetShadowMap(map);
-				if(!shadowMap) {
-					return nullptr;
-				}
-
-				list->GetGraphicsCommandList()->RSSetViewports(1,&shadowMap->GetViewPort());
-				list->GetGraphicsCommandList()->RSSetScissorRects(1,&shadowMap->GetRect());
-
-				list->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_DEPTH_WRITE);
-				list->TrackResource(shadowMap);
-				GetGPU().ClearDepth(*list,shadowMap.get());
-				list->SetRenderTargets(0,nullptr,shadowMap.get());
-				list->AllocateBuffer<FrameBuffer>(eRootBindings::frameBuffer,light.GetShadowMapFrameBuffer(map));
-
-				return shadowMap;
-			};
-
-		for(auto& light : scene.GetAllComponents<Light>()) {
-			if(!light.IsActive() || !light.GetIsShadowCaster() || light.GetIsRendered()) {
-				continue;
-			}
-
-			switch(light.GetType()) {
-			case eLightType::Directional:
+		auto renderShadows = [&commandList](const std::vector<MeshRenderer>& objectsToRender, const std::string_view debugName)
+		{
+			debugName;
+			OPTICK_GPU_EVENT(debugName.data());
+			MaterialBuffer materialBuffer;
+			for (const auto& object : objectsToRender)
 			{
-				OPTICK_GPU_EVENT("DirectionalShadow");
-				const std::shared_ptr<Texture>& shadowMap = setShadowPrerequisite(light,0,commandList);
-				if(!shadowMap) {
+				if (!object.IsActive())
+				{
 					continue;
 				}
 
-				renderShadows(meshRendererList,commandList,"DirectionalLight");
-				shadowMap->SetView(ViewType::SRV);
+				const auto& transform = object.GetComponent<Transform>();
+				commandList->AllocateBuffer<ObjectBuffer>(eRootBindings::objectBuffer, { transform.unmodified_WorldMatrix() });
 
-				commandList->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_DEPTH_READ |
-					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-				commandList->TrackResource(*shadowMap);
+				for (const auto& element : object.GetElements())
+				{
+					commandList->ConfigureInputAssembler(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST, element.IndexResource);
+					materialBuffer.vertexBufferIndex = element.VertexBuffer.GetHandle(ViewType::SRV).heapOffset;
+					commandList->AllocateBuffer<MaterialBuffer>(eRootBindings::materialBuffer, materialBuffer);
+					commandList->Draw(element.IndexResource.GetIndexCount());
+				}
+			}
+		};
+
+		auto setBuffers = [&commandList](const Light& light, int map) -> std::shared_ptr<Texture>
+		{
+			OPTICK_GPU_EVENT("setShadowPrerequisite");
+			const auto& shadowMap = light.GetShadowMap(map);
+			if (!shadowMap)
+			{
+				return nullptr;
+			}
+
+			commandList->SetViewports(shadowMap->GetViewPort());
+			commandList->SetScissorRect(shadowMap->GetRect());
+			commandList->TransitionBarrier(*shadowMap, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+			commandList->TrackResource(shadowMap);
+			commandList->ClearDepth(shadowMap.get());
+			commandList->SetRenderTargets(0, nullptr, shadowMap.get());
+			commandList->AllocateBuffer<FrameBuffer>(eRootBindings::frameBuffer, light.GetShadowMapFrameBuffer(map));
+
+			return shadowMap;
+		};
+
+		auto transitionToSRV = [&commandList](const std::shared_ptr<Texture>& transitionToSRV) -> void
+		{
+			transitionToSRV->SetView(ViewType::SRV);
+
+			commandList->TransitionBarrier(*transitionToSRV, D3D12_RESOURCE_STATE_DEPTH_READ | D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			commandList->TrackResource(*transitionToSRV);
+		};
+
+		auto& lightsInScene = scene.GetAllComponents<Light>();
+		for (auto& light : lightsInScene)
+		{
+			if (!light.IsActive() || !light.GetIsShadowCaster() || light.GetIsRendered())
+			{
+				continue;
+			}
+
+			switch (light.GetType())
+			{
+			case eLightType::Directional:
+			{
+				OPTICK_GPU_EVENT("DirectionalShadow");
+				const auto& shadowMap = setBuffers(light, 0);
+				if (!shadowMap)
+				{
+					continue;
+				}
+
+				renderShadows(meshRendererList, "DirectionalLight");
+				transitionToSRV(shadowMap);
 			}
 			break;
 			case eLightType::Point:
 			{
 				OPTICK_GPU_EVENT("PointlightShadow");
-				for(int j = 0; j < 6; j++) {
-					const std::shared_ptr<Texture>& shadowMap = setShadowPrerequisite(light,j,commandList);
-					if(!shadowMap) {
+				for (int j = 0; j < 6; j++)
+				{
+					const std::shared_ptr<Texture>& shadowMap = setBuffers(light, j);
+					if (!shadowMap)
+					{
 						continue;
 					}
 
-					renderShadows(meshRendererList,commandList,"PointlightShadowDraw");
-					shadowMap->SetView(ViewType::SRV);
-
-					commandList->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_DEPTH_READ |
-						D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-					commandList->TrackResource(*shadowMap);
+					renderShadows(meshRendererList, "PointlightShadowDraw");
+					transitionToSRV(shadowMap);
 				}
 			}
 			break;
 			case eLightType::Spot:
 			{
 				OPTICK_GPU_EVENT("SpotlightShadow");
-				const std::shared_ptr<Texture>& shadowMap = setShadowPrerequisite(light,0,commandList);
-				if(!shadowMap) {
+				const std::shared_ptr<Texture>& shadowMap = setBuffers(light, 0);
+				if (!shadowMap)
+				{
 					continue;
 				}
 
-				renderShadows(meshRendererList,commandList,"SpotlightShadowDraw");
-				shadowMap->SetView(ViewType::SRV);
-
-				commandList->TransitionBarrier(*shadowMap,D3D12_RESOURCE_STATE_DEPTH_READ |
-					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-				commandList->TrackResource(shadowMap);
+				renderShadows(meshRendererList, "SpotlightShadowDraw");
+				transitionToSRV(shadowMap);
 			}
 			break;
 			case eLightType::uninitialized:
-				std::unreachable();
 				break;
 			default:
 				std::unreachable();
@@ -142,26 +152,33 @@ namespace Passes {
 		}
 	}
 
-	LightBuffer CreateLightBuffer(GameObjectManager& scene) {
+	LightBuffer CreateLightBuffer(GameObjectManager& scene)
+	{
 		LightBuffer lightBuffer;
 		lightBuffer.NullifyMemory();
 
-		for(auto& i : scene.GetAllComponents<Light>()) {
-			if(!i.IsActive()) {
+		for (auto& i : scene.GetAllComponents<Light>())
+		{
+			if (!i.IsActive())
+			{
 				continue;
 			}
 
-			switch(i.GetType()) {
+			auto isShadowCaster = i.GetIsShadowCaster();
+
+			switch (i.GetType())
+			{
 			case eLightType::Directional:
 			{
 				OPTICK_EVENT("Directional");
 				auto* data = i.GetData<DirectionalLight>().get();
-				if(i.GetIsShadowCaster()) {
+				if (isShadowCaster)
+				{
 					data->shadowMapIndex = i.GetShadowMap(0)->GetHandle(ViewType::SRV).heapOffset;
 				}
 				auto& directionalLight = lightBuffer.directionalLight;
 				directionalLight = *data;
-				directionalLight.castShadow = i.GetIsShadowCaster();
+				directionalLight.castShadow = isShadowCaster;
 				break;
 			}
 			// REFACTOR
@@ -169,14 +186,16 @@ namespace Passes {
 			{
 				OPTICK_EVENT("Point");
 				auto* data = i.GetData<PointLight>().get();
-				if(i.GetIsShadowCaster()) {
-					for(int j = 0; j < 6; j++) {
+				if (isShadowCaster)
+				{
+					for (int j = 0; j < 6; j++)
+					{
 						data->shadowMapIndex[j] = i.GetShadowMap(j)->GetHandle(ViewType::SRV).heapOffset;
 					}
 				}
-				auto& pointlight = lightBuffer.pointLight[lightBuffer.pointLightAmount];
-				pointlight = *data;
-				pointlight.castShadow = i.GetIsShadowCaster();
+				auto& pointLight = lightBuffer.pointLight[lightBuffer.pointLightAmount];
+				pointLight = *data;
+				pointLight.castShadow = isShadowCaster;
 				lightBuffer.pointLightAmount = ((lightBuffer.pointLightAmount + 1) % 8);
 				break;
 			}
@@ -184,18 +203,17 @@ namespace Passes {
 			{
 				OPTICK_EVENT("Spot");
 				auto* data = i.GetData<SpotLight>().get();
-				if(i.GetIsShadowCaster()) {
+				if (isShadowCaster)
+				{
 					data->shadowMapIndex = i.GetShadowMap(0)->GetHandle(ViewType::SRV).heapOffset;
 				}
+
 				auto& spotLight = lightBuffer.spotLight[lightBuffer.spotLightAmount];
 				spotLight = *data;
-				spotLight.castShadow = i.GetIsShadowCaster();
+				spotLight.castShadow = isShadowCaster;
 				lightBuffer.spotLightAmount = ((lightBuffer.spotLightAmount + 1) % 8);
 				break;
 			}
-
-			default:
-				break;
 			}
 		}
 		return lightBuffer;
@@ -204,30 +222,34 @@ namespace Passes {
 
 void SSAO::Initialize(void) {}
 
-void SSAO::Render(const Renderer& instance,std::shared_ptr<CommandList>& commandList,const Camera& camera) {
+void SSAO::Render(const Renderer& instance, std::shared_ptr<CommandList>& commandList, const Camera& camera)
+{
 	instance;
 	commandList;
 	camera;
 }
 
-void GBuffer::Initialize(const Renderer& instance) {
+void GBuffer::Initialize(const Renderer& instance)
+{
 	UNREFERENCED_PARAMETER(instance);
 }
 
-void GBuffer::Render(const Renderer& instance,std::shared_ptr<CommandList>& commandList,
-	const GameObjectManager& scene) {
+void GBuffer::Render(const Renderer& instance, std::shared_ptr<CommandList>& commandList,
+	const GameObjectManager& scene)
+{
 	const auto& gbufferPSO = instance.m_Cache->GetState(PSOCache::ePipelineStateID::GBuffer);
 	const auto& gBufferTextures = gbufferPSO->RenderTargets();
 	const auto  numTargets = gbufferPSO->GetNumberOfTargets();
 
 
 	std::vector<MeshRenderer> list;
-	if(!scene.GetReadOnly<MeshRenderer>(list)) {
+	if (!scene.GetReadOnly<MeshRenderer>(list))
+	{
 		return;
 	}
 
 	commandList->ClearRenderTargets(numTargets, gBufferTextures);
-	commandList->SetRenderTargets(numTargets, gBufferTextures,instance.m_DepthBuffer.get());
+	commandList->SetRenderTargets(numTargets, gBufferTextures, instance.m_DepthBuffer.get());
 	commandList->SetPipelineState(*gbufferPSO);
 	commandList->SetViewports(gBufferTextures->GetViewPort());
 	commandList->SetScissorRect(gBufferTextures->GetRect());
@@ -238,8 +260,10 @@ void GBuffer::Render(const Renderer& instance,std::shared_ptr<CommandList>& comm
 	const uint32_t dtEffect = instance.GetDefaultTexture(eTextureType::EffectMap)->GetRawTexture()->GetHeapOffset();
 
 	int vertCount = 0;
-	for(const auto& meshRenderer : list) {
-		if(!meshRenderer.IsActive()) {
+	for (const auto& meshRenderer : list)
+	{
+		if (!meshRenderer.IsActive())
+		{
 			continue;
 		}
 
@@ -252,23 +276,27 @@ void GBuffer::Render(const Renderer& instance,std::shared_ptr<CommandList>& comm
 		objectBuffer.MinExtents = meshRenderer.GetRawMesh()->Bounds.GetMin();
 		objectBuffer.hasBone = false;
 		objectBuffer.uniqueID = ID;
-		commandList->AllocateBuffer(eRootBindings::objectBuffer,objectBuffer);
+		commandList->AllocateBuffer(eRootBindings::objectBuffer, objectBuffer);
 
-		for(auto& element : meshRenderer.GetElements()) {
+		for (auto& element : meshRenderer.GetElements())
+		{
 			vertCount += element.VertexBuffer.GetVertexCount();
-			commandList->ConfigureInputAssembler(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,element.IndexResource);
+			commandList->ConfigureInputAssembler(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST, element.IndexResource);
 
 			const unsigned materialIndex = element.MaterialIndex;
 			MaterialBuffer materialBuffer = meshRenderer.GetMaterial(materialIndex)->GetMaterialData();
 
-			for(int i = 0; i < static_cast<int>(eTextureType::EffectMap) + 1; i++) {
+			for (int i = 0; i < static_cast<int>(eTextureType::EffectMap) + 1; i++)
+			{
 				OPTICK_GPU_EVENT("SetTextures");
-				if(const auto textureAsset = meshRenderer.GetTexture(static_cast<eTextureType>(i),materialIndex)) {
+				if (const auto textureAsset = meshRenderer.GetTexture(static_cast<eTextureType>(i), materialIndex))
+				{
 					const auto tex = textureAsset->GetRawTexture();
 					tex->SetView(ViewType::SRV);
 					commandList->TrackResource(tex->Resource());
 					const auto heapOffset = tex->GetHeapOffset();
-					switch(static_cast<eTextureType>(i)) {
+					switch (static_cast<eTextureType>(i))
+					{
 					case eTextureType::ColorMap:
 						materialBuffer.albedoTexture = heapOffset != -1 ? heapOffset : dtAlbedo;
 						break;
@@ -285,8 +313,11 @@ void GBuffer::Render(const Renderer& instance,std::shared_ptr<CommandList>& comm
 						LOGGER.Critical("Texture type is not found or is not valid for used on deffered");
 						break;
 					}
-				} else {
-					switch(static_cast<eTextureType>(i)) {
+				}
+				else
+				{
+					switch (static_cast<eTextureType>(i))
+					{
 					case eTextureType::ColorMap:
 						materialBuffer.albedoTexture = dtAlbedo;
 						break;
@@ -322,7 +353,7 @@ void GBuffer::Render(const Renderer& instance,std::shared_ptr<CommandList>& comm
 
 			OPTICK_GPU_EVENT("Draw");
 			// TODO Circular index buffer for pre allocs one day -_-
-			commandList->GetGraphicsCommandList()->DrawIndexedInstanced(element.IndexResource.GetIndexCount(),1,0,0,
+			commandList->GetGraphicsCommandList()->DrawIndexedInstanced(element.IndexResource.GetIndexCount(), 1, 0, 0,
 				0);
 		}
 	}

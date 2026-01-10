@@ -22,6 +22,8 @@ public:
 
 	void TransitionBarrier(const GpuResource& resource, D3D12_RESOURCE_STATES stateAfter,
 		unsigned subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, bool flushBarriers = false);
+	void TransitionBarrier(const GpuResource* resource, D3D12_RESOURCE_STATES stateAfter,
+		unsigned subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, bool flushBarriers = false);
 
 	void SetDescriptorTable(unsigned slot, Texture* texture);
 
@@ -34,8 +36,13 @@ public:
 
 	void SetRenderTargets(unsigned numberOfTargets, Texture* renderTargets, Texture* depthBuffer);
 	void ClearRenderTargets(unsigned numberOfTargets, Texture* rtv);
+	void ClearRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE rtv, Vector4f clearColor = { 0,0,0,0 });
+	void ClearRenderTarget(Texture* rtv);
 
-	void ClearRenderTarget(Texture rtv);
+	void ClearDepth(const Texture& dsv, FLOAT depth = 0);
+	void ClearDepth(const Texture* dsv, FLOAT depth = 0);
+	void ClearDepth(D3D12_CPU_DESCRIPTOR_HANDLE dsv, FLOAT depth = 0);
+
 	void SetPipelineState(const PSO& pso);
 
 	void SetViewports(const D3D12_VIEWPORT& viewPort, unsigned num = 1);
@@ -53,6 +60,10 @@ public:
 	{
 		return m_CommandList;
 	}
+
+
+	void DrawInstanced(int vertexCount, int instanceCount = 1, int startVertex = 0, int startInstance = 0);
+	void Draw(int indexCount);
 
 	void TrackResource(D12Resource auto&& object)
 	{
@@ -83,6 +94,7 @@ private:
 		unsigned subresource, bool flushBarriers);
 
 	std::unique_ptr<ResourceStateTracker> m_ResourceStateTracker;
+
 	// std::unique_ptr<DescriptorHeap> m_DescriptorHeap;
 	D3D12_COMMAND_LIST_TYPE           m_Type;
 	Ref<DxCommandList> m_CommandList;

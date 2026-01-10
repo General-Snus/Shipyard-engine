@@ -7,6 +7,7 @@
 
 bool GPUCommandQueue::Create(const Ref<DeviceType>& device, D3D12_COMMAND_LIST_TYPE type)
 {
+	OPTICK_EVENT();
 	m_Device = device;
 	m_CommandListType = type;
 	m_FenceValue = 0;
@@ -37,13 +38,16 @@ bool GPUCommandQueue::Create(const Ref<DeviceType>& device, D3D12_COMMAND_LIST_T
 		break;
 	}
 
-	m_ProcessInFlightCommandListsThread = std::jthread(&GPUCommandQueue::ProccessInFlightCommandLists, this);
+	m_ProcessInFlightCommandListsThread = std::jthread([this](std::stop_token s)
+	{
+		this->ProccessInFlightCommandLists(s);
+	});
 	return true;
 }
 
 uint64_t GPUCommandQueue::Signal()
 {
-	OPTICK_GPU_EVENT("Signal");
+	OPTICK_EVENT("Signal");
 	const uint64_t fenceValueForSignal = ++m_FenceValue;
 	Helpers::ThrowIfFailed(m_CommandQueue->Signal(m_Fence.Get(), fenceValueForSignal));
 	return fenceValueForSignal;
@@ -51,11 +55,13 @@ uint64_t GPUCommandQueue::Signal()
 
 bool GPUCommandQueue::IsFenceComplete(uint64_t fenceValue)
 {
+	OPTICK_EVENT();
 	return m_Fence->GetCompletedValue() >= fenceValue;
 }
 
 void GPUCommandQueue::WaitForFenceValue(uint64_t fenceValue)
 {
+	OPTICK_EVENT("WaitForFenceValue");
 	if (!IsFenceComplete(fenceValue))
 	{
 		const auto event = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
@@ -79,13 +85,14 @@ std::shared_ptr<CommandList> GPUCommandQueue::GetCommandList(const std::wstring&
 	}
 	else
 	{
+		LOGGER.Warn("Saturation warning, get command list created new");
 		commandList = std::make_shared<CommandList>(m_Device, m_CommandListType, name);
 	}
 
 #if (USE_NSIGHT_AFTERMATH)
 	// Create an Nsight Aftermath context handle for setting Aftermath event markers in this command list.
 	AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_DX12_CreateContextHandle(commandList->GetGraphicsCommandList().Get(),
-																   &m_hAftermathCommandListContext));
+		&m_hAftermathCommandListContext));
 #endif
 
 	return commandList;
@@ -98,22 +105,22 @@ Ref<ID3D12CommandQueue> GPUCommandQueue::GetCommandQueue()
 
 uint64_t GPUCommandQueue::ExecuteCommandList(std::shared_ptr<CommandList> commandList)
 {
-	return ExecuteCommandList(std::vector({commandList}));
+	return ExecuteCommandList(std::vector({ commandList }));
 }
 
 uint64_t GPUCommandQueue::ExecuteCommandList(const std::vector<std::shared_ptr<CommandList>>& commandLists)
 {
-	OPTICK_GPU_EVENT("ExecuteCommandList");
+	OPTICK_EVENT("ExecuteCommandList");
 	ResourceStateTracker::Lock();
 
 	// Command lists that need to put back on the command list queue.
-	static std::vector<std::shared_ptr<CommandList>> toBeQueued;
-	toBeQueued.clear(); 
+	std::vector<std::shared_ptr<CommandList>> toBeQueued;
+	toBeQueued.clear();
 
-	static std::vector<ID3D12CommandList*> d3d12CommandLists;
+	std::vector<ID3D12CommandList*> d3d12CommandLists;
 	d3d12CommandLists.clear();
 
-	for(auto& commandList : commandLists)
+	for (auto& commandList : commandLists)
 	{
 		auto       pendingCommandList = GetCommandList();
 		const bool hasPendingBarriers = commandList->Close(*pendingCommandList);
@@ -128,20 +135,21 @@ uint64_t GPUCommandQueue::ExecuteCommandList(const std::vector<std::shared_ptr<C
 		d3d12CommandLists.push_back(commandList->GetGraphicsCommandList().Get());
 
 		toBeQueued.push_back(pendingCommandList);
-		toBeQueued.push_back(commandList); 
+		toBeQueued.push_back(commandList);
 	}
 
 	const UINT numCommandLists = static_cast<UINT>(d3d12CommandLists.size());
-	OPTICK_GPU_EVENT("ListExecution");
+	OPTICK_EVENT("ListExecution");
 	m_CommandQueue->ExecuteCommandLists(numCommandLists, d3d12CommandLists.data());
+	 
 	uint64_t fenceValue = Signal();
-	
+
 	ResourceStateTracker::Unlock();
 
 	// Queue command lists for reuse.
-	for(auto& commandList : toBeQueued)
+	for (auto& commandList : toBeQueued)
 	{
-		m_InFlightCommandLists.Push({fenceValue, commandList});
+		m_InFlightCommandLists.Push({ fenceValue, commandList });
 	}
 
 	// If there are any command lists that generate mips then execute those
@@ -156,19 +164,19 @@ uint64_t GPUCommandQueue::ExecuteCommandList(const std::vector<std::shared_ptr<C
 	return fenceValue;
 }
 
-void GPUCommandQueue::ProccessInFlightCommandLists()
+void GPUCommandQueue::ProccessInFlightCommandLists(std::stop_token stop_token)
 {
 	OPTICK_THREAD("ProccessInFlightCommandLists");
-	OPTICK_GPU_EVENT("ProccessInFlightCommandLists");
 	std::unique_lock lock(m_ProcessInFlightCommandListsThreadMutex, std::defer_lock);
-
-	while (m_bProcessInFlightCommandLists)
+	while (m_bProcessInFlightCommandLists || !stop_token.stop_requested())
 	{
+
 		CommandListEntry commandListEntry;
 
 		lock.lock();
 		while (m_InFlightCommandLists.TryPop(commandListEntry))
 		{
+			OPTICK_EVENT("poppedList");
 			const auto fenceValue = std::get<0>(commandListEntry);
 			const auto& commandList = std::get<1>(commandListEntry);
 
@@ -187,6 +195,7 @@ void GPUCommandQueue::ProccessInFlightCommandLists()
 
 void GPUCommandQueue::Flush()
 {
+	OPTICK_EVENT();
 	std::unique_lock lock(m_ProcessInFlightCommandListsThreadMutex);
 	m_ProcessInFlightCommandListsThreadCV.wait(lock, [this] { return m_InFlightCommandLists.Empty(); });
 
@@ -199,11 +208,14 @@ void GPUCommandQueue::Flush()
 
 void GPUCommandQueue::Wait(const GPUCommandQueue& other) const
 {
+	OPTICK_EVENT();
 	m_CommandQueue->Wait(other.m_Fence.Get(), other.m_FenceValue);
 }
 
 void GPUCommandQueue::Destroy()
 {
+	OPTICK_EVENT();
 	Flush();
+	m_ProcessInFlightCommandListsThread.join();
 	m_bProcessInFlightCommandLists = false;
 }

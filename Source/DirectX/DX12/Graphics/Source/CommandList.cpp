@@ -10,6 +10,8 @@
 #include "Graphics/Resources/IndexBuffer.h"
 #include "Graphics/Resources/VertexBuffer.h"
 #include "Graphics/MIPS/GenerateMipsPSO.h"
+#include "Tools\Utilities\LinearAlgebra\Vector4.hpp"
+#include <exception>
 
 CommandList::CommandList(const Ref<DeviceType>& device, D3D12_COMMAND_LIST_TYPE type, const std::wstring& name)
 	: m_Type(type), m_Device(device)
@@ -31,23 +33,32 @@ void CommandList::CopyBuffer(GpuResource& buffer, size_t numElements, size_t ele
 	Ref<ID3D12Resource> d3d12Resource;
 	if (bufferSize != 0)
 	{
-		{
-			const auto var2 = CD3DX12_RESOURCE_DESC::Buffer(bufferSize, flags);
-			Helpers::ThrowIfFailed(m_Device->CreateCommittedResource(&HeapProperties, D3D12_HEAP_FLAG_NONE, &var2,
-				D3D12_RESOURCE_STATE_COMMON, nullptr,
-				IID_PPV_ARGS(d3d12Resource.GetAddressOf())));
-		}
+		const auto descriptor = CD3DX12_RESOURCE_DESC::Buffer(bufferSize, flags);
+		Helpers::ThrowIfFailed(m_Device->CreateCommittedResource(
+			&HeapProperties,
+			D3D12_HEAP_FLAG_NONE,
+			&descriptor,
+			D3D12_RESOURCE_STATE_COMMON,
+			nullptr,
+			IID_PPV_ARGS(d3d12Resource.GetAddressOf())
+		));
+
 
 		ResourceStateTracker::AddGlobalResourceState(d3d12Resource.Get(), D3D12_RESOURCE_STATE_COMMON);
 
 		if (bufferData != nullptr)
 		{
 			Ref<ID3D12Resource> uploadResource;
-			const auto             var1 = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-			const auto             var2 = CD3DX12_RESOURCE_DESC::Buffer(bufferSize);
-			Helpers::ThrowIfFailed(m_Device->CreateCommittedResource(&var1, D3D12_HEAP_FLAG_NONE, &var2,
-				D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
-				IID_PPV_ARGS(uploadResource.GetAddressOf())));
+			const auto heapProperty = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+			const auto uploadResourceDescriptor = CD3DX12_RESOURCE_DESC::Buffer(bufferSize);
+			Helpers::ThrowIfFailed(m_Device->CreateCommittedResource(
+				&heapProperty,
+				D3D12_HEAP_FLAG_NONE,
+				&uploadResourceDescriptor,
+				D3D12_RESOURCE_STATE_GENERIC_READ,
+				nullptr,
+				IID_PPV_ARGS(uploadResource.GetAddressOf())
+			));
 
 			D3D12_SUBRESOURCE_DATA subresourceData = {};
 			subresourceData.pData = bufferData;
@@ -99,6 +110,12 @@ bool CommandList::CreateIndexBuffer(IndexResource& outIndexResource, const std::
 	CopyBuffer(outIndexResource, aIndexList.size(), indexSizeInBytes, aIndexList.data(), D3D12_RESOURCE_FLAG_NONE, aHeapProperties);
 	return true;
 }
+
+void CommandList::TransitionBarrier(const GpuResource* resource, D3D12_RESOURCE_STATES stateAfter, unsigned subresource, bool flushBarriers)
+{
+	TransitionBarrier(*resource, stateAfter, subresource, flushBarriers);
+}
+
 void CommandList::TransitionBarrier(const GpuResource& resource, D3D12_RESOURCE_STATES stateAfter, unsigned subresource, bool flushBarriers)
 {
 	TransitionBarrier(resource.Resource(), resource.m_TransitioningState != -1 ? resource.m_TransitioningState : D3D12_RESOURCE_STATE_COMMON, stateAfter, subresource, flushBarriers);
@@ -184,15 +201,35 @@ void CommandList::ClearRenderTargets(unsigned numberOfTargets, Texture* rtv)
 	OPTICK_EVENT();
 	for (unsigned i = 0; i < numberOfTargets; ++i)
 	{
-		m_CommandList->ClearRenderTargetView(rtv[i].GetHandle(ViewType::RTV).cpuPtr, &rtv->m_ClearColor.x, 0,
-			nullptr);
+		ClearRenderTarget(&rtv[i]);
 	}
 }
 
-void CommandList::ClearRenderTarget(Texture rtv)
+void CommandList::ClearRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE rtv, Vector4f clearColor)
 {
 	OPTICK_EVENT();
-	m_CommandList->ClearRenderTargetView(rtv.GetHandle(ViewType::RTV).cpuPtr, &rtv.m_ClearColor.x, 0, nullptr);
+	m_CommandList->ClearRenderTargetView(rtv, clearColor.begin(), 0, nullptr);
+}
+
+void CommandList::ClearRenderTarget(Texture* rtv)
+{
+	ClearRenderTarget(rtv->GetHandle(ViewType::RTV).cpuPtr, rtv->m_ClearColor);
+}
+
+void CommandList::ClearDepth(const Texture& dsv, FLOAT depth)
+{
+	ClearDepth(dsv.GetHandle(ViewType::DSV).cpuPtr, depth);
+}
+
+void CommandList::ClearDepth(const Texture* dsv, FLOAT depth)
+{
+	ClearDepth(dsv->GetHandle(ViewType::DSV).cpuPtr, depth);
+}
+
+void CommandList::ClearDepth(D3D12_CPU_DESCRIPTOR_HANDLE dsv, FLOAT depth)
+{
+	OPTICK_EVENT();
+	m_CommandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, depth, 0, 0, nullptr);
 }
 
 void CommandList::SetPipelineState(const PSO& pso)
@@ -242,9 +279,22 @@ void CommandList::ConfigureInputAssembler(D3D_PRIMITIVE_TOPOLOGY topology, const
 
 	const auto& vertexLValue = vertexResource.VertexView();
 	m_CommandList->IASetVertexBuffers(0, 1, &vertexLValue);
-	TrackResource(vertexResource); 
+	TrackResource(vertexResource);
 }
- 
+
+
+void CommandList::DrawInstanced(int vertexCount,int instanceCount,int startVertex,int startInstance)
+{
+	OPTICK_GPU_EVENT("DrawInstanced");
+	m_CommandList->DrawInstanced(vertexCount, instanceCount, startVertex, startInstance);
+
+}
+void CommandList::Draw(int indexCount)
+{
+	OPTICK_GPU_EVENT("DrawIndexed");
+	m_CommandList->DrawIndexedInstanced(indexCount, 1, 0, 0, 0);
+}
+
 void CommandList::ReleaseTrackedObjects()
 {
 	OPTICK_EVENT();
@@ -277,6 +327,7 @@ void CommandList::Close()
 
 void CommandList::Reset()
 {
+	OPTICK_EVENT();
 	Helpers::ThrowIfFailed(m_CommandAllocator->Reset());
 	Helpers::ThrowIfFailed(m_CommandList->Reset(m_CommandAllocator.Get(), nullptr));
 

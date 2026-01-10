@@ -22,6 +22,7 @@
 #include <Tools/ImGui/imgui_notify.h>
 #include "Editor\Editor\Core\Editor.h"
 #include "Tools\ImGui\imgui.h"
+#include <vector>
 
 bool Renderer::Initialize(bool enableDeviceDebug)
 {
@@ -155,7 +156,6 @@ void Renderer::SetupDefaultVariables()
 
 	ResourceStateTracker::RemoveGlobalResourceState(m_DepthBuffer->Resource().Get());
 	m_DepthBuffer->Reset();
-	GetGPU().GetCommandQueue()->Flush();
 	m_DepthBuffer->AllocateDepthTexture(renderResolution, "DepthBuffer", 0.0f, 0u, DXGI_FORMAT_D32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 	m_DepthBuffer->CheckFeatureSupport();
 	m_DepthBuffer->SetView(ViewType::DSV);
@@ -237,26 +237,31 @@ uint32_t Renderer::GetAmountOfRenderJob()
 	return static_cast<uint32_t>(m_CustomSceneRenderPasses.size());
 }
 
-void Renderer::Render(std::vector<std::shared_ptr<Viewport>> renderViewPorts)
+void Renderer::Render(const std::vector<std::shared_ptr<Viewport>>& renderViewPorts)
 {
 	OPTICK_EVENT();
 
-	for (auto& viewport : m_CustomSceneRenderPasses)
+	for (const auto& container : { renderViewPorts, m_CustomSceneRenderPasses })
 	{
-		renderViewPorts.emplace_back(viewport);
-		viewport->Update();
+		for (auto& viewport : container)
+		{
+			viewport->Update();
+		}
 	}
 
 	BeginFrame();
 
 	Viewport* gameViewport = nullptr;
-	for (auto& viewport : renderViewPorts)
+	for (const auto& container : { renderViewPorts, m_CustomSceneRenderPasses })
 	{
-		if (viewport->IsGameViewport())
+		for (auto& viewport : container)
 		{
-			gameViewport = viewport.get();
+			if (viewport->IsGameViewport())
+			{
+				gameViewport = viewport.get();
+			}
+			RenderFrame(*viewport);
 		}
-		RenderFrame(*viewport);
 	}
 
 	EndFrame(gameViewport);
@@ -288,51 +293,59 @@ void Renderer::BeginFrame()
 	if(!myCamera) {
 	}
 	*/
+
+	GetGPU().StartNewFrame();
 }
 
-uint64_t Renderer::RenderFrame(Viewport& renderViewPort )
+void Renderer::RenderFrame(Viewport& renderViewPort)
 {
-	if (renderViewPort.IsRenderReady())
+	OPTICK_EVENT();
+	if (!renderViewPort.IsRenderReady())
 	{
-		OPTICK_EVENT();
-		auto scene = renderViewPort.GetAttachedScene()->GetGOM();
 		const auto commandQueue = GetGPU().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
-		auto       commandList = commandQueue->GetCommandList(L"RenderFrame");
+		const auto commandList = commandQueue->GetCommandList(L"RenderFrame");
 		OPTICK_GPU_CONTEXT(commandList->GetGraphicsCommandList().Get());
 
-		OPTICK_GPU_EVENT("RenderFrame");
-		PrepareBuffers(commandList, renderViewPort, scene);
-		Passes::ShadowPass(*this, commandList, scene);
-		commandList->FlushResourceBarriers();
-
-		OPTICK_GPU_EVENT("DeferredRenderingPass");
-		const auto frameBuffer = renderViewPort.GetCamera().GetFrameBuffer();
-		commandList->AllocateBuffer(eRootBindings::frameBuffer, frameBuffer);
-
-		GBuffer::Render(*this, commandList, scene);
-		EnvironmentLightPass(commandList);
-		ToneMapperPass(commandList, renderViewPort.GetTarget());
-
-
-
-		if (!renderViewPort.IsGameViewport())
-		{
-			debugDrawer.Render(commandList);
-		}
-
-		return commandQueue->ExecuteCommandList(commandList);
+		commandList->ClearRenderTarget(renderViewPort.GetTarget());
+		commandlists.emplace_back(commandList);
+		return;
 	}
 
+	auto scene = renderViewPort.GetAttachedScene()->GetGOM();
 	const auto commandQueue = GetGPU().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
-	const auto commandList = commandQueue->GetCommandList(L"RenderFrame");
-	GPU::ClearRTV(*commandList, renderViewPort.GetTarget());
+	auto       commandList = commandQueue->GetCommandList(L"RenderFrame");
+	OPTICK_GPU_CONTEXT(commandList->GetGraphicsCommandList().Get());
 
-	return commandQueue->ExecuteCommandList(commandList);
+	OPTICK_GPU_EVENT("RenderFrame");
+	PrepareBuffers(commandList, renderViewPort, scene);
+	Passes::ShadowPass(*this, commandList, scene);
+
+	OPTICK_GPU_EVENT("DeferredRenderingPass");
+	const auto frameBuffer = renderViewPort.GetCamera().GetFrameBuffer();
+	commandList->AllocateBuffer(eRootBindings::frameBuffer, frameBuffer);
+
+	commandList->FlushResourceBarriers();
+	GBuffer::Render(*this, commandList, scene);
+	OPTICK_GPU_EVENT("Lighting");
+	EnvironmentLightPass(commandList);
+	OPTICK_GPU_EVENT("Postpro");
+	ToneMapperPass(commandList, renderViewPort.GetTarget());
+
+
+	OPTICK_GPU_EVENT("DebugDrawer");
+
+	if (!renderViewPort.IsGameViewport())
+	{
+		debugDrawer.Render(commandList);
+	}
+
+	OPTICK_GPU_EVENT("CommandListExecution");
+	commandlists.emplace_back(commandList);
 }
 
 void Renderer::EndFrame(Viewport* gamePort)
 {
-	OPTICK_GPU_EVENT("EndFrame");
+	OPTICK_EVENT("EndFrame");
 
 	// imgui pass is not written and we have to manually transfer the viewport to backbuffer
 	if (GetEditor().GetIsGUIActive())
@@ -343,7 +356,16 @@ void Renderer::EndFrame(Viewport* gamePort)
 	{
 		ViewportToBackBuffer(gamePort);
 	}
+
+	const auto commandQueue = GetGPU().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+	const auto presentList = commandQueue->GetCommandList();
+	OPTICK_GPU_CONTEXT(presentList->GetGraphicsCommandList().Get());
+	presentList->TransitionBarrier(GetGPU().GetCurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT);
+	commandlists.emplace_back(presentList);
+	commandQueue->ExecuteCommandList(commandlists);
+
 	GetGPU().Present();
+	commandlists.clear();
 }
 
 void Renderer::PrepareBuffers(std::shared_ptr<CommandList> commandList, Viewport& renderViewPort,
@@ -353,8 +375,8 @@ void Renderer::PrepareBuffers(std::shared_ptr<CommandList> commandList, Viewport
 	commandList->TransitionBarrier(GetGPU().GetCurrentBackBuffer(),
 								   D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-	GPU::ClearRTV(*commandList.get(), GetGPU().GetCurrentRenderTargetView());
-	GPU::ClearDepth(*commandList.get(), m_DepthBuffer->GetHandle(ViewType::DSV).cpuPtr);
+	commandList->ClearRenderTarget(GetGPU().GetCurrentRenderTargetView());
+	commandList->ClearDepth(m_DepthBuffer->GetHandle(ViewType::DSV).cpuPtr);
 
 	const auto& rootSignature = m_Cache->m_RootSignature->GetRootSignature();
 	commandList->GetGraphicsCommandList()->SetGraphicsRootSignature(rootSignature.Get());
@@ -418,10 +440,8 @@ void Renderer::EnvironmentLightPass(std::shared_ptr<CommandList> commandList) co
 	*/
 
 	{
-		GetGPU().ClearRTV(*commandList.get(), environmentLight->RenderTargets(),
-							 environmentLight->GetNumberOfTargets());
-		commandList->SetRenderTargets(environmentLight->GetNumberOfTargets(), environmentLight->RenderTargets(),
-									  nullptr);
+		commandList->ClearRenderTargets(environmentLight->GetNumberOfTargets(), environmentLight->RenderTargets());
+		commandList->SetRenderTargets(environmentLight->GetNumberOfTargets(), environmentLight->RenderTargets(), nullptr);
 
 		const auto& pipelineState = environmentLight->GetPipelineState();
 		commandList->GetGraphicsCommandList()->SetPipelineState(pipelineState);
@@ -434,15 +454,14 @@ void Renderer::EnvironmentLightPass(std::shared_ptr<CommandList> commandList) co
 			commandList->TrackResource(gBufferTextures[i]);
 		}
 
-		commandList->FlushResourceBarriers();
+		//commandList->FlushResourceBarriers();
 		commandList->SetDescriptorTable(static_cast<int>(eRootBindings::GbufferPasses), gBufferTextures);
 
 		commandList->GetGraphicsCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		commandList->GetGraphicsCommandList()->IASetVertexBuffers(0, 1, nullptr);
 		commandList->GetGraphicsCommandList()->IASetIndexBuffer(nullptr);
-		commandList->GetGraphicsCommandList()->DrawInstanced(6, 1, 0, 0);
+		commandList->DrawInstanced(6, 1);
 		commandList->GetGraphicsCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
 	}
 }
 
@@ -479,6 +498,7 @@ void Renderer::ViewportToBackBuffer(Viewport* viewport)
 
 	const auto commandQueue = GetGPU().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 	const auto commandList = commandQueue->GetCommandList();
+	OPTICK_GPU_CONTEXT(commandList->GetGraphicsCommandList().Get());
 
 	const auto& copyPSO = m_Cache->GetState(PSOCache::ePipelineStateID::CopyTexture);
 
@@ -502,10 +522,7 @@ void Renderer::ViewportToBackBuffer(Viewport* viewport)
 	OPTICK_GPU_CONTEXT(commandList->GetGraphicsCommandList().Get());
 	OPTICK_GPU_EVENT("CopyTexture");
 
-	commandList->SetDescriptorTable(static_cast<int>(eRootBindings::TargetTexture), viewport->GetTarget());
-	commandList->FlushResourceBarriers();
-
-
+	commandList->SetDescriptorTable(static_cast<int>(eRootBindings::TargetTexture), viewport->GetTarget()); //Switch out to index bind
 	commandList->SetRenderTargets(1, &GetGPU().GetCurrentBackBuffer(), nullptr);
 
 	commandList->SetViewports(GetGPU().m_Viewport);
@@ -514,11 +531,8 @@ void Renderer::ViewportToBackBuffer(Viewport* viewport)
 	commandList->GetGraphicsCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	commandList->GetGraphicsCommandList()->IASetVertexBuffers(0, 1, nullptr);
 	commandList->GetGraphicsCommandList()->IASetIndexBuffer(nullptr);
-	commandList->GetGraphicsCommandList()->DrawInstanced(6, 1, 0, 0);
-
-	commandQueue->ExecuteCommandList(commandList);
-	commandQueue->Wait(*commandQueue); // block then present
-
+	commandList->DrawInstanced(6);
+	commandlists.emplace_back(commandList);
 }
 
 void Renderer::ImGuiPass()
@@ -551,8 +565,5 @@ void Renderer::ImGuiPass()
 	commandList->GetGraphicsCommandList()->SetDescriptorHeaps(std::size(heaps), heaps);
 
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList->GetGraphicsCommandList().Get());
-	commandQueue->ExecuteCommandList(commandList);
-	commandQueue->Wait(*commandQueue);
-	//Ensure this is done before we move on, this should be blocking because --- todo
-
+	this->commandlists.emplace_back(commandList);
 }

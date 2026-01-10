@@ -43,10 +43,11 @@ class GPU : public Singleton
 public:
 	friend class CommandList;
 	friend class GpuResource;
-	bool Initialize(HWND aWindowHandle, bool enableDeviceDebug,Vector2ui backbufferResolution);
+	bool Initialize(HWND aWindowHandle, bool enableDeviceDebug, Vector2ui backbufferResolution);
 	bool UnInitialize();
 
 	void ResizeBackbuffer(Vector2ui resolution);
+	void StartNewFrame();
 	void Present(unsigned aSyncInterval = 0);
 
 	void UpdateBufferResource(const CommandList& commandList, ID3D12Resource** pDestinationResource,
@@ -65,22 +66,6 @@ public:
 							   size_t anImageDataSize, bool generateMips = true,
 							   const D3D12_SHADER_RESOURCE_VIEW_DESC* aSRVDesc = nullptr);
 
-	static void TransitionResource(const CommandList& commandList, const Ref<ID3D12Resource>& resource,
-								   D3D12_RESOURCE_STATES beforeState, D3D12_RESOURCE_STATES afterState);
-
-	static void ClearRTV(const CommandList& commandList, D3D12_CPU_DESCRIPTOR_HANDLE rtv,
-						 Vector4f           clearColor = { 0,0,0,0 });
-
-	void ClearRTV(const CommandList& commandList, Texture* rtv, Vector4f clearColor);
-
-	void ClearRTV(const CommandList& commandList, Texture* rtv, unsigned textureCount, Vector4f clearColor);
-
-	static void ClearRTV(const CommandList& commandList, Texture* rtv, unsigned textureCount = 1);
-
-	static void ClearDepth(const CommandList& commandList, Texture* texture);
-
-	static void ClearDepth(const CommandList& commandList, D3D12_CPU_DESCRIPTOR_HANDLE dsv, FLOAT depth = 0);
-
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentRenderTargetView();
 	Texture& GetCurrentBackBuffer();
 
@@ -94,6 +79,7 @@ public:
 
 	static CommandList& CreateCommandList(Ref<DeviceType> device, Ref<ID3D12CommandAllocator> commandAllocator,
 										  D3D12_COMMAND_LIST_TYPE type);
+
 	std::shared_ptr<GPUCommandQueue> GetCommandQueue(D3D12_COMMAND_LIST_TYPE type = D3D12_COMMAND_LIST_TYPE_DIRECT) const;
 
 	Ref<ID3D12Fence> CreateFence() const;
@@ -117,7 +103,7 @@ public:
 	Ref<DeviceType>                       m_Device{};
 
 	unsigned                         m_Width{};
-	unsigned                         m_Height{};  
+	unsigned                         m_Height{};
 
 	std::shared_ptr<GPUCommandQueue> m_DirectCommandQueue{};
 	std::shared_ptr<GPUCommandQueue> m_CopyCommandQueue{};
