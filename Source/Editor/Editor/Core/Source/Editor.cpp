@@ -387,7 +387,7 @@ bool Editor::Initialize(HWND aHandle)
 #endif // Release
 	if (rendererFailed)
 	{
-		Window::Messagebox("Failure to start","Renderer failed to initialize");
+		Window::Messagebox("Failure to start", "Renderer failed to initialize");
 	}
 
 
@@ -517,26 +517,34 @@ void Editor::DoWinProc(Window* window, const MSG& aMessage)
 
 int Editor::Run()
 {
-	OPTICK_FRAME("MainThread");
+
+	OPTICK_FRAME("Main Thread"); 
+	auto static nextTick = GetTickCount64();
+
+	int loops;
+
+	loops = 0;
 	if (IsGUIActive)
 	{
 		UpdateImGui();
-		Update();
-		Render();
 	}
-	else
-	{
-		Update();
-		Render();
+
+	while (GetTickCount64() > nextTick && loops < maxSkippedFrames)
+	{ 
+		Update(); 
+		nextTick += tickToSkip;
+		loops++;
 	}
+	 
+	Render();
+
 
 	if (Input.IsKeyPressed(Keys::F7))
 	{
 		SetIsGUIActive(!GetIsGUIActive());
 	}
+	//bruh
 
-	Input.Update();
-	Mapper.Update();
 	return 0;
 }
 
@@ -712,15 +720,15 @@ void Editor::Update()
 		Paste();
 	}
 
-	if (Input.IsKeyPressed(Keys::F10))
-	{
-		GetEngineResources().ClearUnused();
-	}
 	if (Input.IsKeyPressed(Keys::F6))
 	{
 		static bool enabled = false;
 		enabled = !enabled;
 		Shipyard_PhysXInstance.ShowDrawLines(enabled);
+	}
+	if (Input.IsKeyPressed(Keys::F10))
+	{
+		GetEngineResources().ClearUnused();
 	}
 
 	// End
@@ -728,6 +736,9 @@ void Editor::Update()
 	gameState.Update(delta);
 	GetRenderer().Update(delta);
 	Shipyard_PhysXInstance.EndRead(delta);
+
+	Input.Update();
+	Mapper.Update();
 }
 
 void Editor::Render()

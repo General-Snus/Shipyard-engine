@@ -21,7 +21,7 @@ enum class EditorCallback
 	SceneChange,
 	WM_DropFile
 };
- 
+
 
 class Editor : public Singleton
 {
@@ -79,6 +79,10 @@ public:
 	GameState                                 gameState;
 
 private:
+	const int tickRate = 60;
+	const int tickToSkip = 1000 / tickRate;
+	const int maxSkippedFrames = 10;
+
 	std::vector<std::filesystem::path> WM_DroppedPath;
 
 	RECT                    ViewportRect;

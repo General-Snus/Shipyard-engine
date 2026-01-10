@@ -369,6 +369,15 @@ struct Filter
         Visibility,
         Wait,
 
+        // Editor
+
+
+
+
+
+
+
+
         // IO
         IO,
 

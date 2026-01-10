@@ -21,6 +21,7 @@
 #include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h> 
 #include <Tools/ImGui/imgui_notify.h>
 #include "Editor\Editor\Core\Editor.h"
+#include "Tools\ImGui\imgui.h"
 
 bool Renderer::Initialize(bool enableDeviceDebug)
 {
