@@ -45,7 +45,7 @@ public:
 
 private:
 	std::shared_ptr<Scene> sceneToRender;
-	void TakeInput();
+	void GizmoInput();
 	void RenderToolbar();
 
 	Vector2f cursorPositionInViewPort;

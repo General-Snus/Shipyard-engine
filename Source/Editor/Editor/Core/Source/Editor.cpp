@@ -130,8 +130,8 @@ static void SetupImGuiStyle(Theme theme)
 	colors[ImGuiCol_Border] = ImVec4(0.24f, 0.25f, 0.27f, 1.00f);
 	colors[ImGuiCol_BorderShadow] = ImVec4(0.31f, 0.31f, 0.31f, 1.00f);
 	colors[ImGuiCol_FrameBg] = ImVec4(0.35f, 0.35f, 0.35f, 1.00f);
-	colors[ImGuiCol_FrameBgHovered] = ImVec4(1.00f, 1.00f, 1.00f, 1.0f);
-	colors[ImGuiCol_FrameBgActive] = ImVec4(1.00f, 1.00f, 1.00f, 1.0f);
+	colors[ImGuiCol_FrameBgHovered] = ImVec4(0.40f, 0.40f, 0.40f, 1.0f);
+	colors[ImGuiCol_FrameBgActive] = ImVec4(0.60f, 0.60f, 0.60f, 1.0f);
 	colors[ImGuiCol_TitleBg] = ImVec4(0.13f, 0.13f, 0.13f, 1.00f);
 	colors[ImGuiCol_TitleBgActive] = ImVec4(0.13f, 0.13f, 0.13f, 1.00f);
 	colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.13f, 0.13f, 0.13f, 1.00f);
@@ -650,8 +650,8 @@ void Editor::FocusObject(const GameObject& focus, bool focusWithOffset) const
 			}
 			const Vector3f offset = -direction * radiusOffset;
 			const Vector3f newPosition = position + offset;
-			ref.LookAt(position);
-			ref.SetPosition(newPosition);
+			ref.LookAt(position,Vector3f::up());
+			//ref.SetPosition(newPosition);
 		}
 	}
 }

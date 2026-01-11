@@ -13,14 +13,15 @@ public:
 	Matrix3x3(const T* aMatrix);
 	Matrix3x3(const std::initializer_list<T>& list);
 	Matrix3x3(const T arr[3][3]);
+	Matrix3x3(const Vector3<T> a, const Vector3<T> b, const Vector3<T> c);
 
 	// Copy Constructor.
 	Matrix3x3<T>(const Matrix3x3<T>& aMatrix);
 	// Copies the top left 3x3 part of the Matrix4x4.
 	Matrix3x3<T>(const Matrix4x4<T>& aMatrix);
 	// () operator for accessing element (row, column) for read/write or read,respectively.
-	T&            operator()(int aRow, int aColumn);
-	const T&      operator()(int aRow, int aColumn) const;
+	T& operator()(int aRow, int aColumn);
+	const T& operator()(int aRow, int aColumn) const;
 	Matrix3x3<T>& operator=(const Matrix3x3<T>& aMatrix3x3) = default;
 
 	~Matrix3x3<T>() = default;
@@ -38,83 +39,113 @@ public:
 	Matrix3x3<T> GetTranspose();
 
 private:
-	T arr[dim3x3][dim3x3];
+	Vector3<T> r0;
+	Vector3<T> r1;
+	Vector3<T> r2;
 };
 
 template <class T>
 Matrix3x3<T>::Matrix3x3()
 {
-	for (short i = 1; i <= dim3x3; i++)
-	{
-		for (short j = 1; j <= dim3x3; j++)
-		{
-			if (i == j)
-			{
-				arr[i - 1][j - 1] = 1;
-			}
-			else
-			{
-				arr[i - 1][j - 1] = 0;
-			}
-		}
-	}
+	r0.x = 1;
+	r1.y = 1;
+	r2.z = 1;
+}
+template<class T>
+inline Matrix3x3<T>::Matrix3x3(const Vector3<T> a, const Vector3<T> b, const Vector3<T> c)
+{
+	r0 = a;
+	r1 = b;
+	r2 = c;
+
 }
 
 template <class T>
-Matrix3x3<T>::Matrix3x3(const T* aMatrix) {
-	for(short i = 1; i <= dim3x3; i++) {
-		for(short j = 1; j <= dim3x3; j++) { 
-			arr[i - 1][j - 1] = aMatrix[(i - 1) * dim3x3 + (j - 1)];
-		}
-	}
+Matrix3x3<T>::Matrix3x3(const T* aMatrix)
+{
+	r0.x = aMatrix[0]; r0.y = aMatrix[1]; r0.z = aMatrix[2];
+	r1.x = aMatrix[3]; r1.y = aMatrix[4]; r1.z = aMatrix[5];
+	r2.x = aMatrix[6]; r2.y = aMatrix[7]; r2.z = aMatrix[8];
 }
 
 template <class T>
-Matrix3x3<T>::Matrix3x3(const std::initializer_list<T>& list) : Matrix3x3() {
-	for(const auto& [numerator, listItem ]: list | std::ranges::views::enumerate) {
-		arr[numerator / dim3x3][numerator % dim3x3] = listItem;
-	}
+Matrix3x3<T>::Matrix3x3(const std::initializer_list<T>& list) : Matrix3x3()
+{
+	r0.x = *(list.begin() + 0);
+	r0.y = *(list.begin() + 1);
+	r0.z = *(list.begin() + 2);
+
+	r1.x = *(list.begin() + 0 + 3);
+	r1.y = *(list.begin() + 1 + 3);
+	r1.z = *(list.begin() + 2 + 3);
+
+	r2.x = *(list.begin() + 0 + 6);
+	r2.y = *(list.begin() + 1 + 6);
+	r2.z = *(list.begin() + 2 + 6);
 }
 
 template <class T>
 Matrix3x3<T>::Matrix3x3(const Matrix3x3<T>& aMatrix)
 {
-	for (short i = 1; i <= dim3x3; i++)
-	{
-		for (short j = 1; j <= dim3x3; j++)
-		{
-			arr[i - 1][j - 1] = aMatrix(i, j);
-		}
-	}
+	r0 = aMatrix.r0;
+	r1 = aMatrix.r1;
+	r2 = aMatrix.r2;
 }
 
 template <class T>
 Matrix3x3<T>::Matrix3x3(const Matrix4x4<T>& aMatrix)
 {
-	for (short i = 1; i <= dim3x3; i++)
-	{
-		for (short j = 1; j <= dim3x3; j++)
-		{
-			arr[i - 1][j - 1] = aMatrix(i, j);
-		}
-	}
+	r0.x = aMatrix(1, 1);
+	r0.y = aMatrix(1, 2);
+	r0.z = aMatrix(1, 3);
+
+	r1.x = aMatrix(2, 1);
+	r1.y = aMatrix(2, 2);
+	r1.z = aMatrix(2, 3);
+
+	r2.x = aMatrix(3, 1);
+	r2.y = aMatrix(3, 2);
+	r2.z = aMatrix(3, 3);
 }
 
 #pragma region Operators
 template <class T>
 T& Matrix3x3<T>::operator()(const int aRow, const int aColumn)
 {
-	assert(aRow <= 3);
-	assert(aColumn <= 3); 
-	return arr[aRow - 1][aColumn - 1];
+	assert(aRow >= 1 && aRow <= 3);
+	assert(aColumn >= 1 && aColumn <= 3);
+	switch (aRow)
+	{
+	case 1:
+		return r0[aColumn - 1];
+	case 2:
+		return r1[aColumn - 1];
+	case 3:
+		return r2[aColumn - 1];
+
+	default:
+		throw "Out of bound";
+	}
 }
 
 template <class T>
 const T& Matrix3x3<T>::operator()(const int aRow, const int aColumn) const
 {
-	assert(aRow <= 3);
-	assert(aColumn <= 3);
-	return arr[aRow - 1][aColumn - 1];
+	assert(aRow >= 1 && aRow <= 3);
+	assert(aColumn >= 1 && aColumn <= 3);
+
+	switch (aRow)
+	{
+	case 1:
+		return r0[aColumn - 1];
+	case 2:
+		return r1[aColumn - 1];
+	case 3:
+		return r2[aColumn - 1];
+
+	default:
+		throw "Out of bound";
+	}
 }
 
 template <class T>
@@ -306,9 +337,10 @@ Matrix3x3<T> Matrix3x3<T>::Transpose(const Matrix3x3<T>& aMatrixToTranspose)
 }
 
 template<class T>
-inline void Matrix3x3<T>::Transpose() { *this =Transpose(*this); }
+inline void Matrix3x3<T>::Transpose() { *this = Transpose(*this); }
 
 template<class T>
-inline Matrix3x3<T> Matrix3x3<T>::GetTranspose() {
+inline Matrix3x3<T> Matrix3x3<T>::GetTranspose()
+{
 	return Transpose(*this);
 }

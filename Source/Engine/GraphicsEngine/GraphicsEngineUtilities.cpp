@@ -21,19 +21,22 @@ bool GraphicsEngineUtilities::GenerateSceneForIcon(std::shared_ptr<Mesh> meshAss
 	}
 
 	renderTarget->isBeingLoaded = true;
-	const auto res = Vector2ui(1920, 1080);
+	const auto res = Vector2ui(512, 512);
 	{
 		auto& camera = GetRenderer().newScene->GetGOM().GetCamera().GetComponent<Camera>();
 		camera.SetResolution(res);
-		auto &transform = camera.transform();
-		const Vector3f position = meshAsset->Bounds.GetCenter() + Vector3f(0, 0, -meshAsset->Bounds.GetRadius());
+		auto& transform = camera.transform();
+		const Vector3f position = meshAsset->Bounds.GetCenter() + 0.5f * Vector3f(-meshAsset->Bounds.GetRadius(), meshAsset->Bounds.GetRadius(), -meshAsset->Bounds.GetRadius());
 		transform.SetPosition(position);
+		transform.LookAt(meshAsset->Bounds.GetCenter());
+
 		transform.Update();
+		camera.Update();
 	}
 
 	{
 		const auto target = GetRenderer().newScene->GetGOM().GetPlayer();
-		auto &mr = target.GetComponent<MeshRenderer>();
+		auto& mr = target.GetComponent<MeshRenderer>();
 		mr.SetNewMesh(meshAsset);
 		mr.SetMaterial(material);
 	}

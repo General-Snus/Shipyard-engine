@@ -83,10 +83,10 @@ void Inspector::RenderImGUi()
 		ImGui::Separator();
 		ImGui::NewLine();
 
-		//auto& transform = gameobject.transform();
-		//ImGui::PushID(&transform);
-		//transform.InspectorView();
-		//ImGui::PopID();
+		auto& transform = gameobject.transform();
+		ImGui::PushID(&transform);
+		transform.InspectorView();
+		ImGui::PopID();
 
 		ImGui::NewLine();
 		for (const auto& cmp : gameobject.GetAllComponents() )

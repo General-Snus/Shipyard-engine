@@ -109,6 +109,7 @@ void Viewport::Update()
 		editorCamera.Update();
 		editorCamera.IsInControl(IsSelected());
 		editorCamera.SetResolution(ViewportResolution);
+		GizmoInput();
 	}
 }
 
@@ -188,7 +189,6 @@ void Viewport::RenderImGUi()
 
 	const std::vector<GameObject>& selectedObjects = GetEditor().GetSelectedGameObjects();
 
-	TakeInput();
 
 	//ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding,{0.f, 0.f});
 	std::string title = "Scene ";
@@ -212,7 +212,7 @@ void Viewport::RenderImGUi()
 		const auto cursorPosition = ImGui::GetCursorScreenPos();
 		ImGui::Image(m_RenderTarget, *(ImVec2*)&ViewportResolution.x);
 		IsMouseHoverering = isWindowFocused;
-
+		
 		if (IsMouseHoverering)
 		{
 			cursorPositionInViewPort = ImGui::CursorPositionInWindow();
@@ -419,7 +419,7 @@ void Viewport::RenderToolbar()
 	}
 }
 
-void Viewport::TakeInput()
+void Viewport::GizmoInput()
 {
 	if (Input.IsKeyPressed(Keys::G))
 	{

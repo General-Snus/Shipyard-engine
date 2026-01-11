@@ -5,6 +5,7 @@
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
 #include <Tools/Utilities/LinearAlgebra/Quaternions.hpp>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
+#include "Tools\Utilities\Math.hpp"
 
 enum eSpace {
 	WORLD,

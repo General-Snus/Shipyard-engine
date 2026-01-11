@@ -7,6 +7,7 @@
 #include "Editor/Editor/Core/ApplicationState.h"
 #include "Tools/Utilities/Input/EnumKeys.h"
 #include "DirectX/XTK/Inc/SimpleMath.h"
+#include "Tools\Utilities\LinearAlgebra\Vector3.hpp"
 
 Camera::Camera(const SY::UUID anOwnerId,GameObjectManager* aManager)
 	: Component(anOwnerId,aManager),localTransform(0,nullptr)
@@ -55,7 +56,7 @@ void Camera::EditorCameraControlls()
 		aTransform = this->gameObject().GetComponent<Transform>();
 	}
 
-	const float           aTimeDelta = TimerInstance.getDeltaTime();
+	const float     aTimeDelta = TimerInstance.getDeltaTime();
 	Vector3f        mdf = cameraSpeed;
 	float           rotationSpeed = 10000;
 	constexpr float mousePower = 500.f;
