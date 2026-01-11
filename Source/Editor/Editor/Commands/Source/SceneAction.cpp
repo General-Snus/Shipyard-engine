@@ -1,8 +1,11 @@
 #include "../SceneAction.h"
-#include <Engine/PersistentSystems/Scene.h>
-#include "Engine/AssetManager/ComponentSystem/Component.h"
-#include "Engine/AssetManager/ComponentSystem/GameObjectManager.h"
+#include "Commands\CommandBuffer.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
+#include "Engine/AssetManager/ComponentSystem/GameObjectManager.h"
+#include "Engine\AssetManager\ComponentSystem\GameObject.h"
+#include <Engine/PersistentSystems/Scene.h>
+#include <cassert>
+#include <format>
 
 GameobjectAdded::GameobjectAdded(const GameObject object) : m_object(object)
 {
@@ -29,7 +32,7 @@ void GameobjectAdded::commandRedo()
 	}
 }
 
-bool GameobjectAdded::merge(std::shared_ptr<BaseCommand>& ptr)
+bool GameobjectAdded::merge(BaseCommand* ptr)
 {
 	ptr;
 	return false;
@@ -60,7 +63,7 @@ void GameobjectDeleted::commandRedo()
 	m_object.scene().GetGOM().DeleteGameObject(m_object.GetID(), true);
 }
 
-bool GameobjectDeleted::merge(std::shared_ptr<BaseCommand>& ptr)
+bool GameobjectDeleted::merge(BaseCommand* ptr)
 {
 	ptr;
 	return false;

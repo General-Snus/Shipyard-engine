@@ -1,8 +1,10 @@
 #pragma once
-#include <assert.h>
-#include <cassert>
-#include <vector>
-#include <Tools/Logging/Logging.h>
+#include "Tools\Logging\Logging.h" 
+#include <cassert> 
+#include <format> 
+#include <memory> 
+#include <string> 
+#include <vector> 
 
 class BaseCommand
 {
@@ -11,7 +13,7 @@ public:
 	virtual void commandUndo() = 0;
 
 	// Try merge with previous command when added, if true adding is redundant
-	virtual bool merge(std::shared_ptr<BaseCommand>& ptr)
+	virtual bool merge(BaseCommand* ptr)
 	{
 		return ptr && !ptr->mergeBlocker;
 	}
@@ -49,7 +51,7 @@ public:
 	{
 		auto ptr = std::make_shared<CommandClass>(arguments...);
 
-		if (commandList.size() > cursor && ptr->merge(commandList[cursor].back()))
+		if (commandList.size() > cursor && ptr->merge(commandList.at(cursor).back().get()))
 		{
 			return;
 		}
@@ -59,8 +61,8 @@ public:
 			commandList.erase(commandList.begin() + (cursor + 1), commandList.end());
 		}
 
-		commandList.push_back({ptr});
-		cursor = static_cast<int>(commandList.size()) - 1;
+		commandList.push_back({ ptr });
+		cursor = commandList.size() - 1;
 	}
 
 	const std::vector<CommandPacket>& getCommandList()
@@ -71,7 +73,7 @@ public:
 	// assumed complete command 
 	void addCommand(const CommandPacket& ptr)
 	{
-		if (ptr.empty() || commandList.size() > cursor && ptr.front()->merge(commandList[cursor].back()))
+		if (ptr.empty() || commandList.size() > cursor && ptr.front()->merge(commandList.at(cursor).back().get()))
 		{
 			return;
 		}
@@ -89,7 +91,7 @@ public:
 	{
 		assert(ptr != nullptr);
 
-		if (commandList.size() > cursor && ptr->merge(commandList[cursor].back()))
+		if (commandList.size() > cursor && ptr->merge(commandList.at(cursor).back().get()))
 		{
 			return;
 		}
@@ -98,7 +100,7 @@ public:
 		{
 			commandList.erase(commandList.begin() + (cursor + 1), commandList.begin() + commandList.size());
 		}
-		commandList.push_back({ptr});
+		commandList.push_back({ ptr });
 		cursor = (commandList.size() - 1);
 	}
 
@@ -126,7 +128,7 @@ public:
 		if (!commandList.empty() && cursor >= 0)
 		{
 			LOGGER.Log(std::format("Undoing command at {}", cursor));
-			for (const auto& command : commandList[cursor])
+			for (const auto& command : commandList.at(cursor))
 			{
 				command->commandUndo();
 			}
@@ -139,7 +141,7 @@ public:
 		if (commandList.size() > cursor + 1)
 		{
 			LOGGER.Log(std::format("Redoing command at {}", cursor));
-			for (const auto& command : commandList[cursor + 1])
+			for (const auto& command : commandList.at(cursor + 1))
 			{
 				command->commandRedo();
 			}

@@ -1,20 +1,17 @@
 #include "DirectXHeader.pch.h"
 #include "../GpuBuffer.h"
-#include <DirectX/DX12/Graphics/GPU.h>
-#include <DirectX/DX12/Graphics/CommandQueue.h>
-#include <DirectX/DX12/Graphics/CommandList.h>
-#include "winerror.h"
-#include "combaseapi.h"
+#include "Tools/Utilities/Math.hpp"
+#include "Tools/Utilities/Ref.h"
 #include "Windows.h"
-#include <cstdint>
 #include "cstring"
-#include <memory>
-#include "Graphics/Gpu_fwd.h"
 #include "d3d12.h"
 #include "d3dx12_core.h"
 #include "dxgiformat.h"
-#include "Tools/Utilities/Math.hpp"
-#include "Tools/Utilities/Ref.h"
+#include <DirectX/DX12/Graphics/CommandList.h>
+#include <DirectX/DX12/Graphics/CommandQueue.h>
+#include <DirectX/DX12/Graphics/GPU.h>
+#include <cstdint>
+#include <memory>
 
 
 GpuBuffer::GpuBuffer(const BufferDescription& desc, void* intialData) : desc(desc)
@@ -42,7 +39,7 @@ GpuBuffer::GpuBuffer(const BufferDescription& desc, void* intialData) : desc(des
 	if (desc.bind_flags && BufferDescription::BufferBinds::ShaderResource)
 		resource_desc.Flags |= D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE;
 
-	D3D12_RESOURCE_STATES resource_state = D3D12_RESOURCE_STATE_COMMON; 
+	D3D12_RESOURCE_STATES resource_state = D3D12_RESOURCE_STATE_COMMON;
 
 	CD3DX12_HEAP_DESC heap = CD3DX12_HEAP_DESC();
 	if (desc.resource_usage == BufferDescription::ResourceUsage::Readback)
@@ -56,7 +53,7 @@ GpuBuffer::GpuBuffer(const BufferDescription& desc, void* intialData) : desc(des
 		heap.Properties.Type = D3D12_HEAP_TYPE_UPLOAD;
 		resource_state = D3D12_RESOURCE_STATE_GENERIC_READ;
 	}
-	  
+
 
 	auto& device = GetGPU().m_Device;
 	HRESULT hr = device->CreateCommittedResource(
@@ -78,12 +75,12 @@ GpuBuffer::GpuBuffer(const BufferDescription& desc, void* intialData) : desc(des
 	if (desc.resource_usage == BufferDescription::ResourceUsage::Readback)
 	{
 		hr = m_Resource->Map(0, nullptr, &mapped_data);
- 	}
+	}
 	else if (desc.resource_usage == BufferDescription::ResourceUsage::Upload)
 	{
 		D3D12_RANGE read_range{};
 		hr = m_Resource->Map(0, &read_range, &mapped_data);
- 
+
 		if (intialData)
 		{
 			memcpy(mapped_data, intialData, desc.size);
@@ -95,10 +92,10 @@ GpuBuffer::GpuBuffer(const BufferDescription& desc, void* intialData) : desc(des
 		const auto commandQueue = GetGPU().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COPY);
 		auto       commandList = commandQueue->GetCommandList(L"GpuBufferInitialization");
 
-		commandList->CopyBuffer(*this,1, sizeof(desc.size), mapped_data,D3D12_RESOURCE_FLAG_NONE, CD3DX12_HEAP_PROPERTIES(heap.Properties));
- 		if (desc.bind_flags || BufferDescription::BufferBinds::ShaderResource)
+		commandList->CopyBuffer(*this, 1, sizeof(desc.size), mapped_data, D3D12_RESOURCE_FLAG_NONE, CD3DX12_HEAP_PROPERTIES(heap.Properties));
+		if (desc.bind_flags || BufferDescription::BufferBinds::ShaderResource)
 		{
-			commandList->TransitionBarrier(*this, D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE); 
+			commandList->TransitionBarrier(*this, D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE);
 		}
 		commandQueue->ExecuteCommandList(commandList);
 	}
@@ -122,8 +119,8 @@ inline void* GpuBuffer::Map()
 	else if (desc.resource_usage == BufferDescription::ResourceUsage::Upload)
 	{
 		D3D12_RANGE read_range{};
-		hr = m_Resource->Map(0, &read_range, &mapped_data); 
-		if (FAILED(hr)) { return nullptr; } 
+		hr = m_Resource->Map(0, &read_range, &mapped_data);
+		if (FAILED(hr)) { return nullptr; }
 	}
 	return mapped_data;
 }
@@ -139,12 +136,12 @@ void GpuBuffer::Update(void const* src_data, uint64_t data_size, uint64_t offset
 	src_data; data_size; offset;
 	if (mapped_data)
 	{
-		memcpy((uint8_t*) mapped_data+ offset, src_data, data_size);
+		memcpy((uint8_t*)mapped_data + offset, src_data, data_size);
 	}
 	else
 	{
 		Map();
- 		memcpy((uint8_t*)mapped_data + offset, src_data, data_size);
+		memcpy((uint8_t*)mapped_data + offset, src_data, data_size);
 	}
 }
 

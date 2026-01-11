@@ -1,8 +1,9 @@
 #pragma once
-#include <memory>
-#include <Engine/AssetManager/ComponentSystem/Gameobject.h>
-#include <Tools/Logging/Logging.h>
 #include "CommandBuffer.h"
+#include "Engine\AssetManager\ComponentSystem\Component.h"
+#include "Engine\AssetManager\ComponentSystem\GameObjectManager.h"
+#include <Engine/AssetManager/ComponentSystem/Gameobject.h>
+#include <vector>
 
 class GameobjectAdded : public BaseCommand
 {
@@ -11,7 +12,7 @@ public:
 	void     commandUndo() override;
 	void     commandRedo() override;
 
-	bool merge(std::shared_ptr<BaseCommand>& ptr) override;
+	bool merge(BaseCommand* ptr) override;
 
 private:
 	GameObject                        m_object;
@@ -26,7 +27,7 @@ public:
 	void     commandUndo() override;
 	void     commandRedo() override;
 
-	bool merge(std::shared_ptr<BaseCommand>& ptr) override;
+	bool merge(BaseCommand* ptr) override;
 
 private:
 	GameObject                        m_object;

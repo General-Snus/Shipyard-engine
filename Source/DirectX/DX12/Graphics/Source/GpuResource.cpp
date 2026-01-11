@@ -1,8 +1,20 @@
 #include "DirectXHeader.pch.h"
 
-#include "Graphics/GpuResource.h"
+#include "DirectX\XTK\Inc\DirectXHelpers.h"
 #include "Graphics/GPU.h"
-#include "Graphics/ResourceStateTracker.h"
+#include "Graphics/GpuResource.h"
+#include "Graphics\Enums.h"
+#include "Graphics\Helpers.h"
+#include "Optick\include\optick.h"
+#include "Tools\Utilities\Error.hpp"
+#include "Tools\Utilities\Ref.h"
+#include "Windows.h"
+#include "d3d12.h"
+#include "d3dx12_core.h"
+#include "dxgiformat.h"
+#include <cassert>
+#include <cstdint>
+#include <exception>
 
 using namespace DirectX;
 
@@ -36,7 +48,7 @@ GpuResource::GpuResource()
 //	return *this;
 // }
 
-void GpuResource::Destroy()
+void GpuResource::Destroy() noexcept
 {
 	m_Resource = nullptr;
 	for (auto& [type, pair] : m_DescriptorHandles)
@@ -67,7 +79,7 @@ void GpuResource::Reset()
 	m_Resource.Reset();
 	m_ResourceName.clear();
 	m_FormatSupport = {};
-	m_DescriptorHandles.clear(); 
+	m_DescriptorHandles.clear();
 }
 
 bool GpuResource::CheckSrvSupport() const

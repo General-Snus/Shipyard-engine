@@ -82,20 +82,27 @@ void Console::RenderImGUi()
 			const auto& messages = buffer.LoggedMessages;
 
 			ImGuiListClipper clipper;
-			clipper.Begin((int)messages.size(), 2 * ImGui::GetTextLineHeightWithSpacing());
+
+
+			clippedMessages.clear();
+			for (const auto& log : messages)
+			{
+				const auto& [type, message, trace, nr] = log;
+				if (!message.empty() && (filter & type) != none)
+				{
+					clippedMessages.emplace_back(log);
+				}
+			}
+
+			clipper.Begin((int)clippedMessages.size(), ImGui::GetTextLineHeightWithSpacing());
 
 			while (clipper.Step())
 			{
 
 				for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
 				{
-					const auto& logEntity = messages[i];
+					const auto& logEntity = clippedMessages[i];
 					const auto& [type, message, trace, nr] = logEntity;
-
-					if (message.empty() || (filter & type) == none)
-					{
-						continue;
-					}
 
 					// Push color and text
 					Color logColor = LOGGER.GetColor(type);
@@ -122,11 +129,10 @@ void Console::RenderImGUi()
 			lastSize = static_cast<int>(messages.size());
 		}
 		ImGui::EndChild();
-
+		ImGui::Separator();
 		if (ImGui::BeginChild("DetailView"))
 		{
 			ImGui::TextWrapped(pickedMessage.message.c_str());
-			ImGui::Spacing();
 			for (auto& traceElement : pickedMessage.trace)
 			{
 				ImGui::TextWrapped(traceElement.description().c_str());

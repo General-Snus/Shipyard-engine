@@ -14,4 +14,5 @@ class Console : public EditorWindow
   private:
     LoggerService::LogType filter = LoggerService::LogType::message;
     LoggerService::LogMsg pickedMessage;
+    std::vector<LoggerService::LogMsg> clippedMessages;
 };

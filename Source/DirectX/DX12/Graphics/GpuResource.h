@@ -22,7 +22,7 @@ public:
 	// GpuResource& operator=(GpuResource&& other) noexcept;
 	// GpuResource(GpuResource& toCopy);
 
-	virtual void Destroy();
+	virtual void Destroy() noexcept;
 
 	virtual void CreateView(size_t numElements,size_t elementSize);
 	virtual void SetView(ViewType view);

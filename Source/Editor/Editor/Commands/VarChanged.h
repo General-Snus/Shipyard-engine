@@ -14,25 +14,25 @@ public:
 	void commandUndo() override;
 	void commandRedo() override;
 
-	bool        merge(std::shared_ptr<BaseCommand>& ptr) override;
+	bool        merge(BaseCommand* ptr) override;
 	std::string getDescription() const override;
 
 private:
 	std::string m_VariableName = "UnknownVariable";
-	var*        m_object;
+	var* m_object;
 	var         m_OldValue;
 	var         m_NewValue;
 };
 
 template <typename var>
-bool PointerVarChanged<var>::merge(std::shared_ptr<BaseCommand>& ptr)
+bool PointerVarChanged<var>::merge(BaseCommand* ptr)
 {
 	if (!BaseCommand::merge(ptr))
 	{
 		return false;
 	}
 
-	if (auto otherCommand = std::dynamic_pointer_cast<PointerVarChanged<var>, BaseCommand>(ptr))
+	if (auto otherCommand = dynamic_cast<PointerVarChanged<var>*>(ptr))
 	{
 		const bool sameAddress = m_object == otherCommand->m_object;
 
@@ -47,8 +47,8 @@ bool PointerVarChanged<var>::merge(std::shared_ptr<BaseCommand>& ptr)
 }
 
 template <typename var>
-PointerVarChanged<var>::PointerVarChanged(var*               value, const var oldVal, const var newValue,
-                                          const std::string& varName)
+PointerVarChanged<var>::PointerVarChanged(var* value, const var oldVal, const var newValue,
+										  const std::string& varName)
 	: m_VariableName(varName), m_object(value)
 {
 	if (!m_object)
@@ -104,7 +104,7 @@ std::string PointerVarChanged<var>::getDescription() const
 	{
 		const std::string outMessage =
 			std::format("{}:{} changed from {} to {}", refl::reflect<var>().name.str(), m_VariableName,
-			            refl::runtime::debug_str(m_OldValue, true), refl::runtime::debug_str(m_NewValue, true));
+						refl::runtime::debug_str(m_OldValue, true), refl::runtime::debug_str(m_NewValue, true));
 
 		return outMessage;
 	}
@@ -127,12 +127,12 @@ template <typename ComponentType, typename var>
 class VarChanged : public BaseCommand
 {
 public:
-	VarChanged(ComponentType*     object, const var* value, var oldVal, var newValue,
-	           const std::string& varName = "");
+	VarChanged(ComponentType* object, const var* value, var oldVal, var newValue,
+			   const std::string& varName = "");
 	void commandUndo() override;
 	void commandRedo() override;
 
-	bool        merge(std::shared_ptr<BaseCommand>& ptr) override;
+	bool        merge(BaseCommand* ptr) override;
 	std::string getDescription() const override;
 
 private:
@@ -144,14 +144,14 @@ private:
 };
 
 template <typename ComponentType, typename var>
-bool VarChanged<ComponentType, var>::merge(std::shared_ptr<BaseCommand>& ptr)
+bool VarChanged<ComponentType, var>::merge(BaseCommand* ptr)
 {
 	if (!BaseCommand::merge(ptr))
 	{
 		return false;
 	}
 
-	if (auto otherCommand = std::dynamic_pointer_cast<VarChanged<ComponentType, var>, BaseCommand>(ptr))
+	if (auto otherCommand = dynamic_cast<VarChanged<ComponentType, var>*>(ptr))
 	{
 		const bool sameObject = m_object == otherCommand->m_object;
 		const bool sameAddress = addressOffset == otherCommand->addressOffset;
@@ -167,8 +167,8 @@ bool VarChanged<ComponentType, var>::merge(std::shared_ptr<BaseCommand>& ptr)
 }
 
 template <typename ComponentType, typename var>
-VarChanged<ComponentType, var>::VarChanged(ComponentType* object, const var*           value, const var oldVal,
-                                           const var      newValue, const std::string& varName)
+VarChanged<ComponentType, var>::VarChanged(ComponentType* object, const var* value, const var oldVal,
+										   const var      newValue, const std::string& varName)
 	: m_VariableName(varName), m_object(object->gameObject())
 {
 	if (!object)
@@ -229,7 +229,7 @@ std::string VarChanged<ComponentType, var>::getDescription() const
 	{
 		const std::string outMessage =
 			std::format("{}:{} changed from {} to {}", refl::reflect<ComponentType>().name.str(), m_VariableName,
-			            refl::runtime::debug_str(m_OldValue, true), refl::runtime::debug_str(m_NewValue, true));
+						refl::runtime::debug_str(m_OldValue, true), refl::runtime::debug_str(m_NewValue, true));
 
 		return outMessage;
 	}
