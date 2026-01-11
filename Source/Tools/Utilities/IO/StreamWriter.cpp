@@ -3,10 +3,10 @@
 FileWriter::FileWriter(std::filesystem::path path) : path(path)
 {
 
-	if (!std::filesystem::exists(path))
+	if (path.has_parent_path())
 	{
 		std::error_code code;
-		bool fail = std::filesystem::create_directories(path, code);
+		bool fail = !std::filesystem::create_directories(path.parent_path(), code);
 		if (fail)
 		{
 			//__debugbreak();
