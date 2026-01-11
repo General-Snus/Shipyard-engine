@@ -3,6 +3,7 @@
 // TODO Un-yikes the includes
 #include "../Editor.h"
 #include "Editor/Editor/Defines.h"
+#include "Editor/Editor/Helpers/ImGuiHelpers.h"
 #include "Editor/Editor/Windows/EditorWindows/ColorPresets.h"  
 #include "Editor/Editor/Windows/EditorWindows/Console.h"
 #include "Editor/Editor/Windows/EditorWindows/ContentDirectory.h"
@@ -16,7 +17,6 @@
 #include "Engine/PersistentSystems/Scene.h"
 #include "Engine/PersistentSystems/System/SceneGraph/WorldGraph.h"
 #include "ImGuizmo.h"
-#include "Editor/Editor/Helpers/ImGuiHelpers.h"
 #include "Tools/Utilities/Input/EnumKeys.h"
 #include "Tools/Utilities/LinearAlgebra/Vectors.hpp" 
 #include "Tools/Utilities/System/Event.h"
@@ -518,7 +518,7 @@ void Editor::DoWinProc(Window* window, const MSG& aMessage)
 int Editor::Run()
 {
 
-	OPTICK_FRAME("Main Thread"); 
+	OPTICK_FRAME("Main Thread");
 	auto static nextTick = GetTickCount64();
 
 	int loops;
@@ -530,12 +530,12 @@ int Editor::Run()
 	}
 
 	while (GetTickCount64() > nextTick && loops < maxSkippedFrames)
-	{ 
-		Update(); 
+	{
+		Update();
 		nextTick += tickToSkip;
 		loops++;
 	}
-	 
+
 	Render();
 
 
@@ -650,7 +650,7 @@ void Editor::FocusObject(const GameObject& focus, bool focusWithOffset) const
 			}
 			const Vector3f offset = -direction * radiusOffset;
 			const Vector3f newPosition = position + offset;
-			ref.LookAt(position,Vector3f::up());
+			ref.LookAt(position, Vector3f::up());
 			//ref.SetPosition(newPosition);
 		}
 	}
@@ -776,6 +776,9 @@ void Editor::TopBar()
 			}
 			if (ImGui::Selectable("Save Scene"))
 			{
+				FileWriter writer = FileWriter("TestWrite.asset");
+				this->GetActiveScene()->GetGOM().Serialize(writer);
+				writer.Write("hello world", 12);
 				// Here we can open the binary scene file
 			}
 

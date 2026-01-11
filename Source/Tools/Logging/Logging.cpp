@@ -1,8 +1,7 @@
 #include "Logging.h"
 
-#include "Windows.h"
 #include "Tools/ImGui/imgui_notify.h"
-
+#include "Windows.h" 
 #include <filesystem>
 #include <iomanip>
 #include <iostream>
@@ -35,7 +34,7 @@ bool LoggerService::Create()
 	return true;
 }
 
-void LoggerService::SetConsoleHandle(void *aHandle)
+void LoggerService::SetConsoleHandle(void* aHandle)
 {
 	myHandle = aHandle;
 }
@@ -45,7 +44,7 @@ void LoggerService::SetPrintToVSOutput(bool bNewValue)
 	shouldPrintToOutput = bNewValue;
 }
 
-void LoggerService::Log(const char *aString, bool withNotice, const std::source_location &location)
+void LoggerService::Log(const char* aString, bool withNotice, const std::source_location& location)
 {
 	Log(std::string(aString), withNotice, location);
 }
@@ -55,22 +54,22 @@ Color LoggerService::GetColor(LogType type)
 	switch (type)
 	{
 		using enum LoggerService::LogType;
-	case message:
-		return {1.0f, 1.0f, 1.0f}; 
-	case warning:
-		return {1.0f, 1.0f, 0.0f};
-	case error:
-		return {1.0f, 0.5f, 0.5f};
-	case critical:
-		return {1.0f, 0.0f, 0.0f};
-	case success:
-		return {0.0f, 1.0f, 0.0f};
-	default:
-		std::unreachable();
+		case message:
+			return { 1.0f, 1.0f, 1.0f };
+		case warning:
+			return { 1.0f, 1.0f, 0.0f };
+		case error:
+			return { 1.0f, 0.5f, 0.5f };
+		case critical:
+			return { 1.0f, 0.0f, 0.0f };
+		case success:
+			return { 0.0f, 1.0f, 0.0f };
+		default:
+			std::unreachable();
 	}
 }
 
-void LoggerService::Log(const std::string &aString, bool withNotice, const std::source_location &location)
+void LoggerService::Log(const std::string& aString, bool withNotice, const std::source_location& location)
 {
 	if (isInitialized)
 	{
@@ -78,7 +77,7 @@ void LoggerService::Log(const std::string &aString, bool withNotice, const std::
 
 		if (withNotice)
 		{
-			ImGui::Notify({ImGuiToastType::Info, aString.c_str()});
+			ImGui::Notify({ ImGuiToastType::Info, aString.c_str() });
 		}
 
 		if (shouldPrintToOutput)
@@ -106,16 +105,16 @@ void LoggerService::Log(const std::string &aString, bool withNotice, const std::
 	}
 }
 
-void LoggerService::Warn(const std::string &aString, bool withNotice, const std::source_location &location)
+void LoggerService::Warn(const std::string& aString, bool withNotice, const std::source_location& location)
 {
 	if (isInitialized)
 	{
 		std::scoped_lock lock(readyToWrite);
 
-		
+
 		if (withNotice)
 		{
-			ImGui::Notify({ImGuiToastType::Warning, aString.c_str()});
+			ImGui::Notify({ ImGuiToastType::Warning, aString.c_str() });
 		}
 
 		if (shouldPrintToOutput)
@@ -143,7 +142,7 @@ void LoggerService::Warn(const std::string &aString, bool withNotice, const std:
 	}
 }
 
-void LoggerService::Err(const std::string &aString, bool withNotice, const std::source_location &location)
+void LoggerService::Err(const std::string& aString, bool withNotice, const std::source_location& location)
 {
 	if (isInitialized)
 	{
@@ -151,7 +150,7 @@ void LoggerService::Err(const std::string &aString, bool withNotice, const std::
 
 		if (withNotice)
 		{
-			ImGui::Notify({ImGuiToastType::Error, aString.c_str()});
+			ImGui::Notify({ ImGuiToastType::Error, aString.c_str() });
 		}
 
 		if (shouldPrintToOutput)
@@ -179,12 +178,12 @@ void LoggerService::Err(const std::string &aString, bool withNotice, const std::
 		}
 
 		std::wcout << "file: " << location.file_name() << '(' << location.line() << ':' << location.column() << ") `"
-				   << location.function_name() << std::endl;
+			<< location.function_name() << std::endl;
 	}
 }
 
-void LoggerService::ErrTrace(const std::string &aString, bool withNotice, const std::stacktrace &trace,
-							 const std::source_location &location)
+void LoggerService::ErrTrace(const std::string& aString, bool withNotice, const std::stacktrace& trace,
+							 const std::source_location& location)
 {
 	if (isInitialized)
 	{
@@ -192,7 +191,7 @@ void LoggerService::ErrTrace(const std::string &aString, bool withNotice, const 
 
 		if (withNotice)
 		{
-			ImGui::Notify({ImGuiToastType::Error, aString.c_str()});
+			ImGui::Notify({ ImGuiToastType::Error, aString.c_str() });
 		}
 
 		if (shouldPrintToOutput)
@@ -221,11 +220,11 @@ void LoggerService::ErrTrace(const std::string &aString, bool withNotice, const 
 		}
 
 		std::wcout << "file: " << location.file_name() << '(' << location.line() << ':' << location.column() << ") `"
-				   << location.function_name() << std::endl;
+			<< location.function_name() << std::endl;
 	}
-} 
+}
 
-void LoggerService::Success(const std::string &aString, bool withNotice, const std::source_location &location)
+void LoggerService::Success(const std::string& aString, bool withNotice, const std::source_location& location)
 {
 	if (isInitialized)
 	{
@@ -233,7 +232,7 @@ void LoggerService::Success(const std::string &aString, bool withNotice, const s
 
 		if (withNotice)
 		{
-			ImGui::Notify({ImGuiToastType::Success, aString.c_str()});
+			ImGui::Notify({ ImGuiToastType::Success, aString.c_str() });
 		}
 
 		if (shouldPrintToOutput)
@@ -260,8 +259,8 @@ void LoggerService::Success(const std::string &aString, bool withNotice, const s
 	}
 }
 
-void LoggerService::Critical(const std::exception &anException, unsigned aLevel,
-							 bool withNotice, const std::source_location &location)
+void LoggerService::Critical(const std::exception& anException, unsigned aLevel,
+							 bool withNotice, const std::source_location& location)
 {
 	if (isInitialized)
 	{
@@ -269,7 +268,7 @@ void LoggerService::Critical(const std::exception &anException, unsigned aLevel,
 
 		if (withNotice)
 		{
-		ImGui::Notify({ImGuiToastType::Error, anException.what()}); 
+			ImGui::Notify({ ImGuiToastType::Error, anException.what() });
 		}
 		if (shouldPrintToOutput)
 		{
@@ -298,13 +297,13 @@ void LoggerService::Critical(const std::exception &anException, unsigned aLevel,
 		}
 
 		std::wcout << "file: " << location.file_name() << '(' << location.line() << ':' << location.column() << ") `"
-				   << location.function_name() << std::endl;
+			<< location.function_name() << std::endl;
 
 		try
 		{
 			std::rethrow_if_nested(anException);
 		}
-		catch (const std::exception &nestedException)
+		catch (const std::exception& nestedException)
 		{
 			Critical(nestedException, aLevel + 1);
 		}
@@ -313,8 +312,8 @@ void LoggerService::Critical(const std::exception &anException, unsigned aLevel,
 
 // Critical error will probably throw somewhere close, if caught and handled like by a script holder it can still print
 // what went bad
-void LoggerService::Critical(const std::string &anExceptionText, unsigned aLevel, bool withNotice,
-							 const std::source_location &location)
+void LoggerService::Critical(const std::string& anExceptionText, unsigned aLevel, bool withNotice,
+							 const std::source_location& location)
 {
 	if (isInitialized)
 	{
@@ -325,16 +324,16 @@ void LoggerService::Critical(const std::string &anExceptionText, unsigned aLevel
 			std::format("[FATAL] [{}] {} Severity {}\n{} {} {}", Timestamp(), anExceptionText,
 						sourceFile.filename().string(), location.function_name(), location.line(), aLevel);
 
-		
+
 		if (withNotice)
 		{
-			ImGui::Notify({ImGuiToastType::Error, anExceptionText.c_str()});
+			ImGui::Notify({ ImGuiToastType::Error, anExceptionText.c_str() });
 		}
 
 		if (shouldPrintToOutput)
 		{
 			LogMsg msg;
-			msg.message = strMsg; 
+			msg.message = strMsg;
 			msg.messageType = LogType::critical;
 			OutputDebugStringA(strMsg.c_str());
 			m_Buffer.Add(msg);
@@ -351,7 +350,7 @@ void LoggerService::Critical(const std::string &anExceptionText, unsigned aLevel
 			std::wcout << " " << anExceptionText.c_str() << "\n";
 			SetConsoleTextAttribute(myHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 			std::wcout << "file: " << location.file_name() << '(' << location.line() << ':' << location.column() << ") `"
-					   << location.function_name() << std::endl;
+				<< location.function_name() << std::endl;
 		}
 
 		throw std::exception(anExceptionText.c_str());
@@ -364,7 +363,7 @@ void LoggerService::NewLine()
 }
 
 void LoggerService::Clear()
-{ 
+{
 	m_Buffer.LoggedMessages.clear();
 	m_Buffer.criticalCount = 0;
 	m_Buffer.errCount = 0;

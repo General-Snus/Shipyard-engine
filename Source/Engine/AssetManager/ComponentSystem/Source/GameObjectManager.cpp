@@ -4,6 +4,7 @@
 #include "Engine/AssetManager/ComponentSystem/ComponentManager.h"
 #include "Engine/AssetManager/ComponentSystem/Components/CameraComponent.h"
 #include "Engine/AssetManager/ComponentSystem/GameObject.h"
+#include "Tools\Utilities\IO\StreamWriter.h"
 
 GameObjectManager::~GameObjectManager() = default;
 
@@ -339,6 +340,22 @@ void GameObjectManager::OnSiblingChanged(SY::UUID anID, const std::type_info* So
 	}
 }
 
+void GameObjectManager::Serialize(StreamWriter& writer)
+{
+	for (auto& [id, data] : this->myGameObjects)
+	{
+		//writer.Write()
+		id; data;
+	}
+
+
+	for (auto& [name, managers] : this->myComponentManagers)
+	{
+		managers->Serialize(writer);
+	}
+
+}
+
 void GameObjectManager::Merge(const GameObjectManager& other)
 {
 	OPTICK_EVENT();
@@ -349,6 +366,7 @@ void GameObjectManager::Merge(const GameObjectManager& other)
 		myGameObjects.emplace(myLastID + key, value);
 		maxId = std::max(maxId, myLastID + key);
 	}
+
 	for (const auto& [key, value] : other.myComponentManagers)
 	{
 		if (myComponentManagers.contains(key))
@@ -392,7 +410,7 @@ void GameObjectManager::SetName(const std::string& name, const SY::UUID aGameObj
 		std::string stringCopy = name;
 		stringCopy.resize(128);
 		LOGGER.Warn(std::format("Name is set to be longer then the max limit of 128, name is reduced to {}",
-		                        stringCopy)); // Why do i need to cstr this??
+			stringCopy)); // Why do i need to cstr this??
 		myGameObjects.at(aGameObjectID).Name = stringCopy;
 		return;
 	}

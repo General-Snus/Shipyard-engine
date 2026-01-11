@@ -1,6 +1,8 @@
 #pragma once 
-#include <Tools/Reflection/refl.hpp>
 #include <Engine\AssetManager\Enums.h>
+#include <Tools/Reflection/refl.hpp>
+#include <Tools/Utilities/IO/StreamWriter.h>
+#include <Tools/Utilities/TemplateHelpers.h>
 
 class GameObjectManager;
 class Component;
@@ -45,6 +47,8 @@ public:
 		return Comparator;
 	}
 
+	virtual void Serialize(StreamWriter& writer) = 0;
+	virtual void Deserialize(StreamReader& reader) = 0;
 protected:
 	std::string Comparator;
 	GameObjectManager* myManager = nullptr;
@@ -55,10 +59,13 @@ private:
 	UpdatePriority myUpdatePriority = UpdatePriority::Normal;
 };
 
-template <class T> class ComponentManager : public ComponentManagerBase
+template<class T> class ComponentManager : public ComponentManagerBase
 {
 public:
-	ComponentManager(GameObjectManager* manager) : ComponentManagerBase(manager, refl::reflect<T>().name.str()) {};
+	ComponentManager(GameObjectManager* manager) : ComponentManagerBase(manager, refl::reflect<T>().name.str())
+	{
+	};
+
 	~ComponentManager() = default;
 	void Destroy() override;
 
@@ -92,9 +99,34 @@ public:
 	void OnColliderExit(const SY::UUID aFirstID, const SY::UUID aTargetID) override;
 	void OnSiblingChanged(const SY::UUID aGameObjectID, const std::type_info* SourceClass = nullptr) override;
 
+
+	void Serialize(StreamWriter& writer) override;
+	void Deserialize(StreamReader& reader) override;
+
+
 private:
 	std::vector<T> myComponents;
 };
+
+
+template<class T>
+inline void ComponentManager<T>::Serialize(StreamWriter& writer)
+{
+	if constexpr (IsDerived<SerializableTag, T>)
+	{
+		for (auto& i : myComponents)
+		{
+			static_assert(requires{ T::Serialize(writer, i); }, "You need to define a public static Serialize(Writer& w,T& data) to use the SerializableTag");
+			T::Serialize(writer, i);
+		}
+	}
+}
+
+template<class T>
+inline void ComponentManager<T>::Deserialize(StreamReader& reader)
+{
+	reader;
+}
 
 template <class T> inline void ComponentManager<T>::Destroy()
 {

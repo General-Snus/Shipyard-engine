@@ -1,16 +1,17 @@
 #include "AssetManager.pch.h"
 
 #include "../Transform.h"
-#include <Tools/Utilities/Math.hpp>
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
+#include <Tools/Utilities/Math.hpp>
 
 #include "Editor/Editor/Helpers/ImGuiHelpers.h"
 #include "Tools/ImGui/imgui.h"
 
+#include "Engine\GraphicsEngine\Renderer.h"
+#include "Tools\ImGui\imgui_internal.h"
+#include "Tools\Utilities\IO\StreamWriter.h"
 #include <Editor/Editor/Commands/CommandBuffer.h>
 #include <Editor/Editor/Commands/VarChanged.h>
-#include "Tools\ImGui\imgui_internal.h"
-#include "Engine\GraphicsEngine\Renderer.h"
 
 Transform::Transform(const SY::UUID anOwnerId, GameObjectManager* aManager) : Component(anOwnerId, aManager) {}
 
@@ -846,4 +847,9 @@ void Transform::Detach()
 		SetDirty(true);
 	}
 
+}
+
+void Transform::Serialize(StreamWriter& writer, Transform& data)
+{
+	writer; data;
 }

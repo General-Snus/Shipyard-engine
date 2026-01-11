@@ -5,10 +5,10 @@
 class ParticleSystem : public Reflectable<ParticleSystem>, public Component
 {
 public:
-    reflectable(ParticleSystem);
+	reflectable(ParticleSystem);
 	ParticleSystem() = delete; // Create a generic cube
 	ParticleSystem(const unsigned int anOwnerId); // Create a generic cube 
-	ParticleSystem(const unsigned int anOwnerId,const std::filesystem::path& aFilePath);
+	ParticleSystem(const unsigned int anOwnerId, const std::filesystem::path& aFilePath);
 
 	void AddEmitter(const ParticleEmitterTemplate& aTemplate);
 

@@ -1,22 +1,23 @@
 #pragma once
 #include "Engine/AssetManager/ComponentSystem/Component.h"
+#include "Engine/AssetManager/Objects/BaseAssets/LightDataBase.h"
 #include <Engine/GraphicsEngine/Rendering/Buffers/FrameBuffer.h>
 #include <Tools/Utilities/Color.h >
-#include "Engine/AssetManager/Objects/BaseAssets/LightDataBase.h"
+#include <Tools/Utilities/Error.hpp>
 
 enum class eLightType : unsigned int
 {
-    Directional = 0,
-    Point = 1,
-    Spot = 2,
-    uninitialized = 3
+	Directional = 0,
+	Point = 1,
+	Spot = 2,
+	uninitialized = 3
 };
 class DirectionalLight;
 class SpotLight;
 class PointLight;
 
 class Texture;
-class Light : public Reflectable<Light>, public Component
+class Light : public Reflectable<Light>, public Component, SerializableTag
 {
 
 	friend class Renderer;
@@ -80,6 +81,12 @@ public:
 	bool isShadowCaster = false;
 	bool isRendered = false;
 	Color m_Color;
+
+	static void Serialize(StreamWriter& writer, Light& data)
+	{
+		writer; data;
+		throw NotImplemented();
+	}
 
 private:
 	bool isDirty = true;

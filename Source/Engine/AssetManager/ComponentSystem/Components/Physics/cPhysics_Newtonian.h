@@ -1,16 +1,16 @@
 #pragma once
 #include <ComponentSystem/Component.h>
 
-class cPhysics_Newtonian : public Reflectable<cPhysics_Newtonian>, public Component
+class cPhysics_Newtonian : public Reflectable<cPhysics_Newtonian>, public Component, SerializableTag
 {
 public:
-    reflectable(cPhysics_Newtonian);
-    cPhysics_Newtonian(const SY::UUID anOwnerId, GameObjectManager *aManager);
-    void Init() override;
-    void Update() override; 
-    bool InspectorView() override;
-    Vector3f ph_force;
-    double ph_mass;
+	reflectable(cPhysics_Newtonian);
+	cPhysics_Newtonian(const SY::UUID anOwnerId, GameObjectManager* aManager);
+	void Init() override;
+	void Update() override;
+	bool InspectorView() override;
+	Vector3f ph_force;
+	double ph_mass;
 };
 
 REFL_AUTO(type(cPhysics_Newtonian), field(ph_force), field(ph_mass))

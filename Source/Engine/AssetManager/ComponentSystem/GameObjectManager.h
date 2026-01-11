@@ -87,6 +87,10 @@ public:
 	// Please dont call this for an other object than your own
 	void OnSiblingChanged(SY::UUID anID, const std::type_info* SourceClass = nullptr);
 
+
+	void Serialize(StreamWriter& writer);
+
+
 private:
 	void Merge(const GameObjectManager& other);
 	std::string GetName(const SY::UUID aGameObjectID);

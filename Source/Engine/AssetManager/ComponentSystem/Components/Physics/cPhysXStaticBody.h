@@ -1,7 +1,7 @@
 #pragma once
+#include "Engine/AssetManager/Reflection/Reflectable.h"
 #include <Engine/AssetManager/ComponentSystem/Component.h>
 #include <Engine/PersistentSystems/Physics/PhysXInterpeter.h>
-#include "Engine/AssetManager/Reflection/Reflectable.h"
 #include <typeinfo>
 
 class Collider;
@@ -9,7 +9,7 @@ class Transform;
 class physx::PxShape;
 class physx::PxRigidStatic;
 
-class cPhysXStaticBody : public Reflectable<cPhysXStaticBody>, public Component
+class cPhysXStaticBody : public Reflectable<cPhysXStaticBody>, public Component, SerializableTag
 {
 public:
 	reflectable(cPhysXStaticBody);

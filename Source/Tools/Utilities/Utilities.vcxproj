@@ -264,6 +264,7 @@
     <ClInclude Include="Error.hpp" />
     <ClInclude Include="LinearAlgebra\Easing.h" />
     <ClInclude Include="LinearAlgebra\VectorX.hpp" />
+    <ClInclude Include="IO\StreamWriter.h" />
     <ClInclude Include="System\Event.h" />
     <ClInclude Include="Files\Images\stb_image.h" />
     <ClInclude Include="Files\Images\stb_image_resize2.h" />
@@ -305,6 +306,7 @@
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="FileHelpers.hpp" />
     <ClCompile Include="Input\Mapper.cpp" />
+    <ClCompile Include="IO\StreamWriter.cpp" />
     <ClCompile Include="System\Source\ServiceLocator.cpp" />
     <ClCompile Include="System\Source\Event.cpp" />
     <ClCompile Include="Game\Timer.cpp" />

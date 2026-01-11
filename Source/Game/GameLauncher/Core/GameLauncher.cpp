@@ -2,19 +2,19 @@
 
 #include "GameLauncher.h"	
 
-#include <UserComponent.h>
 #include "Editor/Editor/Windows/EditorWindows/Viewport.h"
 #include "Engine/PersistentSystems/Physics/Raycast.h" 
 #include "NetworkingGame/BallBouncerGame.h" 
 #include "Tools/Utilities/Math.hpp" 
+#include <UserComponent.h>
 
-#include "Tools/ImGui/crude_json.h"
-#include "Tools/Utilities/LinearAlgebra/Easing.h"
-#include "Engine\PersistentSystems\Networking\NetworkRunner.h"
-#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Collider.h"
 #include "Engine/AssetManager/ComponentSystem/Components/LightComponent.h"
+#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
 #include "Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h"
+#include "Engine\PersistentSystems\Networking\NetworkRunner.h"
+#include "Tools/ImGui/crude_json.h"
+#include "Tools/Utilities/LinearAlgebra/Easing.h"
 
 extern "C" {
 	inline GAME_API GameLauncher* entrypointMain()
@@ -50,6 +50,7 @@ void YourGameLauncher::Start()
 		Scene::activeManager().SetLastGOAsWorld();
 
 		worldRoot.SetName("SkyLight");
+		worldRoot.AddComponent<UserComponent>();
 		worldRoot.transform().SetRotation(45, 45, 0);
 		auto& light = worldRoot.AddComponent<Light>(eLightType::Directional);
 		light.SetIsShadowCaster(true);

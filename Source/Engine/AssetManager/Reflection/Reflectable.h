@@ -1,10 +1,10 @@
 #pragma once
+#include "ReflectionTemplate.h"
 #include <Tools/Reflection/refl.hpp> 
 #include <string>
 #include <type_traits>
 #include <typeinfo>
 #include <vector>
-#include "ReflectionTemplate.h"
 
 namespace Reflection {
 
@@ -97,14 +97,15 @@ public:
 	virtual const Reflection::TypeInfo& GetTypeInfo() const = 0;
 };
 
+
 #define reflectable( className )			\
 using Reflectable<className>::Reflect;		\
 static const Reflection::TypeInfo& StaticTypeInfo() { \
-        return Reflection::TypeInfo::Get<className>(); \
-    } \
-    const Reflection::TypeInfo& GetTypeInfo() const override { \
-        return StaticTypeInfo(); \
-    }
+		return Reflection::TypeInfo::Get<className>(); \
+	} \
+	const Reflection::TypeInfo& GetTypeInfo() const override { \
+		return StaticTypeInfo(); \
+	}
 
 
 

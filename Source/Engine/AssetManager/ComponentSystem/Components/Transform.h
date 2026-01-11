@@ -1,11 +1,11 @@
 #pragma once
+#include "Tools\Utilities\Math.hpp"
 #include <Engine/AssetManager/ComponentSystem/Component.h>
 #include <Engine/AssetManager/ComponentSystem/GameObject.h>
 #include <Engine/GraphicsEngine/DebugDrawer/DebugDrawer.h>
 #include <Tools/Utilities/LinearAlgebra/Matrix4x4.h>
 #include <Tools/Utilities/LinearAlgebra/Quaternions.hpp>
 #include <Tools/Utilities/LinearAlgebra/Vectors.hpp>
-#include "Tools\Utilities\Math.hpp"
 
 enum eSpace {
 	WORLD,
@@ -14,15 +14,15 @@ enum eSpace {
 
 
 // LEFTHANDED X RIGHT Y UP Z FORWARD AS GOD INTENDED
-class Transform : public Reflectable<Transform>, public Component {
+class Transform : public Reflectable<Transform>, public Component, SerializableTag {
 	friend class ReplicationLayer;
 public:
 	reflectable(Transform);
 	Transform() = delete;
-	Transform(SY::UUID anOwnerId,GameObjectManager* aManager);
+	Transform(SY::UUID anOwnerId, GameObjectManager* aManager);
 	void Destroy() override;
 	void Init() override;
-	void Update() override; 
+	void Update() override;
 	const Matrix& LocalMatrix();
 	const Matrix& unmodified_WorldMatrix() const;
 	const Matrix& unmodified_LocalMatrix() const;
@@ -42,29 +42,29 @@ public:
 
 	void Move(Vector2f translation);
 	void Move(Vector3f translation);
-	void Move(float X,float Y,float Z);
+	void Move(float X, float Y, float Z);
 
 	void      SetPosition(Vector2f position);
 	void      SetPosition(Vector3f position);
-	void      SetPosition(float X,float Y,float Z);
+	void      SetPosition(float X, float Y, float Z);
 	Vector3f  GetPosition(eSpace space = LOCAL) const;
 	Vector3f& localPosition();
 
-	void      Rotate(float X,float Y = 0.0f,float Z = 0.0f,eSpace space = LOCAL);
-	void      Rotate(Vector2f angularRotation,eSpace space = LOCAL);
-	void      Rotate(Vector3f angularRotation,eSpace space = LOCAL);
-	void      SetRotation(float X,float Y,float Z);
+	void      Rotate(float X, float Y = 0.0f, float Z = 0.0f, eSpace space = LOCAL);
+	void      Rotate(Vector2f angularRotation, eSpace space = LOCAL);
+	void      Rotate(Vector3f angularRotation, eSpace space = LOCAL);
+	void      SetRotation(float X, float Y, float Z);
 	void      SetRotation(Vector2f angularRotation);
 	void      SetRotation(Vector3f angularRotation);
 	//"You will eventually regret any use of Euler angles."
 	// John Carmack 
 	Vector3f  euler() const;
-	void      LookAt(Vector3f target,Vector3f Up = Math::GlobalUp);
+	void      LookAt(Vector3f target, Vector3f Up = Math::GlobalUp);
 
 	// Not mathematicly sound
 	Vector3f VectorToEulerAngles(Vector3f input) const;
 
-	void SetScale(float X,float Y,float Z);
+	void SetScale(float X, float Y, float Z);
 
 	void     SetScale(float scale);
 	void     SetScale(Vector2f scale);
@@ -85,12 +85,12 @@ public:
 
 	std::string GetParentName() const;
 	bool        SetParent(Transform& parent);
-	bool        SetParent(Transform& parent,bool worldPositionStays);
+	bool        SetParent(Transform& parent, bool worldPositionStays);
 	Transform& Root();
 	bool        HasParent() const;
 	Transform& GetParent() const;
-	bool        Find(const std::string& nameOfChild,Transform& transform) const;
-	bool        FindRecursive(const std::string& nameOfChild,Transform& transform) const;
+	bool        Find(const std::string& nameOfChild, Transform& transform) const;
+	bool        FindRecursive(const std::string& nameOfChild, Transform& transform) const;
 	Transform& GetChild(int index) const;
 
 	bool HasChild(SY::UUID id) const;
@@ -118,6 +118,8 @@ public:
 	// Detach from parent
 	void Detach();
 
+	static void Serialize(StreamWriter& writer, Transform& data);
+
 private:
 	GameObject              m_Parent;
 	std::vector<GameObject> m_Children;
@@ -131,11 +133,12 @@ private:
 	Vector3<float> myPosition{};
 	Vector3<float> myInspectorRotation{};
 	Quaternionf    myQuaternion{};
-	Vector3<float> myScale = Vector3f(1,1,1);
+	Vector3<float> myScale = Vector3f(1, 1, 1);
 
 	Matrix4x4<float>             localMatrix{};
 	Matrix4x4<float>             worldMatrix{};
 	DebugDrawer::PrimitiveHandle primitive{};
 };
 
-REFL_AUTO(type(Transform,bases<Component>))
+REFL_AUTO(type(Transform, bases<Component>))
+

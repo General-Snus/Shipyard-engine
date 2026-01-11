@@ -1,22 +1,16 @@
 #pragma once
 #include <Engine\AssetManager\ComponentSystem\UUID.h>
-#include <Engine\AssetManager\Reflection\Reflectable.h>
 #include <Engine\AssetManager\Interfaces.h> 
+#include <Engine\AssetManager\Reflection\Reflectable.h>
 
 class GameObjectManager;
 class GameObject;
 class Transform;
 
-enum class eComponentType {
-	base,
-	backgroundColor,
-};
-
-
 class Component : public Reflectable<Component>, public AvailableInInspector {
 public:
 	reflectable(Component)
-	Component(const SY::UUID anOwnerID, GameObjectManager* aManager);
+		Component(const SY::UUID anOwnerID, GameObjectManager* aManager);
 	Component(const Component& aComponent);
 	virtual ~Component() noexcept = default;
 

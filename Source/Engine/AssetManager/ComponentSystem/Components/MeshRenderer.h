@@ -2,6 +2,8 @@
 #include "Engine/AssetManager/ComponentSystem/Component.h"
 #include "Engine/AssetManager/Enums.h" 
 #include "Tools/Utilities/LinearAlgebra/AABB3D.hpp"
+#include <Tools/Utilities/Error.hpp>
+
 #define AsUINT(v) static_cast<unsigned>(v)
 
 struct Element;
@@ -10,64 +12,69 @@ class Material;
 class TextureHolder;
 class Skeleton;
 
-class MeshRenderer : public Reflectable<MeshRenderer>, public Component
+class MeshRenderer : public Reflectable<MeshRenderer>, public Component, SerializableTag
 {
 public:
-    reflectable(MeshRenderer);
-    MeshRenderer() = delete;                                             // Create a generic cube
-    MeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager); // Create a generic cube
-    MeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager, const std::filesystem::path &aFilePath,
-                  bool useExact = false);
-    ~MeshRenderer() override = default;
+	reflectable(MeshRenderer);
+	MeshRenderer() = delete;                                             // Create a generic cube
+	MeshRenderer(const SY::UUID anOwnerId, GameObjectManager* aManager); // Create a generic cube
+	MeshRenderer(const SY::UUID anOwnerId, GameObjectManager* aManager, const std::filesystem::path& aFilePath,
+				  bool useExact = false);
+	~MeshRenderer() override = default;
 
-    // Mesh
-    void SetNewMesh(const std::filesystem::path &aFilePath);
-    void SetNewMesh(const std::shared_ptr<Mesh> aMesh);
-    const std::vector<Element>& GetElements() const;
-    std::shared_ptr<Mesh> GetRawMesh() const;
-    float GetBoundingSphereRadius() const;
-    AABB3D<float> GetBoundingBox() const;
+	// Mesh
+	void SetNewMesh(const std::filesystem::path& aFilePath);
+	void SetNewMesh(const std::shared_ptr<Mesh> aMesh);
+	const std::vector<Element>& GetElements() const;
+	std::shared_ptr<Mesh> GetRawMesh() const;
+	float GetBoundingSphereRadius() const;
+	AABB3D<float> GetBoundingBox() const;
 
-    // Materials
-    std::shared_ptr<Material> GetMaterial(int materialIndex = 0) const;
-    void SetMaterialPath(const std::filesystem::path &aFilePath);
-    void SetMaterialPath(const std::filesystem::path &aFilePath, int elementIndex);
-    void SetMaterial(const std::shared_ptr<Material> aMaterial);
-    void SetMaterial(const std::shared_ptr<Material> aMaterial, int elementIndex);
-    std::shared_ptr<TextureHolder> GetTexture(eTextureType type, unsigned materialIndex = 0) const;
+	// Materials
+	std::shared_ptr<Material> GetMaterial(int materialIndex = 0) const;
+	void SetMaterialPath(const std::filesystem::path& aFilePath);
+	void SetMaterialPath(const std::filesystem::path& aFilePath, int elementIndex);
+	void SetMaterial(const std::shared_ptr<Material> aMaterial);
+	void SetMaterial(const std::shared_ptr<Material> aMaterial, int elementIndex);
+	std::shared_ptr<TextureHolder> GetTexture(eTextureType type, unsigned materialIndex = 0) const;
 
-    // Other
-    bool InspectorView() override;
-    bool IsDefaultMesh() const;
-    bool isInstanced = false;
+	// Other
+	bool InspectorView() override;
+	bool IsDefaultMesh() const;
+	bool isInstanced = false;
 
-  protected:
-    std::shared_ptr<Mesh> m_Mesh;
-    // Meshes can have defaulted materials but the meshrenderer has the capacity to override them.
-    std::vector<std::shared_ptr<Material>>
-        m_OverrideMaterial; // TODO MAKE MAP SO INSTANCE CAN KEEP ANY OVERRIDEN MATERIAL YOU MUPPET
+	static void Serialize(StreamWriter& writer, MeshRenderer& data)
+	{
+		writer; data;
+		throw NotImplemented();
+	}
+protected:
+	std::shared_ptr<Mesh> m_Mesh;
+	// Meshes can have defaulted materials but the meshrenderer has the capacity to override them.
+	std::vector<std::shared_ptr<Material>>
+		m_OverrideMaterial; // TODO MAKE MAP SO INSTANCE CAN KEEP ANY OVERRIDEN MATERIAL YOU MUPPET
 };
 
 REFL_AUTO(type(MeshRenderer), field(isInstanced))
 
 class cSkeletalMeshRenderer : public Reflectable<cSkeletalMeshRenderer>, public MeshRenderer
 {
-    friend class cAnimator;
+	friend class cAnimator;
 
-  public:
-    reflectable(cSkeletalMeshRenderer);
-    cSkeletalMeshRenderer() = delete;
-    cSkeletalMeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager);
-    cSkeletalMeshRenderer(const SY::UUID anOwnerId, GameObjectManager *aManager,
-                          const std::filesystem::path &aFilePath);
-    ~cSkeletalMeshRenderer() override = default;
+public:
+	reflectable(cSkeletalMeshRenderer);
+	cSkeletalMeshRenderer() = delete;
+	cSkeletalMeshRenderer(const SY::UUID anOwnerId, GameObjectManager* aManager);
+	cSkeletalMeshRenderer(const SY::UUID anOwnerId, GameObjectManager* aManager,
+						  const std::filesystem::path& aFilePath);
+	~cSkeletalMeshRenderer() override = default;
 
-    void SetNewMesh(const std::filesystem::path &aFilePath); 
-    bool InspectorView() override;
+	void SetNewMesh(const std::filesystem::path& aFilePath);
+	bool InspectorView() override;
 
-	const std::shared_ptr<Skeleton> GetRawSkeleton() const ;
+	const std::shared_ptr<Skeleton> GetRawSkeleton() const;
 
-    std::shared_ptr<Skeleton> mySkeleton;
+	std::shared_ptr<Skeleton> mySkeleton;
 };
 
 REFL_AUTO(type(cSkeletalMeshRenderer), field(mySkeleton))
