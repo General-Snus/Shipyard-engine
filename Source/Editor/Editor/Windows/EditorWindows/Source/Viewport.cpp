@@ -7,16 +7,23 @@
 #include "Engine/AssetManager/ComponentSystem/GameObject.h"
 #include "Engine/AssetManager/ComponentSystem/GameObjectManager.h"
 #include "Engine/AssetManager/Objects/BaseAssets/TextureAsset.h"
+#include "Engine/GraphicsEngine/Renderer.h"
 #include "Engine/PersistentSystems/Scene.h"
+#include "Optick\include\optick.h"
 #include "Tools/Logging/Logging.h"
 #include "Tools/Utilities/Input/Input.hpp"
+#include "Tools\Utilities\LinearAlgebra\Vector2.hpp"
+#include "Tools\Utilities\LinearAlgebra\Vector3.hpp"
+#include "Tools\Utilities\LinearAlgebra\Vector4.hpp"
 #include "imgui_internal.h" 
 #include <Engine/AssetManager/AssetManager.h>
 #include <Engine/PersistentSystems/SceneUtilities.h>
 #include <Font/IconsFontAwesome5.h>
 #include <Tools/ImGui/ImGuizmo.h> 
 #include <filesystem>
-#include "Core\Editor.h"
+#include <format>
+#include <memory>
+#include <string>
 #include <vector>
 
 ImGuizmo::OPERATION m_CurrentGizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
@@ -203,6 +210,7 @@ void Viewport::RenderImGUi()
 
 	if (ImGui::Begin(title.c_str(), &m_KeepWindow, windowFlags))
 	{
+		RenderToolbar();
 		isWindowFocused = ImGui::IsWindowFocused();
 		IsVisible = ImGui::IsItemVisible();
 		ViewportResolution = { ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y };
@@ -212,7 +220,7 @@ void Viewport::RenderImGUi()
 		const auto cursorPosition = ImGui::GetCursorScreenPos();
 		ImGui::Image(m_RenderTarget, *(ImVec2*)&ViewportResolution.x);
 		IsMouseHoverering = isWindowFocused;
-		
+
 		if (IsMouseHoverering)
 		{
 			cursorPositionInViewPort = ImGui::CursorPositionInWindow();
@@ -244,7 +252,8 @@ void Viewport::RenderImGUi()
 				GetCamera().IsInControl(false);
 			}
 
-			for (auto& gameObject : selectedObjects)
+			bool didManipulate = false;
+			for (const auto& gameObject : selectedObjects)
 			{
 				auto& transform = gameObject.transform();
 				Matrix worldMatrix = transform.WorldMatrix();
@@ -253,6 +262,7 @@ void Viewport::RenderImGUi()
 				const bool transformed = ImGuizmo::Manipulate(&cameraView, &cameraProjection, m_CurrentGizmoOperation,
 					m_CurrentGizmoMode, &worldMatrix, &deltaChange, &snapping);
 
+				didManipulate |= transformed;
 				if (transformed)
 				{
 					GetCamera().IsInControl(false);
@@ -276,16 +286,9 @@ void Viewport::RenderImGUi()
 					LOGGER.Log(localMatrix.rotationMatrix().toString());
 					transform.DecomposeMatrixToTransform(localMatrix);
 				}
-				else
-				{
-					if (isWindowFocused)
-					{
-						GetCamera().IsInControl(true);
-					}
-				}
 			}
 
-			//RenderToolbar();
+			GetCamera().IsInControl(!didManipulate && isWindowFocused);
 		}
 	}
 	else
@@ -300,123 +303,91 @@ void Viewport::RenderImGUi()
 void Viewport::RenderToolbar()
 {
 	const auto& style = ImGui::GetStyle();
-	const float textHeight = ImGui::CalcTextSize("A").y;
+	const auto textRect = ImGui::CalcTextSize(ICON_FA_LOCATION_ARROW);
 	// style.FramePadding can also be used here
-	const auto toolbarItemSize = ImVec2{ textHeight * 4.0f, textHeight * 4.0f };
+	const auto toolbarItemSize = ImVec2{ textRect.x, 2 * textRect.y };
 	const auto toolbarPos = ImVec2(
 		2.0f * style.WindowPadding.x + ImGui::GetWindowPos().x,
-		8.0f * (style.WindowPadding.y + style.FramePadding.y) + ImGui::GetWindowPos().y
+		100.0f * (style.WindowPadding.y + style.FramePadding.y) + ImGui::GetWindowPos().y
 	);
 
 	ImGui::SetNextWindowPos(toolbarPos);
 
-	// ImGuiWindowFlags toolbarFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
-	//                                 ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoSavedSettings |
-	//                                 ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_MenuBar;
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 4));
 
-	constexpr ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_NoPadWithHalfSpacing;
-	/*
-	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {0.0f, 0.0f});
-	if (ImGui::BeginChild("##ViewportToolbar_Vertical", ImVec2(toolbarItemSize.x, 0), 0, toolbarFlags))
-	{
-		// Bring the toolbar window always on top.
-		ImGui::BringWindowToDisplayFront(ImGui::GetCurrentWindow());
-		ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
-		if (ImGui::Selectable("Universal", m_CurrentGizmoOperation == ImGuizmo::OPERATION::UNIVERSAL, selectableFlags,
-							  toolbarItemSize))
-		{
-			m_CurrentGizmoOperation = ImGuizmo::OPERATION::UNIVERSAL;
-		}
-		if (ImGui::Selectable("Move", m_CurrentGizmoOperation == ImGuizmo::OPERATION::TRANSLATE, selectableFlags,
-							  toolbarItemSize))
-		{
-			m_CurrentGizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
-		}
-		if (ImGui::Selectable("Rotate", m_CurrentGizmoOperation == ImGuizmo::OPERATION::ROTATE, selectableFlags,
-							  toolbarItemSize))
-		{
-			m_CurrentGizmoOperation = ImGuizmo::OPERATION::ROTATE;
-		}
-		ImGui::Separator();
-		if (ImGui::Selectable("Scale", m_CurrentGizmoOperation == ImGuizmo::OPERATION::SCALE, selectableFlags,
-							  toolbarItemSize))
-		{
-			m_CurrentGizmoOperation = ImGuizmo::OPERATION::SCALE;
-		}
-		if (ImGui::Selectable("Bounds", m_CurrentGizmoOperation == ImGuizmo::OPERATION::BOUNDS, selectableFlags,
-							  toolbarItemSize))
-		{
-			m_CurrentGizmoOperation = ImGuizmo::OPERATION::BOUNDS;
-		}
-		std::string mode;
-		m_CurrentGizmoMode ? mode = "Global" : mode = "Local";
-		if (ImGui::Selectable(mode.c_str(), false, selectableFlags, toolbarItemSize))
-		{
-			m_CurrentGizmoMode = static_cast<ImGuizmo::MODE>(!static_cast<bool>(m_CurrentGizmoMode));
-		}
-		ImGui::PopStyleVar();
-	}
-	ImGui::PopStyleVar();
-	ImGui::EndChild();
-	*/
 	if (ImGui::BeginMenuBar())
 	{
 		// Bring the toolbar window always on top.
 		ImGui::BringWindowToDisplayFront(ImGui::GetCurrentWindow());
-		// ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
-		ImGui::Text("Gizmo Op\neration");
-		static bool arg = true;
-		ImGui::ToggleButton("Test", &arg);
+		//ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
 
-		if (ImGui::Selectable(ICON_FA_LOCATION_ARROW, m_CurrentGizmoOperation == ImGuizmo::OPERATION::UNIVERSAL,
-			selectableFlags, toolbarItemSize))
+		if (ImGui::Selectable(ICON_FA_LOCATION_ARROW, m_CurrentGizmoOperation == ImGuizmo::OPERATION::UNIVERSAL, 0, toolbarItemSize))
 		{
 			m_CurrentGizmoOperation = ImGuizmo::OPERATION::UNIVERSAL;
 		}
 		// Move
-		if (ImGui::Selectable(ICON_FA_ARROWS_ALT, m_CurrentGizmoOperation == ImGuizmo::OPERATION::TRANSLATE,
-			selectableFlags, toolbarItemSize))
+		if (ImGui::Selectable(ICON_FA_ARROWS_ALT, m_CurrentGizmoOperation == ImGuizmo::OPERATION::TRANSLATE, 0, toolbarItemSize))
 		{
 			m_CurrentGizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
 		}
 		// Rotate
-		if (ImGui::Selectable(ICON_FA_SYNC_ALT, m_CurrentGizmoOperation == ImGuizmo::OPERATION::ROTATE, selectableFlags,
-			toolbarItemSize))
+		if (ImGui::Selectable(ICON_FA_SYNC_ALT, m_CurrentGizmoOperation == ImGuizmo::OPERATION::ROTATE, 0, toolbarItemSize))
 		{
 			m_CurrentGizmoOperation = ImGuizmo::OPERATION::ROTATE;
 		}
-		ImGui::Separator();
-		if (ImGui::Selectable(ICON_FA_EXPAND, m_CurrentGizmoOperation == ImGuizmo::OPERATION::SCALE, selectableFlags,
-			toolbarItemSize))
+		if (ImGui::Selectable(ICON_FA_EXPAND, m_CurrentGizmoOperation == ImGuizmo::OPERATION::SCALE, 0, toolbarItemSize))
 		{
 			m_CurrentGizmoOperation = ImGuizmo::OPERATION::SCALE;
 		}
-		if (ImGui::Selectable(ICON_FA_GLOBE, false, selectableFlags, toolbarItemSize))
+		ImGui::Spacing();
+
+		constexpr auto globalSpaceName = ICON_FA_GLOBE " Global";
+		constexpr auto localSpaceName = ICON_FA_GLOBE " Local";
+
+		auto currentSelected = m_CurrentGizmoMode == ImGuizmo::MODE::WORLD ? globalSpaceName : localSpaceName;
+		if (ImGui::BeginCombo("##TransformationSpace", currentSelected, ImGuiComboFlags_WidthFitPreview))
 		{
-			m_CurrentGizmoMode = static_cast<ImGuizmo::MODE>(!static_cast<bool>(m_CurrentGizmoMode));
+			if (ImGui::Selectable(globalSpaceName))
+			{
+				m_CurrentGizmoMode = ImGuizmo::MODE::WORLD;
+			}
+
+
+			if (ImGui::Selectable(localSpaceName))
+			{
+				m_CurrentGizmoMode = ImGuizmo::MODE::LOCAL;
+			}
+
+			ImGui::EndCombo();
 		}
 
 		// posSnapping
-		if (ImGui::Selectable(ICON_FA_BORDER_ALL, m_CurrentGizmoOperation == ImGuizmo::OPERATION::SCALE,
-			selectableFlags, toolbarItemSize))
+		if (ImGui::Selectable(ICON_FA_BORDER_ALL, m_CurrentGizmoOperation == ImGuizmo::OPERATION::SCALE, 0, toolbarItemSize))
 		{
 			m_CurrentGizmoOperation = ImGuizmo::OPERATION::SCALE;
 		}
 		// rotSnapping
 		if (ImGui::Selectable(std::format("{}{}", ICON_FA_UNDO_ALT, "*").c_str(),
-			m_CurrentGizmoOperation == ImGuizmo::OPERATION::SCALE, selectableFlags, toolbarItemSize))
+			m_CurrentGizmoOperation == ImGuizmo::OPERATION::SCALE, 0, toolbarItemSize))
 		{
 			m_CurrentGizmoOperation = ImGuizmo::OPERATION::SCALE;
 		}
 		// ScaleSnapping
-		if (ImGui::Selectable(ICON_FA_EXPAND_ALT, m_CurrentGizmoOperation == ImGuizmo::OPERATION::SCALE,
-			selectableFlags, toolbarItemSize))
+		if (ImGui::Selectable(ICON_FA_EXPAND_ALT, m_CurrentGizmoOperation == ImGuizmo::OPERATION::SCALE, 0, toolbarItemSize))
 		{
 			m_CurrentGizmoOperation = ImGuizmo::OPERATION::SCALE;
 		}
-		// ImGui::PopStyleVar();
+		//ImGui::PopStyleVar();
+		ImGui::Text("Gizmo ");
+		static bool arg = true;
+		if (ImGui::ToggleButton("DebugDrawerEnabler", &arg))
+		{
+			GetRenderer().debugDrawer.enabled = arg; //TODO fix later
+
+		}
 		ImGui::EndMenuBar();
 	}
+	ImGui::PopStyleVar();
 }
 
 void Viewport::GizmoInput()

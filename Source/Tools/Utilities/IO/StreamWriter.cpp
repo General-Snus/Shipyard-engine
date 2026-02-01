@@ -26,3 +26,8 @@ void FileWriter::Write(const char* data, size_t size)
 
 	stream.write(data, size);
 }
+
+void FileReader::Read(const char* data, size_t size)
+{
+	data; size;
+}

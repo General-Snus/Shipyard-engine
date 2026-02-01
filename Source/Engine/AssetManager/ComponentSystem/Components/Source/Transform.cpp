@@ -356,6 +356,7 @@ bool DrawVec3Control(const std::string& label, Vector3f& values, float resetValu
 	bool changed = false;
 	ImGui::PushID(label.c_str());
 
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0);
 	ImGui::Columns(2);
 	ImGui::SetColumnWidth(0, columnWidth);
 	ImGui::Text("%s", label.c_str());
@@ -368,7 +369,11 @@ bool DrawVec3Control(const std::string& label, Vector3f& values, float resetValu
 	const ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
 
 	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
-	ImGui::Button("X", buttonSize);
+	if (ImGui::Button("X", buttonSize))
+	{
+		values.x = resetValue;
+		changed = true;
+	}
 	ImGui::PopStyleColor(1);
 
 	ImGui::SameLine();
@@ -382,7 +387,11 @@ bool DrawVec3Control(const std::string& label, Vector3f& values, float resetValu
 	ImGui::SameLine();
 
 	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
-	ImGui::Button("Y", buttonSize);
+	if (ImGui::Button("Y", buttonSize))
+	{
+		values.y = resetValue;
+		changed = true;
+	}
 	ImGui::PopStyleColor(1);
 
 	ImGui::SameLine();
@@ -395,7 +404,11 @@ bool DrawVec3Control(const std::string& label, Vector3f& values, float resetValu
 	ImGui::SameLine();
 
 	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
-	ImGui::Button("Z", buttonSize);
+	if (ImGui::Button("Z", buttonSize))
+	{
+		values.z = resetValue;
+		changed = true;
+	}
 	ImGui::PopStyleColor(1);
 
 	ImGui::SameLine();
@@ -411,6 +424,9 @@ bool DrawVec3Control(const std::string& label, Vector3f& values, float resetValu
 	ImGui::Columns(1);
 
 	ImGui::PopID();
+
+	ImGui::PopStyleVar();
+
 	return (changed || *justStoppedInteraction);
 }
 

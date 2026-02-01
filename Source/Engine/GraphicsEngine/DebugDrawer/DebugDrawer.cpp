@@ -2,13 +2,13 @@
 
 #include "DebugDrawer.h"
 #include "Renderer.h"
+#include <DirectX/DX12/Graphics/CommandList.h>
+#include <DirectX/DX12/Graphics/CommandQueue.h>
 #include <DirectX/DX12/Graphics/GPU.h>
 #include <DirectX/DX12/Graphics/PSO.h>
-#include <DirectX/DX12/Graphics/CommandQueue.h>
-#include <DirectX/DX12/Graphics/CommandList.h>
 
-#include <Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h>
 #include <Engine/AssetManager/Objects/BaseAssets/MaterialAsset.h>
+#include <Engine/AssetManager/Objects/BaseAssets/ShipyardShader.h>
 
 #include "DirectX/DX12/Graphics/Resources/IndexBuffer.h"
 #include "DirectX/DX12/Graphics/Resources/VertexBuffer.h"
@@ -61,6 +61,7 @@ void DebugDrawer::RemoveDebugPrimitive(PrimitiveHandle& aHandle)
 void DebugDrawer::Update(float aDeltaTime)
 {
 	OPTICK_EVENT();
+
 	for (auto& [primitive, lifetime] : myDebugLifetime)
 	{
 		lifetime -= aDeltaTime;
@@ -79,6 +80,7 @@ void DebugDrawer::Update(float aDeltaTime)
 
 void DebugDrawer::Render(std::shared_ptr<CommandList> commandList)
 {
+	if (!enabled) { return; }
 	if (myPrimitiveListDirty)
 	{
 		myNumLineIndices = 0;

@@ -2,9 +2,9 @@
 #include "Tools/Utilities/LinearAlgebra/Matrix4x4.h"
 #include "Tools/Utilities/LinearAlgebra/Vectors.hpp" 
 #include "Tools/Utilities/Math.hpp"
+#include "Tools\Utilities\Color.h"
 #include <unordered_map>
 #include <vector>
-#include "Tools\Utilities\Color.h"
 
 //Credited for work: Daniel Borghammar & Simon Nilsson 
 struct DebugVertex {
@@ -30,6 +30,7 @@ class DebugDrawer {
 	};
 
 public:
+	bool enabled = true;
 	struct PrimitiveHandle {
 		friend class DebugDrawer;
 	private:
