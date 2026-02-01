@@ -8,16 +8,17 @@ class Transform;
 class TextureHolder;
 class Texture;
 
-class Viewport : public EditorWindow { 
-	friend class Editor; 
+class Viewport : public EditorWindow {
+	friend class Editor;
 public:
 	// MainViewport is will render from the MainCamera and if no such camera exist it will be black
-	explicit Viewport(bool IsMainViewPort,
+	Viewport(bool IsMainViewPort,
 		Vector2ui ViewportResolution = WindowInstance.MonitorResolution(),
 		std::shared_ptr<Scene> sceneToRender = nullptr,
 		std::shared_ptr<TextureHolder> RenderTexture = nullptr);
 
 	~Viewport() override;
+	void Initialize() override;
 	bool IsSelected() const;
 	bool IsHovered() const;
 	bool IsRenderReady() const;
@@ -28,11 +29,11 @@ public:
 
 	std::shared_ptr<Scene> GetAttachedScene() const;
 	Texture* GetTarget() const;
-	Camera& GetCamera()  ;
+	Camera& GetCamera();
 	const Camera& GetCamera() const;
 	Transform& GetCameraTransform();
 	const Transform& GetCameraTransform() const;
-	
+
 
 	Matrix Projection() const;
 	Matrix ViewInverse() const;
@@ -40,7 +41,8 @@ public:
 	void RenderImGUi() override;
 
 	std::shared_ptr<TextureHolder> m_RenderTarget;
-	Vector2f ViewportResolution;
+	Vector2f scaledResolution;
+	Vector2ui backbufferResolution;
 	int ViewportIndex = 0;
 
 private:

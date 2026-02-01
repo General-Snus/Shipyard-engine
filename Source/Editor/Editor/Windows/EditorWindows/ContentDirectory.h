@@ -16,6 +16,7 @@ class ContentDirectory : public EditorWindow
 {
 public:
 	explicit ContentDirectory();
+	void Initialize() override;
 	void Node(const int index, const float cellWidth);
 	void RenderImGUi() override;
 

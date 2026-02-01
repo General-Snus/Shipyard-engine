@@ -146,7 +146,7 @@ void Hierarchy::PopupMenu(SY::UUID id)
 void Hierarchy::RenderNode(Transform& transform)
 {
 	OPTICK_EVENT();
-	auto flags = ImGuiTreeNodeFlags_DefaultOpen |
+	auto hierarchyFlags = ImGuiTreeNodeFlags_DefaultOpen |
 		ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth;
 
 	const auto& style = ImGui::GetStyle();
@@ -161,7 +161,7 @@ void Hierarchy::RenderNode(Transform& transform)
 		if (i.GetID() == id)
 		{
 			isSelected = true;
-			flags |= ImGuiTreeNodeFlags_Selected;
+			hierarchyFlags |= ImGuiTreeNodeFlags_Selected;
 			break;
 		}
 	}
@@ -170,7 +170,7 @@ void Hierarchy::RenderNode(Transform& transform)
 	const bool hasChildren = transform.HasChildren();
 	if (!hasChildren)
 	{
-		flags |= ImGuiTreeNodeFlags_Leaf;
+		hierarchyFlags |= ImGuiTreeNodeFlags_Leaf;
 	}
 
 	{
@@ -182,7 +182,7 @@ void Hierarchy::RenderNode(Transform& transform)
 		ImGui::PushStyleColor(ImGuiCol_Text, color);
 
 		const bool node_open =
-			ImGui::TreeNodeEx((void*)static_cast<intptr_t>(id), flags,
+			ImGui::TreeNodeEx((void*)static_cast<intptr_t>(id), hierarchyFlags,
 				std::format("{} {}", ICON_FA_CUBE, data.GetName()).c_str());
 		DragDrop(transform);
 		if (ImGui::IsItemHovered())
@@ -269,13 +269,13 @@ inline void Hierarchy::DragDrop(Transform& transform)
 	}
 }
 
-void Hierarchy::RenderImGUi() {
+void Hierarchy::RenderImGUi()
+{
 	OPTICK_EVENT();
 
 	clickedAnyNode = false;
 	localActiveMenu = false;
 	const auto& gObjList = Scene::activeManager().GetAllGameObjects();
-	ImGui::Begin("Hierarchy", &m_KeepWindow);
 
 	static char buf[128] = "";
 	{
@@ -370,6 +370,5 @@ void Hierarchy::RenderImGUi() {
 		ImGui::EndDragDropTarget();
 	}
 
-	ImGui::End();
 	sortedList.clear();
 }

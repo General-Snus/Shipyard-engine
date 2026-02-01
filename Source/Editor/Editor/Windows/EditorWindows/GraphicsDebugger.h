@@ -5,10 +5,11 @@
 
 class GraphicsDebugger : public EditorWindow
 {
-  public:
+public:
+	GraphicsDebugger() : EditorWindow("GraphicsDebugger") {}
 	void RenderImGUi() override;
 
-  private:
+private:
 	int currentlyActiveTone = 0;
 	int currentlyActiveLayer = 0;
 };

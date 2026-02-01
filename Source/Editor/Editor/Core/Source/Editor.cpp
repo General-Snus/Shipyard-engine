@@ -66,6 +66,7 @@
 #endif // PHYSX 0
 #include "DirectX\DX12\Graphics\GPU.h"
 #include "Tools\Utilities\Input\Mapper.hpp"
+#include "Windows\EditorWindows\EditorWindow.h"
 
 enum Theme {
 	light,
@@ -445,10 +446,10 @@ bool Editor::Initialize(HWND aHandle)
 
 	AddViewPort();
 	g_EditorWindows.reserve(100); // TODO Bruh
-	g_EditorWindows.emplace_back(std::make_shared<Inspector>());
-	g_EditorWindows.emplace_back(std::make_shared<Hierarchy>());
-	g_EditorWindows.emplace_back(std::make_shared<ContentDirectory>());
-	g_EditorWindows.emplace_back(std::make_shared<Console>());
+	AddWindow(std::make_shared<Inspector>());
+	AddWindow(std::make_shared<Hierarchy>());
+	AddWindow(std::make_shared<ContentDirectory>());
+	AddWindow(std::make_shared<Console>());
 	AddViewPort();
 	return true;
 }
@@ -759,7 +760,13 @@ void Editor::AddViewPort()
 	viewport->ViewportIndex = ViewportIndex;
 	ViewportIndex++;
 	m_Viewports.emplace_back(viewport);
-	g_EditorWindows.emplace_back(viewport);
+	AddWindow(viewport);
+}
+
+void Editor::AddWindow(std::shared_ptr<EditorWindow> window)
+{
+	window->Initialize();
+	g_EditorWindows.emplace_back(window);
 }
 
 void Editor::TopBar()
@@ -791,9 +798,8 @@ void Editor::TopBar()
 		{
 			if (ImGui::Selectable("ImGuiDemoWindow"))
 			{
-				auto window = std::make_shared<CustomFuncWindow>(&ImGui::ShowDemoWindow, static_cast<bool*>(nullptr));
-				window->SetWindowName("ImGui demo holder");
-				g_EditorWindows.emplace_back(window);
+				auto window = std::make_shared<CustomFuncWindow>("Demo window", 0, &ImGui::ShowDemoWindow, static_cast<bool*>(nullptr));
+				AddWindow(window);
 			}
 
 			if (ImGui::Selectable("Light Theme"))
@@ -817,42 +823,42 @@ void Editor::TopBar()
 
 			if (ImGui::Selectable("Inspector"))
 			{
-				g_EditorWindows.emplace_back(std::make_shared<Inspector>());
+				AddWindow(std::make_shared<Inspector>());
 			}
 
 			if (ImGui::Selectable("Hierarchy"))
 			{
-				g_EditorWindows.emplace_back(std::make_shared<Hierarchy>());
+				AddWindow(std::make_shared<Hierarchy>());
 			}
 
 			if (ImGui::Selectable("Content Browser"))
 			{
-				g_EditorWindows.emplace_back(std::make_shared<ContentDirectory>());
+				AddWindow(std::make_shared<ContentDirectory>());
 			}
 
 			if (ImGui::Selectable("Console"))
 			{
-				g_EditorWindows.emplace_back(std::make_shared<Console>());
+				AddWindow(std::make_shared<Console>());
 			}
 
 			if (ImGui::Selectable("History"))
 			{
-				g_EditorWindows.emplace_back(std::make_shared<History>());
+				AddWindow(std::make_shared<History>());
 			}
 
 			if (ImGui::Selectable("Color Presets"))
 			{
-				g_EditorWindows.emplace_back(std::make_shared<ColorPresets>());
+				AddWindow(std::make_shared<ColorPresets>());
 			}
 
 			if (ImGui::Selectable("Chat"))
 			{
-				g_EditorWindows.emplace_back(std::make_shared<ChatWindow>());
+				AddWindow(std::make_shared<ChatWindow>());
 			}
 
 			if (ImGui::Selectable("Network Settings"))
 			{
-				g_EditorWindows.emplace_back(std::make_shared<NetworkSettings>());
+				AddWindow(std::make_shared<NetworkSettings>());
 			}
 
 			ImGui::EndMenu();
@@ -861,17 +867,17 @@ void Editor::TopBar()
 		{
 			if (ImGui::Selectable("Graphics debugger"))
 			{
-				g_EditorWindows.emplace_back(std::make_shared<GraphicsDebugger>());
+				AddWindow(std::make_shared<GraphicsDebugger>());
 			}
 
 			if (ImGui::Selectable("Frame statistics"))
 			{
-				g_EditorWindows.emplace_back(std::make_shared<FrameStatistics>());
+				AddWindow(std::make_shared<FrameStatistics>());
 			}
 
 			if (ImGui::Selectable("Image Viewer"))
 			{
-				g_EditorWindows.emplace_back(std::make_shared<ImageViewer>(m_Viewports.front()->m_RenderTarget));
+				AddWindow(std::make_shared<ImageViewer>("Image viewer", m_Viewports.front()->m_RenderTarget));
 			}
 
 			ImGui::EndMenu();
@@ -922,7 +928,9 @@ void Editor::TopBar()
 		if (windows && windows->m_KeepWindow)
 		{
 			ImGui::PushID(windows->uniqueID);
+			ImGui::Begin(windows->name, &windows->m_KeepWindow, windows->flags);
 			windows->RenderImGUi();
+			ImGui::End();
 			ImGui::PopID();
 		}
 	}

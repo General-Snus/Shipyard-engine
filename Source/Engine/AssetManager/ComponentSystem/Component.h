@@ -9,8 +9,8 @@ class Transform;
 
 class Component : public Reflectable<Component>, public AvailableInInspector {
 public:
-	reflectable(Component)
-		Component(const SY::UUID anOwnerID, GameObjectManager* aManager);
+	reflectable(Component);
+	Component(const SY::UUID anOwnerID, GameObjectManager* aManager);
 	Component(const Component& aComponent);
 	virtual ~Component() noexcept = default;
 

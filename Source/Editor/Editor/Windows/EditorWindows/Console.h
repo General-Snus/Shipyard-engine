@@ -6,13 +6,13 @@
 
 class Console : public EditorWindow
 {
-  public:
-    void RenderImGUi() override;
+public:
+	Console() : EditorWindow("Console", ImGuiWindowFlags_NoResize) {};
+	void RenderImGUi() override;
+	void PushDebugLayerToConsole();
 
-    void PushDebugLayerToConsole();
-
-  private:
-    LoggerService::LogType filter = LoggerService::LogType::message;
-    LoggerService::LogMsg pickedMessage;
-    std::vector<LoggerService::LogMsg> clippedMessages;
+private:
+	LoggerService::LogType filter = LoggerService::LogType::message;
+	LoggerService::LogMsg pickedMessage;
+	std::vector<LoggerService::LogMsg> clippedMessages;
 };

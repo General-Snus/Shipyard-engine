@@ -1,7 +1,8 @@
 #include "../Viewport.h"
+
 #include "DirectX/XTK/Inc/SimpleMath.h" 
+#include "Editor/Editor/Core/Editor.h"
 #include "Editor/Editor/Helpers/ImGuiHelpers.h"
-#include "Editor/Editor/Windows/Window.h"
 #include "Engine/AssetManager/ComponentSystem/Components/CameraComponent.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
 #include "Engine/AssetManager/ComponentSystem/GameObject.h"
@@ -12,10 +13,13 @@
 #include "Optick\include\optick.h"
 #include "Tools/Logging/Logging.h"
 #include "Tools/Utilities/Input/Input.hpp"
+#include "Tools\ImGui\imgui.h" 
+#include "Tools\ImGui\imgui_internal.h" 
 #include "Tools\Utilities\LinearAlgebra\Vector2.hpp"
 #include "Tools\Utilities\LinearAlgebra\Vector3.hpp"
 #include "Tools\Utilities\LinearAlgebra\Vector4.hpp"
-#include "imgui_internal.h" 
+#include "Windows\EditorWindows\EditorWindow.h"
+#include "algorithm"
 #include <Engine/AssetManager/AssetManager.h>
 #include <Engine/PersistentSystems/SceneUtilities.h>
 #include <Font/IconsFontAwesome5.h>
@@ -29,10 +33,24 @@
 ImGuizmo::OPERATION m_CurrentGizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
 ImGuizmo::MODE      m_CurrentGizmoMode = ImGuizmo::MODE::WORLD;
 
-Viewport::Viewport(bool IsMainViewPort, Vector2ui ViewportResolution, std::shared_ptr<Scene> aScene,
-	std::shared_ptr<TextureHolder> RenderTexture)
-	: m_RenderTarget(RenderTexture), ViewportResolution(ViewportResolution), sceneToRender(aScene),
-	isGameViewport(IsMainViewPort), editorCamera(0, nullptr)
+Viewport::Viewport(
+	bool IsMainViewPort,
+	Vector2ui ViewportResolution,
+	std::shared_ptr<Scene> aScene,
+	std::shared_ptr<TextureHolder> RenderTexture) :
+	m_RenderTarget(RenderTexture),
+	scaledResolution(ViewportResolution),
+	backbufferResolution(ViewportResolution),
+	sceneToRender(aScene),
+	isGameViewport(IsMainViewPort),
+	editorCamera(0, nullptr),
+	EditorWindow(IsMainViewPort ? "Game" : "Scene", (int)(ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_MenuBar))
+{
+}
+
+Viewport::~Viewport() = default;
+
+void Viewport::Initialize()
 {
 	editorCamera.Init();
 	if (!m_RenderTarget)
@@ -40,19 +58,17 @@ Viewport::Viewport(bool IsMainViewPort, Vector2ui ViewportResolution, std::share
 		m_RenderTarget = std::make_shared<TextureHolder>("ViewportTargetTexture");
 	}
 
-	if (m_RenderTarget->GetRawTexture()->GetWidth() != ViewportResolution.x &&
-		m_RenderTarget->GetRawTexture()->GetHeight() != ViewportResolution.y)
+	if (m_RenderTarget->GetRawTexture()->GetWidth() != backbufferResolution.x &&
+		m_RenderTarget->GetRawTexture()->GetHeight() != backbufferResolution.y)
 	{
 		auto clearColor = Vector4f(0, 0, 1, 1);
 		if (!ColorManagerInstance.GetColor("ClearColor", clearColor))
 		{
 			ColorManagerInstance.CreateColor("ClearColor", clearColor);
 		}
-		m_RenderTarget->GetRawTexture()->AllocateTexture(ViewportResolution, "Target1", clearColor);
+		m_RenderTarget->GetRawTexture()->AllocateTexture(Vector2ui(backbufferResolution), "Target1", clearColor);
 	}
 }
-
-Viewport::~Viewport() = default;
 
 std::shared_ptr<Scene> Viewport::GetAttachedScene() const
 {
@@ -77,6 +93,7 @@ bool Viewport::IsHovered() const
 bool Viewport::IsRenderReady() const
 {
 	if (!IsVisible) { return false; }
+	if (!m_RenderTarget->GetRawTexture()->IsValid()) { return false; }
 	if (!GetAttachedScene()) { return false; }
 
 	// if you are main and there is a active camera
@@ -108,14 +125,14 @@ void Viewport::Update()
 		if (auto* camera = GetAttachedScene()->GetGOM().GetCamera().TryGetComponent<Camera>())
 		{
 			camera->IsInControl(false);
-			camera->SetResolution(ViewportResolution);
+			camera->SetResolution(scaledResolution);
 		}
 	}
 	else
 	{
 		editorCamera.Update();
 		editorCamera.IsInControl(IsSelected());
-		editorCamera.SetResolution(ViewportResolution);
+		editorCamera.SetResolution(scaledResolution);
 		GizmoInput();
 	}
 }
@@ -172,7 +189,7 @@ const Transform& Viewport::GetCameraTransform() const
 Matrix Viewport::Projection() const
 {
 	const auto& ViewportCamera = GetCamera();
-	const auto dxMatrix = DirectX::XMMatrixPerspectiveFovLH(ViewportCamera.FowInRad(), ViewportResolution.x / ViewportResolution.y,
+	const auto dxMatrix = DirectX::XMMatrixPerspectiveFovLH(ViewportCamera.FowInRad(), static_cast<float>(scaledResolution.x) / scaledResolution.y,
 		ViewportCamera.nearField, ViewportCamera.farfield);
 	return Matrix(&dxMatrix);
 }
@@ -190,114 +207,97 @@ const Matrix& Viewport::View() const
 void Viewport::RenderImGUi()
 {
 	OPTICK_EVENT();
-	constexpr ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_MenuBar;
-	// const auto aspecRatio = (res.x / res.y);
-	// ImGui::SetNextWindowSizeConstraints(ImVec2(0,0),ImVec2(FLT_MAX,FLT_MAX),CustomConstraints::AspectRatio,(void*)&aspecRatio);
 
 	const std::vector<GameObject>& selectedObjects = GetEditor().GetSelectedGameObjects();
+	RenderToolbar();
+	isWindowFocused = ImGui::IsWindowFocused();
+	IsVisible = ImGui::IsItemVisible();
 
+	//Unsure why Imgui somethimes think available region is negative
+	scaledResolution = { ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y };
 
-	//ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding,{0.f, 0.f});
-	std::string title = "Scene ";
-	if (IsGameViewport())
+	auto& ViewportCamera = GetCamera();
+	ViewportCamera.SetResolution(scaledResolution);
+	const auto cursorPosition = ImGui::GetCursorScreenPos();
+	ImGui::Image(m_RenderTarget, *(ImVec2*)&scaledResolution.x);
+	IsMouseHoverering = isWindowFocused;
+
+	if (IsMouseHoverering)
 	{
-		title = "Game";
+		cursorPositionInViewPort = ImGui::CursorPositionInWindow();
 	}
-	else
+
+	if (ImGui::BeginDragDropTarget())
 	{
-		title += std::to_string(ViewportIndex);
-	}
-
-	if (ImGui::Begin(title.c_str(), &m_KeepWindow, windowFlags))
-	{
-		RenderToolbar();
-		isWindowFocused = ImGui::IsWindowFocused();
-		IsVisible = ImGui::IsItemVisible();
-		ViewportResolution = { ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y };
-
-		auto& ViewportCamera = GetCamera();
-		ViewportCamera.SetResolution(ViewportResolution);
-		const auto cursorPosition = ImGui::GetCursorScreenPos();
-		ImGui::Image(m_RenderTarget, *(ImVec2*)&ViewportResolution.x);
-		IsMouseHoverering = isWindowFocused;
-
-		if (IsMouseHoverering)
+		if (const ImGuiPayload* test = ImGui::AcceptDragDropPayload("ContentAsset_Mesh"))
 		{
-			cursorPositionInViewPort = ImGui::CursorPositionInWindow();
+			const std::filesystem::path data = std::string(static_cast<char*>(test->Data), test->DataSize);
+			const std::string           type = GetEngineResources().AssetType(data);
+
+			SceneUtils::AddAssetToScene(data, sceneToRender);
+
+			LOGGER.Log(type);
+		}
+		ImGui::EndDragDropTarget();
+	}
+
+	if (!IsGameViewport())
+	{
+		ImGuizmo::SetDrawlist();
+		ImGuizmo::SetRect(cursorPosition.x, cursorPosition.y, static_cast<float>(scaledResolution.x), static_cast<float>(scaledResolution.y));
+		auto cameraView = ViewInverse();
+		auto cameraProjection = Projection();
+
+		if (!isWindowFocused)
+		{
+			GetCamera().IsInControl(false);
 		}
 
-		if (ImGui::BeginDragDropTarget())
+		bool didManipulate = false;
+		for (const auto& gameObject : selectedObjects)
 		{
-			if (const ImGuiPayload* test = ImGui::AcceptDragDropPayload("ContentAsset_Mesh"))
-			{
-				const std::filesystem::path data = std::string(static_cast<char*>(test->Data), test->DataSize);
-				const std::string           type = GetEngineResources().AssetType(data);
+			auto& transform = gameObject.transform();
+			Matrix worldMatrix = transform.WorldMatrix();
+			Matrix deltaChange;
+			float snapping = 0.0f;
+			const bool transformed = ImGuizmo::Manipulate(&cameraView, &cameraProjection, m_CurrentGizmoOperation,
+				m_CurrentGizmoMode, &worldMatrix, &deltaChange, &snapping);
 
-				SceneUtils::AddAssetToScene(data, sceneToRender);
-
-				LOGGER.Log(type);
-			}
-			ImGui::EndDragDropTarget();
-		}
-
-		if (!IsGameViewport())
-		{
-			ImGuizmo::SetDrawlist();
-			ImGuizmo::SetRect(cursorPosition.x, cursorPosition.y, ViewportResolution.x, ViewportResolution.y);
-			auto cameraView = ViewInverse();
-			auto cameraProjection = Projection();
-
-			if (!isWindowFocused)
+			didManipulate |= transformed;
+			if (transformed)
 			{
 				GetCamera().IsInControl(false);
-			}
-
-			bool didManipulate = false;
-			for (const auto& gameObject : selectedObjects)
-			{
-				auto& transform = gameObject.transform();
-				Matrix worldMatrix = transform.WorldMatrix();
-				Matrix deltaChange;
-				float snapping = 0.0f;
-				const bool transformed = ImGuizmo::Manipulate(&cameraView, &cameraProjection, m_CurrentGizmoOperation,
-					m_CurrentGizmoMode, &worldMatrix, &deltaChange, &snapping);
-
-				didManipulate |= transformed;
-				if (transformed)
+				Matrix localMatrix = worldMatrix;
+				if (transform.HasParent())
 				{
-					GetCamera().IsInControl(false);
-					Matrix localMatrix = worldMatrix;
-					if (transform.HasParent())
-					{
-						localMatrix = worldMatrix * Matrix::Invert(transform.GetParent().WorldMatrix());
-						// TODO This doesnt support scaled objects, fix asap im eepy now
-					}
-
-					Vector3f tra;
-					Vector3f rot;
-					Vector3f sca;
-					//ImGuizmo::DecomposeMatrixToComponents(&localMatrix,&tra.x,&rot.x,&sca.x);
-					ImGuizmo::DecomposeMatrixToComponents(&deltaChange, &tra.x, &rot.x, &sca.x);
-
-					transform.Scale(sca);
-					transform.Rotate(rot);
-					transform.Move(tra);
-
-					LOGGER.Log(localMatrix.rotationMatrix().toString());
-					transform.DecomposeMatrixToTransform(localMatrix);
+					localMatrix = worldMatrix * Matrix::Invert(transform.GetParent().WorldMatrix());
+					// TODO This doesnt support scaled objects, fix asap im eepy now
 				}
-			}
 
-			GetCamera().IsInControl(!didManipulate && isWindowFocused);
+				Vector3f tra;
+				Vector3f rot;
+				Vector3f sca;
+				//ImGuizmo::DecomposeMatrixToComponents(&localMatrix,&tra.x,&rot.x,&sca.x);
+				ImGuizmo::DecomposeMatrixToComponents(&deltaChange, &tra.x, &rot.x, &sca.x);
+
+				transform.Scale(sca);
+				transform.Rotate(rot);
+				transform.Move(tra);
+
+				LOGGER.Log(localMatrix.rotationMatrix().toString());
+				transform.DecomposeMatrixToTransform(localMatrix);
+			}
 		}
+
+		GetCamera().IsInControl(!didManipulate && isWindowFocused);
 	}
-	else
-	{
-		isWindowFocused = false;
-		IsVisible = false;
-	}
-	ImGui::End();
-	//ImGui::PopStyleVar();
+	//}
+	//else
+	//{
+	//	isWindowFocused = false;
+	//	IsVisible = false;
+	//} 
+	////ImGui::PopStyleVar();
 }
 
 void Viewport::RenderToolbar()

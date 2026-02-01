@@ -2,31 +2,31 @@
 #include "Renderer.h" 
 
 #include "DirectX/DX12/Graphics/CommandList.h"
+#include "DirectX/DX12/Graphics/CommandList.h"
+#include "DirectX/DX12/Graphics/CommandQueue.h" 
+#include "DirectX/DX12/Graphics/CommandQueue.h" 
 #include "DirectX/DX12/Graphics/CommandQueue.h" 
 #include "DirectX/DX12/Graphics/GPU.h" 
+#include "DirectX/DX12/Graphics/GPU.h" 
+#include "DirectX/DX12/Graphics/GPU.h" 
+#include "DirectX/DX12/Graphics/GPU.h" 
+#include "DirectX/DX12/Graphics/GPU.h" 
+#include "DirectX/DX12/Graphics/GPU.h" 
+#include "DirectX/DX12/Graphics/PSO.h"
+#include "DirectX/DX12/Graphics/PSO.h"
+#include "DirectX/DX12/Graphics/PSO.h"
+#include "DirectX/DX12/Graphics/PSO.h"
 #include "DirectX/DX12/Graphics/PSO.h"
 #include "DirectX/DX12/Graphics/ResourceStateTracker.h"
 #include "DirectX/DX12/Graphics/RootSignature.h" 
-#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
-#include "DirectX/DX12/Graphics/CommandList.h"
-#include "DirectX/DX12/Graphics/CommandQueue.h" 
-#include "DirectX/DX12/Graphics/GPU.h" 
-#include "DirectX/DX12/Graphics/PSO.h"
+#include "DirectX/DX12/Graphics/RootSignature.h" 
+#include "DirectX/DX12/Graphics/RootSignature.h" 
 #include "DirectX/DX12/Graphics/RootSignature.h" 
 #include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
-#include "DirectX/DX12/Graphics/CommandQueue.h" 
-#include "DirectX/DX12/Graphics/GPU.h" 
-#include "DirectX/DX12/Graphics/PSO.h"
-#include "DirectX/DX12/Graphics/RootSignature.h" 
 #include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
-#include "DirectX/DX12/Graphics/GPU.h" 
-#include "DirectX/DX12/Graphics/PSO.h"
-#include "DirectX/DX12/Graphics/RootSignature.h" 
 #include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
-#include "DirectX/DX12/Graphics/GPU.h" 
-#include "DirectX/DX12/Graphics/PSO.h"
 #include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
-#include "DirectX/DX12/Graphics/GPU.h" 
+#include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
 #include "Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h"
 
 #include "Editor\Editor\Core\Editor.h"
@@ -523,7 +523,7 @@ void Renderer::ViewportToBackBuffer(Viewport* viewport)
 {
 	if (viewport == nullptr) { return; }
 	//viewport->ViewportResolution = {(float) WindowInstance.Resolution().x,(float) WindowInstance.Resolution().y };
-	viewport->ViewportResolution = (Vector2f)WindowInstance.Resolution();
+	viewport->backbufferResolution = WindowInstance.Resolution();
 	viewport->ResolutionUpdate();
 
 	const auto commandQueue = GetGPU().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);

@@ -1,10 +1,10 @@
 #pragma once 
 #include <Editor/Editor/Core/Editor.h>
 #include <Editor/Editor/Windows/EditorWindows/CustomFuncWindow.h>
+#include <Editor\Editor\Helpers\ImGuiHelpers.h>
 #include <Engine/AssetManager/AssetManager.h>
 #include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
 #include <Engine/GraphicsEngine/Renderer.h>
-#include <Editor\Editor\Helpers\ImGuiHelpers.h>
 #include <Tools/ImGui/imgui.h>
 #include <Tools/ImGui/imgui_internal.h>
 #include <memory>
@@ -92,9 +92,12 @@ void SwitchableAsset(std::shared_ptr<assetType>& asset, std::string PayloadType,
 			if constexpr (SupportOwnWindow<std::shared_ptr<assetType>> ||
 				SupportOwnWindowPtr<std::shared_ptr<assetType>>)
 			{
-				auto newWindow = std::make_shared<CustomFuncWindow>(std::bind(&assetType::InspectorView, asset));
-				newWindow->SetWindowName(asset->GetAssetPath().filename().string());
-				GetEditor().g_EditorWindows.emplace_back(newWindow);
+				auto newWindow = std::make_shared<CustomFuncWindow>(
+					asset->GetAssetPath().filename().string().c_str(),
+					0,
+					std::bind(&assetType::InspectorView, asset)
+				);
+				GetEditor().AddWindow(newWindow);
 			}
 		}
 	}

@@ -5,10 +5,11 @@
 class Hierarchy : public EditorWindow
 {
 public:
+	Hierarchy() : EditorWindow("Hierarchy") {}
 	void RenderImGUi() override;
 private:
 	void PopupMenu(SY::UUID id);
-	void RenderNode(  Transform& transform);
-	void DragDrop( Transform& transform );
+	void RenderNode(Transform& transform);
+	void DragDrop(Transform& transform);
 };
 

@@ -6,6 +6,7 @@
 class History : public EditorWindow
 {
 public:
-	void RenderImGUi() override; 
+	History() : EditorWindow("History") {}
+	void RenderImGUi() override;
 };
 

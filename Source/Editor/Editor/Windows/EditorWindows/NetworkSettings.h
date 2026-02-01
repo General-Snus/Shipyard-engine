@@ -4,10 +4,10 @@
 
 class NetworkSettings : public EditorWindow {
 public:
-	NetworkSettings(); 
+	NetworkSettings() : EditorWindow("NetworkSettings") {}
 	void RenderImGUi() override;
-	void DrawPingPlot(float newPing); 
+	void DrawPingPlot(float newPing);
 private:
 	Avg<float, 100> downlink;
 	Avg<float, 100> uplink;
-}; 
+};

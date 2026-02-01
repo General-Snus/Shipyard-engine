@@ -1,6 +1,7 @@
 #include "GraphicsEngine.pch.h"
 
 #include "GraphicsEngineUtilities.h"
+#include "Renderer.h"
 #include <Editor/Editor/Windows/EditorWindows/Viewport.h>
 #include <Engine/AssetManager/ComponentSystem/Components/MeshRenderer.h>
 #include <Engine/AssetManager/ComponentSystem/Components/Transform.h>
@@ -8,7 +9,6 @@
 #include <Engine/AssetManager/Objects/BaseAssets/MeshAsset.h>
 #include <Engine/AssetManager/Objects/BaseAssets/TextureAsset.h>
 #include <Engine/PersistentSystems/Scene.h>
-#include "Renderer.h"
 
 bool GraphicsEngineUtilities::GenerateSceneForIcon(std::shared_ptr<Mesh> meshAsset,
 												   std::shared_ptr<TextureHolder> renderTarget,
@@ -42,6 +42,8 @@ bool GraphicsEngineUtilities::GenerateSceneForIcon(std::shared_ptr<Mesh> meshAss
 	}
 
 	const auto newViewport = std::make_shared<Viewport>(true, res, GetRenderer().newScene, renderTarget);
+	newViewport->Initialize();
+	//TODO Problematic, I should separate the editorWindow viewport and the viewport struct
 	GetRenderer().AddRenderJob(newViewport);
 	return true;
 }

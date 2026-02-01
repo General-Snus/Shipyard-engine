@@ -1,10 +1,10 @@
 #pragma once
+#include "EditorWindow.h"
+#include <Tools/ImGui/imgui.h>
+#include <Tools/Logging/Logging.h>
 #include <array>
 #include <functional>
 #include <future>
-#include <Tools/ImGui/imgui.h>
-#include <Tools/Logging/Logging.h>
-#include "EditorWindow.h"
 
 class CustomFuncWindow : public EditorWindow
 {
@@ -13,7 +13,7 @@ public:
 
 	// Sorry, you have to input the default arguments as part of the constructor
 	template <typename CallbackFunction, typename... Args>
-	explicit CustomFuncWindow(const CallbackFunction&& callback, Args... someArguments)
+	explicit CustomFuncWindow(const char* name, int flags, const CallbackFunction&& callback, Args... someArguments) : EditorWindow(name, flags)
 
 	{
 		for (auto& letter : uniqueID)
@@ -29,25 +29,15 @@ public:
 		}
 	}
 
-	void SetWindowName(const std::string& aName);
-
 	void RenderImGUi() override
 	{
-		if (windowsName.empty())
-		{
-			windowsName = "Name your window you stupid mutt";
-		}
-
-		ImGui::Begin(std::format("{}###{}", windowsName, uniqueID).c_str(), &m_KeepWindow);
 		if (m_Func)
 		{
 			m_Func();
 		}
-		ImGui::End();
 	};
 
 private:
 	std::function<void()>        m_Func;
-	std::string                  windowsName;
 	std::array<unsigned char, 8> uniqueID;
 };

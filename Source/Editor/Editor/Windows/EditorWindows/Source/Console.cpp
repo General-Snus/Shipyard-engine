@@ -1,10 +1,10 @@
 #include "../Console.h"
 
-#include <External/Optick/include/optick.h>
 #include <DirectX\DX12\Graphics\GPU.h> 
+#include <External/Optick/include/optick.h>
 
-#include <ranges>
 #include "imgui.h"
+#include <ranges>
 
 void Console::RenderImGUi()
 {
@@ -12,135 +12,130 @@ void Console::RenderImGUi()
 
 
 	PushDebugLayerToConsole();
-
-	ImGui::Begin("Console", &m_KeepWindow, ImGuiWindowFlags_NoResize);
+	// TODO clipper
+	using enum LoggerService::LogType;
+	const auto& style = ImGui::GetStyle();
+	const auto& buffer = LOGGER.m_Buffer;
+	auto        getButtonColor = [&](LoggerService::LogType val, LoggerService::LogType buttonType)
 	{
-		// TODO clipper
-		using enum LoggerService::LogType;
-		const auto& style = ImGui::GetStyle();
-		const auto& buffer = LOGGER.m_Buffer;
-		auto        getButtonColor = [&](LoggerService::LogType val, LoggerService::LogType buttonType)
+		if ((val & buttonType) == none)
 		{
-			if ((val & buttonType) == none)
-			{
-				return style.Colors[ImGuiCol_Button];
-			}
-			return style.Colors[ImGuiCol_ButtonActive];
-		};
-
-		if (ImGui::ColorButton("All", getButtonColor(filter, All)))
-		{
-			if (filter == All)
-			{
-				filter = none;
-			}
-			if (filter != All)
-			{
-				filter = All;
-			}
+			return style.Colors[ImGuiCol_Button];
 		}
-		ImGui::SameLine();
-		ImGui::Text(std::format("All: {}", buffer.messagesCount + buffer.warnCount + buffer.errCount + buffer.criticalCount + buffer.successCount).c_str());
-		ImGui::SameLine();
+		return style.Colors[ImGuiCol_ButtonActive];
+	};
 
-		ImGui::ColorButton("Messages:", getButtonColor(filter, message)) ? filter ^= message : none;
-		ImGui::SameLine();
-		ImGui::Text(std::format("Messages: {}", buffer.messagesCount).c_str());
-		ImGui::SameLine();
-
-		ImGui::ColorButton("Warnings: ", getButtonColor(filter, warning)) ? filter ^= warning : none;
-		ImGui::SameLine();
-		ImGui::Text(std::format("Warnings: {}", buffer.warnCount).c_str());
-		ImGui::SameLine();
-
-		ImGui::ColorButton("Error: ", getButtonColor(filter, error)) ? filter ^= error : none;
-		ImGui::SameLine();
-		ImGui::Text(std::format("Error: {}", buffer.errCount).c_str());
-		ImGui::SameLine();
-
-		ImGui::ColorButton("Critical: ", getButtonColor(filter, critical)) ? filter ^= critical : none;
-		ImGui::SameLine();
-		ImGui::Text(std::format("Critical: {}", buffer.criticalCount).c_str());
-		ImGui::SameLine();
-
-		ImGui::ColorButton("Success: ", getButtonColor(filter, success)) ? filter ^= success : none;
-		ImGui::SameLine();
-		ImGui::Text(std::format("Success: {}", buffer.successCount).c_str());
-		ImGui::SameLine();
-
-		if (ImGui::Button("Clear"))
+	if (ImGui::ColorButton("All", getButtonColor(filter, All)))
+	{
+		if (filter == All)
 		{
-			std::scoped_lock lock(LOGGER.mutexLock());
-			LOGGER.Clear();
-			pickedMessage = LoggerService::LogMsg();
+			filter = none;
 		}
-
-		const Vector2f spaceAvail = { ImGui::GetContentRegionAvail().x,ImGui::GetContentRegionAvail().y * 0.75f };
-		if (ImGui::BeginChild("ScrollingRegion", static_cast<ImVec2>(spaceAvail)))
+		if (filter != All)
 		{
-			std::scoped_lock lock(LOGGER.mutexLock());
-			const auto& messages = buffer.LoggedMessages;
-
-			ImGuiListClipper clipper;
-
-
-			clippedMessages.clear();
-			for (const auto& log : messages)
-			{
-				const auto& [type, message, trace, nr] = log;
-				if (!message.empty() && (filter & type) != none)
-				{
-					clippedMessages.emplace_back(log);
-				}
-			}
-
-			clipper.Begin((int)clippedMessages.size(), ImGui::GetTextLineHeightWithSpacing());
-
-			while (clipper.Step())
-			{
-
-				for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
-				{
-					const auto& logEntity = clippedMessages[i];
-					const auto& [type, message, trace, nr] = logEntity;
-
-					// Push color and text
-					Color logColor = LOGGER.GetColor(type);
-					ImGui::PushStyleColor(ImGuiCol_Text, static_cast<ImVec4>(logColor.GetRGBA()));
-
-					ImGui::PushID(i);
-					if (ImGui::Selectable(message.c_str(), pickedMessage.logNumber == logEntity.logNumber))
-					{
-						pickedMessage = logEntity;
-					}
-					ImGui::PopID();
-
-					ImGui::PopStyleColor();
-				}
-			}
-			clipper.End();
-
-			// Auto-scroll logic
-			static int lastSize = 0;
-			if (lastSize != messages.size() && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
-			{
-				ImGui::SetScrollHereY(1.0f);
-			}
-			lastSize = static_cast<int>(messages.size());
+			filter = All;
 		}
-		ImGui::EndChild();
-		ImGui::Separator();
-		if (ImGui::BeginChild("DetailView"))
-		{
-			ImGui::TextWrapped(pickedMessage.message.c_str());
-			for (auto& traceElement : pickedMessage.trace)
-			{
-				ImGui::TextWrapped(traceElement.description().c_str());
-			}
-		}
-		ImGui::EndChild();
 	}
-	ImGui::End();
+	ImGui::SameLine();
+	ImGui::Text(std::format("All: {}", buffer.messagesCount + buffer.warnCount + buffer.errCount + buffer.criticalCount + buffer.successCount).c_str());
+	ImGui::SameLine();
+
+	ImGui::ColorButton("Messages:", getButtonColor(filter, message)) ? filter ^= message : none;
+	ImGui::SameLine();
+	ImGui::Text(std::format("Messages: {}", buffer.messagesCount).c_str());
+	ImGui::SameLine();
+
+	ImGui::ColorButton("Warnings: ", getButtonColor(filter, warning)) ? filter ^= warning : none;
+	ImGui::SameLine();
+	ImGui::Text(std::format("Warnings: {}", buffer.warnCount).c_str());
+	ImGui::SameLine();
+
+	ImGui::ColorButton("Error: ", getButtonColor(filter, error)) ? filter ^= error : none;
+	ImGui::SameLine();
+	ImGui::Text(std::format("Error: {}", buffer.errCount).c_str());
+	ImGui::SameLine();
+
+	ImGui::ColorButton("Critical: ", getButtonColor(filter, critical)) ? filter ^= critical : none;
+	ImGui::SameLine();
+	ImGui::Text(std::format("Critical: {}", buffer.criticalCount).c_str());
+	ImGui::SameLine();
+
+	ImGui::ColorButton("Success: ", getButtonColor(filter, success)) ? filter ^= success : none;
+	ImGui::SameLine();
+	ImGui::Text(std::format("Success: {}", buffer.successCount).c_str());
+	ImGui::SameLine();
+
+	if (ImGui::Button("Clear"))
+	{
+		std::scoped_lock lock(LOGGER.mutexLock());
+		LOGGER.Clear();
+		pickedMessage = LoggerService::LogMsg();
+	}
+
+	const Vector2f spaceAvail = { ImGui::GetContentRegionAvail().x,ImGui::GetContentRegionAvail().y * 0.75f };
+	if (ImGui::BeginChild("ScrollingRegion", static_cast<ImVec2>(spaceAvail)))
+	{
+		std::scoped_lock lock(LOGGER.mutexLock());
+		const auto& messages = buffer.LoggedMessages;
+
+		ImGuiListClipper clipper;
+
+
+		clippedMessages.clear();
+		for (const auto& log : messages)
+		{
+			const auto& [type, message, trace, nr] = log;
+			if (!message.empty() && (filter & type) != none)
+			{
+				clippedMessages.emplace_back(log);
+			}
+		}
+
+		clipper.Begin((int)clippedMessages.size(), ImGui::GetTextLineHeightWithSpacing());
+
+		while (clipper.Step())
+		{
+
+			for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
+			{
+				const auto& logEntity = clippedMessages[i];
+				const auto& [type, message, trace, nr] = logEntity;
+
+				// Push color and text
+				Color logColor = LOGGER.GetColor(type);
+				ImGui::PushStyleColor(ImGuiCol_Text, static_cast<ImVec4>(logColor.GetRGBA()));
+
+				ImGui::PushID(i);
+				if (ImGui::Selectable(message.c_str(), pickedMessage.logNumber == logEntity.logNumber))
+				{
+					pickedMessage = logEntity;
+				}
+				ImGui::PopID();
+
+				ImGui::PopStyleColor();
+			}
+		}
+		clipper.End();
+
+		// Auto-scroll logic
+		static int lastSize = 0;
+		if (lastSize != messages.size() && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
+		{
+			ImGui::SetScrollHereY(1.0f);
+		}
+		lastSize = static_cast<int>(messages.size());
+	}
+	ImGui::EndChild();
+	ImGui::Separator();
+	if (ImGui::BeginChild("DetailView"))
+	{
+		ImGui::TextWrapped(pickedMessage.message.c_str());
+		for (auto& traceElement : pickedMessage.trace)
+		{
+			ImGui::TextWrapped(traceElement.description().c_str());
+		}
+	}
+	ImGui::EndChild();
 }
 
 void Console::PushDebugLayerToConsole()

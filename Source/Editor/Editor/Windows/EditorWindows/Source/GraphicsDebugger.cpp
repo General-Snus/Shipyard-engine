@@ -8,7 +8,6 @@
 
 void GraphicsDebugger::RenderImGUi()
 {
-	ImGui::Begin("Debug Filter", &m_KeepWindow);
 
 	constexpr auto& debugFilter = magic_enum::enum_names<DebugFilter>();
 	constexpr auto  enumCount = magic_enum::enum_count<DebugFilter>();
@@ -34,5 +33,4 @@ void GraphicsDebugger::RenderImGUi()
 			}
 		}
 	}
-	ImGui::End();
 }

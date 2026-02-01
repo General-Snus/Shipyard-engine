@@ -1,12 +1,13 @@
 #pragma once
 #include "EditorWindow.h"
+#include "Tools/Utilities/LinearAlgebra/Vector4.hpp"
 #include <string>  
 #include <vector>   
-#include "Tools/Utilities/LinearAlgebra/Vector4.hpp"
 
 class ColorPresets : public EditorWindow
 {
 public:
+	ColorPresets() : EditorWindow("ColorPresets") {}
 	void RenderImGUi() override;
 
 private:

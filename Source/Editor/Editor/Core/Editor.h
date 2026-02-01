@@ -52,7 +52,7 @@ public:
 	{
 		IsGUIActive = set;
 	};
-	std::vector<std::shared_ptr<EditorWindow>> g_EditorWindows;
+	void AddWindow(std::shared_ptr<EditorWindow> window);
 
 	std::vector<GameObject>& GetSelectedGameObjects()
 	{
@@ -90,6 +90,7 @@ private:
 	std::vector<GameObject> copiedObjects;
 	std::shared_ptr<Scene>  m_ActiveScene;
 
+	std::vector<std::shared_ptr<EditorWindow>> g_EditorWindows;
 	std::vector<std::shared_ptr<Viewport>> m_Viewports;
 	bool                                   IsGUIActive = false;
 };

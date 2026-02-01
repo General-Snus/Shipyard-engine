@@ -2,16 +2,16 @@
 #include <Editor/Editor/Core/Editor.h>
 #include <Tools/Reflection/refl.hpp>
 
-#include <Engine/AssetManager/AssetManager.h>
-#include <Engine/PersistentSystems/SceneUtilities.h>
-#include "imgui.h"
-#include "Engine/AssetManager/Enums.h"
 #include "Engine/AssetManager/ComponentSystem/Components/Transform.h"
+#include "Engine/AssetManager/Enums.h"
 #include "Tools/Logging/Logging.h"
 #include "Tools/Utilities/TemplateHelpers.h" 
+#include "imgui.h"
 #include "imgui_internal.h"
+#include <Engine/AssetManager/AssetManager.h>
+#include <Engine/PersistentSystems/SceneUtilities.h>
 
-Inspector::Inspector()
+void Inspector::Initialize()
 {
 	GetEditor().m_Callbacks[EditorCallback::ObjectSelected].AddListener([this]() { this->ToFront(); });
 }
@@ -24,8 +24,6 @@ void Inspector::ToFront()
 void Inspector::RenderImGUi()
 {
 	OPTICK_EVENT();
-
-	ImGui::Begin("Inspector", &m_KeepWindow);
 
 	if (toFront)
 	{
@@ -89,7 +87,7 @@ void Inspector::RenderImGUi()
 		ImGui::PopID();
 
 		ImGui::NewLine();
-		for (const auto& cmp : gameobject.GetAllComponents() )
+		for (const auto& cmp : gameobject.GetAllComponents())
 		{
 			if (cmp->GetTypeInfo().Name() == refl::type_descriptor<Transform>::name.str())
 			{
@@ -103,6 +101,4 @@ void Inspector::RenderImGUi()
 
 		ImGui::NewLine();
 	}
-
-	ImGui::End();
 }

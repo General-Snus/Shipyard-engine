@@ -1,19 +1,17 @@
 #include "../NetworkSettings.h"
 
-#include "imgui.h"
 #include "Editor/Editor/Helpers/ImGuiHelpers.h"
-#include <format>
+#include "Engine\GraphicsEngine\Renderer.h"
+#include "imgui.h"
+#include "misc\cpp\imgui-combo-filter.h"
 #include <Engine/PersistentSystems/Networking/NetworkRunner.h>
 #include <WinSock2.h>
-#include "misc\cpp\imgui-combo-filter.h"
-#include "Engine\GraphicsEngine\Renderer.h"
+#include <format>
 
 
-NetworkSettings::NetworkSettings() {}
 
 void NetworkSettings::RenderImGUi()
 {
-	ImGui::Begin(std::format("Network settings##{}", uniqueID).c_str(), &m_KeepWindow);
 	ImGui::Markdown(R"(
 # Network settings
 Here you can adjust network settings to your liking or something.
@@ -184,8 +182,6 @@ Here you can adjust network settings to your liking or something.
 			GetRenderer().debugDrawer.AddDebugSphere(sphere.Center, sphere.Radius, Colors::red, .01f);
 		}
 	}
-
-	ImGui::End();
 }
 void NetworkSettings::DrawPingPlot(float newPing)
 {
