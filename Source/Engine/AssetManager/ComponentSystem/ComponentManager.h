@@ -1,7 +1,7 @@
 #pragma once 
 #include <Engine\AssetManager\Enums.h>
 #include <Tools/Reflection/refl.hpp>
-#include <Tools/Utilities/IO/StreamWriter.h>
+#include <Tools/Utilities/IO/TextSerializer.h>
 #include <Tools/Utilities/TemplateHelpers.h>
 
 class GameObjectManager;
@@ -47,8 +47,8 @@ public:
 		return Comparator;
 	}
 
-	virtual void Serialize(StreamWriter& writer) = 0;
-	virtual void Deserialize(StreamReader& reader) = 0;
+	virtual void Serialize(TextSerializer& writer) = 0;
+	virtual void Deserialize(BinaryDeserializer& reader) = 0;
 protected:
 	std::string Comparator;
 	GameObjectManager* myManager = nullptr;
@@ -101,7 +101,7 @@ public:
 
 
 	void Serialize(StreamWriter& writer) override;
-	void Deserialize(StreamReader& reader) override;
+	void Deserialize(BinaryDeserializer& reader) override;
 
 
 private:
@@ -123,7 +123,7 @@ inline void ComponentManager<T>::Serialize(StreamWriter& writer)
 }
 
 template<class T>
-inline void ComponentManager<T>::Deserialize(StreamReader& reader)
+inline void ComponentManager<T>::Deserialize(BinaryDeserializer& reader)
 {
 	reader;
 }

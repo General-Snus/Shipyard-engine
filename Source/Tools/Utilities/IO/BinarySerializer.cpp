@@ -1,6 +1,6 @@
-#include "StreamWriter.h"
+#include "BinarySerializer.h"
 
-FileWriter::FileWriter(std::filesystem::path path) : path(path)
+BinaryFileSerializer::BinaryFileSerializer(std::filesystem::path path) : path(path)
 {
 
 	if (path.has_parent_path())
@@ -15,19 +15,19 @@ FileWriter::FileWriter(std::filesystem::path path) : path(path)
 	stream = std::ofstream(path, std::ofstream::out | std::ofstream::binary);
 }
 
-FileWriter::~FileWriter()
+BinaryFileSerializer::~BinaryFileSerializer()
 {
 	stream.close();
 }
 
-void FileWriter::Write(const char* data, size_t size)
+void BinaryFileSerializer::Write(const char* data, size_t size)
 {
 	data; size;
 
 	stream.write(data, size);
 }
 
-void FileReader::Read(const char* data, size_t size)
+void BinaryFileDeserializer::Read(const char* data, size_t size)
 {
 	data; size;
 }

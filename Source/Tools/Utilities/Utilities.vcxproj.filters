@@ -192,7 +192,13 @@
     <ClInclude Include="Network\RPCWrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IO\StreamWriter.h">
+    <ClInclude Include="IO\BinarySerializer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IO\Serializer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IO\TextSerializer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -227,7 +233,13 @@
     <ClCompile Include="DataStructures\Source\VoxelGrid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="IO\StreamWriter.cpp">
+    <ClCompile Include="IO\BinarySerializer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\Serializer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\TextSerializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

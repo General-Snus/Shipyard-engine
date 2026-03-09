@@ -242,6 +242,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="IO\Serializer.h" />
     <ClInclude Include="Color.h" />
     <ClInclude Include="DataStructures\BSTSet.hpp" />
     <ClInclude Include="DataStructures\CircularBuffer.h" />
@@ -256,6 +257,7 @@
     <ClInclude Include="Extensions.h" />
     <ClInclude Include="Input\Mapper.hpp" />
     <ClInclude Include="LinearAlgebra\Frustrum.h" />
+    <ClInclude Include="IO\TextSerializer.h" />
     <ClInclude Include="Network\RPCWrapper.h" />
     <ClInclude Include="Ref.h" />
     <ClInclude Include="DataStructures\Sort.hpp" />
@@ -264,7 +266,7 @@
     <ClInclude Include="Error.hpp" />
     <ClInclude Include="LinearAlgebra\Easing.h" />
     <ClInclude Include="LinearAlgebra\VectorX.hpp" />
-    <ClInclude Include="IO\StreamWriter.h" />
+    <ClInclude Include="IO\BinarySerializer.h" />
     <ClInclude Include="System\Event.h" />
     <ClInclude Include="Files\Images\stb_image.h" />
     <ClInclude Include="Files\Images\stb_image_resize2.h" />
@@ -303,10 +305,12 @@
     <ClInclude Include="DataStructures\VoxelGrid.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="IO\Serializer.cpp" />
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="FileHelpers.hpp" />
     <ClCompile Include="Input\Mapper.cpp" />
-    <ClCompile Include="IO\StreamWriter.cpp" />
+    <ClCompile Include="IO\BinarySerializer.cpp" />
+    <ClCompile Include="IO\TextSerializer.cpp" />
     <ClCompile Include="System\Source\ServiceLocator.cpp" />
     <ClCompile Include="System\Source\Event.cpp" />
     <ClCompile Include="Game\Timer.cpp" />

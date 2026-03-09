@@ -45,8 +45,8 @@ public:
 
 	static void Serialize(StreamWriter& writer, MeshRenderer& data)
 	{
-		writer; data;
-		throw NotImplemented();
+		writer.Write()
+			throw NotImplemented();
 	}
 protected:
 	std::shared_ptr<Mesh> m_Mesh;
